@@ -807,11 +807,10 @@ var SessionManagerModal = /** @class */ (function (_super) {
         this.updateFocusUI();
 
         // Hotkey footer
-        var prevKey = this.plugin.getCommandHotkey('previous-session');
         var nextKey = this.plugin.getCommandHotkey('next-session');
         var footer = contentEl.createDiv({ cls: 'wpp-modal-footer' });
-        if (prevKey || nextKey) {
-            footer.createDiv({ text: (prevKey || '') + '  ' + (nextKey || '') + ' ' + L.footerSwitch });
+        if (nextKey) {
+            footer.createDiv({ text: L.cmdNext + '  ' + nextKey });
         }
         footer.createDiv({ text: L.footerDragReorder });
 
@@ -823,41 +822,38 @@ var SessionManagerModal = /** @class */ (function (_super) {
             var isMac = navigator.platform.indexOf('Mac') !== -1;
             var modKey = isMac ? e.metaKey : e.ctrlKey;
 
-            // Cmd+Alt hotkeys (session switching)
-            if (modKey && e.altKey) {
-                // Cmd+Alt+0-9
-                if (e.key >= '0' && e.key <= '9') {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    var idx = parseInt(e.key, 10);
-                    var ordered = self.plugin.getOrderedSessions();
-                    if (idx < ordered.length) {
-                        self.plugin.switchSession(ordered[idx].id, { silent: true }).then(function () {
-                            self.renderList();
-                        });
-                    }
-                    return;
-                }
-                // Cmd+Alt+Arrow
-                if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    var offset = e.key === 'ArrowLeft' ? -1 : 1;
-                    var ordered = self.plugin.getOrderedSessions();
-                    if (ordered.length <= 1) return;
-                    var currentIndex = -1;
-                    for (var i = 0; i < ordered.length; i++) {
-                        if (ordered[i].id === self.plugin.data.activeSessionId) {
-                            currentIndex = i;
-                            break;
-                        }
-                    }
-                    if (currentIndex === -1) return;
-                    var next = (currentIndex + offset + ordered.length) % ordered.length;
-                    self.plugin.switchSession(ordered[next].id, { silent: true }).then(function () {
+            // Mod+Shift+1-9 (session switching by number)
+            if (modKey && e.shiftKey && e.key >= '1' && e.key <= '9') {
+                e.preventDefault();
+                e.stopPropagation();
+                var idx = parseInt(e.key, 10) - 1;
+                var ordered = self.plugin.getOrderedSessions();
+                if (idx < ordered.length) {
+                    self.plugin.switchSession(ordered[idx].id, { silent: true }).then(function () {
                         self.renderList();
                     });
                 }
+                return;
+            }
+
+            // Mod+Shift+Enter (cycle next session)
+            if (modKey && e.shiftKey && e.key === 'Enter') {
+                e.preventDefault();
+                e.stopPropagation();
+                var ordered = self.plugin.getOrderedSessions();
+                if (ordered.length <= 1) return;
+                var currentIndex = -1;
+                for (var i = 0; i < ordered.length; i++) {
+                    if (ordered[i].id === self.plugin.data.activeSessionId) {
+                        currentIndex = i;
+                        break;
+                    }
+                }
+                if (currentIndex === -1) return;
+                var next = (currentIndex + 1 + ordered.length) % ordered.length;
+                self.plugin.switchSession(ordered[next].id, { silent: true }).then(function () {
+                    self.renderList();
+                });
                 return;
             }
 
@@ -975,8 +971,8 @@ var SessionManagerModal = /** @class */ (function (_super) {
         });
 
         // Hotkey hint
-        var hk = index <= 9 ? self.plugin.getCommandHotkey('switch-to-' + index) : '';
-        item.createSpan({ text: hk || String(index), cls: 'wpp-session-index' });
+        var hk = index <= 8 ? self.plugin.getCommandHotkey('switch-to-' + (index + 1)) : '';
+        item.createSpan({ text: hk || String(index + 1), cls: 'wpp-session-index' });
 
         // Info section
         var info = item.createDiv({ cls: 'wpp-session-info' });
@@ -1103,8 +1099,8 @@ var SessionManagerModal = /** @class */ (function (_super) {
                     items.forEach(function (el, i) {
                         var indexEl = el.querySelector('.wpp-session-index');
                         if (indexEl) {
-                            var hk = i <= 9 ? self.plugin.getCommandHotkey('switch-to-' + i) : '';
-                            indexEl.textContent = hk || String(i);
+                            var hk = i <= 8 ? self.plugin.getCommandHotkey('switch-to-' + (i + 1)) : '';
+                            indexEl.textContent = hk || String(i + 1);
                         }
                     });
 
@@ -1587,14 +1583,14 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
                 callback: function () { self.saveCurrentSession(); },
             });
 
-            // Numbered session switching (Cmd+Alt+0 through 9)
-            for (var n = 0; n <= 9; n++) {
-                (function (idx) {
+            // Numbered session switching (Mod+Shift+1 through 9)
+            for (var n = 1; n <= 9; n++) {
+                (function (num) {
                     self.addCommand({
-                        id: 'switch-to-' + idx,
-                        name: L.cmdSwitchTo(idx),
-                        hotkeys: [{ modifiers: ['Mod', 'Alt'], key: String(idx) }],
-                        callback: function () { self.switchToIndex(idx); },
+                        id: 'switch-to-' + num,
+                        name: L.cmdSwitchTo(num),
+                        hotkeys: [{ modifiers: ['Mod', 'Shift'], key: String(num) }],
+                        callback: function () { self.switchToIndex(num - 1); },
                     });
                 })(n);
             }
@@ -1603,14 +1599,13 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
             self.addCommand({
                 id: 'previous-session',
                 name: L.cmdPrevious,
-                hotkeys: [{ modifiers: ['Mod', 'Alt'], key: 'ArrowLeft' }],
                 callback: function () { self.switchRelative(-1); },
             });
 
             self.addCommand({
                 id: 'next-session',
                 name: L.cmdNext,
-                hotkeys: [{ modifiers: ['Mod', 'Alt'], key: 'ArrowRight' }],
+                hotkeys: [{ modifiers: ['Mod', 'Shift'], key: 'Enter' }],
                 callback: function () { self.switchRelative(1); },
             });
 
@@ -1759,10 +1754,10 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
             name.textContent = ordered[i].name;
             item.appendChild(name);
 
-            var hk = i <= 9 ? this.getCommandHotkey('switch-to-' + i) : '';
+            var hk = i <= 8 ? this.getCommandHotkey('switch-to-' + (i + 1)) : '';
             var hotkeyEl = document.createElement('div');
             hotkeyEl.className = 'wpp-switch-hotkey';
-            hotkeyEl.textContent = hk || String(i);
+            hotkeyEl.textContent = hk || String(i + 1);
             item.appendChild(hotkeyEl);
 
             list.appendChild(item);
@@ -1770,12 +1765,11 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
 
         overlay.appendChild(list);
 
-        var prevKey = this.getCommandHotkey('previous-session');
         var nextKey = this.getCommandHotkey('next-session');
-        if (prevKey || nextKey) {
+        if (nextKey) {
             var footer = document.createElement('div');
             footer.className = 'wpp-switch-footer';
-            footer.textContent = (prevKey || '') + '  ' + (nextKey || '');
+            footer.textContent = L.cmdNext + '  ' + nextKey;
             overlay.appendChild(footer);
         }
 
@@ -1789,8 +1783,8 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
         this.overlayKeyUpHandler = function (e) {
             var isMac = navigator.platform.indexOf('Mac') !== -1;
             var modHeld = isMac ? e.metaKey : e.ctrlKey;
-            var altHeld = e.altKey;
-            if (!modHeld || !altHeld) {
+            var modShiftHeld = modHeld && e.shiftKey;
+            if (!modShiftHeld) {
                 // Ensure minimum 300ms visibility
                 var elapsed = Date.now() - showTime;
                 var minDelay = Math.max(0, 300 - elapsed);
