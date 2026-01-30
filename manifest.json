@@ -3,7 +3,7 @@
     "name": "Workspace++",
     "version": "0.1.2",
     "minAppVersion": "1.11.0",
-    "description": "Obsidian workspace session plugin with a native-feeling UI/UX",
+    "description": "Workspace session manager with a native-feeling UI/UX.",
     "author": "s1m4ne",
     "isDesktopOnly": true
 }
