@@ -1,0 +1,280 @@
+/* ============================================================
+   Workspace++ Styles
+   Matches the core Workspace plugin modal design
+   ============================================================ */
+
+/* Save section */
+.wpp-save-container {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.wpp-save-input {
+    flex: 1;
+}
+
+/* Session list */
+.wpp-session-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.wpp-session-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-radius: 6px;
+}
+
+.wpp-session-item:hover {
+    background: var(--background-modifier-hover-dimmed, rgba(var(--mono-rgb-100), 0.03));
+}
+
+.wpp-session-index {
+    font-size: 10px;
+    color: var(--text-faint);
+    min-width: 32px;
+    text-align: center;
+    flex-shrink: 0;
+    margin-right: 8px;
+}
+
+.wpp-session-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.wpp-session-name-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.wpp-session-name {
+    font-weight: 600;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    word-break: break-word;
+}
+
+.wpp-active-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--interactive-accent);
+    color: var(--text-on-accent);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.wpp-default-label {
+    font-size: var(--font-smallest);
+    color: var(--text-muted);
+}
+
+.wpp-session-modified {
+    font-size: var(--font-smallest);
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+/* Keyboard focus */
+.wpp-session-item.wpp-focused {
+    background: var(--background-modifier-hover);
+}
+
+/* Multi-select */
+.wpp-session-item.wpp-selected {
+    outline: 2px solid var(--interactive-accent);
+    outline-offset: -2px;
+}
+
+.wpp-session-item.wpp-focused.wpp-selected {
+    background: var(--background-modifier-hover);
+    outline: 2px solid var(--interactive-accent);
+    outline-offset: -2px;
+}
+
+/* Bulk actions bar */
+.wpp-bulk-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 12px;
+    margin-bottom: 8px;
+    background: var(--background-secondary);
+    border-radius: 6px;
+}
+
+.wpp-session-item.is-dragging {
+    visibility: hidden;
+}
+
+.wpp-drag-clone {
+    opacity: 0.85;
+    box-shadow: var(--shadow-l);
+    background: var(--background-primary);
+    border-radius: 6px;
+}
+
+.wpp-session-item.wpp-just-moved {
+    background: var(--background-modifier-hover);
+    transition: background 0.6s ease-out;
+}
+
+.wpp-session-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    margin-left: 12px;
+}
+
+.wpp-icon-btn {
+    display: flex;
+    align-items: center;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+}
+
+.wpp-icon-btn:hover {
+    background: var(--background-modifier-hover);
+}
+
+.wpp-icon-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Confirm / Rename modals */
+.wpp-confirm-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.wpp-confirm-buttons button.wpp-btn-focused,
+.wpp-session-actions .wpp-btn-focused {
+    outline: 2px solid var(--interactive-accent);
+    outline-offset: 2px;
+}
+
+.wpp-modal-footer {
+    font-size: 11px;
+    color: var(--text-faint);
+    text-align: center;
+    margin-top: 12px;
+}
+
+.wpp-rename-input {
+    width: 100%;
+    margin-bottom: 8px;
+}
+
+/* Status bar */
+.wpp-status-bar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.wpp-status-bar:hover {
+    color: var(--text-accent);
+}
+
+.wpp-status-icon {
+    display: flex;
+    align-items: center;
+}
+
+.wpp-status-icon svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* Switch overlay (Cmd+Tab style) */
+.wpp-switch-overlay {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--modal-background);
+    border: 1px solid var(--modal-border-color);
+    border-radius: var(--modal-radius);
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    z-index: 9999;
+    box-shadow: var(--shadow-l);
+    max-width: 80vw;
+}
+
+.wpp-switch-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    max-width: 100%;
+}
+
+.wpp-switch-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 18px;
+    border-radius: 8px;
+    min-width: 60px;
+    max-width: 180px;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.wpp-switch-item.is-active {
+    background: var(--interactive-accent);
+    color: var(--text-on-accent);
+}
+
+.wpp-switch-name {
+    font-size: 13px;
+    font-weight: 600;
+    max-width: 100%;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    word-break: break-word;
+}
+
+.wpp-switch-hotkey {
+    font-size: 11px;
+    opacity: 0.5;
+    margin-top: 4px;
+}
+
+.wpp-switch-item.is-active .wpp-switch-hotkey {
+    opacity: 0.7;
+}
+
+.wpp-switch-footer {
+    font-size: 11px;
+    color: var(--text-faint);
+}
