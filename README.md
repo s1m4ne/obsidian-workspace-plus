@@ -8,25 +8,33 @@ An [Obsidian](https://obsidian.md/) plugin for workspace sessions — a UI align
 
 Assign hotkeys to jump directly to sessions by number, or cycle through them.
 
-<!-- TODO: embed video -->
+
+https://github.com/user-attachments/assets/210a2566-a19a-4fab-b791-0766e430de4b
+
 
 ### Switch sessions
 
 Open the session manager and switch between saved layouts.
 
-<!-- TODO: embed video -->
+
+https://github.com/user-attachments/assets/ecb8b9fb-610c-4dba-9702-e662b7bfd7bc
+
 
 ### Create sessions
 
 Save your current workspace layout as a named session.
 
-<!-- TODO: embed video -->
+
+https://github.com/user-attachments/assets/0483fe8e-308f-43ae-b2cc-2cdd63b8f633
+
 
 ### Drag to reorder
 
 Rearrange sessions by dragging them in the session manager.
 
-<!-- TODO: embed video -->
+
+https://github.com/user-attachments/assets/33c6629c-ebff-4073-af4a-641f9fce85e4
+
 
 ### And more
 
