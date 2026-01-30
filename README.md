@@ -2,6 +2,8 @@
 
 An [Obsidian](https://obsidian.md/) plugin for workspace sessions — a UI aligned with Obsidian's core plugins, refined for maximum ease of use. Save and switch layouts instantly.
 
+Bug reports, feature requests, and pull requests are welcome — feel free to open an [issue](https://github.com/s1m4ne/obsidian-workspace-plus/issues) or PR.
+
 ## Features
 
 ### Switch by hotkey
