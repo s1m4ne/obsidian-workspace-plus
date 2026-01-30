@@ -67,6 +67,7 @@ var STRINGS = {
         cmdSwitchTo: function (n) { return 'Switch to session ' + n; },
         cmdPrevious: 'Previous session',
         cmdNext: 'Next session',
+        footerHotkeyHint: 'Assign hotkeys to quickly jump to sessions by number.',
         backupRestored: 'Workspace++: Restored sessions from backup.',
         settingsLanguage: 'Language',
         settingsLanguageDesc: 'Plugin UI language. Restart Obsidian to apply to command names.',
@@ -115,6 +116,7 @@ var STRINGS = {
         cmdSwitchTo: function (n) { return 'セッション ' + n + ' に切り替え'; },
         cmdPrevious: '前のセッション',
         cmdNext: '次のセッション',
+        footerHotkeyHint: 'ホットキーを設定すると番号でセッションにジャンプできます。',
         backupRestored: 'Workspace++: バックアップからセッションを復元しました。',
         settingsLanguage: '言語',
         settingsLanguageDesc: 'プラグインの表示言語。コマンド名への反映にはObsidianの再起動が必要です。',
@@ -163,6 +165,7 @@ var STRINGS = {
         cmdSwitchTo: function (n) { return '切换至会话 ' + n; },
         cmdPrevious: '上一个会话',
         cmdNext: '下一个会话',
+        footerHotkeyHint: '设置快捷键后可通过编号快速跳转至对应会话。',
         backupRestored: 'Workspace++: 已从备份恢复会话。',
         settingsLanguage: '语言',
         settingsLanguageDesc: '插件界面语言。重启 Obsidian 后命令名称才会更新。',
@@ -211,6 +214,7 @@ var STRINGS = {
         cmdSwitchTo: function (n) { return '切換至工作階段 ' + n; },
         cmdPrevious: '上一個工作階段',
         cmdNext: '下一個工作階段',
+        footerHotkeyHint: '設定快捷鍵後可透過編號快速跳至對應工作階段。',
         backupRestored: 'Workspace++: 已從備份還原工作階段。',
         settingsLanguage: '語言',
         settingsLanguageDesc: '外掛介面語言。重新啟動 Obsidian 後命令名稱才會更新。',
@@ -259,6 +263,7 @@ var STRINGS = {
         cmdSwitchTo: function (n) { return '세션 ' + n + ' 전환'; },
         cmdPrevious: '이전 세션',
         cmdNext: '다음 세션',
+        footerHotkeyHint: '단축키를 설정하면 번호로 세션에 빠르게 이동할 수 있습니다.',
         backupRestored: 'Workspace++: 백업에서 세션을 복원했습니다.',
         settingsLanguage: '언어',
         settingsLanguageDesc: '플러그인 UI 언어. 명령어 이름에 적용하려면 Obsidian을 다시 시작하세요.',
@@ -307,6 +312,7 @@ var STRINGS = {
         cmdSwitchTo: function (n) { return 'Basculer vers la session ' + n; },
         cmdPrevious: 'Session précédente',
         cmdNext: 'Session suivante',
+        footerHotkeyHint: 'Assignez des raccourcis pour acc\u00e9der rapidement aux sessions par num\u00e9ro.',
         backupRestored: 'Workspace++ : sessions restaurées depuis la sauvegarde.',
         settingsLanguage: 'Langue',
         settingsLanguageDesc: 'Langue de l\'interface. Red\u00e9marrez Obsidian pour appliquer aux noms de commandes.',
@@ -355,6 +361,7 @@ var STRINGS = {
         cmdSwitchTo: function (n) { return 'Cambiar a la sesión ' + n; },
         cmdPrevious: 'Sesión anterior',
         cmdNext: 'Sesión siguiente',
+        footerHotkeyHint: 'Asigne atajos de teclado para saltar r\u00e1pidamente a sesiones por n\u00famero.',
         backupRestored: 'Workspace++: sesiones restauradas desde la copia de seguridad.',
         settingsLanguage: 'Idioma',
         settingsLanguageDesc: 'Idioma de la interfaz. Reinicie Obsidian para aplicar a los nombres de comandos.',
@@ -403,6 +410,7 @@ var STRINGS = {
         cmdSwitchTo: function (n) { return 'Zu Sitzung ' + n + ' wechseln'; },
         cmdPrevious: 'Vorherige Sitzung',
         cmdNext: 'Nächste Sitzung',
+        footerHotkeyHint: 'Tastenkombinationen zuweisen, um per Nummer schnell zu Sitzungen zu springen.',
         backupRestored: 'Workspace++: Sitzungen aus Sicherung wiederhergestellt.',
         settingsLanguage: 'Sprache',
         settingsLanguageDesc: 'Sprache der Oberfl\u00e4che. Starten Sie Obsidian neu, um Befehlsnamen zu aktualisieren.',
@@ -451,6 +459,7 @@ var STRINGS = {
         cmdSwitchTo: function (n) { return 'Alternar para a sessão ' + n; },
         cmdPrevious: 'Sessão anterior',
         cmdNext: 'Próxima sessão',
+        footerHotkeyHint: 'Atribua atalhos para saltar rapidamente para sess\u00f5es por n\u00famero.',
         backupRestored: 'Workspace++: sessões restauradas a partir do backup.',
         settingsLanguage: 'Idioma',
         settingsLanguageDesc: 'Idioma da interface. Reinicie o Obsidian para aplicar aos nomes dos comandos.',
@@ -499,6 +508,7 @@ var STRINGS = {
         cmdSwitchTo: function (n) { return 'Beralih ke sesi ' + n; },
         cmdPrevious: 'Sesi sebelumnya',
         cmdNext: 'Sesi berikutnya',
+        footerHotkeyHint: 'Tetapkan pintasan untuk langsung beralih ke sesi berdasarkan nomor.',
         backupRestored: 'Workspace++: sesi dipulihkan dari cadangan.',
         settingsLanguage: 'Bahasa',
         settingsLanguageDesc: 'Bahasa antarmuka plugin. Mulai ulang Obsidian untuk menerapkan ke nama perintah.',
@@ -547,6 +557,7 @@ var STRINGS = {
         cmdSwitchTo: function (n) { return 'Перейти к сессии ' + n; },
         cmdPrevious: 'Предыдущая сессия',
         cmdNext: 'Следующая сессия',
+        footerHotkeyHint: '\u041d\u0430\u0437\u043d\u0430\u0447\u044c\u0442\u0435 \u0433\u043e\u0440\u044f\u0447\u0438\u0435 \u043a\u043b\u0430\u0432\u0438\u0448\u0438 \u0434\u043b\u044f \u0431\u044b\u0441\u0442\u0440\u043e\u0433\u043e \u043f\u0435\u0440\u0435\u0445\u043e\u0434\u0430 \u043a \u0441\u0435\u0441\u0441\u0438\u044f\u043c \u043f\u043e \u043d\u043e\u043c\u0435\u0440\u0443.',
         backupRestored: 'Workspace++: сессии восстановлены из резервной копии.',
         settingsLanguage: 'Язык',
         settingsLanguageDesc: 'Язык интерфейса плагина. Перезапустите Obsidian для обновления названий команд.',
@@ -595,6 +606,7 @@ var STRINGS = {
         cmdSwitchTo: function (n) { return 'Passa alla sessione ' + n; },
         cmdPrevious: 'Sessione precedente',
         cmdNext: 'Sessione successiva',
+        footerHotkeyHint: 'Assegna scorciatoie per passare rapidamente alle sessioni per numero.',
         backupRestored: 'Workspace++: sessioni ripristinate dal backup.',
         settingsLanguage: 'Lingua',
         settingsLanguageDesc: 'Lingua dell\'interfaccia. Riavvia Obsidian per applicare ai nomi dei comandi.',
@@ -643,6 +655,7 @@ var STRINGS = {
         cmdSwitchTo: function (n) { return n + '. oturuma ge\u00e7'; },
         cmdPrevious: '\u00d6nceki oturum',
         cmdNext: 'Sonraki oturum',
+        footerHotkeyHint: 'Oturumlara numarayla h\u0131zl\u0131ca ge\u00e7mek i\u00e7in k\u0131sayol atay\u0131n.',
         backupRestored: 'Workspace++: Oturumlar yedekten geri y\u00fcklendi.',
         settingsLanguage: 'Dil',
         settingsLanguageDesc: 'Eklenti aray\u00fcz dili. Komut adlar\u0131na uygulamak i\u00e7in Obsidian\'\u0131 yeniden ba\u015flat\u0131n.',
@@ -691,6 +704,7 @@ var STRINGS = {
         cmdSwitchTo: function (n) { return '\u0627\u0644\u062a\u0628\u062f\u064a\u0644 \u0625\u0644\u0649 \u0627\u0644\u062c\u0644\u0633\u0629 ' + n; },
         cmdPrevious: '\u0627\u0644\u062c\u0644\u0633\u0629 \u0627\u0644\u0633\u0627\u0628\u0642\u0629',
         cmdNext: '\u0627\u0644\u062c\u0644\u0633\u0629 \u0627\u0644\u062a\u0627\u0644\u064a\u0629',
+        footerHotkeyHint: '\u0639\u064a\u0651\u0646 \u0627\u062e\u062a\u0635\u0627\u0631\u0627\u062a \u0644\u0644\u0627\u0646\u062a\u0642\u0627\u0644 \u0627\u0644\u0633\u0631\u064a\u0639 \u0625\u0644\u0649 \u0627\u0644\u062c\u0644\u0633\u0627\u062a \u0628\u0627\u0644\u0631\u0642\u0645.',
         backupRestored: 'Workspace++: \u062a\u0645\u062a \u0627\u0633\u062a\u0639\u0627\u062f\u0629 \u0627\u0644\u062c\u0644\u0633\u0627\u062a \u0645\u0646 \u0627\u0644\u0646\u0633\u062e\u0629 \u0627\u0644\u0627\u062d\u062a\u064a\u0627\u0637\u064a\u0629.',
         settingsLanguage: '\u0627\u0644\u0644\u063a\u0629',
         settingsLanguageDesc: '\u0644\u063a\u0629 \u0648\u0627\u062c\u0647\u0629 \u0627\u0644\u0625\u0636\u0627\u0641\u0629. \u0623\u0639\u062f \u062a\u0634\u063a\u064a\u0644 Obsidian \u0644\u062a\u0637\u0628\u064a\u0642 \u0623\u0633\u0645\u0627\u0621 \u0627\u0644\u0623\u0648\u0627\u0645\u0631.',
@@ -813,6 +827,7 @@ var SessionManagerModal = /** @class */ (function (_super) {
             footer.createDiv({ text: L.cmdNext + '  ' + nextKey });
         }
         footer.createDiv({ text: L.footerDragReorder });
+        footer.createDiv({ text: L.footerHotkeyHint });
 
         // Keyboard handler
         this.modalKeyHandler = function (e) {
@@ -821,20 +836,6 @@ var SessionManagerModal = /** @class */ (function (_super) {
 
             var isMac = navigator.platform.indexOf('Mac') !== -1;
             var modKey = isMac ? e.metaKey : e.ctrlKey;
-
-            // Mod+Shift+1-9 (session switching by number)
-            if (modKey && e.shiftKey && e.key >= '1' && e.key <= '9') {
-                e.preventDefault();
-                e.stopPropagation();
-                var idx = parseInt(e.key, 10) - 1;
-                var ordered = self.plugin.getOrderedSessions();
-                if (idx < ordered.length) {
-                    self.plugin.switchSession(ordered[idx].id, { silent: true }).then(function () {
-                        self.renderList();
-                    });
-                }
-                return;
-            }
 
             // Mod+Shift+Enter (cycle next session)
             if (modKey && e.shiftKey && e.key === 'Enter') {
@@ -1589,7 +1590,6 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
                     self.addCommand({
                         id: 'switch-to-' + num,
                         name: L.cmdSwitchTo(num),
-                        hotkeys: [{ modifiers: ['Mod', 'Shift'], key: String(num) }],
                         callback: function () { self.switchToIndex(num - 1); },
                     });
                 })(n);
