@@ -10,10 +10,10 @@ Bug reports, feature requests, and pull requests are welcome — feel free to op
 
 ### Switch by hotkey
 
-Cycle through sessions with <kbd>⌘</kbd><kbd>⇧</kbd><kbd>Enter</kbd> (Mac) / <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Enter</kbd> (Win). You can also assign hotkeys to jump to sessions by number.
+Cycle through sessions with <kbd>⌘</kbd><kbd>⇧</kbd><kbd>Enter</kbd> (Mac) / <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Enter</kbd> (Win), or navigate left/right with <kbd>⌘</kbd><kbd>⇧</kbd><kbd><</kbd> / <kbd>⌘</kbd><kbd>⇧</kbd><kbd>></kbd>. You can also assign hotkeys to jump to sessions by number (1–9).
 
 
-https://github.com/user-attachments/assets/210a2566-a19a-4fab-b791-0766e430de4b
+<!-- TODO: replace with new video URL -->
 
 
 ### Switch sessions
@@ -21,15 +21,23 @@ https://github.com/user-attachments/assets/210a2566-a19a-4fab-b791-0766e430de4b
 Open the session manager and switch between saved layouts with a click.
 
 
-https://github.com/user-attachments/assets/ecb8b9fb-610c-4dba-9702-e662b7bfd7bc
+<!-- TODO: replace with new video URL -->
 
 
-### Create sessions
+### Create and delete sessions
 
-Create a new session by copying the current workspace layout.
+Create a new session from the current layout, duplicate it with <kbd>⌘</kbd><kbd>⇧</kbd><kbd>M</kbd>, or delete it with <kbd>⌘</kbd><kbd>⇧</kbd><kbd>⌫</kbd>.
 
 
-https://github.com/user-attachments/assets/0483fe8e-308f-43ae-b2cc-2cdd63b8f633
+<!-- TODO: replace with new video URL -->
+
+
+### Rename sessions
+
+Rename the current session with <kbd>⌘</kbd><kbd>⇧</kbd><kbd>R</kbd>, or right-click a session in the manager.
+
+
+<!-- TODO: replace with new video URL -->
 
 
 ### Drag to reorder
@@ -37,16 +45,16 @@ https://github.com/user-attachments/assets/0483fe8e-308f-43ae-b2cc-2cdd63b8f633
 Rearrange sessions by dragging them in the session manager.
 
 
-https://github.com/user-attachments/assets/33c6629c-ebff-4073-af4a-641f9fce85e4
+<!-- TODO: replace with new video URL -->
 
 
 ### And more
 
-- **Rename & delete** sessions from the manager modal
-- **Bulk select** with `Cmd/Ctrl+Click` and delete multiple sessions at once
-- **Keyboard navigation** — arrow keys, Enter to switch, Delete/Backspace to remove
+- **Full hotkey workflow** — create, duplicate, rename, delete, and switch sessions without ever opening the manager
+- **Bulk select** with `Cmd/Ctrl+Click` to delete multiple sessions
+- **Keyboard navigation** in manager — arrow keys, Enter to switch, Delete/Backspace to remove
 - **Status bar** shows the active session name (click to open manager)
-- **Automatic backup** — sessions are backed up and restored if data is corrupted
+- **Automatic backup** — restored automatically if data is corrupted
 - **14 languages** — English, Japanese, Chinese (Simplified/Traditional), Korean, French, Spanish, German, Portuguese, Indonesian, Russian, Italian, Turkish, Arabic
 
 ## Installation
@@ -77,15 +85,17 @@ https://github.com/user-attachments/assets/33c6629c-ebff-4073-af4a-641f9fce85e4
 
 ## Commands
 
-| Command                  | Description                                   |
-| ------------------------ | --------------------------------------------- |
-| Manage sessions          | Open the session manager modal                |
-| Create new session       | Open manager with focus on the name input     |
-| Save current session now | Save the current layout to the active session |
-| Rename current session   | Rename the active session                     |
-| Delete current session   | Delete the active session                     |
-| Switch to session 1–9    | Jump to a session by number                   |
-| Previous / Next session  | Cycle through sessions                        |
+| Command                  | Default Hotkey                                    |
+| ------------------------ | ------------------------------------------------- |
+| Manage sessions          | —                                                 |
+| Create new session       | —                                                 |
+| New empty session        | —                                                 |
+| Duplicate current session| `Cmd/Ctrl+Shift+M`                                |
+| Rename current session   | `Cmd/Ctrl+Shift+R`                                |
+| Delete current session   | `Cmd/Ctrl+Shift+Backspace`                        |
+| Previous session         | `Cmd/Ctrl+Shift+<`                                |
+| Next session             | `Cmd/Ctrl+Shift+Enter`, `Cmd/Ctrl+Shift+>`       |
+| Switch to session 1–9    | —                                                 |
 
 All commands can be assigned custom hotkeys in **Settings** > **Hotkeys**.
 
@@ -99,13 +109,12 @@ All commands can be assigned custom hotkeys in **Settings** > **Hotkeys**.
 
 ### Where Workspace++ fits
 
-**Workspace++** is for people who want workspace sessions to feel effortless—without turning their setup into a feature checklist.
-If you like the core Workspaces workflow but feel friction in the UI (too many clicks, easy-to-misfire saves, or switching that doesn't feel instant), Workspace++ focuses on the basics and polishes them hard.
+**Workspace++** is for people who want workspace sessions to feel native to Obsidian — fast, polished, and keyboard-driven.
 
-- **Minimal, core-aligned UI** that stays out of your way
-- **Fast session switching** (hotkeys + Cmd-Tab style overlay)
-- **Simple session manager** (create/rename/delete + drag reorder)
-- **Sensible defaults**, tuned for daily use—not power-user complexity
+- **Core-aligned UI** designed to blend seamlessly with Obsidian
+- **Full keyboard workflow** — hotkeys for every action, with a Cmd-Tab style overlay
+- **Session manager** with create, rename, delete, bulk select, and drag reorder
+- **Sensible defaults** that work out of the box
 
 ## License
 
