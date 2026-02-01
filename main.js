@@ -73,6 +73,10 @@ var STRINGS = {
         settingsLanguageDesc: 'Plugin UI language. Restart Obsidian to apply to command names.',
         settingsLangAuto: 'Auto (system language)',
         settingsTranslationHelp: 'Found a translation error? Please open an issue or pull request on GitHub.',
+        settingsPreviewHeading: 'Show current session before switching',
+        settingsPreviewDesc: 'When switching sessions with a hotkey, the first press shows your current position without switching.',
+        settingsPreviewNext: 'Next session',
+        settingsPreviewPrevious: 'Previous session',
     },
     ja: {
         modalTitle: 'セッション管理',
@@ -122,6 +126,10 @@ var STRINGS = {
         settingsLanguageDesc: 'プラグインの表示言語。コマンド名への反映にはObsidianの再起動が必要です。',
         settingsLangAuto: '自動（システム言語）',
         settingsTranslationHelp: '翻訳の誤りを見つけたら、GitHubでissueまたはPull requestをお願いします。',
+        settingsPreviewHeading: '切替前に現在のセッションを表示',
+        settingsPreviewDesc: 'ホットキーでセッションを移動する際、1回目は移動せず現在の位置を表示します。',
+        settingsPreviewNext: '次のセッション',
+        settingsPreviewPrevious: '前のセッション',
     },
     zh: {
         modalTitle: '管理会话',
@@ -171,6 +179,10 @@ var STRINGS = {
         settingsLanguageDesc: '插件界面语言。重启 Obsidian 后命令名称才会更新。',
         settingsLangAuto: '自动（系统语言）',
         settingsTranslationHelp: '发现翻译错误？请在 GitHub 上提交 issue 或 Pull request。',
+        settingsPreviewHeading: '切换前显示当前会话',
+        settingsPreviewDesc: '使用快捷键切换会话时，第一次按下仅显示当前位置，不进行切换。',
+        settingsPreviewNext: '下一个会话',
+        settingsPreviewPrevious: '上一个会话',
     },
     'zh-TW': {
         modalTitle: '管理工作階段',
@@ -220,6 +232,10 @@ var STRINGS = {
         settingsLanguageDesc: '外掛介面語言。重新啟動 Obsidian 後命令名稱才會更新。',
         settingsLangAuto: '自動（系統語言）',
         settingsTranslationHelp: '發現翻譯錯誤？請在 GitHub 上提交 issue 或 Pull request。',
+        settingsPreviewHeading: '切換前顯示目前工作階段',
+        settingsPreviewDesc: '使用快捷鍵切換工作階段時，第一次按下僅顯示目前位置，不進行切換。',
+        settingsPreviewNext: '下一個工作階段',
+        settingsPreviewPrevious: '上一個工作階段',
     },
     ko: {
         modalTitle: '세션 관리',
@@ -269,6 +285,10 @@ var STRINGS = {
         settingsLanguageDesc: '플러그인 UI 언어. 명령어 이름에 적용하려면 Obsidian을 다시 시작하세요.',
         settingsLangAuto: '자동 (시스템 언어)',
         settingsTranslationHelp: '번역 오류를 발견하셨나요? GitHub에서 issue 또는 Pull request를 보내주세요.',
+        settingsPreviewHeading: '전환 전 현재 세션 표시',
+        settingsPreviewDesc: '단축키로 세션을 전환할 때 첫 번째 입력에서는 전환하지 않고 현재 위치만 표시합니다.',
+        settingsPreviewNext: '다음 세션',
+        settingsPreviewPrevious: '이전 세션',
     },
     fr: {
         modalTitle: 'Gestion des sessions',
@@ -318,6 +338,10 @@ var STRINGS = {
         settingsLanguageDesc: 'Langue de l\'interface. Red\u00e9marrez Obsidian pour appliquer aux noms de commandes.',
         settingsLangAuto: 'Auto (langue du syst\u00e8me)',
         settingsTranslationHelp: 'Erreur de traduction ? Ouvrez une issue ou une pull request sur GitHub.',
+        settingsPreviewHeading: 'Afficher la session actuelle avant de basculer',
+        settingsPreviewDesc: 'Lors du changement de session par raccourci, la premi\u00e8re pression affiche votre position actuelle sans basculer.',
+        settingsPreviewNext: 'Session suivante',
+        settingsPreviewPrevious: 'Session pr\u00e9c\u00e9dente',
     },
     es: {
         modalTitle: 'Gestión de sesiones',
@@ -367,6 +391,10 @@ var STRINGS = {
         settingsLanguageDesc: 'Idioma de la interfaz. Reinicie Obsidian para aplicar a los nombres de comandos.',
         settingsLangAuto: 'Auto (idioma del sistema)',
         settingsTranslationHelp: '\u00bfError de traducci\u00f3n? Abra un issue o pull request en GitHub.',
+        settingsPreviewHeading: 'Mostrar sesi\u00f3n actual antes de cambiar',
+        settingsPreviewDesc: 'Al cambiar de sesi\u00f3n con un atajo, la primera pulsaci\u00f3n muestra tu posici\u00f3n actual sin cambiar.',
+        settingsPreviewNext: 'Sesi\u00f3n siguiente',
+        settingsPreviewPrevious: 'Sesi\u00f3n anterior',
     },
     de: {
         modalTitle: 'Sitzungen verwalten',
@@ -416,6 +444,10 @@ var STRINGS = {
         settingsLanguageDesc: 'Sprache der Oberfl\u00e4che. Starten Sie Obsidian neu, um Befehlsnamen zu aktualisieren.',
         settingsLangAuto: 'Automatisch (Systemsprache)',
         settingsTranslationHelp: '\u00dcbersetzungsfehler gefunden? Erstellen Sie ein Issue oder einen Pull Request auf GitHub.',
+        settingsPreviewHeading: 'Aktuelle Sitzung vor dem Wechsel anzeigen',
+        settingsPreviewDesc: 'Beim Sitzungswechsel per Tastenkombination zeigt der erste Tastendruck die aktuelle Position an, ohne zu wechseln.',
+        settingsPreviewNext: 'N\u00e4chste Sitzung',
+        settingsPreviewPrevious: 'Vorherige Sitzung',
     },
     pt: {
         modalTitle: 'Gerenciar sessões',
@@ -465,6 +497,10 @@ var STRINGS = {
         settingsLanguageDesc: 'Idioma da interface. Reinicie o Obsidian para aplicar aos nomes dos comandos.',
         settingsLangAuto: 'Auto (idioma do sistema)',
         settingsTranslationHelp: 'Encontrou um erro de tradu\u00e7\u00e3o? Abra uma issue ou pull request no GitHub.',
+        settingsPreviewHeading: 'Mostrar sess\u00e3o atual antes de alternar',
+        settingsPreviewDesc: 'Ao alternar sess\u00f5es com um atalho, o primeiro pressionamento mostra sua posi\u00e7\u00e3o atual sem alternar.',
+        settingsPreviewNext: 'Pr\u00f3xima sess\u00e3o',
+        settingsPreviewPrevious: 'Sess\u00e3o anterior',
     },
     id: {
         modalTitle: 'Kelola sesi',
@@ -514,6 +550,10 @@ var STRINGS = {
         settingsLanguageDesc: 'Bahasa antarmuka plugin. Mulai ulang Obsidian untuk menerapkan ke nama perintah.',
         settingsLangAuto: 'Otomatis (bahasa sistem)',
         settingsTranslationHelp: 'Menemukan kesalahan terjemahan? Silakan buka issue atau pull request di GitHub.',
+        settingsPreviewHeading: 'Tampilkan sesi saat ini sebelum beralih',
+        settingsPreviewDesc: 'Saat beralih sesi dengan pintasan, penekanan pertama menampilkan posisi Anda saat ini tanpa beralih.',
+        settingsPreviewNext: 'Sesi berikutnya',
+        settingsPreviewPrevious: 'Sesi sebelumnya',
     },
     ru: {
         modalTitle: 'Управление сессиями',
@@ -563,6 +603,10 @@ var STRINGS = {
         settingsLanguageDesc: 'Язык интерфейса плагина. Перезапустите Obsidian для обновления названий команд.',
         settingsLangAuto: 'Авто (язык системы)',
         settingsTranslationHelp: 'Нашли ошибку в переводе? Создайте issue или pull request на GitHub.',
+        settingsPreviewHeading: '\u041f\u043e\u043a\u0430\u0437\u0430\u0442\u044c \u0442\u0435\u043a\u0443\u0449\u0443\u044e \u0441\u0435\u0441\u0441\u0438\u044e \u043f\u0435\u0440\u0435\u0434 \u043f\u0435\u0440\u0435\u043a\u043b\u044e\u0447\u0435\u043d\u0438\u0435\u043c',
+        settingsPreviewDesc: '\u041f\u0440\u0438 \u043f\u0435\u0440\u0435\u043a\u043b\u044e\u0447\u0435\u043d\u0438\u0438 \u0441\u0435\u0441\u0441\u0438\u0439 \u0433\u043e\u0440\u044f\u0447\u0435\u0439 \u043a\u043b\u0430\u0432\u0438\u0448\u0435\u0439 \u043f\u0435\u0440\u0432\u043e\u0435 \u043d\u0430\u0436\u0430\u0442\u0438\u0435 \u043f\u043e\u043a\u0430\u0437\u044b\u0432\u0430\u0435\u0442 \u0442\u0435\u043a\u0443\u0449\u0443\u044e \u043f\u043e\u0437\u0438\u0446\u0438\u044e \u0431\u0435\u0437 \u043f\u0435\u0440\u0435\u043a\u043b\u044e\u0447\u0435\u043d\u0438\u044f.',
+        settingsPreviewNext: '\u0421\u043b\u0435\u0434\u0443\u044e\u0449\u0430\u044f \u0441\u0435\u0441\u0441\u0438\u044f',
+        settingsPreviewPrevious: '\u041f\u0440\u0435\u0434\u044b\u0434\u0443\u0449\u0430\u044f \u0441\u0435\u0441\u0441\u0438\u044f',
     },
     it: {
         modalTitle: 'Gestione sessioni',
@@ -612,6 +656,10 @@ var STRINGS = {
         settingsLanguageDesc: 'Lingua dell\'interfaccia. Riavvia Obsidian per applicare ai nomi dei comandi.',
         settingsLangAuto: 'Auto (lingua di sistema)',
         settingsTranslationHelp: 'Errore di traduzione? Apri una issue o una pull request su GitHub.',
+        settingsPreviewHeading: 'Mostra la sessione corrente prima del cambio',
+        settingsPreviewDesc: 'Quando si cambiano le sessioni con una scorciatoia, la prima pressione mostra la posizione attuale senza cambiare.',
+        settingsPreviewNext: 'Sessione successiva',
+        settingsPreviewPrevious: 'Sessione precedente',
     },
     tr: {
         modalTitle: 'Oturumlar\u0131 y\u00f6net',
@@ -661,6 +709,10 @@ var STRINGS = {
         settingsLanguageDesc: 'Eklenti aray\u00fcz dili. Komut adlar\u0131na uygulamak i\u00e7in Obsidian\'\u0131 yeniden ba\u015flat\u0131n.',
         settingsLangAuto: 'Otomatik (sistem dili)',
         settingsTranslationHelp: '\u00c7eviri hatas\u0131 m\u0131 buldunuz? GitHub\'da issue veya pull request a\u00e7\u0131n.',
+        settingsPreviewHeading: 'Ge\u00e7i\u015f \u00f6ncesi mevcut oturumu g\u00f6ster',
+        settingsPreviewDesc: 'K\u0131sayolla oturum de\u011fi\u015ftirirken ilk bas\u0131\u015fta ge\u00e7i\u015f yapmadan mevcut konumunuz g\u00f6sterilir.',
+        settingsPreviewNext: 'Sonraki oturum',
+        settingsPreviewPrevious: '\u00d6nceki oturum',
     },
     ar: {
         modalTitle: '\u0625\u062f\u0627\u0631\u0629 \u0627\u0644\u062c\u0644\u0633\u0627\u062a',
@@ -710,6 +762,10 @@ var STRINGS = {
         settingsLanguageDesc: '\u0644\u063a\u0629 \u0648\u0627\u062c\u0647\u0629 \u0627\u0644\u0625\u0636\u0627\u0641\u0629. \u0623\u0639\u062f \u062a\u0634\u063a\u064a\u0644 Obsidian \u0644\u062a\u0637\u0628\u064a\u0642 \u0623\u0633\u0645\u0627\u0621 \u0627\u0644\u0623\u0648\u0627\u0645\u0631.',
         settingsLangAuto: '\u062a\u0644\u0642\u0627\u0626\u064a (\u0644\u063a\u0629 \u0627\u0644\u0646\u0638\u0627\u0645)',
         settingsTranslationHelp: '\u0648\u062c\u062f\u062a \u062e\u0637\u0623 \u0641\u064a \u0627\u0644\u062a\u0631\u062c\u0645\u0629\u061f \u064a\u0631\u062c\u0649 \u0641\u062a\u062d issue \u0623\u0648 pull request \u0639\u0644\u0649 GitHub.',
+        settingsPreviewHeading: '\u0639\u0631\u0636 \u0627\u0644\u062c\u0644\u0633\u0629 \u0627\u0644\u062d\u0627\u0644\u064a\u0629 \u0642\u0628\u0644 \u0627\u0644\u062a\u0628\u062f\u064a\u0644',
+        settingsPreviewDesc: '\u0639\u0646\u062f \u0627\u0644\u062a\u0628\u062f\u064a\u0644 \u0628\u064a\u0646 \u0627\u0644\u062c\u0644\u0633\u0627\u062a \u0628\u0627\u0644\u0627\u062e\u062a\u0635\u0627\u0631\u060c \u064a\u0639\u0631\u0636 \u0627\u0644\u0636\u063a\u0637 \u0627\u0644\u0623\u0648\u0644 \u0645\u0648\u0642\u0639\u0643 \u0627\u0644\u062d\u0627\u0644\u064a \u062f\u0648\u0646 \u0627\u0644\u062a\u0628\u062f\u064a\u0644.',
+        settingsPreviewNext: '\u0627\u0644\u062c\u0644\u0633\u0629 \u0627\u0644\u062a\u0627\u0644\u064a\u0629',
+        settingsPreviewPrevious: '\u0627\u0644\u062c\u0644\u0633\u0629 \u0627\u0644\u0633\u0627\u0628\u0642\u0629',
     },
 };
 
@@ -827,7 +883,16 @@ var SessionManagerModal = /** @class */ (function (_super) {
             footer.createDiv({ text: L.cmdNext + '  ' + nextKey });
         }
         footer.createDiv({ text: L.footerDragReorder });
-        footer.createDiv({ text: L.footerHotkeyHint });
+        var hotkeyLink = footer.createEl('a', { text: L.footerHotkeyHint });
+        hotkeyLink.addEventListener('click', function (e) {
+            e.preventDefault();
+            self.close();
+            self.app.setting.open();
+            self.app.setting.openTabById('hotkeys');
+            var sc = self.app.setting.activeTab.searchComponent;
+            sc.setValue('Workspace++');
+            sc.inputEl.dispatchEvent(new Event('input'));
+        });
 
         // Keyboard handler
         this.modalKeyHandler = function (e) {
@@ -1146,7 +1211,7 @@ var SessionManagerModal = /** @class */ (function (_super) {
         if (sessionId === this.plugin.data.activeSessionId) return;
         var self = this;
         this.plugin.switchSession(sessionId).then(function () {
-            self.renderList();
+            self.close();
         });
     };
 
@@ -1512,6 +1577,8 @@ var DEFAULT_DATA = {
     sessions: {},
     sessionOrder: [],
     language: 'auto',
+    previewNext: true,
+    previewPrevious: true,
 };
 
 var WorkspacePlusPlus = /** @class */ (function (_super) {
@@ -1680,6 +1747,14 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
             }
         }
         if (currentIndex === -1) return;
+
+        var previewEnabled = offset > 0 ? this.data.previewNext : this.data.previewPrevious;
+
+        if (previewEnabled && !this.switchOverlayEl) {
+            this.showSwitchOverlay(ordered, currentIndex);
+            return;
+        }
+
         var next = (currentIndex + offset + ordered.length) % ordered.length;
         this.showSwitchOverlay(ordered, next);
         this.switchSession(ordered[next].id, { silent: true });
@@ -2098,6 +2173,46 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                 dropdown.onChange(function (value) {
                     self.plugin.data.language = value;
                     resolveLocale(value);
+                    self.plugin.persistData();
+                    self.display();
+                });
+            });
+
+        // Preview before switching — master toggle with nested sub-toggles
+        var allOn = !!self.plugin.data.previewNext && !!self.plugin.data.previewPrevious;
+        var masterSetting = new obsidian.Setting(containerEl)
+            .setName(L.settingsPreviewHeading)
+            .setDesc(L.settingsPreviewDesc)
+            .addToggle(function (toggle) {
+                toggle.setValue(allOn);
+                toggle.onChange(function (value) {
+                    self.plugin.data.previewNext = value;
+                    self.plugin.data.previewPrevious = value;
+                    self.plugin.persistData();
+                    self.display();
+                });
+            });
+
+        masterSetting.settingEl.addClass('wpp-has-nested');
+        var nestedDiv = masterSetting.settingEl.createDiv({ cls: 'wpp-nested-settings' });
+
+        new obsidian.Setting(nestedDiv)
+            .setName(L.settingsPreviewNext)
+            .addToggle(function (toggle) {
+                toggle.setValue(!!self.plugin.data.previewNext);
+                toggle.onChange(function (value) {
+                    self.plugin.data.previewNext = value;
+                    self.plugin.persistData();
+                    self.display();
+                });
+            });
+
+        new obsidian.Setting(nestedDiv)
+            .setName(L.settingsPreviewPrevious)
+            .addToggle(function (toggle) {
+                toggle.setValue(!!self.plugin.data.previewPrevious);
+                toggle.onChange(function (value) {
+                    self.plugin.data.previewPrevious = value;
                     self.plugin.persistData();
                     self.display();
                 });
