@@ -171,6 +171,23 @@
     outline-offset: 2px;
 }
 
+/* Confirm modal hint */
+.wpp-confirm-hint {
+    font-size: var(--font-ui-small);
+    color: var(--text-faint);
+    margin-top: 12px;
+}
+
+.wpp-confirm-hint a {
+    color: var(--text-faint);
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.wpp-confirm-hint a:hover {
+    color: var(--text-accent);
+}
+
 .wpp-modal-footer {
     font-size: 11px;
     color: var(--text-faint);
@@ -275,6 +292,30 @@
 }
 
 .wpp-switch-footer {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
     font-size: 11px;
     color: var(--text-faint);
+}
+
+/* Settings: nested sub-toggles below parent */
+.wpp-has-nested {
+    flex-wrap: wrap;
+}
+
+.wpp-nested-settings {
+    width: 100%;
+    padding-left: 32px;
+    margin-top: 4px;
+}
+
+.wpp-nested-settings .setting-item {
+    border-top: none;
+    padding: 6px 0;
+}
+
+.wpp-nested-settings .setting-item-name {
+    font-size: var(--font-ui-small);
+    color: var(--text-muted);
 }

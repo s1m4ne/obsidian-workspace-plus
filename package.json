@@ -1,0 +1,15 @@
+{
+    "name": "obsidian-workspace-plus",
+    "version": "0.2.0",
+    "description": "Workspace session manager for Obsidian",
+    "main": "main.js",
+    "scripts": {
+        "dev": "node esbuild.config.mjs",
+        "build": "node esbuild.config.mjs production"
+    },
+    "devDependencies": {
+        "builtin-modules": "^4.0.0",
+        "esbuild": "^0.24.0",
+        "obsidian": "latest"
+    }
+}
