@@ -39,9 +39,9 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
             .setDesc(L.settingsLanguageDesc)
             .addDropdown(function (dropdown) {
                 dropdown.addOption('auto', L.settingsLangAuto);
-                var keys = Object.keys(i18n.LANG_OPTIONS);
-                for (var i = 0; i < keys.length; i++) {
-                    dropdown.addOption(keys[i], i18n.LANG_OPTIONS[keys[i]]);
+                var order = i18n.LANG_ORDER;
+                for (var i = 0; i < order.length; i++) {
+                    dropdown.addOption(order[i], i18n.LANG_OPTIONS[order[i]]);
                 }
                 dropdown.setValue(self.plugin.data.language || 'auto');
                 dropdown.onChange(function (value) {

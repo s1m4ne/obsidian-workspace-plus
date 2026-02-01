@@ -236,13 +236,16 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
         else if (key === 'ArrowRight') key = '\u2192';
         else if (key === 'ArrowUp') key = '\u2191';
         else if (key === 'ArrowDown') key = '\u2193';
+        else if (key === ',') key = '<';
+        else if (key === '.') key = '>';
 
         if (isMac) return parts.join('') + key;
         parts.push(key);
         return parts.join('+');
     };
 
-    WorkspacePlusPlus.prototype.getCommandHotkey = function (cmdId) {
+    WorkspacePlusPlus.prototype.getCommandHotkey = function (cmdId, index) {
+        var idx = index || 0;
         var fullId = this.manifest.id + ':' + cmdId;
         try {
             var mgr = this.app.hotkeyManager;
@@ -251,8 +254,8 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
             if (!hotkeys || hotkeys.length === 0) {
                 hotkeys = mgr.getDefaultHotkeys ? mgr.getDefaultHotkeys(fullId) : null;
             }
-            if (!hotkeys || hotkeys.length === 0) return '';
-            return this.formatHotkey(hotkeys[0]);
+            if (!hotkeys || hotkeys.length <= idx) return '';
+            return this.formatHotkey(hotkeys[idx]);
         } catch (e) {
             return '';
         }
@@ -297,6 +300,11 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
             list.appendChild(item);
         }
 
+        var countSpan = document.createElement('div');
+        countSpan.className = 'wpp-switch-count';
+        countSpan.textContent = (activeIndex + 1) + ' / ' + ordered.length;
+        overlay.appendChild(countSpan);
+
         overlay.appendChild(list);
 
         var footerRow = document.createElement('div');
@@ -304,14 +312,21 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
 
         var nextKey = this.getCommandHotkey('next-session');
         if (nextKey) {
-            var hintSpan = document.createElement('span');
-            hintSpan.textContent = L.cmdNext + '  ' + nextKey;
-            footerRow.appendChild(hintSpan);
+            var line1 = document.createElement('div');
+            line1.textContent = L.cmdNext + '  ' + nextKey;
+            footerRow.appendChild(line1);
         }
 
-        var countSpan = document.createElement('span');
-        countSpan.textContent = (activeIndex + 1) + ' / ' + ordered.length;
-        footerRow.appendChild(countSpan);
+        var prevKey2 = this.getCommandHotkey('previous-session');
+        var nextKey2 = this.getCommandHotkey('next-session', 1);
+        if (prevKey2 || nextKey2) {
+            var line2 = document.createElement('div');
+            var parts = [];
+            if (prevKey2) parts.push(L.switchLeft + ' ' + prevKey2);
+            if (nextKey2) parts.push(L.switchRight + ' ' + nextKey2);
+            line2.textContent = parts.join('  /  ');
+            footerRow.appendChild(line2);
+        }
 
         overlay.appendChild(footerRow);
 
