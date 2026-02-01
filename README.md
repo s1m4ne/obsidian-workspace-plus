@@ -4,6 +4,8 @@ An [Obsidian](https://obsidian.md/) plugin for workspace sessions — a UI align
 
 Bug reports, feature requests, and pull requests are welcome — feel free to open an [issue](https://github.com/s1m4ne/obsidian-workspace-plus/issues) or PR.
 
+> **If you find this plugin useful, please give it a ⭐ on GitHub — it helps others discover it!**
+
 ## Features
 
 ### Switch by hotkey
@@ -75,15 +77,15 @@ https://github.com/user-attachments/assets/33c6629c-ebff-4073-af4a-641f9fce85e4
 
 ## Commands
 
-| Command | Description |
-|---|---|
-| Manage sessions | Open the session manager modal |
-| Create new session | Open manager with focus on the name input |
+| Command                  | Description                                   |
+| ------------------------ | --------------------------------------------- |
+| Manage sessions          | Open the session manager modal                |
+| Create new session       | Open manager with focus on the name input     |
 | Save current session now | Save the current layout to the active session |
-| Rename current session | Rename the active session |
-| Delete current session | Delete the active session |
-| Switch to session 1–9 | Jump to a session by number |
-| Previous / Next session | Cycle through sessions |
+| Rename current session   | Rename the active session                     |
+| Delete current session   | Delete the active session                     |
+| Switch to session 1–9    | Jump to a session by number                   |
+| Previous / Next session  | Cycle through sessions                        |
 
 All commands can be assigned custom hotkeys in **Settings** > **Hotkeys**.
 
