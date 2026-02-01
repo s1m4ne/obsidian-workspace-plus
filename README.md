@@ -13,7 +13,7 @@ Bug reports, feature requests, and pull requests are welcome — feel free to op
 Cycle through sessions with <kbd>⌘</kbd><kbd>⇧</kbd><kbd>Enter</kbd> (Mac) / <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Enter</kbd> (Win), or navigate left/right with <kbd>⌘</kbd><kbd>⇧</kbd><kbd><</kbd> / <kbd>⌘</kbd><kbd>⇧</kbd><kbd>></kbd>. You can also assign hotkeys to jump to sessions by number (1–9).
 
 
-<!-- TODO: replace with new video URL -->
+https://github.com/user-attachments/assets/b1dc94f7-b979-4b09-97e6-3ebf4837b5ed
 
 
 ### Switch sessions
@@ -21,7 +21,10 @@ Cycle through sessions with <kbd>⌘</kbd><kbd>⇧</kbd><kbd>Enter</kbd> (Mac) /
 Open the session manager and switch between saved layouts with a click.
 
 
-<!-- TODO: replace with new video URL -->
+
+https://github.com/user-attachments/assets/27a02a7b-aaa8-4795-b67d-4348fa4012f7
+
+
 
 
 ### Create and delete sessions
@@ -29,7 +32,11 @@ Open the session manager and switch between saved layouts with a click.
 Create a new session from the current layout, duplicate it with <kbd>⌘</kbd><kbd>⇧</kbd><kbd>M</kbd>, or delete it with <kbd>⌘</kbd><kbd>⇧</kbd><kbd>⌫</kbd>.
 
 
-<!-- TODO: replace with new video URL -->
+
+
+https://github.com/user-attachments/assets/c86b8000-c49e-442c-8246-17c181a4d921
+
+
 
 
 ### Rename sessions
@@ -37,7 +44,11 @@ Create a new session from the current layout, duplicate it with <kbd>⌘</kbd><k
 Rename the current session with <kbd>⌘</kbd><kbd>⇧</kbd><kbd>R</kbd>, or right-click a session in the manager.
 
 
-<!-- TODO: replace with new video URL -->
+
+https://github.com/user-attachments/assets/6041d80f-9c15-4a59-8d27-8a8f39d9dba6
+
+
+
 
 
 ### Drag to reorder
@@ -45,7 +56,11 @@ Rename the current session with <kbd>⌘</kbd><kbd>⇧</kbd><kbd>R</kbd>, or rig
 Rearrange sessions by dragging them in the session manager.
 
 
-<!-- TODO: replace with new video URL -->
+
+https://github.com/user-attachments/assets/6c2b5a13-cc9f-43ca-bff1-944c5b318a92
+
+
+
 
 
 ### And more
