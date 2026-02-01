@@ -8,7 +8,7 @@ Bug reports, feature requests, and pull requests are welcome — feel free to op
 
 ### Switch by hotkey
 
-Assign hotkeys to jump directly to sessions by number, or cycle through them.
+Cycle through sessions with <kbd>⌘</kbd><kbd>⇧</kbd><kbd>Enter</kbd> (Mac) / <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Enter</kbd> (Win). You can also assign hotkeys to jump to sessions by number.
 
 
 https://github.com/user-attachments/assets/210a2566-a19a-4fab-b791-0766e430de4b
@@ -16,7 +16,7 @@ https://github.com/user-attachments/assets/210a2566-a19a-4fab-b791-0766e430de4b
 
 ### Switch sessions
 
-Open the session manager and switch between saved layouts.
+Open the session manager and switch between saved layouts with a click.
 
 
 https://github.com/user-attachments/assets/ecb8b9fb-610c-4dba-9702-e662b7bfd7bc
@@ -24,7 +24,7 @@ https://github.com/user-attachments/assets/ecb8b9fb-610c-4dba-9702-e662b7bfd7bc
 
 ### Create sessions
 
-Save your current workspace layout as a named session.
+Create a new session by copying the current workspace layout.
 
 
 https://github.com/user-attachments/assets/0483fe8e-308f-43ae-b2cc-2cdd63b8f633
@@ -86,6 +86,24 @@ https://github.com/user-attachments/assets/33c6629c-ebff-4073-af4a-641f9fce85e4
 | Previous / Next session | Cycle through sessions |
 
 All commands can be assigned custom hotkeys in **Settings** > **Hotkeys**.
+
+## Alternatives (and when to pick each)
+
+- **Workspaces** (core plugin): Built-in snapshot layouts—simple save/load for tabs + sidebar state.
+- **Workspaces Plus**: Workspaces with quick save/switch UI, hotkeys, and workspace-specific theming/overrides.
+- **Workspace Navigator**: Workspaces with better state restore (sidebars + file explorer expansion) and a fast switcher.
+- **Context Workspaces**: Space-style UI with Live/Snapshot modes and quick Prev/Next switching.
+- **Contexts**: Switch sets of open notes (tab groups) without full layout—simple and cross-device friendly.
+
+### Where Workspace++ fits
+
+**Workspace++** is for people who want workspace sessions to feel effortless—without turning their setup into a feature checklist.
+If you like the core Workspaces workflow but feel friction in the UI (too many clicks, easy-to-misfire saves, or switching that doesn't feel instant), Workspace++ focuses on the basics and polishes them hard.
+
+- **Minimal, core-aligned UI** that stays out of your way
+- **Fast session switching** (hotkeys + Cmd-Tab style overlay)
+- **Simple session manager** (create/rename/delete + drag reorder)
+- **Sensible defaults**, tuned for daily use—not power-user complexity
 
 ## License
 
