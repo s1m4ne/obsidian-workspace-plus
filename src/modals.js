@@ -54,7 +54,7 @@ var SessionManagerModal = /** @class */ (function (_super) {
         var self = this;
         saveBtn.addEventListener('click', function () { self.onSave(); });
         this.nameInput.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter') self.onSave();
+            if (e.key === 'Enter' && !e.isComposing) self.onSave();
         });
 
         // Focus & selection state
@@ -727,6 +727,9 @@ var RenameModal = /** @class */ (function (_super) {
         this.focusedButtonIndex = -1; // -1 = input focused
 
         this.renameKeyHandler = function (e) {
+            // Skip during IME composition (e.g. Japanese input conversion)
+            if (e.isComposing) return;
+
             if (self.focusedButtonIndex === -1) {
                 // Input focused
                 if (e.key === 'ArrowDown') {
@@ -736,6 +739,7 @@ var RenameModal = /** @class */ (function (_super) {
                     input.blur();
                 } else if (e.key === 'Enter') {
                     e.preventDefault();
+                    e.stopPropagation();
                     doRename();
                 } else if (e.key === 'Escape') {
                     e.preventDefault();
@@ -768,6 +772,7 @@ var RenameModal = /** @class */ (function (_super) {
                     }
                 } else if (e.key === 'Enter') {
                     e.preventDefault();
+                    e.stopPropagation();
                     if (self.focusedButtonIndex === 0) {
                         self.close();
                     } else {
