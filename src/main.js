@@ -620,6 +620,25 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
         return 'Session ' + n;
     };
 
+    WorkspacePlusPlus.prototype.resetSessionsToDefault = function () {
+        var id = utils.generateId();
+        this.hideSwitchOverlay();
+        this.data.sessions = {};
+        this.data.sessionOrder = [];
+        this.data.activeSessionId = null;
+        this.data.sessions[id] = {
+            id: id,
+            name: 'default',
+            modified: Date.now(),
+            layout: this.app.workspace.getLayout(),
+            isDefault: true,
+        };
+        this.data.sessionOrder.push(id);
+        this.data.activeSessionId = id;
+        this.updateStatusBar();
+        return this.persistData();
+    };
+
     WorkspacePlusPlus.prototype.createEmptySession = function () {
         var L = i18n.L;
         var self = this;

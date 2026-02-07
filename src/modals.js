@@ -615,7 +615,9 @@ var ConfirmModal = /** @class */ (function (_super) {
         var cancelBtn = btns.createEl('button', { text: L.cancel });
         cancelBtn.addEventListener('click', function () { self.close(); });
 
-        var confirmBtn = btns.createEl('button', { text: L.delete, cls: 'mod-warning' });
+        var confirmText = this.options.confirmText || L.delete;
+        var confirmClass = this.options.confirmClass || 'mod-warning';
+        var confirmBtn = btns.createEl('button', { text: confirmText, cls: confirmClass });
         confirmBtn.addEventListener('click', function () {
             self.onConfirm();
             self.close();

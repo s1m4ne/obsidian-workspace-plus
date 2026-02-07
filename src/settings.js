@@ -2,6 +2,7 @@
 
 var obsidian = require('obsidian');
 var i18n = require('./i18n');
+var modals = require('./modals');
 
 // ============================================================
 // Settings Tab
@@ -60,6 +61,41 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                 toggle.onChange(function (value) {
                     self.plugin.data.confirmDeleteByHotkey = value;
                     self.plugin.persistData();
+                });
+            });
+
+        new obsidian.Setting(containerEl)
+            .setName(L.settingsResetSessions)
+            .setDesc(L.settingsResetSessionsDesc)
+            .addButton(function (btn) {
+                var isResetting = false;
+                btn.setButtonText(L.settingsResetSessionsBtn);
+                if (typeof btn.setWarning === 'function') {
+                    btn.setWarning();
+                } else if (btn.buttonEl) {
+                    btn.buttonEl.addClass('mod-warning');
+                }
+                btn.onClick(function () {
+                    if (isResetting) return;
+                    new modals.ConfirmModal(self.app, L.confirmResetSessions, function () {
+                        isResetting = true;
+                        btn.setDisabled(true);
+                        return self.plugin.resetSessionsToDefault()
+                            .then(function () {
+                                new obsidian.Notice(L.resetSessionsDone);
+                            })
+                            .catch(function () {
+                                new obsidian.Notice(L.resetSessionsFailed);
+                            })
+                            .then(function () {
+                                isResetting = false;
+                                btn.setDisabled(false);
+                                self.display();
+                            });
+                    }, {
+                        hint: L.resetSessionsHint,
+                        confirmText: L.settingsResetSessionsBtn,
+                    }).open();
                 });
             });
 
