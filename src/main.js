@@ -31,6 +31,8 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
             self.data = Object.assign({}, DEFAULT_DATA, saved || {});
             if (!self.data.sessions) self.data.sessions = {};
             if (!self.data.sessionOrder) self.data.sessionOrder = [];
+            self.isSwitchingSession = false;
+            self.pendingSwitchRequest = null;
             self.syncSessionOrder();
             i18n.resolveLocale(self.data.language);
             var L = i18n.L;
@@ -65,6 +67,8 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
     WorkspacePlusPlus.prototype.onunload = function () {
         this.hideSwitchOverlay();
         this.hideSearchOverlay();
+        this.pendingSwitchRequest = null;
+        this.isSwitchingSession = false;
     };
 
     return WorkspacePlusPlus;

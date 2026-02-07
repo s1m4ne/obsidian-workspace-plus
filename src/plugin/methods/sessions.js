@@ -196,7 +196,54 @@ function attachSessionMethods(WorkspacePlusPlus) {
         return this.persistData();
     };
 
+    WorkspacePlusPlus.prototype.runSwitchRequest = function (request) {
+        var self = this;
+        this.isSwitchingSession = true;
+
+        this.performSessionSwitch(request.targetId, request.options || {})
+            .then(function (ok) {
+                request.resolve(ok);
+            })
+            .catch(function () {
+                request.resolve(false);
+            })
+            .then(function () {
+                self.isSwitchingSession = false;
+                if (!self.pendingSwitchRequest) return;
+                var next = self.pendingSwitchRequest;
+                self.pendingSwitchRequest = null;
+                self.runSwitchRequest(next);
+            });
+    };
+
     WorkspacePlusPlus.prototype.switchSession = function (targetId, options) {
+        var self = this;
+        options = options || {};
+        if (!this.data.sessions[targetId]) return Promise.resolve(false);
+        if (targetId === this.data.activeSessionId && !this.isSwitchingSession) {
+            return Promise.resolve(false);
+        }
+
+        return new Promise(function (resolve) {
+            var request = {
+                targetId: targetId,
+                options: options,
+                resolve: resolve,
+            };
+
+            if (self.isSwitchingSession) {
+                if (self.pendingSwitchRequest) {
+                    self.pendingSwitchRequest.resolve(false);
+                }
+                self.pendingSwitchRequest = request;
+                return;
+            }
+
+            self.runSwitchRequest(request);
+        });
+    };
+
+    WorkspacePlusPlus.prototype.performSessionSwitch = function (targetId, options) {
         var L = i18n.L;
         var self = this;
         options = options || {};
