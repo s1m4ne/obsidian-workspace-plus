@@ -119,8 +119,8 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                 self.hideSearchOverlay();
                 return;
             }
-            self.switchSession(target.id, { silent: true }).then(function () {
-                self.hideSearchOverlay();
+            self.switchSession(target.id, { silent: true }).then(function (switched) {
+                if (switched) self.hideSearchOverlay();
             });
         }
 

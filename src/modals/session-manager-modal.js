@@ -335,7 +335,7 @@ var SessionManagerModal = /** @class */ (function (_super) {
         var info = item.createDiv({ cls: 'wpp-session-info' });
         var nameRow = info.createDiv({ cls: 'wpp-session-name-row' });
         nameRow.createSpan({ text: session.name, cls: 'wpp-session-name' });
-        if (session.isDefault && session.name !== 'default') {
+        if (session.isDefault && session.name !== this.plugin.getDefaultSessionName()) {
             nameRow.createSpan({ text: L.defaultLabel, cls: 'wpp-default-label' });
         }
         if (isActive) {
@@ -503,8 +503,8 @@ var SessionManagerModal = /** @class */ (function (_super) {
     SessionManagerModal.prototype.onLoad = function (sessionId) {
         if (sessionId === this.plugin.data.activeSessionId) return;
         var self = this;
-        this.plugin.switchSession(sessionId).then(function () {
-            self.close();
+        this.plugin.switchSession(sessionId).then(function (switched) {
+            if (switched) self.close();
         });
     };
 

@@ -8,4 +8,6 @@ module.exports = {
     previewNext: true,
     previewPrevious: true,
     confirmDeleteByHotkey: true,
+    autoSaveOnSwitch: true,
+    warnOnUnsavedSwitch: true,
 };

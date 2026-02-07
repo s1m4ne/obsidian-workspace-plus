@@ -392,3 +392,12 @@
     font-size: var(--font-ui-small);
     color: var(--text-muted);
 }
+
+.wpp-settings-section-title {
+    margin: 20px 0 8px;
+    font-size: var(--font-ui-medium);
+}
+
+.wpp-settings-section-title:first-child {
+    margin-top: 0;
+}

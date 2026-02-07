@@ -82,6 +82,89 @@ function attachSessionMethods(WorkspacePlusPlus) {
         return this.data.sessions[this.data.activeSessionId] || null;
     };
 
+    WorkspacePlusPlus.prototype.getCurrentWorkspaceLayout = function () {
+        return this.app.workspace.getLayout();
+    };
+
+    WorkspacePlusPlus.prototype.serializeLayout = function (layout) {
+        try {
+            return JSON.stringify(layout || null);
+        } catch (e) {
+            return '';
+        }
+    };
+
+    WorkspacePlusPlus.prototype.layoutsEqual = function (a, b) {
+        return this.serializeLayout(a) === this.serializeLayout(b);
+    };
+
+    WorkspacePlusPlus.prototype.isAutoSaveOnSwitchEnabled = function () {
+        return this.data.autoSaveOnSwitch !== false;
+    };
+
+    WorkspacePlusPlus.prototype.isWarnOnUnsavedSwitchEnabled = function () {
+        return this.data.warnOnUnsavedSwitch !== false;
+    };
+
+    WorkspacePlusPlus.prototype.getDefaultSessionName = function () {
+        return 'default';
+    };
+
+    WorkspacePlusPlus.prototype.getAutoSessionName = function (n) {
+        if (i18n.L.sessionAutoName) return i18n.L.sessionAutoName(n);
+        return 'Session ' + n;
+    };
+
+    WorkspacePlusPlus.prototype.isActiveSessionDirty = function () {
+        var session = this.getActiveSession();
+        if (!session) return false;
+        return !this.layoutsEqual(session.layout, this.getCurrentWorkspaceLayout());
+    };
+
+    WorkspacePlusPlus.prototype.setAutoSaveOnSwitch = function (enabled, options) {
+        var L = i18n.L;
+        options = options || {};
+        this.data.autoSaveOnSwitch = !!enabled;
+        var isOn = this.isAutoSaveOnSwitchEnabled();
+        return this.persistData().then(function () {
+            if (options.notify) {
+                new obsidian.Notice(isOn ? L.autoSaveEnabled : L.autoSaveDisabled);
+            }
+            return isOn;
+        });
+    };
+
+    WorkspacePlusPlus.prototype.toggleAutoSaveOnSwitch = function (options) {
+        var next = !this.isAutoSaveOnSwitchEnabled();
+        return this.setAutoSaveOnSwitch(next, options || {});
+    };
+
+    WorkspacePlusPlus.prototype.saveActiveSession = function (options) {
+        var L = i18n.L;
+        options = options || {};
+        var session = this.getActiveSession();
+        if (!session) {
+            if (!options.silent) new obsidian.Notice(L.noSession);
+            return Promise.resolve(false);
+        }
+
+        var currentLayout = this.getCurrentWorkspaceLayout();
+        var changed = !this.layoutsEqual(session.layout, currentLayout);
+        session.layout = currentLayout;
+        if (changed || options.touchModified) {
+            session.modified = Date.now();
+        }
+        this.updateStatusBar();
+
+        var name = session.name;
+        return this.persistData().then(function () {
+            if (!options.silent) {
+                new obsidian.Notice(L.savedSession(name));
+            }
+            return changed;
+        });
+    };
+
     WorkspacePlusPlus.prototype.updateStatusBar = function () {
         var L = i18n.L;
         var session = this.getActiveSession();
@@ -98,7 +181,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
 
     WorkspacePlusPlus.prototype.createSession = function (name) {
         var id = utils.generateId();
-        var layout = this.app.workspace.getLayout();
+        var layout = this.getCurrentWorkspaceLayout();
 
         this.data.sessions[id] = {
             id: id,
@@ -118,31 +201,63 @@ function attachSessionMethods(WorkspacePlusPlus) {
         var self = this;
         options = options || {};
         var target = this.data.sessions[targetId];
-        if (!target) return Promise.resolve();
+        if (!target) return Promise.resolve(false);
+        if (target.id === this.data.activeSessionId) return Promise.resolve(false);
 
-        // 1. Save current session state
-        var current = this.getActiveSession();
-        if (current) {
-            current.layout = this.app.workspace.getLayout();
-            current.modified = Date.now();
+        var performSwitch = function (skipCurrentSave) {
+            // 1. Save current session state
+            var current = self.getActiveSession();
+            if (current && !skipCurrentSave) {
+                current.layout = self.getCurrentWorkspaceLayout();
+                current.modified = Date.now();
+            }
+
+            // 2. Update active
+            self.data.activeSessionId = targetId;
+
+            // 3. Apply target layout
+            var applyLayout = target.layout
+                ? self.app.workspace.changeLayout(target.layout)
+                : Promise.resolve();
+
+            return applyLayout.then(function () {
+                self.updateStatusBar();
+                return self.persistData();
+            }).then(function () {
+                if (!options.silent) {
+                    new obsidian.Notice(L.loaded(target.name));
+                }
+                return true;
+            });
+        };
+
+        var autoSaveOnSwitch = this.isAutoSaveOnSwitchEnabled();
+        var shouldWarn = !autoSaveOnSwitch
+            && !options.skipUnsavedWarning
+            && this.isWarnOnUnsavedSwitchEnabled()
+            && this.isActiveSessionDirty();
+
+        if (shouldWarn) {
+            return new Promise(function (resolve) {
+                new modals.UnsavedSwitchModal(
+                    self.app,
+                    L.confirmUnsavedSwitch(target.name),
+                    function () {
+                        self.saveActiveSession({ silent: true, touchModified: true })
+                            .then(function () { return performSwitch(true); })
+                            .then(function (ok) { resolve(ok); })
+                            .catch(function () { resolve(false); });
+                    },
+                    function () {
+                        performSwitch(true)
+                            .then(function (ok) { resolve(ok); })
+                            .catch(function () { resolve(false); });
+                    }
+                ).open();
+            });
         }
 
-        // 2. Update active
-        this.data.activeSessionId = targetId;
-
-        // 3. Apply target layout
-        var applyLayout = target.layout
-            ? this.app.workspace.changeLayout(target.layout)
-            : Promise.resolve();
-
-        return applyLayout.then(function () {
-            self.updateStatusBar();
-            return self.persistData();
-        }).then(function () {
-            if (!options.silent) {
-                new obsidian.Notice(L.loaded(target.name));
-            }
-        });
+        return performSwitch(!autoSaveOnSwitch);
     };
 
     WorkspacePlusPlus.prototype.deleteSession = function (sessionId) {
@@ -242,8 +357,8 @@ function attachSessionMethods(WorkspacePlusPlus) {
             existing[sessions[keys[i]].name] = true;
         }
         var n = 1;
-        while (existing['Session ' + n]) { n++; }
-        return 'Session ' + n;
+        while (existing[this.getAutoSessionName(n)]) { n++; }
+        return this.getAutoSessionName(n);
     };
 
     WorkspacePlusPlus.prototype.resetSessionsToDefault = function () {
@@ -254,9 +369,9 @@ function attachSessionMethods(WorkspacePlusPlus) {
         this.data.activeSessionId = null;
         this.data.sessions[id] = {
             id: id,
-            name: 'default',
+            name: this.getDefaultSessionName(),
             modified: Date.now(),
-            layout: this.app.workspace.getLayout(),
+            layout: this.getCurrentWorkspaceLayout(),
             isDefault: true,
         };
         this.data.sessionOrder.push(id);
@@ -271,8 +386,8 @@ function attachSessionMethods(WorkspacePlusPlus) {
 
         // Save current session state
         var current = this.getActiveSession();
-        if (current) {
-            current.layout = this.app.workspace.getLayout();
+        if (current && this.isAutoSaveOnSwitchEnabled()) {
+            current.layout = this.getCurrentWorkspaceLayout();
             current.modified = Date.now();
         }
 
@@ -292,7 +407,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
         for (var i = 0; i < leaves.length; i++) { leaves[i].detach(); }
 
         // Capture the empty state
-        this.data.sessions[id].layout = this.app.workspace.getLayout();
+        this.data.sessions[id].layout = this.getCurrentWorkspaceLayout();
 
         this.updateStatusBar();
         new obsidian.Notice(L.created(name));
@@ -307,8 +422,8 @@ function attachSessionMethods(WorkspacePlusPlus) {
 
         // Save current session state
         var current = this.getActiveSession();
-        if (current) {
-            current.layout = this.app.workspace.getLayout();
+        if (current && this.isAutoSaveOnSwitchEnabled()) {
+            current.layout = this.getCurrentWorkspaceLayout();
             current.modified = Date.now();
         }
 
@@ -317,7 +432,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
             id: id,
             name: name,
             modified: Date.now(),
-            layout: this.app.workspace.getLayout(),
+            layout: this.getCurrentWorkspaceLayout(),
         };
         this.data.sessionOrder.push(id);
         this.data.activeSessionId = id;
@@ -337,9 +452,9 @@ function attachSessionMethods(WorkspacePlusPlus) {
         var id = utils.generateId();
         this.data.sessions[id] = {
             id: id,
-            name: 'default',
+            name: this.getDefaultSessionName(),
             modified: Date.now(),
-            layout: this.app.workspace.getLayout(),
+            layout: this.getCurrentWorkspaceLayout(),
             isDefault: true,
         };
         this.data.sessionOrder.unshift(id);
@@ -349,10 +464,12 @@ function attachSessionMethods(WorkspacePlusPlus) {
     };
 
     WorkspacePlusPlus.prototype.flushOnStartup = function () {
+        if (!this.isAutoSaveOnSwitchEnabled()) return;
+
         var session = this.getActiveSession();
         if (!session) return;
 
-        session.layout = this.app.workspace.getLayout();
+        session.layout = this.getCurrentWorkspaceLayout();
         session.modified = Date.now();
         return this.persistData();
     };

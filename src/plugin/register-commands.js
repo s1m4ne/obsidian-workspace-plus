@@ -83,9 +83,43 @@ function registerCommands(plugin) {
     });
 
     plugin.addCommand({
+        id: 'save-current-session',
+        name: L.cmdSaveCurrent,
+        hotkeys: [{ modifiers: ['Mod', 'Shift'], key: 'S' }],
+        callback: function () { plugin.saveActiveSession(); },
+    });
+
+    plugin.addCommand({
+        id: 'toggle-auto-save-on-switch',
+        name: L.cmdToggleAutoSave,
+        callback: function () { plugin.toggleAutoSaveOnSwitch({ notify: true }); },
+    });
+
+    plugin.addCommand({
+        id: 'enable-auto-save-on-switch',
+        name: L.cmdEnableAutoSave,
+        checkCallback: function (checking) {
+            var canRun = !plugin.isAutoSaveOnSwitchEnabled();
+            if (!canRun) return false;
+            if (!checking) plugin.setAutoSaveOnSwitch(true, { notify: true });
+            return true;
+        },
+    });
+
+    plugin.addCommand({
+        id: 'disable-auto-save-on-switch',
+        name: L.cmdDisableAutoSave,
+        checkCallback: function (checking) {
+            var canRun = plugin.isAutoSaveOnSwitchEnabled();
+            if (!canRun) return false;
+            if (!checking) plugin.setAutoSaveOnSwitch(false, { notify: true });
+            return true;
+        },
+    });
+
+    plugin.addCommand({
         id: 'search-session-overlay',
         name: L.cmdSearchOverlay,
-        hotkeys: [{ modifiers: ['Mod', 'Shift'], key: 'S' }],
         callback: function () { plugin.openSearchOverlay(); },
     });
 }
