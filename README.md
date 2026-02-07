@@ -66,6 +66,8 @@ https://github.com/user-attachments/assets/6c2b5a13-cc9f-43ca-bff1-944c5b318a92
 ### And more
 
 - **Full hotkey workflow** — create, duplicate, rename, delete, and switch sessions without ever opening the manager
+- **Manual save command** for current session (`Cmd/Ctrl+Shift+S` by default)
+- **Auto-save mode control** — toggle enable/disable auto-save-on-switch and use warning prompts for unsaved changes
 - **Bulk select** with `Cmd/Ctrl+Click` to delete multiple sessions
 - **Keyboard navigation** in manager — arrow keys, Enter to switch, Delete/Backspace to remove
 - **Status bar** shows the active session name (click to open manager)
@@ -108,8 +110,13 @@ https://github.com/user-attachments/assets/6c2b5a13-cc9f-43ca-bff1-944c5b318a92
 | Duplicate current session| `Cmd/Ctrl+Shift+M`                                |
 | Rename current session   | `Cmd/Ctrl+Shift+R`                                |
 | Delete current session   | `Cmd/Ctrl+Shift+Backspace`                        |
+| Save current session     | `Cmd/Ctrl+Shift+S`                                |
+| Toggle auto-save on switch | —                                              |
+| Enable auto-save on switch | —                                              |
+| Disable auto-save on switch | —                                             |
 | Previous session         | `Cmd/Ctrl+Shift+<`                                |
 | Next session             | `Cmd/Ctrl+Shift+Enter`, `Cmd/Ctrl+Shift+>`       |
+| Search session overlay   | —                                                 |
 | Switch to session 1–9    | —                                                 |
 
 All commands can be assigned custom hotkeys in **Settings** > **Hotkeys**.
