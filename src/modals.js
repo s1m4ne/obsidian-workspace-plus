@@ -51,10 +51,49 @@ var SessionManagerModal = /** @class */ (function (_super) {
             cls: 'wpp-save-btn',
         });
 
+        // Filter section
+        var filterContainer = contentEl.createDiv({ cls: 'wpp-filter-container' });
+        this.filterInput = filterContainer.createEl('input', {
+            type: 'text',
+            placeholder: L.filterPlaceholder,
+            cls: 'wpp-filter-input',
+        });
+
         var self = this;
         saveBtn.addEventListener('click', function () { self.onSave(); });
         this.nameInput.addEventListener('keydown', function (e) {
             if (e.key === 'Enter' && !e.isComposing) self.onSave();
+        });
+        this.nameInput.addEventListener('focus', function () {
+            self.focusedIndex = -2;
+            self.focusedButtonIndex = -1;
+            self.updateButtonFocusUI();
+            self.updateFocusUI();
+        });
+        this.filterQuery = '';
+        this.filterInput.addEventListener('focus', function () {
+            self.focusedIndex = -1;
+            self.focusedButtonIndex = -1;
+            self.updateButtonFocusUI();
+            self.updateFocusUI();
+        });
+        this.filterInput.addEventListener('input', function () {
+            self.filterQuery = self.filterInput.value || '';
+            var sessions = self.getNavigationSessions();
+            var activeIdx = -1;
+            for (var i = 0; i < sessions.length; i++) {
+                if (sessions[i].id === self.plugin.data.activeSessionId) {
+                    activeIdx = i;
+                    break;
+                }
+            }
+            if (document.activeElement === self.filterInput) {
+                self.focusedIndex = -1;
+            } else {
+                self.focusedIndex = activeIdx !== -1 ? activeIdx : (sessions.length > 0 ? 0 : -1);
+            }
+            self.focusedButtonIndex = -1;
+            self.renderList();
         });
 
         // Focus & selection state
@@ -78,7 +117,7 @@ var SessionManagerModal = /** @class */ (function (_super) {
         this.renderList();
 
         // Set initial focus to active session
-        var ordered = this.plugin.getOrderedSessions();
+        var ordered = this.getNavigationSessions();
         for (var fi = 0; fi < ordered.length; fi++) {
             if (ordered[fi].id === this.plugin.data.activeSessionId) {
                 this.focusedIndex = fi;
@@ -114,11 +153,19 @@ var SessionManagerModal = /** @class */ (function (_super) {
             var isMac = navigator.platform.indexOf('Mac') !== -1;
             var modKey = isMac ? e.metaKey : e.ctrlKey;
 
+            // Mod+F / Mod+Shift+F — focus filter input
+            if (modKey && (e.key === 'f' || e.key === 'F')) {
+                e.preventDefault();
+                self.filterInput.focus();
+                self.filterInput.select();
+                return;
+            }
+
             // Mod+Shift+Enter (cycle next session)
             if (modKey && e.shiftKey && e.key === 'Enter') {
                 e.preventDefault();
                 e.stopPropagation();
-                var ordered = self.plugin.getOrderedSessions();
+                var ordered = self.getNavigationSessions();
                 if (ordered.length <= 1) return;
                 var currentIndex = -1;
                 for (var i = 0; i < ordered.length; i++) {
@@ -144,8 +191,25 @@ var SessionManagerModal = /** @class */ (function (_super) {
                 return;
             }
 
+            if (e.key === '/' && document.activeElement !== self.filterInput) {
+                e.preventDefault();
+                self.filterInput.focus();
+                self.filterInput.select();
+                return;
+            }
+
+            // Enter on filter input — switch immediately when exactly one match remains
+            if (document.activeElement === self.filterInput && e.key === 'Enter' && !e.isComposing) {
+                var filtered = self.getNavigationSessions();
+                if (filtered.length === 1) {
+                    e.preventDefault();
+                    self.onLoad(filtered[0].id);
+                }
+                return;
+            }
+
             // Skip remaining keys if input is focused
-            if (document.activeElement === self.nameInput) return;
+            if (document.activeElement === self.nameInput || document.activeElement === self.filterInput) return;
 
             // ArrowLeft / ArrowRight — navigate action buttons in focused row
             if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
@@ -192,13 +256,36 @@ var SessionManagerModal = /** @class */ (function (_super) {
         document.addEventListener('keydown', this.modalKeyHandler, true);
     };
 
-    SessionManagerModal.prototype.renderList = function () {
-        this.listEl.empty();
+    SessionManagerModal.prototype.getVisibleSessions = function () {
         var sessions = this.plugin.getOrderedSessions();
-        for (var i = 0; i < sessions.length; i++) {
-            this.renderSessionItem(sessions[i], i);
+        var query = (this.filterQuery || '').trim().toLowerCase();
+        if (!query) return sessions;
+        return sessions.filter(function (s) {
+            return (s.name || '').toLowerCase().indexOf(query) !== -1;
+        });
+    };
+
+    SessionManagerModal.prototype.getNavigationSessions = function () {
+        return this.getVisibleSessions();
+    };
+
+    SessionManagerModal.prototype.renderList = function () {
+        var L = i18n.L;
+        this.listEl.empty();
+        var sessions = this.getVisibleSessions();
+        var ordered = this.plugin.getOrderedSessions();
+        var orderIndex = {};
+        for (var oi = 0; oi < ordered.length; oi++) {
+            orderIndex[ordered[oi].id] = oi;
         }
-        this.setupDragAndDrop();
+        for (var i = 0; i < sessions.length; i++) {
+            this.renderSessionItem(sessions[i], i, orderIndex[sessions[i].id]);
+        }
+        if (sessions.length === 0) {
+            this.listEl.createDiv({ text: L.noFilteredSessions, cls: 'wpp-empty-state' });
+        } else {
+            this.setupDragAndDrop();
+        }
 
         // Clamp focus index
         if (this.focusedIndex >= sessions.length) {
@@ -215,7 +302,7 @@ var SessionManagerModal = /** @class */ (function (_super) {
         this.updateSelectionUI();
     };
 
-    SessionManagerModal.prototype.renderSessionItem = function (session, index) {
+    SessionManagerModal.prototype.renderSessionItem = function (session, index, orderIndex) {
         var L = i18n.L;
         var isActive = session.id === this.plugin.data.activeSessionId;
         var self = this;
@@ -250,8 +337,9 @@ var SessionManagerModal = /** @class */ (function (_super) {
         });
 
         // Hotkey hint
-        var hk = index <= 8 ? self.plugin.getCommandHotkey('switch-to-' + (index + 1)) : '';
-        item.createSpan({ text: hk || String(index + 1), cls: 'wpp-session-index' });
+        var hintIndex = typeof orderIndex === 'number' ? orderIndex : index;
+        var hk = hintIndex <= 8 ? self.plugin.getCommandHotkey('switch-to-' + (hintIndex + 1)) : '';
+        item.createSpan({ text: hk || String(hintIndex + 1), cls: 'wpp-session-index' });
 
         // Info section
         var info = item.createDiv({ cls: 'wpp-session-info' });
@@ -292,6 +380,7 @@ var SessionManagerModal = /** @class */ (function (_super) {
 
     SessionManagerModal.prototype.setupDragAndDrop = function () {
         var self = this;
+        if ((this.filterQuery || '').trim()) return;
 
         this.listEl.querySelectorAll('.wpp-session-item').forEach(function (item) {
             item.addEventListener('mousedown', function (e) {
@@ -470,19 +559,48 @@ var SessionManagerModal = /** @class */ (function (_super) {
     // --- Focus & selection helpers ---
 
     SessionManagerModal.prototype.moveFocus = function (dir) {
-        if (document.activeElement === this.nameInput) {
-            this.nameInput.blur();
+        var sessions = this.getNavigationSessions();
+        var targets = [{ type: 'name' }, { type: 'filter' }];
+        for (var i = 0; i < sessions.length; i++) {
+            targets.push({ type: 'session', index: i });
         }
-        var sessions = this.plugin.getOrderedSessions();
-        if (sessions.length === 0) return;
-        if (this.focusedIndex === -1) {
-            this.focusedIndex = dir > 0 ? 0 : sessions.length - 1;
+        if (targets.length === 0) return;
+
+        var currentPos = 0;
+        if (document.activeElement === this.nameInput || this.focusedIndex === -2) {
+            currentPos = 0;
+        } else if (document.activeElement === this.filterInput || this.focusedIndex === -1) {
+            currentPos = 1;
+        } else if (this.focusedIndex >= 0) {
+            currentPos = Math.min(2 + this.focusedIndex, targets.length - 1);
         } else {
-            this.focusedIndex = (this.focusedIndex + dir + sessions.length) % sessions.length;
+            currentPos = dir > 0 ? 0 : targets.length - 1;
         }
+
+        var nextPos = (currentPos + dir + targets.length) % targets.length;
+        var target = targets[nextPos];
+
+        if (target.type === 'name') {
+            this.focusedIndex = -2;
+            this.updateFocusUI();
+            this.nameInput.focus();
+            var nameLen = this.nameInput.value.length;
+            this.nameInput.setSelectionRange(nameLen, nameLen);
+        } else if (target.type === 'filter') {
+            this.focusedIndex = -1;
+            this.updateFocusUI();
+            this.filterInput.focus();
+            var filterLen = this.filterInput.value.length;
+            this.filterInput.setSelectionRange(filterLen, filterLen);
+        } else {
+            if (document.activeElement === this.nameInput) this.nameInput.blur();
+            if (document.activeElement === this.filterInput) this.filterInput.blur();
+            this.focusedIndex = target.index;
+            this.updateFocusUI();
+        }
+
         this.focusedButtonIndex = -1;
         this.updateButtonFocusUI();
-        this.updateFocusUI();
     };
 
     SessionManagerModal.prototype.updateFocusUI = function () {
@@ -534,7 +652,7 @@ var SessionManagerModal = /** @class */ (function (_super) {
     };
 
     SessionManagerModal.prototype.onFocusedLoad = function () {
-        var sessions = this.plugin.getOrderedSessions();
+        var sessions = this.getNavigationSessions();
         if (this.focusedIndex < 0 || this.focusedIndex >= sessions.length) return;
         this.onLoad(sessions[this.focusedIndex].id);
     };
@@ -544,7 +662,7 @@ var SessionManagerModal = /** @class */ (function (_super) {
         if (this.selectedIds.size > 0) {
             this.onBulkDelete();
         } else {
-            var sessions = this.plugin.getOrderedSessions();
+            var sessions = this.getNavigationSessions();
             if (this.focusedIndex < 0 || this.focusedIndex >= sessions.length) return;
             var session = sessions[this.focusedIndex];
             if (Object.keys(this.plugin.data.sessions).length <= 1) {

@@ -14,6 +14,14 @@
     flex: 1;
 }
 
+.wpp-filter-container {
+    margin-bottom: 10px;
+}
+
+.wpp-filter-input {
+    width: 100%;
+}
+
 /* Session list */
 .wpp-session-list {
     display: flex;
@@ -85,6 +93,12 @@
     font-size: var(--font-smallest);
     color: var(--text-muted);
     margin-top: 2px;
+}
+
+.wpp-empty-state {
+    padding: 10px 12px;
+    color: var(--text-muted);
+    font-size: var(--font-ui-small);
 }
 
 /* Keyboard focus */
@@ -305,6 +319,57 @@
     gap: 2px;
     font-size: 11px;
     color: var(--text-faint);
+}
+
+.wpp-search-overlay {
+    align-items: stretch;
+    min-width: min(640px, 90vw);
+    max-width: min(760px, 95vw);
+}
+
+.wpp-search-row {
+    width: 100%;
+}
+
+.wpp-search-input {
+    width: 100%;
+}
+
+.wpp-search-list {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 4px;
+    width: 100%;
+    max-height: 50vh;
+    overflow-y: auto;
+}
+
+.wpp-search-overlay .wpp-switch-item {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    text-align: left;
+    padding: 8px 12px;
+}
+
+.wpp-search-overlay .wpp-switch-name {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.wpp-search-empty {
+    display: none;
+    color: var(--text-muted);
+    font-size: var(--font-ui-small);
+    text-align: center;
+    padding: 6px 0;
 }
 
 /* Settings: nested sub-toggles below parent */
