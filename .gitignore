@@ -6,3 +6,4 @@ node_modules/
 data.json
 data.backup.json
 .claude/
+.workspace-plus-plus/

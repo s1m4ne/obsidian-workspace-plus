@@ -130,7 +130,10 @@ var SessionManagerModal = /** @class */ (function (_super) {
             self.app.setting.open();
             self.app.setting.openTabById('hotkeys');
             var sc = self.app.setting.activeTab.searchComponent;
-            sc.setValue('Workspace++');
+            var pluginName = (self.plugin.manifest && self.plugin.manifest.name)
+                ? self.plugin.manifest.name
+                : 'Workspace++';
+            sc.setValue(pluginName);
             sc.inputEl.dispatchEvent(new Event('input'));
         });
 

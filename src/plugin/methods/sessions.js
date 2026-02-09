@@ -107,7 +107,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
     };
 
     WorkspacePlusPlus.prototype.getDefaultSessionName = function () {
-        return 'default';
+        return i18n.L.defaultSessionName || 'default';
     };
 
     WorkspacePlusPlus.prototype.getAutoSessionName = function (n) {

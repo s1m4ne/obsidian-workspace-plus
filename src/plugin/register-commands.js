@@ -1,5 +1,6 @@
 'use strict';
 
+var obsidian = require('obsidian');
 var i18n = require('../i18n');
 var modals = require('../modals');
 
@@ -121,6 +122,26 @@ function registerCommands(plugin) {
         id: 'search-session-overlay',
         name: L.cmdSearchOverlay,
         callback: function () { plugin.openSearchOverlay(); },
+    });
+
+    plugin.addCommand({
+        id: 'export-sessions-data',
+        name: L.cmdExportSessions,
+        callback: function () {
+            plugin.exportSessionsSnapshot().catch(function () {
+                new obsidian.Notice(L.exportSessionsFailed);
+            });
+        },
+    });
+
+    plugin.addCommand({
+        id: 'import-sessions-data',
+        name: L.cmdImportSessions,
+        callback: function () {
+            plugin.importSessionsFromLatestExport().catch(function () {
+                new obsidian.Notice(L.importSessionsFailed);
+            });
+        },
     });
 }
 
