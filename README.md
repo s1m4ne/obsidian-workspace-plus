@@ -117,6 +117,8 @@ https://github.com/user-attachments/assets/6c2b5a13-cc9f-43ca-bff1-944c5b318a92
 | Previous session         | `Cmd/Ctrl+Shift+<`                                |
 | Next session             | `Cmd/Ctrl+Shift+Enter`, `Cmd/Ctrl+Shift+>`       |
 | Search session overlay   | —                                                 |
+| Export sessions snapshot | —                                                 |
+| Import latest sessions snapshot | —                                           |
 | Switch to session 1–9    | —                                                 |
 
 All commands can be assigned custom hotkeys in **Settings** > **Hotkeys**.

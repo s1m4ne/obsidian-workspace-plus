@@ -54,7 +54,10 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                 btn.onClick(function () {
                     self.app.setting.openTabById('hotkeys');
                     var sc = self.app.setting.activeTab.searchComponent;
-                    sc.setValue('Workspace++');
+                    var pluginName = (self.plugin.manifest && self.plugin.manifest.name)
+                        ? self.plugin.manifest.name
+                        : 'Workspace++';
+                    sc.setValue(pluginName);
                     sc.inputEl.dispatchEvent(new Event('input'));
                 });
             });
@@ -141,7 +144,41 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                 });
             });
 
-        addSection(L.settingsSectionData);
+        addSection(L.settingsSectionReset);
+
+        new obsidian.Setting(containerEl)
+            .setName(L.settingsResetSettings)
+            .setDesc(L.settingsResetSettingsDesc)
+            .addButton(function (btn) {
+                var isResetting = false;
+                btn.setButtonText(L.settingsResetSettingsBtn);
+                if (typeof btn.setWarning === 'function') {
+                    btn.setWarning();
+                } else if (btn.buttonEl) {
+                    btn.buttonEl.addClass('mod-warning');
+                }
+                btn.onClick(function () {
+                    if (isResetting) return;
+                    new modals.ConfirmModal(self.app, L.confirmResetSettings, function () {
+                        isResetting = true;
+                        btn.setDisabled(true);
+                        return self.plugin.resetSettingsToDefault()
+                            .then(function () {
+                                new obsidian.Notice(L.resetSettingsDone);
+                            })
+                            .catch(function () {
+                                new obsidian.Notice(L.resetSettingsFailed);
+                            })
+                            .then(function () {
+                                isResetting = false;
+                                btn.setDisabled(false);
+                                self.display();
+                            });
+                    }, {
+                        confirmText: L.settingsResetSettingsBtn,
+                    }).open();
+                });
+            });
 
         new obsidian.Setting(containerEl)
             .setName(L.settingsResetSessions)
@@ -178,6 +215,178 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                 });
             });
 
+        new obsidian.Setting(containerEl)
+            .setName(L.settingsResetSessionsAndSettings)
+            .setDesc(L.settingsResetSessionsAndSettingsDesc)
+            .addButton(function (btn) {
+                var isResetting = false;
+                btn.setButtonText(L.settingsResetSessionsAndSettingsBtn);
+                if (typeof btn.setWarning === 'function') {
+                    btn.setWarning();
+                } else if (btn.buttonEl) {
+                    btn.buttonEl.addClass('mod-warning');
+                }
+                btn.onClick(function () {
+                    if (isResetting) return;
+                    new modals.ConfirmModal(self.app, L.confirmResetSessionsAndSettings, function () {
+                        isResetting = true;
+                        btn.setDisabled(true);
+                        return self.plugin.resetSessionsAndSettingsToDefault()
+                            .then(function () {
+                                new obsidian.Notice(L.resetSessionsAndSettingsDone);
+                            })
+                            .catch(function () {
+                                new obsidian.Notice(L.resetSessionsAndSettingsFailed);
+                            })
+                            .then(function () {
+                                isResetting = false;
+                                btn.setDisabled(false);
+                                self.display();
+                            });
+                    }, {
+                        confirmText: L.settingsResetSessionsAndSettingsBtn,
+                    }).open();
+                });
+            });
+
+        var useLocalSettings = self.plugin.isUsingLocalSettings();
+        var advancedDetailsEl = containerEl.createEl('details', { cls: 'wpp-advanced-details' });
+        advancedDetailsEl.createEl('summary', {
+            text: L.settingsSectionAdvanced,
+            cls: 'wpp-advanced-summary',
+        });
+        var advancedBodyEl = advancedDetailsEl.createDiv({ cls: 'wpp-advanced-body' });
+
+        advancedBodyEl.createEl('h3', {
+            text: L.settingsAdvancedStorageSubsection,
+            cls: 'wpp-settings-section-title wpp-advanced-subsection-title',
+        });
+
+        new obsidian.Setting(advancedBodyEl)
+            .setName(L.settingsUseLocalSettings)
+            .setDesc(L.settingsUseLocalSettingsDesc)
+            .addToggle(function (toggle) {
+                toggle.setValue(useLocalSettings);
+                toggle.onChange(function (value) {
+                    self.plugin.setUseLocalSettings(value, { notify: true })
+                        .then(function () {
+                            self.display();
+                        })
+                        .catch(function () {
+                            new obsidian.Notice(L.localSettingsOperationFailed);
+                            self.display();
+                        });
+                });
+            });
+
+        new obsidian.Setting(advancedBodyEl)
+            .setName(L.settingsCopyGlobalToLocal)
+            .setDesc(L.settingsCopyGlobalToLocalDesc)
+            .addButton(function (btn) {
+                btn.setButtonText(L.settingsCopyGlobalToLocalBtn);
+                btn.setDisabled(!useLocalSettings);
+                btn.onClick(function () {
+                    self.plugin.copyGlobalSettingsToLocal({ notify: true })
+                        .then(function () {
+                            self.display();
+                        })
+                        .catch(function () {
+                            new obsidian.Notice(L.localSettingsOperationFailed);
+                        });
+                });
+            });
+
+        new obsidian.Setting(advancedBodyEl)
+            .setName(L.settingsResetLocalSettings)
+            .setDesc(L.settingsResetLocalSettingsDesc)
+            .addButton(function (btn) {
+                btn.setButtonText(L.settingsResetLocalSettingsBtn);
+                btn.setDisabled(!useLocalSettings);
+                btn.onClick(function () {
+                    self.plugin.resetLocalSettings({ notify: true })
+                        .then(function () {
+                            self.display();
+                        })
+                        .catch(function () {
+                            new obsidian.Notice(L.localSettingsOperationFailed);
+                        });
+                });
+            });
+
+        advancedBodyEl.createEl('h3', {
+            text: L.settingsAdvancedTransferSubsection,
+            cls: 'wpp-settings-section-title wpp-advanced-subsection-title',
+        });
+
+        new obsidian.Setting(advancedBodyEl)
+            .setName(L.settingsExportSessions)
+            .setDesc(L.settingsExportSessionsDesc)
+            .addButton(function (btn) {
+                btn.setButtonText(L.settingsExportSessionsBtn);
+                btn.onClick(function () {
+                    self.plugin.exportSessionsSnapshot().catch(function () {
+                        new obsidian.Notice(L.exportSessionsFailed);
+                    });
+                });
+            });
+
+        new obsidian.Setting(advancedBodyEl)
+            .setName(L.settingsImportSessions)
+            .setDesc(L.settingsImportSessionsDesc)
+            .addButton(function (btn) {
+                btn.setButtonText(L.settingsImportSessionsBtn);
+                btn.onClick(function () {
+                    new modals.ConfirmModal(self.app, L.confirmImportSessions, function () {
+                        return self.plugin.importSessionsFromLatestExport().catch(function () {
+                            new obsidian.Notice(L.importSessionsFailed);
+                        });
+                    }, {
+                        confirmText: L.settingsImportSessionsBtn,
+                    }).open();
+                });
+            });
+
+        var diagnosticsInfo = self.plugin.getStorageDiagnosticsInfo();
+        var diagnosticsUpdatedText = '';
+        try {
+            diagnosticsUpdatedText = new Date(diagnosticsInfo.updatedAt).toLocaleString();
+        } catch (e) {
+            diagnosticsUpdatedText = String(diagnosticsInfo.updatedAt);
+        }
+
+        var devDetailsEl = containerEl.createEl('details', { cls: 'wpp-dev-details' });
+        devDetailsEl.createEl('summary', {
+            text: L.settingsDeveloperSection,
+            cls: 'wpp-dev-summary',
+        });
+        var devBodyEl = devDetailsEl.createDiv({ cls: 'wpp-dev-body' });
+        var devCardEl = devBodyEl.createDiv({ cls: 'wpp-dev-card' });
+        devCardEl.createDiv({
+            text: L.settingsStorageDiagnostics,
+            cls: 'wpp-dev-card-title',
+        });
+        devCardEl.createDiv({
+            text: L.settingsStorageDiagnosticsDesc,
+            cls: 'wpp-dev-card-desc',
+        });
+
+        function addDevCardRow(label, value, options) {
+            options = options || {};
+            var row = devCardEl.createDiv({ cls: 'wpp-dev-card-row' });
+            row.createDiv({ text: label, cls: 'wpp-dev-card-label' });
+            row.createDiv({
+                text: String(value),
+                cls: options.code ? 'wpp-dev-card-value wpp-dev-card-value-code' : 'wpp-dev-card-value',
+            });
+        }
+
+        addDevCardRow(L.settingsStorageFieldSessions, diagnosticsInfo.sessionsPath, { code: true });
+        addDevCardRow(L.settingsStorageFieldSessionsBackup, diagnosticsInfo.sessionsBackupPath, { code: true });
+        addDevCardRow(L.settingsStorageFieldLocalSettings, diagnosticsInfo.localSettingsPath, { code: true });
+        addDevCardRow(L.settingsStorageFieldGlobalSettings, diagnosticsInfo.globalSettingsPath, { code: true });
+        addDevCardRow(L.settingsStorageFieldSessionCount, diagnosticsInfo.sessionCount);
+        addDevCardRow(L.settingsStorageFieldUpdatedAt, diagnosticsUpdatedText);
+
         var footerEl = containerEl.createDiv();
         footerEl.style.fontSize = '12px';
         footerEl.style.color = 'var(--text-faint)';
@@ -186,8 +395,8 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
         var helpEl = footerEl.createEl('p', { text: L.settingsTranslationHelp });
         helpEl.style.margin = '0 0 4px';
 
-        var linkEl = footerEl.createEl('a', {
-            text: 'GitHub',
+        footerEl.createEl('a', {
+            text: L.settingsGitHubLink,
             href: 'https://github.com/s1m4ne/obsidian-workspace-plus',
         });
     };
