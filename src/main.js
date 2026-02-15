@@ -47,6 +47,13 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
             self.statusBarEl = self.addStatusBarItem();
             self.statusBarEl.addClass('wpp-status-bar');
             self.statusBarEl.addEventListener('click', function (evt) {
+                if (evt.altKey) {
+                    evt.preventDefault();
+                    evt.stopPropagation();
+                    self.reloadCurrentSessionWithoutSaving();
+                    return;
+                }
+
                 var isMac = typeof navigator !== 'undefined'
                     && typeof navigator.platform === 'string'
                     && navigator.platform.indexOf('Mac') !== -1;

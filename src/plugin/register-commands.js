@@ -91,6 +91,12 @@ function registerCommands(plugin) {
     });
 
     plugin.addCommand({
+        id: 'reload-current-session-without-saving',
+        name: L.cmdReloadCurrentWithoutSaving,
+        callback: function () { plugin.reloadCurrentSessionWithoutSaving(); },
+    });
+
+    plugin.addCommand({
         id: 'toggle-auto-save-on-switch',
         name: L.cmdToggleAutoSave,
         callback: function () { plugin.toggleAutoSaveOnSwitch({ notify: true }); },

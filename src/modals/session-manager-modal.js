@@ -206,16 +206,13 @@ var SessionManagerModal = /** @class */ (function (_super) {
 
                 // From filter area, ArrowDown always goes to the first row's load/switch button.
                 var isFilterFocused = document.activeElement === self.filterInput || controlEl === self.filterInput;
-                var isFilterState = isFilterFocused || (self.focusedIndex === -1 && document.activeElement !== self.nameInput);
-                if (isFilterState && e.key === 'ArrowDown') {
+                if (isFilterFocused && e.key === 'ArrowDown') {
                     var firstLoadBtn = self.listEl.querySelector('.wpp-session-item .wpp-load-btn');
                     if (firstLoadBtn && isElementVisible(firstLoadBtn)) {
                         e.preventDefault();
                         e.stopPropagation();
-                        if (self.focusedIndex >= 0) {
-                            self.focusedIndex = -1;
-                            self.updateFocusUI();
-                        }
+                        self.focusedIndex = 0;
+                        self.updateFocusUI();
                         firstLoadBtn.focus();
                     }
                     return;
@@ -223,8 +220,48 @@ var SessionManagerModal = /** @class */ (function (_super) {
 
                 // Keep vertical movement in the same action type (column) across session rows.
                 var activeActionRow = controlEl && controlEl.closest ? controlEl.closest('.wpp-session-actions') : null;
+                if (!activeActionRow && self.focusedIndex >= 0) {
+                    var rowModeRows = Array.from(self.listEl.querySelectorAll('.wpp-session-item')).filter(function (rowEl) {
+                        return isElementVisible(rowEl);
+                    });
+                    if (rowModeRows.length === 0) return;
+                    var rowModeNext = self.focusedIndex + dir;
+
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    if (rowModeNext >= 0 && rowModeNext < rowModeRows.length) {
+                        var rowModeTarget = rowModeRows[rowModeNext].querySelector('.wpp-session-actions [data-action-key="load"]');
+                        if (!rowModeTarget || !isElementVisible(rowModeTarget)) {
+                            rowModeTarget = rowModeRows[rowModeNext].querySelector('.wpp-session-actions button, .wpp-session-actions .wpp-icon-btn');
+                        }
+                        self.focusedIndex = rowModeNext;
+                        self.updateFocusUI();
+                        if (rowModeTarget && rowModeTarget.focus) rowModeTarget.focus();
+                        return;
+                    }
+
+                    if (e.key === 'ArrowUp' && self.focusedIndex === 0) {
+                        self.focusedIndex = -1;
+                        self.updateFocusUI();
+                        self.filterInput.focus();
+                        self.filterInput.select();
+                        return;
+                    }
+                    if (e.key === 'ArrowDown' && self.focusedIndex === rowModeRows.length - 1) {
+                        self.focusedIndex = -2;
+                        self.updateFocusUI();
+                        self.nameInput.focus();
+                        var rowNameLen = self.nameInput.value.length;
+                        self.nameInput.setSelectionRange(rowNameLen, rowNameLen);
+                        return;
+                    }
+                }
+
                 if (activeActionRow && self.contentEl.contains(activeActionRow)) {
                     var actionKey = controlEl && controlEl.getAttribute ? controlEl.getAttribute('data-action-key') : '';
+                    // save-inline exists only on the active row, so treat it as "load" for vertical movement.
+                    var verticalActionKey = actionKey === 'save-inline' ? 'load' : actionKey;
                     var currentRowEl = controlEl && controlEl.closest ? controlEl.closest('.wpp-session-item') : null;
                     if (!currentRowEl || !self.listEl.contains(currentRowEl)) return;
 
@@ -241,10 +278,23 @@ var SessionManagerModal = /** @class */ (function (_super) {
                         self.updateFocusUI();
                     }
 
-                    if (actionKey) {
+                    if (verticalActionKey) {
                         var nextRowIndex = currentRowIndex + dir;
                         while (nextRowIndex >= 0 && nextRowIndex < rows.length) {
-                            var target = rows[nextRowIndex].querySelector('.wpp-session-actions [data-action-key="' + actionKey + '"]');
+                            var nextRowEl = rows[nextRowIndex];
+                            var target = nextRowEl.querySelector('.wpp-session-actions [data-action-key="' + verticalActionKey + '"]');
+                            if ((!target || !isElementVisible(target)) && verticalActionKey !== 'load') {
+                                target = nextRowEl.querySelector('.wpp-session-actions [data-action-key="load"]');
+                            }
+                            if (!target || !isElementVisible(target)) {
+                                var fallbackRowControls = Array.from(nextRowEl.querySelectorAll('.wpp-session-actions button, .wpp-session-actions .wpp-icon-btn'));
+                                for (var fi = 0; fi < fallbackRowControls.length; fi++) {
+                                    if (isElementVisible(fallbackRowControls[fi])) {
+                                        target = fallbackRowControls[fi];
+                                        break;
+                                    }
+                                }
+                            }
                             if (target && isElementVisible(target)) {
                                 target.focus();
                                 return;
@@ -443,7 +493,7 @@ var SessionManagerModal = /** @class */ (function (_super) {
         loadBtn.setAttribute('data-action-key', 'load');
         loadBtn.addEventListener('click', function () { self.onLoad(session.id); });
 
-        if (isActive) {
+        if (isActive && !self.plugin.isAutoSaveOnSwitchEnabled()) {
             var saveCurrentBtn = actions.createEl('button', {
                 text: L.saveInline,
                 cls: 'wpp-save-inline-btn',
