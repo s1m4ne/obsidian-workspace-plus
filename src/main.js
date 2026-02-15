@@ -33,6 +33,7 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
             if (!self.data.sessionOrder) self.data.sessionOrder = [];
             self.isSwitchingSession = false;
             self.pendingSwitchRequest = null;
+            self.switchLockAt = 0;
             self.syncSessionOrder();
             i18n.resolveLocale(self.data.language);
             var L = i18n.L;

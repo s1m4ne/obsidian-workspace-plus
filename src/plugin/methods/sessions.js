@@ -199,6 +199,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
     WorkspacePlusPlus.prototype.runSwitchRequest = function (request) {
         var self = this;
         this.isSwitchingSession = true;
+        this.switchLockAt = Date.now();
 
         this.performSessionSwitch(request.targetId, request.options || {})
             .then(function (ok) {
@@ -209,6 +210,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
             })
             .then(function () {
                 self.isSwitchingSession = false;
+                self.switchLockAt = 0;
                 if (!self.pendingSwitchRequest) return;
                 var next = self.pendingSwitchRequest;
                 self.pendingSwitchRequest = null;
@@ -219,6 +221,23 @@ function attachSessionMethods(WorkspacePlusPlus) {
     WorkspacePlusPlus.prototype.switchSession = function (targetId, options) {
         var self = this;
         options = options || {};
+
+        // Recover from stale switching lock (e.g. interrupted modal flow).
+        if (this.isSwitchingSession) {
+            var lockAt = this.switchLockAt || 0;
+            var elapsed = lockAt ? (Date.now() - lockAt) : Number.MAX_SAFE_INTEGER;
+            var hasBlockingUi = !!document.querySelector('.wpp-confirm-buttons')
+                || !!document.querySelector('.wpp-switch-overlay');
+            if (!hasBlockingUi && elapsed > 5000) {
+                this.isSwitchingSession = false;
+                this.switchLockAt = 0;
+                if (this.pendingSwitchRequest) {
+                    this.pendingSwitchRequest.resolve(false);
+                    this.pendingSwitchRequest = null;
+                }
+            }
+        }
+
         if (!this.data.sessions[targetId]) return Promise.resolve(false);
         if (targetId === this.data.activeSessionId && !this.isSwitchingSession) {
             return Promise.resolve(false);
@@ -299,6 +318,9 @@ function attachSessionMethods(WorkspacePlusPlus) {
                         performSwitch(true)
                             .then(function (ok) { resolve(ok); })
                             .catch(function () { resolve(false); });
+                    },
+                    function () {
+                        resolve(false);
                     }
                 ).open();
             });
