@@ -165,6 +165,30 @@ function attachSessionMethods(WorkspacePlusPlus) {
         });
     };
 
+    WorkspacePlusPlus.prototype.reloadCurrentSessionWithoutSaving = function (options) {
+        var L = i18n.L;
+        options = options || {};
+        var session = this.getActiveSession();
+        if (!session) {
+            if (!options.silent) new obsidian.Notice(L.noSession);
+            return Promise.resolve(false);
+        }
+
+        var applyLayout = session.layout
+            ? this.app.workspace.changeLayout(session.layout)
+            : Promise.resolve();
+        var name = session.name;
+
+        return applyLayout.then(function () {
+            if (!options.silent) {
+                new obsidian.Notice(L.reloadedSession(name));
+            }
+            return true;
+        }).catch(function () {
+            return false;
+        });
+    };
+
     WorkspacePlusPlus.prototype.updateStatusBar = function () {
         var L = i18n.L;
         var session = this.getActiveSession();
