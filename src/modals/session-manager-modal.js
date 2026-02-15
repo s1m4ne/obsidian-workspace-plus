@@ -493,7 +493,7 @@ var SessionManagerModal = /** @class */ (function (_super) {
         loadBtn.setAttribute('data-action-key', 'load');
         loadBtn.addEventListener('click', function () { self.onLoad(session.id); });
 
-        if (isActive) {
+        if (isActive && !self.plugin.isAutoSaveOnSwitchEnabled()) {
             var saveCurrentBtn = actions.createEl('button', {
                 text: L.saveInline,
                 cls: 'wpp-save-inline-btn',
