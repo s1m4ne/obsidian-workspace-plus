@@ -33,6 +33,7 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
             if (!self.data.sessionOrder) self.data.sessionOrder = [];
             self.isSwitchingSession = false;
             self.pendingSwitchRequest = null;
+            self.switchLockAt = 0;
             self.syncSessionOrder();
             i18n.resolveLocale(self.data.language);
             var L = i18n.L;
@@ -45,7 +46,17 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
             // Status bar
             self.statusBarEl = self.addStatusBarItem();
             self.statusBarEl.addClass('wpp-status-bar');
-            self.statusBarEl.addEventListener('click', function () {
+            self.statusBarEl.addEventListener('click', function (evt) {
+                var isMac = typeof navigator !== 'undefined'
+                    && typeof navigator.platform === 'string'
+                    && navigator.platform.indexOf('Mac') !== -1;
+                var isSaveClick = isMac ? evt.metaKey : evt.ctrlKey;
+                if (isSaveClick) {
+                    evt.preventDefault();
+                    evt.stopPropagation();
+                    self.saveActiveSession();
+                    return;
+                }
                 new modals.SessionManagerModal(self.app, self).open();
             });
             self.updateStatusBar();

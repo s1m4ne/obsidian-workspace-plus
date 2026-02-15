@@ -7,11 +7,13 @@ var i18n = require('../i18n');
 // Unsaved Switch Modal
 // ============================================================
 var UnsavedSwitchModal = /** @class */ (function (_super) {
-    function UnsavedSwitchModal(app, message, onSaveAndSwitch, onSwitchWithoutSaving) {
+    function UnsavedSwitchModal(app, message, onSaveAndSwitch, onSwitchWithoutSaving, onCancel) {
         var _this = _super.call(this, app) || this;
         _this.message = message;
         _this.onSaveAndSwitch = onSaveAndSwitch;
         _this.onSwitchWithoutSaving = onSwitchWithoutSaving;
+        _this.onCancel = onCancel || function () {};
+        _this.didResolve = false;
         return _this;
     }
 
@@ -27,15 +29,21 @@ var UnsavedSwitchModal = /** @class */ (function (_super) {
 
         var btns = contentEl.createDiv({ cls: 'wpp-confirm-buttons' });
         var self = this;
+        function finish(callback) {
+            if (self.didResolve) return;
+            self.didResolve = true;
+            if (callback) callback();
+        }
 
         var cancelBtn = btns.createEl('button', { text: L.cancel });
         cancelBtn.addEventListener('click', function () {
+            finish(self.onCancel);
             self.close();
         });
 
         var saveAndSwitchBtn = btns.createEl('button', { text: L.saveAndSwitch, cls: 'mod-cta' });
         saveAndSwitchBtn.addEventListener('click', function () {
-            self.onSaveAndSwitch();
+            finish(self.onSaveAndSwitch);
             self.close();
         });
 
@@ -44,7 +52,7 @@ var UnsavedSwitchModal = /** @class */ (function (_super) {
             cls: 'mod-warning',
         });
         switchWithoutSavingBtn.addEventListener('click', function () {
-            self.onSwitchWithoutSaving();
+            finish(self.onSwitchWithoutSaving);
             self.close();
         });
 
@@ -74,6 +82,7 @@ var UnsavedSwitchModal = /** @class */ (function (_super) {
             if (e.key === 'Escape') {
                 e.preventDefault();
                 e.stopImmediatePropagation();
+                finish(self.onCancel);
                 self.close();
             }
         };
@@ -92,6 +101,10 @@ var UnsavedSwitchModal = /** @class */ (function (_super) {
         if (this.keyHandler) {
             document.removeEventListener('keydown', this.keyHandler, true);
             this.keyHandler = null;
+        }
+        if (!this.didResolve) {
+            this.didResolve = true;
+            this.onCancel();
         }
         this.contentEl.empty();
     };

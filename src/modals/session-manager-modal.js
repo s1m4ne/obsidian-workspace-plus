@@ -56,15 +56,11 @@ var SessionManagerModal = /** @class */ (function (_super) {
         });
         this.nameInput.addEventListener('focus', function () {
             self.focusedIndex = -2;
-            self.focusedButtonIndex = -1;
-            self.updateButtonFocusUI();
             self.updateFocusUI();
         });
         this.filterQuery = '';
         this.filterInput.addEventListener('focus', function () {
             self.focusedIndex = -1;
-            self.focusedButtonIndex = -1;
-            self.updateButtonFocusUI();
             self.updateFocusUI();
         });
         this.filterInput.addEventListener('input', function () {
@@ -82,13 +78,11 @@ var SessionManagerModal = /** @class */ (function (_super) {
             } else {
                 self.focusedIndex = activeIdx !== -1 ? activeIdx : (sessions.length > 0 ? 0 : -1);
             }
-            self.focusedButtonIndex = -1;
             self.renderList();
         });
 
         // Focus & selection state
         this.focusedIndex = -1;
-        this.focusedButtonIndex = -1;
         this.selectedIds = new Set();
 
         // Bulk actions bar
@@ -137,62 +131,169 @@ var SessionManagerModal = /** @class */ (function (_super) {
             sc.inputEl.dispatchEvent(new Event('input'));
         });
 
-        // Keyboard handler
+        // Keyboard handling: Enter activation + directional arrow traversal.
         this.modalKeyHandler = function (e) {
-            // Skip if a confirm/rename modal or switch overlay is on top
             if (document.querySelector('.wpp-confirm-buttons')) return;
             if (document.querySelector('.wpp-switch-overlay')) return;
 
-            var isMac = navigator.platform.indexOf('Mac') !== -1;
-            var modKey = isMac ? e.metaKey : e.ctrlKey;
+            var activeEl = document.activeElement;
+            if (activeEl && activeEl !== document.body && !self.contentEl.contains(activeEl)) return;
+            var controlEl = activeEl && activeEl.closest
+                ? activeEl.closest('button, .wpp-icon-btn, input, select, textarea, a')
+                : activeEl;
+            if (controlEl && !self.contentEl.contains(controlEl)) controlEl = activeEl;
 
-            // Mod+F / Mod+Shift+F — focus filter input
-            if (modKey && (e.key === 'f' || e.key === 'F')) {
-                e.preventDefault();
-                self.filterInput.focus();
-                self.filterInput.select();
-                return;
+            function isElementVisible(el) {
+                if (!el) return false;
+                if (el.offsetParent !== null) return true;
+                var rects = el.getClientRects ? el.getClientRects() : [];
+                return rects && rects.length > 0;
             }
 
-            // Mod+Shift+Enter (cycle next session)
-            if (modKey && e.shiftKey && e.key === 'Enter') {
+            function getArrowNavigables() {
+                var selector = [
+                    'button:not([disabled])',
+                    'input:not([disabled]):not([type="hidden"])',
+                    'select:not([disabled])',
+                    'textarea:not([disabled])',
+                    'a[href]',
+                    '[tabindex]:not([tabindex="-1"])',
+                    '.wpp-icon-btn[tabindex="-1"]',
+                ].join(',');
+                return Array.from(self.contentEl.querySelectorAll(selector)).filter(function (el) {
+                    if (!isElementVisible(el)) return false;
+                    if (el.getAttribute('aria-hidden') === 'true') return false;
+                    if (el.tabIndex < 0 && !el.classList.contains('wpp-icon-btn')) return false;
+                    return true;
+                });
+            }
+
+            // Left/Right: move only inside the current session-action row.
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                if (e.isComposing) return;
+                if (!controlEl) return;
+                var actionRow = controlEl.closest('.wpp-session-actions');
+                if (!actionRow || !self.contentEl.contains(actionRow)) return;
+                var rowControls = Array.from(actionRow.querySelectorAll('button, .wpp-icon-btn')).filter(function (el) {
+                    return isElementVisible(el);
+                });
+                if (rowControls.length === 0) return;
+                var rowIndex = rowControls.indexOf(controlEl);
+                if (rowIndex === -1) return;
+                var nextRowIndex = rowIndex + (e.key === 'ArrowRight' ? 1 : -1);
+                if (nextRowIndex < 0 || nextRowIndex >= rowControls.length) return;
+
                 e.preventDefault();
                 e.stopPropagation();
-                var ordered = self.getNavigationSessions();
-                if (ordered.length <= 1) return;
-                var currentIndex = -1;
-                for (var i = 0; i < ordered.length; i++) {
-                    if (ordered[i].id === self.plugin.data.activeSessionId) {
-                        currentIndex = i;
-                        break;
-                    }
+                if (self.focusedIndex >= 0) {
+                    self.focusedIndex = -1;
+                    self.updateFocusUI();
                 }
-                if (currentIndex === -1) return;
-                var next = (currentIndex + 1 + ordered.length) % ordered.length;
-                self.plugin.switchSession(ordered[next].id, { silent: true }).then(function () {
-                    self.renderList();
-                });
+                rowControls[nextRowIndex].focus();
                 return;
             }
 
-            // Arrow keys — navigate focus (up/down only)
-            // Works even when input is focused
+            // Up/Down: move across all arrow-navigable controls (Tab range + icon buttons).
             if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-                e.preventDefault();
+                if (e.isComposing) return;
+                var isTextInput = !!(activeEl && (
+                    activeEl.tagName === 'INPUT'
+                    || activeEl.tagName === 'TEXTAREA'
+                ));
+                if (isTextInput && activeEl.tagName === 'TEXTAREA') return;
+                if (activeEl && activeEl.tagName === 'SELECT') return;
                 var dir = e.key === 'ArrowUp' ? -1 : 1;
-                self.moveFocus(dir);
-                return;
-            }
 
-            if (e.key === '/' && document.activeElement !== self.filterInput) {
+                // From filter area, ArrowDown always goes to the first row's load/switch button.
+                var isFilterFocused = document.activeElement === self.filterInput || controlEl === self.filterInput;
+                var isFilterState = isFilterFocused || (self.focusedIndex === -1 && document.activeElement !== self.nameInput);
+                if (isFilterState && e.key === 'ArrowDown') {
+                    var firstLoadBtn = self.listEl.querySelector('.wpp-session-item .wpp-load-btn');
+                    if (firstLoadBtn && isElementVisible(firstLoadBtn)) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (self.focusedIndex >= 0) {
+                            self.focusedIndex = -1;
+                            self.updateFocusUI();
+                        }
+                        firstLoadBtn.focus();
+                    }
+                    return;
+                }
+
+                // Keep vertical movement in the same action type (column) across session rows.
+                var activeActionRow = controlEl && controlEl.closest ? controlEl.closest('.wpp-session-actions') : null;
+                if (activeActionRow && self.contentEl.contains(activeActionRow)) {
+                    var actionKey = controlEl && controlEl.getAttribute ? controlEl.getAttribute('data-action-key') : '';
+                    var currentRowEl = controlEl && controlEl.closest ? controlEl.closest('.wpp-session-item') : null;
+                    if (!currentRowEl || !self.listEl.contains(currentRowEl)) return;
+
+                    var rows = Array.from(self.listEl.querySelectorAll('.wpp-session-item')).filter(function (rowEl) {
+                        return isElementVisible(rowEl);
+                    });
+                    var currentRowIndex = rows.indexOf(currentRowEl);
+                    if (currentRowIndex === -1 || rows.length === 0) return;
+
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (self.focusedIndex >= 0) {
+                        self.focusedIndex = -1;
+                        self.updateFocusUI();
+                    }
+
+                    if (actionKey) {
+                        var nextRowIndex = currentRowIndex + dir;
+                        while (nextRowIndex >= 0 && nextRowIndex < rows.length) {
+                            var target = rows[nextRowIndex].querySelector('.wpp-session-actions [data-action-key="' + actionKey + '"]');
+                            if (target && isElementVisible(target)) {
+                                target.focus();
+                                return;
+                            }
+                            nextRowIndex += dir;
+                        }
+                    }
+
+                    // No same-column target: only allow boundary escape.
+                    if (e.key === 'ArrowUp' && currentRowIndex === 0) {
+                        self.filterInput.focus();
+                        self.filterInput.select();
+                    } else if (e.key === 'ArrowDown' && currentRowIndex === rows.length - 1) {
+                        self.nameInput.focus();
+                        var nameLen = self.nameInput.value.length;
+                        self.nameInput.setSelectionRange(nameLen, nameLen);
+                    }
+                    return;
+                }
+
+                var navigables = getArrowNavigables();
+                if (navigables.length === 0) return;
+                var currentIndex = navigables.indexOf(controlEl);
+                var nextEl = null;
+                if (currentIndex === -1) {
+                    var startKey = e.key === 'ArrowUp';
+                    nextEl = startKey ? navigables[navigables.length - 1] : navigables[0];
+                } else {
+                    var fallbackIndex = currentIndex + dir;
+                    if (fallbackIndex < 0) fallbackIndex = navigables.length - 1;
+                    if (fallbackIndex >= navigables.length) fallbackIndex = 0;
+                    nextEl = navigables[fallbackIndex];
+                }
+
                 e.preventDefault();
-                self.filterInput.focus();
-                self.filterInput.select();
+                e.stopPropagation();
+                if (nextEl && nextEl.focus) {
+                    if (self.focusedIndex >= 0) {
+                        self.focusedIndex = -1;
+                        self.updateFocusUI();
+                    }
+                    nextEl.focus();
+                }
                 return;
             }
 
-            // Enter on filter input — switch immediately when exactly one match remains
-            if (document.activeElement === self.filterInput && e.key === 'Enter' && !e.isComposing) {
+            if (e.key !== 'Enter') return;
+
+            if (controlEl === self.filterInput && !e.isComposing) {
                 var filtered = self.getNavigationSessions();
                 if (filtered.length === 1) {
                     e.preventDefault();
@@ -201,52 +302,43 @@ var SessionManagerModal = /** @class */ (function (_super) {
                 return;
             }
 
-            // Skip remaining keys if input is focused
-            if (document.activeElement === self.nameInput || document.activeElement === self.filterInput) return;
-
-            // ArrowLeft / ArrowRight — navigate action buttons in focused row
-            if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-                if (self.focusedIndex < 0) return;
+            if (controlEl && controlEl.classList && controlEl.classList.contains('wpp-icon-btn') && self.contentEl.contains(controlEl)) {
                 e.preventDefault();
-                var buttons = self.getActionButtons();
-                if (buttons.length === 0) return;
-                if (e.key === 'ArrowRight') {
-                    if (self.focusedButtonIndex < buttons.length - 1) {
-                        self.focusedButtonIndex++;
-                    }
-                } else {
-                    if (self.focusedButtonIndex > 0) {
-                        self.focusedButtonIndex--;
-                    } else {
-                        self.focusedButtonIndex = -1;
-                    }
-                }
-                self.updateButtonFocusUI();
+                e.stopPropagation();
+                controlEl.click();
                 return;
             }
 
-            // Enter — activate focused button, or switch to focused session
-            if (e.key === 'Enter') {
+            if (controlEl && controlEl.tagName === 'BUTTON' && self.contentEl.contains(controlEl)) {
                 e.preventDefault();
-                if (self.focusedButtonIndex >= 0) {
-                    var buttons = self.getActionButtons();
-                    if (buttons[self.focusedButtonIndex]) {
-                        buttons[self.focusedButtonIndex].click();
+                e.stopPropagation();
+                if (controlEl.classList.contains('wpp-load-btn')) {
+                    var row = controlEl.closest('.wpp-session-item');
+                    if (row && row.dataset && row.dataset.sessionId) {
+                        self.onLoad(row.dataset.sessionId);
+                        return;
                     }
-                    return;
                 }
+                controlEl.click();
+                return;
+            }
+
+            if (controlEl && (
+                controlEl.tagName === 'INPUT'
+                || controlEl.tagName === 'TEXTAREA'
+                || controlEl.tagName === 'SELECT'
+                || controlEl.tagName === 'A'
+            )) {
+                return;
+            }
+
+            if (self.focusedIndex >= 0) {
+                e.preventDefault();
                 self.onFocusedLoad();
-                return;
-            }
-
-            // Delete / Backspace — delete focused or selected
-            if (e.key === 'Delete' || e.key === 'Backspace') {
-                e.preventDefault();
-                self.onKeyDelete();
-                return;
             }
         };
         document.addEventListener('keydown', this.modalKeyHandler, true);
+
     };
 
     SessionManagerModal.prototype.getVisibleSessions = function () {
@@ -307,8 +399,6 @@ var SessionManagerModal = /** @class */ (function (_super) {
         item.addEventListener('click', function (e) {
             // Always move focus to clicked item
             self.focusedIndex = index;
-            self.focusedButtonIndex = -1;
-            self.updateButtonFocusUI();
             self.updateFocusUI();
 
             if (e.target.closest('button, .wpp-icon-btn')) return;
@@ -350,10 +440,31 @@ var SessionManagerModal = /** @class */ (function (_super) {
         var actions = item.createDiv({ cls: 'wpp-session-actions' });
 
         var loadBtn = actions.createEl('button', { text: L.load, cls: 'wpp-load-btn' });
+        loadBtn.setAttribute('data-action-key', 'load');
         loadBtn.addEventListener('click', function () { self.onLoad(session.id); });
 
+        if (isActive) {
+            var saveCurrentBtn = actions.createEl('button', {
+                text: L.saveInline,
+                cls: 'wpp-save-inline-btn',
+            });
+            saveCurrentBtn.setAttribute('data-action-key', 'save-inline');
+            saveCurrentBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                self.plugin.saveActiveSession().then(function () {
+                    self.renderList();
+                });
+            });
+            actions.insertBefore(saveCurrentBtn, loadBtn);
+            // Keep the save button width consistent with the switch button.
+            saveCurrentBtn.style.width = loadBtn.offsetWidth + 'px';
+        }
+
         // Rename button
-        var renameBtn = actions.createDiv({ cls: 'wpp-icon-btn', attr: { 'aria-label': L.rename } });
+        var renameBtn = actions.createDiv({
+            cls: 'wpp-icon-btn',
+            attr: { 'aria-label': L.rename, role: 'button', tabindex: '-1', 'data-action-key': 'rename' },
+        });
         obsidian.setIcon(renameBtn, 'pencil');
         renameBtn.addEventListener('click', function (e) {
             e.stopPropagation();
@@ -362,7 +473,10 @@ var SessionManagerModal = /** @class */ (function (_super) {
 
         // Delete button (hidden for last remaining session)
         if (Object.keys(self.plugin.data.sessions).length > 1) {
-            var deleteBtn = actions.createDiv({ cls: 'wpp-icon-btn', attr: { 'aria-label': L.delete } });
+            var deleteBtn = actions.createDiv({
+                cls: 'wpp-icon-btn',
+                attr: { 'aria-label': L.delete, role: 'button', tabindex: '-1', 'data-action-key': 'delete' },
+            });
             obsidian.setIcon(deleteBtn, 'x');
             deleteBtn.addEventListener('click', function (e) {
                 e.stopPropagation();
@@ -551,51 +665,6 @@ var SessionManagerModal = /** @class */ (function (_super) {
 
     // --- Focus & selection helpers ---
 
-    SessionManagerModal.prototype.moveFocus = function (dir) {
-        var sessions = this.getNavigationSessions();
-        var targets = [{ type: 'name' }, { type: 'filter' }];
-        for (var i = 0; i < sessions.length; i++) {
-            targets.push({ type: 'session', index: i });
-        }
-        if (targets.length === 0) return;
-
-        var currentPos = 0;
-        if (document.activeElement === this.nameInput || this.focusedIndex === -2) {
-            currentPos = 0;
-        } else if (document.activeElement === this.filterInput || this.focusedIndex === -1) {
-            currentPos = 1;
-        } else if (this.focusedIndex >= 0) {
-            currentPos = Math.min(2 + this.focusedIndex, targets.length - 1);
-        } else {
-            currentPos = dir > 0 ? 0 : targets.length - 1;
-        }
-
-        var nextPos = (currentPos + dir + targets.length) % targets.length;
-        var target = targets[nextPos];
-
-        if (target.type === 'name') {
-            this.focusedIndex = -2;
-            this.updateFocusUI();
-            this.nameInput.focus();
-            var nameLen = this.nameInput.value.length;
-            this.nameInput.setSelectionRange(nameLen, nameLen);
-        } else if (target.type === 'filter') {
-            this.focusedIndex = -1;
-            this.updateFocusUI();
-            this.filterInput.focus();
-            var filterLen = this.filterInput.value.length;
-            this.filterInput.setSelectionRange(filterLen, filterLen);
-        } else {
-            if (document.activeElement === this.nameInput) this.nameInput.blur();
-            if (document.activeElement === this.filterInput) this.filterInput.blur();
-            this.focusedIndex = target.index;
-            this.updateFocusUI();
-        }
-
-        this.focusedButtonIndex = -1;
-        this.updateButtonFocusUI();
-    };
-
     SessionManagerModal.prototype.updateFocusUI = function () {
         var self = this;
         var items = this.listEl.querySelectorAll('.wpp-session-item');
@@ -604,24 +673,6 @@ var SessionManagerModal = /** @class */ (function (_super) {
         });
         if (this.focusedIndex >= 0 && items[this.focusedIndex]) {
             items[this.focusedIndex].scrollIntoView({ block: 'nearest' });
-        }
-    };
-
-    SessionManagerModal.prototype.getActionButtons = function () {
-        var items = this.listEl.querySelectorAll('.wpp-session-item');
-        if (this.focusedIndex < 0 || !items[this.focusedIndex]) return [];
-        var actions = items[this.focusedIndex].querySelector('.wpp-session-actions');
-        if (!actions) return [];
-        return actions.querySelectorAll('button, .wpp-icon-btn');
-    };
-
-    SessionManagerModal.prototype.updateButtonFocusUI = function () {
-        this.listEl.querySelectorAll('.wpp-session-actions .wpp-btn-focused').forEach(function (el) {
-            el.classList.remove('wpp-btn-focused');
-        });
-        var buttons = this.getActionButtons();
-        if (this.focusedButtonIndex >= 0 && this.focusedButtonIndex < buttons.length) {
-            buttons[this.focusedButtonIndex].classList.add('wpp-btn-focused');
         }
     };
 
@@ -648,22 +699,6 @@ var SessionManagerModal = /** @class */ (function (_super) {
         var sessions = this.getNavigationSessions();
         if (this.focusedIndex < 0 || this.focusedIndex >= sessions.length) return;
         this.onLoad(sessions[this.focusedIndex].id);
-    };
-
-    SessionManagerModal.prototype.onKeyDelete = function () {
-        var L = i18n.L;
-        if (this.selectedIds.size > 0) {
-            this.onBulkDelete();
-        } else {
-            var sessions = this.getNavigationSessions();
-            if (this.focusedIndex < 0 || this.focusedIndex >= sessions.length) return;
-            var session = sessions[this.focusedIndex];
-            if (Object.keys(this.plugin.data.sessions).length <= 1) {
-                new obsidian.Notice(L.cannotDeleteLast);
-                return;
-            }
-            this.onDelete(session);
-        }
     };
 
     SessionManagerModal.prototype.onBulkDelete = function () {
