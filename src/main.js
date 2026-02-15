@@ -45,7 +45,17 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
             // Status bar
             self.statusBarEl = self.addStatusBarItem();
             self.statusBarEl.addClass('wpp-status-bar');
-            self.statusBarEl.addEventListener('click', function () {
+            self.statusBarEl.addEventListener('click', function (evt) {
+                var isMac = typeof navigator !== 'undefined'
+                    && typeof navigator.platform === 'string'
+                    && navigator.platform.indexOf('Mac') !== -1;
+                var isSaveClick = isMac ? evt.metaKey : evt.ctrlKey;
+                if (isSaveClick) {
+                    evt.preventDefault();
+                    evt.stopPropagation();
+                    self.saveActiveSession();
+                    return;
+                }
                 new modals.SessionManagerModal(self.app, self).open();
             });
             self.updateStatusBar();
