@@ -131,13 +131,17 @@ var SessionManagerModal = /** @class */ (function (_super) {
             sc.inputEl.dispatchEvent(new Event('input'));
         });
 
-        // Keyboard handling: Enter activation + arrow-key focus traversal.
+        // Keyboard handling: Enter activation + directional arrow traversal.
         this.modalKeyHandler = function (e) {
             if (document.querySelector('.wpp-confirm-buttons')) return;
             if (document.querySelector('.wpp-switch-overlay')) return;
 
             var activeEl = document.activeElement;
             if (activeEl && activeEl !== document.body && !self.contentEl.contains(activeEl)) return;
+            var controlEl = activeEl && activeEl.closest
+                ? activeEl.closest('button, .wpp-icon-btn, input, select, textarea, a')
+                : activeEl;
+            if (controlEl && !self.contentEl.contains(controlEl)) controlEl = activeEl;
 
             function isElementVisible(el) {
                 if (!el) return false;
@@ -146,7 +150,7 @@ var SessionManagerModal = /** @class */ (function (_super) {
                 return rects && rects.length > 0;
             }
 
-            function getTabNavigables() {
+            function getArrowNavigables() {
                 var selector = [
                     'button:not([disabled])',
                     'input:not([disabled]):not([type="hidden"])',
@@ -154,78 +158,142 @@ var SessionManagerModal = /** @class */ (function (_super) {
                     'textarea:not([disabled])',
                     'a[href]',
                     '[tabindex]:not([tabindex="-1"])',
+                    '.wpp-icon-btn[tabindex="-1"]',
                 ].join(',');
                 return Array.from(self.contentEl.querySelectorAll(selector)).filter(function (el) {
                     if (!isElementVisible(el)) return false;
                     if (el.getAttribute('aria-hidden') === 'true') return false;
-                    if (el.tabIndex < 0) return false;
+                    if (el.tabIndex < 0 && !el.classList.contains('wpp-icon-btn')) return false;
                     return true;
                 });
             }
 
-            function syncFocusStateByElement(el) {
-                if (!el) return;
-                if (el === self.nameInput) {
-                    self.focusedIndex = -2;
-                    self.updateFocusUI();
-                    return;
-                }
-                if (el === self.filterInput) {
+            // Left/Right: move only inside the current session-action row.
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                if (e.isComposing) return;
+                if (!controlEl) return;
+                var actionRow = controlEl.closest('.wpp-session-actions');
+                if (!actionRow || !self.contentEl.contains(actionRow)) return;
+                var rowControls = Array.from(actionRow.querySelectorAll('button, .wpp-icon-btn')).filter(function (el) {
+                    return isElementVisible(el);
+                });
+                if (rowControls.length === 0) return;
+                var rowIndex = rowControls.indexOf(controlEl);
+                if (rowIndex === -1) return;
+                var nextRowIndex = rowIndex + (e.key === 'ArrowRight' ? 1 : -1);
+                if (nextRowIndex < 0 || nextRowIndex >= rowControls.length) return;
+
+                e.preventDefault();
+                e.stopPropagation();
+                if (self.focusedIndex >= 0) {
                     self.focusedIndex = -1;
                     self.updateFocusUI();
-                    return;
                 }
-                var row = el.closest('.wpp-session-item');
-                if (!row || !self.listEl.contains(row)) return;
-                var rows = Array.from(self.listEl.querySelectorAll('.wpp-session-item'));
-                var rowIndex = rows.indexOf(row);
-                if (rowIndex !== -1) {
-                    self.focusedIndex = rowIndex;
-                    self.updateFocusUI();
-                }
+                rowControls[nextRowIndex].focus();
+                return;
             }
 
-            var isArrowKey = e.key === 'ArrowLeft'
-                || e.key === 'ArrowRight'
-                || e.key === 'ArrowUp'
-                || e.key === 'ArrowDown';
-            if (isArrowKey) {
+            // Up/Down: move across all arrow-navigable controls (Tab range + icon buttons).
+            if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
                 if (e.isComposing) return;
                 var isTextInput = !!(activeEl && (
                     activeEl.tagName === 'INPUT'
                     || activeEl.tagName === 'TEXTAREA'
                 ));
-                // Keep caret movement in text inputs for left/right.
-                if (isTextInput && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) return;
+                if (isTextInput && activeEl.tagName === 'TEXTAREA') return;
                 if (activeEl && activeEl.tagName === 'SELECT') return;
+                var dir = e.key === 'ArrowUp' ? -1 : 1;
 
-                var navigables = getTabNavigables();
+                // From filter area, ArrowDown always goes to the first row's load/switch button.
+                var isFilterFocused = document.activeElement === self.filterInput || controlEl === self.filterInput;
+                var isFilterState = isFilterFocused || (self.focusedIndex === -1 && document.activeElement !== self.nameInput);
+                if (isFilterState && e.key === 'ArrowDown') {
+                    var firstLoadBtn = self.listEl.querySelector('.wpp-session-item .wpp-load-btn');
+                    if (firstLoadBtn && isElementVisible(firstLoadBtn)) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (self.focusedIndex >= 0) {
+                            self.focusedIndex = -1;
+                            self.updateFocusUI();
+                        }
+                        firstLoadBtn.focus();
+                    }
+                    return;
+                }
+
+                // Keep vertical movement in the same action type (column) across session rows.
+                var activeActionRow = controlEl && controlEl.closest ? controlEl.closest('.wpp-session-actions') : null;
+                if (activeActionRow && self.contentEl.contains(activeActionRow)) {
+                    var actionKey = controlEl && controlEl.getAttribute ? controlEl.getAttribute('data-action-key') : '';
+                    var currentRowEl = controlEl && controlEl.closest ? controlEl.closest('.wpp-session-item') : null;
+                    if (!currentRowEl || !self.listEl.contains(currentRowEl)) return;
+
+                    var rows = Array.from(self.listEl.querySelectorAll('.wpp-session-item')).filter(function (rowEl) {
+                        return isElementVisible(rowEl);
+                    });
+                    var currentRowIndex = rows.indexOf(currentRowEl);
+                    if (currentRowIndex === -1 || rows.length === 0) return;
+
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (self.focusedIndex >= 0) {
+                        self.focusedIndex = -1;
+                        self.updateFocusUI();
+                    }
+
+                    if (actionKey) {
+                        var nextRowIndex = currentRowIndex + dir;
+                        while (nextRowIndex >= 0 && nextRowIndex < rows.length) {
+                            var target = rows[nextRowIndex].querySelector('.wpp-session-actions [data-action-key="' + actionKey + '"]');
+                            if (target && isElementVisible(target)) {
+                                target.focus();
+                                return;
+                            }
+                            nextRowIndex += dir;
+                        }
+                    }
+
+                    // No same-column target: only allow boundary escape.
+                    if (e.key === 'ArrowUp' && currentRowIndex === 0) {
+                        self.filterInput.focus();
+                        self.filterInput.select();
+                    } else if (e.key === 'ArrowDown' && currentRowIndex === rows.length - 1) {
+                        self.nameInput.focus();
+                        var nameLen = self.nameInput.value.length;
+                        self.nameInput.setSelectionRange(nameLen, nameLen);
+                    }
+                    return;
+                }
+
+                var navigables = getArrowNavigables();
                 if (navigables.length === 0) return;
-                var currentIndex = navigables.indexOf(activeEl);
-                var isBackward = e.key === 'ArrowLeft' || e.key === 'ArrowUp';
-                var nextIndex;
-
+                var currentIndex = navigables.indexOf(controlEl);
+                var nextEl = null;
                 if (currentIndex === -1) {
-                    nextIndex = isBackward ? navigables.length - 1 : 0;
+                    var startKey = e.key === 'ArrowUp';
+                    nextEl = startKey ? navigables[navigables.length - 1] : navigables[0];
                 } else {
-                    nextIndex = currentIndex + (isBackward ? -1 : 1);
-                    if (nextIndex < 0) nextIndex = navigables.length - 1;
-                    if (nextIndex >= navigables.length) nextIndex = 0;
+                    var fallbackIndex = currentIndex + dir;
+                    if (fallbackIndex < 0) fallbackIndex = navigables.length - 1;
+                    if (fallbackIndex >= navigables.length) fallbackIndex = 0;
+                    nextEl = navigables[fallbackIndex];
                 }
 
                 e.preventDefault();
                 e.stopPropagation();
-                var nextEl = navigables[nextIndex];
                 if (nextEl && nextEl.focus) {
+                    if (self.focusedIndex >= 0) {
+                        self.focusedIndex = -1;
+                        self.updateFocusUI();
+                    }
                     nextEl.focus();
-                    syncFocusStateByElement(nextEl);
                 }
                 return;
             }
 
             if (e.key !== 'Enter') return;
 
-            if (activeEl === self.filterInput && !e.isComposing) {
+            if (controlEl === self.filterInput && !e.isComposing) {
                 var filtered = self.getNavigationSessions();
                 if (filtered.length === 1) {
                     e.preventDefault();
@@ -234,25 +302,32 @@ var SessionManagerModal = /** @class */ (function (_super) {
                 return;
             }
 
-            if (activeEl && activeEl.tagName === 'BUTTON' && self.contentEl.contains(activeEl)) {
+            if (controlEl && controlEl.classList && controlEl.classList.contains('wpp-icon-btn') && self.contentEl.contains(controlEl)) {
                 e.preventDefault();
                 e.stopPropagation();
-                if (activeEl.classList.contains('wpp-load-btn')) {
-                    var row = activeEl.closest('.wpp-session-item');
+                controlEl.click();
+                return;
+            }
+
+            if (controlEl && controlEl.tagName === 'BUTTON' && self.contentEl.contains(controlEl)) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (controlEl.classList.contains('wpp-load-btn')) {
+                    var row = controlEl.closest('.wpp-session-item');
                     if (row && row.dataset && row.dataset.sessionId) {
                         self.onLoad(row.dataset.sessionId);
                         return;
                     }
                 }
-                activeEl.click();
+                controlEl.click();
                 return;
             }
 
-            if (activeEl && (
-                activeEl.tagName === 'INPUT'
-                || activeEl.tagName === 'TEXTAREA'
-                || activeEl.tagName === 'SELECT'
-                || activeEl.tagName === 'A'
+            if (controlEl && (
+                controlEl.tagName === 'INPUT'
+                || controlEl.tagName === 'TEXTAREA'
+                || controlEl.tagName === 'SELECT'
+                || controlEl.tagName === 'A'
             )) {
                 return;
             }
@@ -365,6 +440,7 @@ var SessionManagerModal = /** @class */ (function (_super) {
         var actions = item.createDiv({ cls: 'wpp-session-actions' });
 
         var loadBtn = actions.createEl('button', { text: L.load, cls: 'wpp-load-btn' });
+        loadBtn.setAttribute('data-action-key', 'load');
         loadBtn.addEventListener('click', function () { self.onLoad(session.id); });
 
         if (isActive) {
@@ -372,6 +448,7 @@ var SessionManagerModal = /** @class */ (function (_super) {
                 text: L.saveInline,
                 cls: 'wpp-save-inline-btn',
             });
+            saveCurrentBtn.setAttribute('data-action-key', 'save-inline');
             saveCurrentBtn.addEventListener('click', function (e) {
                 e.stopPropagation();
                 self.plugin.saveActiveSession().then(function () {
@@ -384,7 +461,10 @@ var SessionManagerModal = /** @class */ (function (_super) {
         }
 
         // Rename button
-        var renameBtn = actions.createDiv({ cls: 'wpp-icon-btn', attr: { 'aria-label': L.rename } });
+        var renameBtn = actions.createDiv({
+            cls: 'wpp-icon-btn',
+            attr: { 'aria-label': L.rename, role: 'button', tabindex: '-1', 'data-action-key': 'rename' },
+        });
         obsidian.setIcon(renameBtn, 'pencil');
         renameBtn.addEventListener('click', function (e) {
             e.stopPropagation();
@@ -393,7 +473,10 @@ var SessionManagerModal = /** @class */ (function (_super) {
 
         // Delete button (hidden for last remaining session)
         if (Object.keys(self.plugin.data.sessions).length > 1) {
-            var deleteBtn = actions.createDiv({ cls: 'wpp-icon-btn', attr: { 'aria-label': L.delete } });
+            var deleteBtn = actions.createDiv({
+                cls: 'wpp-icon-btn',
+                attr: { 'aria-label': L.delete, role: 'button', tabindex: '-1', 'data-action-key': 'delete' },
+            });
             obsidian.setIcon(deleteBtn, 'x');
             deleteBtn.addEventListener('click', function (e) {
                 e.stopPropagation();

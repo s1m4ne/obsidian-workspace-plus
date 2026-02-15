@@ -170,6 +170,15 @@
     background: var(--background-modifier-hover);
 }
 
+.wpp-icon-btn:focus,
+.wpp-icon-btn:focus-visible {
+    background: var(--background-modifier-hover);
+    color: var(--text-muted);
+    outline: 2px solid var(--background-modifier-hover);
+    outline-offset: 0;
+    box-shadow: none;
+}
+
 .wpp-icon-btn svg {
     width: 16px;
     height: 16px;
