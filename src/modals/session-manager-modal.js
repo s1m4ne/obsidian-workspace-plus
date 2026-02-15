@@ -352,6 +352,22 @@ var SessionManagerModal = /** @class */ (function (_super) {
         var loadBtn = actions.createEl('button', { text: L.load, cls: 'wpp-load-btn' });
         loadBtn.addEventListener('click', function () { self.onLoad(session.id); });
 
+        if (isActive) {
+            var saveCurrentBtn = actions.createEl('button', {
+                text: L.saveInline,
+                cls: 'wpp-save-inline-btn',
+            });
+            saveCurrentBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                self.plugin.saveActiveSession().then(function () {
+                    self.renderList();
+                });
+            });
+            actions.insertBefore(saveCurrentBtn, loadBtn);
+            // Keep the save button width consistent with the switch button.
+            saveCurrentBtn.style.width = loadBtn.offsetWidth + 'px';
+        }
+
         // Rename button
         var renameBtn = actions.createDiv({ cls: 'wpp-icon-btn', attr: { 'aria-label': L.rename } });
         obsidian.setIcon(renameBtn, 'pencil');

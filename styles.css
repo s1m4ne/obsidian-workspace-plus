@@ -153,6 +153,10 @@
     margin-left: 12px;
 }
 
+.wpp-save-inline-btn {
+    text-align: center;
+}
+
 .wpp-icon-btn {
     display: flex;
     align-items: center;
