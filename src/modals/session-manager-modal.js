@@ -131,14 +131,99 @@ var SessionManagerModal = /** @class */ (function (_super) {
             sc.inputEl.dispatchEvent(new Event('input'));
         });
 
-        // Minimal Enter handling for stable keyboard activation.
+        // Keyboard handling: Enter activation + arrow-key focus traversal.
         this.modalKeyHandler = function (e) {
-            if (e.key !== 'Enter') return;
             if (document.querySelector('.wpp-confirm-buttons')) return;
             if (document.querySelector('.wpp-switch-overlay')) return;
 
             var activeEl = document.activeElement;
             if (activeEl && activeEl !== document.body && !self.contentEl.contains(activeEl)) return;
+
+            function isElementVisible(el) {
+                if (!el) return false;
+                if (el.offsetParent !== null) return true;
+                var rects = el.getClientRects ? el.getClientRects() : [];
+                return rects && rects.length > 0;
+            }
+
+            function getTabNavigables() {
+                var selector = [
+                    'button:not([disabled])',
+                    'input:not([disabled]):not([type="hidden"])',
+                    'select:not([disabled])',
+                    'textarea:not([disabled])',
+                    'a[href]',
+                    '[tabindex]:not([tabindex="-1"])',
+                ].join(',');
+                return Array.from(self.contentEl.querySelectorAll(selector)).filter(function (el) {
+                    if (!isElementVisible(el)) return false;
+                    if (el.getAttribute('aria-hidden') === 'true') return false;
+                    if (el.tabIndex < 0) return false;
+                    return true;
+                });
+            }
+
+            function syncFocusStateByElement(el) {
+                if (!el) return;
+                if (el === self.nameInput) {
+                    self.focusedIndex = -2;
+                    self.updateFocusUI();
+                    return;
+                }
+                if (el === self.filterInput) {
+                    self.focusedIndex = -1;
+                    self.updateFocusUI();
+                    return;
+                }
+                var row = el.closest('.wpp-session-item');
+                if (!row || !self.listEl.contains(row)) return;
+                var rows = Array.from(self.listEl.querySelectorAll('.wpp-session-item'));
+                var rowIndex = rows.indexOf(row);
+                if (rowIndex !== -1) {
+                    self.focusedIndex = rowIndex;
+                    self.updateFocusUI();
+                }
+            }
+
+            var isArrowKey = e.key === 'ArrowLeft'
+                || e.key === 'ArrowRight'
+                || e.key === 'ArrowUp'
+                || e.key === 'ArrowDown';
+            if (isArrowKey) {
+                if (e.isComposing) return;
+                var isTextInput = !!(activeEl && (
+                    activeEl.tagName === 'INPUT'
+                    || activeEl.tagName === 'TEXTAREA'
+                ));
+                // Keep caret movement in text inputs for left/right.
+                if (isTextInput && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) return;
+                if (activeEl && activeEl.tagName === 'SELECT') return;
+
+                var navigables = getTabNavigables();
+                if (navigables.length === 0) return;
+                var currentIndex = navigables.indexOf(activeEl);
+                var isBackward = e.key === 'ArrowLeft' || e.key === 'ArrowUp';
+                var nextIndex;
+
+                if (currentIndex === -1) {
+                    nextIndex = isBackward ? navigables.length - 1 : 0;
+                } else {
+                    nextIndex = currentIndex + (isBackward ? -1 : 1);
+                    if (nextIndex < 0) nextIndex = navigables.length - 1;
+                    if (nextIndex >= navigables.length) nextIndex = 0;
+                }
+
+                e.preventDefault();
+                e.stopPropagation();
+                var nextEl = navigables[nextIndex];
+                if (nextEl && nextEl.focus) {
+                    nextEl.focus();
+                    syncFocusStateByElement(nextEl);
+                }
+                return;
+            }
+
+            if (e.key !== 'Enter') return;
 
             if (activeEl === self.filterInput && !e.isComposing) {
                 var filtered = self.getNavigationSessions();
