@@ -117,19 +117,6 @@ var SessionManagerModal = /** @class */ (function (_super) {
             footer.createDiv({ text: L.cmdNext + '  ' + nextKey });
         }
         footer.createDiv({ text: L.footerDragReorder });
-        var hotkeyLink = footer.createEl('a', { text: L.footerHotkeyHint });
-        hotkeyLink.addEventListener('click', function (e) {
-            e.preventDefault();
-            self.close();
-            self.app.setting.open();
-            self.app.setting.openTabById('hotkeys');
-            var sc = self.app.setting.activeTab.searchComponent;
-            var pluginName = (self.plugin.manifest && self.plugin.manifest.name)
-                ? self.plugin.manifest.name
-                : 'Workspace++';
-            sc.setValue(pluginName);
-            sc.inputEl.dispatchEvent(new Event('input'));
-        });
 
         // Keyboard handling: Enter activation + directional arrow traversal.
         this.modalKeyHandler = function (e) {
