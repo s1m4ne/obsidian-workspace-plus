@@ -40,6 +40,47 @@ function attachSessionMethods(WorkspacePlusPlus) {
             .filter(function (s) { return !!s; });
     };
 
+    WorkspacePlusPlus.prototype.syncSessionCommands = function () {
+        var L = i18n.L;
+        var ordered = this.getOrderedSessions();
+        var self = this;
+
+        // 1. Re-register numbered commands (1-9) with session names
+        for (var n = 1; n <= 9; n++) {
+            (function (num) {
+                self.removeCommand('switch-to-' + num);
+                var session = ordered[num - 1];
+                self.addCommand({
+                    id: 'switch-to-' + num,
+                    name: L.cmdSwitchTo(num, session ? session.name : undefined),
+                    callback: function () { self.switchToIndex(num - 1); },
+                });
+            })(n);
+        }
+
+        // 2. Remove old dynamic commands
+        var oldIds = this._dynamicSessionCommandIds || [];
+        for (var i = 0; i < oldIds.length; i++) {
+            this.removeCommand(oldIds[i]);
+        }
+        this._dynamicSessionCommandIds = [];
+
+        // 3. Register dynamic commands for sessions beyond the first 9
+        for (var j = 9; j < ordered.length; j++) {
+            (function (session) {
+                var cmdId = 'switch-to-named-' + session.id;
+                self.addCommand({
+                    id: cmdId,
+                    name: L.cmdSwitchToNamed(session.name),
+                    callback: function () {
+                        self.switchSession(session.id);
+                    },
+                });
+                self._dynamicSessionCommandIds.push(cmdId);
+            })(ordered[j]);
+        }
+    };
+
     WorkspacePlusPlus.prototype.switchToIndex = function (index) {
         var ordered = this.getOrderedSessions();
         if (index >= ordered.length) return;
@@ -217,6 +258,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
         this.data.activeSessionId = id;
 
         this.updateStatusBar();
+        this.syncSessionCommands();
         return this.persistData();
     };
 
@@ -367,6 +409,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
             this.data.activeSessionId = remaining || null;
         }
         this.updateStatusBar();
+        this.syncSessionCommands();
         return this.persistData().then(function () { return true; });
     };
 
@@ -390,6 +433,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
             session.name = newName;
             session.modified = Date.now();
             self.updateStatusBar();
+            self.syncSessionCommands();
             self.persistData().then(function () {
                 new obsidian.Notice(L.renamed(oldName, newName));
                 var ordered = self.getOrderedSessions();
@@ -470,6 +514,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
         this.data.sessionOrder.push(id);
         this.data.activeSessionId = id;
         this.updateStatusBar();
+        this.syncSessionCommands();
         return this.persistData();
     };
 
@@ -503,6 +548,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
         this.data.sessions[id].layout = this.getCurrentWorkspaceLayout();
 
         this.updateStatusBar();
+        this.syncSessionCommands();
         new obsidian.Notice(L.created(name));
         var ordered = this.getOrderedSessions();
         this.showSwitchOverlay(ordered, ordered.length - 1);
@@ -531,6 +577,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
         this.data.activeSessionId = id;
 
         this.updateStatusBar();
+        this.syncSessionCommands();
         new obsidian.Notice(L.duplicated(name));
         var ordered = this.getOrderedSessions();
         this.showSwitchOverlay(ordered, ordered.length - 1);
@@ -553,6 +600,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
         this.data.sessionOrder.unshift(id);
         this.data.activeSessionId = id;
         this.updateStatusBar();
+        this.syncSessionCommands();
         this.persistData();
     };
 
