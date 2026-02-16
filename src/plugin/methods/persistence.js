@@ -382,6 +382,7 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
                     self.data.sessionOrder = imported.sessionOrder;
                     self.syncSessionOrder();
                     self.updateStatusBar();
+                    self.syncSessionCommands();
                     return self.persistData().then(function () {
                         new obsidian.Notice(L.importSessionsDone(latestPath), 7000);
                         return true;

@@ -65,6 +65,9 @@ function registerCommands(plugin) {
         })(n);
     }
 
+    // Track dynamic command IDs for named session switching
+    plugin._dynamicSessionCommandIds = [];
+
     // Previous / Next session
     plugin.addCommand({
         id: 'previous-session',

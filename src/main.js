@@ -77,6 +77,7 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
             // Startup: ensure default session exists, then flush
             self.app.workspace.onLayoutReady(function () {
                 self.ensureDefaultSession();
+                self.syncSessionCommands();
                 self.flushOnStartup();
             });
         });
