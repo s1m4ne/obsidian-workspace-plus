@@ -23,6 +23,7 @@ var SETTINGS_KEYS = [
     'confirmDeleteByHotkey',
     'autoSaveOnSwitch',
     'warnOnUnsavedSwitch',
+    'statusBarQuickSwitcher',
 ];
 
 function pickKeys(data, keys) {

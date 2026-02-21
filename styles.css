@@ -265,11 +265,12 @@
     padding: 16px 20px;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
     gap: 12px;
     z-index: 9999;
     box-shadow: var(--shadow-l);
-    max-width: 80vw;
+    min-width: min(300px, 80vw);
+    max-width: min(480px, 80vw);
 }
 
 .wpp-switch-count {
@@ -281,21 +282,21 @@
 
 .wpp-switch-list {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 8px;
-    max-width: 100%;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+    max-height: 50vh;
+    overflow-y: auto;
 }
 
 .wpp-switch-item {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    padding: 10px 18px;
+    justify-content: space-between;
+    padding: 8px 12px;
     border-radius: 8px;
-    min-width: 60px;
-    max-width: 180px;
-    text-align: center;
+    min-width: 0;
     color: var(--text-muted);
 }
 
@@ -307,18 +308,18 @@
 .wpp-switch-name {
     font-size: 13px;
     font-weight: 600;
-    max-width: 100%;
+    flex: 1;
+    min-width: 0;
     overflow: hidden;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    word-break: break-word;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .wpp-switch-hotkey {
     font-size: 11px;
     opacity: 0.5;
-    margin-top: 4px;
+    flex-shrink: 0;
+    margin-left: 8px;
 }
 
 .wpp-switch-item.is-active .wpp-switch-hotkey {
@@ -336,8 +337,46 @@
 
 .wpp-search-overlay {
     align-items: stretch;
-    min-width: min(640px, 90vw);
-    max-width: min(760px, 95vw);
+    min-width: min(400px, 90vw);
+    max-width: min(480px, 95vw);
+    /* Position bottom-right */
+    top: auto;
+    left: auto;
+    right: 16px;
+    bottom: 40px;
+    transform: none;
+}
+
+.wpp-search-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.wpp-search-header .wpp-switch-count {
+    align-self: auto;
+    margin-bottom: 0;
+}
+
+.wpp-search-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 2px;
+    border-radius: 4px;
+}
+
+.wpp-search-close:hover {
+    color: var(--text-normal);
+    background: var(--background-modifier-hover);
+}
+
+.wpp-search-close svg {
+    width: 16px;
+    height: 16px;
 }
 
 .wpp-search-row {
@@ -371,10 +410,91 @@
 }
 
 .wpp-search-overlay .wpp-switch-name {
+    flex: 1;
+    min-width: 0;
     display: block;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+/* Quick switcher name row (name + ACTIVE badge) */
+.wpp-qs-name-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+}
+
+/* Remove purple is-active highlight in search overlay */
+.wpp-search-overlay .wpp-switch-item.is-active {
+    background: none;
+    color: var(--text-muted);
+}
+
+/* Hover effect for search overlay items */
+.wpp-search-overlay .wpp-switch-item:hover {
+    background: var(--background-modifier-hover-dimmed, rgba(var(--mono-rgb-100), 0.03));
+}
+
+/* Keyboard navigation: highlight selected item */
+.wpp-search-overlay.wpp-keyboard-nav .wpp-switch-item.wpp-kb-selected,
+.wpp-search-overlay.wpp-keyboard-nav .wpp-switch-item.wpp-kb-selected:hover {
+    background: var(--background-modifier-hover);
+}
+
+/* Keyboard navigation: suppress hover on non-selected items */
+.wpp-search-overlay.wpp-keyboard-nav .wpp-switch-item:hover {
+    background: none;
+}
+
+/* Dragging styles for search overlay */
+.wpp-search-overlay .wpp-switch-item.is-dragging {
+    visibility: hidden;
+}
+
+.wpp-search-overlay .wpp-switch-item.wpp-just-moved {
+    background: var(--background-modifier-hover);
+    transition: background 0.6s ease-out;
+}
+
+/* Quick switcher action icons */
+.wpp-qs-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+    margin-left: 8px;
+}
+
+.wpp-qs-action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 4px;
+    border-radius: 4px;
+}
+
+.wpp-qs-action-btn:hover {
+    background: var(--background-modifier-hover);
+    color: var(--text-normal);
+}
+
+.wpp-qs-action-delete:hover {
+    color: var(--text-error);
+}
+
+.wpp-qs-action-btn svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* Hide hotkey in search overlay (actions replace it) */
+.wpp-search-overlay .wpp-switch-hotkey {
+    display: none;
 }
 
 .wpp-search-empty {
