@@ -62,6 +62,17 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                 });
             });
 
+        new obsidian.Setting(containerEl)
+            .setName(L.settingsStatusBarQuickSwitcher)
+            .setDesc(L.settingsStatusBarQuickSwitcherDesc)
+            .addToggle(function (toggle) {
+                toggle.setValue(!!self.plugin.data.statusBarQuickSwitcher);
+                toggle.onChange(function (value) {
+                    self.plugin.data.statusBarQuickSwitcher = value;
+                    self.plugin.persistData();
+                });
+            });
+
         addSection(L.settingsSectionSwitching);
 
         var autoSaveOnSwitch = self.plugin.isAutoSaveOnSwitchEnabled();

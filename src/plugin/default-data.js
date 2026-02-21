@@ -10,4 +10,5 @@ module.exports = {
     confirmDeleteByHotkey: true,
     autoSaveOnSwitch: true,
     warnOnUnsavedSwitch: true,
+    statusBarQuickSwitcher: false,
 };

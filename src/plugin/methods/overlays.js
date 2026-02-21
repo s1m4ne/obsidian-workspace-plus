@@ -1,6 +1,8 @@
 'use strict';
 
+var obsidian = require('obsidian');
 var i18n = require('../../i18n');
+var modals = require('../../modals');
 
 function attachOverlayMethods(WorkspacePlusPlus) {
     // --- Switch overlay ---
@@ -22,13 +24,9 @@ function attachOverlayMethods(WorkspacePlusPlus) {
         this.hideSwitchOverlay();
         this.hideSearchOverlay();
 
-        var orderIndex = {};
-        for (var oi = 0; oi < ordered.length; oi++) {
-            orderIndex[ordered[oi].id] = oi;
-        }
-
         var filtered = ordered.slice();
         var selectedIndex = 0;
+        var keyboardNav = false;
         for (var ai = 0; ai < filtered.length; ai++) {
             if (filtered[ai].id === this.data.activeSessionId) {
                 selectedIndex = ai;
@@ -39,9 +37,24 @@ function attachOverlayMethods(WorkspacePlusPlus) {
         var overlay = document.createElement('div');
         overlay.className = 'wpp-switch-overlay wpp-search-overlay';
 
+        // Header row: count + close button
+        var headerRow = document.createElement('div');
+        headerRow.className = 'wpp-search-header';
+
         var countSpan = document.createElement('div');
         countSpan.className = 'wpp-switch-count';
-        overlay.appendChild(countSpan);
+        headerRow.appendChild(countSpan);
+
+        var closeBtn = document.createElement('div');
+        closeBtn.className = 'wpp-search-close';
+        obsidian.setIcon(closeBtn, 'x');
+        closeBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            self.hideSearchOverlay();
+        });
+        headerRow.appendChild(closeBtn);
+
+        overlay.appendChild(headerRow);
 
         var searchRow = document.createElement('div');
         searchRow.className = 'wpp-search-row';
@@ -67,6 +80,23 @@ function attachOverlayMethods(WorkspacePlusPlus) {
         footerRow.textContent = L.searchOverlayHelp;
         overlay.appendChild(footerRow);
 
+        function refreshOrderedSessions() {
+            ordered = self.getOrderedSessions();
+            filtered = self.filterSessionsByQuery(ordered, searchInput.value);
+            if (filtered.length > 0) {
+                if (selectedIndex >= filtered.length) selectedIndex = filtered.length - 1;
+                for (var i = 0; i < filtered.length; i++) {
+                    if (filtered[i].id === self.data.activeSessionId) {
+                        selectedIndex = i;
+                        break;
+                    }
+                }
+            } else {
+                selectedIndex = -1;
+            }
+            renderList();
+        }
+
         function renderList() {
             while (list.firstChild) list.removeChild(list.firstChild);
             if (filtered.length === 0) {
@@ -85,32 +115,223 @@ function attachOverlayMethods(WorkspacePlusPlus) {
 
             for (var i = 0; i < filtered.length; i++) {
                 var session = filtered[i];
+                var isActive = session.id === self.data.activeSessionId;
                 var item = document.createElement('div');
                 item.className = 'wpp-switch-item';
-                if (i === selectedIndex) item.classList.add('is-active');
+                if (i === selectedIndex) item.classList.add('wpp-kb-selected');
+                item.dataset.sessionId = session.id;
+
+                var nameRow = document.createElement('div');
+                nameRow.className = 'wpp-qs-name-row';
 
                 var name = document.createElement('div');
                 name.className = 'wpp-switch-name';
                 name.textContent = session.name;
-                item.appendChild(name);
+                nameRow.appendChild(name);
 
-                var pos = orderIndex[session.id];
-                var hk = pos <= 8 ? self.getCommandHotkey('switch-to-' + (pos + 1)) : '';
-                var hotkeyEl = document.createElement('div');
-                hotkeyEl.className = 'wpp-switch-hotkey';
-                hotkeyEl.textContent = hk || String(pos + 1);
-                item.appendChild(hotkeyEl);
+                if (isActive) {
+                    var badge = document.createElement('span');
+                    badge.className = 'wpp-active-badge';
+                    badge.textContent = L.active;
+                    nameRow.appendChild(badge);
+                }
 
-                (function (idx) {
-                    item.addEventListener('click', function () {
+                item.appendChild(nameRow);
+
+                // Action icons (rename & delete)
+                var actions = document.createElement('div');
+                actions.className = 'wpp-qs-actions';
+
+                var renameIcon = document.createElement('div');
+                renameIcon.className = 'wpp-qs-action-btn';
+                obsidian.setIcon(renameIcon, 'pencil');
+                actions.appendChild(renameIcon);
+
+                var deleteIcon = document.createElement('div');
+                deleteIcon.className = 'wpp-qs-action-btn wpp-qs-action-delete';
+                obsidian.setIcon(deleteIcon, 'trash-2');
+                actions.appendChild(deleteIcon);
+
+                item.appendChild(actions);
+
+                (function (idx, sess, itemEl) {
+                    // Click on item to switch
+                    itemEl.addEventListener('click', function (e) {
+                        if (e.target.closest('.wpp-qs-action-btn')) return;
                         selectedIndex = idx;
                         switchSelected();
                     });
-                })(i);
+
+                    // Drag to reorder
+                    setupDrag(itemEl);
+
+                    // Mouse hover updates selection (when not in keyboard mode)
+                    itemEl.addEventListener('mouseenter', function () {
+                        if (keyboardNav) return;
+                        selectedIndex = idx;
+                        updateSelection();
+                    });
+
+                    // Rename
+                    renameIcon.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        new modals.RenameModal(self.app, sess.name, function (newName) {
+                            var exists = Object.values(self.data.sessions)
+                                .some(function (s) { return s.name === newName && s.id !== sess.id; });
+                            if (exists) {
+                                new obsidian.Notice(L.duplicateName);
+                                return;
+                            }
+                            sess.name = newName;
+                            sess.modified = Date.now();
+                            self.updateStatusBar();
+                            self.syncSessionCommands();
+                            self.persistData().then(function () {
+                                refreshOrderedSessions();
+                            });
+                        }).open();
+                    });
+
+                    // Delete
+                    deleteIcon.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        if (Object.keys(self.data.sessions).length <= 1) {
+                            new obsidian.Notice(L.cannotDeleteLast);
+                            return;
+                        }
+
+                        var doDelete = function () {
+                            self.deleteSession(sess.id).then(function (deleted) {
+                                if (!deleted) return;
+                                new obsidian.Notice(L.deleted(sess.name));
+                                refreshOrderedSessions();
+                            });
+                        };
+
+                        if (self.data.confirmDeleteByHotkey !== false) {
+                            new modals.ConfirmModal(self.app, L.confirmDeleteActive(sess.name), doDelete).open();
+                        } else {
+                            doDelete();
+                        }
+                    });
+                })(i, session, item);
 
                 list.appendChild(item);
             }
+
+            // Scroll selected (active) item into view
+            var selectedItem = list.querySelector('.wpp-kb-selected');
+            if (selectedItem) {
+                selectedItem.scrollIntoView({ block: 'nearest' });
+            }
         }
+
+        // --- Drag to reorder ---
+        function setupDrag(dragItem) {
+            dragItem.addEventListener('mousedown', function (e) {
+                if (e.button !== 0) return;
+                if (e.target.closest('.wpp-qs-action-btn')) return;
+
+                var startX = e.clientX;
+                var startY = e.clientY;
+                var dragStarted = false;
+                var cloneEl = null;
+
+                function startDragOp(ev) {
+                    dragStarted = true;
+                    var rect = dragItem.getBoundingClientRect();
+                    var offsetX = startX - rect.left;
+                    var offsetY = startY - rect.top;
+
+                    cloneEl = dragItem.cloneNode(true);
+                    cloneEl.classList.add('wpp-drag-clone');
+                    cloneEl.style.position = 'fixed';
+                    cloneEl.style.width = rect.width + 'px';
+                    cloneEl.style.top = (ev.clientY - offsetY) + 'px';
+                    cloneEl.style.left = (ev.clientX - offsetX) + 'px';
+                    cloneEl.style.zIndex = '10000';
+                    cloneEl.style.pointerEvents = 'none';
+                    document.body.appendChild(cloneEl);
+
+                    dragItem.classList.add('is-dragging');
+                    cloneEl._offsetX = offsetX;
+                    cloneEl._offsetY = offsetY;
+                }
+
+                function onMouseMove(ev) {
+                    if (!dragStarted) {
+                        var dx = ev.clientX - startX;
+                        var dy = ev.clientY - startY;
+                        if (Math.abs(dx) + Math.abs(dy) < 5) return;
+                        startDragOp(ev);
+                    }
+                    cloneEl.style.top = (ev.clientY - cloneEl._offsetY) + 'px';
+                    cloneEl.style.left = (ev.clientX - cloneEl._offsetX) + 'px';
+
+                    var siblings = list.querySelectorAll('.wpp-switch-item');
+                    var placed = false;
+                    for (var si = 0; si < siblings.length; si++) {
+                        var el = siblings[si];
+                        if (el === dragItem) continue;
+                        var r = el.getBoundingClientRect();
+                        if (ev.clientY < r.top + r.height / 2) {
+                            list.insertBefore(dragItem, el);
+                            placed = true;
+                            break;
+                        }
+                    }
+                    if (!placed) list.appendChild(dragItem);
+                }
+
+                function onMouseUp() {
+                    document.removeEventListener('mousemove', onMouseMove);
+                    document.removeEventListener('mouseup', onMouseUp);
+                    if (!dragStarted) return;
+
+                    cloneEl.remove();
+                    dragItem.classList.remove('is-dragging');
+
+                    // Persist new order
+                    var newOrder = [];
+                    var items = list.querySelectorAll('.wpp-switch-item');
+                    for (var ni = 0; ni < items.length; ni++) {
+                        newOrder.push(items[ni].dataset.sessionId);
+                    }
+                    self.data.sessionOrder = newOrder;
+                    self.syncSessionCommands();
+                    self.persistData();
+
+                    dragItem.classList.add('wpp-just-moved');
+                    setTimeout(function () {
+                        dragItem.classList.remove('wpp-just-moved');
+                    }, 600);
+                }
+
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+            });
+        }
+
+        function updateSelection() {
+            var items = list.querySelectorAll('.wpp-switch-item');
+            for (var si = 0; si < items.length; si++) {
+                items[si].classList.toggle('wpp-kb-selected', si === selectedIndex);
+            }
+            if (filtered.length > 0) {
+                countSpan.textContent = (selectedIndex + 1) + ' / ' + filtered.length;
+            }
+            if (keyboardNav && items[selectedIndex]) {
+                items[selectedIndex].scrollIntoView({ block: 'nearest' });
+            }
+        }
+
+        // Exit keyboard mode when mouse moves over the list
+        list.addEventListener('mousemove', function () {
+            if (keyboardNav) {
+                keyboardNav = false;
+                overlay.classList.remove('wpp-keyboard-nav');
+            }
+        });
 
         function switchSelected() {
             if (selectedIndex < 0 || selectedIndex >= filtered.length) return;
@@ -142,6 +363,8 @@ function attachOverlayMethods(WorkspacePlusPlus) {
 
         this.searchOverlayKeyHandler = function (e) {
             if (!self.searchOverlayEl) return;
+            // Don't process keys while a modal (rename/confirm) is open
+            if (document.querySelector('.modal-container')) return;
 
             if (e.key === 'Escape') {
                 e.preventDefault();
@@ -153,15 +376,42 @@ function attachOverlayMethods(WorkspacePlusPlus) {
             if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
                 e.preventDefault();
                 if (filtered.length === 0) return;
+                keyboardNav = true;
+                overlay.classList.add('wpp-keyboard-nav');
                 var dir = e.key === 'ArrowUp' ? -1 : 1;
                 selectedIndex = (selectedIndex + dir + filtered.length) % filtered.length;
-                renderList();
+                updateSelection();
                 return;
             }
 
             if (e.key === 'Enter' && !e.isComposing) {
                 e.preventDefault();
                 switchSelected();
+                return;
+            }
+
+            if (e.key === 'Delete' || e.key === 'Backspace') {
+                // Don't interfere with text editing in search input
+                if (document.activeElement === searchInput && searchInput.value.length > 0) return;
+                e.preventDefault();
+                if (selectedIndex < 0 || selectedIndex >= filtered.length) return;
+                var sess = filtered[selectedIndex];
+                if (Object.keys(self.data.sessions).length <= 1) {
+                    new obsidian.Notice(L.cannotDeleteLast);
+                    return;
+                }
+                var doDelete = function () {
+                    self.deleteSession(sess.id).then(function (deleted) {
+                        if (!deleted) return;
+                        new obsidian.Notice(L.deleted(sess.name));
+                        refreshOrderedSessions();
+                    });
+                };
+                if (self.data.confirmDeleteByHotkey !== false) {
+                    new modals.ConfirmModal(self.app, L.confirmDeleteActive(sess.name), doDelete).open();
+                } else {
+                    doDelete();
+                }
                 return;
             }
 
@@ -172,13 +422,18 @@ function attachOverlayMethods(WorkspacePlusPlus) {
             }
         };
 
-        this.searchOverlayBlurHandler = function () {
-            self.hideSearchOverlay();
+        this.searchOverlayClickOutsideHandler = function (e) {
+            if (!self.searchOverlayEl) return;
+            // Don't close if a modal (rename/confirm) is open
+            if (document.querySelector('.modal-container')) return;
+            if (!self.searchOverlayEl.contains(e.target)) {
+                self.hideSearchOverlay();
+            }
         };
 
         searchInput.addEventListener('input', this.searchOverlayInputHandler);
         document.addEventListener('keydown', this.searchOverlayKeyHandler, true);
-        window.addEventListener('blur', this.searchOverlayBlurHandler);
+        document.addEventListener('mousedown', this.searchOverlayClickOutsideHandler, true);
 
         document.body.appendChild(overlay);
         this.searchOverlayEl = overlay;
@@ -344,9 +599,9 @@ function attachOverlayMethods(WorkspacePlusPlus) {
             document.removeEventListener('keydown', this.searchOverlayKeyHandler, true);
             this.searchOverlayKeyHandler = null;
         }
-        if (this.searchOverlayBlurHandler) {
-            window.removeEventListener('blur', this.searchOverlayBlurHandler);
-            this.searchOverlayBlurHandler = null;
+        if (this.searchOverlayClickOutsideHandler) {
+            document.removeEventListener('mousedown', this.searchOverlayClickOutsideHandler, true);
+            this.searchOverlayClickOutsideHandler = null;
         }
         this.searchOverlayInputHandler = null;
         this.searchOverlayInputEl = null;
