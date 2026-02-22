@@ -15,7 +15,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
         });
     };
 
-    WorkspacePlusPlus.prototype.openSearchOverlay = function () {
+    WorkspacePlusPlus.prototype.openSearchOverlay = function (anchorEl) {
         var L = i18n.L;
         var self = this;
         var ordered = this.getOrderedSessions();
@@ -426,6 +426,8 @@ function attachOverlayMethods(WorkspacePlusPlus) {
             if (!self.searchOverlayEl) return;
             // Don't close if a modal (rename/confirm) is open
             if (document.querySelector('.modal-container')) return;
+            // Let status bar handle its own toggle
+            if (self.statusBarEl && self.statusBarEl.contains(e.target)) return;
             if (!self.searchOverlayEl.contains(e.target)) {
                 self.hideSearchOverlay();
             }
@@ -438,6 +440,125 @@ function attachOverlayMethods(WorkspacePlusPlus) {
         document.body.appendChild(overlay);
         this.searchOverlayEl = overlay;
         renderList();
+
+        // Position overlay relative to anchor (status bar button)
+        var margin = 8;
+
+        var STATUS_BAR_FALLBACK_HEIGHT = 28;
+        var MIN_VISIBLE_HEIGHT = 20;
+
+        function cacheStatusBarMetrics() {
+            var aEl = anchorEl || self.statusBarEl;
+            var statusBar = aEl ? aEl.closest('.status-bar') : document.querySelector('.status-bar');
+            if (statusBar) {
+                var h = statusBar.getBoundingClientRect().height;
+                if (h >= MIN_VISIBLE_HEIGHT) {
+                    self._cachedBarHeight = h;
+                }
+            }
+            if (aEl) {
+                var aRect = aEl.getBoundingClientRect();
+                if (aRect.width > 0 && aRect.height > 0) {
+                    self._cachedAnchorCenterX = aRect.left + aRect.width / 2;
+                }
+            }
+        }
+
+        // Cache now while bar may be visible
+        cacheStatusBarMetrics();
+
+        function positionToAnchor() {
+            var oRect = overlay.getBoundingClientRect();
+            var barHeight = self._cachedBarHeight || STATUS_BAR_FALLBACK_HEIGHT;
+
+            // Horizontal: use cached anchor center, or viewport center
+            var centerX = self._cachedAnchorCenterX || window.innerWidth / 2;
+            var lp = centerX - oRect.width / 2;
+            lp = Math.max(margin, Math.min(lp, window.innerWidth - oRect.width - margin));
+
+            // Vertical: always position above status bar area
+            var bp = barHeight + margin;
+            if (bp + oRect.height > window.innerHeight - margin) {
+                bp = margin;
+            }
+
+            overlay.style.right = 'auto';
+            overlay.style.top = 'auto';
+            overlay.style.left = lp + 'px';
+            overlay.style.bottom = bp + 'px';
+        }
+
+        // Position: saved position > anchor-based > CSS default
+        var savedPos = self.data.searchOverlayPosition;
+
+        if (savedPos && savedPos.left != null && savedPos.bottom != null) {
+            var overlayRect = overlay.getBoundingClientRect();
+            var sl = Math.max(margin, Math.min(savedPos.left, window.innerWidth - overlayRect.width - margin));
+            var sb = Math.max(margin, Math.min(savedPos.bottom, window.innerHeight - overlayRect.height - margin));
+            overlay.style.right = 'auto';
+            overlay.style.top = 'auto';
+            overlay.style.left = sl + 'px';
+            overlay.style.bottom = sb + 'px';
+        } else {
+            positionToAnchor();
+        }
+
+        // Double-click on empty area to reset position to anchor default
+        overlay.addEventListener('dblclick', function (e) {
+            if (e.target.closest('.wpp-search-close')) return;
+            if (e.target.closest('.wpp-switch-item')) return;
+            if (e.target.closest('.wpp-search-input')) return;
+            if (e.target.closest('.wpp-qs-action-btn')) return;
+            positionToAnchor();
+            self.data.searchOverlayPosition = null;
+            self.persistData();
+        });
+
+        // Drag to reposition overlay via any empty area
+        overlay.addEventListener('mousedown', function (e) {
+            if (e.target.closest('.wpp-search-close')) return;
+            if (e.target.closest('.wpp-switch-item')) return;
+            if (e.target.closest('.wpp-search-input')) return;
+            if (e.target.closest('.wpp-qs-action-btn')) return;
+            if (e.button !== 0) return;
+            e.preventDefault();
+            overlay.classList.add('wpp-dragging');
+
+            var rect = overlay.getBoundingClientRect();
+            var offsetX = e.clientX - rect.left;
+            var offsetY = e.clientY - rect.top;
+
+            function onMove(ev) {
+                var newLeft = ev.clientX - offsetX;
+                var newTop = ev.clientY - offsetY;
+                var oRect = overlay.getBoundingClientRect();
+                newLeft = Math.max(margin, Math.min(newLeft, window.innerWidth - oRect.width - margin));
+                newTop = Math.max(margin, Math.min(newTop, window.innerHeight - oRect.height - margin));
+                var newBottom = window.innerHeight - newTop - oRect.height;
+                overlay.style.right = 'auto';
+                overlay.style.top = 'auto';
+                overlay.style.left = newLeft + 'px';
+                overlay.style.bottom = newBottom + 'px';
+            }
+
+            function onUp() {
+                document.removeEventListener('mousemove', onMove);
+                document.removeEventListener('mouseup', onUp);
+                overlay.classList.remove('wpp-dragging');
+
+                // Save position (bottom-based for stable positioning on resize)
+                var finalRect = overlay.getBoundingClientRect();
+                self.data.searchOverlayPosition = {
+                    left: finalRect.left,
+                    bottom: window.innerHeight - finalRect.bottom,
+                };
+                self.persistData();
+            }
+
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onUp);
+        });
+
         setTimeout(function () { searchInput.focus(); }, 20);
     };
 

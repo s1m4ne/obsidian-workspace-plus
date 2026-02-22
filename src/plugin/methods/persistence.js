@@ -24,6 +24,7 @@ var SETTINGS_KEYS = [
     'autoSaveOnSwitch',
     'warnOnUnsavedSwitch',
     'statusBarQuickSwitcher',
+    'searchOverlayPosition',
 ];
 
 function pickKeys(data, keys) {
