@@ -65,7 +65,11 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
                     return;
                 }
                 if (self.data.statusBarQuickSwitcher) {
-                    self.openSearchOverlay();
+                    if (self.searchOverlayEl) {
+                        self.hideSearchOverlay();
+                    } else {
+                        self.openSearchOverlay(self.statusBarEl);
+                    }
                 } else {
                     new modals.SessionManagerModal(self.app, self).open();
                 }

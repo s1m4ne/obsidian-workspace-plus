@@ -347,11 +347,26 @@
     transform: none;
 }
 
+.wpp-search-overlay {
+    cursor: grab;
+}
+
+.wpp-search-overlay.wpp-dragging {
+    cursor: grabbing;
+}
+
+.wpp-search-overlay .wpp-search-input,
+.wpp-search-overlay .wpp-switch-item,
+.wpp-search-overlay .wpp-search-close {
+    cursor: default;
+}
+
 .wpp-search-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     width: 100%;
+    padding: 4px 0;
 }
 
 .wpp-search-header .wpp-switch-count {
