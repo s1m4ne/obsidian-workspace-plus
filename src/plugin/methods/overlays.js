@@ -37,6 +37,15 @@ function attachOverlayMethods(WorkspacePlusPlus) {
         var overlay = document.createElement('div');
         overlay.className = 'wpp-switch-overlay wpp-search-overlay';
 
+        // Resize handles at four corners
+        var corners = ['tl', 'tr', 'bl', 'br'];
+        for (var ci = 0; ci < corners.length; ci++) {
+            var corner = document.createElement('div');
+            corner.className = 'wpp-resize-corner wpp-resize-' + corners[ci];
+            corner.dataset.corner = corners[ci];
+            overlay.appendChild(corner);
+        }
+
         // Header row: count + close button
         var headerRow = document.createElement('div');
         headerRow.className = 'wpp-search-header';
@@ -488,6 +497,27 @@ function attachOverlayMethods(WorkspacePlusPlus) {
             overlay.style.bottom = bp + 'px';
         }
 
+        // Apply saved size
+        var savedSize = self.data.searchOverlaySize;
+        var MIN_WIDTH = 300;
+        var MIN_HEIGHT = 200;
+
+        if (savedSize && savedSize.width != null && savedSize.height != null) {
+            overlay.style.width = Math.max(MIN_WIDTH, savedSize.width) + 'px';
+            overlay.style.height = Math.max(MIN_HEIGHT, savedSize.height) + 'px';
+            overlay.style.minWidth = '0';
+            overlay.style.maxWidth = 'none';
+            list.style.maxHeight = 'none';
+        }
+
+        function resetSize() {
+            overlay.style.width = '';
+            overlay.style.height = '';
+            overlay.style.minWidth = '';
+            overlay.style.maxWidth = '';
+            list.style.maxHeight = '';
+        }
+
         // Position: saved position > anchor-based > CSS default
         var savedPos = self.data.searchOverlayPosition;
 
@@ -503,15 +533,109 @@ function attachOverlayMethods(WorkspacePlusPlus) {
             positionToAnchor();
         }
 
-        // Double-click on empty area to reset position to anchor default
+        // Double-click on empty area to reset position and size
         overlay.addEventListener('dblclick', function (e) {
             if (e.target.closest('.wpp-search-close')) return;
             if (e.target.closest('.wpp-switch-item')) return;
             if (e.target.closest('.wpp-search-input')) return;
             if (e.target.closest('.wpp-qs-action-btn')) return;
+            resetSize();
             positionToAnchor();
             self.data.searchOverlayPosition = null;
+            self.data.searchOverlaySize = null;
             self.persistData();
+        });
+
+        // Resize via corner handles
+        overlay.addEventListener('mousedown', function (e) {
+            var cornerEl = e.target.closest('.wpp-resize-corner');
+            if (!cornerEl) return;
+            if (e.button !== 0) return;
+            e.preventDefault();
+            e.stopPropagation();
+
+            var dir = cornerEl.dataset.corner;
+            var startX = e.clientX;
+            var startY = e.clientY;
+            var startRect = overlay.getBoundingClientRect();
+            var startWidth = startRect.width;
+            var startHeight = startRect.height;
+            var startLeft = startRect.left;
+            var startBottom = window.innerHeight - startRect.bottom;
+
+            function onMove(ev) {
+                var dx = ev.clientX - startX;
+                var dy = ev.clientY - startY;
+                var newWidth = startWidth;
+                var newHeight = startHeight;
+                var newLeft = startLeft;
+                var newBottom = startBottom;
+
+                // Horizontal
+                if (dir === 'tr' || dir === 'br') {
+                    newWidth = Math.max(MIN_WIDTH, startWidth + dx);
+                } else {
+                    newWidth = Math.max(MIN_WIDTH, startWidth - dx);
+                    newLeft = startLeft + (startWidth - newWidth);
+                }
+
+                // Vertical
+                if (dir === 'tl' || dir === 'tr') {
+                    newHeight = Math.max(MIN_HEIGHT, startHeight - dy);
+                } else {
+                    newHeight = Math.max(MIN_HEIGHT, startHeight + dy);
+                    newBottom = startBottom - (newHeight - startHeight);
+                    if (newBottom < margin) {
+                        newHeight = startHeight + startBottom - margin;
+                        newBottom = margin;
+                    }
+                }
+
+                // Enforce minimum sizes first
+                newWidth = Math.max(MIN_WIDTH, newWidth);
+                newHeight = Math.max(MIN_HEIGHT, newHeight);
+
+                // Clamp to viewport — ensure all edges stay within margin
+                if (newLeft < margin) newLeft = margin;
+                if (newLeft + newWidth > window.innerWidth - margin) {
+                    newLeft = window.innerWidth - margin - newWidth;
+                    if (newLeft < margin) newLeft = margin;
+                }
+                if (newBottom < margin) newBottom = margin;
+                if (window.innerHeight - newBottom - newHeight < margin) {
+                    newBottom = window.innerHeight - newHeight - margin;
+                    if (newBottom < margin) newBottom = margin;
+                }
+
+                overlay.style.width = newWidth + 'px';
+                overlay.style.height = newHeight + 'px';
+                overlay.style.minWidth = '0';
+                overlay.style.maxWidth = 'none';
+                overlay.style.left = newLeft + 'px';
+                overlay.style.bottom = newBottom + 'px';
+                overlay.style.right = 'auto';
+                overlay.style.top = 'auto';
+                list.style.maxHeight = 'none';
+            }
+
+            function onUp() {
+                document.removeEventListener('mousemove', onMove);
+                document.removeEventListener('mouseup', onUp);
+
+                var finalRect = overlay.getBoundingClientRect();
+                self.data.searchOverlaySize = {
+                    width: finalRect.width,
+                    height: finalRect.height,
+                };
+                self.data.searchOverlayPosition = {
+                    left: finalRect.left,
+                    bottom: window.innerHeight - finalRect.bottom,
+                };
+                self.persistData();
+            }
+
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onUp);
         });
 
         // Drag to reposition overlay via any empty area
@@ -520,6 +644,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
             if (e.target.closest('.wpp-switch-item')) return;
             if (e.target.closest('.wpp-search-input')) return;
             if (e.target.closest('.wpp-qs-action-btn')) return;
+            if (e.target.closest('.wpp-resize-corner')) return;
             if (e.button !== 0) return;
             e.preventDefault();
             overlay.classList.add('wpp-dragging');

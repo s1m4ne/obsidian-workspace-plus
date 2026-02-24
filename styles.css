@@ -275,7 +275,7 @@
 
 .wpp-switch-count {
     align-self: flex-end;
-    font-size: 11px;
+    font-size: var(--font-ui-smaller);
     color: var(--text-faint);
     margin-bottom: -4px;
 }
@@ -306,8 +306,8 @@
 }
 
 .wpp-switch-name {
-    font-size: 13px;
-    font-weight: 600;
+    font-size: var(--font-ui-small);
+    font-weight: var(--font-semibold);
     flex: 1;
     min-width: 0;
     overflow: hidden;
@@ -316,7 +316,7 @@
 }
 
 .wpp-switch-hotkey {
-    font-size: 11px;
+    font-size: var(--font-ui-smaller);
     opacity: 0.5;
     flex-shrink: 0;
     margin-left: 8px;
@@ -331,7 +331,7 @@
     flex-direction: column;
     align-items: center;
     gap: 2px;
-    font-size: 11px;
+    font-size: var(--font-ui-smaller);
     color: var(--text-faint);
 }
 
@@ -390,8 +390,8 @@
 }
 
 .wpp-search-close svg {
-    width: 16px;
-    height: 16px;
+    width: var(--icon-s);
+    height: var(--icon-s);
 }
 
 .wpp-search-row {
@@ -410,7 +410,22 @@
     width: 100%;
     max-height: 50vh;
     overflow-y: auto;
+    flex: 1;
+    min-height: 60px;
 }
+
+/* Corner resize handles */
+.wpp-resize-corner {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    z-index: 1;
+}
+
+.wpp-resize-tl { top: 0; left: 0; cursor: nwse-resize; }
+.wpp-resize-tr { top: 0; right: 0; cursor: nesw-resize; }
+.wpp-resize-bl { bottom: 0; left: 0; cursor: nesw-resize; }
+.wpp-resize-br { bottom: 0; right: 0; cursor: nwse-resize; }
 
 .wpp-search-overlay .wpp-switch-item {
     width: 100%;
@@ -503,8 +518,8 @@
 }
 
 .wpp-qs-action-btn svg {
-    width: 14px;
-    height: 14px;
+    width: var(--icon-xs);
+    height: var(--icon-xs);
 }
 
 /* Hide hotkey in search overlay (actions replace it) */

@@ -12,4 +12,5 @@ module.exports = {
     warnOnUnsavedSwitch: true,
     statusBarQuickSwitcher: false,
     searchOverlayPosition: null,
+    searchOverlaySize: null,
 };
