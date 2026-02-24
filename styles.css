@@ -265,38 +265,37 @@
     padding: 16px 20px;
     display: flex;
     flex-direction: column;
-    align-items: stretch;
+    align-items: center;
     gap: 12px;
     z-index: 9999;
     box-shadow: var(--shadow-l);
-    min-width: min(300px, 80vw);
-    max-width: min(480px, 80vw);
+    max-width: 80vw;
 }
 
 .wpp-switch-count {
     align-self: flex-end;
-    font-size: var(--font-ui-smaller);
+    font-size: 11px;
     color: var(--text-faint);
     margin-bottom: -4px;
 }
 
 .wpp-switch-list {
     display: flex;
-    flex-direction: column;
-    gap: 4px;
-    width: 100%;
-    max-height: 50vh;
-    overflow-y: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    max-width: 100%;
 }
 
 .wpp-switch-item {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
-    justify-content: space-between;
-    padding: 8px 12px;
+    padding: 10px 18px;
     border-radius: 8px;
-    min-width: 0;
+    min-width: 60px;
+    max-width: 180px;
+    text-align: center;
     color: var(--text-muted);
 }
 
@@ -306,20 +305,19 @@
 }
 
 .wpp-switch-name {
-    font-size: var(--font-ui-small);
-    font-weight: var(--font-semibold);
-    flex: 1;
-    min-width: 0;
+    font-size: 13px;
+    font-weight: 600;
+    max-width: 100%;
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    word-break: break-word;
 }
 
 .wpp-switch-hotkey {
-    font-size: var(--font-ui-smaller);
+    font-size: 11px;
     opacity: 0.5;
-    flex-shrink: 0;
-    margin-left: 8px;
 }
 
 .wpp-switch-item.is-active .wpp-switch-hotkey {
@@ -331,13 +329,13 @@
     flex-direction: column;
     align-items: center;
     gap: 2px;
-    font-size: var(--font-ui-smaller);
+    font-size: 11px;
     color: var(--text-faint);
 }
 
 .wpp-search-overlay {
     align-items: stretch;
-    min-width: min(400px, 90vw);
+    min-width: min(300px, 80vw);
     max-width: min(480px, 95vw);
     /* Position bottom-right */
     top: auto;
@@ -367,6 +365,14 @@
     justify-content: space-between;
     width: 100%;
     padding: 4px 0;
+}
+
+.wpp-search-overlay .wpp-switch-count {
+    font-size: var(--font-ui-smaller);
+}
+
+.wpp-search-overlay .wpp-switch-footer {
+    font-size: var(--font-ui-smaller);
 }
 
 .wpp-search-header .wpp-switch-count {
@@ -440,6 +446,8 @@
 }
 
 .wpp-search-overlay .wpp-switch-name {
+    font-size: var(--font-ui-small);
+    font-weight: var(--font-semibold);
     flex: 1;
     min-width: 0;
     display: block;
