@@ -29,12 +29,30 @@ function attachOverlayMethods(WorkspacePlusPlus) {
         var filtered = ordered.slice();
         var selectedIndex = 0;
         var keyboardNav = false;
-        for (var ai = 0; ai < filtered.length; ai++) {
-            if (filtered[ai].id === this.data.activeSessionId) {
-                selectedIndex = ai;
-                break;
+
+        function syncSelectedIndexToActive(options) {
+            options = options || {};
+            if (filtered.length === 0) {
+                selectedIndex = -1;
+                return;
             }
+
+            var activeIdx = self.findActiveSessionIndex(filtered);
+            if (activeIdx !== -1) {
+                selectedIndex = activeIdx;
+                return;
+            }
+
+            if (options.preserveWhenMissing) {
+                if (selectedIndex >= filtered.length) {
+                    selectedIndex = filtered.length - 1;
+                }
+                return;
+            }
+
+            selectedIndex = 0;
         }
+        syncSelectedIndexToActive();
 
         function getOverlayGroupId() {
             var groups = self.data.groups || {};
@@ -101,30 +119,15 @@ function attachOverlayMethods(WorkspacePlusPlus) {
 
         function onOverlaySave() {
             var selectedGroupId = getOverlayGroupId();
-            var beforeActiveGroupId = self.data.activeGroupId || null;
-            self.createSessionValidated(saveInput.value).then(function (result) {
+            self.createSessionForViewedGroup(saveInput.value, selectedGroupId).then(function (result) {
                 if (!result || !result.created) return;
-                var createdSessionId = result.sessionId;
                 var createdName = result.name;
-                var chain = Promise.resolve();
-                if (selectedGroupId && selectedGroupId !== beforeActiveGroupId) {
-                    chain = self.addSessionToGroup(createdSessionId, selectedGroupId).then(function () {
-                        return self.resolveGroupSelection(selectedGroupId).then(function (result) {
-                            overlayGroupId = result.resolvedGroupId || null;
-                            self.searchOverlayViewGroupId = overlayGroupId;
-                        });
-                    });
-                } else {
-                    overlayGroupId = self.data.activeGroupId || null;
-                    self.searchOverlayViewGroupId = overlayGroupId || null;
-                }
-
-                return chain.then(function () {
-                    saveInput.value = '';
-                    new obsidian.Notice(L.created(createdName));
-                    renderGroupTabs();
-                    refreshOrderedSessions();
-                });
+                overlayGroupId = result.viewGroupId || null;
+                self.searchOverlayViewGroupId = overlayGroupId;
+                saveInput.value = '';
+                new obsidian.Notice(L.created(createdName));
+                renderGroupTabs();
+                refreshOrderedSessions();
             });
         }
 
@@ -309,15 +312,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                                 mi.setSection('danger');
                                 mi.onClick(function () {
                                     new modals.ConfirmModal(self.app, L.confirmDeleteAllSessions(sessionCount - 1), function () {
-                                        var activeId = self.data.activeSessionId;
-                                        var ids = Object.keys(self.data.sessions).filter(function (id) {
-                                            return id !== activeId;
-                                        });
-                                        var promises = ids.map(function (id) {
-                                            return self.deleteSession(id);
-                                        });
-                                        return Promise.all(promises).then(function (results) {
-                                            var deletedCount = results.filter(function (d) { return d; }).length;
+                                        return self.deleteAllInactiveSessions().then(function (deletedCount) {
                                             renderGroupTabs();
                                             refreshOrderedSessions();
                                             if (deletedCount > 0) {
@@ -453,17 +448,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
         function refreshOrderedSessions() {
             ordered = self.getOrderedSessionsForGroup(getOverlayGroupId());
             filtered = self.filterSessionsByQuery(ordered, searchInput.value);
-            if (filtered.length > 0) {
-                if (selectedIndex >= filtered.length) selectedIndex = filtered.length - 1;
-                for (var i = 0; i < filtered.length; i++) {
-                    if (filtered[i].id === self.data.activeSessionId) {
-                        selectedIndex = i;
-                        break;
-                    }
-                }
-            } else {
-                selectedIndex = -1;
-            }
+            syncSelectedIndexToActive({ preserveWhenMissing: true });
             renderList();
         }
 
@@ -897,17 +882,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
 
         this.searchOverlayInputHandler = function () {
             filtered = self.filterSessionsByQuery(ordered, searchInput.value);
-            if (filtered.length > 0) {
-                selectedIndex = 0;
-                for (var i = 0; i < filtered.length; i++) {
-                    if (filtered[i].id === self.data.activeSessionId) {
-                        selectedIndex = i;
-                        break;
-                    }
-                }
-            } else {
-                selectedIndex = -1;
-            }
+            syncSelectedIndexToActive();
             renderList();
         };
 

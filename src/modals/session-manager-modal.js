@@ -67,13 +67,7 @@ var SessionManagerModal = /** @class */ (function (_super) {
         this.filterInput.addEventListener('input', function () {
             self.filterQuery = self.filterInput.value || '';
             var sessions = self.getNavigationSessions();
-            var activeIdx = -1;
-            for (var i = 0; i < sessions.length; i++) {
-                if (sessions[i].id === self.plugin.data.activeSessionId) {
-                    activeIdx = i;
-                    break;
-                }
-            }
+            var activeIdx = self.plugin.findActiveSessionIndex(sessions);
             if (document.activeElement === self.filterInput) {
                 self.focusedIndex = -1;
             } else {
@@ -107,12 +101,7 @@ var SessionManagerModal = /** @class */ (function (_super) {
 
         // Set initial focus to active session
         var ordered = this.getNavigationSessions();
-        for (var fi = 0; fi < ordered.length; fi++) {
-            if (ordered[fi].id === this.plugin.data.activeSessionId) {
-                this.focusedIndex = fi;
-                break;
-            }
-        }
+        this.focusedIndex = this.plugin.findActiveSessionIndex(ordered);
         this.updateFocusUI();
 
         // Hotkey footer
@@ -794,29 +783,14 @@ var SessionManagerModal = /** @class */ (function (_super) {
         var L = i18n.L;
         var self = this;
         var selectedGroupId = this.getModalGroupId();
-        var beforeActiveGroupId = this.plugin.data.activeGroupId || null;
-        this.plugin.createSessionValidated(this.nameInput.value).then(function (result) {
+        this.plugin.createSessionForViewedGroup(this.nameInput.value, selectedGroupId).then(function (result) {
             if (!result || !result.created) return;
-            var createdSessionId = result.sessionId;
             var createdName = result.name;
-            var chain = Promise.resolve();
-
-            if (selectedGroupId && selectedGroupId !== beforeActiveGroupId) {
-                chain = self.plugin.addSessionToGroup(createdSessionId, selectedGroupId).then(function () {
-                    return self.plugin.resolveGroupSelection(selectedGroupId).then(function (result) {
-                        self.modalGroupId = result.resolvedGroupId || null;
-                    });
-                });
-            } else {
-                self.modalGroupId = self.plugin.data.activeGroupId || null;
-            }
-
-            return chain.then(function () {
-                self.nameInput.value = '';
-                self.renderGroupTabs();
-                self.renderList();
-                new obsidian.Notice(L.created(createdName));
-            });
+            self.modalGroupId = result.viewGroupId || null;
+            self.nameInput.value = '';
+            self.renderGroupTabs();
+            self.renderList();
+            new obsidian.Notice(L.created(createdName));
         });
     };
 
@@ -1069,15 +1043,7 @@ var SessionManagerModal = /** @class */ (function (_super) {
                             mi.setSection('danger');
                             mi.onClick(function () {
                                 new ConfirmModal(self.app, L.confirmDeleteAllSessions(sessionCount - 1), function () {
-                                    var activeId = self.plugin.data.activeSessionId;
-                                    var ids = Object.keys(self.plugin.data.sessions).filter(function (id) {
-                                        return id !== activeId;
-                                    });
-                                    var promises = ids.map(function (id) {
-                                        return self.plugin.deleteSession(id);
-                                    });
-                                    return Promise.all(promises).then(function (results) {
-                                        var deletedCount = results.filter(function (d) { return d; }).length;
+                                    return self.plugin.deleteAllInactiveSessions().then(function (deletedCount) {
                                         self.renderGroupTabs();
                                         self.renderList();
                                         if (deletedCount > 0) {
