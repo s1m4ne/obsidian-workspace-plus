@@ -132,6 +132,53 @@ function registerCommands(plugin) {
         callback: function () { plugin.openSearchOverlay(); },
     });
 
+    // --- Group commands ---
+
+    function getCurrentGroupViewId() {
+        if (plugin.switchOverlayEl) return plugin.switchOverlayViewGroupId || null;
+        if (plugin.searchOverlayEl) return plugin.searchOverlayViewGroupId || null;
+        return plugin.data.activeGroupId || null;
+    }
+
+    function showSwitchOverlayForGroup(groupId) {
+        var ordered = plugin.getOrderedSessionsForGroup(groupId || null);
+        var activeIndex = plugin.getActiveSessionIndex(ordered);
+        plugin.showSwitchOverlay(ordered, activeIndex, groupId || null);
+    }
+
+    plugin.addCommand({
+        id: 'exit-group',
+        name: L.cmdExitGroup,
+        checkCallback: function (checking) {
+            if (!plugin.data.activeGroupId) return false;
+            if (!checking) plugin.exitGroup();
+            return true;
+        },
+    });
+
+    plugin.addCommand({
+        id: 'next-group',
+        name: L.cmdNextGroup,
+        hotkeys: [{ modifiers: ['Mod', 'Shift'], key: 'Tab' }],
+        callback: function () {
+            var targetGroupId = plugin.getRelativeGroupId(getCurrentGroupViewId(), 1);
+            if (typeof targetGroupId === 'undefined') {
+                showSwitchOverlayForGroup(plugin.data.activeGroupId || null);
+                return;
+            }
+
+            plugin.resolveGroupSelection(targetGroupId).then(function (result) {
+                showSwitchOverlayForGroup(result.resolvedGroupId);
+            });
+        },
+    });
+
+    plugin.addCommand({
+        id: 'previous-group',
+        name: L.cmdPreviousGroup,
+        callback: function () { plugin.switchGroupRelative(-1); },
+    });
+
 }
 
 module.exports = registerCommands;

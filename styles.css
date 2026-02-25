@@ -37,6 +37,7 @@
     justify-content: space-between;
     padding: 10px 12px;
     border-radius: 6px;
+    cursor: grab;
 }
 
 .wpp-session-item:hover {
@@ -101,6 +102,10 @@
     font-size: var(--font-ui-small);
 }
 
+.wpp-empty-state-group {
+    text-align: center;
+}
+
 /* Keyboard focus */
 .wpp-session-item.wpp-focused {
     background: var(--background-modifier-hover);
@@ -131,6 +136,11 @@
 
 .wpp-session-item.is-dragging {
     visibility: hidden;
+}
+
+body.wpp-session-list-dragging,
+body.wpp-session-list-dragging * {
+    cursor: grabbing !important;
 }
 
 .wpp-drag-clone {
@@ -335,8 +345,10 @@
 
 .wpp-search-overlay {
     align-items: stretch;
-    min-width: min(300px, 80vw);
+    gap: 8px;
+    min-width: min(220px, 80vw);
     max-width: min(480px, 95vw);
+    overflow: hidden;
     /* Position bottom-right */
     top: auto;
     left: auto;
@@ -354,6 +366,8 @@
 }
 
 .wpp-search-overlay .wpp-search-input,
+.wpp-search-overlay .wpp-save-input,
+.wpp-search-overlay .wpp-save-btn,
 .wpp-search-overlay .wpp-switch-item,
 .wpp-search-overlay .wpp-search-close {
     cursor: default;
@@ -373,6 +387,10 @@
 
 .wpp-search-overlay .wpp-switch-footer {
     font-size: var(--font-ui-smaller);
+}
+
+.wpp-search-overlay .wpp-save-container {
+    margin-bottom: 0;
 }
 
 .wpp-search-header .wpp-switch-count {
@@ -411,13 +429,16 @@
 .wpp-search-list {
     display: flex;
     flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
     justify-content: flex-start;
     gap: 4px;
     width: 100%;
     max-height: 50vh;
     overflow-y: auto;
+    overflow-x: hidden;
     flex: 1;
-    min-height: 60px;
+    min-height: 0;
 }
 
 /* Corner resize handles */
@@ -435,8 +456,9 @@
 
 .wpp-search-overlay .wpp-switch-item {
     width: 100%;
-    max-width: none;
+    max-width: 100%;
     min-width: 0;
+    box-sizing: border-box;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -530,6 +552,21 @@
     height: var(--icon-xs);
 }
 
+/* Quick switcher info column (name + modified time) */
+.wpp-qs-info-col {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+    gap: 2px;
+}
+
+/* Quick switcher modified timestamp */
+.wpp-qs-modified {
+    font-size: 10px;
+    color: var(--text-faint);
+}
+
 /* Hide hotkey in search overlay (actions replace it) */
 .wpp-search-overlay .wpp-switch-hotkey {
     display: none;
@@ -541,6 +578,113 @@
     font-size: var(--font-ui-small);
     text-align: center;
     padding: 6px 0;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Group tabs */
+.wpp-group-tabs {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+    overflow-x: auto;
+    padding: 2px 0;
+    flex-shrink: 0;
+}
+
+.wpp-group-tab {
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: var(--font-ui-smaller);
+    color: var(--text-muted);
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.wpp-group-tab:hover {
+    background: var(--background-modifier-hover-dimmed, rgba(var(--mono-rgb-100), 0.03));
+    color: var(--text-normal);
+}
+
+.wpp-group-tab.is-active {
+    background: var(--interactive-accent);
+    color: var(--text-on-accent);
+}
+
+/* Group tab D&D dragging */
+.wpp-group-tab.is-dragging {
+    visibility: hidden;
+}
+
+/* Group tab drop target (during drag) */
+.wpp-group-tab.wpp-group-drop-target {
+    outline: 2px solid var(--interactive-accent);
+    outline-offset: -2px;
+    background: var(--background-modifier-hover);
+}
+
+/* Modal group tabs row */
+.wpp-group-tabs-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 8px;
+    overflow-x: auto;
+    padding: 2px 0;
+}
+
+/* Group add button */
+.wpp-group-add-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+.wpp-group-add-btn:hover {
+    background: var(--background-modifier-hover);
+    color: var(--text-normal);
+}
+
+.wpp-group-add-btn svg {
+    width: var(--icon-xs);
+    height: var(--icon-xs);
+}
+
+.wpp-instant-tooltip {
+    position: fixed;
+    background: var(--background-modifier-message);
+    color: var(--text-normal);
+    padding: 4px 8px;
+    border-radius: var(--radius-s);
+    font-size: var(--font-ui-smaller);
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: var(--layer-popover);
+    box-shadow: var(--shadow-s);
+}
+
+/* Status bar group indicator */
+.wpp-status-group {
+    color: var(--text-muted);
+    font-size: var(--font-ui-smaller);
+}
+
+.wpp-status-separator {
+    color: var(--text-faint);
+    font-size: var(--font-ui-smaller);
 }
 
 /* Settings: nested sub-toggles below parent */

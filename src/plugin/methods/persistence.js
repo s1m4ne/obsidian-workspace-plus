@@ -14,6 +14,10 @@ var SESSION_KEYS = [
     'activeSessionId',
     'sessions',
     'sessionOrder',
+    'groups',
+    'groupOrder',
+    'sessionGroups',
+    'activeGroupId',
 ];
 
 var SETTINGS_KEYS = [
@@ -141,10 +145,54 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
         if (active && !sessions[active]) active = null;
         if (!active && order.length > 0) active = order[0];
 
+        // --- Normalize group data ---
+        var groups = (raw && raw.groups && typeof raw.groups === 'object') ? raw.groups : {};
+        var rawGroupOrder = Array.isArray(raw && raw.groupOrder) ? raw.groupOrder : Object.keys(groups);
+        var seenGroups = {};
+        var groupOrder = [];
+
+        for (i = 0; i < rawGroupOrder.length; i++) {
+            var gid = rawGroupOrder[i];
+            if (!groups[gid] || seenGroups[gid]) continue;
+            seenGroups[gid] = true;
+            groupOrder.push(gid);
+        }
+
+        var allGroupIds = Object.keys(groups);
+        for (i = 0; i < allGroupIds.length; i++) {
+            if (seenGroups[allGroupIds[i]]) continue;
+            seenGroups[allGroupIds[i]] = true;
+            groupOrder.push(allGroupIds[i]);
+        }
+
+        var sessionGroups = (raw && raw.sessionGroups && typeof raw.sessionGroups === 'object')
+            ? raw.sessionGroups : {};
+
+        // Clean up references to non-existent sessions or groups
+        var sessionGroupsCleaned = {};
+        var sgKeys = Object.keys(sessionGroups);
+        for (i = 0; i < sgKeys.length; i++) {
+            var sid = sgKeys[i];
+            if (!sessions[sid]) continue;
+            var gids = Array.isArray(sessionGroups[sid]) ? sessionGroups[sid] : [];
+            var validGids = [];
+            for (var k = 0; k < gids.length; k++) {
+                if (groups[gids[k]]) validGids.push(gids[k]);
+            }
+            if (validGids.length > 0) sessionGroupsCleaned[sid] = validGids;
+        }
+
+        var activeGroupId = (raw && typeof raw.activeGroupId === 'string' && groups[raw.activeGroupId])
+            ? raw.activeGroupId : null;
+
         return {
             activeSessionId: active,
             sessions: sessions,
             sessionOrder: order,
+            groups: groups,
+            groupOrder: groupOrder,
+            sessionGroups: sessionGroupsCleaned,
+            activeGroupId: activeGroupId,
         };
     };
 
@@ -383,6 +431,10 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
                     self.data.activeSessionId = imported.activeSessionId;
                     self.data.sessions = imported.sessions;
                     self.data.sessionOrder = imported.sessionOrder;
+                    self.data.groups = imported.groups || {};
+                    self.data.groupOrder = imported.groupOrder || [];
+                    self.data.sessionGroups = imported.sessionGroups || {};
+                    self.data.activeGroupId = imported.activeGroupId || null;
                     self.syncSessionOrder();
                     self.updateStatusBar();
                     self.syncSessionCommands();

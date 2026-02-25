@@ -7,10 +7,11 @@ var i18n = require('../i18n');
 // Rename Modal
 // ============================================================
 var RenameModal = /** @class */ (function (_super) {
-    function RenameModal(app, currentName, onRename) {
+    function RenameModal(app, currentName, onRename, options) {
         var _this = _super.call(this, app) || this;
         _this.currentName = currentName;
         _this.onRename = onRename;
+        _this.modalOptions = options || {};
         return _this;
     }
 
@@ -21,12 +22,13 @@ var RenameModal = /** @class */ (function (_super) {
         var L = i18n.L;
         var contentEl = this.contentEl;
         var self = this;
-        this.titleEl.setText(L.renameTitle);
+        var opts = this.modalOptions;
+        this.titleEl.setText(opts.title || L.renameTitle);
 
         var input = contentEl.createEl('input', {
             type: 'text',
             value: this.currentName,
-            placeholder: L.renamePlaceholder,
+            placeholder: opts.placeholder || L.renamePlaceholder,
             cls: 'wpp-rename-input',
         });
         input.select();
@@ -34,7 +36,7 @@ var RenameModal = /** @class */ (function (_super) {
         var btns = contentEl.createDiv({ cls: 'wpp-confirm-buttons' });
         var cancelBtn = btns.createEl('button', { text: L.cancel });
         cancelBtn.addEventListener('click', function () { self.close(); });
-        var renameBtn = btns.createEl('button', { text: L.rename, cls: 'mod-cta' });
+        var renameBtn = btns.createEl('button', { text: opts.buttonText || L.rename, cls: 'mod-cta' });
 
         var doRename = function () {
             var newName = input.value.trim();

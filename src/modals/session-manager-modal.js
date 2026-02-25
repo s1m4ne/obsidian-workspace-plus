@@ -50,6 +50,7 @@ var SessionManagerModal = /** @class */ (function (_super) {
         });
 
         var self = this;
+        this.modalGroupId = this.plugin.data.activeGroupId || null;
         saveBtn.addEventListener('click', function () { self.onSave(); });
         this.nameInput.addEventListener('keydown', function (e) {
             if (e.key === 'Enter' && !e.isComposing) self.onSave();
@@ -80,6 +81,10 @@ var SessionManagerModal = /** @class */ (function (_super) {
             }
             self.renderList();
         });
+
+        // Group tabs
+        this.groupTabsRow = contentEl.createDiv({ cls: 'wpp-group-tabs-row' });
+        this.renderGroupTabs();
 
         // Focus & selection state
         this.focusedIndex = -1;
@@ -117,6 +122,9 @@ var SessionManagerModal = /** @class */ (function (_super) {
             footer.createDiv({ text: L.cmdNext + '  ' + nextKey });
         }
         footer.createDiv({ text: L.footerDragReorder });
+        if (this.plugin.getOrderedGroups().length > 0) {
+            footer.createDiv({ text: L.footerDragToGroup });
+        }
 
         // Keyboard handling: Enter activation + directional arrow traversal.
         this.modalKeyHandler = function (e) {
@@ -379,11 +387,34 @@ var SessionManagerModal = /** @class */ (function (_super) {
     };
 
     SessionManagerModal.prototype.getVisibleSessions = function () {
-        var sessions = this.plugin.getOrderedSessions();
+        var sessions = this.plugin.getOrderedSessionsForGroup(this.getModalGroupId());
         var query = (this.filterQuery || '').trim().toLowerCase();
         if (!query) return sessions;
         return sessions.filter(function (s) {
             return (s.name || '').toLowerCase().indexOf(query) !== -1;
+        });
+    };
+
+    SessionManagerModal.prototype.getModalGroupId = function () {
+        var groups = this.plugin.data.groups || {};
+        if (this.modalGroupId && !groups[this.modalGroupId]) {
+            this.modalGroupId = this.plugin.data.activeGroupId || null;
+        }
+        return this.modalGroupId || null;
+    };
+
+    SessionManagerModal.prototype.selectGroup = function (groupId) {
+        var self = this;
+        var nextGroupId = groupId || null;
+        return this.plugin.setActiveGroup(nextGroupId).then(function (switched) {
+            if (switched) {
+                self.modalGroupId = self.plugin.data.activeGroupId || null;
+            } else {
+                self.modalGroupId = nextGroupId;
+            }
+            self.renderGroupTabs();
+            self.renderList();
+            return switched;
         });
     };
 
@@ -395,7 +426,8 @@ var SessionManagerModal = /** @class */ (function (_super) {
         var L = i18n.L;
         this.listEl.empty();
         var sessions = this.getVisibleSessions();
-        var ordered = this.plugin.getOrderedSessions();
+        var selectedGroupId = this.getModalGroupId();
+        var ordered = this.plugin.getOrderedSessionsForGroup(selectedGroupId);
         var orderIndex = {};
         for (var oi = 0; oi < ordered.length; oi++) {
             orderIndex[ordered[oi].id] = oi;
@@ -404,7 +436,11 @@ var SessionManagerModal = /** @class */ (function (_super) {
             this.renderSessionItem(sessions[i], i, orderIndex[sessions[i].id]);
         }
         if (sessions.length === 0) {
-            this.listEl.createDiv({ text: L.noFilteredSessions, cls: 'wpp-empty-state' });
+            var isGroupEmpty = !!selectedGroupId && ordered.length === 0;
+            var emptyMsg = isGroupEmpty
+                ? L.noGroupSessions : L.noFilteredSessions;
+            var emptyEl = this.listEl.createDiv({ text: emptyMsg, cls: 'wpp-empty-state' });
+            if (isGroupEmpty) emptyEl.addClass('wpp-empty-state-group');
         } else {
             this.setupDragAndDrop();
         }
@@ -454,6 +490,71 @@ var SessionManagerModal = /** @class */ (function (_super) {
                 self.selectedIds.clear();
                 self.updateSelectionUI();
             }
+        });
+
+        // Right-click context menu
+        item.addEventListener('contextmenu', function (e) {
+            e.preventDefault();
+            var menu = new obsidian.Menu();
+
+            // Switch
+            if (!isActive) {
+                menu.addItem(function (mi) {
+                    mi.setTitle(L.contextSwitchSession);
+                    mi.setIcon('arrow-right');
+                    mi.onClick(function () { self.onLoad(session.id); });
+                });
+            }
+
+            // Rename
+            menu.addItem(function (mi) {
+                mi.setTitle(L.contextRenameSession);
+                mi.setIcon('pencil');
+                mi.onClick(function () { self.onRename(session); });
+            });
+
+            // Duplicate
+            menu.addItem(function (mi) {
+                mi.setTitle(L.contextDuplicateSession);
+                mi.setIcon('copy');
+                mi.onClick(function () {
+                    self.plugin.duplicateSession(session.id).then(function () {
+                        self.renderList();
+                    });
+                });
+            });
+
+            // Remove from group (only when a group is active)
+            var selectedGroupId = self.getModalGroupId();
+            if (selectedGroupId) {
+                menu.addItem(function (mi) {
+                    mi.setTitle(L.groupRemoveFromGroup);
+                    mi.setIcon('log-out');
+                    mi.onClick(function () {
+                        var activeGid = self.getModalGroupId();
+                        if (!activeGid) return;
+                        var gName = (self.plugin.data.groups[activeGid] || {}).name || '';
+                        self.plugin.removeSessionFromGroup(session.id, activeGid).then(function () {
+                            new obsidian.Notice(L.groupRemovedSession(session.name, gName));
+                            self.renderGroupTabs();
+                            self.renderList();
+                        });
+                    });
+                });
+            }
+
+            // Delete (with separator, hidden for last session)
+            if (Object.keys(self.plugin.data.sessions).length > 1) {
+                menu.addSeparator();
+                menu.addItem(function (mi) {
+                    mi.setTitle(L.contextDeleteSession);
+                    mi.setIcon('trash-2');
+                    mi.setSection('danger');
+                    mi.onClick(function () { self.onDelete(session); });
+                });
+            }
+
+            menu.showAtMouseEvent(e);
         });
 
         // Hotkey hint
@@ -514,7 +615,7 @@ var SessionManagerModal = /** @class */ (function (_super) {
                 cls: 'wpp-icon-btn',
                 attr: { 'aria-label': L.delete, role: 'button', tabindex: '-1', 'data-action-key': 'delete' },
             });
-            obsidian.setIcon(deleteBtn, 'x');
+            obsidian.setIcon(deleteBtn, 'trash-2');
             deleteBtn.addEventListener('click', function (e) {
                 e.stopPropagation();
                 self.onDelete(session);
@@ -541,6 +642,7 @@ var SessionManagerModal = /** @class */ (function (_super) {
 
                 function startDrag(ev) {
                     dragStarted = true;
+                    document.body.classList.add('wpp-session-list-dragging');
                     var rect = item.getBoundingClientRect();
                     var offsetX = startX - rect.left;
                     var offsetY = startY - rect.top;
@@ -562,6 +664,30 @@ var SessionManagerModal = /** @class */ (function (_super) {
                     cloneEl._offsetY = offsetY;
                 }
 
+                function updateGroupDropTarget(ev) {
+                    var tabs = self.groupTabsRow.querySelectorAll('.wpp-group-tab');
+                    var hoveredTab = null;
+                    for (var t = 0; t < tabs.length; t++) {
+                        var tr = tabs[t].getBoundingClientRect();
+                        if (ev.clientX >= tr.left && ev.clientX <= tr.right &&
+                            ev.clientY >= tr.top && ev.clientY <= tr.bottom) {
+                            hoveredTab = tabs[t];
+                            break;
+                        }
+                    }
+                    for (var t2 = 0; t2 < tabs.length; t2++) {
+                        tabs[t2].classList.toggle('wpp-group-drop-target', tabs[t2] === hoveredTab);
+                    }
+                    return hoveredTab;
+                }
+
+                function clearGroupDropTargets() {
+                    var tabs = self.groupTabsRow.querySelectorAll('.wpp-group-tab');
+                    for (var t = 0; t < tabs.length; t++) {
+                        tabs[t].classList.remove('wpp-group-drop-target');
+                    }
+                }
+
                 function onMouseMove(ev) {
                     if (!dragStarted) {
                         var dx = ev.clientX - startX;
@@ -572,6 +698,10 @@ var SessionManagerModal = /** @class */ (function (_super) {
 
                     cloneEl.style.top = (ev.clientY - cloneEl._offsetY) + 'px';
                     cloneEl.style.left = (ev.clientX - cloneEl._offsetX) + 'px';
+
+                    // Check if hovering over a group tab
+                    var hoverTab = updateGroupDropTarget(ev);
+                    if (hoverTab) return; // Don't reorder while over group tabs
 
                     var siblings = self.listEl.querySelectorAll('.wpp-session-item');
                     var placed = false;
@@ -590,22 +720,89 @@ var SessionManagerModal = /** @class */ (function (_super) {
                     }
                 }
 
-                function onMouseUp() {
+                function onMouseUp(ev) {
                     document.removeEventListener('mousemove', onMouseMove);
                     document.removeEventListener('mouseup', onMouseUp);
+                    document.body.classList.remove('wpp-session-list-dragging');
 
                     if (!dragStarted) return;
 
                     cloneEl.remove();
                     draggedEl.classList.remove('is-dragging');
 
+                    // Check if dropped on a group tab
+                    var dropTab = updateGroupDropTarget(ev);
+                    clearGroupDropTargets();
+
+                    if (dropTab && dropTab.dataset.groupId && dropTab.dataset.groupId !== '__all__') {
+                        var sessionId = draggedEl.dataset.sessionId;
+                        var groupId = dropTab.dataset.groupId;
+                        var sessionName = (self.plugin.data.sessions[sessionId] || {}).name || '';
+                        var groupName = (self.plugin.data.groups[groupId] || {}).name || '';
+                        // Remove from all other groups first (move, not copy)
+                        var sg = self.plugin.data.sessionGroups || {};
+                        var oldGroups = (sg[sessionId] || []).slice();
+                        var removeChain = Promise.resolve();
+                        for (var rgi = 0; rgi < oldGroups.length; rgi++) {
+                            if (oldGroups[rgi] !== groupId) {
+                                (function (gid) {
+                                    removeChain = removeChain.then(function () {
+                                        return self.plugin.removeSessionFromGroup(sessionId, gid);
+                                    });
+                                })(oldGroups[rgi]);
+                            }
+                        }
+                        removeChain.then(function () {
+                            return self.plugin.addSessionToGroup(sessionId, groupId);
+                        }).then(function () {
+                            new obsidian.Notice(i18n.L.groupAddedSession(sessionName, groupName));
+                            self.renderGroupTabs();
+                            self.renderList();
+                        });
+                        return;
+                    } else {
+                        var currentGroupId = self.getModalGroupId();
+                        if (dropTab && dropTab.dataset.groupId === '__all__' && currentGroupId) {
+                        // Drop on "All" tab while viewing a group → remove from group
+                            var rmSessionId = draggedEl.dataset.sessionId;
+                            var rmGroupId = currentGroupId;
+                            var rmSessionName = (self.plugin.data.sessions[rmSessionId] || {}).name || '';
+                            var rmGroupName = (self.plugin.data.groups[rmGroupId] || {}).name || '';
+                            self.plugin.removeSessionFromGroup(rmSessionId, rmGroupId).then(function () {
+                                new obsidian.Notice(i18n.L.groupRemovedSession(rmSessionName, rmGroupName));
+                                self.renderGroupTabs();
+                                self.renderList();
+                            });
+                            return;
+                        }
+                    }
+
                     // Read order from DOM
-                    var newOrder = [];
+                    var newVisibleOrder = [];
                     var items = self.listEl.querySelectorAll('.wpp-session-item');
                     items.forEach(function (el) {
-                        newOrder.push(el.dataset.sessionId);
+                        newVisibleOrder.push(el.dataset.sessionId);
                     });
-                    self.plugin.data.sessionOrder = newOrder;
+
+                    // Merge into full session order (preserve non-visible sessions)
+                    var fullOrder = self.plugin.data.sessionOrder;
+                    var visibleSet = {};
+                    for (var vi = 0; vi < newVisibleOrder.length; vi++) {
+                        visibleSet[newVisibleOrder[vi]] = true;
+                    }
+                    var visibleIdx = 0;
+                    var merged = [];
+                    for (var fi = 0; fi < fullOrder.length; fi++) {
+                        if (visibleSet[fullOrder[fi]]) {
+                            merged.push(newVisibleOrder[visibleIdx++]);
+                        } else {
+                            merged.push(fullOrder[fi]);
+                        }
+                    }
+                    while (visibleIdx < newVisibleOrder.length) {
+                        merged.push(newVisibleOrder[visibleIdx++]);
+                    }
+                    self.plugin.data.sessionOrder = merged;
 
                     // Update index labels in-place
                     items.forEach(function (el, i) {
@@ -635,10 +832,11 @@ var SessionManagerModal = /** @class */ (function (_super) {
     SessionManagerModal.prototype.onSave = function () {
         var L = i18n.L;
         var self = this;
+        var selectedGroupId = this.getModalGroupId();
+        var beforeActiveGroupId = this.plugin.data.activeGroupId || null;
         var name = this.nameInput.value.trim();
         if (!name) {
-            new obsidian.Notice(L.emptyName);
-            return;
+            name = this.plugin.getNextSessionName();
         }
         // Check duplicate
         var exists = Object.values(this.plugin.data.sessions)
@@ -648,9 +846,29 @@ var SessionManagerModal = /** @class */ (function (_super) {
             return;
         }
         this.plugin.createSession(name).then(function () {
-            self.nameInput.value = '';
-            self.renderList();
-            new obsidian.Notice(L.created(name));
+            var createdSessionId = self.plugin.data.activeSessionId;
+            var chain = Promise.resolve();
+
+            if (selectedGroupId && selectedGroupId !== beforeActiveGroupId) {
+                chain = self.plugin.addSessionToGroup(createdSessionId, selectedGroupId).then(function () {
+                    return self.plugin.setActiveGroup(selectedGroupId).then(function (switched) {
+                        if (switched) {
+                            self.modalGroupId = self.plugin.data.activeGroupId || null;
+                        } else {
+                            self.modalGroupId = selectedGroupId;
+                        }
+                    });
+                });
+            } else {
+                self.modalGroupId = self.plugin.data.activeGroupId || null;
+            }
+
+            return chain.then(function () {
+                self.nameInput.value = '';
+                self.renderGroupTabs();
+                self.renderList();
+                new obsidian.Notice(L.created(name));
+            });
         });
     };
 
@@ -760,7 +978,330 @@ var SessionManagerModal = /** @class */ (function (_super) {
         }).open();
     };
 
+    SessionManagerModal.prototype.renderGroupTabs = function () {
+        var L = i18n.L;
+        var self = this;
+        var el = this.groupTabsRow;
+        while (el.firstChild) el.removeChild(el.firstChild);
+
+        var groups = this.plugin.data.groups || {};
+        var selectedGroupId = this.getModalGroupId();
+
+        // Ensure __all__ and all existing groups are in groupOrder
+        if (!this.plugin.data.groupOrder) this.plugin.data.groupOrder = [];
+        if (this.plugin.data.groupOrder.indexOf('__all__') === -1) {
+            this.plugin.data.groupOrder.unshift('__all__');
+        }
+        var existingIds = Object.keys(groups);
+        for (var ei = 0; ei < existingIds.length; ei++) {
+            if (this.plugin.data.groupOrder.indexOf(existingIds[ei]) === -1) {
+                this.plugin.data.groupOrder.push(existingIds[ei]);
+            }
+        }
+
+        var groupOrder = this.plugin.data.groupOrder;
+
+        // --- Group tab D&D helper ---
+        function setupGroupTabDrag(tabEl) {
+            tabEl.addEventListener('mousedown', function (e) {
+                if (e.button !== 0) return;
+                var startX = e.clientX;
+                var dragStarted = false;
+                var cloneEl = null;
+
+                function startDrag(ev) {
+                    dragStarted = true;
+                    var rect = tabEl.getBoundingClientRect();
+                    cloneEl = tabEl.cloneNode(true);
+                    cloneEl.classList.add('wpp-drag-clone');
+                    cloneEl.style.position = 'fixed';
+                    cloneEl.style.width = rect.width + 'px';
+                    cloneEl.style.height = rect.height + 'px';
+                    cloneEl.style.top = rect.top + 'px';
+                    cloneEl.style.left = (ev.clientX - (startX - rect.left)) + 'px';
+                    cloneEl.style.zIndex = '10000';
+                    cloneEl.style.pointerEvents = 'none';
+                    document.body.appendChild(cloneEl);
+                    tabEl.classList.add('is-dragging');
+                    cloneEl._offsetX = startX - rect.left;
+                }
+
+                function onMove(ev) {
+                    if (!dragStarted) {
+                        if (Math.abs(ev.clientX - startX) < 5) return;
+                        startDrag(ev);
+                    }
+                    cloneEl.style.left = (ev.clientX - cloneEl._offsetX) + 'px';
+
+                    // Reorder tabs in DOM based on horizontal position
+                    var tabs = el.querySelectorAll('.wpp-group-tab');
+                    var placed = false;
+                    for (var ti = 0; ti < tabs.length; ti++) {
+                        var sibling = tabs[ti];
+                        if (sibling === tabEl) continue;
+                        var r = sibling.getBoundingClientRect();
+                        if (ev.clientX < r.left + r.width / 2) {
+                            el.insertBefore(tabEl, sibling);
+                            placed = true;
+                            break;
+                        }
+                    }
+                    if (!placed) {
+                        var addBtnEl = el.querySelector('.wpp-group-add-btn');
+                        if (addBtnEl) {
+                            el.insertBefore(tabEl, addBtnEl);
+                        }
+                    }
+                }
+
+                function onUp() {
+                    document.removeEventListener('mousemove', onMove);
+                    document.removeEventListener('mouseup', onUp);
+                    if (!dragStarted) return;
+                    cloneEl.remove();
+                    tabEl.classList.remove('is-dragging');
+
+                    // Read new order from DOM
+                    var tabs = el.querySelectorAll('.wpp-group-tab');
+                    var newOrder = [];
+                    for (var ti = 0; ti < tabs.length; ti++) {
+                        newOrder.push(tabs[ti].dataset.groupId);
+                    }
+                    self.plugin.data.groupOrder = newOrder;
+                    self.plugin.persistData();
+                }
+
+                document.addEventListener('mousemove', onMove);
+                document.addEventListener('mouseup', onUp);
+            });
+        }
+
+        // Render tabs in groupOrder
+        for (var gi = 0; gi < groupOrder.length; gi++) {
+            var gid = groupOrder[gi];
+
+            if (gid === '__all__') {
+                // "All" tab
+                var allTab = el.createDiv({ cls: 'wpp-group-tab' });
+                if (!selectedGroupId) allTab.classList.add('is-active');
+                allTab.textContent = L.groupAll;
+                allTab.dataset.groupId = '__all__';
+                allTab.addEventListener('click', function () {
+                    self.selectGroup(null);
+                });
+
+                // "All" tab right-click context menu
+                allTab.addEventListener('contextmenu', function (e) {
+                    e.preventDefault();
+                    var menu = new obsidian.Menu();
+
+                    menu.addItem(function (mi) {
+                        mi.setTitle(L.groupCreateNew);
+                        mi.setIcon('plus');
+                        mi.onClick(function () {
+                            new RenameModal(self.app, '', function (name) {
+                                if (!name.trim()) {
+                                    new obsidian.Notice(L.groupEmptyName);
+                                    return;
+                                }
+                                var existingGroups = self.plugin.data.groups || {};
+                                var keys = Object.keys(existingGroups);
+                                for (var i = 0; i < keys.length; i++) {
+                                    if (existingGroups[keys[i]].name === name.trim()) {
+                                        new obsidian.Notice(L.groupDuplicateName);
+                                        return;
+                                    }
+                                }
+                                self.plugin.createGroup(name.trim()).then(function () {
+                                    self.renderGroupTabs();
+                                });
+                            }, {
+                                title: L.groupCreateNew,
+                                placeholder: L.groupCreatePlaceholder,
+                                buttonText: L.save,
+                            }).open();
+                        });
+                    });
+
+                    var allGroups = self.plugin.getOrderedGroups();
+                    if (allGroups.length > 0) {
+                        menu.addSeparator();
+                        menu.addItem(function (mi) {
+                            mi.setTitle(L.contextDeleteAllGroups);
+                            mi.setIcon('folder-x');
+                            mi.setSection('danger');
+                            mi.onClick(function () {
+                                new ConfirmModal(self.app, L.confirmDeleteAllGroups(allGroups.length), function () {
+                                    self.plugin.data.sessionGroups = {};
+                                    self.plugin.data.groups = {};
+                                    self.plugin.data.groupOrder = [];
+                                    self.plugin.data.activeGroupId = null;
+                                    self.modalGroupId = null;
+                                    self.plugin.updateStatusBar();
+                                    self.plugin.persistData().then(function () {
+                                        new obsidian.Notice(L.deletedAllGroups(allGroups.length));
+                                        self.renderGroupTabs();
+                                        self.renderList();
+                                    });
+                                }).open();
+                            });
+                        });
+                    }
+
+                    var sessionCount = Object.keys(self.plugin.data.sessions).length;
+                    if (sessionCount > 1) {
+                        if (allGroups.length === 0) menu.addSeparator();
+                        menu.addItem(function (mi) {
+                            mi.setTitle(L.contextDeleteAllSessions);
+                            mi.setIcon('trash-2');
+                            mi.setSection('danger');
+                            mi.onClick(function () {
+                                new ConfirmModal(self.app, L.confirmDeleteAllSessions(sessionCount - 1), function () {
+                                    var activeId = self.plugin.data.activeSessionId;
+                                    var ids = Object.keys(self.plugin.data.sessions).filter(function (id) {
+                                        return id !== activeId;
+                                    });
+                                    var promises = ids.map(function (id) {
+                                        return self.plugin.deleteSession(id);
+                                    });
+                                    return Promise.all(promises).then(function (results) {
+                                        var deletedCount = results.filter(function (d) { return d; }).length;
+                                        self.renderGroupTabs();
+                                        self.renderList();
+                                        if (deletedCount > 0) {
+                                            new obsidian.Notice(L.deletedAllSessions(deletedCount));
+                                        }
+                                    });
+                                }).open();
+                            });
+                        });
+                    }
+
+                    menu.showAtMouseEvent(e);
+                });
+
+                setupGroupTabDrag(allTab);
+
+            } else if (groups[gid]) {
+                // Group tab
+                (function (group) {
+                    var tab = el.createDiv({ cls: 'wpp-group-tab' });
+                    if (selectedGroupId === group.id) tab.classList.add('is-active');
+                    tab.textContent = group.name;
+                    tab.dataset.groupId = group.id;
+                    tab.addEventListener('click', function () {
+                        self.selectGroup(group.id);
+                    });
+                    // Right-click context menu
+                    tab.addEventListener('contextmenu', function (e) {
+                        e.preventDefault();
+                        var menu = new obsidian.Menu();
+                        menu.addItem(function (item) {
+                            item.setTitle(L.groupContextRename);
+                            item.setIcon('pencil');
+                            item.onClick(function () {
+                                new RenameModal(self.app, group.name, function (newName) {
+                                    var existingGroups = self.plugin.data.groups || {};
+                                    var keys = Object.keys(existingGroups);
+                                    for (var i = 0; i < keys.length; i++) {
+                                        if (existingGroups[keys[i]].name === newName && keys[i] !== group.id) {
+                                            new obsidian.Notice(L.groupDuplicateName);
+                                            return;
+                                        }
+                                    }
+                                    self.plugin.renameGroup(group.id, newName).then(function () {
+                                        self.renderGroupTabs();
+                                    });
+                                }, { title: L.groupContextRename }).open();
+                            });
+                        });
+                        var groupSessionIds = self.plugin.getGroupSessionIds(group.id);
+                        if (groupSessionIds.length > 0) {
+                            menu.addItem(function (item) {
+                                item.setTitle(L.groupRemoveAllSessions);
+                                item.setIcon('log-out');
+                                item.onClick(function () {
+                                    new ConfirmModal(self.app, L.confirmRemoveAllFromGroup(group.name, groupSessionIds.length), function () {
+                                        var sg = self.plugin.data.sessionGroups || {};
+                                        var keys = Object.keys(sg);
+                                        for (var k = 0; k < keys.length; k++) {
+                                            var arr = sg[keys[k]];
+                                            var idx = arr.indexOf(group.id);
+                                            if (idx !== -1) {
+                                                arr.splice(idx, 1);
+                                                if (arr.length === 0) delete sg[keys[k]];
+                                            }
+                                        }
+                                        self.plugin.persistData().then(function () {
+                                            new obsidian.Notice(L.groupRemovedAllSessions(group.name));
+                                            self.renderGroupTabs();
+                                            self.renderList();
+                                        });
+                                    }).open();
+                                });
+                            });
+                        }
+
+                        menu.addSeparator();
+                        menu.addItem(function (item) {
+                            item.setTitle(L.groupContextDelete);
+                            item.setIcon('trash-2');
+                            item.setSection('danger');
+                            item.onClick(function () {
+                                new ConfirmModal(self.app, L.confirmDeleteGroup(group.name), function () {
+                                    self.plugin.deleteGroup(group.id).then(function () {
+                                        if (self.modalGroupId === group.id) {
+                                            self.modalGroupId = self.plugin.data.activeGroupId || null;
+                                        }
+                                        self.renderGroupTabs();
+                                        self.renderList();
+                                    });
+                                }).open();
+                            });
+                        });
+                        menu.showAtMouseEvent(e);
+                    });
+
+                    setupGroupTabDrag(tab);
+                })(groups[gid]);
+            }
+        }
+
+        // "+" add group button
+        var addBtn = el.createDiv({ cls: 'wpp-group-add-btn' });
+        obsidian.setIcon(addBtn, 'plus');
+        obsidian.setTooltip(addBtn, L.groupCreateNew, {
+            placement: 'bottom',
+            delay: 0,
+        });
+
+        addBtn.addEventListener('click', function () {
+            new RenameModal(self.app, '', function (name) {
+                if (!name.trim()) {
+                    new obsidian.Notice(L.groupEmptyName);
+                    return;
+                }
+                var existingGroups = self.plugin.data.groups || {};
+                var keys = Object.keys(existingGroups);
+                for (var i = 0; i < keys.length; i++) {
+                    if (existingGroups[keys[i]].name === name.trim()) {
+                        new obsidian.Notice(L.groupDuplicateName);
+                        return;
+                    }
+                }
+                self.plugin.createGroup(name.trim()).then(function () {
+                    self.renderGroupTabs();
+                });
+            }, {
+                title: L.groupCreateNew,
+                placeholder: L.groupCreatePlaceholder,
+                buttonText: L.save,
+            }).open();
+        });
+    };
+
     SessionManagerModal.prototype.onClose = function () {
+        document.body.classList.remove('wpp-session-list-dragging');
         if (this.modalKeyHandler) {
             document.removeEventListener('keydown', this.modalKeyHandler, true);
             this.modalKeyHandler = null;

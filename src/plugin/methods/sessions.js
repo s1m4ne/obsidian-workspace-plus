@@ -33,11 +33,39 @@ function attachSessionMethods(WorkspacePlusPlus) {
         }
     };
 
-    WorkspacePlusPlus.prototype.getOrderedSessions = function () {
+    WorkspacePlusPlus.prototype.getOrderedSessionsUnfiltered = function () {
         var sessions = this.data.sessions;
         return this.data.sessionOrder
             .map(function (id) { return sessions[id]; })
             .filter(function (s) { return !!s; });
+    };
+
+    WorkspacePlusPlus.prototype.getOrderedSessionsForGroup = function (groupId) {
+        var all = this.getOrderedSessionsUnfiltered();
+        var targetGroupId = groupId || null;
+        if (!targetGroupId) return all;
+
+        var sessionGroups = this.data.sessionGroups || {};
+        return all.filter(function (s) {
+            var groups = sessionGroups[s.id];
+            return groups && groups.indexOf(targetGroupId) !== -1;
+        });
+    };
+
+    WorkspacePlusPlus.prototype.getOrderedSessions = function () {
+        return this.getOrderedSessionsForGroup(this.data.activeGroupId);
+    };
+
+    WorkspacePlusPlus.prototype.getSessionIndex = function (sessions, sessionId) {
+        if (!sessions || sessions.length === 0) return 0;
+        for (var i = 0; i < sessions.length; i++) {
+            if (sessions[i] && sessions[i].id === sessionId) return i;
+        }
+        return 0;
+    };
+
+    WorkspacePlusPlus.prototype.getActiveSessionIndex = function (sessions) {
+        return this.getSessionIndex(sessions, this.data.activeSessionId);
     };
 
     WorkspacePlusPlus.prototype.syncSessionCommands = function () {
@@ -94,7 +122,11 @@ function attachSessionMethods(WorkspacePlusPlus) {
 
     WorkspacePlusPlus.prototype.switchRelative = function (offset) {
         var ordered = this.getOrderedSessions();
-        if (ordered.length === 0) return;
+        if (ordered.length === 0) {
+            // Empty group – still show overlay so user can switch groups via Tab
+            this.showSwitchOverlay(ordered, 0);
+            return;
+        }
         var currentIndex = -1;
         for (var i = 0; i < ordered.length; i++) {
             if (ordered[i].id === this.data.activeSessionId) {
@@ -137,6 +169,19 @@ function attachSessionMethods(WorkspacePlusPlus) {
 
     WorkspacePlusPlus.prototype.layoutsEqual = function (a, b) {
         return this.serializeLayout(a) === this.serializeLayout(b);
+    };
+
+    // Compare layouts ignoring volatile scroll/position state (left, top, scroll)
+    WorkspacePlusPlus.prototype.layoutsEqualStructural = function (a, b) {
+        try {
+            var normalize = function (layout) {
+                return JSON.stringify(layout || null)
+                    .replace(/"(?:left|top|scroll)":-?\d+(?:\.\d+)?/g, '"_":0');
+            };
+            return normalize(a) === normalize(b);
+        } catch (e) {
+            return this.layoutsEqual(a, b);
+        }
     };
 
     WorkspacePlusPlus.prototype.isAutoSaveOnSwitchEnabled = function () {
@@ -190,7 +235,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
         }
 
         var currentLayout = this.getCurrentWorkspaceLayout();
-        var changed = !this.layoutsEqual(session.layout, currentLayout);
+        var changed = !this.layoutsEqualStructural(session.layout, currentLayout);
         session.layout = currentLayout;
         if (changed || options.touchModified) {
             session.modified = Date.now();
@@ -200,7 +245,11 @@ function attachSessionMethods(WorkspacePlusPlus) {
         var name = session.name;
         return this.persistData().then(function () {
             if (!options.silent) {
-                new obsidian.Notice(L.savedSession(name));
+                if (changed) {
+                    new obsidian.Notice(L.savedSession(name));
+                } else {
+                    new obsidian.Notice(L.noChanges);
+                }
             }
             return changed;
         });
@@ -216,7 +265,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
         }
 
         var applyLayout = session.layout
-            ? this.app.workspace.changeLayout(session.layout)
+            ? this.app.workspace.changeLayout(session.layout).catch(function () {})
             : Promise.resolve();
         var name = session.name;
 
@@ -236,6 +285,20 @@ function attachSessionMethods(WorkspacePlusPlus) {
         this.statusBarEl.empty();
         var icon = this.statusBarEl.createSpan({ cls: 'wpp-status-icon' });
         obsidian.setIcon(icon, 'panels-left-bottom');
+
+        // Show group name if a group is active
+        var activeGroup = this.getActiveGroup();
+        if (activeGroup) {
+            this.statusBarEl.createSpan({
+                text: activeGroup.name,
+                cls: 'wpp-status-group',
+            });
+            this.statusBarEl.createSpan({
+                text: ' / ',
+                cls: 'wpp-status-separator',
+            });
+        }
+
         this.statusBarEl.createSpan({
             text: session ? session.name : L.noSession,
             cls: 'wpp-status-name',
@@ -256,6 +319,13 @@ function attachSessionMethods(WorkspacePlusPlus) {
         };
         this.data.sessionOrder.push(id);
         this.data.activeSessionId = id;
+
+        // Auto-add to active group
+        if (this.data.activeGroupId) {
+            if (!this.data.sessionGroups) this.data.sessionGroups = {};
+            if (!this.data.sessionGroups[id]) this.data.sessionGroups[id] = [];
+            this.data.sessionGroups[id].push(this.data.activeGroupId);
+        }
 
         this.updateStatusBar();
         this.syncSessionCommands();
@@ -349,7 +419,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
 
             // 3. Apply target layout
             var applyLayout = target.layout
-                ? self.app.workspace.changeLayout(target.layout)
+                ? self.app.workspace.changeLayout(target.layout).catch(function () {})
                 : Promise.resolve();
 
             return applyLayout.then(function () {
@@ -402,6 +472,11 @@ function attachSessionMethods(WorkspacePlusPlus) {
         delete this.data.sessions[sessionId];
         var orderIdx = this.data.sessionOrder.indexOf(sessionId);
         if (orderIdx !== -1) this.data.sessionOrder.splice(orderIdx, 1);
+
+        // Clean up group membership
+        if (this.data.sessionGroups && this.data.sessionGroups[sessionId]) {
+            delete this.data.sessionGroups[sessionId];
+        }
         if (this.data.activeSessionId === sessionId) {
             // Keep same index position; if it was the last, move to index - 1
             var fallbackIdx = Math.min(orderIdx, this.data.sessionOrder.length - 1);
@@ -504,6 +579,10 @@ function attachSessionMethods(WorkspacePlusPlus) {
         this.data.sessions = {};
         this.data.sessionOrder = [];
         this.data.activeSessionId = null;
+        this.data.groups = {};
+        this.data.groupOrder = [];
+        this.data.sessionGroups = {};
+        this.data.activeGroupId = null;
         this.data.sessions[id] = {
             id: id,
             name: this.getDefaultSessionName(),
@@ -538,6 +617,13 @@ function attachSessionMethods(WorkspacePlusPlus) {
         };
         this.data.sessionOrder.push(id);
         this.data.activeSessionId = id;
+
+        // Auto-add to active group
+        if (this.data.activeGroupId) {
+            if (!this.data.sessionGroups) this.data.sessionGroups = {};
+            if (!this.data.sessionGroups[id]) this.data.sessionGroups[id] = [];
+            this.data.sessionGroups[id].push(this.data.activeGroupId);
+        }
 
         // Close only main area leaves (keep sidebars intact)
         var leaves = [];
@@ -576,11 +662,48 @@ function attachSessionMethods(WorkspacePlusPlus) {
         this.data.sessionOrder.push(id);
         this.data.activeSessionId = id;
 
+        // Auto-add to active group
+        if (this.data.activeGroupId) {
+            if (!this.data.sessionGroups) this.data.sessionGroups = {};
+            if (!this.data.sessionGroups[id]) this.data.sessionGroups[id] = [];
+            this.data.sessionGroups[id].push(this.data.activeGroupId);
+        }
+
         this.updateStatusBar();
         this.syncSessionCommands();
         new obsidian.Notice(L.duplicated(name));
         var ordered = this.getOrderedSessions();
         this.showSwitchOverlay(ordered, ordered.length - 1);
+        return this.persistData();
+    };
+
+    /**
+     * Duplicate an arbitrary session by its ID (does NOT switch to the copy).
+     */
+    WorkspacePlusPlus.prototype.duplicateSession = function (sessionId) {
+        var L = i18n.L;
+        var source = this.data.sessions[sessionId];
+        if (!source) return Promise.resolve();
+
+        var name = this.getNextSessionName();
+        var newId = utils.generateId();
+        this.data.sessions[newId] = {
+            id: newId,
+            name: name,
+            modified: Date.now(),
+            layout: JSON.parse(JSON.stringify(source.layout)),
+        };
+        this.data.sessionOrder.push(newId);
+
+        // Copy group memberships
+        var groups = (this.data.sessionGroups || {})[sessionId];
+        if (groups && groups.length > 0) {
+            if (!this.data.sessionGroups) this.data.sessionGroups = {};
+            this.data.sessionGroups[newId] = groups.slice();
+        }
+
+        this.syncSessionCommands();
+        new obsidian.Notice(L.duplicated(name));
         return this.persistData();
     };
 
@@ -613,6 +736,208 @@ function attachSessionMethods(WorkspacePlusPlus) {
         session.layout = this.getCurrentWorkspaceLayout();
         session.modified = Date.now();
         return this.persistData();
+    };
+
+    // --- Group operations ---
+
+    WorkspacePlusPlus.prototype.getOrderedGroups = function () {
+        var groups = this.data.groups || {};
+        return (this.data.groupOrder || [])
+            .map(function (id) { return groups[id]; })
+            .filter(function (g) { return !!g; });
+    };
+
+    WorkspacePlusPlus.prototype.getActiveGroup = function () {
+        if (!this.data.activeGroupId) return null;
+        return (this.data.groups || {})[this.data.activeGroupId] || null;
+    };
+
+    WorkspacePlusPlus.prototype.createGroup = function (name) {
+        var L = i18n.L;
+        var id = utils.generateId();
+        if (!this.data.groups) this.data.groups = {};
+        if (!this.data.groupOrder) this.data.groupOrder = [];
+
+        this.data.groups[id] = { id: id, name: name };
+        this.data.groupOrder.push(id);
+
+        new obsidian.Notice(L.groupCreated(name));
+        return this.persistData().then(function () { return id; });
+    };
+
+    WorkspacePlusPlus.prototype.deleteGroup = function (groupId) {
+        var L = i18n.L;
+        if (!this.data.groups || !this.data.groups[groupId]) return Promise.resolve(false);
+
+        var name = this.data.groups[groupId].name;
+        delete this.data.groups[groupId];
+
+        var orderIdx = (this.data.groupOrder || []).indexOf(groupId);
+        if (orderIdx !== -1) this.data.groupOrder.splice(orderIdx, 1);
+
+        // Remove group from all session memberships
+        var sg = this.data.sessionGroups || {};
+        var keys = Object.keys(sg);
+        for (var i = 0; i < keys.length; i++) {
+            var arr = sg[keys[i]];
+            var idx = arr.indexOf(groupId);
+            if (idx !== -1) {
+                arr.splice(idx, 1);
+                if (arr.length === 0) delete sg[keys[i]];
+            }
+        }
+
+        // Reset active group if deleted
+        if (this.data.activeGroupId === groupId) {
+            this.data.activeGroupId = null;
+        }
+
+        this.updateStatusBar();
+        this.syncSessionCommands();
+        new obsidian.Notice(L.groupDeleted(name));
+        return this.persistData().then(function () { return true; });
+    };
+
+    WorkspacePlusPlus.prototype.renameGroup = function (groupId, newName) {
+        var L = i18n.L;
+        if (!this.data.groups || !this.data.groups[groupId]) return Promise.resolve(false);
+
+        var oldName = this.data.groups[groupId].name;
+        this.data.groups[groupId].name = newName;
+        this.updateStatusBar();
+
+        new obsidian.Notice(L.groupRenamed(oldName, newName));
+        return this.persistData().then(function () { return true; });
+    };
+
+    WorkspacePlusPlus.prototype.setActiveGroup = function (groupId) {
+        var nextGroupId = groupId || null;
+        if (nextGroupId && (!this.data.groups || !this.data.groups[nextGroupId])) return Promise.resolve(false);
+
+        var self = this;
+        var commitGroup = function () {
+            self.data.activeGroupId = nextGroupId;
+            self.syncSessionCommands();
+            self.updateStatusBar();
+            return self.persistData().then(function () { return true; });
+        };
+
+        if (!nextGroupId) {
+            return commitGroup();
+        }
+
+        // Resolve target sessions before mutating group to keep group/session switch atomic.
+        var sessionGroups = this.data.sessionGroups || {};
+        var targetSessions = this.getOrderedSessionsUnfiltered().filter(function (s) {
+            var groups = sessionGroups[s.id];
+            return groups && groups.indexOf(nextGroupId) !== -1;
+        });
+        if (targetSessions.length === 0) {
+            return Promise.resolve(false);
+        }
+
+        var activeId = this.data.activeSessionId;
+        var isInTarget = targetSessions.some(function (s) { return s.id === activeId; });
+        if (isInTarget) {
+            return commitGroup();
+        }
+
+        return this.switchSession(targetSessions[0].id).then(function (switched) {
+            if (!switched) return false;
+            return commitGroup();
+        });
+    };
+
+    WorkspacePlusPlus.prototype.exitGroup = function () {
+        return this.setActiveGroup(null);
+    };
+
+    WorkspacePlusPlus.prototype.getRelativeGroupId = function (baseGroupId, offset) {
+        var ordered = this.getOrderedGroups();
+        if (ordered.length === 0) return undefined;
+
+        var currentId = baseGroupId || null;
+        if (!currentId) {
+            var edgeIdx = offset > 0 ? 0 : ordered.length - 1;
+            return ordered[edgeIdx].id;
+        }
+
+        var currentIdx = -1;
+        for (var i = 0; i < ordered.length; i++) {
+            if (ordered[i].id === currentId) { currentIdx = i; break; }
+        }
+        if (currentIdx === -1) return ordered[0].id;
+
+        var nextIdx = currentIdx + offset;
+        if (nextIdx < 0 || nextIdx >= ordered.length) return null;
+        return ordered[nextIdx].id;
+    };
+
+    WorkspacePlusPlus.prototype.resolveGroupSelection = function (groupId) {
+        var targetGroupId = groupId || null;
+        var targetSessions = this.getOrderedSessionsForGroup(targetGroupId);
+        var self = this;
+
+        return this.setActiveGroup(targetGroupId).then(function (switched) {
+            var resolvedGroupId;
+            if (switched) {
+                resolvedGroupId = self.data.activeGroupId || null;
+            } else if (targetSessions.length === 0) {
+                // Empty group is a view-only selection in overlays/modals.
+                resolvedGroupId = targetGroupId;
+            } else {
+                resolvedGroupId = self.data.activeGroupId || null;
+            }
+            return {
+                switched: switched,
+                targetGroupId: targetGroupId,
+                resolvedGroupId: resolvedGroupId,
+                sessions: self.getOrderedSessionsForGroup(resolvedGroupId),
+            };
+        });
+    };
+
+    WorkspacePlusPlus.prototype.switchGroupRelative = function (offset) {
+        var targetGroupId = this.getRelativeGroupId(this.data.activeGroupId, offset);
+        if (typeof targetGroupId === 'undefined') return Promise.resolve(false);
+        return this.setActiveGroup(targetGroupId);
+    };
+
+    WorkspacePlusPlus.prototype.addSessionToGroup = function (sessionId, groupId) {
+        if (!this.data.sessions[sessionId]) return Promise.resolve(false);
+        if (!this.data.groups || !this.data.groups[groupId]) return Promise.resolve(false);
+
+        if (!this.data.sessionGroups) this.data.sessionGroups = {};
+        if (!this.data.sessionGroups[sessionId]) this.data.sessionGroups[sessionId] = [];
+
+        if (this.data.sessionGroups[sessionId].indexOf(groupId) === -1) {
+            this.data.sessionGroups[sessionId].push(groupId);
+        }
+
+        return this.persistData();
+    };
+
+    WorkspacePlusPlus.prototype.removeSessionFromGroup = function (sessionId, groupId) {
+        if (!this.data.sessionGroups || !this.data.sessionGroups[sessionId]) return Promise.resolve(false);
+
+        var arr = this.data.sessionGroups[sessionId];
+        var idx = arr.indexOf(groupId);
+        if (idx === -1) return Promise.resolve(false);
+
+        arr.splice(idx, 1);
+        if (arr.length === 0) delete this.data.sessionGroups[sessionId];
+
+        return this.persistData();
+    };
+
+    WorkspacePlusPlus.prototype.getGroupSessionIds = function (groupId) {
+        var sg = this.data.sessionGroups || {};
+        var result = [];
+        var keys = Object.keys(sg);
+        for (var i = 0; i < keys.length; i++) {
+            if (sg[keys[i]].indexOf(groupId) !== -1) result.push(keys[i]);
+        }
+        return result;
     };
 }
 

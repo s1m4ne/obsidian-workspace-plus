@@ -13,4 +13,8 @@ module.exports = {
     statusBarQuickSwitcher: false,
     searchOverlayPosition: null,
     searchOverlaySize: null,
+    groups: {},
+    groupOrder: [],
+    sessionGroups: {},
+    activeGroupId: null,
 };
