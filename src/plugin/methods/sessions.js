@@ -877,17 +877,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
         });
         this.data.groupOrder = this.normalizeGroupTabOrder(nextOrder);
 
-        // Remove group from all session memberships
-        var sg = this.data.sessionGroups || {};
-        var keys = Object.keys(sg);
-        for (var i = 0; i < keys.length; i++) {
-            var arr = sg[keys[i]];
-            var idx = arr.indexOf(groupId);
-            if (idx !== -1) {
-                arr.splice(idx, 1);
-                if (arr.length === 0) delete sg[keys[i]];
-            }
-        }
+        this.removeGroupMembershipFromAllSessions(groupId, { persist: false });
 
         // Reset active group if deleted
         if (this.data.activeGroupId === groupId) {
@@ -1005,6 +995,72 @@ function attachSessionMethods(WorkspacePlusPlus) {
         return this.setActiveGroup(targetGroupId);
     };
 
+    WorkspacePlusPlus.prototype.removeGroupMembershipFromAllSessions = function (groupId, options) {
+        if (!groupId) return Promise.resolve(false);
+
+        var sg = this.data.sessionGroups || {};
+        var keys = Object.keys(sg);
+        var changed = false;
+        for (var i = 0; i < keys.length; i++) {
+            var arr = sg[keys[i]];
+            var idx = arr.indexOf(groupId);
+            if (idx !== -1) {
+                arr.splice(idx, 1);
+                changed = true;
+                if (arr.length === 0) delete sg[keys[i]];
+            }
+        }
+
+        if (!changed) return Promise.resolve(false);
+        this.syncSessionCommands();
+        if (options && options.persist === false) return Promise.resolve(true);
+        return this.persistData().then(function () { return true; });
+    };
+
+    WorkspacePlusPlus.prototype.removeAllSessionsFromGroup = function (groupId, options) {
+        if (!groupId) return Promise.resolve(false);
+        var groups = this.data.groups || {};
+        if (!groups[groupId]) return Promise.resolve(false);
+        return this.removeGroupMembershipFromAllSessions(groupId, options);
+    };
+
+    WorkspacePlusPlus.prototype.moveSessionToGroupExclusive = function (sessionId, groupId, options) {
+        if (!this.data.sessions[sessionId]) return Promise.resolve(false);
+        if (!this.data.groups || !this.data.groups[groupId]) return Promise.resolve(false);
+
+        if (!this.data.sessionGroups) this.data.sessionGroups = {};
+        var prev = this.data.sessionGroups[sessionId] || [];
+        var changed = prev.length !== 1 || prev[0] !== groupId;
+
+        if (!changed) return Promise.resolve(false);
+        this.data.sessionGroups[sessionId] = [groupId];
+        this.syncSessionCommands();
+        if (options && options.persist === false) return Promise.resolve(true);
+        return this.persistData().then(function () { return true; });
+    };
+
+    WorkspacePlusPlus.prototype.clearAllGroups = function (options) {
+        var groupCount = Object.keys(this.data.groups || {}).length;
+        var sessionGroupCount = Object.keys(this.data.sessionGroups || {}).length;
+        var hasActiveGroup = !!this.data.activeGroupId;
+        var hadCustomOrder = Array.isArray(this.data.groupOrder)
+            ? this.data.groupOrder.some(function (id) { return id !== '__all__'; })
+            : false;
+        var changed = groupCount > 0 || sessionGroupCount > 0 || hasActiveGroup || hadCustomOrder;
+
+        this.data.sessionGroups = {};
+        this.data.groups = {};
+        this.data.groupOrder = this.normalizeGroupTabOrder([]);
+        this.data.activeGroupId = null;
+
+        this.syncSessionCommands();
+        this.updateStatusBar();
+
+        if (!changed) return Promise.resolve(false);
+        if (options && options.persist === false) return Promise.resolve(true);
+        return this.persistData().then(function () { return true; });
+    };
+
     WorkspacePlusPlus.prototype.addSessionToGroup = function (sessionId, groupId) {
         if (!this.data.sessions[sessionId]) return Promise.resolve(false);
         if (!this.data.groups || !this.data.groups[groupId]) return Promise.resolve(false);
@@ -1012,11 +1068,11 @@ function attachSessionMethods(WorkspacePlusPlus) {
         if (!this.data.sessionGroups) this.data.sessionGroups = {};
         if (!this.data.sessionGroups[sessionId]) this.data.sessionGroups[sessionId] = [];
 
-        if (this.data.sessionGroups[sessionId].indexOf(groupId) === -1) {
-            this.data.sessionGroups[sessionId].push(groupId);
-        }
+        if (this.data.sessionGroups[sessionId].indexOf(groupId) !== -1) return Promise.resolve(false);
 
-        return this.persistData();
+        this.data.sessionGroups[sessionId].push(groupId);
+        this.syncSessionCommands();
+        return this.persistData().then(function () { return true; });
     };
 
     WorkspacePlusPlus.prototype.removeSessionFromGroup = function (sessionId, groupId) {
@@ -1029,7 +1085,8 @@ function attachSessionMethods(WorkspacePlusPlus) {
         arr.splice(idx, 1);
         if (arr.length === 0) delete this.data.sessionGroups[sessionId];
 
-        return this.persistData();
+        this.syncSessionCommands();
+        return this.persistData().then(function () { return true; });
     };
 
     WorkspacePlusPlus.prototype.getGroupSessionIds = function (groupId) {

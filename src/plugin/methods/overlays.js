@@ -306,14 +306,9 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                                 mi.setSection('danger');
                                 mi.onClick(function () {
                                     new modals.ConfirmModal(self.app, L.confirmDeleteAllGroups(allGroupsList.length), function () {
-                                        self.data.sessionGroups = {};
-                                        self.data.groups = {};
-                                        self.setGroupTabOrder([], { persist: false });
-                                        self.data.activeGroupId = null;
-                                        overlayGroupId = null;
-                                        self.searchOverlayViewGroupId = null;
-                                        self.updateStatusBar();
-                                        self.persistData().then(function () {
+                                        return self.clearAllGroups().then(function () {
+                                            overlayGroupId = null;
+                                            self.searchOverlayViewGroupId = null;
                                             new obsidian.Notice(L.deletedAllGroups(allGroupsList.length));
                                             renderGroupTabs();
                                             refreshOrderedSessions();
@@ -398,21 +393,14 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                                     mi.setIcon('log-out');
                                     mi.onClick(function () {
                                         new modals.ConfirmModal(self.app, L.confirmRemoveAllFromGroup(group.name, groupSessionIds.length), function () {
-                                            var sg = self.data.sessionGroups || {};
-                                            var keys = Object.keys(sg);
-                                            for (var k = 0; k < keys.length; k++) {
-                                                var arr = sg[keys[k]];
-                                                var idx = arr.indexOf(group.id);
-                                                if (idx !== -1) {
-                                                    arr.splice(idx, 1);
-                                                    if (arr.length === 0) delete sg[keys[k]];
-                                                }
-                                            }
-                                            self.persistData().then(function () {
+                                            return self.removeAllSessionsFromGroup(group.id).then(function () {
                                                 new obsidian.Notice(L.groupRemovedAllSessions(group.name));
                                                 renderGroupTabs();
                                                 refreshOrderedSessions();
                                             });
+                                        }, {
+                                            confirmText: L.remove,
+                                            confirmClass: 'mod-cta',
                                         }).open();
                                     });
                                 });
@@ -878,22 +866,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                         var groupId = dropTab.dataset.groupId;
                         var sessionName = (self.data.sessions[sessionId] || {}).name || '';
                         var groupName = (self.data.groups[groupId] || {}).name || '';
-                        // Remove from all other groups first (move, not copy)
-                        var sg = self.data.sessionGroups || {};
-                        var oldGroups = (sg[sessionId] || []).slice();
-                        var removeChain = Promise.resolve();
-                        for (var rgi = 0; rgi < oldGroups.length; rgi++) {
-                            if (oldGroups[rgi] !== groupId) {
-                                (function (gid) {
-                                    removeChain = removeChain.then(function () {
-                                        return self.removeSessionFromGroup(sessionId, gid);
-                                    });
-                                })(oldGroups[rgi]);
-                            }
-                        }
-                        removeChain.then(function () {
-                            return self.addSessionToGroup(sessionId, groupId);
-                        }).then(function () {
+                        self.moveSessionToGroupExclusive(sessionId, groupId).then(function () {
                             new obsidian.Notice(i18n.L.groupAddedSession(sessionName, groupName));
                             renderGroupTabs();
                             refreshOrderedSessions();

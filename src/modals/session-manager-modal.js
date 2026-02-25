@@ -406,15 +406,11 @@ var SessionManagerModal = /** @class */ (function (_super) {
     SessionManagerModal.prototype.selectGroup = function (groupId) {
         var self = this;
         var nextGroupId = groupId || null;
-        return this.plugin.setActiveGroup(nextGroupId).then(function (switched) {
-            if (switched) {
-                self.modalGroupId = self.plugin.data.activeGroupId || null;
-            } else {
-                self.modalGroupId = nextGroupId;
-            }
+        return this.plugin.resolveGroupSelection(nextGroupId).then(function (result) {
+            self.modalGroupId = result.resolvedGroupId || null;
             self.renderGroupTabs();
             self.renderList();
-            return switched;
+            return result.switched;
         });
     };
 
@@ -739,22 +735,7 @@ var SessionManagerModal = /** @class */ (function (_super) {
                         var groupId = dropTab.dataset.groupId;
                         var sessionName = (self.plugin.data.sessions[sessionId] || {}).name || '';
                         var groupName = (self.plugin.data.groups[groupId] || {}).name || '';
-                        // Remove from all other groups first (move, not copy)
-                        var sg = self.plugin.data.sessionGroups || {};
-                        var oldGroups = (sg[sessionId] || []).slice();
-                        var removeChain = Promise.resolve();
-                        for (var rgi = 0; rgi < oldGroups.length; rgi++) {
-                            if (oldGroups[rgi] !== groupId) {
-                                (function (gid) {
-                                    removeChain = removeChain.then(function () {
-                                        return self.plugin.removeSessionFromGroup(sessionId, gid);
-                                    });
-                                })(oldGroups[rgi]);
-                            }
-                        }
-                        removeChain.then(function () {
-                            return self.plugin.addSessionToGroup(sessionId, groupId);
-                        }).then(function () {
+                        self.plugin.moveSessionToGroupExclusive(sessionId, groupId).then(function () {
                             new obsidian.Notice(i18n.L.groupAddedSession(sessionName, groupName));
                             self.renderGroupTabs();
                             self.renderList();
@@ -831,12 +812,8 @@ var SessionManagerModal = /** @class */ (function (_super) {
 
             if (selectedGroupId && selectedGroupId !== beforeActiveGroupId) {
                 chain = self.plugin.addSessionToGroup(createdSessionId, selectedGroupId).then(function () {
-                    return self.plugin.setActiveGroup(selectedGroupId).then(function (switched) {
-                        if (switched) {
-                            self.modalGroupId = self.plugin.data.activeGroupId || null;
-                        } else {
-                            self.modalGroupId = selectedGroupId;
-                        }
+                    return self.plugin.resolveGroupSelection(selectedGroupId).then(function (result) {
+                        self.modalGroupId = result.resolvedGroupId || null;
                     });
                 });
             } else {
@@ -1098,14 +1075,9 @@ var SessionManagerModal = /** @class */ (function (_super) {
                             mi.setIcon('folder-x');
                             mi.setSection('danger');
                             mi.onClick(function () {
-                                    new ConfirmModal(self.app, L.confirmDeleteAllGroups(allGroups.length), function () {
-                                        self.plugin.data.sessionGroups = {};
-                                        self.plugin.data.groups = {};
-                                        self.plugin.setGroupTabOrder([], { persist: false });
-                                        self.plugin.data.activeGroupId = null;
+                                new ConfirmModal(self.app, L.confirmDeleteAllGroups(allGroups.length), function () {
+                                    return self.plugin.clearAllGroups().then(function () {
                                         self.modalGroupId = null;
-                                        self.plugin.updateStatusBar();
-                                    self.plugin.persistData().then(function () {
                                         new obsidian.Notice(L.deletedAllGroups(allGroups.length));
                                         self.renderGroupTabs();
                                         self.renderList();
@@ -1189,21 +1161,14 @@ var SessionManagerModal = /** @class */ (function (_super) {
                                 item.setIcon('log-out');
                                 item.onClick(function () {
                                     new ConfirmModal(self.app, L.confirmRemoveAllFromGroup(group.name, groupSessionIds.length), function () {
-                                        var sg = self.plugin.data.sessionGroups || {};
-                                        var keys = Object.keys(sg);
-                                        for (var k = 0; k < keys.length; k++) {
-                                            var arr = sg[keys[k]];
-                                            var idx = arr.indexOf(group.id);
-                                            if (idx !== -1) {
-                                                arr.splice(idx, 1);
-                                                if (arr.length === 0) delete sg[keys[k]];
-                                            }
-                                        }
-                                        self.plugin.persistData().then(function () {
+                                        return self.plugin.removeAllSessionsFromGroup(group.id).then(function () {
                                             new obsidian.Notice(L.groupRemovedAllSessions(group.name));
                                             self.renderGroupTabs();
                                             self.renderList();
                                         });
+                                    }, {
+                                        confirmText: L.remove,
+                                        confirmClass: 'mod-cta',
                                     }).open();
                                 });
                             });
