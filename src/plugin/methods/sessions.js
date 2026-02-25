@@ -747,21 +747,58 @@ function attachSessionMethods(WorkspacePlusPlus) {
             .filter(function (g) { return !!g; });
     };
 
-    WorkspacePlusPlus.prototype.getOrderedGroupTabIds = function () {
-        if (!this.data.groupOrder) this.data.groupOrder = [];
-        if (this.data.groupOrder.indexOf('__all__') === -1) {
-            this.data.groupOrder.unshift('__all__');
+    WorkspacePlusPlus.prototype.normalizeGroupTabOrder = function (order) {
+        var groups = this.data.groups || {};
+        var input = Array.isArray(order) ? order : [];
+        var seen = {};
+        var out = [];
+        var i;
+
+        for (i = 0; i < input.length; i++) {
+            var gid = input[i];
+            if (gid !== '__all__' && !groups[gid]) continue;
+            if (seen[gid]) continue;
+            seen[gid] = true;
+            out.push(gid);
         }
 
-        var groups = this.data.groups || {};
+        if (!seen.__all__) {
+            out.unshift('__all__');
+            seen.__all__ = true;
+        }
+
         var existingIds = Object.keys(groups);
-        for (var i = 0; i < existingIds.length; i++) {
-            if (this.data.groupOrder.indexOf(existingIds[i]) === -1) {
-                this.data.groupOrder.push(existingIds[i]);
+        for (i = 0; i < existingIds.length; i++) {
+            if (seen[existingIds[i]]) continue;
+            seen[existingIds[i]] = true;
+            out.push(existingIds[i]);
+        }
+
+        return out;
+    };
+
+    WorkspacePlusPlus.prototype.getOrderedGroupTabIds = function () {
+        this.data.groupOrder = this.normalizeGroupTabOrder(this.data.groupOrder);
+        return this.data.groupOrder.slice();
+    };
+
+    WorkspacePlusPlus.prototype.setGroupTabOrder = function (order, options) {
+        var prev = Array.isArray(this.data.groupOrder) ? this.data.groupOrder : [];
+        var normalized = this.normalizeGroupTabOrder(order);
+        var changed = prev.length !== normalized.length;
+        if (!changed) {
+            for (var i = 0; i < prev.length; i++) {
+                if (prev[i] !== normalized[i]) {
+                    changed = true;
+                    break;
+                }
             }
         }
+        this.data.groupOrder = normalized;
 
-        return this.data.groupOrder.slice();
+        if (options && options.persist === false) return Promise.resolve(changed);
+        if (!changed) return Promise.resolve(false);
+        return this.persistData().then(function () { return true; });
     };
 
     WorkspacePlusPlus.prototype.getActiveGroup = function () {
@@ -773,10 +810,11 @@ function attachSessionMethods(WorkspacePlusPlus) {
         var L = i18n.L;
         var id = utils.generateId();
         if (!this.data.groups) this.data.groups = {};
-        if (!this.data.groupOrder) this.data.groupOrder = [];
 
         this.data.groups[id] = { id: id, name: name };
-        this.data.groupOrder.push(id);
+        var nextOrder = Array.isArray(this.data.groupOrder) ? this.data.groupOrder.slice() : [];
+        nextOrder.push(id);
+        this.data.groupOrder = this.normalizeGroupTabOrder(nextOrder);
 
         new obsidian.Notice(L.groupCreated(name));
         return this.persistData().then(function () { return id; });
@@ -789,8 +827,10 @@ function attachSessionMethods(WorkspacePlusPlus) {
         var name = this.data.groups[groupId].name;
         delete this.data.groups[groupId];
 
-        var orderIdx = (this.data.groupOrder || []).indexOf(groupId);
-        if (orderIdx !== -1) this.data.groupOrder.splice(orderIdx, 1);
+        var nextOrder = (this.data.groupOrder || []).filter(function (gid) {
+            return gid !== groupId;
+        });
+        this.data.groupOrder = this.normalizeGroupTabOrder(nextOrder);
 
         // Remove group from all session memberships
         var sg = this.data.sessionGroups || {};

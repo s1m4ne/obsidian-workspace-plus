@@ -1055,8 +1055,7 @@ var SessionManagerModal = /** @class */ (function (_super) {
                     for (var ti = 0; ti < tabs.length; ti++) {
                         newOrder.push(tabs[ti].dataset.groupId);
                     }
-                    self.plugin.data.groupOrder = newOrder;
-                    self.plugin.persistData();
+                    self.plugin.setGroupTabOrder(newOrder);
                 }
 
                 document.addEventListener('mousemove', onMove);
@@ -1119,13 +1118,13 @@ var SessionManagerModal = /** @class */ (function (_super) {
                             mi.setIcon('folder-x');
                             mi.setSection('danger');
                             mi.onClick(function () {
-                                new ConfirmModal(self.app, L.confirmDeleteAllGroups(allGroups.length), function () {
-                                    self.plugin.data.sessionGroups = {};
-                                    self.plugin.data.groups = {};
-                                    self.plugin.data.groupOrder = [];
-                                    self.plugin.data.activeGroupId = null;
-                                    self.modalGroupId = null;
-                                    self.plugin.updateStatusBar();
+                                    new ConfirmModal(self.app, L.confirmDeleteAllGroups(allGroups.length), function () {
+                                        self.plugin.data.sessionGroups = {};
+                                        self.plugin.data.groups = {};
+                                        self.plugin.setGroupTabOrder([], { persist: false });
+                                        self.plugin.data.activeGroupId = null;
+                                        self.modalGroupId = null;
+                                        self.plugin.updateStatusBar();
                                     self.plugin.persistData().then(function () {
                                         new obsidian.Notice(L.deletedAllGroups(allGroups.length));
                                         self.renderGroupTabs();

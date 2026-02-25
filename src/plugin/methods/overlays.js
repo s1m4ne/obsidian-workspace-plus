@@ -244,8 +244,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                         for (var ti = 0; ti < tabs.length; ti++) {
                             newOrder.push(tabs[ti].dataset.groupId);
                         }
-                        self.data.groupOrder = newOrder;
-                        self.persistData();
+                        self.setGroupTabOrder(newOrder);
                     }
 
                     document.addEventListener('mousemove', onMove);
@@ -312,7 +311,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                                     new modals.ConfirmModal(self.app, L.confirmDeleteAllGroups(allGroupsList.length), function () {
                                         self.data.sessionGroups = {};
                                         self.data.groups = {};
-                                        self.data.groupOrder = [];
+                                        self.setGroupTabOrder([], { persist: false });
                                         self.data.activeGroupId = null;
                                         overlayGroupId = null;
                                         self.searchOverlayViewGroupId = null;

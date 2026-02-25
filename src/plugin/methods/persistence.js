@@ -451,7 +451,9 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
                     self.data.sessions = imported.sessions;
                     self.data.sessionOrder = imported.sessionOrder;
                     self.data.groups = imported.groups || {};
-                    self.data.groupOrder = imported.groupOrder || [];
+                    self.data.groupOrder = typeof self.normalizeGroupTabOrder === 'function'
+                        ? self.normalizeGroupTabOrder(imported.groupOrder || [])
+                        : (imported.groupOrder || []);
                     self.data.sessionGroups = imported.sessionGroups || {};
                     self.data.activeGroupId = imported.activeGroupId || null;
                     self.syncSessionOrder();
