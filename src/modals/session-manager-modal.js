@@ -5,6 +5,7 @@ var i18n = require('../i18n');
 var ConfirmModal = require('./confirm-modal');
 var RenameModal = require('./rename-modal');
 var formatRelativeTime = require('./format-relative-time');
+var groupTabUi = require('../group-tab-ui');
 
 // ============================================================
 // Session Manager Modal
@@ -905,75 +906,10 @@ var SessionManagerModal = /** @class */ (function (_super) {
 
         // --- Group tab D&D helper ---
         function setupGroupTabDrag(tabEl) {
-            tabEl.addEventListener('mousedown', function (e) {
-                if (e.button !== 0) return;
-                var startX = e.clientX;
-                var dragStarted = false;
-                var cloneEl = null;
-
-                function startDrag(ev) {
-                    dragStarted = true;
-                    var rect = tabEl.getBoundingClientRect();
-                    cloneEl = tabEl.cloneNode(true);
-                    cloneEl.classList.add('wpp-drag-clone');
-                    cloneEl.style.position = 'fixed';
-                    cloneEl.style.width = rect.width + 'px';
-                    cloneEl.style.height = rect.height + 'px';
-                    cloneEl.style.top = rect.top + 'px';
-                    cloneEl.style.left = (ev.clientX - (startX - rect.left)) + 'px';
-                    cloneEl.style.zIndex = '10000';
-                    cloneEl.style.pointerEvents = 'none';
-                    document.body.appendChild(cloneEl);
-                    tabEl.classList.add('is-dragging');
-                    cloneEl._offsetX = startX - rect.left;
-                }
-
-                function onMove(ev) {
-                    if (!dragStarted) {
-                        if (Math.abs(ev.clientX - startX) < 5) return;
-                        startDrag(ev);
-                    }
-                    cloneEl.style.left = (ev.clientX - cloneEl._offsetX) + 'px';
-
-                    // Reorder tabs in DOM based on horizontal position
-                    var tabs = el.querySelectorAll('.wpp-group-tab');
-                    var placed = false;
-                    for (var ti = 0; ti < tabs.length; ti++) {
-                        var sibling = tabs[ti];
-                        if (sibling === tabEl) continue;
-                        var r = sibling.getBoundingClientRect();
-                        if (ev.clientX < r.left + r.width / 2) {
-                            el.insertBefore(tabEl, sibling);
-                            placed = true;
-                            break;
-                        }
-                    }
-                    if (!placed) {
-                        var addBtnEl = el.querySelector('.wpp-group-add-btn');
-                        if (addBtnEl) {
-                            el.insertBefore(tabEl, addBtnEl);
-                        }
-                    }
-                }
-
-                function onUp() {
-                    document.removeEventListener('mousemove', onMove);
-                    document.removeEventListener('mouseup', onUp);
-                    if (!dragStarted) return;
-                    cloneEl.remove();
-                    tabEl.classList.remove('is-dragging');
-
-                    // Read new order from DOM
-                    var tabs = el.querySelectorAll('.wpp-group-tab');
-                    var newOrder = [];
-                    for (var ti = 0; ti < tabs.length; ti++) {
-                        newOrder.push(tabs[ti].dataset.groupId);
-                    }
+            groupTabUi.attachGroupTabDrag(tabEl, el, {
+                onCommit: function (newOrder) {
                     self.plugin.setGroupTabOrder(newOrder);
-                }
-
-                document.addEventListener('mousemove', onMove);
-                document.addEventListener('mouseup', onUp);
+                },
             });
         }
 
@@ -994,68 +930,20 @@ var SessionManagerModal = /** @class */ (function (_super) {
                 // "All" tab right-click context menu
                 allTab.addEventListener('contextmenu', function (e) {
                     e.preventDefault();
-                    var menu = new obsidian.Menu();
-
-                    menu.addItem(function (mi) {
-                        mi.setTitle(L.groupCreateNew);
-                        mi.setIcon('plus');
-                        mi.onClick(function () {
-                            new RenameModal(self.app, '', function (name) {
-                                self.plugin.createGroupValidated(name).then(function (created) {
-                                    if (!created) return;
-                                    self.renderGroupTabs();
-                                });
-                            }, {
-                                title: L.groupCreateNew,
-                                placeholder: L.groupCreatePlaceholder,
-                                buttonText: L.save,
-                                emptyNotice: L.groupEmptyName,
-                            }).open();
-                        });
+                    groupTabUi.openAllGroupsTabContextMenu({
+                        app: self.app,
+                        plugin: self.plugin,
+                        event: e,
+                        onResetViewGroup: function () {
+                            self.modalGroupId = null;
+                        },
+                        onGroupsChanged: function () {
+                            self.renderGroupTabs();
+                        },
+                        onSessionsChanged: function () {
+                            self.renderList();
+                        },
                     });
-
-                    var allGroups = self.plugin.getOrderedGroups();
-                    if (allGroups.length > 0) {
-                        menu.addSeparator();
-                        menu.addItem(function (mi) {
-                            mi.setTitle(L.contextDeleteAllGroups);
-                            mi.setIcon('folder-x');
-                            mi.setSection('danger');
-                            mi.onClick(function () {
-                                new ConfirmModal(self.app, L.confirmDeleteAllGroups(allGroups.length), function () {
-                                    return self.plugin.clearAllGroups().then(function () {
-                                        self.modalGroupId = null;
-                                        new obsidian.Notice(L.deletedAllGroups(allGroups.length));
-                                        self.renderGroupTabs();
-                                        self.renderList();
-                                    });
-                                }).open();
-                            });
-                        });
-                    }
-
-                    var sessionCount = Object.keys(self.plugin.data.sessions).length;
-                    if (sessionCount > 1) {
-                        if (allGroups.length === 0) menu.addSeparator();
-                        menu.addItem(function (mi) {
-                            mi.setTitle(L.contextDeleteAllSessions);
-                            mi.setIcon('trash-2');
-                            mi.setSection('danger');
-                            mi.onClick(function () {
-                                new ConfirmModal(self.app, L.confirmDeleteAllSessions(sessionCount - 1), function () {
-                                    return self.plugin.deleteAllInactiveSessions().then(function (deletedCount) {
-                                        self.renderGroupTabs();
-                                        self.renderList();
-                                        if (deletedCount > 0) {
-                                            new obsidian.Notice(L.deletedAllSessions(deletedCount));
-                                        }
-                                    });
-                                }).open();
-                            });
-                        });
-                    }
-
-                    menu.showAtMouseEvent(e);
                 });
 
                 setupGroupTabDrag(allTab);
@@ -1073,60 +961,23 @@ var SessionManagerModal = /** @class */ (function (_super) {
                     // Right-click context menu
                     tab.addEventListener('contextmenu', function (e) {
                         e.preventDefault();
-                        var menu = new obsidian.Menu();
-                        menu.addItem(function (item) {
-                            item.setTitle(L.groupContextRename);
-                            item.setIcon('pencil');
-                            item.onClick(function () {
-                                new RenameModal(self.app, group.name, function (newName) {
-                                    self.plugin.renameGroupValidated(group.id, newName).then(function (renamed) {
-                                        if (!renamed) return;
-                                        self.renderGroupTabs();
-                                    });
-                                }, {
-                                    title: L.groupContextRename,
-                                    emptyNotice: L.groupEmptyName,
-                                }).open();
-                            });
+                        groupTabUi.openGroupTabContextMenu({
+                            app: self.app,
+                            plugin: self.plugin,
+                            event: e,
+                            group: group,
+                            onDeleteGroup: function (deletedGroupId) {
+                                if (self.modalGroupId === deletedGroupId) {
+                                    self.modalGroupId = self.plugin.data.activeGroupId || null;
+                                }
+                            },
+                            onGroupsChanged: function () {
+                                self.renderGroupTabs();
+                            },
+                            onSessionsChanged: function () {
+                                self.renderList();
+                            },
                         });
-                        var groupSessionIds = self.plugin.getGroupSessionIds(group.id);
-                        if (groupSessionIds.length > 0) {
-                            menu.addItem(function (item) {
-                                item.setTitle(L.groupRemoveAllSessions);
-                                item.setIcon('log-out');
-                                item.onClick(function () {
-                                    new ConfirmModal(self.app, L.confirmRemoveAllFromGroup(group.name, groupSessionIds.length), function () {
-                                        return self.plugin.removeAllSessionsFromGroup(group.id).then(function () {
-                                            new obsidian.Notice(L.groupRemovedAllSessions(group.name));
-                                            self.renderGroupTabs();
-                                            self.renderList();
-                                        });
-                                    }, {
-                                        confirmText: L.remove,
-                                        confirmClass: 'mod-cta',
-                                    }).open();
-                                });
-                            });
-                        }
-
-                        menu.addSeparator();
-                        menu.addItem(function (item) {
-                            item.setTitle(L.groupContextDelete);
-                            item.setIcon('trash-2');
-                            item.setSection('danger');
-                            item.onClick(function () {
-                                new ConfirmModal(self.app, L.confirmDeleteGroup(group.name), function () {
-                                    self.plugin.deleteGroup(group.id).then(function () {
-                                        if (self.modalGroupId === group.id) {
-                                            self.modalGroupId = self.plugin.data.activeGroupId || null;
-                                        }
-                                        self.renderGroupTabs();
-                                        self.renderList();
-                                    });
-                                }).open();
-                            });
-                        });
-                        menu.showAtMouseEvent(e);
                     });
 
                     setupGroupTabDrag(tab);
@@ -1143,17 +994,9 @@ var SessionManagerModal = /** @class */ (function (_super) {
         });
 
         addBtn.addEventListener('click', function () {
-            new RenameModal(self.app, '', function (name) {
-                self.plugin.createGroupValidated(name).then(function (created) {
-                    if (!created) return;
-                    self.renderGroupTabs();
-                });
-            }, {
-                title: L.groupCreateNew,
-                placeholder: L.groupCreatePlaceholder,
-                buttonText: L.save,
-                emptyNotice: L.groupEmptyName,
-            }).open();
+            groupTabUi.openCreateGroupPrompt(self.app, self.plugin, function () {
+                self.renderGroupTabs();
+            });
         });
     };
 
