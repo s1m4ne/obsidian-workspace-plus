@@ -10,6 +10,7 @@ var attachHotkeyMethods = require('./plugin/methods/hotkeys');
 var attachOverlayMethods = require('./plugin/methods/overlays');
 var attachPersistenceMethods = require('./plugin/methods/persistence');
 var attachSessionMethods = require('./plugin/methods/sessions');
+var utils = require('./utils');
 
 i18n.resolveLocale();
 
@@ -31,6 +32,7 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
             self.data = Object.assign({}, DEFAULT_DATA, saved || {});
             if (!self.data.sessions) self.data.sessions = {};
             if (!self.data.sessionOrder) self.data.sessionOrder = [];
+            self.normalizeGroupFeatureState();
             self.isSwitchingSession = false;
             self.pendingSwitchRequest = null;
             self.switchLockAt = 0;
@@ -54,10 +56,7 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
                     return;
                 }
 
-                var isMac = typeof navigator !== 'undefined'
-                    && typeof navigator.platform === 'string'
-                    && navigator.platform.indexOf('Mac') !== -1;
-                var isSaveClick = isMac ? evt.metaKey : evt.ctrlKey;
+                var isSaveClick = utils.isModPressed(evt);
                 if (isSaveClick) {
                     evt.preventDefault();
                     evt.stopPropagation();
@@ -96,6 +95,7 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
         this.hideSearchOverlay();
         this.pendingSwitchRequest = null;
         this.isSwitchingSession = false;
+        return this.flushPendingPersistence();
     };
 
     return WorkspacePlusPlus;

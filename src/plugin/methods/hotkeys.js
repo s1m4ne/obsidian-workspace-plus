@@ -1,10 +1,12 @@
 'use strict';
 
+var utils = require('../../utils');
+
 function attachHotkeyMethods(WorkspacePlusPlus) {
     // --- Hotkey helpers ---
 
     WorkspacePlusPlus.prototype.formatHotkey = function (hotkey) {
-        var isMac = navigator.platform.indexOf('Mac') !== -1;
+        var isMac = utils.isMacPlatform();
         var parts = [];
         var mods = hotkey.modifiers || [];
         for (var i = 0; i < mods.length; i++) {

@@ -5,6 +5,8 @@ var i18n = require('../i18n');
 var ConfirmModal = require('./confirm-modal');
 var RenameModal = require('./rename-modal');
 var formatRelativeTime = require('./format-relative-time');
+var groupTabUi = require('../group-tab-ui');
+var utils = require('../utils');
 
 // ============================================================
 // Session Manager Modal
@@ -50,6 +52,9 @@ var SessionManagerModal = /** @class */ (function (_super) {
         });
 
         var self = this;
+        this.modalGroupId = this.plugin.isGroupFeatureEnabled()
+            ? (this.plugin.data.activeGroupId || null)
+            : null;
         saveBtn.addEventListener('click', function () { self.onSave(); });
         this.nameInput.addEventListener('keydown', function (e) {
             if (e.key === 'Enter' && !e.isComposing) self.onSave();
@@ -66,13 +71,7 @@ var SessionManagerModal = /** @class */ (function (_super) {
         this.filterInput.addEventListener('input', function () {
             self.filterQuery = self.filterInput.value || '';
             var sessions = self.getNavigationSessions();
-            var activeIdx = -1;
-            for (var i = 0; i < sessions.length; i++) {
-                if (sessions[i].id === self.plugin.data.activeSessionId) {
-                    activeIdx = i;
-                    break;
-                }
-            }
+            var activeIdx = self.plugin.findActiveSessionIndex(sessions);
             if (document.activeElement === self.filterInput) {
                 self.focusedIndex = -1;
             } else {
@@ -80,6 +79,10 @@ var SessionManagerModal = /** @class */ (function (_super) {
             }
             self.renderList();
         });
+
+        // Group tabs
+        this.groupTabsRow = contentEl.createDiv({ cls: 'wpp-group-tabs-row' });
+        this.renderGroupTabs();
 
         // Focus & selection state
         this.focusedIndex = -1;
@@ -102,12 +105,7 @@ var SessionManagerModal = /** @class */ (function (_super) {
 
         // Set initial focus to active session
         var ordered = this.getNavigationSessions();
-        for (var fi = 0; fi < ordered.length; fi++) {
-            if (ordered[fi].id === this.plugin.data.activeSessionId) {
-                this.focusedIndex = fi;
-                break;
-            }
-        }
+        this.focusedIndex = this.plugin.findActiveSessionIndex(ordered);
         this.updateFocusUI();
 
         // Hotkey footer
@@ -117,6 +115,9 @@ var SessionManagerModal = /** @class */ (function (_super) {
             footer.createDiv({ text: L.cmdNext + '  ' + nextKey });
         }
         footer.createDiv({ text: L.footerDragReorder });
+        if (this.plugin.getOrderedGroups().length > 0) {
+            footer.createDiv({ text: L.footerDragToGroup });
+        }
 
         // Keyboard handling: Enter activation + directional arrow traversal.
         this.modalKeyHandler = function (e) {
@@ -379,11 +380,40 @@ var SessionManagerModal = /** @class */ (function (_super) {
     };
 
     SessionManagerModal.prototype.getVisibleSessions = function () {
-        var sessions = this.plugin.getOrderedSessions();
+        var sessions = this.plugin.getOrderedSessionsForGroup(this.getModalGroupId());
         var query = (this.filterQuery || '').trim().toLowerCase();
         if (!query) return sessions;
         return sessions.filter(function (s) {
             return (s.name || '').toLowerCase().indexOf(query) !== -1;
+        });
+    };
+
+    SessionManagerModal.prototype.getModalGroupId = function () {
+        if (!this.plugin.isGroupFeatureEnabled()) {
+            this.modalGroupId = null;
+            return null;
+        }
+        var groups = this.plugin.data.groups || {};
+        if (this.modalGroupId && !groups[this.modalGroupId]) {
+            this.modalGroupId = this.plugin.data.activeGroupId || null;
+        }
+        return this.modalGroupId || null;
+    };
+
+    SessionManagerModal.prototype.selectGroup = function (groupId) {
+        if (!this.plugin.isGroupFeatureEnabled()) {
+            this.modalGroupId = null;
+            this.renderGroupTabs();
+            this.renderList();
+            return Promise.resolve(false);
+        }
+        var self = this;
+        var nextGroupId = groupId || null;
+        return this.plugin.resolveGroupSelection(nextGroupId).then(function (result) {
+            self.modalGroupId = result.resolvedGroupId || null;
+            self.renderGroupTabs();
+            self.renderList();
+            return result.switched;
         });
     };
 
@@ -395,7 +425,8 @@ var SessionManagerModal = /** @class */ (function (_super) {
         var L = i18n.L;
         this.listEl.empty();
         var sessions = this.getVisibleSessions();
-        var ordered = this.plugin.getOrderedSessions();
+        var selectedGroupId = this.getModalGroupId();
+        var ordered = this.plugin.getOrderedSessionsForGroup(selectedGroupId);
         var orderIndex = {};
         for (var oi = 0; oi < ordered.length; oi++) {
             orderIndex[ordered[oi].id] = oi;
@@ -404,7 +435,11 @@ var SessionManagerModal = /** @class */ (function (_super) {
             this.renderSessionItem(sessions[i], i, orderIndex[sessions[i].id]);
         }
         if (sessions.length === 0) {
-            this.listEl.createDiv({ text: L.noFilteredSessions, cls: 'wpp-empty-state' });
+            var isGroupEmpty = !!selectedGroupId && ordered.length === 0;
+            var emptyMsg = isGroupEmpty
+                ? L.noGroupSessions : L.noFilteredSessions;
+            var emptyEl = this.listEl.createDiv({ text: emptyMsg, cls: 'wpp-empty-state' });
+            if (isGroupEmpty) emptyEl.addClass('wpp-empty-state-group');
         } else {
             this.setupDragAndDrop();
         }
@@ -439,8 +474,7 @@ var SessionManagerModal = /** @class */ (function (_super) {
             self.updateFocusUI();
 
             if (e.target.closest('button, .wpp-icon-btn')) return;
-            var isMac = navigator.platform.indexOf('Mac') !== -1;
-            var cmdKey = isMac ? e.metaKey : e.ctrlKey;
+            var cmdKey = utils.isModPressed(e);
             if (cmdKey) {
                 // Cmd+Click: toggle selection
                 if (self.selectedIds.has(session.id)) {
@@ -454,6 +488,71 @@ var SessionManagerModal = /** @class */ (function (_super) {
                 self.selectedIds.clear();
                 self.updateSelectionUI();
             }
+        });
+
+        // Right-click context menu
+        item.addEventListener('contextmenu', function (e) {
+            e.preventDefault();
+            var menu = new obsidian.Menu();
+
+            // Switch
+            if (!isActive) {
+                menu.addItem(function (mi) {
+                    mi.setTitle(L.contextSwitchSession);
+                    mi.setIcon('arrow-right');
+                    mi.onClick(function () { self.onLoad(session.id); });
+                });
+            }
+
+            // Rename
+            menu.addItem(function (mi) {
+                mi.setTitle(L.contextRenameSession);
+                mi.setIcon('pencil');
+                mi.onClick(function () { self.onRename(session); });
+            });
+
+            // Duplicate
+            menu.addItem(function (mi) {
+                mi.setTitle(L.contextDuplicateSession);
+                mi.setIcon('copy');
+                mi.onClick(function () {
+                    self.plugin.duplicateSession(session.id).then(function () {
+                        self.renderList();
+                    });
+                });
+            });
+
+            // Remove from group (only when a group is active)
+            var selectedGroupId = self.getModalGroupId();
+            if (selectedGroupId) {
+                menu.addItem(function (mi) {
+                    mi.setTitle(L.groupRemoveFromGroup);
+                    mi.setIcon('log-out');
+                    mi.onClick(function () {
+                        var activeGid = self.getModalGroupId();
+                        if (!activeGid) return;
+                        var gName = (self.plugin.data.groups[activeGid] || {}).name || '';
+                        self.plugin.removeSessionFromGroup(session.id, activeGid).then(function () {
+                            new obsidian.Notice(L.groupRemovedSession(session.name, gName));
+                            self.renderGroupTabs();
+                            self.renderList();
+                        });
+                    });
+                });
+            }
+
+            // Delete (with separator, hidden for last session)
+            if (Object.keys(self.plugin.data.sessions).length > 1) {
+                menu.addSeparator();
+                menu.addItem(function (mi) {
+                    mi.setTitle(L.contextDeleteSession);
+                    mi.setIcon('trash-2');
+                    mi.setSection('danger');
+                    mi.onClick(function () { self.onDelete(session); });
+                });
+            }
+
+            menu.showAtMouseEvent(e);
         });
 
         // Hotkey hint
@@ -514,7 +613,7 @@ var SessionManagerModal = /** @class */ (function (_super) {
                 cls: 'wpp-icon-btn',
                 attr: { 'aria-label': L.delete, role: 'button', tabindex: '-1', 'data-action-key': 'delete' },
             });
-            obsidian.setIcon(deleteBtn, 'x');
+            obsidian.setIcon(deleteBtn, 'trash-2');
             deleteBtn.addEventListener('click', function (e) {
                 e.stopPropagation();
                 self.onDelete(session);
@@ -530,8 +629,7 @@ var SessionManagerModal = /** @class */ (function (_super) {
             item.addEventListener('mousedown', function (e) {
                 if (e.button !== 0) return;
                 if (e.target.closest('button, input, .wpp-icon-btn')) return;
-                var isMac = navigator.platform.indexOf('Mac') !== -1;
-                if (isMac ? e.metaKey : e.ctrlKey) return;
+                if (utils.isModPressed(e)) return;
 
                 var startX = e.clientX;
                 var startY = e.clientY;
@@ -541,6 +639,7 @@ var SessionManagerModal = /** @class */ (function (_super) {
 
                 function startDrag(ev) {
                     dragStarted = true;
+                    document.body.classList.add('wpp-session-list-dragging');
                     var rect = item.getBoundingClientRect();
                     var offsetX = startX - rect.left;
                     var offsetY = startY - rect.top;
@@ -562,6 +661,30 @@ var SessionManagerModal = /** @class */ (function (_super) {
                     cloneEl._offsetY = offsetY;
                 }
 
+                function updateGroupDropTarget(ev) {
+                    var tabs = self.groupTabsRow.querySelectorAll('.wpp-group-tab');
+                    var hoveredTab = null;
+                    for (var t = 0; t < tabs.length; t++) {
+                        var tr = tabs[t].getBoundingClientRect();
+                        if (ev.clientX >= tr.left && ev.clientX <= tr.right &&
+                            ev.clientY >= tr.top && ev.clientY <= tr.bottom) {
+                            hoveredTab = tabs[t];
+                            break;
+                        }
+                    }
+                    for (var t2 = 0; t2 < tabs.length; t2++) {
+                        tabs[t2].classList.toggle('wpp-group-drop-target', tabs[t2] === hoveredTab);
+                    }
+                    return hoveredTab;
+                }
+
+                function clearGroupDropTargets() {
+                    var tabs = self.groupTabsRow.querySelectorAll('.wpp-group-tab');
+                    for (var t = 0; t < tabs.length; t++) {
+                        tabs[t].classList.remove('wpp-group-drop-target');
+                    }
+                }
+
                 function onMouseMove(ev) {
                     if (!dragStarted) {
                         var dx = ev.clientX - startX;
@@ -572,6 +695,10 @@ var SessionManagerModal = /** @class */ (function (_super) {
 
                     cloneEl.style.top = (ev.clientY - cloneEl._offsetY) + 'px';
                     cloneEl.style.left = (ev.clientX - cloneEl._offsetX) + 'px';
+
+                    // Check if hovering over a group tab
+                    var hoverTab = updateGroupDropTarget(ev);
+                    if (hoverTab) return; // Don't reorder while over group tabs
 
                     var siblings = self.listEl.querySelectorAll('.wpp-session-item');
                     var placed = false;
@@ -590,22 +717,54 @@ var SessionManagerModal = /** @class */ (function (_super) {
                     }
                 }
 
-                function onMouseUp() {
+                function onMouseUp(ev) {
                     document.removeEventListener('mousemove', onMouseMove);
                     document.removeEventListener('mouseup', onMouseUp);
+                    document.body.classList.remove('wpp-session-list-dragging');
 
                     if (!dragStarted) return;
 
                     cloneEl.remove();
                     draggedEl.classList.remove('is-dragging');
 
+                    // Check if dropped on a group tab
+                    var dropTab = updateGroupDropTarget(ev);
+                    clearGroupDropTargets();
+
+                    if (dropTab && dropTab.dataset.groupId && dropTab.dataset.groupId !== '__all__') {
+                        var sessionId = draggedEl.dataset.sessionId;
+                        var groupId = dropTab.dataset.groupId;
+                        var sessionName = (self.plugin.data.sessions[sessionId] || {}).name || '';
+                        var groupName = (self.plugin.data.groups[groupId] || {}).name || '';
+                        self.plugin.moveSessionToGroupExclusive(sessionId, groupId).then(function () {
+                            new obsidian.Notice(i18n.L.groupAddedSession(sessionName, groupName));
+                            self.renderGroupTabs();
+                            self.renderList();
+                        });
+                        return;
+                    } else {
+                        var currentGroupId = self.getModalGroupId();
+                        if (dropTab && dropTab.dataset.groupId === '__all__' && currentGroupId) {
+                        // Drop on "All" tab while viewing a group → remove from group
+                            var rmSessionId = draggedEl.dataset.sessionId;
+                            var rmGroupId = currentGroupId;
+                            var rmSessionName = (self.plugin.data.sessions[rmSessionId] || {}).name || '';
+                            var rmGroupName = (self.plugin.data.groups[rmGroupId] || {}).name || '';
+                            self.plugin.removeSessionFromGroup(rmSessionId, rmGroupId).then(function () {
+                                new obsidian.Notice(i18n.L.groupRemovedSession(rmSessionName, rmGroupName));
+                                self.renderGroupTabs();
+                                self.renderList();
+                            });
+                            return;
+                        }
+                    }
+
                     // Read order from DOM
-                    var newOrder = [];
+                    var newVisibleOrder = [];
                     var items = self.listEl.querySelectorAll('.wpp-session-item');
                     items.forEach(function (el) {
-                        newOrder.push(el.dataset.sessionId);
+                        newVisibleOrder.push(el.dataset.sessionId);
                     });
-                    self.plugin.data.sessionOrder = newOrder;
 
                     // Update index labels in-place
                     items.forEach(function (el, i) {
@@ -623,7 +782,7 @@ var SessionManagerModal = /** @class */ (function (_super) {
                         movedRef.classList.remove('wpp-just-moved');
                     }, 600);
 
-                    self.plugin.persistData();
+                    self.plugin.setSessionOrderFromVisible(newVisibleOrder, { syncCommands: false });
                 }
 
                 document.addEventListener('mousemove', onMouseMove);
@@ -635,22 +794,15 @@ var SessionManagerModal = /** @class */ (function (_super) {
     SessionManagerModal.prototype.onSave = function () {
         var L = i18n.L;
         var self = this;
-        var name = this.nameInput.value.trim();
-        if (!name) {
-            new obsidian.Notice(L.emptyName);
-            return;
-        }
-        // Check duplicate
-        var exists = Object.values(this.plugin.data.sessions)
-            .some(function (s) { return s.name === name; });
-        if (exists) {
-            new obsidian.Notice(L.duplicateName);
-            return;
-        }
-        this.plugin.createSession(name).then(function () {
+        var selectedGroupId = this.getModalGroupId();
+        this.plugin.createSessionForViewedGroup(this.nameInput.value, selectedGroupId).then(function (result) {
+            if (!result || !result.created) return;
+            var createdName = result.name;
+            self.modalGroupId = result.viewGroupId || null;
             self.nameInput.value = '';
+            self.renderGroupTabs();
             self.renderList();
-            new obsidian.Notice(L.created(name));
+            new obsidian.Notice(L.created(createdName));
         });
     };
 
@@ -666,20 +818,12 @@ var SessionManagerModal = /** @class */ (function (_super) {
         var L = i18n.L;
         var self = this;
         new RenameModal(this.app, session.name, function (newName) {
-            var exists = Object.values(self.plugin.data.sessions)
-                .some(function (s) { return s.name === newName && s.id !== session.id; });
-            if (exists) {
-                new obsidian.Notice(L.duplicateName);
-                return;
-            }
-            var oldName = session.name;
-            session.name = newName;
-            session.modified = Date.now();
-            self.plugin.updateStatusBar();
-            self.plugin.persistData().then(function () {
+            self.plugin.renameSessionById(session.id, newName).then(function (renamed) {
+                if (!renamed) return;
                 self.renderList();
-                new obsidian.Notice(L.renamed(oldName, newName));
             });
+        }, {
+            emptyNotice: L.emptyName,
         }).open();
     };
 
@@ -760,7 +904,121 @@ var SessionManagerModal = /** @class */ (function (_super) {
         }).open();
     };
 
+    SessionManagerModal.prototype.renderGroupTabs = function () {
+        var L = i18n.L;
+        var self = this;
+        var el = this.groupTabsRow;
+        while (el.firstChild) el.removeChild(el.firstChild);
+
+        if (!this.plugin.isGroupFeatureEnabled()) {
+            el.style.display = 'none';
+            return;
+        }
+        el.style.display = '';
+
+        var groups = this.plugin.data.groups || {};
+        var selectedGroupId = this.getModalGroupId();
+
+        var groupOrder = this.plugin.getOrderedGroupTabIds();
+
+        // --- Group tab D&D helper ---
+        function setupGroupTabDrag(tabEl) {
+            groupTabUi.attachGroupTabDrag(tabEl, el, {
+                onCommit: function (newOrder) {
+                    self.plugin.setGroupTabOrder(newOrder);
+                },
+            });
+        }
+
+        // Render tabs in groupOrder
+        for (var gi = 0; gi < groupOrder.length; gi++) {
+            var gid = groupOrder[gi];
+
+            if (gid === '__all__') {
+                // "All" tab
+                var allTab = el.createDiv({ cls: 'wpp-group-tab' });
+                if (!selectedGroupId) allTab.classList.add('is-active');
+                allTab.textContent = L.groupAll;
+                allTab.dataset.groupId = '__all__';
+                allTab.addEventListener('click', function () {
+                    self.selectGroup(null);
+                });
+
+                // "All" tab right-click context menu
+                allTab.addEventListener('contextmenu', function (e) {
+                    e.preventDefault();
+                    groupTabUi.openAllGroupsTabContextMenu({
+                        app: self.app,
+                        plugin: self.plugin,
+                        event: e,
+                        onResetViewGroup: function () {
+                            self.modalGroupId = null;
+                        },
+                        onGroupsChanged: function () {
+                            self.renderGroupTabs();
+                        },
+                        onSessionsChanged: function () {
+                            self.renderList();
+                        },
+                    });
+                });
+
+                setupGroupTabDrag(allTab);
+
+            } else if (groups[gid]) {
+                // Group tab
+                (function (group) {
+                    var tab = el.createDiv({ cls: 'wpp-group-tab' });
+                    if (selectedGroupId === group.id) tab.classList.add('is-active');
+                    tab.textContent = group.name;
+                    tab.dataset.groupId = group.id;
+                    tab.addEventListener('click', function () {
+                        self.selectGroup(group.id);
+                    });
+                    // Right-click context menu
+                    tab.addEventListener('contextmenu', function (e) {
+                        e.preventDefault();
+                        groupTabUi.openGroupTabContextMenu({
+                            app: self.app,
+                            plugin: self.plugin,
+                            event: e,
+                            group: group,
+                            onDeleteGroup: function (deletedGroupId) {
+                                if (self.modalGroupId === deletedGroupId) {
+                                    self.modalGroupId = self.plugin.data.activeGroupId || null;
+                                }
+                            },
+                            onGroupsChanged: function () {
+                                self.renderGroupTabs();
+                            },
+                            onSessionsChanged: function () {
+                                self.renderList();
+                            },
+                        });
+                    });
+
+                    setupGroupTabDrag(tab);
+                })(groups[gid]);
+            }
+        }
+
+        // "+" add group button
+        var addBtn = el.createDiv({ cls: 'wpp-group-add-btn' });
+        obsidian.setIcon(addBtn, 'plus');
+        obsidian.setTooltip(addBtn, L.groupCreateNew, {
+            placement: 'bottom',
+            delay: 0,
+        });
+
+        addBtn.addEventListener('click', function () {
+            groupTabUi.openCreateGroupPrompt(self.app, self.plugin, function () {
+                self.renderGroupTabs();
+            });
+        });
+    };
+
     SessionManagerModal.prototype.onClose = function () {
+        document.body.classList.remove('wpp-session-list-dragging');
         if (this.modalKeyHandler) {
             document.removeEventListener('keydown', this.modalKeyHandler, true);
             this.modalKeyHandler = null;

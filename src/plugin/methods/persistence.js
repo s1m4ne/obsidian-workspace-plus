@@ -14,6 +14,10 @@ var SESSION_KEYS = [
     'activeSessionId',
     'sessions',
     'sessionOrder',
+    'groups',
+    'groupOrder',
+    'sessionGroups',
+    'activeGroupId',
 ];
 
 var SETTINGS_KEYS = [
@@ -24,6 +28,7 @@ var SETTINGS_KEYS = [
     'autoSaveOnSwitch',
     'warnOnUnsavedSwitch',
     'statusBarQuickSwitcher',
+    'groupFeatureEnabled',
     'searchOverlayPosition',
     'searchOverlaySize',
 ];
@@ -53,6 +58,13 @@ function hasNonEmptySessions(data) {
         && typeof data.sessions === 'object'
         && Object.keys(data.sessions).length > 0
     );
+}
+
+function getPersistStamp(data) {
+    if (!data || typeof data !== 'object') return 0;
+    var stamp = data._wppSavedAt;
+    if (typeof stamp !== 'number' || !isFinite(stamp)) return 0;
+    return stamp;
 }
 
 function pad2(n) {
@@ -141,10 +153,55 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
         if (active && !sessions[active]) active = null;
         if (!active && order.length > 0) active = order[0];
 
+        // --- Normalize group data ---
+        var groups = (raw && raw.groups && typeof raw.groups === 'object') ? raw.groups : {};
+        var rawGroupOrder = Array.isArray(raw && raw.groupOrder) ? raw.groupOrder : Object.keys(groups);
+        var seenGroups = {};
+        var groupOrder = [];
+
+        for (i = 0; i < rawGroupOrder.length; i++) {
+            var gid = rawGroupOrder[i];
+            if (gid !== '__all__' && !groups[gid]) continue;
+            if (seenGroups[gid]) continue;
+            seenGroups[gid] = true;
+            groupOrder.push(gid);
+        }
+
+        var allGroupIds = Object.keys(groups);
+        for (i = 0; i < allGroupIds.length; i++) {
+            if (seenGroups[allGroupIds[i]]) continue;
+            seenGroups[allGroupIds[i]] = true;
+            groupOrder.push(allGroupIds[i]);
+        }
+
+        var sessionGroups = (raw && raw.sessionGroups && typeof raw.sessionGroups === 'object')
+            ? raw.sessionGroups : {};
+
+        // Clean up references to non-existent sessions or groups
+        var sessionGroupsCleaned = {};
+        var sgKeys = Object.keys(sessionGroups);
+        for (i = 0; i < sgKeys.length; i++) {
+            var sid = sgKeys[i];
+            if (!sessions[sid]) continue;
+            var gids = Array.isArray(sessionGroups[sid]) ? sessionGroups[sid] : [];
+            var validGids = [];
+            for (var k = 0; k < gids.length; k++) {
+                if (groups[gids[k]]) validGids.push(gids[k]);
+            }
+            if (validGids.length > 0) sessionGroupsCleaned[sid] = validGids;
+        }
+
+        var activeGroupId = (raw && typeof raw.activeGroupId === 'string' && groups[raw.activeGroupId])
+            ? raw.activeGroupId : null;
+
         return {
             activeSessionId: active,
             sessions: sessions,
             sessionOrder: order,
+            groups: groups,
+            groupOrder: groupOrder,
+            sessionGroups: sessionGroupsCleaned,
+            activeGroupId: activeGroupId,
         };
     };
 
@@ -162,6 +219,17 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
 
     WorkspacePlusPlus.prototype.ensureStorageDir = function () {
         return this.ensureDir(this.getStorageDirPath());
+    };
+
+    WorkspacePlusPlus.prototype.getFileMtime = function (path) {
+        return this.app.vault.adapter.stat(path)
+            .then(function (stat) {
+                if (!stat || typeof stat.mtime !== 'number') return 0;
+                return stat.mtime;
+            })
+            .catch(function () {
+                return 0;
+            });
     };
 
     WorkspacePlusPlus.prototype.readJsonIfExists = function (path) {
@@ -383,6 +451,12 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
                     self.data.activeSessionId = imported.activeSessionId;
                     self.data.sessions = imported.sessions;
                     self.data.sessionOrder = imported.sessionOrder;
+                    self.data.groups = imported.groups || {};
+                    self.data.groupOrder = typeof self.normalizeGroupTabOrder === 'function'
+                        ? self.normalizeGroupTabOrder(imported.groupOrder || [])
+                        : (imported.groupOrder || []);
+                    self.data.sessionGroups = imported.sessionGroups || {};
+                    self.data.activeGroupId = imported.activeGroupId || null;
                     self.syncSessionOrder();
                     self.updateStatusBar();
                     self.syncSessionCommands();
@@ -397,10 +471,16 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
             });
     };
 
-    WorkspacePlusPlus.prototype.persistData = function () {
+    WorkspacePlusPlus.prototype.persistDataImmediate = function () {
         var self = this;
         var sessionData = this.extractSessionData(this.data);
         var settingsData = Object.assign({}, this.getDefaultSettingsData(), this.extractSettingsData(this.data));
+        var now = Date.now();
+        if (typeof this._lastPersistStamp === 'number' && now <= this._lastPersistStamp) {
+            now = this._lastPersistStamp + 1;
+        }
+        this._lastPersistStamp = now;
+        sessionData._wppSavedAt = now;
 
         if (this.isUsingLocalSettings()) {
             if (!this.globalSettings) {
@@ -427,6 +507,31 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
             });
     };
 
+    WorkspacePlusPlus.prototype.persistData = function () {
+        var self = this;
+        if (!this._persistQueue) {
+            this._persistQueue = Promise.resolve();
+        }
+
+        var next = this._persistQueue
+            .catch(function () {
+                return;
+            })
+            .then(function () {
+                return self.persistDataImmediate();
+            });
+
+        this._persistQueue = next;
+        return next;
+    };
+
+    WorkspacePlusPlus.prototype.flushPendingPersistence = function () {
+        if (!this._persistQueue) return Promise.resolve();
+        return this._persistQueue.catch(function () {
+            return;
+        });
+    };
+
     WorkspacePlusPlus.prototype.loadLocalSettingsData = function () {
         var L = i18n.L;
         return this.readJsonIfExists(this.getLocalSettingsPath()).then(function (res) {
@@ -442,22 +547,51 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
     WorkspacePlusPlus.prototype.loadSessionDataFromStorage = function () {
         var self = this;
         var L = i18n.L;
-        return this.readJsonIfExists(this.getSessionsPath()).then(function (mainRes) {
-            if (mainRes.exists && !mainRes.error && hasSessionShape(mainRes.data)) {
+        var mainPath = this.getSessionsPath();
+        var backupPath = this.getSessionsBackupPath();
+
+        return Promise.all([
+            this.readJsonIfExists(mainPath),
+            this.readJsonIfExists(backupPath),
+            this.getFileMtime(mainPath),
+            this.getFileMtime(backupPath),
+        ]).then(function (parts) {
+            var mainRes = parts[0];
+            var backupRes = parts[1];
+            var mainMtime = parts[2] || 0;
+            var backupMtime = parts[3] || 0;
+
+            var mainValid = mainRes.exists && !mainRes.error && hasSessionShape(mainRes.data);
+            var backupValid = backupRes.exists && !backupRes.error && hasSessionShape(backupRes.data);
+            var mainStamp = mainValid ? getPersistStamp(mainRes.data) : 0;
+            var backupStamp = backupValid ? getPersistStamp(backupRes.data) : 0;
+
+            if (!mainValid && !backupValid) return null;
+
+            var useBackup = false;
+            if (!mainValid && backupValid) {
+                useBackup = true;
+            } else if (mainValid && backupValid) {
+                if (backupStamp > mainStamp) {
+                    useBackup = true;
+                } else if (backupStamp === mainStamp && backupMtime > mainMtime) {
+                    // If backup is newer (e.g. app quit between backup write and main write),
+                    // prefer backup to avoid losing the latest change.
+                    useBackup = true;
+                }
+            }
+
+            if (!useBackup) {
                 return self.normalizeSessionData(mainRes.data);
             }
 
-            return self.readJsonIfExists(self.getSessionsBackupPath()).then(function (backupRes) {
-                if (backupRes.exists && !backupRes.error && hasSessionShape(backupRes.data)) {
-                    var restored = self.normalizeSessionData(backupRes.data);
-                    return self.writeJson(self.getSessionsPath(), restored).catch(function () {
-                        return;
-                    }).then(function () {
-                        new obsidian.Notice(L.backupRestored);
-                        return restored;
-                    });
-                }
-                return null;
+            var restoredRaw = backupRes.data;
+            var restored = self.normalizeSessionData(restoredRaw);
+            return self.writeJson(mainPath, restoredRaw).catch(function () {
+                return;
+            }).then(function () {
+                if (!mainValid) new obsidian.Notice(L.backupRestored);
+                return restored;
             });
         });
     };

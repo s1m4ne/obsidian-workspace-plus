@@ -10,7 +10,12 @@ module.exports = {
     confirmDeleteByHotkey: true,
     autoSaveOnSwitch: true,
     warnOnUnsavedSwitch: true,
-    statusBarQuickSwitcher: false,
+    statusBarQuickSwitcher: true,
+    groupFeatureEnabled: true,
     searchOverlayPosition: null,
     searchOverlaySize: null,
+    groups: {},
+    groupOrder: [],
+    sessionGroups: {},
+    activeGroupId: null,
 };

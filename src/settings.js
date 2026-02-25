@@ -5,6 +5,146 @@ var i18n = require('./i18n');
 var modals = require('./modals');
 
 // ============================================================
+// Group Sessions Modal — checkbox list to toggle session membership
+// ============================================================
+var GroupSessionsModal = /** @class */ (function (_super) {
+    function GroupSessionsModal(app, plugin, group) {
+        var _this = _super.call(this, app) || this;
+        _this.plugin = plugin;
+        _this.group = group;
+        return _this;
+    }
+
+    GroupSessionsModal.prototype = Object.create(_super.prototype);
+    GroupSessionsModal.prototype.constructor = GroupSessionsModal;
+
+    GroupSessionsModal.prototype.onOpen = function () {
+        var L = i18n.L;
+        var self = this;
+        var contentEl = this.contentEl;
+        contentEl.empty();
+        contentEl.createEl('h3', { text: self.group.name + ' — ' + L.settingsGroupManageSessions });
+
+        var allSessions = self.plugin.getOrderedSessionsUnfiltered();
+        var memberIds = self.plugin.getGroupSessionIds(self.group.id);
+
+        for (var i = 0; i < allSessions.length; i++) {
+            (function (session) {
+                var isMember = memberIds.indexOf(session.id) !== -1;
+                new obsidian.Setting(contentEl)
+                    .setName(session.name)
+                    .addToggle(function (toggle) {
+                        toggle.setValue(isMember);
+                        toggle.onChange(function (value) {
+                            if (value) {
+                                self.plugin.addSessionToGroup(session.id, self.group.id);
+                            } else {
+                                self.plugin.removeSessionFromGroup(session.id, self.group.id);
+                            }
+                        });
+                    });
+            })(allSessions[i]);
+        }
+    };
+
+    GroupSessionsModal.prototype.onClose = function () {
+        this.contentEl.empty();
+    };
+
+    return GroupSessionsModal;
+})(obsidian.Modal);
+
+function applyWarningStyle(btn) {
+    if (typeof btn.setWarning === 'function') {
+        btn.setWarning();
+        return;
+    }
+    if (btn.buttonEl) {
+        btn.buttonEl.addClass('mod-warning');
+    }
+}
+
+function addToggleSetting(parentEl, options) {
+    var setting = new obsidian.Setting(parentEl)
+        .setName(options.name);
+
+    if (options.desc) {
+        setting.setDesc(options.desc);
+    }
+
+    setting.addToggle(function (toggle) {
+        toggle.setValue(!!options.value);
+        if (options.disabled && typeof toggle.setDisabled === 'function') {
+            toggle.setDisabled(true);
+        }
+        toggle.onChange(function (value) {
+            options.onChange(value);
+        });
+    });
+
+    return setting;
+}
+
+function addDangerResetSetting(parentEl, app, display, options) {
+    new obsidian.Setting(parentEl)
+        .setName(options.name)
+        .setDesc(options.desc)
+        .addButton(function (btn) {
+            var isRunning = false;
+            btn.setButtonText(options.buttonText);
+            applyWarningStyle(btn);
+            btn.onClick(function () {
+                if (isRunning) return;
+                var confirmOptions = {
+                    confirmText: options.buttonText,
+                };
+                if (options.confirmHint) {
+                    confirmOptions.hint = options.confirmHint;
+                }
+                new modals.ConfirmModal(app, options.confirmMessage, function () {
+                    isRunning = true;
+                    btn.setDisabled(true);
+                    return options.run()
+                        .then(function () {
+                            new obsidian.Notice(options.successNotice);
+                        })
+                        .catch(function () {
+                            new obsidian.Notice(options.failureNotice);
+                        })
+                        .then(function () {
+                            isRunning = false;
+                            btn.setDisabled(false);
+                            display();
+                        });
+                }, confirmOptions).open();
+            });
+        });
+}
+
+function addAsyncActionSetting(parentEl, options) {
+    new obsidian.Setting(parentEl)
+        .setName(options.name)
+        .setDesc(options.desc)
+        .addButton(function (btn) {
+            btn.setButtonText(options.buttonText);
+            if (options.disabled) {
+                btn.setDisabled(true);
+            }
+            btn.onClick(function () {
+                options.run()
+                    .then(function () {
+                        if (options.onSuccess) options.onSuccess();
+                    })
+                    .catch(function () {
+                        if (options.failureNotice) {
+                            new obsidian.Notice(options.failureNotice);
+                        }
+                    });
+            });
+        });
+}
+
+// ============================================================
 // Settings Tab
 // ============================================================
 var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
@@ -62,16 +202,15 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                 });
             });
 
-        new obsidian.Setting(containerEl)
-            .setName(L.settingsStatusBarQuickSwitcher)
-            .setDesc(L.settingsStatusBarQuickSwitcherDesc)
-            .addToggle(function (toggle) {
-                toggle.setValue(!!self.plugin.data.statusBarQuickSwitcher);
-                toggle.onChange(function (value) {
-                    self.plugin.data.statusBarQuickSwitcher = value;
-                    self.plugin.persistData();
-                });
-            });
+        addToggleSetting(containerEl, {
+            name: L.settingsStatusBarQuickSwitcher,
+            desc: L.settingsStatusBarQuickSwitcherDesc,
+            value: self.plugin.data.statusBarQuickSwitcher,
+            onChange: function (value) {
+                self.plugin.data.statusBarQuickSwitcher = value;
+                self.plugin.persistData();
+            },
+        });
 
         addSection(L.settingsSectionSwitching);
 
@@ -88,19 +227,16 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                 });
             });
 
-        new obsidian.Setting(containerEl)
-            .setName(L.settingsWarnUnsavedSwitch)
-            .setDesc(L.settingsWarnUnsavedSwitchDesc)
-            .addToggle(function (toggle) {
-                toggle.setValue(self.plugin.isWarnOnUnsavedSwitchEnabled());
-                if (toggle.setDisabled) {
-                    toggle.setDisabled(autoSaveOnSwitch);
-                }
-                toggle.onChange(function (value) {
-                    self.plugin.data.warnOnUnsavedSwitch = value;
-                    self.plugin.persistData();
-                });
-            });
+        addToggleSetting(containerEl, {
+            name: L.settingsWarnUnsavedSwitch,
+            desc: L.settingsWarnUnsavedSwitchDesc,
+            value: self.plugin.isWarnOnUnsavedSwitchEnabled(),
+            disabled: autoSaveOnSwitch,
+            onChange: function (value) {
+                self.plugin.data.warnOnUnsavedSwitch = value;
+                self.plugin.persistData();
+            },
+        });
 
         // Preview before switching — master toggle with nested sub-toggles
         var allOn = !!self.plugin.data.previewNext && !!self.plugin.data.previewPrevious;
@@ -144,121 +280,146 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
 
         addSection(L.settingsSectionDeletion);
 
-        new obsidian.Setting(containerEl)
-            .setName(L.settingsConfirmDelete)
-            .setDesc(L.settingsConfirmDeleteDesc)
-            .addToggle(function (toggle) {
-                toggle.setValue(self.plugin.data.confirmDeleteByHotkey !== false);
-                toggle.onChange(function (value) {
-                    self.plugin.data.confirmDeleteByHotkey = value;
-                    self.plugin.persistData();
+        addToggleSetting(containerEl, {
+            name: L.settingsConfirmDelete,
+            desc: L.settingsConfirmDeleteDesc,
+            value: self.plugin.data.confirmDeleteByHotkey !== false,
+            onChange: function (value) {
+                self.plugin.data.confirmDeleteByHotkey = value;
+                self.plugin.persistData();
+            },
+        });
+
+        // ---- Session Groups ----
+        addSection(L.settingsSectionGroups);
+
+        addToggleSetting(containerEl, {
+            name: L.settingsSectionGroups,
+            desc: L.settingsSectionGroupsDesc,
+            value: self.plugin.isGroupFeatureEnabled(),
+            onChange: function (value) {
+                self.plugin.setGroupFeatureEnabled(value).then(function () {
+                    self.display();
+                });
+            },
+        });
+
+        if (self.plugin.isGroupFeatureEnabled()) {
+            // Create group
+            var createGroupSetting = new obsidian.Setting(containerEl)
+                .setName(L.settingsGroupCreate)
+                .setDesc(L.settingsGroupCreateDesc);
+
+            var groupNameInput = null;
+            createGroupSetting.addText(function (text) {
+                groupNameInput = text;
+                text.setPlaceholder(L.settingsGroupCreatePlaceholder);
+            });
+
+            createGroupSetting.addButton(function (btn) {
+                btn.setButtonText(L.settingsGroupCreateBtn);
+                btn.onClick(function () {
+                    if (!groupNameInput) return;
+                    self.plugin.createGroupValidated(groupNameInput.getValue()).then(function (created) {
+                        if (!created) return;
+                        self.display();
+                    });
                 });
             });
+
+            // List existing groups
+            var orderedGroups = self.plugin.getOrderedGroups();
+            for (var gIdx = 0; gIdx < orderedGroups.length; gIdx++) {
+                (function (group) {
+                    var sessionCount = self.plugin.getGroupSessionIds(group.id).length;
+                    var groupSetting = new obsidian.Setting(containerEl)
+                        .setName(group.name)
+                        .setDesc(L.settingsGroupManageSessionsDesc + ' · ' + L.settingsGroupSessionCount(sessionCount));
+
+                    // Manage sessions button
+                    groupSetting.addButton(function (btn) {
+                        btn.setButtonText(L.settingsGroupManageSessions);
+                        btn.onClick(function () {
+                            new GroupSessionsModal(self.app, self.plugin, group).open();
+                        });
+                    });
+
+                    // Rename
+                    groupSetting.addExtraButton(function (btn) {
+                        btn.setIcon('pencil');
+                        btn.setTooltip(L.rename);
+                        btn.onClick(function () {
+                            new modals.RenameModal(self.app, group.name, function (newName) {
+                                self.plugin.renameGroupValidated(group.id, newName).then(function (renamed) {
+                                    if (!renamed) return;
+                                    self.display();
+                                });
+                            }, {
+                                emptyNotice: L.groupEmptyName,
+                            }).open();
+                        });
+                    });
+
+                    // Delete
+                    groupSetting.addExtraButton(function (btn) {
+                        btn.setIcon('trash-2');
+                        btn.setTooltip(L.settingsGroupDelete);
+                        btn.onClick(function () {
+                            new modals.ConfirmModal(self.app, L.settingsGroupDeleteConfirm(group.name), function () {
+                                self.plugin.deleteGroup(group.id).then(function () {
+                                    self.display();
+                                });
+                            }).open();
+                        });
+                    });
+                })(orderedGroups[gIdx]);
+            }
+        }
 
         addSection(L.settingsSectionReset);
 
-        new obsidian.Setting(containerEl)
-            .setName(L.settingsResetSettings)
-            .setDesc(L.settingsResetSettingsDesc)
-            .addButton(function (btn) {
-                var isResetting = false;
-                btn.setButtonText(L.settingsResetSettingsBtn);
-                if (typeof btn.setWarning === 'function') {
-                    btn.setWarning();
-                } else if (btn.buttonEl) {
-                    btn.buttonEl.addClass('mod-warning');
-                }
-                btn.onClick(function () {
-                    if (isResetting) return;
-                    new modals.ConfirmModal(self.app, L.confirmResetSettings, function () {
-                        isResetting = true;
-                        btn.setDisabled(true);
-                        return self.plugin.resetSettingsToDefault()
-                            .then(function () {
-                                new obsidian.Notice(L.resetSettingsDone);
-                            })
-                            .catch(function () {
-                                new obsidian.Notice(L.resetSettingsFailed);
-                            })
-                            .then(function () {
-                                isResetting = false;
-                                btn.setDisabled(false);
-                                self.display();
-                            });
-                    }, {
-                        confirmText: L.settingsResetSettingsBtn,
-                    }).open();
-                });
-            });
+        addDangerResetSetting(containerEl, self.app, function () {
+            self.display();
+        }, {
+            name: L.settingsResetSettings,
+            desc: L.settingsResetSettingsDesc,
+            buttonText: L.settingsResetSettingsBtn,
+            confirmMessage: L.confirmResetSettings,
+            run: function () {
+                return self.plugin.resetSettingsToDefault();
+            },
+            successNotice: L.resetSettingsDone,
+            failureNotice: L.resetSettingsFailed,
+        });
 
-        new obsidian.Setting(containerEl)
-            .setName(L.settingsResetSessions)
-            .setDesc(L.settingsResetSessionsDesc)
-            .addButton(function (btn) {
-                var isResetting = false;
-                btn.setButtonText(L.settingsResetSessionsBtn);
-                if (typeof btn.setWarning === 'function') {
-                    btn.setWarning();
-                } else if (btn.buttonEl) {
-                    btn.buttonEl.addClass('mod-warning');
-                }
-                btn.onClick(function () {
-                    if (isResetting) return;
-                    new modals.ConfirmModal(self.app, L.confirmResetSessions, function () {
-                        isResetting = true;
-                        btn.setDisabled(true);
-                        return self.plugin.resetSessionsToDefault()
-                            .then(function () {
-                                new obsidian.Notice(L.resetSessionsDone);
-                            })
-                            .catch(function () {
-                                new obsidian.Notice(L.resetSessionsFailed);
-                            })
-                            .then(function () {
-                                isResetting = false;
-                                btn.setDisabled(false);
-                                self.display();
-                            });
-                    }, {
-                        hint: L.resetSessionsHint,
-                        confirmText: L.settingsResetSessionsBtn,
-                    }).open();
-                });
-            });
+        addDangerResetSetting(containerEl, self.app, function () {
+            self.display();
+        }, {
+            name: L.settingsResetSessions,
+            desc: L.settingsResetSessionsDesc,
+            buttonText: L.settingsResetSessionsBtn,
+            confirmMessage: L.confirmResetSessions,
+            confirmHint: L.resetSessionsHint,
+            run: function () {
+                return self.plugin.resetSessionsToDefault();
+            },
+            successNotice: L.resetSessionsDone,
+            failureNotice: L.resetSessionsFailed,
+        });
 
-        new obsidian.Setting(containerEl)
-            .setName(L.settingsResetSessionsAndSettings)
-            .setDesc(L.settingsResetSessionsAndSettingsDesc)
-            .addButton(function (btn) {
-                var isResetting = false;
-                btn.setButtonText(L.settingsResetSessionsAndSettingsBtn);
-                if (typeof btn.setWarning === 'function') {
-                    btn.setWarning();
-                } else if (btn.buttonEl) {
-                    btn.buttonEl.addClass('mod-warning');
-                }
-                btn.onClick(function () {
-                    if (isResetting) return;
-                    new modals.ConfirmModal(self.app, L.confirmResetSessionsAndSettings, function () {
-                        isResetting = true;
-                        btn.setDisabled(true);
-                        return self.plugin.resetSessionsAndSettingsToDefault()
-                            .then(function () {
-                                new obsidian.Notice(L.resetSessionsAndSettingsDone);
-                            })
-                            .catch(function () {
-                                new obsidian.Notice(L.resetSessionsAndSettingsFailed);
-                            })
-                            .then(function () {
-                                isResetting = false;
-                                btn.setDisabled(false);
-                                self.display();
-                            });
-                    }, {
-                        confirmText: L.settingsResetSessionsAndSettingsBtn,
-                    }).open();
-                });
-            });
+        addDangerResetSetting(containerEl, self.app, function () {
+            self.display();
+        }, {
+            name: L.settingsResetSessionsAndSettings,
+            desc: L.settingsResetSessionsAndSettingsDesc,
+            buttonText: L.settingsResetSessionsAndSettingsBtn,
+            confirmMessage: L.confirmResetSessionsAndSettings,
+            run: function () {
+                return self.plugin.resetSessionsAndSettingsToDefault();
+            },
+            successNotice: L.resetSessionsAndSettingsDone,
+            failureNotice: L.resetSessionsAndSettingsFailed,
+        });
 
         var useLocalSettings = self.plugin.isUsingLocalSettings();
         var advancedDetailsEl = containerEl.createEl('details', { cls: 'wpp-advanced-details' });
@@ -273,56 +434,49 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
             cls: 'wpp-settings-section-title wpp-advanced-subsection-title',
         });
 
-        new obsidian.Setting(advancedBodyEl)
-            .setName(L.settingsUseLocalSettings)
-            .setDesc(L.settingsUseLocalSettingsDesc)
-            .addToggle(function (toggle) {
-                toggle.setValue(useLocalSettings);
-                toggle.onChange(function (value) {
-                    self.plugin.setUseLocalSettings(value, { notify: true })
-                        .then(function () {
-                            self.display();
-                        })
-                        .catch(function () {
-                            new obsidian.Notice(L.localSettingsOperationFailed);
-                            self.display();
-                        });
-                });
-            });
+        addToggleSetting(advancedBodyEl, {
+            name: L.settingsUseLocalSettings,
+            desc: L.settingsUseLocalSettingsDesc,
+            value: useLocalSettings,
+            onChange: function (value) {
+                self.plugin.setUseLocalSettings(value, { notify: true })
+                    .then(function () {
+                        self.display();
+                    })
+                    .catch(function () {
+                        new obsidian.Notice(L.localSettingsOperationFailed);
+                        self.display();
+                    });
+            },
+        });
 
-        new obsidian.Setting(advancedBodyEl)
-            .setName(L.settingsCopyGlobalToLocal)
-            .setDesc(L.settingsCopyGlobalToLocalDesc)
-            .addButton(function (btn) {
-                btn.setButtonText(L.settingsCopyGlobalToLocalBtn);
-                btn.setDisabled(!useLocalSettings);
-                btn.onClick(function () {
-                    self.plugin.copyGlobalSettingsToLocal({ notify: true })
-                        .then(function () {
-                            self.display();
-                        })
-                        .catch(function () {
-                            new obsidian.Notice(L.localSettingsOperationFailed);
-                        });
-                });
-            });
+        addAsyncActionSetting(advancedBodyEl, {
+            name: L.settingsCopyGlobalToLocal,
+            desc: L.settingsCopyGlobalToLocalDesc,
+            buttonText: L.settingsCopyGlobalToLocalBtn,
+            disabled: !useLocalSettings,
+            run: function () {
+                return self.plugin.copyGlobalSettingsToLocal({ notify: true });
+            },
+            onSuccess: function () {
+                self.display();
+            },
+            failureNotice: L.localSettingsOperationFailed,
+        });
 
-        new obsidian.Setting(advancedBodyEl)
-            .setName(L.settingsResetLocalSettings)
-            .setDesc(L.settingsResetLocalSettingsDesc)
-            .addButton(function (btn) {
-                btn.setButtonText(L.settingsResetLocalSettingsBtn);
-                btn.setDisabled(!useLocalSettings);
-                btn.onClick(function () {
-                    self.plugin.resetLocalSettings({ notify: true })
-                        .then(function () {
-                            self.display();
-                        })
-                        .catch(function () {
-                            new obsidian.Notice(L.localSettingsOperationFailed);
-                        });
-                });
-            });
+        addAsyncActionSetting(advancedBodyEl, {
+            name: L.settingsResetLocalSettings,
+            desc: L.settingsResetLocalSettingsDesc,
+            buttonText: L.settingsResetLocalSettingsBtn,
+            disabled: !useLocalSettings,
+            run: function () {
+                return self.plugin.resetLocalSettings({ notify: true });
+            },
+            onSuccess: function () {
+                self.display();
+            },
+            failureNotice: L.localSettingsOperationFailed,
+        });
 
         advancedBodyEl.createEl('h3', {
             text: L.settingsAdvancedTransferSubsection,

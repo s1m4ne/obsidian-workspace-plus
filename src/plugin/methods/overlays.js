@@ -3,6 +3,124 @@
 var obsidian = require('obsidian');
 var i18n = require('../../i18n');
 var modals = require('../../modals');
+var formatRelativeTime = require('../../modals/format-relative-time');
+var groupTabUi = require('../../group-tab-ui');
+var utils = require('../../utils');
+
+function hasBlockingModal() {
+    return !!document.querySelector('.modal-container');
+}
+
+function syncSearchOverlaySelectedIndex(plugin, filtered, currentIndex, options) {
+    options = options || {};
+    if (!filtered || filtered.length === 0) {
+        return -1;
+    }
+
+    var activeIdx = plugin.findActiveSessionIndex(filtered);
+    if (activeIdx !== -1) {
+        return activeIdx;
+    }
+
+    if (options.preserveWhenMissing) {
+        if (currentIndex >= filtered.length) {
+            return filtered.length - 1;
+        }
+        return currentIndex < 0 ? 0 : currentIndex;
+    }
+
+    return 0;
+}
+
+function createSearchOverlayKeyHandler(options) {
+    return function (e) {
+        var plugin = options.plugin;
+        if (!plugin.searchOverlayEl) return;
+        if (hasBlockingModal()) return;
+
+        // Let global command hotkeys (e.g. Mod+Shift+Enter/Tab) flow through.
+        if (utils.isModPressed(e)) {
+            return;
+        }
+
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            plugin.hideSearchOverlay();
+            return;
+        }
+
+        if (e.key === 'Tab') {
+            if (document.activeElement === options.saveInput) return;
+            if (!plugin.isGroupFeatureEnabled() || plugin.getOrderedGroups().length === 0) return;
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            var nextGroupId = plugin.getRelativeGroupId(options.getOverlayGroupId(), e.shiftKey ? -1 : 1);
+            if (typeof nextGroupId === 'undefined') return;
+            options.applyOverlayGroupSelection(nextGroupId);
+            return;
+        }
+
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+            if (document.activeElement === options.saveInput) return;
+            var filtered = options.getFiltered();
+            e.preventDefault();
+            if (filtered.length === 0) return;
+            options.setKeyboardNav(true);
+            options.overlay.classList.add('wpp-keyboard-nav');
+            var dir = e.key === 'ArrowUp' ? -1 : 1;
+            var selectedIndex = options.getSelectedIndex();
+            options.setSelectedIndex((selectedIndex + dir + filtered.length) % filtered.length);
+            options.updateSelection();
+            return;
+        }
+
+        if (e.key === 'Enter' && !e.isComposing) {
+            if (document.activeElement === options.saveInput) return;
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            options.switchSelected();
+            return;
+        }
+
+        if (e.key === 'Delete' || e.key === 'Backspace') {
+            var searchInput = options.searchInput;
+            if (document.activeElement === searchInput && searchInput.value.length > 0) return;
+            if (document.activeElement === options.saveInput) return;
+            e.preventDefault();
+
+            var filteredForDelete = options.getFiltered();
+            var selectedForDelete = options.getSelectedIndex();
+            if (selectedForDelete < 0 || selectedForDelete >= filteredForDelete.length) return;
+            var sess = filteredForDelete[selectedForDelete];
+            if (Object.keys(plugin.data.sessions).length <= 1) {
+                new obsidian.Notice(i18n.L.cannotDeleteLast);
+                return;
+            }
+
+            var doDelete = function () {
+                plugin.deleteSession(sess.id).then(function (deleted) {
+                    if (!deleted) return;
+                    new obsidian.Notice(i18n.L.deleted(sess.name));
+                    options.refreshOrderedSessions();
+                });
+            };
+
+            if (plugin.data.confirmDeleteByHotkey !== false) {
+                new modals.ConfirmModal(plugin.app, i18n.L.confirmDeleteActive(sess.name), doDelete).open();
+            } else {
+                doDelete();
+            }
+            return;
+        }
+
+        if (e.key === '/' && document.activeElement !== options.searchInput && document.activeElement !== options.saveInput) {
+            e.preventDefault();
+            options.searchInput.focus();
+            options.searchInput.select();
+        }
+    };
+}
 
 function attachOverlayMethods(WorkspacePlusPlus) {
     // --- Switch overlay ---
@@ -18,8 +136,11 @@ function attachOverlayMethods(WorkspacePlusPlus) {
     WorkspacePlusPlus.prototype.openSearchOverlay = function (anchorEl) {
         var L = i18n.L;
         var self = this;
-        var ordered = this.getOrderedSessions();
-        if (ordered.length === 0) return;
+        var overlayGroupId = this.isGroupFeatureEnabled()
+            ? (this.data.activeGroupId || null)
+            : null;
+        this.searchOverlayViewGroupId = overlayGroupId;
+        var ordered = this.getOrderedSessionsForGroup(overlayGroupId);
 
         this.hideSwitchOverlay();
         this.hideSearchOverlay();
@@ -27,11 +148,34 @@ function attachOverlayMethods(WorkspacePlusPlus) {
         var filtered = ordered.slice();
         var selectedIndex = 0;
         var keyboardNav = false;
-        for (var ai = 0; ai < filtered.length; ai++) {
-            if (filtered[ai].id === this.data.activeSessionId) {
-                selectedIndex = ai;
-                break;
+
+        function syncSelectedIndexToActive(options) {
+            selectedIndex = syncSearchOverlaySelectedIndex(self, filtered, selectedIndex, options || {});
+        }
+        syncSelectedIndexToActive();
+
+        function getOverlayGroupId() {
+            if (!self.isGroupFeatureEnabled()) {
+                overlayGroupId = null;
+                self.searchOverlayViewGroupId = null;
+                return null;
             }
+            var groups = self.data.groups || {};
+            if (overlayGroupId && !groups[overlayGroupId]) {
+                overlayGroupId = self.data.activeGroupId || null;
+            }
+            self.searchOverlayViewGroupId = overlayGroupId || null;
+            return overlayGroupId || null;
+        }
+
+        function applyOverlayGroupSelection(groupId) {
+            return self.resolveGroupSelection(groupId).then(function (result) {
+                overlayGroupId = result.resolvedGroupId || null;
+                self.searchOverlayViewGroupId = overlayGroupId;
+                renderGroupTabs();
+                refreshOrderedSessions();
+                return result.switched;
+            });
         }
 
         var overlay = document.createElement('div');
@@ -65,6 +209,46 @@ function attachOverlayMethods(WorkspacePlusPlus) {
 
         overlay.appendChild(headerRow);
 
+        // Save section (same as main modal)
+        var saveRow = document.createElement('div');
+        saveRow.className = 'wpp-save-container';
+        var saveInput = document.createElement('input');
+        saveInput.type = 'text';
+        saveInput.className = 'wpp-save-input';
+        saveInput.placeholder = L.savePlaceholder;
+        saveRow.appendChild(saveInput);
+        var saveBtn = document.createElement('button');
+        saveBtn.className = 'wpp-save-btn';
+        saveBtn.textContent = L.save;
+        saveRow.appendChild(saveBtn);
+
+        function onOverlaySave() {
+            var selectedGroupId = getOverlayGroupId();
+            self.createSessionForViewedGroup(saveInput.value, selectedGroupId).then(function (result) {
+                if (!result || !result.created) return;
+                var createdName = result.name;
+                overlayGroupId = result.viewGroupId || null;
+                self.searchOverlayViewGroupId = overlayGroupId;
+                saveInput.value = '';
+                new obsidian.Notice(L.created(createdName));
+                renderGroupTabs();
+                refreshOrderedSessions();
+            });
+        }
+
+        saveBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            onOverlaySave();
+        });
+        saveInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' && !e.isComposing) {
+                e.stopPropagation();
+                onOverlaySave();
+            }
+        });
+        overlay.appendChild(saveRow);
+
+        // Search / filter section
         var searchRow = document.createElement('div');
         searchRow.className = 'wpp-search-row';
         var searchInput = document.createElement('input');
@@ -74,6 +258,127 @@ function attachOverlayMethods(WorkspacePlusPlus) {
         searchRow.appendChild(searchInput);
         this.searchOverlayInputEl = searchInput;
         overlay.appendChild(searchRow);
+
+        // Group tabs row
+        var groupTabsRow = document.createElement('div');
+        groupTabsRow.className = 'wpp-group-tabs';
+
+        function renderGroupTabs() {
+            while (groupTabsRow.firstChild) groupTabsRow.removeChild(groupTabsRow.firstChild);
+            if (!self.isGroupFeatureEnabled()) {
+                groupTabsRow.style.display = 'none';
+                footerRow.textContent = L.searchOverlayHelp;
+                return;
+            }
+            var groups = self.data.groups || {};
+            var realGroups = self.getOrderedGroups();
+            groupTabsRow.style.display = '';
+            footerRow.textContent = realGroups.length > 0
+                ? (L.searchOverlayHelpWithGroups || L.searchOverlayHelp)
+                : L.searchOverlayHelp;
+
+            var groupOrder = self.getOrderedGroupTabIds();
+
+            // Group tab D&D helper
+            function setupGroupTabDrag(tabEl) {
+                groupTabUi.attachGroupTabDrag(tabEl, groupTabsRow, {
+                    stopPropagationOnMouseDown: true,
+                    onCommit: function (newOrder) {
+                        self.setGroupTabOrder(newOrder);
+                    },
+                });
+            }
+
+            // Render tabs in groupOrder
+            for (var gi = 0; gi < groupOrder.length; gi++) {
+                var gid = groupOrder[gi];
+
+                if (gid === '__all__') {
+                    var allTab = document.createElement('div');
+                    allTab.className = 'wpp-group-tab';
+                    allTab.dataset.groupId = '__all__';
+                    if (!getOverlayGroupId()) allTab.classList.add('is-active');
+                    allTab.textContent = L.groupAll;
+                    allTab.addEventListener('click', function () {
+                        applyOverlayGroupSelection(null);
+                    });
+
+                    // "All" tab right-click context menu
+                    allTab.addEventListener('contextmenu', function (e) {
+                        e.preventDefault();
+                        groupTabUi.openAllGroupsTabContextMenu({
+                            app: self.app,
+                            plugin: self,
+                            event: e,
+                            onResetViewGroup: function () {
+                                overlayGroupId = null;
+                                self.searchOverlayViewGroupId = null;
+                            },
+                            onGroupsChanged: function () {
+                                renderGroupTabs();
+                            },
+                            onSessionsChanged: function () {
+                                refreshOrderedSessions();
+                            },
+                        });
+                    });
+
+                    setupGroupTabDrag(allTab);
+                    groupTabsRow.appendChild(allTab);
+                } else if (groups[gid]) {
+                    (function (group) {
+                        var tab = document.createElement('div');
+                        tab.className = 'wpp-group-tab';
+                        tab.dataset.groupId = group.id;
+                        if (getOverlayGroupId() === group.id) tab.classList.add('is-active');
+                        tab.textContent = group.name;
+                        tab.addEventListener('click', function () {
+                            applyOverlayGroupSelection(group.id);
+                        });
+
+                        // Group tab right-click context menu
+                        tab.addEventListener('contextmenu', function (e) {
+                            e.preventDefault();
+                            groupTabUi.openGroupTabContextMenu({
+                                app: self.app,
+                                plugin: self,
+                                event: e,
+                                group: group,
+                                onDeleteGroup: function (deletedGroupId) {
+                                    if (overlayGroupId === deletedGroupId) {
+                                        overlayGroupId = self.data.activeGroupId || null;
+                                        self.searchOverlayViewGroupId = overlayGroupId || null;
+                                    }
+                                },
+                                onGroupsChanged: function () {
+                                    renderGroupTabs();
+                                },
+                                onSessionsChanged: function () {
+                                    refreshOrderedSessions();
+                                },
+                            });
+                        });
+
+                        setupGroupTabDrag(tab);
+                        groupTabsRow.appendChild(tab);
+                    })(groups[gid]);
+                }
+            }
+
+            // "+" add group button
+            var addBtn = document.createElement('div');
+            addBtn.className = 'wpp-group-add-btn';
+            obsidian.setIcon(addBtn, 'plus');
+            addBtn.addEventListener('click', function () {
+                groupTabUi.openCreateGroupPrompt(self.app, self, function () {
+                    renderGroupTabs();
+                    refreshOrderedSessions();
+                });
+            });
+            groupTabsRow.appendChild(addBtn);
+        }
+
+        overlay.appendChild(groupTabsRow);
 
         var list = document.createElement('div');
         list.className = 'wpp-switch-list wpp-search-list';
@@ -86,23 +391,16 @@ function attachOverlayMethods(WorkspacePlusPlus) {
 
         var footerRow = document.createElement('div');
         footerRow.className = 'wpp-switch-footer';
-        footerRow.textContent = L.searchOverlayHelp;
         overlay.appendChild(footerRow);
 
+        // Initial render of group tabs (also sets footer text)
+        renderGroupTabs();
+
+        self._refreshOverlaySessions = refreshOrderedSessions;
         function refreshOrderedSessions() {
-            ordered = self.getOrderedSessions();
+            ordered = self.getOrderedSessionsForGroup(getOverlayGroupId());
             filtered = self.filterSessionsByQuery(ordered, searchInput.value);
-            if (filtered.length > 0) {
-                if (selectedIndex >= filtered.length) selectedIndex = filtered.length - 1;
-                for (var i = 0; i < filtered.length; i++) {
-                    if (filtered[i].id === self.data.activeSessionId) {
-                        selectedIndex = i;
-                        break;
-                    }
-                }
-            } else {
-                selectedIndex = -1;
-            }
+            syncSelectedIndexToActive({ preserveWhenMissing: true });
             renderList();
         }
 
@@ -111,7 +409,14 @@ function attachOverlayMethods(WorkspacePlusPlus) {
             if (filtered.length === 0) {
                 selectedIndex = -1;
                 countSpan.textContent = '0 / 0';
-                emptyEl.style.display = '';
+                // Show appropriate message: empty group vs no search results
+                if (getOverlayGroupId() && ordered.length === 0) {
+                    emptyEl.textContent = L.noGroupSessions;
+                } else {
+                    emptyEl.textContent = L.noFilteredSessions;
+                }
+                list.style.display = 'none';
+                emptyEl.style.display = 'flex';
                 return;
             }
 
@@ -119,6 +424,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                 selectedIndex = 0;
             }
 
+            list.style.display = '';
             emptyEl.style.display = 'none';
             countSpan.textContent = (selectedIndex + 1) + ' / ' + filtered.length;
 
@@ -129,6 +435,10 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                 item.className = 'wpp-switch-item';
                 if (i === selectedIndex) item.classList.add('wpp-kb-selected');
                 item.dataset.sessionId = session.id;
+
+                // Info column (name + modified time)
+                var infoCol = document.createElement('div');
+                infoCol.className = 'wpp-qs-info-col';
 
                 var nameRow = document.createElement('div');
                 nameRow.className = 'wpp-qs-name-row';
@@ -145,11 +455,28 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                     nameRow.appendChild(badge);
                 }
 
-                item.appendChild(nameRow);
+                infoCol.appendChild(nameRow);
 
-                // Action icons (rename & delete)
+                // Modified timestamp
+                var modifiedEl = document.createElement('div');
+                modifiedEl.className = 'wpp-qs-modified';
+                modifiedEl.textContent = formatRelativeTime(session.modified);
+                infoCol.appendChild(modifiedEl);
+
+                item.appendChild(infoCol);
+
+                // Action icons (save?, rename & delete)
                 var actions = document.createElement('div');
                 actions.className = 'wpp-qs-actions';
+
+                // Save icon (only for active session when auto-save is disabled)
+                var saveIcon = null;
+                if (isActive && !self.isAutoSaveOnSwitchEnabled()) {
+                    saveIcon = document.createElement('div');
+                    saveIcon.className = 'wpp-qs-action-btn';
+                    obsidian.setIcon(saveIcon, 'save');
+                    actions.appendChild(saveIcon);
+                }
 
                 var renameIcon = document.createElement('div');
                 renameIcon.className = 'wpp-qs-action-btn';
@@ -163,7 +490,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
 
                 item.appendChild(actions);
 
-                (function (idx, sess, itemEl) {
+                (function (idx, sess, itemEl, _saveIcon, _isActive) {
                     // Click on item to switch
                     itemEl.addEventListener('click', function (e) {
                         if (e.target.closest('.wpp-qs-action-btn')) return;
@@ -181,23 +508,116 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                         updateSelection();
                     });
 
+                    // Right-click context menu
+                    itemEl.addEventListener('contextmenu', function (e) {
+                        e.preventDefault();
+                        var menu = new obsidian.Menu();
+
+                        // Switch (only if not active)
+                        if (!_isActive) {
+                            menu.addItem(function (mi) {
+                                mi.setTitle(L.contextSwitchSession);
+                                mi.setIcon('arrow-right');
+                                mi.onClick(function () {
+                                    selectedIndex = idx;
+                                    switchSelected();
+                                });
+                            });
+                        }
+
+                        // Rename
+                        menu.addItem(function (mi) {
+                            mi.setTitle(L.contextRenameSession);
+                            mi.setIcon('pencil');
+                            mi.onClick(function () {
+                                new modals.RenameModal(self.app, sess.name, function (newName) {
+                                    self.renameSessionById(sess.id, newName).then(function (renamed) {
+                                        if (!renamed) return;
+                                        refreshOrderedSessions();
+                                    });
+                                }, {
+                                    emptyNotice: L.emptyName,
+                                }).open();
+                            });
+                        });
+
+                        // Duplicate
+                        menu.addItem(function (mi) {
+                            mi.setTitle(L.contextDuplicateSession);
+                            mi.setIcon('copy');
+                            mi.onClick(function () {
+                                self.duplicateSession(sess.id).then(function () {
+                                    refreshOrderedSessions();
+                                });
+                            });
+                        });
+
+                        // Remove from group (only when a group is selected)
+                        var selectedGroupId = getOverlayGroupId();
+                        if (selectedGroupId) {
+                            menu.addItem(function (mi) {
+                                mi.setTitle(L.groupRemoveFromGroup);
+                                mi.setIcon('log-out');
+                                mi.onClick(function () {
+                                    var activeGid = getOverlayGroupId();
+                                    if (!activeGid) return;
+                                    var gName = (self.data.groups[activeGid] || {}).name || '';
+                                    self.removeSessionFromGroup(sess.id, activeGid).then(function () {
+                                        new obsidian.Notice(L.groupRemovedSession(sess.name, gName));
+                                        renderGroupTabs();
+                                        refreshOrderedSessions();
+                                    });
+                                });
+                            });
+                        }
+
+                        // Delete (with separator, hidden for last session)
+                        if (Object.keys(self.data.sessions).length > 1) {
+                            menu.addSeparator();
+                            menu.addItem(function (mi) {
+                                mi.setTitle(L.contextDeleteSession);
+                                mi.setIcon('trash-2');
+                                mi.setSection('danger');
+                                mi.onClick(function () {
+                                    var doDelete = function () {
+                                        self.deleteSession(sess.id).then(function (deleted) {
+                                            if (!deleted) return;
+                                            new obsidian.Notice(L.deleted(sess.name));
+                                            refreshOrderedSessions();
+                                        });
+                                    };
+                                    if (self.data.confirmDeleteByHotkey !== false) {
+                                        new modals.ConfirmModal(self.app, L.confirmDeleteActive(sess.name), doDelete).open();
+                                    } else {
+                                        doDelete();
+                                    }
+                                });
+                            });
+                        }
+
+                        menu.showAtMouseEvent(e);
+                    });
+
+                    // Save
+                    if (_saveIcon) {
+                        _saveIcon.addEventListener('click', function (e) {
+                            e.stopPropagation();
+                            self.saveActiveSession().then(function () {
+                                refreshOrderedSessions();
+                            });
+                        });
+                    }
+
                     // Rename
                     renameIcon.addEventListener('click', function (e) {
                         e.stopPropagation();
                         new modals.RenameModal(self.app, sess.name, function (newName) {
-                            var exists = Object.values(self.data.sessions)
-                                .some(function (s) { return s.name === newName && s.id !== sess.id; });
-                            if (exists) {
-                                new obsidian.Notice(L.duplicateName);
-                                return;
-                            }
-                            sess.name = newName;
-                            sess.modified = Date.now();
-                            self.updateStatusBar();
-                            self.syncSessionCommands();
-                            self.persistData().then(function () {
+                            self.renameSessionById(sess.id, newName).then(function (renamed) {
+                                if (!renamed) return;
                                 refreshOrderedSessions();
                             });
+                        }, {
+                            emptyNotice: L.emptyName,
                         }).open();
                     });
 
@@ -223,7 +643,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                             doDelete();
                         }
                     });
-                })(i, session, item);
+                })(i, session, item, saveIcon, isActive);
 
                 list.appendChild(item);
             }
@@ -267,6 +687,30 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                     cloneEl._offsetY = offsetY;
                 }
 
+                function updateOverlayGroupDropTarget(ev) {
+                    var tabs = groupTabsRow.querySelectorAll('.wpp-group-tab');
+                    var hoveredTab = null;
+                    for (var t = 0; t < tabs.length; t++) {
+                        var tr = tabs[t].getBoundingClientRect();
+                        if (ev.clientX >= tr.left && ev.clientX <= tr.right &&
+                            ev.clientY >= tr.top && ev.clientY <= tr.bottom) {
+                            hoveredTab = tabs[t];
+                            break;
+                        }
+                    }
+                    for (var t2 = 0; t2 < tabs.length; t2++) {
+                        tabs[t2].classList.toggle('wpp-group-drop-target', tabs[t2] === hoveredTab);
+                    }
+                    return hoveredTab;
+                }
+
+                function clearOverlayGroupDropTargets() {
+                    var tabs = groupTabsRow.querySelectorAll('.wpp-group-tab');
+                    for (var t = 0; t < tabs.length; t++) {
+                        tabs[t].classList.remove('wpp-group-drop-target');
+                    }
+                }
+
                 function onMouseMove(ev) {
                     if (!dragStarted) {
                         var dx = ev.clientX - startX;
@@ -276,6 +720,10 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                     }
                     cloneEl.style.top = (ev.clientY - cloneEl._offsetY) + 'px';
                     cloneEl.style.left = (ev.clientX - cloneEl._offsetX) + 'px';
+
+                    // Check if hovering over a group tab
+                    var hoverTab = updateOverlayGroupDropTarget(ev);
+                    if (hoverTab) return; // Don't reorder while over group tabs
 
                     var siblings = list.querySelectorAll('.wpp-switch-item');
                     var placed = false;
@@ -292,7 +740,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                     if (!placed) list.appendChild(dragItem);
                 }
 
-                function onMouseUp() {
+                function onMouseUp(ev) {
                     document.removeEventListener('mousemove', onMouseMove);
                     document.removeEventListener('mouseup', onMouseUp);
                     if (!dragStarted) return;
@@ -300,15 +748,45 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                     cloneEl.remove();
                     dragItem.classList.remove('is-dragging');
 
+                    // Check if dropped on a group tab
+                    var dropTab = updateOverlayGroupDropTarget(ev);
+                    clearOverlayGroupDropTargets();
+
+                    if (dropTab && dropTab.dataset.groupId && dropTab.dataset.groupId !== '__all__') {
+                        var sessionId = dragItem.dataset.sessionId;
+                        var groupId = dropTab.dataset.groupId;
+                        var sessionName = (self.data.sessions[sessionId] || {}).name || '';
+                        var groupName = (self.data.groups[groupId] || {}).name || '';
+                        self.moveSessionToGroupExclusive(sessionId, groupId).then(function () {
+                            new obsidian.Notice(i18n.L.groupAddedSession(sessionName, groupName));
+                            renderGroupTabs();
+                            refreshOrderedSessions();
+                        });
+                        return;
+                    } else {
+                        var currentGroupId = getOverlayGroupId();
+                        if (dropTab && dropTab.dataset.groupId === '__all__' && currentGroupId) {
+                        // Drop on "All" tab while viewing a group → remove from group
+                            var rmSessionId = dragItem.dataset.sessionId;
+                            var rmGroupId = currentGroupId;
+                            var rmSessionName = (self.data.sessions[rmSessionId] || {}).name || '';
+                            var rmGroupName = (self.data.groups[rmGroupId] || {}).name || '';
+                            self.removeSessionFromGroup(rmSessionId, rmGroupId).then(function () {
+                                new obsidian.Notice(i18n.L.groupRemovedSession(rmSessionName, rmGroupName));
+                                renderGroupTabs();
+                                refreshOrderedSessions();
+                            });
+                            return;
+                        }
+                    }
+
                     // Persist new order
-                    var newOrder = [];
+                    var newVisibleOrder = [];
                     var items = list.querySelectorAll('.wpp-switch-item');
                     for (var ni = 0; ni < items.length; ni++) {
-                        newOrder.push(items[ni].dataset.sessionId);
+                        newVisibleOrder.push(items[ni].dataset.sessionId);
                     }
-                    self.data.sessionOrder = newOrder;
-                    self.syncSessionCommands();
-                    self.persistData();
+                    self.setSessionOrderFromVisible(newVisibleOrder);
 
                     dragItem.classList.add('wpp-just-moved');
                     setTimeout(function () {
@@ -356,85 +834,30 @@ function attachOverlayMethods(WorkspacePlusPlus) {
 
         this.searchOverlayInputHandler = function () {
             filtered = self.filterSessionsByQuery(ordered, searchInput.value);
-            if (filtered.length > 0) {
-                selectedIndex = 0;
-                for (var i = 0; i < filtered.length; i++) {
-                    if (filtered[i].id === self.data.activeSessionId) {
-                        selectedIndex = i;
-                        break;
-                    }
-                }
-            } else {
-                selectedIndex = -1;
-            }
+            syncSelectedIndexToActive();
             renderList();
         };
 
-        this.searchOverlayKeyHandler = function (e) {
-            if (!self.searchOverlayEl) return;
-            // Don't process keys while a modal (rename/confirm) is open
-            if (document.querySelector('.modal-container')) return;
-
-            if (e.key === 'Escape') {
-                e.preventDefault();
-                e.stopImmediatePropagation();
-                self.hideSearchOverlay();
-                return;
-            }
-
-            if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-                e.preventDefault();
-                if (filtered.length === 0) return;
-                keyboardNav = true;
-                overlay.classList.add('wpp-keyboard-nav');
-                var dir = e.key === 'ArrowUp' ? -1 : 1;
-                selectedIndex = (selectedIndex + dir + filtered.length) % filtered.length;
-                updateSelection();
-                return;
-            }
-
-            if (e.key === 'Enter' && !e.isComposing) {
-                e.preventDefault();
-                switchSelected();
-                return;
-            }
-
-            if (e.key === 'Delete' || e.key === 'Backspace') {
-                // Don't interfere with text editing in search input
-                if (document.activeElement === searchInput && searchInput.value.length > 0) return;
-                e.preventDefault();
-                if (selectedIndex < 0 || selectedIndex >= filtered.length) return;
-                var sess = filtered[selectedIndex];
-                if (Object.keys(self.data.sessions).length <= 1) {
-                    new obsidian.Notice(L.cannotDeleteLast);
-                    return;
-                }
-                var doDelete = function () {
-                    self.deleteSession(sess.id).then(function (deleted) {
-                        if (!deleted) return;
-                        new obsidian.Notice(L.deleted(sess.name));
-                        refreshOrderedSessions();
-                    });
-                };
-                if (self.data.confirmDeleteByHotkey !== false) {
-                    new modals.ConfirmModal(self.app, L.confirmDeleteActive(sess.name), doDelete).open();
-                } else {
-                    doDelete();
-                }
-                return;
-            }
-
-            if (e.key === '/' && document.activeElement !== searchInput) {
-                e.preventDefault();
-                searchInput.focus();
-                searchInput.select();
-            }
-        };
+        this.searchOverlayKeyHandler = createSearchOverlayKeyHandler({
+            plugin: self,
+            overlay: overlay,
+            saveInput: saveInput,
+            searchInput: searchInput,
+            getOverlayGroupId: getOverlayGroupId,
+            applyOverlayGroupSelection: applyOverlayGroupSelection,
+            switchSelected: switchSelected,
+            refreshOrderedSessions: refreshOrderedSessions,
+            updateSelection: updateSelection,
+            getFiltered: function () { return filtered; },
+            getSelectedIndex: function () { return selectedIndex; },
+            setSelectedIndex: function (value) { selectedIndex = value; },
+            setKeyboardNav: function (value) { keyboardNav = value; },
+        });
 
         this.searchOverlayClickOutsideHandler = function (e) {
             if (!self.searchOverlayEl) return;
             // Don't close if a modal (rename/confirm) is open
-            if (document.querySelector('.modal-container')) return;
+            if (hasBlockingModal()) return;
             // Let status bar handle its own toggle
             if (self.statusBarEl && self.statusBarEl.contains(e.target)) return;
             if (!self.searchOverlayEl.contains(e.target)) {
@@ -499,8 +922,8 @@ function attachOverlayMethods(WorkspacePlusPlus) {
 
         // Apply saved size
         var savedSize = self.data.searchOverlaySize;
-        var MIN_WIDTH = 300;
-        var MIN_HEIGHT = 200;
+        var MIN_WIDTH = 220;
+        var MIN_HEIGHT = 140;
 
         if (savedSize && savedSize.width != null && savedSize.height != null) {
             overlay.style.width = Math.max(MIN_WIDTH, savedSize.width) + 'px';
@@ -643,6 +1066,11 @@ function attachOverlayMethods(WorkspacePlusPlus) {
             if (e.target.closest('.wpp-search-close')) return;
             if (e.target.closest('.wpp-switch-item')) return;
             if (e.target.closest('.wpp-search-input')) return;
+            if (e.target.closest('.wpp-save-input')) return;
+            if (e.target.closest('.wpp-save-btn')) return;
+            if (e.target.closest('.wpp-group-tab')) return;
+            if (e.target.closest('.wpp-group-add-btn')) return;
+            if (e.target.closest('.wpp-group-tabs')) return;
             if (e.target.closest('.wpp-qs-action-btn')) return;
             if (e.target.closest('.wpp-resize-corner')) return;
             if (e.button !== 0) return;
@@ -687,20 +1115,105 @@ function attachOverlayMethods(WorkspacePlusPlus) {
         setTimeout(function () { searchInput.focus(); }, 20);
     };
 
-    WorkspacePlusPlus.prototype.showSwitchOverlay = function (ordered, activeIndex) {
+    WorkspacePlusPlus.prototype.showSwitchOverlay = function (ordered, activeIndex, viewGroupId) {
         var L = i18n.L;
         this.hideSearchOverlay();
-        // Remove existing overlay
+        // Clean up existing overlay and listeners
+        this.cleanupOverlayListeners();
         if (this.switchOverlayEl) {
             this.switchOverlayEl.remove();
         }
         if (this.switchOverlayTimer) {
             clearTimeout(this.switchOverlayTimer);
         }
+        var overlayGroupId = this.isGroupFeatureEnabled()
+            ? (typeof viewGroupId === 'undefined'
+                ? (this.data.activeGroupId || null)
+                : (viewGroupId || null))
+            : null;
+        if (overlayGroupId && !(this.data.groups || {})[overlayGroupId]) {
+            overlayGroupId = this.data.activeGroupId || null;
+        }
+        this.switchOverlayViewGroupId = overlayGroupId;
+        var self = this;
+
+        function reopenOverlayForGroup(result) {
+            var newOrdered = result.sessions;
+            var newActiveIndex = self.getActiveSessionIndex(newOrdered);
+            self.showSwitchOverlay(newOrdered, newActiveIndex, result.resolvedGroupId);
+        }
+
+        function onGroupTabClick(targetGroupId, e) {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            self.resolveGroupSelection(targetGroupId || null).then(reopenOverlayForGroup);
+        }
+
+        function onSessionItemClick(sessionId, e) {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            if (!sessionId) return;
+            if (sessionId === self.data.activeSessionId) {
+                self.hideSwitchOverlay();
+                return;
+            }
+            self.switchSession(sessionId, { silent: true }).then(function (switched) {
+                if (switched) self.hideSwitchOverlay();
+            });
+        }
 
         var overlay = document.createElement('div');
         overlay.className = 'wpp-switch-overlay';
 
+        // Count
+        var countSpan = document.createElement('div');
+        countSpan.className = 'wpp-switch-count';
+        countSpan.textContent = ordered.length > 0
+            ? (activeIndex + 1) + ' / ' + ordered.length
+            : '0 / 0';
+        overlay.appendChild(countSpan);
+
+        // Group tabs (only when groups exist)
+        var realGroups = this.getOrderedGroups();
+        if (realGroups.length > 0) {
+            var groupTabsRow = document.createElement('div');
+            groupTabsRow.className = 'wpp-group-tabs';
+
+            var allGroups = this.data.groups || {};
+            var groupOrder = this.getOrderedGroupTabIds();
+            for (var gi = 0; gi < groupOrder.length; gi++) {
+                var gid = groupOrder[gi];
+                if (gid === '__all__') {
+                    var allTab = document.createElement('div');
+                    allTab.className = 'wpp-group-tab';
+                    if (!overlayGroupId) allTab.classList.add('is-active');
+                    allTab.textContent = L.groupAll;
+                    allTab.addEventListener('click', function (e) {
+                        onGroupTabClick(null, e);
+                    });
+                    groupTabsRow.appendChild(allTab);
+                } else if (allGroups[gid]) {
+                    var tab = document.createElement('div');
+                    tab.className = 'wpp-group-tab';
+                    if (overlayGroupId === gid) tab.classList.add('is-active');
+                    tab.textContent = allGroups[gid].name;
+                    (function (targetGroupId) {
+                        tab.addEventListener('click', function (e) {
+                            onGroupTabClick(targetGroupId, e);
+                        });
+                    })(gid);
+                    groupTabsRow.appendChild(tab);
+                }
+            }
+
+            overlay.appendChild(groupTabsRow);
+        }
+
+        // Session list
         var list = document.createElement('div');
         list.className = 'wpp-switch-list';
 
@@ -710,6 +1223,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
             if (i === activeIndex) {
                 item.classList.add('is-active');
             }
+            item.dataset.sessionId = ordered[i].id;
 
             var name = document.createElement('div');
             name.className = 'wpp-switch-name';
@@ -722,18 +1236,27 @@ function attachOverlayMethods(WorkspacePlusPlus) {
             hotkeyEl.textContent = hk || String(i + 1);
             item.appendChild(hotkeyEl);
 
+            (function (targetSessionId) {
+                item.addEventListener('click', function (e) {
+                    onSessionItemClick(targetSessionId, e);
+                });
+            })(ordered[i].id);
+
             list.appendChild(item);
         }
 
-        var countSpan = document.createElement('div');
-        countSpan.className = 'wpp-switch-count';
-        countSpan.textContent = (activeIndex + 1) + ' / ' + ordered.length;
-        overlay.appendChild(countSpan);
-
         overlay.appendChild(list);
 
+        // Footer
         var footerRow = document.createElement('div');
         footerRow.className = 'wpp-switch-footer';
+
+        // Group hint (only when groups exist)
+        if (realGroups.length > 0) {
+            var groupLine = document.createElement('div');
+            groupLine.textContent = (L.keyTab || 'Tab') + '  ' + L.switchGroup;
+            footerRow.appendChild(groupLine);
+        }
 
         var nextKey = this.getCommandHotkey('next-session');
         if (nextKey) {
@@ -755,18 +1278,50 @@ function attachOverlayMethods(WorkspacePlusPlus) {
 
         overlay.appendChild(footerRow);
 
+        // Measure max size using ALL sessions (unfiltered) before showing
+        var allSessions = this.getOrderedSessionsUnfiltered();
+        if (allSessions.length > ordered.length) {
+            var measure = overlay.cloneNode(false);
+            measure.style.visibility = 'hidden';
+            measure.style.pointerEvents = 'none';
+            // Clone count + group tabs
+            for (var ci = 0; ci < overlay.childNodes.length; ci++) {
+                if (overlay.childNodes[ci] === list) break;
+                measure.appendChild(overlay.childNodes[ci].cloneNode(true));
+            }
+            // Build full session list for measurement
+            var measureList = document.createElement('div');
+            measureList.className = 'wpp-switch-list';
+            for (var mi = 0; mi < allSessions.length; mi++) {
+                var mItem = document.createElement('div');
+                mItem.className = 'wpp-switch-item';
+                var mName = document.createElement('div');
+                mName.className = 'wpp-switch-name';
+                mName.textContent = allSessions[mi].name;
+                mItem.appendChild(mName);
+                var mHk = document.createElement('div');
+                mHk.className = 'wpp-switch-hotkey';
+                mHk.textContent = String(mi + 1);
+                mItem.appendChild(mHk);
+                measureList.appendChild(mItem);
+            }
+            measure.appendChild(measureList);
+            // Clone footer
+            measure.appendChild(footerRow.cloneNode(true));
+            document.body.appendChild(measure);
+            overlay.style.minWidth = measure.offsetWidth + 'px';
+            overlay.style.minHeight = measure.offsetHeight + 'px';
+            measure.remove();
+        }
+
         document.body.appendChild(overlay);
         this.switchOverlayEl = overlay;
 
         // Dismiss when modifier keys are released
-        var self = this;
         var showTime = Date.now();
 
         this.overlayKeyUpHandler = function (e) {
-            var isMac = navigator.platform.indexOf('Mac') !== -1;
-            var modHeld = isMac ? e.metaKey : e.ctrlKey;
-            var modShiftHeld = modHeld && e.shiftKey;
-            if (!modShiftHeld) {
+            if (!utils.isModShiftPressed(e)) {
                 // Ensure minimum 300ms visibility
                 var elapsed = Date.now() - showTime;
                 var minDelay = Math.max(0, 300 - elapsed);
@@ -795,12 +1350,27 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                 self.hideSwitchOverlay();
             }, 5000);
         }
-        this.overlayKeyDownHandler = function () {
+        this.overlayKeyDownHandler = function (e) {
             // Any keydown means user is still active – reset the safety timer
             if (self.switchOverlayTimer) {
                 clearTimeout(self.switchOverlayTimer);
             }
             safetyCheck();
+
+            // Tab cycles groups (only when groups exist)
+            if (e.key === 'Tab' && self.switchOverlayEl && !utils.isModPressed(e)) {
+                if (!self.isGroupFeatureEnabled() || self.getOrderedGroups().length === 0) return;
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                var nextGroupId = self.getRelativeGroupId(overlayGroupId, e.shiftKey ? -1 : 1);
+                if (typeof nextGroupId === 'undefined') return;
+
+                self.resolveGroupSelection(nextGroupId).then(function (result) {
+                    var newOrdered = result.sessions;
+                    var newActiveIndex = self.getActiveSessionIndex(newOrdered);
+                    self.showSwitchOverlay(newOrdered, newActiveIndex, result.resolvedGroupId);
+                });
+            }
         };
         document.addEventListener('keydown', this.overlayKeyDownHandler);
         safetyCheck();
@@ -830,6 +1400,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
             this.switchOverlayEl.remove();
             this.switchOverlayEl = null;
         }
+        this.switchOverlayViewGroupId = null;
         this.cleanupOverlayListeners();
     };
 
@@ -838,6 +1409,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
             this.searchOverlayEl.remove();
             this.searchOverlayEl = null;
         }
+        this.searchOverlayViewGroupId = null;
         if (this.searchOverlayInputHandler && this.searchOverlayInputEl) {
             this.searchOverlayInputEl.removeEventListener('input', this.searchOverlayInputHandler);
         }
@@ -851,6 +1423,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
         }
         this.searchOverlayInputHandler = null;
         this.searchOverlayInputEl = null;
+        this._refreshOverlaySessions = null;
     };
 }
 

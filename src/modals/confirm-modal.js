@@ -49,7 +49,7 @@ var ConfirmModal = /** @class */ (function (_super) {
         }
 
         this.buttons = [cancelBtn, confirmBtn];
-        this.focusedButtonIndex = 1; // Default focus on Delete
+        this.focusedButtonIndex = 1; // Default focus on confirm action
         this.updateButtonFocus();
 
         // Keyboard handler
