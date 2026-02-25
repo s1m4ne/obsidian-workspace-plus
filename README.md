@@ -68,9 +68,11 @@ https://github.com/user-attachments/assets/6c2b5a13-cc9f-43ca-bff1-944c5b318a92
 - **Full hotkey workflow** — create, duplicate, rename, delete, and switch sessions without ever opening the manager
 - **Manual save command** for current session (`Cmd/Ctrl+Shift+S` by default)
 - **Auto-save mode control** — toggle enable/disable auto-save-on-switch and use warning prompts for unsaved changes
+- **Status bar quick switcher** — enabled by default; click to open quick overlay, `Cmd/Ctrl+Click` to save current session
+- **Session groups** — enabled by default; organize sessions by group and toggle the feature ON/OFF in settings
 - **Bulk select** with `Cmd/Ctrl+Click` to delete multiple sessions
 - **Keyboard navigation** in manager — arrow keys, Enter to switch, Delete/Backspace to remove
-- **Status bar** shows the active session name (click to open manager)
+- **Status bar** shows the active session and group name
 - **Automatic backup** — restored automatically if data is corrupted
 - **14 languages** — English, Japanese, Chinese (Simplified/Traditional), Korean, French, Spanish, German, Portuguese, Indonesian, Russian, Italian, Turkish, Arabic
 
@@ -116,6 +118,10 @@ https://github.com/user-attachments/assets/6c2b5a13-cc9f-43ca-bff1-944c5b318a92
 | Disable auto-save on switch | —                                             |
 | Previous session         | `Cmd/Ctrl+Shift+<`                                |
 | Next session             | `Cmd/Ctrl+Shift+Enter`, `Cmd/Ctrl+Shift+>`       |
+| Switch group             | —                                                 |
+| Exit group (show all sessions) | —                                          |
+| Next group               | `Cmd/Ctrl+Shift+Tab`                              |
+| Previous group           | —                                                 |
 | Search session overlay   | —                                                 |
 | Export sessions snapshot | —                                                 |
 | Import latest sessions snapshot | —                                           |
