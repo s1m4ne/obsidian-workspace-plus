@@ -10,6 +10,7 @@ var attachHotkeyMethods = require('./plugin/methods/hotkeys');
 var attachOverlayMethods = require('./plugin/methods/overlays');
 var attachPersistenceMethods = require('./plugin/methods/persistence');
 var attachSessionMethods = require('./plugin/methods/sessions');
+var utils = require('./utils');
 
 i18n.resolveLocale();
 
@@ -54,10 +55,7 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
                     return;
                 }
 
-                var isMac = typeof navigator !== 'undefined'
-                    && typeof navigator.platform === 'string'
-                    && navigator.platform.indexOf('Mac') !== -1;
-                var isSaveClick = isMac ? evt.metaKey : evt.ctrlKey;
+                var isSaveClick = utils.isModPressed(evt);
                 if (isSaveClick) {
                     evt.preventDefault();
                     evt.stopPropagation();

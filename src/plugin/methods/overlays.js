@@ -5,6 +5,121 @@ var i18n = require('../../i18n');
 var modals = require('../../modals');
 var formatRelativeTime = require('../../modals/format-relative-time');
 var groupTabUi = require('../../group-tab-ui');
+var utils = require('../../utils');
+
+function hasBlockingModal() {
+    return !!document.querySelector('.modal-container');
+}
+
+function syncSearchOverlaySelectedIndex(plugin, filtered, currentIndex, options) {
+    options = options || {};
+    if (!filtered || filtered.length === 0) {
+        return -1;
+    }
+
+    var activeIdx = plugin.findActiveSessionIndex(filtered);
+    if (activeIdx !== -1) {
+        return activeIdx;
+    }
+
+    if (options.preserveWhenMissing) {
+        if (currentIndex >= filtered.length) {
+            return filtered.length - 1;
+        }
+        return currentIndex < 0 ? 0 : currentIndex;
+    }
+
+    return 0;
+}
+
+function createSearchOverlayKeyHandler(options) {
+    return function (e) {
+        var plugin = options.plugin;
+        if (!plugin.searchOverlayEl) return;
+        if (hasBlockingModal()) return;
+
+        // Let global command hotkeys (e.g. Mod+Shift+Enter/Tab) flow through.
+        if (utils.isModPressed(e)) {
+            return;
+        }
+
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            plugin.hideSearchOverlay();
+            return;
+        }
+
+        if (e.key === 'Tab') {
+            if (document.activeElement === options.saveInput) return;
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            var nextGroupId = plugin.getRelativeGroupId(options.getOverlayGroupId(), e.shiftKey ? -1 : 1);
+            if (typeof nextGroupId === 'undefined') return;
+            options.applyOverlayGroupSelection(nextGroupId);
+            return;
+        }
+
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+            if (document.activeElement === options.saveInput) return;
+            var filtered = options.getFiltered();
+            e.preventDefault();
+            if (filtered.length === 0) return;
+            options.setKeyboardNav(true);
+            options.overlay.classList.add('wpp-keyboard-nav');
+            var dir = e.key === 'ArrowUp' ? -1 : 1;
+            var selectedIndex = options.getSelectedIndex();
+            options.setSelectedIndex((selectedIndex + dir + filtered.length) % filtered.length);
+            options.updateSelection();
+            return;
+        }
+
+        if (e.key === 'Enter' && !e.isComposing) {
+            if (document.activeElement === options.saveInput) return;
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            options.switchSelected();
+            return;
+        }
+
+        if (e.key === 'Delete' || e.key === 'Backspace') {
+            var searchInput = options.searchInput;
+            if (document.activeElement === searchInput && searchInput.value.length > 0) return;
+            if (document.activeElement === options.saveInput) return;
+            e.preventDefault();
+
+            var filteredForDelete = options.getFiltered();
+            var selectedForDelete = options.getSelectedIndex();
+            if (selectedForDelete < 0 || selectedForDelete >= filteredForDelete.length) return;
+            var sess = filteredForDelete[selectedForDelete];
+            if (Object.keys(plugin.data.sessions).length <= 1) {
+                new obsidian.Notice(i18n.L.cannotDeleteLast);
+                return;
+            }
+
+            var doDelete = function () {
+                plugin.deleteSession(sess.id).then(function (deleted) {
+                    if (!deleted) return;
+                    new obsidian.Notice(i18n.L.deleted(sess.name));
+                    options.refreshOrderedSessions();
+                });
+            };
+
+            if (plugin.data.confirmDeleteByHotkey !== false) {
+                new modals.ConfirmModal(plugin.app, i18n.L.confirmDeleteActive(sess.name), doDelete).open();
+            } else {
+                doDelete();
+            }
+            return;
+        }
+
+        if (e.key === '/' && document.activeElement !== options.searchInput && document.activeElement !== options.saveInput) {
+            e.preventDefault();
+            options.searchInput.focus();
+            options.searchInput.select();
+        }
+    };
+}
 
 function attachOverlayMethods(WorkspacePlusPlus) {
     // --- Switch overlay ---
@@ -32,26 +147,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
         var keyboardNav = false;
 
         function syncSelectedIndexToActive(options) {
-            options = options || {};
-            if (filtered.length === 0) {
-                selectedIndex = -1;
-                return;
-            }
-
-            var activeIdx = self.findActiveSessionIndex(filtered);
-            if (activeIdx !== -1) {
-                selectedIndex = activeIdx;
-                return;
-            }
-
-            if (options.preserveWhenMissing) {
-                if (selectedIndex >= filtered.length) {
-                    selectedIndex = filtered.length - 1;
-                }
-                return;
-            }
-
-            selectedIndex = 0;
+            selectedIndex = syncSearchOverlaySelectedIndex(self, filtered, selectedIndex, options || {});
         }
         syncSelectedIndexToActive();
 
@@ -729,95 +825,26 @@ function attachOverlayMethods(WorkspacePlusPlus) {
             renderList();
         };
 
-        this.searchOverlayKeyHandler = function (e) {
-            if (!self.searchOverlayEl) return;
-            // Don't process keys while a modal (rename/confirm) is open
-            if (document.querySelector('.modal-container')) return;
-
-            var isMac = navigator.platform.indexOf('Mac') !== -1;
-            var modHeld = isMac ? e.metaKey : e.ctrlKey;
-
-            // Let global command hotkeys (e.g. Mod+Shift+Enter/Tab) flow through.
-            if (modHeld) {
-                return;
-            }
-
-            if (e.key === 'Escape') {
-                e.preventDefault();
-                e.stopImmediatePropagation();
-                self.hideSearchOverlay();
-                return;
-            }
-
-            if (e.key === 'Tab') {
-                // Don't interfere with save input
-                if (document.activeElement === saveInput) return;
-                e.preventDefault();
-                e.stopImmediatePropagation();
-                var nextGroupId = self.getRelativeGroupId(getOverlayGroupId(), e.shiftKey ? -1 : 1);
-                if (typeof nextGroupId === 'undefined') return;
-                applyOverlayGroupSelection(nextGroupId);
-                return;
-            }
-
-            if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-                if (document.activeElement === saveInput) return;
-                e.preventDefault();
-                if (filtered.length === 0) return;
-                keyboardNav = true;
-                overlay.classList.add('wpp-keyboard-nav');
-                var dir = e.key === 'ArrowUp' ? -1 : 1;
-                selectedIndex = (selectedIndex + dir + filtered.length) % filtered.length;
-                updateSelection();
-                return;
-            }
-
-            if (e.key === 'Enter' && !e.isComposing) {
-                // Don't interfere with save input
-                if (document.activeElement === saveInput) return;
-                e.preventDefault();
-                e.stopImmediatePropagation();
-                switchSelected();
-                return;
-            }
-
-            if (e.key === 'Delete' || e.key === 'Backspace') {
-                // Don't interfere with text editing in inputs
-                if (document.activeElement === searchInput && searchInput.value.length > 0) return;
-                if (document.activeElement === saveInput) return;
-                e.preventDefault();
-                if (selectedIndex < 0 || selectedIndex >= filtered.length) return;
-                var sess = filtered[selectedIndex];
-                if (Object.keys(self.data.sessions).length <= 1) {
-                    new obsidian.Notice(L.cannotDeleteLast);
-                    return;
-                }
-                var doDelete = function () {
-                    self.deleteSession(sess.id).then(function (deleted) {
-                        if (!deleted) return;
-                        new obsidian.Notice(L.deleted(sess.name));
-                        refreshOrderedSessions();
-                    });
-                };
-                if (self.data.confirmDeleteByHotkey !== false) {
-                    new modals.ConfirmModal(self.app, L.confirmDeleteActive(sess.name), doDelete).open();
-                } else {
-                    doDelete();
-                }
-                return;
-            }
-
-            if (e.key === '/' && document.activeElement !== searchInput && document.activeElement !== saveInput) {
-                e.preventDefault();
-                searchInput.focus();
-                searchInput.select();
-            }
-        };
+        this.searchOverlayKeyHandler = createSearchOverlayKeyHandler({
+            plugin: self,
+            overlay: overlay,
+            saveInput: saveInput,
+            searchInput: searchInput,
+            getOverlayGroupId: getOverlayGroupId,
+            applyOverlayGroupSelection: applyOverlayGroupSelection,
+            switchSelected: switchSelected,
+            refreshOrderedSessions: refreshOrderedSessions,
+            updateSelection: updateSelection,
+            getFiltered: function () { return filtered; },
+            getSelectedIndex: function () { return selectedIndex; },
+            setSelectedIndex: function (value) { selectedIndex = value; },
+            setKeyboardNav: function (value) { keyboardNav = value; },
+        });
 
         this.searchOverlayClickOutsideHandler = function (e) {
             if (!self.searchOverlayEl) return;
             // Don't close if a modal (rename/confirm) is open
-            if (document.querySelector('.modal-container')) return;
+            if (hasBlockingModal()) return;
             // Let status bar handle its own toggle
             if (self.statusBarEl && self.statusBarEl.contains(e.target)) return;
             if (!self.searchOverlayEl.contains(e.target)) {
@@ -1279,10 +1306,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
         var showTime = Date.now();
 
         this.overlayKeyUpHandler = function (e) {
-            var isMac = navigator.platform.indexOf('Mac') !== -1;
-            var modHeld = isMac ? e.metaKey : e.ctrlKey;
-            var modShiftHeld = modHeld && e.shiftKey;
-            if (!modShiftHeld) {
+            if (!utils.isModShiftPressed(e)) {
                 // Ensure minimum 300ms visibility
                 var elapsed = Date.now() - showTime;
                 var minDelay = Math.max(0, 300 - elapsed);
@@ -1318,11 +1342,8 @@ function attachOverlayMethods(WorkspacePlusPlus) {
             }
             safetyCheck();
 
-            var isMac = navigator.platform.indexOf('Mac') !== -1;
-            var modHeld = isMac ? e.metaKey : e.ctrlKey;
-
             // Tab cycles groups (only when groups exist)
-            if (e.key === 'Tab' && self.switchOverlayEl && !modHeld) {
+            if (e.key === 'Tab' && self.switchOverlayEl && !utils.isModPressed(e)) {
                 e.preventDefault();
                 e.stopImmediatePropagation();
                 var nextGroupId = self.getRelativeGroupId(overlayGroupId, e.shiftKey ? -1 : 1);

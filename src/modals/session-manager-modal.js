@@ -6,6 +6,7 @@ var ConfirmModal = require('./confirm-modal');
 var RenameModal = require('./rename-modal');
 var formatRelativeTime = require('./format-relative-time');
 var groupTabUi = require('../group-tab-ui');
+var utils = require('../utils');
 
 // ============================================================
 // Session Manager Modal
@@ -461,8 +462,7 @@ var SessionManagerModal = /** @class */ (function (_super) {
             self.updateFocusUI();
 
             if (e.target.closest('button, .wpp-icon-btn')) return;
-            var isMac = navigator.platform.indexOf('Mac') !== -1;
-            var cmdKey = isMac ? e.metaKey : e.ctrlKey;
+            var cmdKey = utils.isModPressed(e);
             if (cmdKey) {
                 // Cmd+Click: toggle selection
                 if (self.selectedIds.has(session.id)) {
@@ -617,8 +617,7 @@ var SessionManagerModal = /** @class */ (function (_super) {
             item.addEventListener('mousedown', function (e) {
                 if (e.button !== 0) return;
                 if (e.target.closest('button, input, .wpp-icon-btn')) return;
-                var isMac = navigator.platform.indexOf('Mac') !== -1;
-                if (isMac ? e.metaKey : e.ctrlKey) return;
+                if (utils.isModPressed(e)) return;
 
                 var startX = e.clientX;
                 var startY = e.clientY;
