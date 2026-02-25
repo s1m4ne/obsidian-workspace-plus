@@ -56,6 +56,51 @@ function attachSessionMethods(WorkspacePlusPlus) {
         return this.getOrderedSessionsForGroup(this.data.activeGroupId);
     };
 
+    WorkspacePlusPlus.prototype.mergeVisibleSessionOrder = function (visibleOrder) {
+        var fullOrder = Array.isArray(this.data.sessionOrder) ? this.data.sessionOrder : [];
+        var visible = Array.isArray(visibleOrder) ? visibleOrder : [];
+        var visibleSet = {};
+        for (var i = 0; i < visible.length; i++) {
+            visibleSet[visible[i]] = true;
+        }
+
+        var visibleIdx = 0;
+        var merged = [];
+        for (var fi = 0; fi < fullOrder.length; fi++) {
+            if (visibleSet[fullOrder[fi]]) {
+                merged.push(visible[visibleIdx++]);
+            } else {
+                merged.push(fullOrder[fi]);
+            }
+        }
+        while (visibleIdx < visible.length) {
+            merged.push(visible[visibleIdx++]);
+        }
+        return merged;
+    };
+
+    WorkspacePlusPlus.prototype.setSessionOrderFromVisible = function (visibleOrder, options) {
+        var prev = Array.isArray(this.data.sessionOrder) ? this.data.sessionOrder : [];
+        var merged = this.mergeVisibleSessionOrder(visibleOrder);
+        var changed = prev.length !== merged.length;
+        if (!changed) {
+            for (var i = 0; i < prev.length; i++) {
+                if (prev[i] !== merged[i]) {
+                    changed = true;
+                    break;
+                }
+            }
+        }
+
+        this.data.sessionOrder = merged;
+        if (!(options && options.syncCommands === false)) {
+            this.syncSessionCommands();
+        }
+        if (options && options.persist === false) return Promise.resolve(changed);
+        if (!changed) return Promise.resolve(false);
+        return this.persistData().then(function () { return true; });
+    };
+
     WorkspacePlusPlus.prototype.getSessionIndex = function (sessions, sessionId) {
         if (!sessions || sessions.length === 0) return 0;
         for (var i = 0; i < sessions.length; i++) {

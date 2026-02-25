@@ -784,26 +784,6 @@ var SessionManagerModal = /** @class */ (function (_super) {
                         newVisibleOrder.push(el.dataset.sessionId);
                     });
 
-                    // Merge into full session order (preserve non-visible sessions)
-                    var fullOrder = self.plugin.data.sessionOrder;
-                    var visibleSet = {};
-                    for (var vi = 0; vi < newVisibleOrder.length; vi++) {
-                        visibleSet[newVisibleOrder[vi]] = true;
-                    }
-                    var visibleIdx = 0;
-                    var merged = [];
-                    for (var fi = 0; fi < fullOrder.length; fi++) {
-                        if (visibleSet[fullOrder[fi]]) {
-                            merged.push(newVisibleOrder[visibleIdx++]);
-                        } else {
-                            merged.push(fullOrder[fi]);
-                        }
-                    }
-                    while (visibleIdx < newVisibleOrder.length) {
-                        merged.push(newVisibleOrder[visibleIdx++]);
-                    }
-                    self.plugin.data.sessionOrder = merged;
-
                     // Update index labels in-place
                     items.forEach(function (el, i) {
                         var indexEl = el.querySelector('.wpp-session-index');
@@ -820,7 +800,7 @@ var SessionManagerModal = /** @class */ (function (_super) {
                         movedRef.classList.remove('wpp-just-moved');
                     }, 600);
 
-                    self.plugin.persistData();
+                    self.plugin.setSessionOrderFromVisible(newVisibleOrder, { syncCommands: false });
                 }
 
                 document.addEventListener('mousemove', onMouseMove);

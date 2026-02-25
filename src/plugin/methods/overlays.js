@@ -167,13 +167,10 @@ function attachOverlayMethods(WorkspacePlusPlus) {
             while (groupTabsRow.firstChild) groupTabsRow.removeChild(groupTabsRow.firstChild);
             var groups = self.data.groups || {};
             var realGroups = self.getOrderedGroups();
-            if (realGroups.length === 0) {
-                groupTabsRow.style.display = 'none';
-                footerRow.textContent = L.searchOverlayHelp;
-                return;
-            }
             groupTabsRow.style.display = '';
-            footerRow.textContent = (L.searchOverlayHelpWithGroups || L.searchOverlayHelp);
+            footerRow.textContent = realGroups.length > 0
+                ? (L.searchOverlayHelpWithGroups || L.searchOverlayHelp)
+                : L.searchOverlayHelp;
 
             var groupOrder = self.getOrderedGroupTabIds();
 
@@ -925,28 +922,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                     for (var ni = 0; ni < items.length; ni++) {
                         newVisibleOrder.push(items[ni].dataset.sessionId);
                     }
-
-                    // Merge into full session order (preserve non-visible sessions)
-                    var fullOrder = self.data.sessionOrder;
-                    var visibleSet = {};
-                    for (var vi = 0; vi < newVisibleOrder.length; vi++) {
-                        visibleSet[newVisibleOrder[vi]] = true;
-                    }
-                    var visibleIdx = 0;
-                    var merged = [];
-                    for (var fi = 0; fi < fullOrder.length; fi++) {
-                        if (visibleSet[fullOrder[fi]]) {
-                            merged.push(newVisibleOrder[visibleIdx++]);
-                        } else {
-                            merged.push(fullOrder[fi]);
-                        }
-                    }
-                    while (visibleIdx < newVisibleOrder.length) {
-                        merged.push(newVisibleOrder[visibleIdx++]);
-                    }
-                    self.data.sessionOrder = merged;
-                    self.syncSessionCommands();
-                    self.persistData();
+                    self.setSessionOrderFromVisible(newVisibleOrder);
 
                     dragItem.classList.add('wpp-just-moved');
                     setTimeout(function () {
