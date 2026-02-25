@@ -40,10 +40,15 @@ var RenameModal = /** @class */ (function (_super) {
 
         var doRename = function () {
             var newName = input.value.trim();
-            if (newName && newName !== self.currentName) {
-                self.onRename(newName);
-                self.close();
+            if (!newName) {
+                if (opts.emptyNotice) {
+                    new obsidian.Notice(opts.emptyNotice);
+                }
+                return;
             }
+            if (newName === self.currentName) return;
+            self.onRename(newName);
+            self.close();
         };
 
         renameBtn.addEventListener('click', doRename);

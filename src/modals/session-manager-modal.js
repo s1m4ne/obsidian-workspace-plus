@@ -853,6 +853,8 @@ var SessionManagerModal = /** @class */ (function (_super) {
                 self.renderList();
                 new obsidian.Notice(L.renamed(oldName, newName));
             });
+        }, {
+            emptyNotice: L.emptyName,
         }).open();
     };
 

@@ -586,6 +586,8 @@ function attachSessionMethods(WorkspacePlusPlus) {
                 }
                 self.showSwitchOverlay(ordered, activeIdx);
             });
+        }, {
+            emptyNotice: L.emptyName,
         }).open();
     };
 

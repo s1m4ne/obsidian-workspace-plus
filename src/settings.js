@@ -245,7 +245,7 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                 var sessionCount = self.plugin.getGroupSessionIds(group.id).length;
                 var groupSetting = new obsidian.Setting(containerEl)
                     .setName(group.name)
-                    .setDesc(L.settingsGroupSessionCount(sessionCount));
+                    .setDesc(L.settingsGroupManageSessionsDesc + ' · ' + L.settingsGroupSessionCount(sessionCount));
 
                 // Manage sessions button
                 groupSetting.addButton(function (btn) {
@@ -275,9 +275,9 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                 // Delete
                 groupSetting.addExtraButton(function (btn) {
                     btn.setIcon('trash-2');
-                    btn.setTooltip(L.delete);
+                    btn.setTooltip(L.settingsGroupDelete);
                     btn.onClick(function () {
-                        new modals.ConfirmModal(self.app, L.confirmDeleteGroup(group.name), function () {
+                        new modals.ConfirmModal(self.app, L.settingsGroupDeleteConfirm(group.name), function () {
                             self.plugin.deleteGroup(group.id).then(function () {
                                 self.display();
                             });

@@ -627,6 +627,8 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                                     self.persistData().then(function () {
                                         refreshOrderedSessions();
                                     });
+                                }, {
+                                    emptyNotice: L.emptyName,
                                 }).open();
                             });
                         });
@@ -714,6 +716,8 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                             self.persistData().then(function () {
                                 refreshOrderedSessions();
                             });
+                        }, {
+                            emptyNotice: L.emptyName,
                         }).open();
                     });
 

@@ -1,5 +1,6 @@
 'use strict';
 
+var obsidian = require('obsidian');
 var i18n = require('../i18n');
 var modals = require('../modals');
 
@@ -132,6 +133,31 @@ function registerCommands(plugin) {
         callback: function () { plugin.openSearchOverlay(); },
     });
 
+    plugin.addCommand({
+        id: 'export-sessions-snapshot',
+        name: L.cmdExportSessions,
+        callback: function () {
+            plugin.exportSessionsSnapshot().catch(function () {
+                new obsidian.Notice(L.exportSessionsFailed);
+            });
+        },
+    });
+
+    plugin.addCommand({
+        id: 'import-latest-sessions-snapshot',
+        name: L.cmdImportSessions,
+        callback: function () {
+            new modals.ConfirmModal(plugin.app, L.confirmImportSessions, function () {
+                return plugin.importSessionsFromLatestExport().catch(function () {
+                    new obsidian.Notice(L.importSessionsFailed);
+                });
+            }, {
+                confirmText: L.settingsImportSessionsBtn || L.cmdImportSessions,
+                confirmClass: 'mod-cta',
+            }).open();
+        },
+    });
+
     // --- Group commands ---
 
     function getCurrentGroupViewId() {
@@ -145,6 +171,22 @@ function registerCommands(plugin) {
         var activeIndex = plugin.getActiveSessionIndex(ordered);
         plugin.showSwitchOverlay(ordered, activeIndex, groupId || null);
     }
+
+    plugin.addCommand({
+        id: 'switch-group',
+        name: L.cmdSwitchGroup,
+        callback: function () {
+            var targetGroupId = plugin.getRelativeGroupId(getCurrentGroupViewId(), 1);
+            if (typeof targetGroupId === 'undefined') {
+                showSwitchOverlayForGroup(plugin.data.activeGroupId || null);
+                return;
+            }
+
+            plugin.resolveGroupSelection(targetGroupId).then(function (result) {
+                showSwitchOverlayForGroup(result.resolvedGroupId);
+            });
+        },
+    });
 
     plugin.addCommand({
         id: 'exit-group',
