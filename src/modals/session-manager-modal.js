@@ -800,8 +800,7 @@ var SessionManagerModal = /** @class */ (function (_super) {
             name = this.plugin.getNextSessionName();
         }
         // Check duplicate
-        var exists = Object.values(this.plugin.data.sessions)
-            .some(function (s) { return s.name === name; });
+        var exists = this.plugin.isSessionNameTaken(name);
         if (exists) {
             new obsidian.Notice(L.duplicateName);
             return;
@@ -841,8 +840,7 @@ var SessionManagerModal = /** @class */ (function (_super) {
         var L = i18n.L;
         var self = this;
         new RenameModal(this.app, session.name, function (newName) {
-            var exists = Object.values(self.plugin.data.sessions)
-                .some(function (s) { return s.name === newName && s.id !== session.id; });
+            var exists = self.plugin.isSessionNameTaken(newName, session.id);
             if (exists) {
                 new obsidian.Notice(L.duplicateName);
                 return;
@@ -1048,15 +1046,12 @@ var SessionManagerModal = /** @class */ (function (_super) {
                                     new obsidian.Notice(L.groupEmptyName);
                                     return;
                                 }
-                                var existingGroups = self.plugin.data.groups || {};
-                                var keys = Object.keys(existingGroups);
-                                for (var i = 0; i < keys.length; i++) {
-                                    if (existingGroups[keys[i]].name === name.trim()) {
-                                        new obsidian.Notice(L.groupDuplicateName);
-                                        return;
-                                    }
+                                var groupName = name.trim();
+                                if (self.plugin.isGroupNameTaken(groupName)) {
+                                    new obsidian.Notice(L.groupDuplicateName);
+                                    return;
                                 }
-                                self.plugin.createGroup(name.trim()).then(function () {
+                                self.plugin.createGroup(groupName).then(function () {
                                     self.renderGroupTabs();
                                 });
                             }, {
@@ -1140,13 +1135,9 @@ var SessionManagerModal = /** @class */ (function (_super) {
                             item.setIcon('pencil');
                             item.onClick(function () {
                                 new RenameModal(self.app, group.name, function (newName) {
-                                    var existingGroups = self.plugin.data.groups || {};
-                                    var keys = Object.keys(existingGroups);
-                                    for (var i = 0; i < keys.length; i++) {
-                                        if (existingGroups[keys[i]].name === newName && keys[i] !== group.id) {
-                                            new obsidian.Notice(L.groupDuplicateName);
-                                            return;
-                                        }
+                                    if (self.plugin.isGroupNameTaken(newName, group.id)) {
+                                        new obsidian.Notice(L.groupDuplicateName);
+                                        return;
                                     }
                                     self.plugin.renameGroup(group.id, newName).then(function () {
                                         self.renderGroupTabs();
@@ -1213,15 +1204,12 @@ var SessionManagerModal = /** @class */ (function (_super) {
                     new obsidian.Notice(L.groupEmptyName);
                     return;
                 }
-                var existingGroups = self.plugin.data.groups || {};
-                var keys = Object.keys(existingGroups);
-                for (var i = 0; i < keys.length; i++) {
-                    if (existingGroups[keys[i]].name === name.trim()) {
-                        new obsidian.Notice(L.groupDuplicateName);
-                        return;
-                    }
+                var groupName = name.trim();
+                if (self.plugin.isGroupNameTaken(groupName)) {
+                    new obsidian.Notice(L.groupDuplicateName);
+                    return;
                 }
-                self.plugin.createGroup(name.trim()).then(function () {
+                self.plugin.createGroup(groupName).then(function () {
                     self.renderGroupTabs();
                 });
             }, {

@@ -56,6 +56,30 @@ function attachSessionMethods(WorkspacePlusPlus) {
         return this.getOrderedSessionsForGroup(this.data.activeGroupId);
     };
 
+    WorkspacePlusPlus.prototype.isSessionNameTaken = function (name, excludeSessionId) {
+        var sessions = this.data.sessions || {};
+        var keys = Object.keys(sessions);
+        for (var i = 0; i < keys.length; i++) {
+            var id = keys[i];
+            if (excludeSessionId && id === excludeSessionId) continue;
+            if (!sessions[id]) continue;
+            if (sessions[id].name === name) return true;
+        }
+        return false;
+    };
+
+    WorkspacePlusPlus.prototype.isGroupNameTaken = function (name, excludeGroupId) {
+        var groups = this.data.groups || {};
+        var keys = Object.keys(groups);
+        for (var i = 0; i < keys.length; i++) {
+            var id = keys[i];
+            if (excludeGroupId && id === excludeGroupId) continue;
+            if (!groups[id]) continue;
+            if (groups[id].name === name) return true;
+        }
+        return false;
+    };
+
     WorkspacePlusPlus.prototype.mergeVisibleSessionOrder = function (visibleOrder) {
         var fullOrder = Array.isArray(this.data.sessionOrder) ? this.data.sessionOrder : [];
         var visible = Array.isArray(visibleOrder) ? visibleOrder : [];
@@ -543,8 +567,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
         }
 
         new modals.RenameModal(this.app, session.name, function (newName) {
-            var exists = Object.values(self.data.sessions)
-                .some(function (s) { return s.name === newName && s.id !== session.id; });
+            var exists = self.isSessionNameTaken(newName, session.id);
             if (exists) {
                 new obsidian.Notice(L.duplicateName);
                 return;

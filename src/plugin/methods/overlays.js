@@ -106,8 +106,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
             if (!name) {
                 name = self.getNextSessionName();
             }
-            var exists = Object.values(self.data.sessions)
-                .some(function (s) { return s.name === name; });
+            var exists = self.isSessionNameTaken(name);
             if (exists) {
                 new obsidian.Notice(L.duplicateName);
                 return;
@@ -277,15 +276,12 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                                         new obsidian.Notice(L.groupEmptyName);
                                         return;
                                     }
-                                    var existingGroups = self.data.groups || {};
-                                    var keys = Object.keys(existingGroups);
-                                    for (var i = 0; i < keys.length; i++) {
-                                        if (existingGroups[keys[i]].name === name.trim()) {
-                                            new obsidian.Notice(L.groupDuplicateName);
-                                            return;
-                                        }
+                                    var groupName = name.trim();
+                                    if (self.isGroupNameTaken(groupName)) {
+                                        new obsidian.Notice(L.groupDuplicateName);
+                                        return;
                                     }
-                                    self.createGroup(name.trim()).then(function () {
+                                    self.createGroup(groupName).then(function () {
                                         renderGroupTabs();
                                         refreshOrderedSessions();
                                     });
@@ -372,13 +368,9 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                                 mi.setIcon('pencil');
                                 mi.onClick(function () {
                                     new modals.RenameModal(self.app, group.name, function (newName) {
-                                        var existingGroups = self.data.groups || {};
-                                        var keys = Object.keys(existingGroups);
-                                        for (var i = 0; i < keys.length; i++) {
-                                            if (existingGroups[keys[i]].name === newName && keys[i] !== group.id) {
-                                                new obsidian.Notice(L.groupDuplicateName);
-                                                return;
-                                            }
+                                        if (self.isGroupNameTaken(newName, group.id)) {
+                                            new obsidian.Notice(L.groupDuplicateName);
+                                            return;
                                         }
                                         self.renameGroup(group.id, newName).then(function () {
                                             renderGroupTabs();
@@ -442,15 +434,12 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                         new obsidian.Notice(L.groupEmptyName);
                         return;
                     }
-                    var existingGroups = self.data.groups || {};
-                    var keys = Object.keys(existingGroups);
-                    for (var i = 0; i < keys.length; i++) {
-                        if (existingGroups[keys[i]].name === name.trim()) {
-                            new obsidian.Notice(L.groupDuplicateName);
-                            return;
-                        }
+                    var groupName = name.trim();
+                    if (self.isGroupNameTaken(groupName)) {
+                        new obsidian.Notice(L.groupDuplicateName);
+                        return;
                     }
-                    self.createGroup(name.trim()).then(function () {
+                    self.createGroup(groupName).then(function () {
                         renderGroupTabs();
                         refreshOrderedSessions();
                     });
@@ -626,8 +615,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                             mi.setIcon('pencil');
                             mi.onClick(function () {
                                 new modals.RenameModal(self.app, sess.name, function (newName) {
-                                    var exists = Object.values(self.data.sessions)
-                                        .some(function (s) { return s.name === newName && s.id !== sess.id; });
+                                    var exists = self.isSessionNameTaken(newName, sess.id);
                                     if (exists) {
                                         new obsidian.Notice(L.duplicateName);
                                         return;
@@ -714,8 +702,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                     renameIcon.addEventListener('click', function (e) {
                         e.stopPropagation();
                         new modals.RenameModal(self.app, sess.name, function (newName) {
-                            var exists = Object.values(self.data.sessions)
-                                .some(function (s) { return s.name === newName && s.id !== sess.id; });
+                            var exists = self.isSessionNameTaken(newName, sess.id);
                             if (exists) {
                                 new obsidian.Notice(L.duplicateName);
                                 return;

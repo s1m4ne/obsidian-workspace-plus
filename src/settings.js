@@ -228,14 +228,9 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                     new obsidian.Notice(L.groupEmptyName);
                     return;
                 }
-                // Check duplicate
-                var groups = self.plugin.data.groups || {};
-                var keys = Object.keys(groups);
-                for (var i = 0; i < keys.length; i++) {
-                    if (groups[keys[i]].name === name) {
-                        new obsidian.Notice(L.groupDuplicateName);
-                        return;
-                    }
+                if (self.plugin.isGroupNameTaken(name)) {
+                    new obsidian.Notice(L.groupDuplicateName);
+                    return;
                 }
                 self.plugin.createGroup(name).then(function () {
                     self.display();
@@ -266,14 +261,9 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                     btn.setTooltip(L.rename);
                     btn.onClick(function () {
                         new modals.RenameModal(self.app, group.name, function (newName) {
-                            // Check duplicate
-                            var groups = self.plugin.data.groups || {};
-                            var keys = Object.keys(groups);
-                            for (var i = 0; i < keys.length; i++) {
-                                if (groups[keys[i]].name === newName && keys[i] !== group.id) {
-                                    new obsidian.Notice(L.groupDuplicateName);
-                                    return;
-                                }
+                            if (self.plugin.isGroupNameTaken(newName, group.id)) {
+                                new obsidian.Notice(L.groupDuplicateName);
+                                return;
                             }
                             self.plugin.renameGroup(group.id, newName).then(function () {
                                 self.display();
