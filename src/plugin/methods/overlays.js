@@ -1250,6 +1250,36 @@ function attachOverlayMethods(WorkspacePlusPlus) {
             overlayGroupId = this.data.activeGroupId || null;
         }
         this.switchOverlayViewGroupId = overlayGroupId;
+        var self = this;
+
+        function reopenOverlayForGroup(result) {
+            var newOrdered = result.sessions;
+            var newActiveIndex = self.getActiveSessionIndex(newOrdered);
+            self.showSwitchOverlay(newOrdered, newActiveIndex, result.resolvedGroupId);
+        }
+
+        function onGroupTabClick(targetGroupId, e) {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            self.resolveGroupSelection(targetGroupId || null).then(reopenOverlayForGroup);
+        }
+
+        function onSessionItemClick(sessionId, e) {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            if (!sessionId) return;
+            if (sessionId === self.data.activeSessionId) {
+                self.hideSwitchOverlay();
+                return;
+            }
+            self.switchSession(sessionId, { silent: true }).then(function (switched) {
+                if (switched) self.hideSwitchOverlay();
+            });
+        }
 
         var overlay = document.createElement('div');
         overlay.className = 'wpp-switch-overlay';
@@ -1277,12 +1307,20 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                     allTab.className = 'wpp-group-tab';
                     if (!overlayGroupId) allTab.classList.add('is-active');
                     allTab.textContent = L.groupAll;
+                    allTab.addEventListener('click', function (e) {
+                        onGroupTabClick(null, e);
+                    });
                     groupTabsRow.appendChild(allTab);
                 } else if (allGroups[gid]) {
                     var tab = document.createElement('div');
                     tab.className = 'wpp-group-tab';
                     if (overlayGroupId === gid) tab.classList.add('is-active');
                     tab.textContent = allGroups[gid].name;
+                    (function (targetGroupId) {
+                        tab.addEventListener('click', function (e) {
+                            onGroupTabClick(targetGroupId, e);
+                        });
+                    })(gid);
                     groupTabsRow.appendChild(tab);
                 }
             }
@@ -1300,6 +1338,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
             if (i === activeIndex) {
                 item.classList.add('is-active');
             }
+            item.dataset.sessionId = ordered[i].id;
 
             var name = document.createElement('div');
             name.className = 'wpp-switch-name';
@@ -1311,6 +1350,12 @@ function attachOverlayMethods(WorkspacePlusPlus) {
             hotkeyEl.className = 'wpp-switch-hotkey';
             hotkeyEl.textContent = hk || String(i + 1);
             item.appendChild(hotkeyEl);
+
+            (function (targetSessionId) {
+                item.addEventListener('click', function (e) {
+                    onSessionItemClick(targetSessionId, e);
+                });
+            })(ordered[i].id);
 
             list.appendChild(item);
         }
@@ -1388,7 +1433,6 @@ function attachOverlayMethods(WorkspacePlusPlus) {
         this.switchOverlayEl = overlay;
 
         // Dismiss when modifier keys are released
-        var self = this;
         var showTime = Date.now();
 
         this.overlayKeyUpHandler = function (e) {

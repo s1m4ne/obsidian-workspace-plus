@@ -307,6 +307,21 @@ body.wpp-session-list-dragging * {
     max-width: 180px;
     text-align: center;
     color: var(--text-muted);
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.wpp-switch-overlay:not(.wpp-search-overlay) .wpp-switch-item {
+    cursor: pointer;
+}
+
+.wpp-switch-overlay:not(.wpp-search-overlay) .wpp-switch-item:hover {
+    background: var(--background-modifier-hover-dimmed, rgba(var(--mono-rgb-100), 0.03));
+    color: var(--text-normal);
+}
+
+.wpp-switch-overlay:not(.wpp-search-overlay) .wpp-switch-item.is-active:hover {
+    background: var(--interactive-accent);
+    color: var(--text-on-accent);
 }
 
 .wpp-switch-item.is-active {
