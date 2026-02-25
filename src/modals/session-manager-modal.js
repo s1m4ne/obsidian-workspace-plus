@@ -795,18 +795,10 @@ var SessionManagerModal = /** @class */ (function (_super) {
         var self = this;
         var selectedGroupId = this.getModalGroupId();
         var beforeActiveGroupId = this.plugin.data.activeGroupId || null;
-        var name = this.nameInput.value.trim();
-        if (!name) {
-            name = this.plugin.getNextSessionName();
-        }
-        // Check duplicate
-        var exists = this.plugin.isSessionNameTaken(name);
-        if (exists) {
-            new obsidian.Notice(L.duplicateName);
-            return;
-        }
-        this.plugin.createSession(name).then(function () {
-            var createdSessionId = self.plugin.data.activeSessionId;
+        this.plugin.createSessionValidated(this.nameInput.value).then(function (result) {
+            if (!result || !result.created) return;
+            var createdSessionId = result.sessionId;
+            var createdName = result.name;
             var chain = Promise.resolve();
 
             if (selectedGroupId && selectedGroupId !== beforeActiveGroupId) {
@@ -823,7 +815,7 @@ var SessionManagerModal = /** @class */ (function (_super) {
                 self.nameInput.value = '';
                 self.renderGroupTabs();
                 self.renderList();
-                new obsidian.Notice(L.created(name));
+                new obsidian.Notice(L.created(createdName));
             });
         });
     };
@@ -840,18 +832,9 @@ var SessionManagerModal = /** @class */ (function (_super) {
         var L = i18n.L;
         var self = this;
         new RenameModal(this.app, session.name, function (newName) {
-            var exists = self.plugin.isSessionNameTaken(newName, session.id);
-            if (exists) {
-                new obsidian.Notice(L.duplicateName);
-                return;
-            }
-            var oldName = session.name;
-            session.name = newName;
-            session.modified = Date.now();
-            self.plugin.updateStatusBar();
-            self.plugin.persistData().then(function () {
+            self.plugin.renameSessionById(session.id, newName).then(function (renamed) {
+                if (!renamed) return;
                 self.renderList();
-                new obsidian.Notice(L.renamed(oldName, newName));
             });
         }, {
             emptyNotice: L.emptyName,
@@ -1044,22 +1027,15 @@ var SessionManagerModal = /** @class */ (function (_super) {
                         mi.setIcon('plus');
                         mi.onClick(function () {
                             new RenameModal(self.app, '', function (name) {
-                                if (!name.trim()) {
-                                    new obsidian.Notice(L.groupEmptyName);
-                                    return;
-                                }
-                                var groupName = name.trim();
-                                if (self.plugin.isGroupNameTaken(groupName)) {
-                                    new obsidian.Notice(L.groupDuplicateName);
-                                    return;
-                                }
-                                self.plugin.createGroup(groupName).then(function () {
+                                self.plugin.createGroupValidated(name).then(function (created) {
+                                    if (!created) return;
                                     self.renderGroupTabs();
                                 });
                             }, {
                                 title: L.groupCreateNew,
                                 placeholder: L.groupCreatePlaceholder,
                                 buttonText: L.save,
+                                emptyNotice: L.groupEmptyName,
                             }).open();
                         });
                     });
@@ -1137,14 +1113,14 @@ var SessionManagerModal = /** @class */ (function (_super) {
                             item.setIcon('pencil');
                             item.onClick(function () {
                                 new RenameModal(self.app, group.name, function (newName) {
-                                    if (self.plugin.isGroupNameTaken(newName, group.id)) {
-                                        new obsidian.Notice(L.groupDuplicateName);
-                                        return;
-                                    }
-                                    self.plugin.renameGroup(group.id, newName).then(function () {
+                                    self.plugin.renameGroupValidated(group.id, newName).then(function (renamed) {
+                                        if (!renamed) return;
                                         self.renderGroupTabs();
                                     });
-                                }, { title: L.groupContextRename }).open();
+                                }, {
+                                    title: L.groupContextRename,
+                                    emptyNotice: L.groupEmptyName,
+                                }).open();
                             });
                         });
                         var groupSessionIds = self.plugin.getGroupSessionIds(group.id);
@@ -1202,22 +1178,15 @@ var SessionManagerModal = /** @class */ (function (_super) {
 
         addBtn.addEventListener('click', function () {
             new RenameModal(self.app, '', function (name) {
-                if (!name.trim()) {
-                    new obsidian.Notice(L.groupEmptyName);
-                    return;
-                }
-                var groupName = name.trim();
-                if (self.plugin.isGroupNameTaken(groupName)) {
-                    new obsidian.Notice(L.groupDuplicateName);
-                    return;
-                }
-                self.plugin.createGroup(groupName).then(function () {
+                self.plugin.createGroupValidated(name).then(function (created) {
+                    if (!created) return;
                     self.renderGroupTabs();
                 });
             }, {
                 title: L.groupCreateNew,
                 placeholder: L.groupCreatePlaceholder,
                 buttonText: L.save,
+                emptyNotice: L.groupEmptyName,
             }).open();
         });
     };

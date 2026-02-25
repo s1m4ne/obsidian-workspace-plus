@@ -223,16 +223,8 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
             btn.setButtonText(L.settingsGroupCreateBtn);
             btn.onClick(function () {
                 if (!groupNameInput) return;
-                var name = groupNameInput.getValue().trim();
-                if (!name) {
-                    new obsidian.Notice(L.groupEmptyName);
-                    return;
-                }
-                if (self.plugin.isGroupNameTaken(name)) {
-                    new obsidian.Notice(L.groupDuplicateName);
-                    return;
-                }
-                self.plugin.createGroup(name).then(function () {
+                self.plugin.createGroupValidated(groupNameInput.getValue()).then(function (created) {
+                    if (!created) return;
                     self.display();
                 });
             });
@@ -261,13 +253,12 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                     btn.setTooltip(L.rename);
                     btn.onClick(function () {
                         new modals.RenameModal(self.app, group.name, function (newName) {
-                            if (self.plugin.isGroupNameTaken(newName, group.id)) {
-                                new obsidian.Notice(L.groupDuplicateName);
-                                return;
-                            }
-                            self.plugin.renameGroup(group.id, newName).then(function () {
+                            self.plugin.renameGroupValidated(group.id, newName).then(function (renamed) {
+                                if (!renamed) return;
                                 self.display();
                             });
+                        }, {
+                            emptyNotice: L.groupEmptyName,
                         }).open();
                     });
                 });

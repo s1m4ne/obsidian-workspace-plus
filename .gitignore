@@ -7,3 +7,4 @@ data.json
 data.backup.json
 .claude/
 .workspace-plus-plus/
+.hotreload

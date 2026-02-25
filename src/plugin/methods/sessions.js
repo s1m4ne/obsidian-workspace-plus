@@ -80,6 +80,133 @@ function attachSessionMethods(WorkspacePlusPlus) {
         return false;
     };
 
+    WorkspacePlusPlus.prototype.createSessionValidated = function (name, options) {
+        var L = i18n.L;
+        options = options || {};
+        var rawName = typeof name === 'string' ? name : '';
+        var finalName = rawName.trim();
+        if (!finalName) {
+            // Empty input can auto-generate, but whitespace-only input is treated as invalid.
+            if (rawName.length > 0) {
+                if (options.notify !== false) {
+                    new obsidian.Notice(L.emptyName);
+                }
+                return Promise.resolve({
+                    created: false,
+                    reason: 'empty',
+                    name: '',
+                    sessionId: null,
+                });
+            }
+            finalName = this.getNextSessionName();
+        }
+
+        if (this.isSessionNameTaken(finalName)) {
+            if (options.notify !== false) {
+                new obsidian.Notice(L.duplicateName);
+            }
+            return Promise.resolve({
+                created: false,
+                reason: 'duplicate',
+                name: finalName,
+                sessionId: null,
+            });
+        }
+
+        var self = this;
+        return this.createSession(finalName).then(function () {
+            return {
+                created: true,
+                reason: '',
+                name: finalName,
+                sessionId: self.data.activeSessionId,
+            };
+        });
+    };
+
+    WorkspacePlusPlus.prototype.renameSessionById = function (sessionId, newName, options) {
+        var L = i18n.L;
+        options = options || {};
+        var session = this.data.sessions[sessionId];
+        if (!session) return Promise.resolve(false);
+
+        var normalized = typeof newName === 'string' ? newName.trim() : '';
+        if (!normalized) {
+            if (options.notify !== false) {
+                new obsidian.Notice(L.emptyName);
+            }
+            return Promise.resolve(false);
+        }
+        if (normalized === session.name) return Promise.resolve(false);
+
+        if (this.isSessionNameTaken(normalized, sessionId)) {
+            if (options.notify !== false) {
+                new obsidian.Notice(L.duplicateName);
+            }
+            return Promise.resolve(false);
+        }
+
+        var oldName = session.name;
+        session.name = normalized;
+        session.modified = Date.now();
+        this.updateStatusBar();
+        this.syncSessionCommands();
+
+        return this.persistData().then(function () {
+            if (options.notify !== false) {
+                new obsidian.Notice(L.renamed(oldName, normalized));
+            }
+            return true;
+        });
+    };
+
+    WorkspacePlusPlus.prototype.createGroupValidated = function (name, options) {
+        var L = i18n.L;
+        options = options || {};
+        var normalized = typeof name === 'string' ? name.trim() : '';
+
+        if (!normalized) {
+            if (options.notify !== false) {
+                new obsidian.Notice(L.groupEmptyName);
+            }
+            return Promise.resolve(false);
+        }
+        if (this.isGroupNameTaken(normalized)) {
+            if (options.notify !== false) {
+                new obsidian.Notice(L.groupDuplicateName);
+            }
+            return Promise.resolve(false);
+        }
+
+        return this.createGroup(normalized);
+    };
+
+    WorkspacePlusPlus.prototype.renameGroupValidated = function (groupId, newName, options) {
+        var L = i18n.L;
+        options = options || {};
+        var groups = this.data.groups || {};
+        var group = groups[groupId];
+        if (!group) return Promise.resolve(false);
+
+        var normalized = typeof newName === 'string' ? newName.trim() : '';
+        if (!normalized) {
+            if (options.notify !== false) {
+                new obsidian.Notice(L.groupEmptyName);
+            }
+            return Promise.resolve(false);
+        }
+        if (normalized === group.name) return Promise.resolve(false);
+
+        if (this.isGroupNameTaken(normalized, groupId)) {
+            if (options.notify !== false) {
+                new obsidian.Notice(L.groupDuplicateName);
+            }
+            return Promise.resolve(false);
+        }
+
+        return this.renameGroup(groupId, normalized);
+    };
+
     WorkspacePlusPlus.prototype.mergeVisibleSessionOrder = function (visibleOrder) {
         var fullOrder = Array.isArray(this.data.sessionOrder) ? this.data.sessionOrder : [];
         var visible = Array.isArray(visibleOrder) ? visibleOrder : [];
@@ -567,18 +694,8 @@ function attachSessionMethods(WorkspacePlusPlus) {
         }
 
         new modals.RenameModal(this.app, session.name, function (newName) {
-            var exists = self.isSessionNameTaken(newName, session.id);
-            if (exists) {
-                new obsidian.Notice(L.duplicateName);
-                return;
-            }
-            var oldName = session.name;
-            session.name = newName;
-            session.modified = Date.now();
-            self.updateStatusBar();
-            self.syncSessionCommands();
-            self.persistData().then(function () {
-                new obsidian.Notice(L.renamed(oldName, newName));
+            self.renameSessionById(session.id, newName).then(function (renamed) {
+                if (!renamed) return;
                 var ordered = self.getOrderedSessions();
                 var activeIdx = 0;
                 for (var i = 0; i < ordered.length; i++) {

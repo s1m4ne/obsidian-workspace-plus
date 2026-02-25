@@ -102,17 +102,10 @@ function attachOverlayMethods(WorkspacePlusPlus) {
         function onOverlaySave() {
             var selectedGroupId = getOverlayGroupId();
             var beforeActiveGroupId = self.data.activeGroupId || null;
-            var name = saveInput.value.trim();
-            if (!name) {
-                name = self.getNextSessionName();
-            }
-            var exists = self.isSessionNameTaken(name);
-            if (exists) {
-                new obsidian.Notice(L.duplicateName);
-                return;
-            }
-            self.createSession(name).then(function () {
-                var createdSessionId = self.data.activeSessionId;
+            self.createSessionValidated(saveInput.value).then(function (result) {
+                if (!result || !result.created) return;
+                var createdSessionId = result.sessionId;
+                var createdName = result.name;
                 var chain = Promise.resolve();
                 if (selectedGroupId && selectedGroupId !== beforeActiveGroupId) {
                     chain = self.addSessionToGroup(createdSessionId, selectedGroupId).then(function () {
@@ -128,7 +121,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
 
                 return chain.then(function () {
                     saveInput.value = '';
-                    new obsidian.Notice(L.created(name));
+                    new obsidian.Notice(L.created(createdName));
                     renderGroupTabs();
                     refreshOrderedSessions();
                 });
@@ -272,16 +265,8 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                             mi.setIcon('plus');
                             mi.onClick(function () {
                                 new modals.RenameModal(self.app, '', function (name) {
-                                    if (!name.trim()) {
-                                        new obsidian.Notice(L.groupEmptyName);
-                                        return;
-                                    }
-                                    var groupName = name.trim();
-                                    if (self.isGroupNameTaken(groupName)) {
-                                        new obsidian.Notice(L.groupDuplicateName);
-                                        return;
-                                    }
-                                    self.createGroup(groupName).then(function () {
+                                    self.createGroupValidated(name).then(function (created) {
+                                        if (!created) return;
                                         renderGroupTabs();
                                         refreshOrderedSessions();
                                     });
@@ -289,6 +274,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                                     title: L.groupCreateNew,
                                     placeholder: L.groupCreatePlaceholder,
                                     buttonText: L.save,
+                                    emptyNotice: L.groupEmptyName,
                                 }).open();
                             });
                         });
@@ -368,14 +354,14 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                                 mi.setIcon('pencil');
                                 mi.onClick(function () {
                                     new modals.RenameModal(self.app, group.name, function (newName) {
-                                        if (self.isGroupNameTaken(newName, group.id)) {
-                                            new obsidian.Notice(L.groupDuplicateName);
-                                            return;
-                                        }
-                                        self.renameGroup(group.id, newName).then(function () {
+                                        self.renameGroupValidated(group.id, newName).then(function (renamed) {
+                                            if (!renamed) return;
                                             renderGroupTabs();
                                         });
-                                    }, { title: L.groupContextRename }).open();
+                                    }, {
+                                        title: L.groupContextRename,
+                                        emptyNotice: L.groupEmptyName,
+                                    }).open();
                                 });
                             });
                             var groupSessionIds = self.getGroupSessionIds(group.id);
@@ -430,16 +416,8 @@ function attachOverlayMethods(WorkspacePlusPlus) {
             obsidian.setIcon(addBtn, 'plus');
             addBtn.addEventListener('click', function () {
                 new modals.RenameModal(self.app, '', function (name) {
-                    if (!name.trim()) {
-                        new obsidian.Notice(L.groupEmptyName);
-                        return;
-                    }
-                    var groupName = name.trim();
-                    if (self.isGroupNameTaken(groupName)) {
-                        new obsidian.Notice(L.groupDuplicateName);
-                        return;
-                    }
-                    self.createGroup(groupName).then(function () {
+                    self.createGroupValidated(name).then(function (created) {
+                        if (!created) return;
                         renderGroupTabs();
                         refreshOrderedSessions();
                     });
@@ -447,6 +425,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                     title: L.groupCreateNew,
                     placeholder: L.groupCreatePlaceholder,
                     buttonText: L.save,
+                    emptyNotice: L.groupEmptyName,
                 }).open();
             });
             groupTabsRow.appendChild(addBtn);
@@ -615,16 +594,8 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                             mi.setIcon('pencil');
                             mi.onClick(function () {
                                 new modals.RenameModal(self.app, sess.name, function (newName) {
-                                    var exists = self.isSessionNameTaken(newName, sess.id);
-                                    if (exists) {
-                                        new obsidian.Notice(L.duplicateName);
-                                        return;
-                                    }
-                                    sess.name = newName;
-                                    sess.modified = Date.now();
-                                    self.updateStatusBar();
-                                    self.syncSessionCommands();
-                                    self.persistData().then(function () {
+                                    self.renameSessionById(sess.id, newName).then(function (renamed) {
+                                        if (!renamed) return;
                                         refreshOrderedSessions();
                                     });
                                 }, {
@@ -704,16 +675,8 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                     renameIcon.addEventListener('click', function (e) {
                         e.stopPropagation();
                         new modals.RenameModal(self.app, sess.name, function (newName) {
-                            var exists = self.isSessionNameTaken(newName, sess.id);
-                            if (exists) {
-                                new obsidian.Notice(L.duplicateName);
-                                return;
-                            }
-                            sess.name = newName;
-                            sess.modified = Date.now();
-                            self.updateStatusBar();
-                            self.syncSessionCommands();
-                            self.persistData().then(function () {
+                            self.renameSessionById(sess.id, newName).then(function (renamed) {
+                                if (!renamed) return;
                                 refreshOrderedSessions();
                             });
                         }, {
