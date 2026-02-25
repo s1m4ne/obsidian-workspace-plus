@@ -987,19 +987,7 @@ var SessionManagerModal = /** @class */ (function (_super) {
         var groups = this.plugin.data.groups || {};
         var selectedGroupId = this.getModalGroupId();
 
-        // Ensure __all__ and all existing groups are in groupOrder
-        if (!this.plugin.data.groupOrder) this.plugin.data.groupOrder = [];
-        if (this.plugin.data.groupOrder.indexOf('__all__') === -1) {
-            this.plugin.data.groupOrder.unshift('__all__');
-        }
-        var existingIds = Object.keys(groups);
-        for (var ei = 0; ei < existingIds.length; ei++) {
-            if (this.plugin.data.groupOrder.indexOf(existingIds[ei]) === -1) {
-                this.plugin.data.groupOrder.push(existingIds[ei]);
-            }
-        }
-
-        var groupOrder = this.plugin.data.groupOrder;
+        var groupOrder = this.plugin.getOrderedGroupTabIds();
 
         // --- Group tab D&D helper ---
         function setupGroupTabDrag(tabEl) {

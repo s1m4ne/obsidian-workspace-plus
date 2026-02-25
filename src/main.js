@@ -96,6 +96,7 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
         this.hideSearchOverlay();
         this.pendingSwitchRequest = null;
         this.isSwitchingSession = false;
+        return this.flushPendingPersistence();
     };
 
     return WorkspacePlusPlus;

@@ -747,6 +747,23 @@ function attachSessionMethods(WorkspacePlusPlus) {
             .filter(function (g) { return !!g; });
     };
 
+    WorkspacePlusPlus.prototype.getOrderedGroupTabIds = function () {
+        if (!this.data.groupOrder) this.data.groupOrder = [];
+        if (this.data.groupOrder.indexOf('__all__') === -1) {
+            this.data.groupOrder.unshift('__all__');
+        }
+
+        var groups = this.data.groups || {};
+        var existingIds = Object.keys(groups);
+        for (var i = 0; i < existingIds.length; i++) {
+            if (this.data.groupOrder.indexOf(existingIds[i]) === -1) {
+                this.data.groupOrder.push(existingIds[i]);
+            }
+        }
+
+        return this.data.groupOrder.slice();
+    };
+
     WorkspacePlusPlus.prototype.getActiveGroup = function () {
         if (!this.data.activeGroupId) return null;
         return (this.data.groups || {})[this.data.activeGroupId] || null;

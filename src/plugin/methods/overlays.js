@@ -175,24 +175,13 @@ function attachOverlayMethods(WorkspacePlusPlus) {
             groupTabsRow.style.display = '';
             footerRow.textContent = (L.searchOverlayHelpWithGroups || L.searchOverlayHelp);
 
-            // Ensure __all__ and all existing groups are in groupOrder
-            if (!self.data.groupOrder) self.data.groupOrder = [];
-            if (self.data.groupOrder.indexOf('__all__') === -1) {
-                self.data.groupOrder.unshift('__all__');
-            }
-            var existingIds = Object.keys(groups);
-            for (var ei = 0; ei < existingIds.length; ei++) {
-                if (self.data.groupOrder.indexOf(existingIds[ei]) === -1) {
-                    self.data.groupOrder.push(existingIds[ei]);
-                }
-            }
-
-            var groupOrder = self.data.groupOrder;
+            var groupOrder = self.getOrderedGroupTabIds();
 
             // Group tab D&D helper
             function setupGroupTabDrag(tabEl) {
                 tabEl.addEventListener('mousedown', function (e) {
                     if (e.button !== 0) return;
+                    e.stopPropagation();
                     var startX = e.clientX;
                     var dragStarted = false;
                     var cloneEl = null;
@@ -234,7 +223,12 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                             }
                         }
                         if (!placed) {
-                            groupTabsRow.appendChild(tabEl);
+                            var addBtnEl = groupTabsRow.querySelector('.wpp-group-add-btn');
+                            if (addBtnEl) {
+                                groupTabsRow.insertBefore(tabEl, addBtnEl);
+                            } else {
+                                groupTabsRow.appendChild(tabEl);
+                            }
                         }
                     }
 
@@ -1314,6 +1308,9 @@ function attachOverlayMethods(WorkspacePlusPlus) {
             if (e.target.closest('.wpp-search-input')) return;
             if (e.target.closest('.wpp-save-input')) return;
             if (e.target.closest('.wpp-save-btn')) return;
+            if (e.target.closest('.wpp-group-tab')) return;
+            if (e.target.closest('.wpp-group-add-btn')) return;
+            if (e.target.closest('.wpp-group-tabs')) return;
             if (e.target.closest('.wpp-qs-action-btn')) return;
             if (e.target.closest('.wpp-resize-corner')) return;
             if (e.button !== 0) return;
@@ -1394,20 +1391,8 @@ function attachOverlayMethods(WorkspacePlusPlus) {
             var groupTabsRow = document.createElement('div');
             groupTabsRow.className = 'wpp-group-tabs';
 
-            // Ensure __all__ and all existing groups are in groupOrder
-            if (!this.data.groupOrder) this.data.groupOrder = [];
-            if (this.data.groupOrder.indexOf('__all__') === -1) {
-                this.data.groupOrder.unshift('__all__');
-            }
             var allGroups = this.data.groups || {};
-            var existingIds = Object.keys(allGroups);
-            for (var ei = 0; ei < existingIds.length; ei++) {
-                if (this.data.groupOrder.indexOf(existingIds[ei]) === -1) {
-                    this.data.groupOrder.push(existingIds[ei]);
-                }
-            }
-
-            var groupOrder = this.data.groupOrder;
+            var groupOrder = this.getOrderedGroupTabIds();
             for (var gi = 0; gi < groupOrder.length; gi++) {
                 var gid = groupOrder[gi];
                 if (gid === '__all__') {
