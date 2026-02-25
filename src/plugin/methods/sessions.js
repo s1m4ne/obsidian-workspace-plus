@@ -531,25 +531,51 @@ function attachSessionMethods(WorkspacePlusPlus) {
 
     // --- Session operations ---
 
+    WorkspacePlusPlus.prototype.attachSessionToActiveGroup = function (sessionId) {
+        var activeGroupId = this.data.activeGroupId;
+        if (!activeGroupId) return;
+        if (!this.data.sessionGroups) this.data.sessionGroups = {};
+        if (!Array.isArray(this.data.sessionGroups[sessionId])) {
+            this.data.sessionGroups[sessionId] = [];
+        }
+        if (this.data.sessionGroups[sessionId].indexOf(activeGroupId) === -1) {
+            this.data.sessionGroups[sessionId].push(activeGroupId);
+        }
+    };
+
+    WorkspacePlusPlus.prototype.insertSessionAndActivate = function (session) {
+        this.data.sessions[session.id] = session;
+        this.data.sessionOrder.push(session.id);
+        this.data.activeSessionId = session.id;
+        this.attachSessionToActiveGroup(session.id);
+    };
+
+    WorkspacePlusPlus.prototype.captureActiveSessionLayoutIfAutoSave = function () {
+        var current = this.getActiveSession();
+        if (!current || !this.isAutoSaveOnSwitchEnabled()) return;
+        current.layout = this.getCurrentWorkspaceLayout();
+        current.modified = Date.now();
+    };
+
+    WorkspacePlusPlus.prototype.createSessionRecord = function (id, name, layout, options) {
+        options = options || {};
+        var record = {
+            id: id,
+            name: name,
+            modified: typeof options.modified === 'number' ? options.modified : Date.now(),
+            layout: layout,
+        };
+        if (options.isDefault) {
+            record.isDefault = true;
+        }
+        return record;
+    };
+
     WorkspacePlusPlus.prototype.createSession = function (name) {
         var id = utils.generateId();
         var layout = this.getCurrentWorkspaceLayout();
 
-        this.data.sessions[id] = {
-            id: id,
-            name: name,
-            modified: Date.now(),
-            layout: layout,
-        };
-        this.data.sessionOrder.push(id);
-        this.data.activeSessionId = id;
-
-        // Auto-add to active group
-        if (this.data.activeGroupId) {
-            if (!this.data.sessionGroups) this.data.sessionGroups = {};
-            if (!this.data.sessionGroups[id]) this.data.sessionGroups[id] = [];
-            this.data.sessionGroups[id].push(this.data.activeGroupId);
-        }
+        this.insertSessionAndActivate(this.createSessionRecord(id, name, layout));
 
         this.updateStatusBar();
         this.syncSessionCommands();
@@ -811,13 +837,12 @@ function attachSessionMethods(WorkspacePlusPlus) {
         this.data.groupOrder = [];
         this.data.sessionGroups = {};
         this.data.activeGroupId = null;
-        this.data.sessions[id] = {
-            id: id,
-            name: this.getDefaultSessionName(),
-            modified: Date.now(),
-            layout: this.getCurrentWorkspaceLayout(),
-            isDefault: true,
-        };
+        this.data.sessions[id] = this.createSessionRecord(
+            id,
+            this.getDefaultSessionName(),
+            this.getCurrentWorkspaceLayout(),
+            { isDefault: true }
+        );
         this.data.sessionOrder.push(id);
         this.data.activeSessionId = id;
         this.updateStatusBar();
@@ -828,30 +853,11 @@ function attachSessionMethods(WorkspacePlusPlus) {
     WorkspacePlusPlus.prototype.createEmptySession = function () {
         var L = i18n.L;
         var name = this.getNextSessionName();
-
-        // Save current session state
-        var current = this.getActiveSession();
-        if (current && this.isAutoSaveOnSwitchEnabled()) {
-            current.layout = this.getCurrentWorkspaceLayout();
-            current.modified = Date.now();
-        }
+        this.captureActiveSessionLayoutIfAutoSave();
 
         var id = utils.generateId();
-        this.data.sessions[id] = {
-            id: id,
-            name: name,
-            modified: Date.now(),
-            layout: null,
-        };
-        this.data.sessionOrder.push(id);
-        this.data.activeSessionId = id;
-
-        // Auto-add to active group
-        if (this.data.activeGroupId) {
-            if (!this.data.sessionGroups) this.data.sessionGroups = {};
-            if (!this.data.sessionGroups[id]) this.data.sessionGroups[id] = [];
-            this.data.sessionGroups[id].push(this.data.activeGroupId);
-        }
+        var session = this.createSessionRecord(id, name, null);
+        this.insertSessionAndActivate(session);
 
         // Close only main area leaves (keep sidebars intact)
         var leaves = [];
@@ -859,7 +865,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
         for (var i = 0; i < leaves.length; i++) { leaves[i].detach(); }
 
         // Capture the empty state
-        this.data.sessions[id].layout = this.getCurrentWorkspaceLayout();
+        session.layout = this.getCurrentWorkspaceLayout();
 
         this.updateStatusBar();
         this.syncSessionCommands();
@@ -872,30 +878,10 @@ function attachSessionMethods(WorkspacePlusPlus) {
     WorkspacePlusPlus.prototype.duplicateCurrentSession = function () {
         var L = i18n.L;
         var name = this.getNextSessionName();
-
-        // Save current session state
-        var current = this.getActiveSession();
-        if (current && this.isAutoSaveOnSwitchEnabled()) {
-            current.layout = this.getCurrentWorkspaceLayout();
-            current.modified = Date.now();
-        }
+        this.captureActiveSessionLayoutIfAutoSave();
 
         var id = utils.generateId();
-        this.data.sessions[id] = {
-            id: id,
-            name: name,
-            modified: Date.now(),
-            layout: this.getCurrentWorkspaceLayout(),
-        };
-        this.data.sessionOrder.push(id);
-        this.data.activeSessionId = id;
-
-        // Auto-add to active group
-        if (this.data.activeGroupId) {
-            if (!this.data.sessionGroups) this.data.sessionGroups = {};
-            if (!this.data.sessionGroups[id]) this.data.sessionGroups[id] = [];
-            this.data.sessionGroups[id].push(this.data.activeGroupId);
-        }
+        this.insertSessionAndActivate(this.createSessionRecord(id, name, this.getCurrentWorkspaceLayout()));
 
         this.updateStatusBar();
         this.syncSessionCommands();
@@ -915,12 +901,11 @@ function attachSessionMethods(WorkspacePlusPlus) {
 
         var name = this.getNextSessionName();
         var newId = utils.generateId();
-        this.data.sessions[newId] = {
-            id: newId,
-            name: name,
-            modified: Date.now(),
-            layout: JSON.parse(JSON.stringify(source.layout)),
-        };
+        this.data.sessions[newId] = this.createSessionRecord(
+            newId,
+            name,
+            JSON.parse(JSON.stringify(source.layout))
+        );
         this.data.sessionOrder.push(newId);
 
         // Copy group memberships
@@ -941,13 +926,12 @@ function attachSessionMethods(WorkspacePlusPlus) {
         if (hasDefault) return;
 
         var id = utils.generateId();
-        this.data.sessions[id] = {
-            id: id,
-            name: this.getDefaultSessionName(),
-            modified: Date.now(),
-            layout: this.getCurrentWorkspaceLayout(),
-            isDefault: true,
-        };
+        this.data.sessions[id] = this.createSessionRecord(
+            id,
+            this.getDefaultSessionName(),
+            this.getCurrentWorkspaceLayout(),
+            { isDefault: true }
+        );
         this.data.sessionOrder.unshift(id);
         this.data.activeSessionId = id;
         this.updateStatusBar();
