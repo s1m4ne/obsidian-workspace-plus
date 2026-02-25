@@ -44,6 +44,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
 
     WorkspacePlusPlus.prototype.getOrderedSessionsForGroup = function (groupId) {
         var all = this.getOrderedSessionsUnfiltered();
+        if (!this.isGroupFeatureEnabled()) return all;
         var targetGroupId = groupId || null;
         if (!targetGroupId) return all;
 
@@ -55,6 +56,9 @@ function attachSessionMethods(WorkspacePlusPlus) {
     };
 
     WorkspacePlusPlus.prototype.getOrderedSessions = function () {
+        if (!this.isGroupFeatureEnabled()) {
+            return this.getOrderedSessionsUnfiltered();
+        }
         return this.getOrderedSessionsForGroup(this.data.activeGroupId);
     };
 
@@ -244,6 +248,37 @@ function attachSessionMethods(WorkspacePlusPlus) {
         return this.data.warnOnUnsavedSwitch !== false;
     };
 
+    WorkspacePlusPlus.prototype.isGroupFeatureEnabled = function () {
+        return this.data.groupFeatureEnabled !== false;
+    };
+
+    WorkspacePlusPlus.prototype.normalizeGroupFeatureState = function () {
+        if (this.isGroupFeatureEnabled()) return;
+        this.data.activeGroupId = null;
+    };
+
+    WorkspacePlusPlus.prototype.setGroupFeatureEnabled = function (enabled) {
+        var nextEnabled = enabled !== false;
+        var changed = this.isGroupFeatureEnabled() !== nextEnabled;
+        this.data.groupFeatureEnabled = nextEnabled;
+
+        if (!nextEnabled && this.data.activeGroupId) {
+            this.data.activeGroupId = null;
+            changed = true;
+        }
+
+        if (!nextEnabled) {
+            this.hideSwitchOverlay();
+            this.hideSearchOverlay();
+        }
+
+        this.syncSessionCommands();
+        this.updateStatusBar();
+
+        if (!changed) return Promise.resolve(false);
+        return this.persistData().then(function () { return true; });
+    };
+
     WorkspacePlusPlus.prototype.getDefaultSessionName = function () {
         return i18n.L.defaultSessionName || 'default';
     };
@@ -360,6 +395,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
     // --- Session operations ---
 
     WorkspacePlusPlus.prototype.attachSessionToActiveGroup = function (sessionId) {
+        if (!this.isGroupFeatureEnabled()) return;
         var activeGroupId = this.data.activeGroupId;
         if (!activeGroupId) return;
         if (!this.data.sessionGroups) this.data.sessionGroups = {};
@@ -781,6 +817,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
     // --- Group operations ---
 
     WorkspacePlusPlus.prototype.getOrderedGroups = function () {
+        if (!this.isGroupFeatureEnabled()) return [];
         var groups = this.data.groups || {};
         return (this.data.groupOrder || [])
             .map(function (id) { return groups[id]; })
@@ -818,11 +855,13 @@ function attachSessionMethods(WorkspacePlusPlus) {
     };
 
     WorkspacePlusPlus.prototype.getOrderedGroupTabIds = function () {
+        if (!this.isGroupFeatureEnabled()) return [];
         this.data.groupOrder = this.normalizeGroupTabOrder(this.data.groupOrder);
         return this.data.groupOrder.slice();
     };
 
     WorkspacePlusPlus.prototype.setGroupTabOrder = function (order, options) {
+        if (!this.isGroupFeatureEnabled()) return Promise.resolve(false);
         var prev = Array.isArray(this.data.groupOrder) ? this.data.groupOrder : [];
         var normalized = this.normalizeGroupTabOrder(order);
         var changed = prev.length !== normalized.length;
@@ -842,6 +881,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
     };
 
     WorkspacePlusPlus.prototype.getActiveGroup = function () {
+        if (!this.isGroupFeatureEnabled()) return null;
         if (!this.data.activeGroupId) return null;
         return (this.data.groups || {})[this.data.activeGroupId] || null;
     };
@@ -898,6 +938,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
     };
 
     WorkspacePlusPlus.prototype.setActiveGroup = function (groupId) {
+        if (!this.isGroupFeatureEnabled()) return Promise.resolve(false);
         var nextGroupId = groupId || null;
         if (nextGroupId && (!this.data.groups || !this.data.groups[nextGroupId])) return Promise.resolve(false);
 
@@ -940,6 +981,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
     };
 
     WorkspacePlusPlus.prototype.getRelativeGroupId = function (baseGroupId, offset) {
+        if (!this.isGroupFeatureEnabled()) return undefined;
         var ordered = this.getOrderedGroups();
         if (ordered.length === 0) return undefined;
 
@@ -961,6 +1003,14 @@ function attachSessionMethods(WorkspacePlusPlus) {
     };
 
     WorkspacePlusPlus.prototype.resolveGroupSelection = function (groupId) {
+        if (!this.isGroupFeatureEnabled()) {
+            return Promise.resolve({
+                switched: false,
+                targetGroupId: null,
+                resolvedGroupId: null,
+                sessions: this.getOrderedSessionsUnfiltered(),
+            });
+        }
         var targetGroupId = groupId || null;
         var targetSessions = this.getOrderedSessionsForGroup(targetGroupId);
         var self = this;
@@ -985,6 +1035,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
     };
 
     WorkspacePlusPlus.prototype.switchGroupRelative = function (offset) {
+        if (!this.isGroupFeatureEnabled()) return Promise.resolve(false);
         var targetGroupId = this.getRelativeGroupId(this.data.activeGroupId, offset);
         if (typeof targetGroupId === 'undefined') return Promise.resolve(false);
         return this.setActiveGroup(targetGroupId);

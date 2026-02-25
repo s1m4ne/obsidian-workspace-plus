@@ -293,74 +293,87 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
         // ---- Session Groups ----
         addSection(L.settingsSectionGroups);
 
-        // Create group
-        var createGroupSetting = new obsidian.Setting(containerEl)
-            .setName(L.settingsGroupCreate)
-            .setDesc(L.settingsGroupCreateDesc);
-
-        var groupNameInput = null;
-        createGroupSetting.addText(function (text) {
-            groupNameInput = text;
-            text.setPlaceholder(L.settingsGroupCreatePlaceholder);
-        });
-
-        createGroupSetting.addButton(function (btn) {
-            btn.setButtonText(L.settingsGroupCreateBtn);
-            btn.onClick(function () {
-                if (!groupNameInput) return;
-                self.plugin.createGroupValidated(groupNameInput.getValue()).then(function (created) {
-                    if (!created) return;
+        addToggleSetting(containerEl, {
+            name: L.settingsSectionGroups,
+            desc: L.settingsSectionGroupsDesc,
+            value: self.plugin.isGroupFeatureEnabled(),
+            onChange: function (value) {
+                self.plugin.setGroupFeatureEnabled(value).then(function () {
                     self.display();
                 });
-            });
+            },
         });
 
-        // List existing groups
-        var orderedGroups = self.plugin.getOrderedGroups();
-        for (var gIdx = 0; gIdx < orderedGroups.length; gIdx++) {
-            (function (group) {
-                var sessionCount = self.plugin.getGroupSessionIds(group.id).length;
-                var groupSetting = new obsidian.Setting(containerEl)
-                    .setName(group.name)
-                    .setDesc(L.settingsGroupManageSessionsDesc + ' · ' + L.settingsGroupSessionCount(sessionCount));
+        if (self.plugin.isGroupFeatureEnabled()) {
+            // Create group
+            var createGroupSetting = new obsidian.Setting(containerEl)
+                .setName(L.settingsGroupCreate)
+                .setDesc(L.settingsGroupCreateDesc);
 
-                // Manage sessions button
-                groupSetting.addButton(function (btn) {
-                    btn.setButtonText(L.settingsGroupManageSessions);
-                    btn.onClick(function () {
-                        new GroupSessionsModal(self.app, self.plugin, group).open();
+            var groupNameInput = null;
+            createGroupSetting.addText(function (text) {
+                groupNameInput = text;
+                text.setPlaceholder(L.settingsGroupCreatePlaceholder);
+            });
+
+            createGroupSetting.addButton(function (btn) {
+                btn.setButtonText(L.settingsGroupCreateBtn);
+                btn.onClick(function () {
+                    if (!groupNameInput) return;
+                    self.plugin.createGroupValidated(groupNameInput.getValue()).then(function (created) {
+                        if (!created) return;
+                        self.display();
                     });
                 });
+            });
 
-                // Rename
-                groupSetting.addExtraButton(function (btn) {
-                    btn.setIcon('pencil');
-                    btn.setTooltip(L.rename);
-                    btn.onClick(function () {
-                        new modals.RenameModal(self.app, group.name, function (newName) {
-                            self.plugin.renameGroupValidated(group.id, newName).then(function (renamed) {
-                                if (!renamed) return;
-                                self.display();
-                            });
-                        }, {
-                            emptyNotice: L.groupEmptyName,
-                        }).open();
-                    });
-                });
+            // List existing groups
+            var orderedGroups = self.plugin.getOrderedGroups();
+            for (var gIdx = 0; gIdx < orderedGroups.length; gIdx++) {
+                (function (group) {
+                    var sessionCount = self.plugin.getGroupSessionIds(group.id).length;
+                    var groupSetting = new obsidian.Setting(containerEl)
+                        .setName(group.name)
+                        .setDesc(L.settingsGroupManageSessionsDesc + ' · ' + L.settingsGroupSessionCount(sessionCount));
 
-                // Delete
-                groupSetting.addExtraButton(function (btn) {
-                    btn.setIcon('trash-2');
-                    btn.setTooltip(L.settingsGroupDelete);
-                    btn.onClick(function () {
-                        new modals.ConfirmModal(self.app, L.settingsGroupDeleteConfirm(group.name), function () {
-                            self.plugin.deleteGroup(group.id).then(function () {
-                                self.display();
-                            });
-                        }).open();
+                    // Manage sessions button
+                    groupSetting.addButton(function (btn) {
+                        btn.setButtonText(L.settingsGroupManageSessions);
+                        btn.onClick(function () {
+                            new GroupSessionsModal(self.app, self.plugin, group).open();
+                        });
                     });
-                });
-            })(orderedGroups[gIdx]);
+
+                    // Rename
+                    groupSetting.addExtraButton(function (btn) {
+                        btn.setIcon('pencil');
+                        btn.setTooltip(L.rename);
+                        btn.onClick(function () {
+                            new modals.RenameModal(self.app, group.name, function (newName) {
+                                self.plugin.renameGroupValidated(group.id, newName).then(function (renamed) {
+                                    if (!renamed) return;
+                                    self.display();
+                                });
+                            }, {
+                                emptyNotice: L.groupEmptyName,
+                            }).open();
+                        });
+                    });
+
+                    // Delete
+                    groupSetting.addExtraButton(function (btn) {
+                        btn.setIcon('trash-2');
+                        btn.setTooltip(L.settingsGroupDelete);
+                        btn.onClick(function () {
+                            new modals.ConfirmModal(self.app, L.settingsGroupDeleteConfirm(group.name), function () {
+                                self.plugin.deleteGroup(group.id).then(function () {
+                                    self.display();
+                                });
+                            }).open();
+                        });
+                    });
+                })(orderedGroups[gIdx]);
+            }
         }
 
         addSection(L.settingsSectionReset);

@@ -151,6 +151,7 @@ function registerCommands(plugin) {
     }
 
     function switchGroupAndShowOverlay(step) {
+        if (!plugin.isGroupFeatureEnabled()) return;
         var targetGroupId = plugin.getRelativeGroupId(getCurrentGroupViewId(), step);
         if (typeof targetGroupId === 'undefined') {
             showSwitchOverlayForGroup(plugin.data.activeGroupId || null);
@@ -174,6 +175,7 @@ function registerCommands(plugin) {
         id: 'exit-group',
         name: L.cmdExitGroup,
         checkCallback: function (checking) {
+            if (!plugin.isGroupFeatureEnabled()) return false;
             if (!plugin.data.activeGroupId) return false;
             if (!checking) plugin.exitGroup();
             return true;

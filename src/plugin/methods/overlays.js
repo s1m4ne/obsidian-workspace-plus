@@ -52,6 +52,7 @@ function createSearchOverlayKeyHandler(options) {
 
         if (e.key === 'Tab') {
             if (document.activeElement === options.saveInput) return;
+            if (!plugin.isGroupFeatureEnabled() || plugin.getOrderedGroups().length === 0) return;
             e.preventDefault();
             e.stopImmediatePropagation();
             var nextGroupId = plugin.getRelativeGroupId(options.getOverlayGroupId(), e.shiftKey ? -1 : 1);
@@ -135,7 +136,9 @@ function attachOverlayMethods(WorkspacePlusPlus) {
     WorkspacePlusPlus.prototype.openSearchOverlay = function (anchorEl) {
         var L = i18n.L;
         var self = this;
-        var overlayGroupId = this.data.activeGroupId || null;
+        var overlayGroupId = this.isGroupFeatureEnabled()
+            ? (this.data.activeGroupId || null)
+            : null;
         this.searchOverlayViewGroupId = overlayGroupId;
         var ordered = this.getOrderedSessionsForGroup(overlayGroupId);
 
@@ -152,6 +155,11 @@ function attachOverlayMethods(WorkspacePlusPlus) {
         syncSelectedIndexToActive();
 
         function getOverlayGroupId() {
+            if (!self.isGroupFeatureEnabled()) {
+                overlayGroupId = null;
+                self.searchOverlayViewGroupId = null;
+                return null;
+            }
             var groups = self.data.groups || {};
             if (overlayGroupId && !groups[overlayGroupId]) {
                 overlayGroupId = self.data.activeGroupId || null;
@@ -257,6 +265,11 @@ function attachOverlayMethods(WorkspacePlusPlus) {
 
         function renderGroupTabs() {
             while (groupTabsRow.firstChild) groupTabsRow.removeChild(groupTabsRow.firstChild);
+            if (!self.isGroupFeatureEnabled()) {
+                groupTabsRow.style.display = 'none';
+                footerRow.textContent = L.searchOverlayHelp;
+                return;
+            }
             var groups = self.data.groups || {};
             var realGroups = self.getOrderedGroups();
             groupTabsRow.style.display = '';
@@ -1113,9 +1126,11 @@ function attachOverlayMethods(WorkspacePlusPlus) {
         if (this.switchOverlayTimer) {
             clearTimeout(this.switchOverlayTimer);
         }
-        var overlayGroupId = typeof viewGroupId === 'undefined'
-            ? (this.data.activeGroupId || null)
-            : (viewGroupId || null);
+        var overlayGroupId = this.isGroupFeatureEnabled()
+            ? (typeof viewGroupId === 'undefined'
+                ? (this.data.activeGroupId || null)
+                : (viewGroupId || null))
+            : null;
         if (overlayGroupId && !(this.data.groups || {})[overlayGroupId]) {
             overlayGroupId = this.data.activeGroupId || null;
         }
@@ -1344,6 +1359,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
 
             // Tab cycles groups (only when groups exist)
             if (e.key === 'Tab' && self.switchOverlayEl && !utils.isModPressed(e)) {
+                if (!self.isGroupFeatureEnabled() || self.getOrderedGroups().length === 0) return;
                 e.preventDefault();
                 e.stopImmediatePropagation();
                 var nextGroupId = self.getRelativeGroupId(overlayGroupId, e.shiftKey ? -1 : 1);

@@ -52,7 +52,9 @@ var SessionManagerModal = /** @class */ (function (_super) {
         });
 
         var self = this;
-        this.modalGroupId = this.plugin.data.activeGroupId || null;
+        this.modalGroupId = this.plugin.isGroupFeatureEnabled()
+            ? (this.plugin.data.activeGroupId || null)
+            : null;
         saveBtn.addEventListener('click', function () { self.onSave(); });
         this.nameInput.addEventListener('keydown', function (e) {
             if (e.key === 'Enter' && !e.isComposing) self.onSave();
@@ -387,6 +389,10 @@ var SessionManagerModal = /** @class */ (function (_super) {
     };
 
     SessionManagerModal.prototype.getModalGroupId = function () {
+        if (!this.plugin.isGroupFeatureEnabled()) {
+            this.modalGroupId = null;
+            return null;
+        }
         var groups = this.plugin.data.groups || {};
         if (this.modalGroupId && !groups[this.modalGroupId]) {
             this.modalGroupId = this.plugin.data.activeGroupId || null;
@@ -395,6 +401,12 @@ var SessionManagerModal = /** @class */ (function (_super) {
     };
 
     SessionManagerModal.prototype.selectGroup = function (groupId) {
+        if (!this.plugin.isGroupFeatureEnabled()) {
+            this.modalGroupId = null;
+            this.renderGroupTabs();
+            this.renderList();
+            return Promise.resolve(false);
+        }
         var self = this;
         var nextGroupId = groupId || null;
         return this.plugin.resolveGroupSelection(nextGroupId).then(function (result) {
@@ -897,6 +909,12 @@ var SessionManagerModal = /** @class */ (function (_super) {
         var self = this;
         var el = this.groupTabsRow;
         while (el.firstChild) el.removeChild(el.firstChild);
+
+        if (!this.plugin.isGroupFeatureEnabled()) {
+            el.style.display = 'none';
+            return;
+        }
+        el.style.display = '';
 
         var groups = this.plugin.data.groups || {};
         var selectedGroupId = this.getModalGroupId();

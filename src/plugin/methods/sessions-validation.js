@@ -74,11 +74,17 @@ function attachSessionValidationMethods(WorkspacePlusPlus) {
 
     WorkspacePlusPlus.prototype.createSessionForViewedGroup = function (name, viewedGroupId, options) {
         var self = this;
-        var targetGroupId = viewedGroupId || null;
-        var beforeActiveGroupId = this.data.activeGroupId || null;
+        var groupsEnabled = this.isGroupFeatureEnabled();
+        var targetGroupId = groupsEnabled ? (viewedGroupId || null) : null;
+        var beforeActiveGroupId = groupsEnabled ? (this.data.activeGroupId || null) : null;
 
         return this.createSessionValidated(name, options).then(function (result) {
             if (!result || !result.created) return result;
+
+            if (!groupsEnabled) {
+                result.viewGroupId = null;
+                return result;
+            }
 
             var createdSessionId = result.sessionId;
             if (targetGroupId && targetGroupId !== beforeActiveGroupId) {

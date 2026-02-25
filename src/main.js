@@ -32,6 +32,7 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
             self.data = Object.assign({}, DEFAULT_DATA, saved || {});
             if (!self.data.sessions) self.data.sessions = {};
             if (!self.data.sessionOrder) self.data.sessionOrder = [];
+            self.normalizeGroupFeatureState();
             self.isSwitchingSession = false;
             self.pendingSwitchRequest = null;
             self.switchLockAt = 0;

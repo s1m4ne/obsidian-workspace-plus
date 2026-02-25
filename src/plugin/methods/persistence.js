@@ -28,6 +28,7 @@ var SETTINGS_KEYS = [
     'autoSaveOnSwitch',
     'warnOnUnsavedSwitch',
     'statusBarQuickSwitcher',
+    'groupFeatureEnabled',
     'searchOverlayPosition',
     'searchOverlaySize',
 ];
