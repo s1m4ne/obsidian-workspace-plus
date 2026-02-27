@@ -36,11 +36,27 @@ var RenameModal = /** @class */ (function (_super) {
         var btns = contentEl.createDiv({ cls: 'wpp-confirm-buttons' });
         var cancelBtn = btns.createEl('button', { text: L.cancel });
         cancelBtn.addEventListener('click', function () { self.close(); });
+
+        // Optional skip button (e.g. "Save without naming")
+        var skipBtn = null;
+        if (opts.skipButtonText && opts.onSkip) {
+            skipBtn = btns.createEl('button', { text: opts.skipButtonText });
+            skipBtn.addEventListener('click', function () {
+                opts.onSkip();
+                self.close();
+            });
+        }
+
         var renameBtn = btns.createEl('button', { text: opts.buttonText || L.rename, cls: 'mod-cta' });
 
         var doRename = function () {
             var newName = input.value.trim();
             if (!newName) {
+                if (opts.onSkip) {
+                    opts.onSkip();
+                    self.close();
+                    return;
+                }
                 if (opts.emptyNotice) {
                     new obsidian.Notice(opts.emptyNotice);
                 }
@@ -53,7 +69,8 @@ var RenameModal = /** @class */ (function (_super) {
 
         renameBtn.addEventListener('click', doRename);
 
-        this.buttons = [cancelBtn, renameBtn];
+        this.buttons = skipBtn ? [cancelBtn, skipBtn, renameBtn] : [cancelBtn, renameBtn];
+        var lastBtnIdx = this.buttons.length - 1;
         this.focusedButtonIndex = -1; // -1 = input focused
 
         this.renameKeyHandler = function (e) {
@@ -64,7 +81,7 @@ var RenameModal = /** @class */ (function (_super) {
                 // Input focused
                 if (e.key === 'ArrowDown') {
                     e.preventDefault();
-                    self.focusedButtonIndex = 1;
+                    self.focusedButtonIndex = lastBtnIdx;
                     self.updateRenameBtnFocus();
                     input.blur();
                 } else if (e.key === 'Enter') {
@@ -96,18 +113,14 @@ var RenameModal = /** @class */ (function (_super) {
                     self.updateRenameBtnFocus();
                 } else if (e.key === 'ArrowRight') {
                     e.preventDefault();
-                    if (self.focusedButtonIndex < 1) {
-                        self.focusedButtonIndex = 1;
+                    if (self.focusedButtonIndex < lastBtnIdx) {
+                        self.focusedButtonIndex++;
                         self.updateRenameBtnFocus();
                     }
                 } else if (e.key === 'Enter') {
                     e.preventDefault();
                     e.stopPropagation();
-                    if (self.focusedButtonIndex === 0) {
-                        self.close();
-                    } else {
-                        doRename();
-                    }
+                    self.buttons[self.focusedButtonIndex].click();
                 } else if (e.key === 'Escape') {
                     e.preventDefault();
                     e.stopImmediatePropagation();
