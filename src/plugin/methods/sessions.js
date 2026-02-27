@@ -315,10 +315,43 @@ function attachSessionMethods(WorkspacePlusPlus) {
     WorkspacePlusPlus.prototype.saveActiveSession = function (options) {
         var L = i18n.L;
         options = options || {};
+        var self = this;
         var session = this.getActiveSession();
         if (!session) {
             if (!options.silent) new obsidian.Notice(L.noSession);
             return Promise.resolve(false);
+        }
+
+        // Prompt for a session name when saving an unnamed default session
+        if (
+            !options.silent
+            && session.isDefault
+            && session.name === this.getDefaultSessionName()
+        ) {
+            var doSave = function (name, resolve) {
+                session.name = name;
+                session.layout = self.getCurrentWorkspaceLayout();
+                session.modified = Date.now();
+                self.updateStatusBar();
+                self.syncSessionCommands();
+                self.persistData().then(function () {
+                    new obsidian.Notice(L.savedSession(name));
+                    resolve(true);
+                });
+            };
+            return new Promise(function (resolve) {
+                new modals.RenameModal(self.app, '', function (newName) {
+                    doSave(newName, resolve);
+                }, {
+                    title: L.nameSessionTitle,
+                    placeholder: L.nameSessionPlaceholder,
+                    buttonText: L.saveInline,
+                    skipButtonText: L.saveWithoutNaming,
+                    onSkip: function () {
+                        doSave(session.name, resolve);
+                    },
+                }).open();
+            });
         }
 
         var currentLayout = this.getCurrentWorkspaceLayout();
