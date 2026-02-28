@@ -85,6 +85,10 @@ function registerCommands(plugin) {
         plugin.saveActiveSession();
     }, [{ modifiers: ['Mod', 'Shift'], key: 'S' }]);
 
+    addSimpleCommand('save-as-session', L.cmdSaveAs, function () {
+        plugin.saveAsSession();
+    });
+
     addSimpleCommand('reload-current-session-without-saving', L.cmdReloadCurrentWithoutSaving, function () {
         plugin.reloadCurrentSessionWithoutSaving();
     });
