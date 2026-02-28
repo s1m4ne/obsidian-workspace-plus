@@ -18,4 +18,8 @@ module.exports = {
     groupOrder: [],
     sessionGroups: {},
     activeGroupId: null,
+    versionHistoryEnabled: true,
+    versionHistorySnapshotInterval: 5,
+    versionHistoryCtrlRmbRestore: true,
+    versionHistoryConfirmRestore: true,
 };

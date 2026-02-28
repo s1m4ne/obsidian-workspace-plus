@@ -23,6 +23,7 @@ var i18n = require('./i18n');
  * @param {Function} [options.onDuplicate]
  * @param {Function} [options.onDelete]
  * @param {Function} [options.onRemoveFromGroup]
+ * @param {Function} [options.onVersionHistory]
  */
 function openSessionContextMenu(options) {
     var L = i18n.L;
@@ -98,6 +99,17 @@ function openSessionContextMenu(options) {
             if (typeof options.onDuplicate === 'function') options.onDuplicate();
         });
     });
+
+    // Version history
+    if (plugin.isVersionHistoryEnabled()) {
+        menu.addItem(function (mi) {
+            mi.setTitle(L.contextVersionHistory);
+            mi.setIcon('history');
+            mi.onClick(function () {
+                if (typeof options.onVersionHistory === 'function') options.onVersionHistory();
+            });
+        });
+    }
 
     // Remove from group
     if (options.showRemoveFromGroup) {

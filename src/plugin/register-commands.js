@@ -123,6 +123,20 @@ function registerCommands(plugin) {
         plugin.openSearchOverlay();
     });
 
+    addCommand({
+        id: 'version-history',
+        name: L.cmdVersionHistory,
+        checkCallback: function (checking) {
+            if (!plugin.isVersionHistoryEnabled()) return false;
+            var session = plugin.getActiveSession();
+            if (!session) return false;
+            if (!checking) {
+                new modals.HistoryModal(plugin.app, plugin, session).open();
+            }
+            return true;
+        },
+    });
+
     addSimpleCommand('export-sessions-snapshot', L.cmdExportSessions, function () {
         runWithFailureNotice(function () {
             return plugin.exportSessionsSnapshot();

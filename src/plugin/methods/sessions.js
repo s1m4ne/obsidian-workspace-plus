@@ -330,6 +330,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
         ) {
             var doSave = function (name, resolve) {
                 session.name = name;
+                self.pushLayoutToHistory(session);
                 session.layout = self.getCurrentWorkspaceLayout();
                 session.modified = Date.now();
                 self.updateStatusBar();
@@ -356,6 +357,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
 
         var currentLayout = this.getCurrentWorkspaceLayout();
         var changed = !this.layoutsEqualStructural(session.layout, currentLayout);
+        this.pushLayoutToHistory(session);
         session.layout = currentLayout;
         if (changed || options.touchModified) {
             session.modified = Date.now();
@@ -450,6 +452,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
     WorkspacePlusPlus.prototype.captureActiveSessionLayoutIfAutoSave = function () {
         var current = this.getActiveSession();
         if (!current || !this.isAutoSaveOnSwitchEnabled()) return;
+        this.pushLayoutToHistory(current);
         current.layout = this.getCurrentWorkspaceLayout();
         current.modified = Date.now();
     };
@@ -557,6 +560,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
             // 1. Save current session state
             var current = self.getActiveSession();
             if (current && !skipCurrentSave) {
+                self.pushLayoutToHistory(current);
                 current.layout = self.getCurrentWorkspaceLayout();
                 current.modified = Date.now();
             }
@@ -877,6 +881,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
         var session = this.getActiveSession();
         if (!session) return;
 
+        this.pushLayoutToHistory(session);
         session.layout = this.getCurrentWorkspaceLayout();
         session.modified = Date.now();
         return this.persistData();

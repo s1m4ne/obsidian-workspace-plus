@@ -31,6 +31,10 @@ var SETTINGS_KEYS = [
     'groupFeatureEnabled',
     'searchOverlayPosition',
     'searchOverlaySize',
+    'versionHistoryEnabled',
+    'versionHistorySnapshotInterval',
+    'versionHistoryCtrlRmbRestore',
+    'versionHistoryConfirmRestore',
 ];
 
 function pickKeys(data, keys) {
