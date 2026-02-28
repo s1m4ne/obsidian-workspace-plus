@@ -3,12 +3,12 @@
 var obsidian = require('obsidian');
 var i18n = require('../i18n');
 var ConfirmModal = require('./confirm-modal');
-var RenameModal = require('./rename-modal');
 var HistoryModal = require('./history-modal');
 var formatRelativeTime = require('./format-relative-time');
 var groupTabUi = require('../group-tab-ui');
 var utils = require('../utils');
 var sessionContextMenu = require('../session-context-menu');
+var sessionListActions = require('../session-list-actions');
 
 // ============================================================
 // Session Manager Modal
@@ -802,16 +802,15 @@ var SessionManagerModal = /** @class */ (function (_super) {
     };
 
     SessionManagerModal.prototype.onRename = function (session) {
-        var L = i18n.L;
         var self = this;
-        new RenameModal(this.app, session.name, function (newName) {
-            self.plugin.renameSessionById(session.id, newName).then(function (renamed) {
-                if (!renamed) return;
+        sessionListActions.renameSessionWithPrompt({
+            app: this.app,
+            plugin: this.plugin,
+            session: session,
+            onRenamed: function () {
                 self.renderList();
-            });
-        }, {
-            emptyNotice: L.emptyName,
-        }).open();
+            },
+        });
     };
 
     SessionManagerModal.prototype.onDelete = function (session) {
@@ -821,14 +820,17 @@ var SessionManagerModal = /** @class */ (function (_super) {
         var message = isActive
             ? L.confirmDeleteActive(session.name)
             : L.confirmDelete(session.name);
-
-        new ConfirmModal(this.app, message, function () {
-            return self.plugin.deleteSession(session.id).then(function (deleted) {
-                if (!deleted) return;
+        return sessionListActions.deleteSessionWithPrompt({
+            app: this.app,
+            plugin: this.plugin,
+            session: session,
+            isActive: isActive,
+            confirmMessage: message,
+            forceConfirm: true,
+            onDeleted: function () {
                 self.renderList();
-                new obsidian.Notice(L.deleted(session.name));
-            });
-        }).open();
+            },
+        });
     };
 
     // --- Focus & selection helpers ---
