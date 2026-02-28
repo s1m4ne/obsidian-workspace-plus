@@ -8,6 +8,7 @@ module.exports = {
     previewNext: true,
     previewPrevious: true,
     confirmDeleteByHotkey: true,
+    confirmQuickActions: false,
     autoSaveOnSwitch: true,
     warnOnUnsavedSwitch: true,
     statusBarQuickSwitcher: true,
