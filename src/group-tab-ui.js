@@ -113,6 +113,110 @@ function attachGroupTabDrag(tabEl, tabsContainerEl, options) {
     });
 }
 
+function renderGroupTabs(options) {
+    var L = i18n.L;
+    options = options || {};
+    var plugin = options.plugin;
+    var containerEl = options.containerEl;
+    if (!plugin || !containerEl) return;
+
+    while (containerEl.firstChild) containerEl.removeChild(containerEl.firstChild);
+
+    var app = options.app || plugin.app;
+    var groups = options.groups || plugin.data.groups || {};
+    var groupOrder = options.groupOrder || plugin.getOrderedGroupTabIds();
+    var selectedGroupId = options.selectedGroupId || null;
+
+    function setupGroupTabDrag(tabEl) {
+        if (!options.onGroupOrderCommit) return;
+        attachGroupTabDrag(tabEl, containerEl, {
+            stopPropagationOnMouseDown: !!options.stopPropagationOnMouseDown,
+            onCommit: function (newOrder) {
+                options.onGroupOrderCommit(newOrder);
+            },
+        });
+    }
+
+    for (var gi = 0; gi < groupOrder.length; gi++) {
+        var gid = groupOrder[gi];
+
+        if (gid === '__all__') {
+            var allTab = document.createElement('div');
+            allTab.className = 'wpp-group-tab';
+            allTab.dataset.groupId = '__all__';
+            if (!selectedGroupId) allTab.classList.add('is-active');
+            allTab.textContent = L.groupAll;
+            allTab.addEventListener('click', function () {
+                if (typeof options.onSelectGroup === 'function') {
+                    options.onSelectGroup(null);
+                }
+            });
+            allTab.addEventListener('contextmenu', function (e) {
+                e.preventDefault();
+                openAllGroupsTabContextMenu({
+                    app: app,
+                    plugin: plugin,
+                    event: e,
+                    onResetViewGroup: options.onResetViewGroup,
+                    onGroupsChanged: options.onGroupsChanged,
+                    onSessionsChanged: options.onSessionsChanged,
+                });
+            });
+            setupGroupTabDrag(allTab);
+            containerEl.appendChild(allTab);
+            continue;
+        }
+
+        var group = groups[gid];
+        if (!group) continue;
+
+        (function (currentGroup) {
+            var tab = document.createElement('div');
+            tab.className = 'wpp-group-tab';
+            tab.dataset.groupId = currentGroup.id;
+            if (selectedGroupId === currentGroup.id) tab.classList.add('is-active');
+            tab.textContent = currentGroup.name;
+            tab.addEventListener('click', function () {
+                if (typeof options.onSelectGroup === 'function') {
+                    options.onSelectGroup(currentGroup.id);
+                }
+            });
+            tab.addEventListener('contextmenu', function (e) {
+                e.preventDefault();
+                openGroupTabContextMenu({
+                    app: app,
+                    plugin: plugin,
+                    event: e,
+                    group: currentGroup,
+                    onDeleteGroup: options.onDeleteGroup,
+                    onGroupsChanged: options.onGroupsChanged,
+                    onSessionsChanged: options.onSessionsChanged,
+                });
+            });
+            setupGroupTabDrag(tab);
+            containerEl.appendChild(tab);
+        })(group);
+    }
+
+    var addBtn = document.createElement('div');
+    addBtn.className = 'wpp-group-add-btn';
+    obsidian.setIcon(addBtn, 'plus');
+    if (options.addButtonTooltip) {
+        obsidian.setTooltip(addBtn, options.addButtonTooltip, {
+            placement: options.addButtonTooltipPlacement || 'bottom',
+            delay: options.addButtonTooltipDelay || 0,
+        });
+    }
+    addBtn.addEventListener('click', function () {
+        if (typeof options.onAddGroupClick === 'function') {
+            options.onAddGroupClick();
+            return;
+        }
+        openCreateGroupPrompt(app, plugin, options.onGroupsChanged);
+    });
+    containerEl.appendChild(addBtn);
+}
+
 function openAllGroupsTabContextMenu(options) {
     var L = i18n.L;
     options = options || {};
@@ -258,4 +362,5 @@ module.exports = {
     openAllGroupsTabContextMenu: openAllGroupsTabContextMenu,
     openCreateGroupPrompt: openCreateGroupPrompt,
     openGroupTabContextMenu: openGroupTabContextMenu,
+    renderGroupTabs: renderGroupTabs,
 };

@@ -909,100 +909,39 @@ var SessionManagerModal = /** @class */ (function (_super) {
         var selectedGroupId = this.getModalGroupId();
 
         var groupOrder = this.plugin.getOrderedGroupTabIds();
-
-        // --- Group tab D&D helper ---
-        function setupGroupTabDrag(tabEl) {
-            groupTabUi.attachGroupTabDrag(tabEl, el, {
-                onCommit: function (newOrder) {
-                    self.plugin.setGroupTabOrder(newOrder);
-                },
-            });
-        }
-
-        // Render tabs in groupOrder
-        for (var gi = 0; gi < groupOrder.length; gi++) {
-            var gid = groupOrder[gi];
-
-            if (gid === '__all__') {
-                // "All" tab
-                var allTab = el.createDiv({ cls: 'wpp-group-tab' });
-                if (!selectedGroupId) allTab.classList.add('is-active');
-                allTab.textContent = L.groupAll;
-                allTab.dataset.groupId = '__all__';
-                allTab.addEventListener('click', function () {
-                    self.selectGroup(null);
-                });
-
-                // "All" tab right-click context menu
-                allTab.addEventListener('contextmenu', function (e) {
-                    e.preventDefault();
-                    groupTabUi.openAllGroupsTabContextMenu({
-                        app: self.app,
-                        plugin: self.plugin,
-                        event: e,
-                        onResetViewGroup: function () {
-                            self.modalGroupId = null;
-                        },
-                        onGroupsChanged: function () {
-                            self.renderGroupTabs();
-                        },
-                        onSessionsChanged: function () {
-                            self.renderList();
-                        },
-                    });
-                });
-
-                setupGroupTabDrag(allTab);
-
-            } else if (groups[gid]) {
-                // Group tab
-                (function (group) {
-                    var tab = el.createDiv({ cls: 'wpp-group-tab' });
-                    if (selectedGroupId === group.id) tab.classList.add('is-active');
-                    tab.textContent = group.name;
-                    tab.dataset.groupId = group.id;
-                    tab.addEventListener('click', function () {
-                        self.selectGroup(group.id);
-                    });
-                    // Right-click context menu
-                    tab.addEventListener('contextmenu', function (e) {
-                        e.preventDefault();
-                        groupTabUi.openGroupTabContextMenu({
-                            app: self.app,
-                            plugin: self.plugin,
-                            event: e,
-                            group: group,
-                            onDeleteGroup: function (deletedGroupId) {
-                                if (self.modalGroupId === deletedGroupId) {
-                                    self.modalGroupId = self.plugin.data.activeGroupId || null;
-                                }
-                            },
-                            onGroupsChanged: function () {
-                                self.renderGroupTabs();
-                            },
-                            onSessionsChanged: function () {
-                                self.renderList();
-                            },
-                        });
-                    });
-
-                    setupGroupTabDrag(tab);
-                })(groups[gid]);
-            }
-        }
-
-        // "+" add group button
-        var addBtn = el.createDiv({ cls: 'wpp-group-add-btn' });
-        obsidian.setIcon(addBtn, 'plus');
-        obsidian.setTooltip(addBtn, L.groupCreateNew, {
-            placement: 'bottom',
-            delay: 0,
-        });
-
-        addBtn.addEventListener('click', function () {
-            groupTabUi.openCreateGroupPrompt(self.app, self.plugin, function () {
+        groupTabUi.renderGroupTabs({
+            app: this.app,
+            plugin: this.plugin,
+            containerEl: el,
+            groups: groups,
+            groupOrder: groupOrder,
+            selectedGroupId: selectedGroupId,
+            onSelectGroup: function (groupId) {
+                self.selectGroup(groupId);
+            },
+            onResetViewGroup: function () {
+                self.modalGroupId = null;
+            },
+            onDeleteGroup: function (deletedGroupId) {
+                if (self.modalGroupId === deletedGroupId) {
+                    self.modalGroupId = self.plugin.data.activeGroupId || null;
+                }
+            },
+            onGroupsChanged: function () {
                 self.renderGroupTabs();
-            });
+            },
+            onSessionsChanged: function () {
+                self.renderList();
+            },
+            onGroupOrderCommit: function (newOrder) {
+                self.plugin.setGroupTabOrder(newOrder);
+            },
+            addButtonTooltip: L.groupCreateNew,
+            onAddGroupClick: function () {
+                groupTabUi.openCreateGroupPrompt(self.app, self.plugin, function () {
+                    self.renderGroupTabs();
+                });
+            },
         });
     };
 
