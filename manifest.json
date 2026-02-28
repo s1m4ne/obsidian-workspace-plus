@@ -5,5 +5,6 @@
     "minAppVersion": "1.11.0",
     "description": "Workspace session manager with a native-feeling UI/UX.",
     "author": "s1m4ne",
-    "isDesktopOnly": false
+    "isDesktopOnly": false,
+    "icon": "panels-top-left"
 }

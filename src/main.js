@@ -42,7 +42,7 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
             var L = i18n.L;
 
             // Ribbon icon (left sidebar)
-            self.addRibbonIcon('panels-left-bottom', L.ribbonTooltip, function () {
+            self.addRibbonIcon('panels-top-left', L.ribbonTooltip, function () {
                 new modals.SessionManagerModal(self.app, self).open();
             });
 
