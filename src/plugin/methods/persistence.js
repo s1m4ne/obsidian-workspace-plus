@@ -9,6 +9,8 @@ var SESSIONS_FILE = STORAGE_DIR + '/sessions.json';
 var SESSIONS_BACKUP_FILE = STORAGE_DIR + '/sessions.backup.json';
 var LOCAL_SETTINGS_FILE = STORAGE_DIR + '/settings.local.json';
 var EXPORT_DIR = STORAGE_DIR + '/exports';
+var BACKUPS_DIR = STORAGE_DIR + '/backups';
+var BACKUP_ROTATION_INTERVAL = 3600000; // 1 hour
 
 var SESSION_KEYS = [
     'activeSessionId',
@@ -111,6 +113,14 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
 
     WorkspacePlusPlus.prototype.getExportDirPath = function () {
         return EXPORT_DIR;
+    };
+
+    WorkspacePlusPlus.prototype.getBackupsDirPath = function () {
+        return BACKUPS_DIR;
+    };
+
+    WorkspacePlusPlus.prototype.getRotationBackupPath = function (generation) {
+        return BACKUPS_DIR + '/sessions.' + generation + '.json';
     };
 
     WorkspacePlusPlus.prototype.getDefaultSettingsData = function () {
@@ -503,6 +513,9 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
                 );
             })
             .then(function () {
+                return self.rotateBackupIfNeeded(sessionData);
+            })
+            .then(function () {
                 if (!self.isUsingLocalSettings()) return;
                 return self.writeJson(self.getLocalSettingsPath(), settingsData, true);
             })
@@ -534,6 +547,146 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
         return this._persistQueue.catch(function () {
             return;
         });
+    };
+
+    // --- Rotation backup ---
+
+    WorkspacePlusPlus.prototype.initRotationBackupTimestamp = function () {
+        var self = this;
+        return this.readJsonIfExists(this.getRotationBackupPath(1))
+            .then(function (res) {
+                if (res.exists && res.data) {
+                    self._lastRotationBackupAt = getPersistStamp(res.data) || 0;
+                } else {
+                    self._lastRotationBackupAt = 0;
+                }
+            })
+            .catch(function () {
+                self._lastRotationBackupAt = 0;
+            });
+    };
+
+    WorkspacePlusPlus.prototype.rotateBackupIfNeeded = function (sessionData) {
+        var now = Date.now();
+        var last = this._lastRotationBackupAt || 0;
+        if (now - last < BACKUP_ROTATION_INTERVAL) return Promise.resolve();
+
+        var self = this;
+        this._lastRotationBackupAt = now;
+
+        return this.ensureDir(this.getBackupsDirPath())
+            .then(function () {
+                // Shift generations: 2→3, 1→2
+                return self.copyFileIfExists(
+                    self.getRotationBackupPath(2),
+                    self.getRotationBackupPath(3)
+                );
+            })
+            .then(function () {
+                return self.copyFileIfExists(
+                    self.getRotationBackupPath(1),
+                    self.getRotationBackupPath(2)
+                );
+            })
+            .then(function () {
+                // Write current data as generation 1
+                return self.writeJson(self.getRotationBackupPath(1), sessionData);
+            })
+            .catch(function () {
+                // Backup failure should not block normal persistence
+                return;
+            });
+    };
+
+    WorkspacePlusPlus.prototype.copyFileIfExists = function (srcPath, dstPath) {
+        var self = this;
+        return this.app.vault.adapter.exists(srcPath).then(function (exists) {
+            if (!exists) return;
+            return self.app.vault.adapter.read(srcPath).then(function (raw) {
+                return self.app.vault.adapter.write(dstPath, raw);
+            });
+        });
+    };
+
+    WorkspacePlusPlus.prototype.getRotationBackupInfo = function () {
+        var self = this;
+        var results = [];
+
+        function readGeneration(n) {
+            return self.readJsonIfExists(self.getRotationBackupPath(n))
+                .then(function (res) {
+                    if (!res.exists || !res.data) return null;
+                    var stamp = getPersistStamp(res.data);
+                    var sessions = res.data.sessions;
+                    var count = (sessions && typeof sessions === 'object')
+                        ? Object.keys(sessions).length : 0;
+                    return { generation: n, savedAt: stamp, sessionCount: count };
+                })
+                .catch(function () {
+                    return null;
+                });
+        }
+
+        return Promise.all([
+            readGeneration(1),
+            readGeneration(2),
+            readGeneration(3),
+        ]).then(function (items) {
+            for (var i = 0; i < items.length; i++) {
+                if (items[i]) results.push(items[i]);
+            }
+            return results;
+        });
+    };
+
+    WorkspacePlusPlus.prototype.restoreFromRotationBackup = function (generation) {
+        var self = this;
+        var L = i18n.L;
+        return this.readJsonIfExists(this.getRotationBackupPath(generation))
+            .then(function (res) {
+                if (!res.exists || res.error || !res.data) {
+                    new obsidian.Notice(L.rotationBackupRestoreFailed);
+                    return false;
+                }
+                if (!hasSessionShape(res.data)) {
+                    new obsidian.Notice(L.rotationBackupRestoreFailed);
+                    return false;
+                }
+                var imported = self.normalizeSessionData(res.data);
+                if (!hasNonEmptySessions(imported)) {
+                    new obsidian.Notice(L.rotationBackupRestoreFailed);
+                    return false;
+                }
+
+                self.data.activeSessionId = imported.activeSessionId;
+                self.data.sessions = imported.sessions;
+                self.data.sessionOrder = imported.sessionOrder;
+                self.data.groups = imported.groups || {};
+                self.data.groupOrder = typeof self.normalizeGroupTabOrder === 'function'
+                    ? self.normalizeGroupTabOrder(imported.groupOrder || [])
+                    : (imported.groupOrder || []);
+                self.data.sessionGroups = imported.sessionGroups || {};
+                self.data.activeGroupId = imported.activeGroupId || null;
+                self.syncSessionOrder();
+                self.updateStatusBar();
+                self.syncSessionCommands();
+
+                return self.persistData().then(function () {
+                    var active = self.getActiveSession();
+                    if (active && active.layout) {
+                        return self.app.workspace.changeLayout(active.layout).then(function () {
+                            new obsidian.Notice(L.rotationBackupRestored);
+                            return true;
+                        });
+                    }
+                    new obsidian.Notice(L.rotationBackupRestored);
+                    return true;
+                });
+            })
+            .catch(function () {
+                new obsidian.Notice(L.rotationBackupRestoreFailed);
+                return false;
+            });
     };
 
     WorkspacePlusPlus.prototype.loadLocalSettingsData = function () {

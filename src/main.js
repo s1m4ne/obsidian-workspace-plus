@@ -156,6 +156,7 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
                 self.syncSessionCommands();
                 self.flushOnStartup();
                 self.startHistorySnapshotTimer();
+                self.initRotationBackupTimestamp();
             });
         });
     };
