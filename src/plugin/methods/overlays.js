@@ -280,104 +280,43 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                 : L.searchOverlayHelp;
 
             var groupOrder = self.getOrderedGroupTabIds();
-
-            // Group tab D&D helper
-            function setupGroupTabDrag(tabEl) {
-                groupTabUi.attachGroupTabDrag(tabEl, groupTabsRow, {
-                    stopPropagationOnMouseDown: true,
-                    onCommit: function (newOrder) {
-                        self.setGroupTabOrder(newOrder);
-                    },
-                });
-            }
-
-            // Render tabs in groupOrder
-            for (var gi = 0; gi < groupOrder.length; gi++) {
-                var gid = groupOrder[gi];
-
-                if (gid === '__all__') {
-                    var allTab = document.createElement('div');
-                    allTab.className = 'wpp-group-tab';
-                    allTab.dataset.groupId = '__all__';
-                    if (!getOverlayGroupId()) allTab.classList.add('is-active');
-                    allTab.textContent = L.groupAll;
-                    allTab.addEventListener('click', function () {
-                        applyOverlayGroupSelection(null);
-                    });
-
-                    // "All" tab right-click context menu
-                    allTab.addEventListener('contextmenu', function (e) {
-                        e.preventDefault();
-                        groupTabUi.openAllGroupsTabContextMenu({
-                            app: self.app,
-                            plugin: self,
-                            event: e,
-                            onResetViewGroup: function () {
-                                overlayGroupId = null;
-                                self.searchOverlayViewGroupId = null;
-                            },
-                            onGroupsChanged: function () {
-                                renderGroupTabs();
-                            },
-                            onSessionsChanged: function () {
-                                refreshOrderedSessions();
-                            },
-                        });
-                    });
-
-                    setupGroupTabDrag(allTab);
-                    groupTabsRow.appendChild(allTab);
-                } else if (groups[gid]) {
-                    (function (group) {
-                        var tab = document.createElement('div');
-                        tab.className = 'wpp-group-tab';
-                        tab.dataset.groupId = group.id;
-                        if (getOverlayGroupId() === group.id) tab.classList.add('is-active');
-                        tab.textContent = group.name;
-                        tab.addEventListener('click', function () {
-                            applyOverlayGroupSelection(group.id);
-                        });
-
-                        // Group tab right-click context menu
-                        tab.addEventListener('contextmenu', function (e) {
-                            e.preventDefault();
-                            groupTabUi.openGroupTabContextMenu({
-                                app: self.app,
-                                plugin: self,
-                                event: e,
-                                group: group,
-                                onDeleteGroup: function (deletedGroupId) {
-                                    if (overlayGroupId === deletedGroupId) {
-                                        overlayGroupId = self.data.activeGroupId || null;
-                                        self.searchOverlayViewGroupId = overlayGroupId || null;
-                                    }
-                                },
-                                onGroupsChanged: function () {
-                                    renderGroupTabs();
-                                },
-                                onSessionsChanged: function () {
-                                    refreshOrderedSessions();
-                                },
-                            });
-                        });
-
-                        setupGroupTabDrag(tab);
-                        groupTabsRow.appendChild(tab);
-                    })(groups[gid]);
-                }
-            }
-
-            // "+" add group button
-            var addBtn = document.createElement('div');
-            addBtn.className = 'wpp-group-add-btn';
-            obsidian.setIcon(addBtn, 'plus');
-            addBtn.addEventListener('click', function () {
-                groupTabUi.openCreateGroupPrompt(self.app, self, function () {
+            groupTabUi.renderGroupTabs({
+                app: self.app,
+                plugin: self,
+                containerEl: groupTabsRow,
+                groups: groups,
+                groupOrder: groupOrder,
+                selectedGroupId: getOverlayGroupId(),
+                stopPropagationOnMouseDown: true,
+                onSelectGroup: function (groupId) {
+                    applyOverlayGroupSelection(groupId);
+                },
+                onResetViewGroup: function () {
+                    overlayGroupId = null;
+                    self.searchOverlayViewGroupId = null;
+                },
+                onDeleteGroup: function (deletedGroupId) {
+                    if (overlayGroupId === deletedGroupId) {
+                        overlayGroupId = self.data.activeGroupId || null;
+                        self.searchOverlayViewGroupId = overlayGroupId || null;
+                    }
+                },
+                onGroupsChanged: function () {
                     renderGroupTabs();
+                },
+                onSessionsChanged: function () {
                     refreshOrderedSessions();
-                });
+                },
+                onGroupOrderCommit: function (newOrder) {
+                    self.setGroupTabOrder(newOrder);
+                },
+                onAddGroupClick: function () {
+                    groupTabUi.openCreateGroupPrompt(self.app, self, function () {
+                        renderGroupTabs();
+                        refreshOrderedSessions();
+                    });
+                },
             });
-            groupTabsRow.appendChild(addBtn);
         }
 
         overlay.appendChild(groupTabsRow);
