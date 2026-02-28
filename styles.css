@@ -384,10 +384,10 @@ body.wpp-session-list-dragging * {
 .wpp-search-overlay {
     align-items: stretch;
     gap: 8px;
-    width: min(400px, 95vw);
+    width: min(440px, 95vw);
     height: min(450px, 80vh);
-    min-width: min(260px, 90vw);
-    max-width: min(540px, 95vw);
+    min-width: min(286px, 90vw);
+    max-width: min(594px, 95vw);
     overflow: hidden;
     /* Position bottom-right */
     top: auto;

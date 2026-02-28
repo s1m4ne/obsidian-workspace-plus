@@ -81,7 +81,7 @@ function createSearchOverlayKeyHandler(options) {
             if (document.activeElement === options.saveInput) return;
             e.preventDefault();
             e.stopImmediatePropagation();
-            options.switchSelected();
+            options.switchSelected({ shiftKey: e.shiftKey });
             return;
         }
 
@@ -182,6 +182,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
 
         var overlay = document.createElement('div');
         overlay.className = 'wpp-switch-overlay wpp-search-overlay';
+        overlay.tabIndex = -1;
 
         // Resize handles at four corners
         var corners = ['tl', 'tr', 'bl', 'br'];
@@ -265,19 +266,25 @@ function attachOverlayMethods(WorkspacePlusPlus) {
         var groupTabsRow = document.createElement('div');
         groupTabsRow.className = 'wpp-group-tabs';
 
+        function stripSaveHint(text) {
+            return text.replace(/  \/  ⇧.+?  \/  /, '  /  ');
+        }
+
         function renderGroupTabs() {
             while (groupTabsRow.firstChild) groupTabsRow.removeChild(groupTabsRow.firstChild);
+            var autoSave = self.isAutoSaveOnSwitchEnabled();
             if (!self.isGroupFeatureEnabled()) {
                 groupTabsRow.style.display = 'none';
-                footerRow.textContent = L.searchOverlayHelp;
+                footerRow.textContent = autoSave ? stripSaveHint(L.searchOverlayHelp) : L.searchOverlayHelp;
                 return;
             }
             var groups = self.data.groups || {};
             var realGroups = self.getOrderedGroups();
             groupTabsRow.style.display = '';
-            footerRow.textContent = realGroups.length > 0
+            var helpText = realGroups.length > 0
                 ? (L.searchOverlayHelpWithGroups || L.searchOverlayHelp)
                 : L.searchOverlayHelp;
+            footerRow.textContent = autoSave ? stripSaveHint(helpText) : helpText;
 
             var groupOrder = self.getOrderedGroupTabIds();
             groupTabUi.renderGroupTabs({
@@ -362,7 +369,8 @@ function attachOverlayMethods(WorkspacePlusPlus) {
             }
 
             if (selectedIndex < 0 || selectedIndex >= filtered.length) {
-                selectedIndex = 0;
+                var activeIdx = self.findActiveSessionIndex(filtered);
+                selectedIndex = activeIdx !== -1 ? activeIdx : 0;
             }
 
             list.style.display = '';
@@ -748,10 +756,18 @@ function attachOverlayMethods(WorkspacePlusPlus) {
             }
         });
 
-        function switchSelected() {
+        function switchSelected(opts) {
+            opts = opts || {};
             if (selectedIndex < 0 || selectedIndex >= filtered.length) return;
             var target = filtered[selectedIndex];
             if (target.id === self.data.activeSessionId) {
+                if (opts.shiftKey) {
+                    self.saveActiveSession().then(function () {
+                        refreshOrderedSessions();
+                    });
+                } else {
+                    self.reloadCurrentSessionWithoutSaving();
+                }
                 self.hideSearchOverlay();
                 return;
             }
@@ -799,6 +815,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
 
         document.body.appendChild(overlay);
         this.searchOverlayEl = overlay;
+        overlay.classList.add('wpp-keyboard-nav');
         renderList();
 
         // Position overlay relative to anchor (status bar button)
@@ -1040,7 +1057,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
             document.addEventListener('mouseup', onUp);
         });
 
-        setTimeout(function () { searchInput.focus(); }, 20);
+        setTimeout(function () { overlay.focus(); }, 20);
     };
 
     WorkspacePlusPlus.prototype.showSwitchOverlay = function (ordered, activeIndex, viewGroupId) {
