@@ -416,22 +416,26 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                 if (isActive && !self.isAutoSaveOnSwitchEnabled()) {
                     saveIcon = document.createElement('div');
                     saveIcon.className = 'wpp-qs-action-btn';
+                    saveIcon.setAttribute('aria-label', L.saveInline);
                     obsidian.setIcon(saveIcon, 'save');
                     actions.appendChild(saveIcon);
 
                     reloadIcon = document.createElement('div');
                     reloadIcon.className = 'wpp-qs-action-btn';
+                    reloadIcon.setAttribute('aria-label', L.contextReloadSession);
                     obsidian.setIcon(reloadIcon, 'rotate-ccw');
                     actions.appendChild(reloadIcon);
                 }
 
                 var renameIcon = document.createElement('div');
                 renameIcon.className = 'wpp-qs-action-btn';
+                renameIcon.setAttribute('aria-label', L.rename);
                 obsidian.setIcon(renameIcon, 'pencil');
                 actions.appendChild(renameIcon);
 
                 var deleteIcon = document.createElement('div');
                 deleteIcon.className = 'wpp-qs-action-btn wpp-qs-action-delete';
+                deleteIcon.setAttribute('aria-label', L.delete);
                 obsidian.setIcon(deleteIcon, 'trash-2');
                 actions.appendChild(deleteIcon);
 
