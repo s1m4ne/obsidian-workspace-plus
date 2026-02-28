@@ -384,6 +384,85 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                     self.plugin.persistData();
                 },
             });
+
+            // --- Backup ---
+            addSection(L.rotationBackupSectionTitle);
+
+            new obsidian.Setting(contentEl)
+                .setName(L.rotationBackupCreate)
+                .setDesc(L.rotationBackupDesc)
+                .addButton(function (btn) {
+                    btn.setButtonText(L.rotationBackupCreateBtn);
+                    btn.onClick(function () {
+                        btn.setDisabled(true);
+                        var sessionData = self.plugin.extractSessionData(self.plugin.data);
+                        sessionData._wppSavedAt = Date.now();
+                        self.plugin.ensureDir(self.plugin.getBackupsDirPath())
+                            .then(function () {
+                                return self.plugin.copyFileIfExists(
+                                    self.plugin.getRotationBackupPath(2),
+                                    self.plugin.getRotationBackupPath(3)
+                                );
+                            })
+                            .then(function () {
+                                return self.plugin.copyFileIfExists(
+                                    self.plugin.getRotationBackupPath(1),
+                                    self.plugin.getRotationBackupPath(2)
+                                );
+                            })
+                            .then(function () {
+                                return self.plugin.writeJson(
+                                    self.plugin.getRotationBackupPath(1),
+                                    sessionData
+                                );
+                            })
+                            .then(function () {
+                                self.plugin._lastRotationBackupAt = Date.now();
+                                self.display();
+                            })
+                            .catch(function () {
+                                btn.setDisabled(false);
+                            });
+                    });
+                });
+
+            var backupListEl = contentEl.createDiv({ cls: 'wpp-backup-list' });
+            backupListEl.createDiv({ text: L.rotationBackupNone, cls: 'wpp-backup-none' });
+
+            self.plugin.getRotationBackupInfo().then(function (backups) {
+                backupListEl.empty();
+                if (backups.length === 0) {
+                    backupListEl.createDiv({ text: L.rotationBackupNone, cls: 'wpp-backup-none' });
+                    return;
+                }
+                for (var i = 0; i < backups.length; i++) {
+                    (function (backup) {
+                        var timeStr = '';
+                        try {
+                            timeStr = new Date(backup.savedAt).toLocaleString();
+                        } catch (e) {
+                            timeStr = String(backup.savedAt);
+                        }
+                        new obsidian.Setting(backupListEl)
+                            .setName(L.rotationBackupGeneration(timeStr, backup.sessionCount))
+                            .addButton(function (btn) {
+                                btn.setButtonText(L.rotationBackupRestore);
+                                btn.onClick(function () {
+                                    new modals.ConfirmModal(self.app,
+                                        L.rotationBackupRestoreConfirm(timeStr, backup.sessionCount),
+                                        function () {
+                                            return self.plugin.restoreFromRotationBackup(backup.generation)
+                                                .then(function (ok) {
+                                                    if (ok) self.display();
+                                                });
+                                        },
+                                        { confirmText: L.rotationBackupRestore }
+                                    ).open();
+                                });
+                            });
+                    })(backups[i]);
+                }
+            });
         }
 
         // ── Groups tab ──
