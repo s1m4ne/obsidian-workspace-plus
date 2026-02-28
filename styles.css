@@ -272,6 +272,8 @@ body.wpp-session-list-dragging * {
 
 .wpp-status-bar:hover {
     color: var(--text-accent);
+    background: var(--background-modifier-hover);
+    border-radius: 4px;
 }
 
 .wpp-status-icon {

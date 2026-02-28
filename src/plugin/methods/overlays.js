@@ -6,6 +6,7 @@ var modals = require('../../modals');
 var formatRelativeTime = require('../../modals/format-relative-time');
 var groupTabUi = require('../../group-tab-ui');
 var utils = require('../../utils');
+var sessionContextMenu = require('../../session-context-menu');
 
 function hasBlockingModal() {
     return !!document.querySelector('.modal-container');
@@ -469,13 +470,19 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                 var actions = document.createElement('div');
                 actions.className = 'wpp-qs-actions';
 
-                // Save icon (only for active session when auto-save is disabled)
+                // Save & reload icons (only for active session when auto-save is disabled)
                 var saveIcon = null;
+                var reloadIcon = null;
                 if (isActive && !self.isAutoSaveOnSwitchEnabled()) {
                     saveIcon = document.createElement('div');
                     saveIcon.className = 'wpp-qs-action-btn';
                     obsidian.setIcon(saveIcon, 'save');
                     actions.appendChild(saveIcon);
+
+                    reloadIcon = document.createElement('div');
+                    reloadIcon.className = 'wpp-qs-action-btn';
+                    obsidian.setIcon(reloadIcon, 'rotate-ccw');
+                    actions.appendChild(reloadIcon);
                 }
 
                 var renameIcon = document.createElement('div');
@@ -490,7 +497,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
 
                 item.appendChild(actions);
 
-                (function (idx, sess, itemEl, _saveIcon, _isActive) {
+                (function (idx, sess, itemEl, _saveIcon, _reloadIcon, _isActive) {
                     // Click on item to switch
                     itemEl.addEventListener('click', function (e) {
                         if (e.target.closest('.wpp-qs-action-btn')) return;
@@ -511,25 +518,28 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                     // Right-click context menu
                     itemEl.addEventListener('contextmenu', function (e) {
                         e.preventDefault();
-                        var menu = new obsidian.Menu();
-
-                        // Switch (only if not active)
-                        if (!_isActive) {
-                            menu.addItem(function (mi) {
-                                mi.setTitle(L.contextSwitchSession);
-                                mi.setIcon('arrow-right');
-                                mi.onClick(function () {
-                                    selectedIndex = idx;
-                                    switchSelected();
+                        var selectedGroupId = getOverlayGroupId();
+                        sessionContextMenu.openSessionContextMenu({
+                            plugin: self,
+                            app: self.app,
+                            session: sess,
+                            isActive: _isActive,
+                            event: e,
+                            showSwitch: true,
+                            showRemoveFromGroup: !!selectedGroupId,
+                            onSave: function () {
+                                self.saveActiveSession().then(function () {
+                                    refreshOrderedSessions();
                                 });
-                            });
-                        }
-
-                        // Rename
-                        menu.addItem(function (mi) {
-                            mi.setTitle(L.contextRenameSession);
-                            mi.setIcon('pencil');
-                            mi.onClick(function () {
+                            },
+                            onReload: function () {
+                                self.reloadCurrentSessionWithoutSaving();
+                            },
+                            onSwitch: function () {
+                                selectedIndex = idx;
+                                switchSelected();
+                            },
+                            onRename: function () {
                                 new modals.RenameModal(self.app, sess.name, function (newName) {
                                     self.renameSessionById(sess.id, newName).then(function (renamed) {
                                         if (!renamed) return;
@@ -538,64 +548,37 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                                 }, {
                                     emptyNotice: L.emptyName,
                                 }).open();
-                            });
-                        });
-
-                        // Duplicate
-                        menu.addItem(function (mi) {
-                            mi.setTitle(L.contextDuplicateSession);
-                            mi.setIcon('copy');
-                            mi.onClick(function () {
+                            },
+                            onDuplicate: function () {
                                 self.duplicateSession(sess.id).then(function () {
                                     refreshOrderedSessions();
                                 });
-                            });
-                        });
-
-                        // Remove from group (only when a group is selected)
-                        var selectedGroupId = getOverlayGroupId();
-                        if (selectedGroupId) {
-                            menu.addItem(function (mi) {
-                                mi.setTitle(L.groupRemoveFromGroup);
-                                mi.setIcon('log-out');
-                                mi.onClick(function () {
-                                    var activeGid = getOverlayGroupId();
-                                    if (!activeGid) return;
-                                    var gName = (self.data.groups[activeGid] || {}).name || '';
-                                    self.removeSessionFromGroup(sess.id, activeGid).then(function () {
-                                        new obsidian.Notice(L.groupRemovedSession(sess.name, gName));
-                                        renderGroupTabs();
+                            },
+                            onRemoveFromGroup: function () {
+                                var activeGid = getOverlayGroupId();
+                                if (!activeGid) return;
+                                var gName = (self.data.groups[activeGid] || {}).name || '';
+                                self.removeSessionFromGroup(sess.id, activeGid).then(function () {
+                                    new obsidian.Notice(L.groupRemovedSession(sess.name, gName));
+                                    renderGroupTabs();
+                                    refreshOrderedSessions();
+                                });
+                            },
+                            onDelete: function () {
+                                var doDelete = function () {
+                                    self.deleteSession(sess.id).then(function (deleted) {
+                                        if (!deleted) return;
+                                        new obsidian.Notice(L.deleted(sess.name));
                                         refreshOrderedSessions();
                                     });
-                                });
-                            });
-                        }
-
-                        // Delete (with separator, hidden for last session)
-                        if (Object.keys(self.data.sessions).length > 1) {
-                            menu.addSeparator();
-                            menu.addItem(function (mi) {
-                                mi.setTitle(L.contextDeleteSession);
-                                mi.setIcon('trash-2');
-                                mi.setSection('danger');
-                                mi.onClick(function () {
-                                    var doDelete = function () {
-                                        self.deleteSession(sess.id).then(function (deleted) {
-                                            if (!deleted) return;
-                                            new obsidian.Notice(L.deleted(sess.name));
-                                            refreshOrderedSessions();
-                                        });
-                                    };
-                                    if (self.data.confirmDeleteByHotkey !== false) {
-                                        new modals.ConfirmModal(self.app, L.confirmDeleteActive(sess.name), doDelete).open();
-                                    } else {
-                                        doDelete();
-                                    }
-                                });
-                            });
-                        }
-
-                        menu.showAtMouseEvent(e);
+                                };
+                                if (self.data.confirmDeleteByHotkey !== false) {
+                                    new modals.ConfirmModal(self.app, L.confirmDeleteActive(sess.name), doDelete).open();
+                                } else {
+                                    doDelete();
+                                }
+                            },
+                        });
                     });
 
                     // Save
@@ -605,6 +588,14 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                             self.saveActiveSession().then(function () {
                                 refreshOrderedSessions();
                             });
+                        });
+                    }
+
+                    // Reload
+                    if (_reloadIcon) {
+                        _reloadIcon.addEventListener('click', function (e) {
+                            e.stopPropagation();
+                            self.reloadCurrentSessionWithoutSaving();
                         });
                     }
 
@@ -643,7 +634,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                             doDelete();
                         }
                     });
-                })(i, session, item, saveIcon, isActive);
+                })(i, session, item, saveIcon, reloadIcon, isActive);
 
                 list.appendChild(item);
             }

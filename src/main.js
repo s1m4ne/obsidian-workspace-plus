@@ -11,6 +11,7 @@ var attachOverlayMethods = require('./plugin/methods/overlays');
 var attachPersistenceMethods = require('./plugin/methods/persistence');
 var attachSessionMethods = require('./plugin/methods/sessions');
 var utils = require('./utils');
+var sessionContextMenu = require('./session-context-menu');
 
 i18n.resolveLocale();
 
@@ -72,6 +73,45 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
                 } else {
                     new modals.SessionManagerModal(self.app, self).open();
                 }
+            });
+            self.statusBarEl.addEventListener('contextmenu', function (evt) {
+                evt.preventDefault();
+                var session = self.getActiveSession();
+                if (!session) return;
+                sessionContextMenu.openSessionContextMenu({
+                    plugin: self,
+                    app: self.app,
+                    session: session,
+                    isActive: true,
+                    event: evt,
+                    showSaveAs: true,
+                    showSwitch: false,
+                    showRemoveFromGroup: false,
+                    onSave: function () {
+                        self.saveActiveSession();
+                    },
+                    onReload: function () {
+                        self.reloadCurrentSessionWithoutSaving();
+                    },
+                    onSaveAs: function () {
+                        self.saveAsSession();
+                    },
+                    onRename: function () {
+                        new modals.RenameModal(self.app, session.name, function (newName) {
+                            self.renameSessionById(session.id, newName);
+                        }, {
+                            emptyNotice: L.emptyName,
+                        }).open();
+                    },
+                    onDuplicate: function () {
+                        self.duplicateSession(session.id);
+                    },
+                    onDelete: function () {
+                        new modals.ConfirmModal(self.app, L.confirmDeleteActive(session.name), function () {
+                            self.deleteSession(session.id);
+                        }).open();
+                    },
+                });
             });
             self.updateStatusBar();
 
