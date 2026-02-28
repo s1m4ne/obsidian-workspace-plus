@@ -299,6 +299,14 @@ function attachSessionMethods(WorkspacePlusPlus) {
         options = options || {};
         this.data.autoSaveOnSwitch = !!enabled;
         var isOn = this.isAutoSaveOnSwitchEnabled();
+
+        // Sync snapshot timer — it requires both version history and auto-save
+        if (isOn) {
+            this.startHistorySnapshotTimer();
+        } else {
+            this.stopHistorySnapshotTimer();
+        }
+
         return this.persistData().then(function () {
             if (options.notify) {
                 new obsidian.Notice(isOn ? L.autoSaveEnabled : L.autoSaveDisabled);

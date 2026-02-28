@@ -342,24 +342,26 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
             vhMasterSetting.settingEl.addClass('wpp-has-nested');
             var vhNestedDiv = vhMasterSetting.settingEl.createDiv({ cls: 'wpp-nested-settings' });
 
-            new obsidian.Setting(vhNestedDiv)
-                .setName(L.settingsVersionHistoryInterval)
-                .setDesc(L.settingsVersionHistoryIntervalDesc)
-                .addDropdown(function (dropdown) {
-                    dropdown.addOption('1', '1');
-                    dropdown.addOption('2', '2');
-                    dropdown.addOption('5', '5');
-                    dropdown.addOption('10', '10');
-                    dropdown.addOption('15', '15');
-                    dropdown.addOption('30', '30');
-                    dropdown.setValue(String(self.plugin.getVersionHistorySnapshotInterval()));
-                    if (!versionHistoryEnabled) dropdown.setDisabled(true);
-                    dropdown.onChange(function (value) {
-                        self.plugin.data.versionHistorySnapshotInterval = parseInt(value, 10);
-                        self.plugin.persistData();
-                        self.plugin.startHistorySnapshotTimer();
+            if (self.plugin.isAutoSaveOnSwitchEnabled()) {
+                new obsidian.Setting(vhNestedDiv)
+                    .setName(L.settingsVersionHistoryInterval)
+                    .setDesc(L.settingsVersionHistoryIntervalDesc)
+                    .addDropdown(function (dropdown) {
+                        dropdown.addOption('1', '1');
+                        dropdown.addOption('2', '2');
+                        dropdown.addOption('5', '5');
+                        dropdown.addOption('10', '10');
+                        dropdown.addOption('15', '15');
+                        dropdown.addOption('30', '30');
+                        dropdown.setValue(String(self.plugin.getVersionHistorySnapshotInterval()));
+                        if (!versionHistoryEnabled) dropdown.setDisabled(true);
+                        dropdown.onChange(function (value) {
+                            self.plugin.data.versionHistorySnapshotInterval = parseInt(value, 10);
+                            self.plugin.persistData();
+                            self.plugin.startHistorySnapshotTimer();
+                        });
                     });
-                });
+            }
 
             addToggleSetting(vhNestedDiv, {
                 name: L.settingsVersionHistoryCtrlRmb,
