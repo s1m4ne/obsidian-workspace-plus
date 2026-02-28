@@ -6,7 +6,8 @@
     "scripts": {
         "dev": "node esbuild.config.mjs",
         "build": "node esbuild.config.mjs production",
-        "check:i18n": "node scripts/check-i18n.js"
+        "check:i18n": "node scripts/check-i18n.js",
+        "test": "node --test tests/*.test.js"
     },
     "devDependencies": {
         "builtin-modules": "^4.0.0",
