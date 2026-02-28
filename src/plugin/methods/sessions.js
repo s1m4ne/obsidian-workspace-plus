@@ -620,6 +620,9 @@ function attachSessionMethods(WorkspacePlusPlus) {
         var session = this.data.sessions[sessionId];
         if (!session || Object.keys(this.data.sessions).length <= 1) return Promise.resolve(false);
 
+        var wasActive = this.data.activeSessionId === sessionId;
+        var nextActiveId = null;
+
         delete this.data.sessions[sessionId];
         var orderIdx = this.data.sessionOrder.indexOf(sessionId);
         if (orderIdx !== -1) this.data.sessionOrder.splice(orderIdx, 1);
@@ -628,15 +631,30 @@ function attachSessionMethods(WorkspacePlusPlus) {
         if (this.data.sessionGroups && this.data.sessionGroups[sessionId]) {
             delete this.data.sessionGroups[sessionId];
         }
-        if (this.data.activeSessionId === sessionId) {
+        if (wasActive) {
             // Keep same index position; if it was the last, move to index - 1
             var fallbackIdx = Math.min(orderIdx, this.data.sessionOrder.length - 1);
             var remaining = this.data.sessionOrder[fallbackIdx] || Object.keys(this.data.sessions)[0];
-            this.data.activeSessionId = remaining || null;
+            nextActiveId = remaining || null;
+            this.data.activeSessionId = nextActiveId;
         }
+
+        var applyNextLayout = Promise.resolve();
+        if (wasActive && nextActiveId) {
+            var nextSession = this.data.sessions[nextActiveId];
+            applyNextLayout = nextSession && nextSession.layout
+                ? this.app.workspace.changeLayout(nextSession.layout).catch(function () {})
+                : Promise.resolve();
+        }
+
         this.updateStatusBar();
         this.syncSessionCommands();
-        return this.persistData().then(function () { return true; });
+        var self = this;
+        return applyNextLayout
+            .then(function () {
+                return self.persistData();
+            })
+            .then(function () { return true; });
     };
 
     WorkspacePlusPlus.prototype.renameCurrentSession = function () {
