@@ -88,7 +88,9 @@ function attachSessionValidationMethods(WorkspacePlusPlus) {
 
             var createdSessionId = result.sessionId;
             if (targetGroupId && targetGroupId !== beforeActiveGroupId) {
-                return self.addSessionToGroup(createdSessionId, targetGroupId).then(function () {
+                // When creating from a different viewed group, keep membership exclusive
+                // so the new session doesn't remain in the previously active group.
+                return self.moveSessionToGroupExclusive(createdSessionId, targetGroupId).then(function () {
                     return self.resolveGroupSelection(targetGroupId).then(function (selection) {
                         result.viewGroupId = selection.resolvedGroupId || null;
                         return result;
