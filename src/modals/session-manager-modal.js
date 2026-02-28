@@ -7,6 +7,7 @@ var RenameModal = require('./rename-modal');
 var formatRelativeTime = require('./format-relative-time');
 var groupTabUi = require('../group-tab-ui');
 var utils = require('../utils');
+var sessionContextMenu = require('../session-context-menu');
 
 // ============================================================
 // Session Manager Modal
@@ -493,66 +494,48 @@ var SessionManagerModal = /** @class */ (function (_super) {
         // Right-click context menu
         item.addEventListener('contextmenu', function (e) {
             e.preventDefault();
-            var menu = new obsidian.Menu();
-
-            // Switch
-            if (!isActive) {
-                menu.addItem(function (mi) {
-                    mi.setTitle(L.contextSwitchSession);
-                    mi.setIcon('arrow-right');
-                    mi.onClick(function () { self.onLoad(session.id); });
-                });
-            }
-
-            // Rename
-            menu.addItem(function (mi) {
-                mi.setTitle(L.contextRenameSession);
-                mi.setIcon('pencil');
-                mi.onClick(function () { self.onRename(session); });
-            });
-
-            // Duplicate
-            menu.addItem(function (mi) {
-                mi.setTitle(L.contextDuplicateSession);
-                mi.setIcon('copy');
-                mi.onClick(function () {
+            var selectedGroupId = self.getModalGroupId();
+            sessionContextMenu.openSessionContextMenu({
+                plugin: self.plugin,
+                app: self.app,
+                session: session,
+                isActive: isActive,
+                event: e,
+                showSwitch: true,
+                showRemoveFromGroup: !!selectedGroupId,
+                onSave: function () {
+                    self.plugin.saveActiveSession().then(function () {
+                        self.renderList();
+                    });
+                },
+                onReload: function () {
+                    self.plugin.reloadCurrentSessionWithoutSaving();
+                },
+                onSwitch: function () {
+                    self.onLoad(session.id);
+                },
+                onRename: function () {
+                    self.onRename(session);
+                },
+                onDuplicate: function () {
                     self.plugin.duplicateSession(session.id).then(function () {
                         self.renderList();
                     });
-                });
-            });
-
-            // Remove from group (only when a group is active)
-            var selectedGroupId = self.getModalGroupId();
-            if (selectedGroupId) {
-                menu.addItem(function (mi) {
-                    mi.setTitle(L.groupRemoveFromGroup);
-                    mi.setIcon('log-out');
-                    mi.onClick(function () {
-                        var activeGid = self.getModalGroupId();
-                        if (!activeGid) return;
-                        var gName = (self.plugin.data.groups[activeGid] || {}).name || '';
-                        self.plugin.removeSessionFromGroup(session.id, activeGid).then(function () {
-                            new obsidian.Notice(L.groupRemovedSession(session.name, gName));
-                            self.renderGroupTabs();
-                            self.renderList();
-                        });
+                },
+                onRemoveFromGroup: function () {
+                    var activeGid = self.getModalGroupId();
+                    if (!activeGid) return;
+                    var gName = (self.plugin.data.groups[activeGid] || {}).name || '';
+                    self.plugin.removeSessionFromGroup(session.id, activeGid).then(function () {
+                        new obsidian.Notice(L.groupRemovedSession(session.name, gName));
+                        self.renderGroupTabs();
+                        self.renderList();
                     });
-                });
-            }
-
-            // Delete (with separator, hidden for last session)
-            if (Object.keys(self.plugin.data.sessions).length > 1) {
-                menu.addSeparator();
-                menu.addItem(function (mi) {
-                    mi.setTitle(L.contextDeleteSession);
-                    mi.setIcon('trash-2');
-                    mi.setSection('danger');
-                    mi.onClick(function () { self.onDelete(session); });
-                });
-            }
-
-            menu.showAtMouseEvent(e);
+                },
+                onDelete: function () {
+                    self.onDelete(session);
+                },
+            });
         });
 
         // Hotkey hint
