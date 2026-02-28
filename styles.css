@@ -724,6 +724,37 @@ body.wpp-session-list-dragging * {
     font-size: var(--font-ui-smaller);
 }
 
+/* Settings: tab bar */
+.wpp-settings-tab-bar {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--background-modifier-border);
+    padding-bottom: 8px;
+}
+
+.wpp-settings-tab {
+    padding: 6px 16px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: var(--font-ui-small);
+    cursor: pointer;
+    font-weight: 500;
+    font-family: inherit;
+}
+
+.wpp-settings-tab:hover {
+    background: var(--background-modifier-hover);
+    color: var(--text-normal);
+}
+
+.wpp-settings-tab.is-active {
+    background: var(--interactive-accent);
+    color: var(--text-on-accent);
+}
+
 /* Settings: nested sub-toggles below parent */
 .wpp-has-nested {
     flex-wrap: wrap;

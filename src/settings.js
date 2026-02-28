@@ -163,395 +163,413 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
         var containerEl = this.containerEl;
         containerEl.empty();
 
-        function addSection(title) {
-            containerEl.createEl('h3', { text: title, cls: 'wpp-settings-section-title' });
+        if (!self.activeTab) self.activeTab = 'general';
+
+        // ── Tab bar ──
+        var tabs = [
+            { id: 'general', label: L.settingsSectionGeneral },
+            { id: 'sessions', label: L.settingsTabSessions },
+            { id: 'groups', label: L.settingsSectionGroups },
+            { id: 'advanced', label: L.settingsSectionAdvanced },
+        ];
+        var tabBarEl = containerEl.createDiv({ cls: 'wpp-settings-tab-bar' });
+        for (var ti = 0; ti < tabs.length; ti++) {
+            (function (tab) {
+                var btn = tabBarEl.createEl('button', {
+                    text: tab.label,
+                    cls: 'wpp-settings-tab' + (tab.id === self.activeTab ? ' is-active' : ''),
+                });
+                btn.addEventListener('click', function () {
+                    self.activeTab = tab.id;
+                    self.display();
+                });
+            })(tabs[ti]);
         }
 
-        addSection(L.settingsSectionGeneral);
+        var contentEl = containerEl.createDiv({ cls: 'wpp-settings-tab-content' });
 
-        new obsidian.Setting(containerEl)
-            .setName(L.settingsLanguage)
-            .setDesc(L.settingsLanguageDesc)
-            .addDropdown(function (dropdown) {
-                dropdown.addOption('auto', L.settingsLangAuto);
-                var order = i18n.LANG_ORDER;
-                for (var i = 0; i < order.length; i++) {
-                    dropdown.addOption(order[i], i18n.LANG_OPTIONS[order[i]]);
+        function addSection(title) {
+            contentEl.createEl('h3', { text: title, cls: 'wpp-settings-section-title' });
+        }
+
+        // ── General tab ──
+        if (self.activeTab === 'general') {
+            new obsidian.Setting(contentEl)
+                .setName(L.settingsLanguage)
+                .setDesc(L.settingsLanguageDesc)
+                .addDropdown(function (dropdown) {
+                    dropdown.addOption('auto', L.settingsLangAuto);
+                    var order = i18n.LANG_ORDER;
+                    for (var i = 0; i < order.length; i++) {
+                        dropdown.addOption(order[i], i18n.LANG_OPTIONS[order[i]]);
+                    }
+                    dropdown.setValue(self.plugin.data.language || 'auto');
+                    dropdown.onChange(function (value) {
+                        self.plugin.data.language = value;
+                        i18n.resolveLocale(value);
+                        self.plugin.persistData();
+                        self.display();
+                    });
+                });
+
+            new obsidian.Setting(contentEl)
+                .setName(L.settingsHotkeys)
+                .addButton(function (btn) {
+                    btn.setButtonText(L.settingsHotkeysBtn);
+                    btn.onClick(function () {
+                        self.app.setting.openTabById('hotkeys');
+                        var sc = self.app.setting.activeTab.searchComponent;
+                        var pluginName = (self.plugin.manifest && self.plugin.manifest.name)
+                            ? self.plugin.manifest.name
+                            : 'Workspace++';
+                        sc.setValue(pluginName);
+                        sc.inputEl.dispatchEvent(new Event('input'));
+                    });
+                });
+
+            addToggleSetting(contentEl, {
+                name: L.settingsStatusBarQuickSwitcher,
+                desc: L.settingsStatusBarQuickSwitcherDesc,
+                value: self.plugin.data.statusBarQuickSwitcher,
+                onChange: function (value) {
+                    self.plugin.data.statusBarQuickSwitcher = value;
+                    self.plugin.persistData();
+                },
+            });
+        }
+
+        // ── Sessions tab ──
+        if (self.activeTab === 'sessions') {
+            addSection(L.settingsSectionSwitching);
+
+            var autoSaveOnSwitch = self.plugin.isAutoSaveOnSwitchEnabled();
+            new obsidian.Setting(contentEl)
+                .setName(L.settingsAutoSaveOnSwitch)
+                .setDesc(L.settingsAutoSaveOnSwitchDesc)
+                .addToggle(function (toggle) {
+                    toggle.setValue(autoSaveOnSwitch);
+                    toggle.onChange(function (value) {
+                        self.plugin.setAutoSaveOnSwitch(value).then(function () {
+                            self.display();
+                        });
+                    });
+                });
+
+            addToggleSetting(contentEl, {
+                name: L.settingsWarnUnsavedSwitch,
+                desc: L.settingsWarnUnsavedSwitchDesc,
+                value: self.plugin.isWarnOnUnsavedSwitchEnabled(),
+                disabled: autoSaveOnSwitch,
+                onChange: function (value) {
+                    self.plugin.data.warnOnUnsavedSwitch = value;
+                    self.plugin.persistData();
+                },
+            });
+
+            // Preview before switching — master toggle with nested sub-toggles
+            var allOn = !!self.plugin.data.previewNext && !!self.plugin.data.previewPrevious;
+            var masterSetting = new obsidian.Setting(contentEl)
+                .setName(L.settingsPreviewHeading)
+                .setDesc(L.settingsPreviewDesc)
+                .addToggle(function (toggle) {
+                    toggle.setValue(allOn);
+                    toggle.onChange(function (value) {
+                        self.plugin.data.previewNext = value;
+                        self.plugin.data.previewPrevious = value;
+                        self.plugin.persistData();
+                        self.display();
+                    });
+                });
+
+            masterSetting.settingEl.addClass('wpp-has-nested');
+            var nestedDiv = masterSetting.settingEl.createDiv({ cls: 'wpp-nested-settings' });
+
+            new obsidian.Setting(nestedDiv)
+                .setName(L.settingsPreviewNext)
+                .addToggle(function (toggle) {
+                    toggle.setValue(!!self.plugin.data.previewNext);
+                    toggle.onChange(function (value) {
+                        self.plugin.data.previewNext = value;
+                        self.plugin.persistData();
+                        self.display();
+                    });
+                });
+
+            new obsidian.Setting(nestedDiv)
+                .setName(L.settingsPreviewPrevious)
+                .addToggle(function (toggle) {
+                    toggle.setValue(!!self.plugin.data.previewPrevious);
+                    toggle.onChange(function (value) {
+                        self.plugin.data.previewPrevious = value;
+                        self.plugin.persistData();
+                        self.display();
+                    });
+                });
+
+            addSection(L.settingsSectionDeletion);
+
+            addToggleSetting(contentEl, {
+                name: L.settingsConfirmDelete,
+                desc: L.settingsConfirmDeleteDesc,
+                value: self.plugin.data.confirmDeleteByHotkey !== false,
+                onChange: function (value) {
+                    self.plugin.data.confirmDeleteByHotkey = value;
+                    self.plugin.persistData();
+                },
+            });
+        }
+
+        // ── Groups tab ──
+        if (self.activeTab === 'groups') {
+            addToggleSetting(contentEl, {
+                name: L.settingsSectionGroups,
+                desc: L.settingsSectionGroupsDesc,
+                value: self.plugin.isGroupFeatureEnabled(),
+                onChange: function (value) {
+                    self.plugin.setGroupFeatureEnabled(value).then(function () {
+                        self.display();
+                    });
+                },
+            });
+
+            if (self.plugin.isGroupFeatureEnabled()) {
+                // Create group
+                var createGroupSetting = new obsidian.Setting(contentEl)
+                    .setName(L.settingsGroupCreate)
+                    .setDesc(L.settingsGroupCreateDesc);
+
+                var groupNameInput = null;
+                createGroupSetting.addText(function (text) {
+                    groupNameInput = text;
+                    text.setPlaceholder(L.settingsGroupCreatePlaceholder);
+                });
+
+                createGroupSetting.addButton(function (btn) {
+                    btn.setButtonText(L.settingsGroupCreateBtn);
+                    btn.onClick(function () {
+                        if (!groupNameInput) return;
+                        self.plugin.createGroupValidated(groupNameInput.getValue()).then(function (created) {
+                            if (!created) return;
+                            self.display();
+                        });
+                    });
+                });
+
+                // List existing groups
+                var orderedGroups = self.plugin.getOrderedGroups();
+                for (var gIdx = 0; gIdx < orderedGroups.length; gIdx++) {
+                    (function (group) {
+                        var sessionCount = self.plugin.getGroupSessionIds(group.id).length;
+                        var groupSetting = new obsidian.Setting(contentEl)
+                            .setName(group.name)
+                            .setDesc(L.settingsGroupManageSessionsDesc + ' · ' + L.settingsGroupSessionCount(sessionCount));
+
+                        // Manage sessions button
+                        groupSetting.addButton(function (btn) {
+                            btn.setButtonText(L.settingsGroupManageSessions);
+                            btn.onClick(function () {
+                                new GroupSessionsModal(self.app, self.plugin, group).open();
+                            });
+                        });
+
+                        // Rename
+                        groupSetting.addExtraButton(function (btn) {
+                            btn.setIcon('pencil');
+                            btn.setTooltip(L.rename);
+                            btn.onClick(function () {
+                                new modals.RenameModal(self.app, group.name, function (newName) {
+                                    self.plugin.renameGroupValidated(group.id, newName).then(function (renamed) {
+                                        if (!renamed) return;
+                                        self.display();
+                                    });
+                                }, {
+                                    emptyNotice: L.groupEmptyName,
+                                }).open();
+                            });
+                        });
+
+                        // Delete
+                        groupSetting.addExtraButton(function (btn) {
+                            btn.setIcon('trash-2');
+                            btn.setTooltip(L.settingsGroupDelete);
+                            btn.onClick(function () {
+                                new modals.ConfirmModal(self.app, L.settingsGroupDeleteConfirm(group.name), function () {
+                                    self.plugin.deleteGroup(group.id).then(function () {
+                                        self.display();
+                                    });
+                                }).open();
+                            });
+                        });
+                    })(orderedGroups[gIdx]);
                 }
-                dropdown.setValue(self.plugin.data.language || 'auto');
-                dropdown.onChange(function (value) {
-                    self.plugin.data.language = value;
-                    i18n.resolveLocale(value);
-                    self.plugin.persistData();
-                    self.display();
-                });
-            });
-
-        new obsidian.Setting(containerEl)
-            .setName(L.settingsHotkeys)
-            .addButton(function (btn) {
-                btn.setButtonText(L.settingsHotkeysBtn);
-                btn.onClick(function () {
-                    self.app.setting.openTabById('hotkeys');
-                    var sc = self.app.setting.activeTab.searchComponent;
-                    var pluginName = (self.plugin.manifest && self.plugin.manifest.name)
-                        ? self.plugin.manifest.name
-                        : 'Workspace++';
-                    sc.setValue(pluginName);
-                    sc.inputEl.dispatchEvent(new Event('input'));
-                });
-            });
-
-        addToggleSetting(containerEl, {
-            name: L.settingsStatusBarQuickSwitcher,
-            desc: L.settingsStatusBarQuickSwitcherDesc,
-            value: self.plugin.data.statusBarQuickSwitcher,
-            onChange: function (value) {
-                self.plugin.data.statusBarQuickSwitcher = value;
-                self.plugin.persistData();
-            },
-        });
-
-        addSection(L.settingsSectionSwitching);
-
-        var autoSaveOnSwitch = self.plugin.isAutoSaveOnSwitchEnabled();
-        new obsidian.Setting(containerEl)
-            .setName(L.settingsAutoSaveOnSwitch)
-            .setDesc(L.settingsAutoSaveOnSwitchDesc)
-            .addToggle(function (toggle) {
-                toggle.setValue(autoSaveOnSwitch);
-                toggle.onChange(function (value) {
-                    self.plugin.setAutoSaveOnSwitch(value).then(function () {
-                        self.display();
-                    });
-                });
-            });
-
-        addToggleSetting(containerEl, {
-            name: L.settingsWarnUnsavedSwitch,
-            desc: L.settingsWarnUnsavedSwitchDesc,
-            value: self.plugin.isWarnOnUnsavedSwitchEnabled(),
-            disabled: autoSaveOnSwitch,
-            onChange: function (value) {
-                self.plugin.data.warnOnUnsavedSwitch = value;
-                self.plugin.persistData();
-            },
-        });
-
-        // Preview before switching — master toggle with nested sub-toggles
-        var allOn = !!self.plugin.data.previewNext && !!self.plugin.data.previewPrevious;
-        var masterSetting = new obsidian.Setting(containerEl)
-            .setName(L.settingsPreviewHeading)
-            .setDesc(L.settingsPreviewDesc)
-            .addToggle(function (toggle) {
-                toggle.setValue(allOn);
-                toggle.onChange(function (value) {
-                    self.plugin.data.previewNext = value;
-                    self.plugin.data.previewPrevious = value;
-                    self.plugin.persistData();
-                    self.display();
-                });
-            });
-
-        masterSetting.settingEl.addClass('wpp-has-nested');
-        var nestedDiv = masterSetting.settingEl.createDiv({ cls: 'wpp-nested-settings' });
-
-        new obsidian.Setting(nestedDiv)
-            .setName(L.settingsPreviewNext)
-            .addToggle(function (toggle) {
-                toggle.setValue(!!self.plugin.data.previewNext);
-                toggle.onChange(function (value) {
-                    self.plugin.data.previewNext = value;
-                    self.plugin.persistData();
-                    self.display();
-                });
-            });
-
-        new obsidian.Setting(nestedDiv)
-            .setName(L.settingsPreviewPrevious)
-            .addToggle(function (toggle) {
-                toggle.setValue(!!self.plugin.data.previewPrevious);
-                toggle.onChange(function (value) {
-                    self.plugin.data.previewPrevious = value;
-                    self.plugin.persistData();
-                    self.display();
-                });
-            });
-
-        addSection(L.settingsSectionDeletion);
-
-        addToggleSetting(containerEl, {
-            name: L.settingsConfirmDelete,
-            desc: L.settingsConfirmDeleteDesc,
-            value: self.plugin.data.confirmDeleteByHotkey !== false,
-            onChange: function (value) {
-                self.plugin.data.confirmDeleteByHotkey = value;
-                self.plugin.persistData();
-            },
-        });
-
-        // ---- Session Groups ----
-        addSection(L.settingsSectionGroups);
-
-        addToggleSetting(containerEl, {
-            name: L.settingsSectionGroups,
-            desc: L.settingsSectionGroupsDesc,
-            value: self.plugin.isGroupFeatureEnabled(),
-            onChange: function (value) {
-                self.plugin.setGroupFeatureEnabled(value).then(function () {
-                    self.display();
-                });
-            },
-        });
-
-        if (self.plugin.isGroupFeatureEnabled()) {
-            // Create group
-            var createGroupSetting = new obsidian.Setting(containerEl)
-                .setName(L.settingsGroupCreate)
-                .setDesc(L.settingsGroupCreateDesc);
-
-            var groupNameInput = null;
-            createGroupSetting.addText(function (text) {
-                groupNameInput = text;
-                text.setPlaceholder(L.settingsGroupCreatePlaceholder);
-            });
-
-            createGroupSetting.addButton(function (btn) {
-                btn.setButtonText(L.settingsGroupCreateBtn);
-                btn.onClick(function () {
-                    if (!groupNameInput) return;
-                    self.plugin.createGroupValidated(groupNameInput.getValue()).then(function (created) {
-                        if (!created) return;
-                        self.display();
-                    });
-                });
-            });
-
-            // List existing groups
-            var orderedGroups = self.plugin.getOrderedGroups();
-            for (var gIdx = 0; gIdx < orderedGroups.length; gIdx++) {
-                (function (group) {
-                    var sessionCount = self.plugin.getGroupSessionIds(group.id).length;
-                    var groupSetting = new obsidian.Setting(containerEl)
-                        .setName(group.name)
-                        .setDesc(L.settingsGroupManageSessionsDesc + ' · ' + L.settingsGroupSessionCount(sessionCount));
-
-                    // Manage sessions button
-                    groupSetting.addButton(function (btn) {
-                        btn.setButtonText(L.settingsGroupManageSessions);
-                        btn.onClick(function () {
-                            new GroupSessionsModal(self.app, self.plugin, group).open();
-                        });
-                    });
-
-                    // Rename
-                    groupSetting.addExtraButton(function (btn) {
-                        btn.setIcon('pencil');
-                        btn.setTooltip(L.rename);
-                        btn.onClick(function () {
-                            new modals.RenameModal(self.app, group.name, function (newName) {
-                                self.plugin.renameGroupValidated(group.id, newName).then(function (renamed) {
-                                    if (!renamed) return;
-                                    self.display();
-                                });
-                            }, {
-                                emptyNotice: L.groupEmptyName,
-                            }).open();
-                        });
-                    });
-
-                    // Delete
-                    groupSetting.addExtraButton(function (btn) {
-                        btn.setIcon('trash-2');
-                        btn.setTooltip(L.settingsGroupDelete);
-                        btn.onClick(function () {
-                            new modals.ConfirmModal(self.app, L.settingsGroupDeleteConfirm(group.name), function () {
-                                self.plugin.deleteGroup(group.id).then(function () {
-                                    self.display();
-                                });
-                            }).open();
-                        });
-                    });
-                })(orderedGroups[gIdx]);
             }
         }
 
-        addSection(L.settingsSectionReset);
+        // ── Advanced tab ──
+        if (self.activeTab === 'advanced') {
+            addSection(L.settingsAdvancedStorageSubsection);
 
-        addDangerResetSetting(containerEl, self.app, function () {
-            self.display();
-        }, {
-            name: L.settingsResetSettings,
-            desc: L.settingsResetSettingsDesc,
-            buttonText: L.settingsResetSettingsBtn,
-            confirmMessage: L.confirmResetSettings,
-            run: function () {
-                return self.plugin.resetSettingsToDefault();
-            },
-            successNotice: L.resetSettingsDone,
-            failureNotice: L.resetSettingsFailed,
-        });
+            var useLocalSettings = self.plugin.isUsingLocalSettings();
 
-        addDangerResetSetting(containerEl, self.app, function () {
-            self.display();
-        }, {
-            name: L.settingsResetSessions,
-            desc: L.settingsResetSessionsDesc,
-            buttonText: L.settingsResetSessionsBtn,
-            confirmMessage: L.confirmResetSessions,
-            confirmHint: L.resetSessionsHint,
-            run: function () {
-                return self.plugin.resetSessionsToDefault();
-            },
-            successNotice: L.resetSessionsDone,
-            failureNotice: L.resetSessionsFailed,
-        });
-
-        addDangerResetSetting(containerEl, self.app, function () {
-            self.display();
-        }, {
-            name: L.settingsResetSessionsAndSettings,
-            desc: L.settingsResetSessionsAndSettingsDesc,
-            buttonText: L.settingsResetSessionsAndSettingsBtn,
-            confirmMessage: L.confirmResetSessionsAndSettings,
-            run: function () {
-                return self.plugin.resetSessionsAndSettingsToDefault();
-            },
-            successNotice: L.resetSessionsAndSettingsDone,
-            failureNotice: L.resetSessionsAndSettingsFailed,
-        });
-
-        var useLocalSettings = self.plugin.isUsingLocalSettings();
-        var advancedDetailsEl = containerEl.createEl('details', { cls: 'wpp-advanced-details' });
-        advancedDetailsEl.createEl('summary', {
-            text: L.settingsSectionAdvanced,
-            cls: 'wpp-advanced-summary',
-        });
-        var advancedBodyEl = advancedDetailsEl.createDiv({ cls: 'wpp-advanced-body' });
-
-        advancedBodyEl.createEl('h3', {
-            text: L.settingsAdvancedStorageSubsection,
-            cls: 'wpp-settings-section-title wpp-advanced-subsection-title',
-        });
-
-        addToggleSetting(advancedBodyEl, {
-            name: L.settingsUseLocalSettings,
-            desc: L.settingsUseLocalSettingsDesc,
-            value: useLocalSettings,
-            onChange: function (value) {
-                self.plugin.setUseLocalSettings(value, { notify: true })
-                    .then(function () {
-                        self.display();
-                    })
-                    .catch(function () {
-                        new obsidian.Notice(L.localSettingsOperationFailed);
-                        self.display();
-                    });
-            },
-        });
-
-        addAsyncActionSetting(advancedBodyEl, {
-            name: L.settingsCopyGlobalToLocal,
-            desc: L.settingsCopyGlobalToLocalDesc,
-            buttonText: L.settingsCopyGlobalToLocalBtn,
-            disabled: !useLocalSettings,
-            run: function () {
-                return self.plugin.copyGlobalSettingsToLocal({ notify: true });
-            },
-            onSuccess: function () {
-                self.display();
-            },
-            failureNotice: L.localSettingsOperationFailed,
-        });
-
-        addAsyncActionSetting(advancedBodyEl, {
-            name: L.settingsResetLocalSettings,
-            desc: L.settingsResetLocalSettingsDesc,
-            buttonText: L.settingsResetLocalSettingsBtn,
-            disabled: !useLocalSettings,
-            run: function () {
-                return self.plugin.resetLocalSettings({ notify: true });
-            },
-            onSuccess: function () {
-                self.display();
-            },
-            failureNotice: L.localSettingsOperationFailed,
-        });
-
-        advancedBodyEl.createEl('h3', {
-            text: L.settingsAdvancedTransferSubsection,
-            cls: 'wpp-settings-section-title wpp-advanced-subsection-title',
-        });
-
-        new obsidian.Setting(advancedBodyEl)
-            .setName(L.settingsExportSessions)
-            .setDesc(L.settingsExportSessionsDesc)
-            .addButton(function (btn) {
-                btn.setButtonText(L.settingsExportSessionsBtn);
-                btn.onClick(function () {
-                    self.plugin.exportSessionsSnapshot().catch(function () {
-                        new obsidian.Notice(L.exportSessionsFailed);
-                    });
-                });
-            });
-
-        new obsidian.Setting(advancedBodyEl)
-            .setName(L.settingsImportSessions)
-            .setDesc(L.settingsImportSessionsDesc)
-            .addButton(function (btn) {
-                btn.setButtonText(L.settingsImportSessionsBtn);
-                btn.onClick(function () {
-                    new modals.ConfirmModal(self.app, L.confirmImportSessions, function () {
-                        return self.plugin.importSessionsFromLatestExport().catch(function () {
-                            new obsidian.Notice(L.importSessionsFailed);
+            addToggleSetting(contentEl, {
+                name: L.settingsUseLocalSettings,
+                desc: L.settingsUseLocalSettingsDesc,
+                value: useLocalSettings,
+                onChange: function (value) {
+                    self.plugin.setUseLocalSettings(value, { notify: true })
+                        .then(function () {
+                            self.display();
+                        })
+                        .catch(function () {
+                            new obsidian.Notice(L.localSettingsOperationFailed);
+                            self.display();
                         });
-                    }, {
-                        confirmText: L.settingsImportSessionsBtn,
-                    }).open();
+                },
+            });
+
+            addAsyncActionSetting(contentEl, {
+                name: L.settingsCopyGlobalToLocal,
+                desc: L.settingsCopyGlobalToLocalDesc,
+                buttonText: L.settingsCopyGlobalToLocalBtn,
+                disabled: !useLocalSettings,
+                run: function () {
+                    return self.plugin.copyGlobalSettingsToLocal({ notify: true });
+                },
+                onSuccess: function () {
+                    self.display();
+                },
+                failureNotice: L.localSettingsOperationFailed,
+            });
+
+            addAsyncActionSetting(contentEl, {
+                name: L.settingsResetLocalSettings,
+                desc: L.settingsResetLocalSettingsDesc,
+                buttonText: L.settingsResetLocalSettingsBtn,
+                disabled: !useLocalSettings,
+                run: function () {
+                    return self.plugin.resetLocalSettings({ notify: true });
+                },
+                onSuccess: function () {
+                    self.display();
+                },
+                failureNotice: L.localSettingsOperationFailed,
+            });
+
+            addSection(L.settingsAdvancedTransferSubsection);
+
+            new obsidian.Setting(contentEl)
+                .setName(L.settingsExportSessions)
+                .setDesc(L.settingsExportSessionsDesc)
+                .addButton(function (btn) {
+                    btn.setButtonText(L.settingsExportSessionsBtn);
+                    btn.onClick(function () {
+                        self.plugin.exportSessionsSnapshot().catch(function () {
+                            new obsidian.Notice(L.exportSessionsFailed);
+                        });
+                    });
                 });
+
+            new obsidian.Setting(contentEl)
+                .setName(L.settingsImportSessions)
+                .setDesc(L.settingsImportSessionsDesc)
+                .addButton(function (btn) {
+                    btn.setButtonText(L.settingsImportSessionsBtn);
+                    btn.onClick(function () {
+                        new modals.ConfirmModal(self.app, L.confirmImportSessions, function () {
+                            return self.plugin.importSessionsFromLatestExport().catch(function () {
+                                new obsidian.Notice(L.importSessionsFailed);
+                            });
+                        }, {
+                            confirmText: L.settingsImportSessionsBtn,
+                        }).open();
+                    });
+                });
+
+            addSection(L.settingsSectionReset);
+
+            addDangerResetSetting(contentEl, self.app, function () {
+                self.display();
+            }, {
+                name: L.settingsResetSettings,
+                desc: L.settingsResetSettingsDesc,
+                buttonText: L.settingsResetSettingsBtn,
+                confirmMessage: L.confirmResetSettings,
+                run: function () {
+                    return self.plugin.resetSettingsToDefault();
+                },
+                successNotice: L.resetSettingsDone,
+                failureNotice: L.resetSettingsFailed,
             });
 
-        var diagnosticsInfo = self.plugin.getStorageDiagnosticsInfo();
-        var diagnosticsUpdatedText = '';
-        try {
-            diagnosticsUpdatedText = new Date(diagnosticsInfo.updatedAt).toLocaleString();
-        } catch (e) {
-            diagnosticsUpdatedText = String(diagnosticsInfo.updatedAt);
-        }
-
-        var devDetailsEl = containerEl.createEl('details', { cls: 'wpp-dev-details' });
-        devDetailsEl.createEl('summary', {
-            text: L.settingsDeveloperSection,
-            cls: 'wpp-dev-summary',
-        });
-        var devBodyEl = devDetailsEl.createDiv({ cls: 'wpp-dev-body' });
-        var devCardEl = devBodyEl.createDiv({ cls: 'wpp-dev-card' });
-        devCardEl.createDiv({
-            text: L.settingsStorageDiagnostics,
-            cls: 'wpp-dev-card-title',
-        });
-        devCardEl.createDiv({
-            text: L.settingsStorageDiagnosticsDesc,
-            cls: 'wpp-dev-card-desc',
-        });
-
-        function addDevCardRow(label, value, options) {
-            options = options || {};
-            var row = devCardEl.createDiv({ cls: 'wpp-dev-card-row' });
-            row.createDiv({ text: label, cls: 'wpp-dev-card-label' });
-            row.createDiv({
-                text: String(value),
-                cls: options.code ? 'wpp-dev-card-value wpp-dev-card-value-code' : 'wpp-dev-card-value',
+            addDangerResetSetting(contentEl, self.app, function () {
+                self.display();
+            }, {
+                name: L.settingsResetSessions,
+                desc: L.settingsResetSessionsDesc,
+                buttonText: L.settingsResetSessionsBtn,
+                confirmMessage: L.confirmResetSessions,
+                confirmHint: L.resetSessionsHint,
+                run: function () {
+                    return self.plugin.resetSessionsToDefault();
+                },
+                successNotice: L.resetSessionsDone,
+                failureNotice: L.resetSessionsFailed,
             });
+
+            addDangerResetSetting(contentEl, self.app, function () {
+                self.display();
+            }, {
+                name: L.settingsResetSessionsAndSettings,
+                desc: L.settingsResetSessionsAndSettingsDesc,
+                buttonText: L.settingsResetSessionsAndSettingsBtn,
+                confirmMessage: L.confirmResetSessionsAndSettings,
+                run: function () {
+                    return self.plugin.resetSessionsAndSettingsToDefault();
+                },
+                successNotice: L.resetSessionsAndSettingsDone,
+                failureNotice: L.resetSessionsAndSettingsFailed,
+            });
+
+            // Developer tools
+            addSection(L.settingsDeveloperSection);
+
+            var diagnosticsInfo = self.plugin.getStorageDiagnosticsInfo();
+            var diagnosticsUpdatedText = '';
+            try {
+                diagnosticsUpdatedText = new Date(diagnosticsInfo.updatedAt).toLocaleString();
+            } catch (e) {
+                diagnosticsUpdatedText = String(diagnosticsInfo.updatedAt);
+            }
+
+            var devCardEl = contentEl.createDiv({ cls: 'wpp-dev-card' });
+            devCardEl.createDiv({
+                text: L.settingsStorageDiagnostics,
+                cls: 'wpp-dev-card-title',
+            });
+            devCardEl.createDiv({
+                text: L.settingsStorageDiagnosticsDesc,
+                cls: 'wpp-dev-card-desc',
+            });
+
+            function addDevCardRow(label, value, options) {
+                options = options || {};
+                var row = devCardEl.createDiv({ cls: 'wpp-dev-card-row' });
+                row.createDiv({ text: label, cls: 'wpp-dev-card-label' });
+                row.createDiv({
+                    text: String(value),
+                    cls: options.code ? 'wpp-dev-card-value wpp-dev-card-value-code' : 'wpp-dev-card-value',
+                });
+            }
+
+            addDevCardRow(L.settingsStorageFieldSessions, diagnosticsInfo.sessionsPath, { code: true });
+            addDevCardRow(L.settingsStorageFieldSessionsBackup, diagnosticsInfo.sessionsBackupPath, { code: true });
+            addDevCardRow(L.settingsStorageFieldLocalSettings, diagnosticsInfo.localSettingsPath, { code: true });
+            addDevCardRow(L.settingsStorageFieldGlobalSettings, diagnosticsInfo.globalSettingsPath, { code: true });
+            addDevCardRow(L.settingsStorageFieldSessionCount, diagnosticsInfo.sessionCount);
+            addDevCardRow(L.settingsStorageFieldUpdatedAt, diagnosticsUpdatedText);
         }
 
-        addDevCardRow(L.settingsStorageFieldSessions, diagnosticsInfo.sessionsPath, { code: true });
-        addDevCardRow(L.settingsStorageFieldSessionsBackup, diagnosticsInfo.sessionsBackupPath, { code: true });
-        addDevCardRow(L.settingsStorageFieldLocalSettings, diagnosticsInfo.localSettingsPath, { code: true });
-        addDevCardRow(L.settingsStorageFieldGlobalSettings, diagnosticsInfo.globalSettingsPath, { code: true });
-        addDevCardRow(L.settingsStorageFieldSessionCount, diagnosticsInfo.sessionCount);
-        addDevCardRow(L.settingsStorageFieldUpdatedAt, diagnosticsUpdatedText);
-
+        // ── Footer (all tabs) ──
         var footerEl = containerEl.createDiv();
         footerEl.style.fontSize = '12px';
         footerEl.style.color = 'var(--text-faint)';
