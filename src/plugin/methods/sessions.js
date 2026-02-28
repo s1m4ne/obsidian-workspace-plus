@@ -404,7 +404,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
         var session = this.getActiveSession();
         this.statusBarEl.empty();
         var icon = this.statusBarEl.createSpan({ cls: 'wpp-status-icon' });
-        obsidian.setIcon(icon, 'panels-left-bottom');
+        obsidian.setIcon(icon, 'panels-top-left');
 
         // Show group name if a group is active
         var activeGroup = this.getActiveGroup();
