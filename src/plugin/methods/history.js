@@ -198,12 +198,13 @@ function attachHistoryMethods(WorkspacePlusPlus) {
     WorkspacePlusPlus.prototype.startHistorySnapshotTimer = function () {
         this.stopHistorySnapshotTimer();
         if (!this.isVersionHistoryEnabled()) return;
+        if (!this.isAutoSaveOnSwitchEnabled()) return;
 
         var self = this;
         var intervalMs = this.getVersionHistorySnapshotInterval() * 60000;
 
         this._historySnapshotTimer = setInterval(function () {
-            if (!self.isVersionHistoryEnabled()) {
+            if (!self.isVersionHistoryEnabled() || !self.isAutoSaveOnSwitchEnabled()) {
                 self.stopHistorySnapshotTimer();
                 return;
             }
