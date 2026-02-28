@@ -3,6 +3,7 @@
 var obsidian = require('obsidian');
 var i18n = require('./i18n');
 var modals = require('./modals');
+var formatRelativeTime = require('./modals/format-relative-time');
 
 // ============================================================
 // Group Sessions Modal — checkbox list to toggle session membership
@@ -318,6 +319,16 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                 },
             });
 
+            addToggleSetting(contentEl, {
+                name: L.settingsConfirmQuickActions,
+                desc: L.settingsConfirmQuickActionsDesc,
+                value: !!self.plugin.data.confirmQuickActions,
+                onChange: function (value) {
+                    self.plugin.data.confirmQuickActions = value;
+                    self.plugin.persistData();
+                },
+            });
+
             // --- Version History ---
             addSection(L.historyTitle);
 
@@ -437,19 +448,27 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                 }
                 for (var i = 0; i < backups.length; i++) {
                     (function (backup) {
-                        var timeStr = '';
+                        var absoluteTime = '';
                         try {
-                            timeStr = new Date(backup.savedAt).toLocaleString();
+                            absoluteTime = new Date(backup.savedAt).toLocaleString();
                         } catch (e) {
-                            timeStr = String(backup.savedAt);
+                            absoluteTime = String(backup.savedAt);
                         }
-                        new obsidian.Setting(backupListEl)
-                            .setName(L.rotationBackupGeneration(timeStr, backup.sessionCount))
+                        var relativeTime = formatRelativeTime(backup.savedAt);
+                        var setting = new obsidian.Setting(backupListEl);
+                        var nameEl = setting.nameEl;
+                        var numSpan = document.createElement('span');
+                        numSpan.textContent = backup.generation + '.';
+                        numSpan.style.color = 'var(--text-accent)';
+                        numSpan.style.marginRight = '6px';
+                        nameEl.appendChild(numSpan);
+                        nameEl.appendText(relativeTime + '  ·  ' + L.rotationBackupGeneration(backup.sessionCount));
+                        setting.setDesc(absoluteTime)
                             .addButton(function (btn) {
                                 btn.setButtonText(L.rotationBackupRestore);
                                 btn.onClick(function () {
                                     new modals.ConfirmModal(self.app,
-                                        L.rotationBackupRestoreConfirm(timeStr, backup.sessionCount),
+                                        L.rotationBackupRestoreConfirm(absoluteTime, backup.sessionCount),
                                         function () {
                                             return self.plugin.restoreFromRotationBackup(backup.generation)
                                                 .then(function (ok) {

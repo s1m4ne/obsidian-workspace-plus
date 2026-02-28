@@ -317,6 +317,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                 onGroupOrderCommit: function (newOrder) {
                     self.setGroupTabOrder(newOrder);
                 },
+                addButtonTooltip: L.groupCreateNew,
                 onAddGroupClick: function () {
                     groupTabUi.openCreateGroupPrompt(self.app, self, function () {
                         renderGroupTabs();
@@ -538,9 +539,16 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                     if (_saveIcon) {
                         _saveIcon.addEventListener('click', function (e) {
                             e.stopPropagation();
-                            self.saveActiveSession().then(function () {
-                                refreshOrderedSessions();
-                            });
+                            var doSave = function () {
+                                self.saveActiveSession().then(function () {
+                                    refreshOrderedSessions();
+                                });
+                            };
+                            if (self.data.confirmQuickActions) {
+                                new modals.ConfirmModal(self.app, L.confirmSaveSession(sess.name), doSave, { confirmText: L.saveInline, confirmClass: 'mod-cta' }).open();
+                            } else {
+                                doSave();
+                            }
                         });
                     }
 
@@ -548,7 +556,14 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                     if (_reloadIcon) {
                         _reloadIcon.addEventListener('click', function (e) {
                             e.stopPropagation();
-                            self.reloadCurrentSessionWithoutSaving();
+                            var doReload = function () {
+                                self.reloadCurrentSessionWithoutSaving();
+                            };
+                            if (self.data.confirmQuickActions) {
+                                new modals.ConfirmModal(self.app, L.confirmReloadSession(sess.name), doReload, { confirmText: L.load, confirmClass: 'mod-cta' }).open();
+                            } else {
+                                doReload();
+                            }
                         });
                     }
 
@@ -762,11 +777,25 @@ function attachOverlayMethods(WorkspacePlusPlus) {
             var target = filtered[selectedIndex];
             if (target.id === self.data.activeSessionId) {
                 if (opts.shiftKey) {
-                    self.saveActiveSession().then(function () {
-                        refreshOrderedSessions();
-                    });
+                    var doSave = function () {
+                        self.saveActiveSession().then(function () {
+                            refreshOrderedSessions();
+                        });
+                    };
+                    if (self.data.confirmQuickActions) {
+                        new modals.ConfirmModal(self.app, L.confirmSaveSession(target.name), doSave, { confirmText: L.saveInline, confirmClass: 'mod-cta' }).open();
+                    } else {
+                        doSave();
+                    }
                 } else {
-                    self.reloadCurrentSessionWithoutSaving();
+                    var doReload = function () {
+                        self.reloadCurrentSessionWithoutSaving();
+                    };
+                    if (self.data.confirmQuickActions) {
+                        new modals.ConfirmModal(self.app, L.confirmReloadSession(target.name), doReload, { confirmText: L.load, confirmClass: 'mod-cta' }).open();
+                    } else {
+                        doReload();
+                    }
                 }
                 self.hideSearchOverlay();
                 return;
