@@ -788,6 +788,41 @@ function attachSessionMethods(WorkspacePlusPlus) {
         return this.persistData();
     };
 
+    WorkspacePlusPlus.prototype.saveAsSession = function () {
+        var L = i18n.L;
+        var self = this;
+        var session = this.getActiveSession();
+        if (!session) {
+            new obsidian.Notice(L.noSession);
+            return Promise.resolve(false);
+        }
+
+        return new Promise(function (resolve) {
+            new modals.RenameModal(self.app, '', function (newName) {
+                self.captureActiveSessionLayoutIfAutoSave();
+
+                var id = utils.generateId();
+                self.insertSessionAndActivate(
+                    self.createSessionRecord(id, newName, self.getCurrentWorkspaceLayout())
+                );
+
+                self.updateStatusBar();
+                self.syncSessionCommands();
+                new obsidian.Notice(L.savedAs(newName));
+                var ordered = self.getOrderedSessions();
+                self.showSwitchOverlay(ordered, ordered.length - 1);
+                self.persistData().then(function () {
+                    resolve(true);
+                });
+            }, {
+                title: L.nameSessionTitle,
+                placeholder: L.nameSessionPlaceholder,
+                buttonText: L.saveInline,
+                emptyNotice: L.emptyName,
+            }).open();
+        });
+    };
+
     /**
      * Duplicate an arbitrary session by its ID (does NOT switch to the copy).
      */
