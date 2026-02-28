@@ -204,7 +204,7 @@ function renderGroupTabs(options) {
     if (options.addButtonTooltip) {
         obsidian.setTooltip(addBtn, options.addButtonTooltip, {
             placement: options.addButtonTooltipPlacement || 'bottom',
-            delay: options.addButtonTooltipDelay || 0,
+            delay: options.addButtonTooltipDelay || 250,
         });
     }
     addBtn.addEventListener('click', function () {

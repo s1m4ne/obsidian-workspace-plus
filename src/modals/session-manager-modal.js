@@ -586,9 +586,10 @@ var SessionManagerModal = /** @class */ (function (_super) {
         // Rename button
         var renameBtn = actions.createDiv({
             cls: 'wpp-icon-btn',
-            attr: { 'aria-label': L.rename, role: 'button', tabindex: '-1', 'data-action-key': 'rename' },
+            attr: { role: 'button', tabindex: '-1', 'data-action-key': 'rename' },
         });
         obsidian.setIcon(renameBtn, 'pencil');
+        obsidian.setTooltip(renameBtn, L.rename, { delay: 250 });
         renameBtn.addEventListener('click', function (e) {
             e.stopPropagation();
             self.onRename(session);
@@ -598,9 +599,10 @@ var SessionManagerModal = /** @class */ (function (_super) {
         if (Object.keys(self.plugin.data.sessions).length > 1) {
             var deleteBtn = actions.createDiv({
                 cls: 'wpp-icon-btn',
-                attr: { 'aria-label': L.delete, role: 'button', tabindex: '-1', 'data-action-key': 'delete' },
+                attr: { role: 'button', tabindex: '-1', 'data-action-key': 'delete' },
             });
             obsidian.setIcon(deleteBtn, 'trash-2');
+            obsidian.setTooltip(deleteBtn, L.delete, { delay: 250 });
             deleteBtn.addEventListener('click', function (e) {
                 e.stopPropagation();
                 self.onDelete(session);

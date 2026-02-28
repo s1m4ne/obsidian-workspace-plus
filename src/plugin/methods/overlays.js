@@ -416,27 +416,27 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                 if (isActive && !self.isAutoSaveOnSwitchEnabled()) {
                     saveIcon = document.createElement('div');
                     saveIcon.className = 'wpp-qs-action-btn';
-                    saveIcon.setAttribute('aria-label', L.saveInline);
                     obsidian.setIcon(saveIcon, 'save');
+                    obsidian.setTooltip(saveIcon, L.saveInline, { delay: 250 });
                     actions.appendChild(saveIcon);
 
                     reloadIcon = document.createElement('div');
                     reloadIcon.className = 'wpp-qs-action-btn';
-                    reloadIcon.setAttribute('aria-label', L.contextReloadSession);
                     obsidian.setIcon(reloadIcon, 'rotate-ccw');
+                    obsidian.setTooltip(reloadIcon, L.contextReloadSession, { delay: 250 });
                     actions.appendChild(reloadIcon);
                 }
 
                 var renameIcon = document.createElement('div');
                 renameIcon.className = 'wpp-qs-action-btn';
-                renameIcon.setAttribute('aria-label', L.rename);
                 obsidian.setIcon(renameIcon, 'pencil');
+                obsidian.setTooltip(renameIcon, L.rename, { delay: 250 });
                 actions.appendChild(renameIcon);
 
                 var deleteIcon = document.createElement('div');
-                deleteIcon.className = 'wpp-qs-action-btn wpp-qs-action-delete';
-                deleteIcon.setAttribute('aria-label', L.delete);
+                deleteIcon.className = 'wpp-qs-action-btn';
                 obsidian.setIcon(deleteIcon, 'trash-2');
+                obsidian.setTooltip(deleteIcon, L.delete, { delay: 250 });
                 actions.appendChild(deleteIcon);
 
                 item.appendChild(actions);
@@ -606,7 +606,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                     cloneEl.style.width = rect.width + 'px';
                     cloneEl.style.top = (ev.clientY - offsetY) + 'px';
                     cloneEl.style.left = (ev.clientX - offsetX) + 'px';
-                    cloneEl.style.zIndex = '10000';
+                    cloneEl.style.zIndex = '9999';
                     cloneEl.style.pointerEvents = 'none';
                     document.body.appendChild(cloneEl);
 

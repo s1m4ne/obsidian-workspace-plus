@@ -300,7 +300,7 @@ body.wpp-session-list-dragging * {
     flex-direction: column;
     align-items: center;
     gap: 12px;
-    z-index: 9999;
+    z-index: var(--layer-popover);
     box-shadow: var(--shadow-l);
     max-width: 80vw;
 }
@@ -580,10 +580,6 @@ body.wpp-session-list-dragging * {
     color: var(--text-normal);
 }
 
-.wpp-qs-action-delete:hover {
-    color: var(--text-error);
-}
-
 .wpp-qs-action-btn svg {
     width: var(--icon-xs);
     height: var(--icon-xs);
@@ -698,19 +694,6 @@ body.wpp-session-list-dragging * {
 .wpp-group-add-btn svg {
     width: var(--icon-xs);
     height: var(--icon-xs);
-}
-
-.wpp-instant-tooltip {
-    position: fixed;
-    background: var(--background-modifier-message);
-    color: var(--text-normal);
-    padding: 4px 8px;
-    border-radius: var(--radius-s);
-    font-size: var(--font-ui-smaller);
-    white-space: nowrap;
-    pointer-events: none;
-    z-index: var(--layer-popover);
-    box-shadow: var(--shadow-s);
 }
 
 /* Status bar group indicator */
