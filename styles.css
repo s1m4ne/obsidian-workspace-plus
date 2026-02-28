@@ -77,12 +77,14 @@
 .wpp-active-badge {
     font-size: 10px;
     font-weight: 700;
-    padding: 2px 8px;
+    padding: 4px 8px;
     border-radius: 4px;
     background: var(--interactive-accent);
     color: var(--text-on-accent);
-    text-transform: uppercase;
     letter-spacing: 0.5px;
+    line-height: 1;
+    flex-shrink: 0;
+    align-self: center;
 }
 
 .wpp-default-label {
@@ -148,6 +150,25 @@ body.wpp-session-list-dragging * {
     box-shadow: var(--shadow-l);
     background: var(--background-primary);
     border-radius: 6px;
+}
+
+/* Preserve search overlay row layout when clone is moved to document.body */
+.wpp-drag-clone.wpp-switch-item {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    text-align: left;
+    max-width: none;
+    padding: 10px 12px;
+}
+
+.wpp-drag-clone .wpp-switch-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    -webkit-line-clamp: unset;
+    display: block;
 }
 
 .wpp-session-item.wpp-just-moved {
@@ -481,15 +502,13 @@ body.wpp-session-list-dragging * {
     justify-content: space-between;
     align-items: center;
     text-align: left;
-    padding: 8px 12px;
+    padding: 10px 12px;
 }
 
 .wpp-search-overlay .wpp-switch-name {
     font-size: var(--font-ui-small);
     font-weight: var(--font-semibold);
-    flex: 1;
     min-width: 0;
-    display: block;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -500,7 +519,6 @@ body.wpp-session-list-dragging * {
     display: flex;
     align-items: center;
     gap: 8px;
-    flex: 1;
     min-width: 0;
 }
 

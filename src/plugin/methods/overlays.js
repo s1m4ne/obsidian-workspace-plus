@@ -448,13 +448,6 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                 name.textContent = session.name;
                 nameRow.appendChild(name);
 
-                if (isActive) {
-                    var badge = document.createElement('span');
-                    badge.className = 'wpp-active-badge';
-                    badge.textContent = L.active;
-                    nameRow.appendChild(badge);
-                }
-
                 infoCol.appendChild(nameRow);
 
                 // Modified timestamp
@@ -464,6 +457,13 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                 infoCol.appendChild(modifiedEl);
 
                 item.appendChild(infoCol);
+
+                if (isActive) {
+                    var badge = document.createElement('span');
+                    badge.className = 'wpp-active-badge';
+                    badge.textContent = L.active;
+                    item.appendChild(badge);
+                }
 
                 // Action icons (save?, rename & delete)
                 var actions = document.createElement('div');
