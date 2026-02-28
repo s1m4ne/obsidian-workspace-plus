@@ -4,6 +4,7 @@ var obsidian = require('obsidian');
 var i18n = require('../i18n');
 var ConfirmModal = require('./confirm-modal');
 var RenameModal = require('./rename-modal');
+var HistoryModal = require('./history-modal');
 var formatRelativeTime = require('./format-relative-time');
 var groupTabUi = require('../group-tab-ui');
 var utils = require('../utils');
@@ -534,6 +535,9 @@ var SessionManagerModal = /** @class */ (function (_super) {
                 },
                 onDelete: function () {
                     self.onDelete(session);
+                },
+                onVersionHistory: function () {
+                    new HistoryModal(self.app, self.plugin, session).open();
                 },
             });
         });

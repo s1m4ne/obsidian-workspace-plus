@@ -578,6 +578,9 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                                     doDelete();
                                 }
                             },
+                            onVersionHistory: function () {
+                                new modals.HistoryModal(self.app, self, sess).open();
+                            },
                         });
                     });
 

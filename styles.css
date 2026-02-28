@@ -880,3 +880,63 @@ body.wpp-session-list-dragging * {
         gap: 4px;
     }
 }
+
+/* ── Version History Modal ── */
+
+.wpp-history-modal .wpp-history-list {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.wpp-history-date-label {
+    font-size: var(--font-ui-small);
+    color: var(--text-muted);
+    margin: 16px 0 4px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.wpp-history-date-label:first-child {
+    margin-top: 0;
+}
+
+.wpp-history-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-radius: 6px;
+}
+
+.wpp-history-item:hover {
+    background: var(--background-modifier-hover);
+}
+
+.wpp-history-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.wpp-history-time {
+    font-weight: var(--font-semibold);
+    font-size: var(--font-ui-small);
+}
+
+.wpp-history-summary {
+    font-size: var(--font-ui-smaller);
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wpp-history-restore-btn {
+    flex-shrink: 0;
+    margin-left: 8px;
+}
+
+.wpp-history-empty {
+    color: var(--text-muted);
+    text-align: center;
+    padding: 24px 0;
+}
