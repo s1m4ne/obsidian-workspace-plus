@@ -7,6 +7,7 @@ var formatRelativeTime = require('../../modals/format-relative-time');
 var groupTabUi = require('../../group-tab-ui');
 var utils = require('../../utils');
 var sessionContextMenu = require('../../session-context-menu');
+var sessionListActions = require('../../session-list-actions');
 
 function hasBlockingModal() {
     return !!document.querySelector('.modal-container');
@@ -540,14 +541,14 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                                 switchSelected();
                             },
                             onRename: function () {
-                                new modals.RenameModal(self.app, sess.name, function (newName) {
-                                    self.renameSessionById(sess.id, newName).then(function (renamed) {
-                                        if (!renamed) return;
+                                sessionListActions.renameSessionWithPrompt({
+                                    app: self.app,
+                                    plugin: self,
+                                    session: sess,
+                                    onRenamed: function () {
                                         refreshOrderedSessions();
-                                    });
-                                }, {
-                                    emptyNotice: L.emptyName,
-                                }).open();
+                                    },
+                                });
                             },
                             onDuplicate: function () {
                                 self.duplicateSession(sess.id).then(function () {
@@ -565,18 +566,16 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                                 });
                             },
                             onDelete: function () {
-                                var doDelete = function () {
-                                    self.deleteSession(sess.id).then(function (deleted) {
-                                        if (!deleted) return;
-                                        new obsidian.Notice(L.deleted(sess.name));
+                                sessionListActions.deleteSessionWithPrompt({
+                                    app: self.app,
+                                    plugin: self,
+                                    session: sess,
+                                    isActive: _isActive,
+                                    confirmMessage: L.confirmDeleteActive(sess.name),
+                                    onDeleted: function () {
                                         refreshOrderedSessions();
-                                    });
-                                };
-                                if (self.data.confirmDeleteByHotkey !== false) {
-                                    new modals.ConfirmModal(self.app, L.confirmDeleteActive(sess.name), doDelete).open();
-                                } else {
-                                    doDelete();
-                                }
+                                    },
+                                });
                             },
                             onVersionHistory: function () {
                                 new modals.HistoryModal(self.app, self, sess).open();
@@ -605,37 +604,29 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                     // Rename
                     renameIcon.addEventListener('click', function (e) {
                         e.stopPropagation();
-                        new modals.RenameModal(self.app, sess.name, function (newName) {
-                            self.renameSessionById(sess.id, newName).then(function (renamed) {
-                                if (!renamed) return;
+                        sessionListActions.renameSessionWithPrompt({
+                            app: self.app,
+                            plugin: self,
+                            session: sess,
+                            onRenamed: function () {
                                 refreshOrderedSessions();
-                            });
-                        }, {
-                            emptyNotice: L.emptyName,
-                        }).open();
+                            },
+                        });
                     });
 
                     // Delete
                     deleteIcon.addEventListener('click', function (e) {
                         e.stopPropagation();
-                        if (Object.keys(self.data.sessions).length <= 1) {
-                            new obsidian.Notice(L.cannotDeleteLast);
-                            return;
-                        }
-
-                        var doDelete = function () {
-                            self.deleteSession(sess.id).then(function (deleted) {
-                                if (!deleted) return;
-                                new obsidian.Notice(L.deleted(sess.name));
+                        sessionListActions.deleteSessionWithPrompt({
+                            app: self.app,
+                            plugin: self,
+                            session: sess,
+                            isActive: _isActive,
+                            confirmMessage: L.confirmDeleteActive(sess.name),
+                            onDeleted: function () {
                                 refreshOrderedSessions();
-                            });
-                        };
-
-                        if (self.data.confirmDeleteByHotkey !== false) {
-                            new modals.ConfirmModal(self.app, L.confirmDeleteActive(sess.name), doDelete).open();
-                        } else {
-                            doDelete();
-                        }
+                            },
+                        });
                     });
                 })(i, session, item, saveIcon, reloadIcon, isActive);
 
