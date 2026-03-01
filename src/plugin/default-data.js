@@ -15,6 +15,7 @@ module.exports = {
     groupFeatureEnabled: true,
     showFilterInput: false,
     showActiveSwitchCommand: false,
+    numberedSwitchCommands: true,
     searchOverlayPosition: null,
     searchOverlaySize: null,
     groups: {},

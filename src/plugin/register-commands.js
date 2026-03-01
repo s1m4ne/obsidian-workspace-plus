@@ -56,22 +56,24 @@ function registerCommands(plugin) {
     }, [{ modifiers: ['Mod', 'Shift'], key: 'M' }]);
 
     // Numbered session switching (Mod+Shift+1 through 9)
-    for (var n = 1; n <= 9; n++) {
-        (function (num) {
-            addCommand({
-                id: 'switch-to-' + num,
-                name: L.cmdSwitchTo(num),
-                checkCallback: function (checking) {
-                    if (!plugin.data.showActiveSwitchCommand) {
-                        var ordered = plugin.getOrderedSessions();
-                        var session = ordered[num - 1];
-                        if (session && session.id === plugin.data.activeSessionId) return false;
-                    }
-                    if (!checking) plugin.switchToIndex(num - 1);
-                    return true;
-                },
-            });
-        })(n);
+    if (plugin.data.numberedSwitchCommands) {
+        for (var n = 1; n <= 9; n++) {
+            (function (num) {
+                addCommand({
+                    id: 'switch-to-' + num,
+                    name: L.cmdSwitchTo(num),
+                    checkCallback: function (checking) {
+                        if (!plugin.data.showActiveSwitchCommand) {
+                            var ordered = plugin.getOrderedSessions();
+                            var session = ordered[num - 1];
+                            if (session && session.id === plugin.data.activeSessionId) return false;
+                        }
+                        if (!checking) plugin.switchToIndex(num - 1);
+                        return true;
+                    },
+                });
+            })(n);
+        }
     }
 
     // Track dynamic command IDs for named session switching
