@@ -15,6 +15,7 @@ var i18n = require('./i18n');
  * @param {boolean} [options.showSaveAs]           - show "Save As" item (status bar only)
  * @param {boolean} [options.showSwitch]            - show "Switch" item (overlay / modal)
  * @param {boolean} [options.showRemoveFromGroup]   - show "Remove from group" item
+ * @param {boolean} [options.showMoveToGroup]       - show "Move to group" submenu
  * @param {Function} [options.onSave]
  * @param {Function} [options.onReload]
  * @param {Function} [options.onSaveAs]
@@ -23,6 +24,7 @@ var i18n = require('./i18n');
  * @param {Function} [options.onDuplicate]
  * @param {Function} [options.onDelete]
  * @param {Function} [options.onRemoveFromGroup]
+ * @param {Function} [options.onMoveToGroup]
  * @param {Function} [options.onVersionHistory]
  */
 function openSessionContextMenu(options) {
@@ -119,6 +121,30 @@ function openSessionContextMenu(options) {
             mi.onClick(function () {
                 if (typeof options.onRemoveFromGroup === 'function') options.onRemoveFromGroup();
             });
+        });
+    }
+
+    // Move to group (submenu)
+    if (options.showMoveToGroup) {
+        menu.addItem(function (mi) {
+            mi.setTitle(L.groupMoveToGroup);
+            mi.setIcon('folder-input');
+            var submenu = mi.setSubmenu();
+            var groups = plugin.getOrderedGroups();
+            var sessionGroupIds = (plugin.data.sessionGroups || {})[session.id] || [];
+            for (var gi = 0; gi < groups.length; gi++) {
+                (function (group) {
+                    submenu.addItem(function (sub) {
+                        sub.setTitle(group.name);
+                        if (sessionGroupIds.indexOf(group.id) !== -1) {
+                            sub.setChecked(true);
+                        }
+                        sub.onClick(function () {
+                            if (typeof options.onMoveToGroup === 'function') options.onMoveToGroup(group.id);
+                        });
+                    });
+                })(groups[gi]);
+            }
         });
     }
 

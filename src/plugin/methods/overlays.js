@@ -517,6 +517,17 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                                     refreshOrderedSessions();
                                 });
                             },
+                            showMoveToGroup: self.isGroupFeatureEnabled() && self.getOrderedGroups().length > 0,
+                            onMoveToGroup: function (groupId) {
+                                var gName = (self.data.groups[groupId] || {}).name || '';
+                                self.moveSessionToGroupExclusive(sess.id, groupId).then(function (moved) {
+                                    if (moved) {
+                                        new obsidian.Notice(L.groupAddedSession(sess.name, gName));
+                                        renderGroupTabs();
+                                        refreshOrderedSessions();
+                                    }
+                                });
+                            },
                             onDelete: function () {
                                 sessionListActions.deleteSessionWithPrompt({
                                     app: self.app,
