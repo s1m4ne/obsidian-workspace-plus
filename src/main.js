@@ -12,7 +12,7 @@ var attachPersistenceMethods = require('./plugin/methods/persistence');
 var attachSessionMethods = require('./plugin/methods/sessions');
 var attachHistoryMethods = require('./plugin/methods/history');
 var utils = require('./utils');
-var sessionContextMenu = require('./session-context-menu');
+var statusBarActions = require('./statusbar-actions');
 
 i18n.resolveLocale();
 
@@ -34,6 +34,23 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
             self.data = Object.assign({}, DEFAULT_DATA, saved || {});
             if (!self.data.sessions) self.data.sessions = {};
             if (!self.data.sessionOrder) self.data.sessionOrder = [];
+
+            // Migrate legacy settings into statusBarActions
+            if (!self.data.statusBarActions) {
+                self.data.statusBarActions = Object.assign({}, DEFAULT_DATA.statusBarActions);
+                if (self.data.statusBarQuickSwitcher === false) {
+                    self.data.statusBarActions.click = 'sessionManager';
+                }
+                if (self.data.versionHistoryCtrlRmbRestore === false) {
+                    self.data.statusBarActions.modRightClick = 'none';
+                }
+            }
+
+            // Migrate: existing users keep filter visible (new default is OFF)
+            if (saved && saved.showFilterInput === undefined) {
+                self.data.showFilterInput = true;
+            }
+
             self.normalizeGroupFeatureState();
             self.isSwitchingSession = false;
             self.pendingSwitchRequest = null;
@@ -51,106 +68,25 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
             self.statusBarEl = self.addStatusBarItem();
             self.statusBarEl.addClass('wpp-status-bar');
             self.statusBarEl.addEventListener('click', function (evt) {
-                if (evt.altKey) {
+                var key = 'click';
+                if (evt.altKey) key = 'altClick';
+                else if (utils.isModPressed(evt)) key = 'modClick';
+                else if (evt.shiftKey) key = 'shiftClick';
+                var action = (self.data.statusBarActions || {})[key] || 'none';
+                if (action !== 'none') {
                     evt.preventDefault();
                     evt.stopPropagation();
-                    self.reloadCurrentSessionWithoutSaving();
-                    return;
                 }
-
-                var isSaveClick = utils.isModPressed(evt);
-                if (isSaveClick) {
-                    evt.preventDefault();
-                    evt.stopPropagation();
-                    self.saveActiveSession();
-                    return;
-                }
-                if (self.data.statusBarQuickSwitcher) {
-                    if (self.searchOverlayEl) {
-                        self.hideSearchOverlay();
-                    } else {
-                        self.openSearchOverlay(self.statusBarEl);
-                    }
-                } else {
-                    new modals.SessionManagerModal(self.app, self).open();
-                }
+                statusBarActions.executeStatusBarAction(self, action, evt);
             });
             self.statusBarEl.addEventListener('contextmenu', function (evt) {
                 evt.preventDefault();
-
-                // Mod+RMB: quick restore from history (Cmd on Mac, Ctrl on Windows/Linux)
-                if (utils.isModPressed(evt)
-                    && self.isVersionHistoryEnabled()
-                    && self.isVersionHistoryCtrlRmbEnabled()
-                ) {
-                    var activeSession = self.getActiveSession();
-                    if (!activeSession || !activeSession.history || activeSession.history.length === 0) {
-                        new obsidian.Notice(L.historyNoEntries);
-                        return;
-                    }
-                    if (self.isVersionHistoryConfirmRestoreEnabled()) {
-                        var latestTime = new Date(activeSession.history[0].savedAt)
-                            .toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                        new modals.ConfirmModal(self.app,
-                            L.historyRestoreConfirm(activeSession.name, latestTime),
-                            function () { self.quickRestoreLatestHistory(); },
-                            { confirmText: L.historyRestore, confirmClass: 'mod-cta' }
-                        ).open();
-                    } else {
-                        self.quickRestoreLatestHistory();
-                    }
-                    return;
-                }
-
-                var session = self.getActiveSession();
-                if (!session) return;
-                sessionContextMenu.openSessionContextMenu({
-                    plugin: self,
-                    app: self.app,
-                    session: session,
-                    isActive: true,
-                    event: evt,
-                    showSaveAs: true,
-                    showSwitch: false,
-                    showRemoveFromGroup: false,
-                    showMoveToGroup: self.isGroupFeatureEnabled() && self.getOrderedGroups().length > 0,
-                    onMoveToGroup: function (groupId) {
-                        var gName = (self.data.groups[groupId] || {}).name || '';
-                        self.moveSessionToGroupExclusive(session.id, groupId).then(function (moved) {
-                            if (moved) {
-                                new obsidian.Notice(L.groupAddedSession(session.name, gName));
-                                self.updateStatusBar();
-                            }
-                        });
-                    },
-                    onSave: function () {
-                        self.saveActiveSession();
-                    },
-                    onReload: function () {
-                        self.reloadCurrentSessionWithoutSaving();
-                    },
-                    onSaveAs: function () {
-                        self.saveAsSession();
-                    },
-                    onRename: function () {
-                        new modals.RenameModal(self.app, session.name, function (newName) {
-                            self.renameSessionById(session.id, newName);
-                        }, {
-                            emptyNotice: L.emptyName,
-                        }).open();
-                    },
-                    onDuplicate: function () {
-                        self.duplicateSession(session.id);
-                    },
-                    onDelete: function () {
-                        new modals.ConfirmModal(self.app, L.confirmDeleteActive(session.name), function () {
-                            self.deleteSession(session.id);
-                        }).open();
-                    },
-                    onVersionHistory: function () {
-                        new modals.HistoryModal(self.app, self, session).open();
-                    },
-                });
+                var key = 'rightClick';
+                if (evt.altKey) key = 'altRightClick';
+                else if (utils.isModPressed(evt)) key = 'modRightClick';
+                else if (evt.shiftKey) key = 'shiftRightClick';
+                var action = (self.data.statusBarActions || {})[key] || 'none';
+                statusBarActions.executeStatusBarAction(self, action, evt);
             });
             self.updateStatusBar();
 
@@ -158,7 +94,8 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
             registerCommands(self);
 
             // Settings tab
-            self.addSettingTab(new settings.WorkspacePlusPlusSettingTab(self.app, self));
+            self.settingTab = new settings.WorkspacePlusPlusSettingTab(self.app, self);
+            self.addSettingTab(self.settingTab);
 
             // Startup: ensure default session exists, then flush
             self.app.workspace.onLayoutReady(function () {

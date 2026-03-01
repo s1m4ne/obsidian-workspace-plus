@@ -103,6 +103,17 @@ function openSettingsContextMenu(options) {
         });
     });
 
+    menu.addItem(function (mi) {
+        mi.setTitle(L.settingsShowFilterInput);
+        mi.setIcon('search');
+        if (plugin.data.showFilterInput) mi.setChecked(true);
+        mi.onClick(function () {
+            plugin.data.showFilterInput = !plugin.data.showFilterInput;
+            plugin.persistData();
+            if (typeof options.onChanged === 'function') options.onChanged();
+        });
+    });
+
     menu.addSeparator();
 
     // --- Actions ---
@@ -153,6 +164,16 @@ function openSettingsContextMenu(options) {
                 : 'Workspace++';
             sc.setValue(pluginName);
             sc.inputEl.dispatchEvent(new Event('input'));
+        });
+    });
+
+    menu.addItem(function (mi) {
+        mi.setTitle(L.contextCustomizeClicks);
+        mi.setIcon('mouse-pointer-click');
+        mi.onClick(function () {
+            if (plugin.settingTab) plugin.settingTab.activeTab = 'general';
+            app.setting.open();
+            app.setting.openTabById(plugin.manifest.id);
         });
     });
 

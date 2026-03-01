@@ -194,6 +194,15 @@ function attachOverlayMethods(WorkspacePlusPlus) {
             overlay.appendChild(corner);
         }
 
+        // Resize handles at four edges
+        var edges = ['top', 'right', 'bottom', 'left'];
+        for (var ei = 0; ei < edges.length; ei++) {
+            var edgeEl = document.createElement('div');
+            edgeEl.className = 'wpp-resize-edge wpp-resize-' + edges[ei];
+            edgeEl.dataset.edge = edges[ei];
+            overlay.appendChild(edgeEl);
+        }
+
         // Header row: count + close button
         var headerRow = document.createElement('div');
         headerRow.className = 'wpp-search-header';
@@ -261,6 +270,9 @@ function attachOverlayMethods(WorkspacePlusPlus) {
         searchInput.placeholder = L.searchOverlayPlaceholder;
         searchRow.appendChild(searchInput);
         this.searchOverlayInputEl = searchInput;
+        if (!self.data.showFilterInput) {
+            searchRow.style.display = 'none';
+        }
         overlay.appendChild(searchRow);
 
         // Group tabs row
@@ -976,21 +988,24 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                     self.persistData();
                 },
                 onChanged: function () {
+                    searchRow.style.display = self.data.showFilterInput ? '' : 'none';
                     renderGroupTabs();
                     refreshOrderedSessions();
                 },
             });
         });
 
-        // Resize via corner handles
+        // Resize via corner and edge handles
         overlay.addEventListener('mousedown', function (e) {
             var cornerEl = e.target.closest('.wpp-resize-corner');
-            if (!cornerEl) return;
+            var edgeEl = !cornerEl ? e.target.closest('.wpp-resize-edge') : null;
+            if (!cornerEl && !edgeEl) return;
             if (e.button !== 0) return;
             e.preventDefault();
             e.stopPropagation();
 
-            var dir = cornerEl.dataset.corner;
+            var dir = cornerEl ? cornerEl.dataset.corner : null;
+            var edge = edgeEl ? edgeEl.dataset.edge : null;
             var startX = e.clientX;
             var startY = e.clientY;
             var startRect = overlay.getBoundingClientRect();
@@ -1008,17 +1023,21 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                 var newBottom = startBottom;
 
                 // Horizontal
-                if (dir === 'tr' || dir === 'br') {
+                var moveRight = dir === 'tr' || dir === 'br' || edge === 'right';
+                var moveLeft  = dir === 'tl' || dir === 'bl' || edge === 'left';
+                if (moveRight) {
                     newWidth = Math.max(MIN_WIDTH, startWidth + dx);
-                } else {
+                } else if (moveLeft) {
                     newWidth = Math.max(MIN_WIDTH, startWidth - dx);
                     newLeft = startLeft + (startWidth - newWidth);
                 }
 
                 // Vertical
-                if (dir === 'tl' || dir === 'tr') {
+                var moveTop    = dir === 'tl' || dir === 'tr' || edge === 'top';
+                var moveBottom = dir === 'bl' || dir === 'br' || edge === 'bottom';
+                if (moveTop) {
                     newHeight = Math.max(MIN_HEIGHT, startHeight - dy);
-                } else {
+                } else if (moveBottom) {
                     newHeight = Math.max(MIN_HEIGHT, startHeight + dy);
                     newBottom = startBottom - (newHeight - startHeight);
                     if (newBottom < margin) {
@@ -1027,7 +1046,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                     }
                 }
 
-                // Enforce minimum sizes first
+                // Enforce minimum sizes
                 newWidth = Math.max(MIN_WIDTH, newWidth);
                 newHeight = Math.max(MIN_HEIGHT, newHeight);
 

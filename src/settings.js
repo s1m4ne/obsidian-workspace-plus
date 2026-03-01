@@ -4,6 +4,8 @@ var obsidian = require('obsidian');
 var i18n = require('./i18n');
 var modals = require('./modals');
 var formatRelativeTime = require('./modals/format-relative-time');
+var statusBarActions = require('./statusbar-actions');
+var DEFAULT_DATA = require('./plugin/default-data');
 
 // ============================================================
 // Group Sessions Modal — checkbox list to toggle session membership
@@ -228,19 +230,71 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                     });
                 });
 
-            addToggleSetting(contentEl, {
-                name: L.settingsStatusBarQuickSwitcher,
-                desc: L.settingsStatusBarQuickSwitcherDesc,
-                value: self.plugin.data.statusBarQuickSwitcher,
-                onChange: function (value) {
-                    self.plugin.data.statusBarQuickSwitcher = value;
-                    self.plugin.persistData();
-                },
-            });
+            // ── Status bar click actions ──
+            addSection(L.settingsSectionStatusBar);
+
+            var slotKeys = statusBarActions.SLOT_KEYS;
+            var actionIds = statusBarActions.ACTION_IDS;
+            var slotLabelMap = {
+                click: 'statusBarSlotClick',
+                altClick: 'statusBarSlotAltClick',
+                modClick: 'statusBarSlotModClick',
+                shiftClick: 'statusBarSlotShiftClick',
+                rightClick: 'statusBarSlotRightClick',
+                altRightClick: 'statusBarSlotAltRightClick',
+                modRightClick: 'statusBarSlotModRightClick',
+                shiftRightClick: 'statusBarSlotShiftRightClick',
+            };
+            var actionLabelMap = {
+                none: 'statusBarActionNone',
+                quickSwitcher: 'statusBarActionQuickSwitcher',
+                sessionManager: 'statusBarActionSessionManager',
+                saveSession: 'statusBarActionSaveSession',
+                reloadWithoutSaving: 'statusBarActionReloadWithoutSaving',
+                versionHistory: 'statusBarActionVersionHistory',
+                restoreLatestHistory: 'statusBarActionRestoreLatestHistory',
+                sessionMenu: 'statusBarActionSessionMenu',
+                settingsMenu: 'statusBarActionSettingsMenu',
+            };
+
+            for (var si = 0; si < slotKeys.length; si++) {
+                (function (slotKey) {
+                    var labelKey = slotLabelMap[slotKey];
+                    var slotLabel = typeof L[labelKey] === 'function' ? L[labelKey]() : L[labelKey];
+                    new obsidian.Setting(contentEl)
+                        .setName(slotLabel)
+                        .addDropdown(function (dropdown) {
+                            for (var ai = 0; ai < actionIds.length; ai++) {
+                                var aid = actionIds[ai];
+                                dropdown.addOption(aid, L[actionLabelMap[aid]]);
+                            }
+                            dropdown.setValue((self.plugin.data.statusBarActions || {})[slotKey] || 'none');
+                            dropdown.onChange(function (value) {
+                                if (!self.plugin.data.statusBarActions) {
+                                    self.plugin.data.statusBarActions = Object.assign({}, DEFAULT_DATA.statusBarActions);
+                                }
+                                self.plugin.data.statusBarActions[slotKey] = value;
+                                self.plugin.persistData();
+                            });
+                        });
+                })(slotKeys[si]);
+            }
         }
 
         // ── Sessions tab ──
         if (self.activeTab === 'sessions') {
+            addSection(L.settingsSectionSessionManager);
+
+            addToggleSetting(contentEl, {
+                name: L.settingsShowFilterInput,
+                desc: L.settingsShowFilterInputDesc,
+                value: !!self.plugin.data.showFilterInput,
+                onChange: function (value) {
+                    self.plugin.data.showFilterInput = value;
+                    self.plugin.persistData();
+                },
+            });
+
             addSection(L.settingsSectionSwitching);
 
             var autoSaveOnSwitch = self.plugin.isAutoSaveOnSwitchEnabled();
@@ -376,17 +430,6 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                         });
                     });
             }
-
-            addToggleSetting(vhNestedDiv, {
-                name: L.settingsVersionHistoryCtrlRmb,
-                desc: L.settingsVersionHistoryCtrlRmbDesc,
-                value: self.plugin.isVersionHistoryCtrlRmbEnabled(),
-                disabled: !versionHistoryEnabled,
-                onChange: function (value) {
-                    self.plugin.data.versionHistoryCtrlRmbRestore = value;
-                    self.plugin.persistData();
-                },
-            });
 
             addToggleSetting(vhNestedDiv, {
                 name: L.settingsVersionHistoryConfirmRestore,

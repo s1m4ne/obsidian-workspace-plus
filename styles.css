@@ -384,8 +384,8 @@ body.wpp-session-list-dragging * {
 .wpp-search-overlay {
     align-items: stretch;
     gap: 8px;
-    width: min(440px, 95vw);
-    height: min(450px, 80vh);
+    width: min(370px, 95vw);
+    height: min(400px, 80vh);
     min-width: min(286px, 90vw);
     max-width: min(594px, 95vw);
     overflow: hidden;
@@ -493,6 +493,16 @@ body.wpp-session-list-dragging * {
 .wpp-resize-tr { top: 0; right: 0; cursor: nesw-resize; }
 .wpp-resize-bl { bottom: 0; left: 0; cursor: nesw-resize; }
 .wpp-resize-br { bottom: 0; right: 0; cursor: nwse-resize; }
+
+/* Edge resize handles */
+.wpp-resize-edge {
+    position: absolute;
+    z-index: 1;
+}
+.wpp-resize-top    { top: 0; left: 12px; right: 12px; height: 6px; cursor: n-resize; }
+.wpp-resize-bottom { bottom: 0; left: 12px; right: 12px; height: 6px; cursor: s-resize; }
+.wpp-resize-left   { left: 0; top: 12px; bottom: 12px; width: 6px; cursor: w-resize; }
+.wpp-resize-right  { right: 0; top: 12px; bottom: 12px; width: 6px; cursor: e-resize; }
 
 .wpp-search-overlay .wpp-switch-item {
     width: 100%;
