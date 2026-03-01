@@ -334,6 +334,27 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
 
             addSection(L.settingsSectionSwitchPreview);
 
+            addToggleSetting(contentEl, {
+                name: L.settingsShowActiveSwitchCommand,
+                desc: L.settingsShowActiveSwitchCommandDesc,
+                value: !!self.plugin.data.showActiveSwitchCommand,
+                onChange: function (value) {
+                    self.plugin.data.showActiveSwitchCommand = value;
+                    self.plugin.persistData();
+                },
+            });
+
+            addToggleSetting(contentEl, {
+                name: L.settingsNumberedSwitchCommands,
+                desc: L.settingsNumberedSwitchCommandsDesc,
+                value: !!self.plugin.data.numberedSwitchCommands,
+                onChange: function (value) {
+                    self.plugin.data.numberedSwitchCommands = value;
+                    self.plugin.persistData();
+                    self.plugin.syncSessionCommands();
+                },
+            });
+
             // Preview before switching — master toggle with nested sub-toggles
             var allOn = !!self.plugin.data.previewNext && !!self.plugin.data.previewPrevious;
             var masterSetting = new obsidian.Setting(contentEl)
