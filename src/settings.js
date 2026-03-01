@@ -256,16 +256,29 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                     });
                 });
 
-            addToggleSetting(contentEl, {
-                name: L.settingsWarnUnsavedSwitch,
-                desc: L.settingsWarnUnsavedSwitchDesc,
-                value: self.plugin.isWarnOnUnsavedSwitchEnabled(),
-                disabled: autoSaveOnSwitch,
-                onChange: function (value) {
-                    self.plugin.data.warnOnUnsavedSwitch = value;
-                    self.plugin.persistData();
-                },
-            });
+            if (!autoSaveOnSwitch) {
+                addToggleSetting(contentEl, {
+                    name: L.settingsWarnUnsavedSwitch,
+                    desc: L.settingsWarnUnsavedSwitchDesc,
+                    value: self.plugin.isWarnOnUnsavedSwitchEnabled(),
+                    onChange: function (value) {
+                        self.plugin.data.warnOnUnsavedSwitch = value;
+                        self.plugin.persistData();
+                    },
+                });
+
+                addToggleSetting(contentEl, {
+                    name: L.settingsConfirmQuickActions,
+                    desc: L.settingsConfirmQuickActionsDesc,
+                    value: !!self.plugin.data.confirmQuickActions,
+                    onChange: function (value) {
+                        self.plugin.data.confirmQuickActions = value;
+                        self.plugin.persistData();
+                    },
+                });
+            }
+
+            addSection(L.settingsSectionSwitchPreview);
 
             // Preview before switching — master toggle with nested sub-toggles
             var allOn = !!self.plugin.data.previewNext && !!self.plugin.data.previewPrevious;
@@ -315,16 +328,6 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                 value: self.plugin.data.confirmDeleteByHotkey !== false,
                 onChange: function (value) {
                     self.plugin.data.confirmDeleteByHotkey = value;
-                    self.plugin.persistData();
-                },
-            });
-
-            addToggleSetting(contentEl, {
-                name: L.settingsConfirmQuickActions,
-                desc: L.settingsConfirmQuickActionsDesc,
-                value: !!self.plugin.data.confirmQuickActions,
-                onChange: function (value) {
-                    self.plugin.data.confirmQuickActions = value;
                     self.plugin.persistData();
                 },
             });

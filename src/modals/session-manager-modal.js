@@ -8,6 +8,7 @@ var formatRelativeTime = require('./format-relative-time');
 var groupTabUi = require('../group-tab-ui');
 var utils = require('../utils');
 var sessionContextMenu = require('../session-context-menu');
+var settingsContextMenu = require('../settings-context-menu');
 var sessionListActions = require('../session-list-actions');
 
 // ============================================================
@@ -120,6 +121,25 @@ var SessionManagerModal = /** @class */ (function (_super) {
         if (this.plugin.getOrderedGroups().length > 0) {
             footer.createDiv({ text: L.footerDragToGroup });
         }
+
+        // Right-click on empty area → settings context menu
+        contentEl.addEventListener('contextmenu', function (e) {
+            if (e.target.closest('.wpp-session-item')) return;
+            if (e.target.closest('.wpp-save-container')) return;
+            if (e.target.closest('.wpp-filter-container')) return;
+            if (e.target.closest('.wpp-bulk-actions')) return;
+            if (e.target.closest('.wpp-group-tab')) return;
+            e.preventDefault();
+            settingsContextMenu.openSettingsContextMenu({
+                plugin: self.plugin,
+                app: self.app,
+                event: e,
+                onChanged: function () {
+                    self.renderGroupTabs();
+                    self.renderList();
+                },
+            });
+        });
 
         // Keyboard handling: Enter activation + directional arrow traversal.
         this.modalKeyHandler = function (e) {
