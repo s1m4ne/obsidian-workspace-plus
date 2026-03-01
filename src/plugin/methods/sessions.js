@@ -854,16 +854,36 @@ function attachSessionMethods(WorkspacePlusPlus) {
             new modals.RenameModal(self.app, '', function (newName) {
                 self.captureActiveSessionLayoutIfAutoSave();
 
-                var id = utils.generateId();
-                self.insertSessionAndActivate(
-                    self.createSessionRecord(id, newName, self.getCurrentWorkspaceLayout())
-                );
+                var layout = self.getCurrentWorkspaceLayout();
+
+                // Check if a session with the same name already exists
+                var existing = null;
+                var allSessions = self.getOrderedSessionsUnfiltered();
+                for (var i = 0; i < allSessions.length; i++) {
+                    if (allSessions[i].name === newName) {
+                        existing = allSessions[i];
+                        break;
+                    }
+                }
+
+                if (existing) {
+                    // Overwrite existing session
+                    existing.layout = layout;
+                    existing.modified = Date.now();
+                    self.data.activeSessionId = existing.id;
+                } else {
+                    var id = utils.generateId();
+                    self.insertSessionAndActivate(
+                        self.createSessionRecord(id, newName, layout)
+                    );
+                }
 
                 self.updateStatusBar();
                 self.syncSessionCommands();
                 new obsidian.Notice(L.savedAs(newName));
                 var ordered = self.getOrderedSessions();
-                self.showSwitchOverlay(ordered, ordered.length - 1);
+                var activeIndex = self.findActiveSessionIndex(ordered);
+                self.showSwitchOverlay(ordered, activeIndex);
                 self.persistData().then(function () {
                     resolve(true);
                 });
