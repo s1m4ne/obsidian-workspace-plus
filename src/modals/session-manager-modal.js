@@ -533,6 +533,17 @@ var SessionManagerModal = /** @class */ (function (_super) {
                         self.renderList();
                     });
                 },
+                showMoveToGroup: self.plugin.isGroupFeatureEnabled() && self.plugin.getOrderedGroups().length > 0,
+                onMoveToGroup: function (groupId) {
+                    var gName = (self.plugin.data.groups[groupId] || {}).name || '';
+                    self.plugin.moveSessionToGroupExclusive(session.id, groupId).then(function (moved) {
+                        if (moved) {
+                            new obsidian.Notice(L.groupAddedSession(session.name, gName));
+                            self.renderGroupTabs();
+                            self.renderList();
+                        }
+                    });
+                },
                 onDelete: function () {
                     self.onDelete(session);
                 },

@@ -113,6 +113,16 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
                     showSaveAs: true,
                     showSwitch: false,
                     showRemoveFromGroup: false,
+                    showMoveToGroup: self.isGroupFeatureEnabled() && self.getOrderedGroups().length > 0,
+                    onMoveToGroup: function (groupId) {
+                        var gName = (self.data.groups[groupId] || {}).name || '';
+                        self.moveSessionToGroupExclusive(session.id, groupId).then(function (moved) {
+                            if (moved) {
+                                new obsidian.Notice(L.groupAddedSession(session.name, gName));
+                                self.updateStatusBar();
+                            }
+                        });
+                    },
                     onSave: function () {
                         self.saveActiveSession();
                     },
