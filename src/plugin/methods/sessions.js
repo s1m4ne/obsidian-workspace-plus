@@ -143,7 +143,15 @@ function attachSessionMethods(WorkspacePlusPlus) {
                 self.addCommand({
                     id: 'switch-to-' + num,
                     name: L.cmdSwitchTo(num, session ? session.name : undefined),
-                    callback: function () { self.switchToIndex(num - 1); },
+                    checkCallback: function (checking) {
+                        if (!self.data.showActiveSwitchCommand) {
+                            var currentOrdered = self.getOrderedSessions();
+                            var targetSession = currentOrdered[num - 1];
+                            if (targetSession && targetSession.id === self.data.activeSessionId) return false;
+                        }
+                        if (!checking) self.switchToIndex(num - 1);
+                        return true;
+                    },
                 });
             })(n);
         }
@@ -162,8 +170,12 @@ function attachSessionMethods(WorkspacePlusPlus) {
                 self.addCommand({
                     id: cmdId,
                     name: L.cmdSwitchToNamed(session.name),
-                    callback: function () {
-                        self.switchSession(session.id);
+                    checkCallback: function (checking) {
+                        if (!self.data.showActiveSwitchCommand) {
+                            if (session.id === self.data.activeSessionId) return false;
+                        }
+                        if (!checking) self.switchSession(session.id);
+                        return true;
                     },
                 });
                 self._dynamicSessionCommandIds.push(cmdId);

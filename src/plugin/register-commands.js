@@ -61,7 +61,15 @@ function registerCommands(plugin) {
             addCommand({
                 id: 'switch-to-' + num,
                 name: L.cmdSwitchTo(num),
-                callback: function () { plugin.switchToIndex(num - 1); },
+                checkCallback: function (checking) {
+                    if (!plugin.data.showActiveSwitchCommand) {
+                        var ordered = plugin.getOrderedSessions();
+                        var session = ordered[num - 1];
+                        if (session && session.id === plugin.data.activeSessionId) return false;
+                    }
+                    if (!checking) plugin.switchToIndex(num - 1);
+                    return true;
+                },
             });
         })(n);
     }

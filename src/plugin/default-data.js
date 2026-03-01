@@ -14,6 +14,7 @@ module.exports = {
     statusBarQuickSwitcher: true,
     groupFeatureEnabled: true,
     showFilterInput: false,
+    showActiveSwitchCommand: false,
     searchOverlayPosition: null,
     searchOverlaySize: null,
     groups: {},
