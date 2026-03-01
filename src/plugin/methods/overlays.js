@@ -7,6 +7,7 @@ var formatRelativeTime = require('../../modals/format-relative-time');
 var groupTabUi = require('../../group-tab-ui');
 var utils = require('../../utils');
 var sessionContextMenu = require('../../session-context-menu');
+var settingsContextMenu = require('../../settings-context-menu');
 var sessionListActions = require('../../session-list-actions');
 
 function hasBlockingModal() {
@@ -952,6 +953,33 @@ function attachOverlayMethods(WorkspacePlusPlus) {
             self.data.searchOverlayPosition = null;
             self.data.searchOverlaySize = null;
             self.persistData();
+        });
+
+        // Right-click on empty area → settings context menu
+        overlay.addEventListener('contextmenu', function (e) {
+            if (e.target.closest('.wpp-switch-item')) return;
+            if (e.target.closest('.wpp-search-input')) return;
+            if (e.target.closest('.wpp-search-close')) return;
+            if (e.target.closest('.wpp-qs-action-btn')) return;
+            if (e.target.closest('.wpp-group-tab')) return;
+            e.preventDefault();
+            settingsContextMenu.openSettingsContextMenu({
+                plugin: self,
+                app: self.app,
+                event: e,
+                showResetOverlay: true,
+                onResetOverlay: function () {
+                    resetSize();
+                    positionToAnchor();
+                    self.data.searchOverlayPosition = null;
+                    self.data.searchOverlaySize = null;
+                    self.persistData();
+                },
+                onChanged: function () {
+                    renderGroupTabs();
+                    refreshOrderedSessions();
+                },
+            });
         });
 
         // Resize via corner handles
