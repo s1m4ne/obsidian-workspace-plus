@@ -46,13 +46,16 @@ var SessionManagerModal = /** @class */ (function (_super) {
             cls: 'wpp-save-btn',
         });
 
-        // Filter section
-        var filterContainer = contentEl.createDiv({ cls: 'wpp-filter-container' });
-        this.filterInput = filterContainer.createEl('input', {
-            type: 'text',
-            placeholder: L.filterPlaceholder,
-            cls: 'wpp-filter-input',
-        });
+        // Filter section (conditional)
+        this.filterInput = null;
+        if (this.plugin.data.showFilterInput) {
+            var filterContainer = contentEl.createDiv({ cls: 'wpp-filter-container' });
+            this.filterInput = filterContainer.createEl('input', {
+                type: 'text',
+                placeholder: L.filterPlaceholder,
+                cls: 'wpp-filter-input',
+            });
+        }
 
         var self = this;
         this.modalGroupId = this.plugin.isGroupFeatureEnabled()
@@ -67,21 +70,23 @@ var SessionManagerModal = /** @class */ (function (_super) {
             self.updateFocusUI();
         });
         this.filterQuery = '';
-        this.filterInput.addEventListener('focus', function () {
-            self.focusedIndex = -1;
-            self.updateFocusUI();
-        });
-        this.filterInput.addEventListener('input', function () {
-            self.filterQuery = self.filterInput.value || '';
-            var sessions = self.getNavigationSessions();
-            var activeIdx = self.plugin.findActiveSessionIndex(sessions);
-            if (document.activeElement === self.filterInput) {
+        if (this.filterInput) {
+            this.filterInput.addEventListener('focus', function () {
                 self.focusedIndex = -1;
-            } else {
-                self.focusedIndex = activeIdx !== -1 ? activeIdx : (sessions.length > 0 ? 0 : -1);
-            }
-            self.renderList();
-        });
+                self.updateFocusUI();
+            });
+            this.filterInput.addEventListener('input', function () {
+                self.filterQuery = self.filterInput.value || '';
+                var sessions = self.getNavigationSessions();
+                var activeIdx = self.plugin.findActiveSessionIndex(sessions);
+                if (document.activeElement === self.filterInput) {
+                    self.focusedIndex = -1;
+                } else {
+                    self.focusedIndex = activeIdx !== -1 ? activeIdx : (sessions.length > 0 ? 0 : -1);
+                }
+                self.renderList();
+            });
+        }
 
         // Group tabs
         this.groupTabsRow = contentEl.createDiv({ cls: 'wpp-group-tabs-row' });
@@ -252,10 +257,16 @@ var SessionManagerModal = /** @class */ (function (_super) {
                     }
 
                     if (e.key === 'ArrowUp' && self.focusedIndex === 0) {
-                        self.focusedIndex = -1;
-                        self.updateFocusUI();
-                        self.filterInput.focus();
-                        self.filterInput.select();
+                        if (self.filterInput) {
+                            self.focusedIndex = -1;
+                            self.updateFocusUI();
+                            self.filterInput.focus();
+                            self.filterInput.select();
+                        } else {
+                            self.focusedIndex = -2;
+                            self.updateFocusUI();
+                            self.nameInput.focus();
+                        }
                         return;
                     }
                     if (e.key === 'ArrowDown' && self.focusedIndex === rowModeRows.length - 1) {
@@ -315,8 +326,12 @@ var SessionManagerModal = /** @class */ (function (_super) {
 
                     // No same-column target: only allow boundary escape.
                     if (e.key === 'ArrowUp' && currentRowIndex === 0) {
-                        self.filterInput.focus();
-                        self.filterInput.select();
+                        if (self.filterInput) {
+                            self.filterInput.focus();
+                            self.filterInput.select();
+                        } else {
+                            self.nameInput.focus();
+                        }
                     } else if (e.key === 'ArrowDown' && currentRowIndex === rows.length - 1) {
                         self.nameInput.focus();
                         var nameLen = self.nameInput.value.length;

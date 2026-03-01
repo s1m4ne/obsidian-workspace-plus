@@ -13,6 +13,7 @@ module.exports = {
     warnOnUnsavedSwitch: true,
     statusBarQuickSwitcher: true,
     groupFeatureEnabled: true,
+    showFilterInput: false,
     searchOverlayPosition: null,
     searchOverlaySize: null,
     groups: {},
@@ -23,4 +24,14 @@ module.exports = {
     versionHistorySnapshotInterval: 5,
     versionHistoryCtrlRmbRestore: true,
     versionHistoryConfirmRestore: true,
+    statusBarActions: {
+        click:           'quickSwitcher',
+        altClick:        'reloadWithoutSaving',
+        modClick:        'saveSession',
+        shiftClick:      'none',
+        rightClick:      'sessionMenu',
+        altRightClick:   'none',
+        modRightClick:   'restoreLatestHistory',
+        shiftRightClick: 'none',
+    },
 };

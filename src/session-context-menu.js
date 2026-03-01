@@ -16,6 +16,7 @@ var i18n = require('./i18n');
  * @param {boolean} [options.showSwitch]            - show "Switch" item (overlay / modal)
  * @param {boolean} [options.showRemoveFromGroup]   - show "Remove from group" item
  * @param {boolean} [options.showMoveToGroup]       - show "Move to group" submenu
+ * @param {boolean} [options.showCustomizeClicks]   - show "Customize click actions" item (status bar only)
  * @param {Function} [options.onSave]
  * @param {Function} [options.onReload]
  * @param {Function} [options.onSaveAs]
@@ -145,6 +146,20 @@ function openSessionContextMenu(options) {
                     });
                 })(groups[gi]);
             }
+        });
+    }
+
+    // --- Customize click actions (status bar only) ---
+    if (options.showCustomizeClicks) {
+        menu.addSeparator();
+        menu.addItem(function (mi) {
+            mi.setTitle(L.contextCustomizeClicks);
+            mi.setIcon('mouse-pointer-click');
+            mi.onClick(function () {
+                if (plugin.settingTab) plugin.settingTab.activeTab = 'general';
+                app.setting.open();
+                app.setting.openTabById(plugin.manifest.id);
+            });
         });
     }
 

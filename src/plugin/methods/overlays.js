@@ -261,6 +261,9 @@ function attachOverlayMethods(WorkspacePlusPlus) {
         searchInput.placeholder = L.searchOverlayPlaceholder;
         searchRow.appendChild(searchInput);
         this.searchOverlayInputEl = searchInput;
+        if (!self.data.showFilterInput) {
+            searchRow.style.display = 'none';
+        }
         overlay.appendChild(searchRow);
 
         // Group tabs row
@@ -976,6 +979,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                     self.persistData();
                 },
                 onChanged: function () {
+                    searchRow.style.display = self.data.showFilterInput ? '' : 'none';
                     renderGroupTabs();
                     refreshOrderedSessions();
                 },
