@@ -22,6 +22,24 @@ function arPlural(n, one, two, few, many) {
     return n + ' ' + many;
 }
 
+function isMacPlatform() {
+    return typeof navigator !== 'undefined'
+        && typeof navigator.platform === 'string'
+        && navigator.platform.indexOf('Mac') !== -1;
+}
+
+function platformLabel(macText, otherText) {
+    return function () {
+        return isMacPlatform() ? macText : otherText;
+    };
+}
+
+function modifiedClickLabel(baseText, macKey, otherKey) {
+    return function () {
+        return (isMacPlatform() ? macKey : otherKey) + ' + ' + baseText;
+    };
+}
+
 var STRINGS = {
     en: {
         modalTitle: 'Manage sessions',
@@ -156,11 +174,27 @@ var STRINGS = {
         settingsStatusBarScrollPresetCustom: 'Custom',
         settingsStatusBarScrollModifier: 'Required modifier',
         settingsStatusBarScrollModifierDesc: 'Choose which modifier must be held while scrolling on the status bar item.',
-        settingsStatusBarScrollModifierRecommended: 'Cmd/Ctrl or Option/Alt',
+        settingsStatusBarScrollModifierRecommended: function () {
+            return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1)
+                ? 'Cmd or Option'
+                : 'Ctrl or Alt';
+        },
         settingsStatusBarScrollModifierNone: 'None',
-        settingsStatusBarScrollModifierModOnly: 'Cmd/Ctrl only',
-        settingsStatusBarScrollModifierAltOnly: 'Option/Alt only',
-        settingsStatusBarScrollModifierModOrAlt: 'Cmd/Ctrl or Option/Alt',
+        settingsStatusBarScrollModifierModOnly: function () {
+            return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1)
+                ? 'Cmd only'
+                : 'Ctrl only';
+        },
+        settingsStatusBarScrollModifierAltOnly: function () {
+            return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1)
+                ? 'Option only'
+                : 'Alt only';
+        },
+        settingsStatusBarScrollModifierModOrAlt: function () {
+            return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1)
+                ? 'Cmd or Option'
+                : 'Ctrl or Alt';
+        },
         settingsStatusBarScrollThreshold: 'Sensitivity threshold',
         settingsStatusBarScrollThresholdDesc: 'Lower values switch more easily. Used only when the preset is Custom.',
         settingsStatusBarScrollCooldown: 'Cooldown',
@@ -186,6 +220,10 @@ var STRINGS = {
         statusBarSlotAltClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2325' : 'Alt') + ' + Click'; },
         statusBarSlotModClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2318' : 'Ctrl') + ' + Click'; },
         statusBarSlotShiftClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u21e7' : 'Shift') + ' + Click'; },
+        statusBarSlotMiddleClick: 'Middle-click',
+        statusBarSlotAltMiddleClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2325' : 'Alt') + ' + Middle-click'; },
+        statusBarSlotModMiddleClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2318' : 'Ctrl') + ' + Middle-click'; },
+        statusBarSlotShiftMiddleClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u21e7' : 'Shift') + ' + Middle-click'; },
         statusBarSlotRightClick: 'Right-click',
         statusBarSlotAltRightClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2325' : 'Alt') + ' + Right-click'; },
         statusBarSlotModRightClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2318' : 'Ctrl') + ' + Right-click'; },
@@ -323,8 +361,12 @@ var STRINGS = {
         settingsVersionHistoryEnabledDesc: 'Keep a history of layout changes for each session.',
         settingsVersionHistoryInterval: 'Snapshot interval (minutes)',
         settingsVersionHistoryIntervalDesc: 'How often to check for layout changes and save a snapshot.',
-        settingsVersionHistoryCtrlRmb: 'Quick restore (Ctrl + Right-click)',
-        settingsVersionHistoryCtrlRmbDesc: 'Right-click the status bar while holding Ctrl to restore the previous layout.',
+        settingsVersionHistoryCtrlRmb: function () {
+            return 'Quick restore (' + ((typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1) ? 'Cmd' : 'Ctrl') + ' + Right-click)';
+        },
+        settingsVersionHistoryCtrlRmbDesc: function () {
+            return 'Right-click the status bar while holding ' + ((typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1) ? 'Cmd' : 'Ctrl') + ' to restore the previous layout.';
+        },
         settingsVersionHistoryConfirmRestore: 'Confirm before restoring',
         settingsVersionHistoryConfirmRestoreDesc: 'Show a confirmation dialog before restoring a previous layout.',
         rotationBackupSectionTitle: 'Backup',
@@ -342,7 +384,7 @@ var STRINGS = {
     },
     zh: {
         settingsStatusBarModScrollSwitch: '按住 Ctrl/Cmd 并滚动以切换会话',
-        settingsStatusBarModScrollSwitchDesc: '在状态栏项目上按住 Ctrl/Cmd 并垂直滚动即可切换会话。使用阈值和冷却时间以减少触控板误触。',
+        settingsStatusBarModScrollSwitchDesc: '在状态栏项目上，按住所选修饰键并垂直滚动即可切换会话。使用阈值和冷却时间以减少触控板误触。',
         modalTitle: '管理会话',
         savePlaceholder: '新会话名称…',
         filterPlaceholder: '筛选会话...',
@@ -451,6 +493,10 @@ var STRINGS = {
         statusBarSlotAltClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2325' : 'Alt') + ' + \u70b9\u51fb'; },
         statusBarSlotModClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2318' : 'Ctrl') + ' + \u70b9\u51fb'; },
         statusBarSlotShiftClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u21e7' : 'Shift') + ' + \u70b9\u51fb'; },
+        statusBarSlotMiddleClick: '\u4e2d\u952e\u70b9\u51fb',
+        statusBarSlotAltMiddleClick: modifiedClickLabel('\u4e2d\u952e\u70b9\u51fb', '\u2325', 'Alt'),
+        statusBarSlotModMiddleClick: modifiedClickLabel('\u4e2d\u952e\u70b9\u51fb', '\u2318', 'Ctrl'),
+        statusBarSlotShiftMiddleClick: modifiedClickLabel('\u4e2d\u952e\u70b9\u51fb', '\u21e7', 'Shift'),
         statusBarSlotRightClick: '\u53f3\u952e',
         statusBarSlotAltRightClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2325' : 'Alt') + ' + \u53f3\u952e'; },
         statusBarSlotModRightClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2318' : 'Ctrl') + ' + \u53f3\u952e'; },
@@ -550,8 +596,8 @@ var STRINGS = {
         settingsVersionHistoryEnabledDesc: '为每个会话保留布局变更的历史记录。',
         settingsVersionHistoryInterval: '快照间隔（分钟）',
         settingsVersionHistoryIntervalDesc: '检查布局变更并保存快照的频率。',
-        settingsVersionHistoryCtrlRmb: '快速恢复 (Ctrl + 右键)',
-        settingsVersionHistoryCtrlRmbDesc: '按住 Ctrl 键右键点击状态栏可恢复上一个布局。',
+        settingsVersionHistoryCtrlRmb: platformLabel('快速恢复 (Cmd + 右键)', '快速恢复 (Ctrl + 右键)'),
+        settingsVersionHistoryCtrlRmbDesc: platformLabel('按住 Cmd 键右键点击状态栏可恢复上一个布局。', '按住 Ctrl 键右键点击状态栏可恢复上一个布局。'),
         settingsVersionHistoryConfirmRestore: '恢复前确认',
         settingsVersionHistoryConfirmRestoreDesc: '恢复布局前显示确认对话框。',
         rotationBackupSectionTitle: '备份',
@@ -569,7 +615,7 @@ var STRINGS = {
     },
     'zh-TW': {
         settingsStatusBarModScrollSwitch: '按住 Ctrl/Cmd 並捲動以切換工作階段',
-        settingsStatusBarModScrollSwitchDesc: '在狀態列項目上按住 Ctrl/Cmd 並垂直捲動即可切換工作階段。使用閾值與冷卻時間以減少觸控板誤觸。',
+        settingsStatusBarModScrollSwitchDesc: '在狀態列項目上，按住所選修飾鍵並垂直捲動即可切換工作階段。使用閾值與冷卻時間以減少觸控板誤觸。',
         modalTitle: '管理工作階段',
         savePlaceholder: '新工作階段名稱\u2026',
         filterPlaceholder: '篩選工作階段...',
@@ -678,6 +724,10 @@ var STRINGS = {
         statusBarSlotAltClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2325' : 'Alt') + ' + \u9ede\u64ca'; },
         statusBarSlotModClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2318' : 'Ctrl') + ' + \u9ede\u64ca'; },
         statusBarSlotShiftClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u21e7' : 'Shift') + ' + \u9ede\u64ca'; },
+        statusBarSlotMiddleClick: '\u4e2d\u9375\u9ede\u64ca',
+        statusBarSlotAltMiddleClick: modifiedClickLabel('\u4e2d\u9375\u9ede\u64ca', '\u2325', 'Alt'),
+        statusBarSlotModMiddleClick: modifiedClickLabel('\u4e2d\u9375\u9ede\u64ca', '\u2318', 'Ctrl'),
+        statusBarSlotShiftMiddleClick: modifiedClickLabel('\u4e2d\u9375\u9ede\u64ca', '\u21e7', 'Shift'),
         statusBarSlotRightClick: '\u53f3\u9375',
         statusBarSlotAltRightClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2325' : 'Alt') + ' + \u53f3\u9375'; },
         statusBarSlotModRightClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2318' : 'Ctrl') + ' + \u53f3\u9375'; },
@@ -777,8 +827,8 @@ var STRINGS = {
         settingsVersionHistoryEnabledDesc: '為每個工作階段保留佈局變更的歷史紀錄。',
         settingsVersionHistoryInterval: '快照間隔（分鐘）',
         settingsVersionHistoryIntervalDesc: '檢查佈局變更並儲存快照的頻率。',
-        settingsVersionHistoryCtrlRmb: '快速還原 (Ctrl + 右鍵)',
-        settingsVersionHistoryCtrlRmbDesc: '按住 Ctrl 鍵右鍵點擊狀態列可還原上一個佈局。',
+        settingsVersionHistoryCtrlRmb: platformLabel('快速還原 (Cmd + 右鍵)', '快速還原 (Ctrl + 右鍵)'),
+        settingsVersionHistoryCtrlRmbDesc: platformLabel('按住 Cmd 鍵右鍵點擊狀態列可還原上一個佈局。', '按住 Ctrl 鍵右鍵點擊狀態列可還原上一個佈局。'),
         settingsVersionHistoryConfirmRestore: '還原前確認',
         settingsVersionHistoryConfirmRestoreDesc: '還原佈局前顯示確認對話框。',
         rotationBackupSectionTitle: '備份',
@@ -796,7 +846,7 @@ var STRINGS = {
     },
     es: {
         settingsStatusBarModScrollSwitch: 'Mod + rueda para cambiar de sesión',
-        settingsStatusBarModScrollSwitchDesc: 'Sobre el elemento de la barra de estado, mantén Cmd/Ctrl y desplázate verticalmente para cambiar de sesión. Usa umbral y enfriamiento para reducir activaciones accidentales del trackpad.',
+        settingsStatusBarModScrollSwitchDesc: 'Sobre el elemento de la barra de estado, desplázate verticalmente mientras mantienes la tecla modificadora elegida para cambiar de sesión. Usa umbral y enfriamiento para reducir activaciones accidentales del trackpad.',
         modalTitle: 'Gestión de sesiones',
         savePlaceholder: 'Nombre de la nueva sesión...',
         filterPlaceholder: 'Filtrar sesiones...',
@@ -905,6 +955,10 @@ var STRINGS = {
         statusBarSlotAltClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2325' : 'Alt') + ' + Clic'; },
         statusBarSlotModClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2318' : 'Ctrl') + ' + Clic'; },
         statusBarSlotShiftClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u21e7' : 'Shift') + ' + Clic'; },
+        statusBarSlotMiddleClick: 'Clic central',
+        statusBarSlotAltMiddleClick: modifiedClickLabel('Clic central', '\u2325', 'Alt'),
+        statusBarSlotModMiddleClick: modifiedClickLabel('Clic central', '\u2318', 'Ctrl'),
+        statusBarSlotShiftMiddleClick: modifiedClickLabel('Clic central', '\u21e7', 'Shift'),
         statusBarSlotRightClick: 'Clic derecho',
         statusBarSlotAltRightClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2325' : 'Alt') + ' + Clic derecho'; },
         statusBarSlotModRightClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2318' : 'Ctrl') + ' + Clic derecho'; },
@@ -1004,8 +1058,8 @@ var STRINGS = {
         settingsVersionHistoryEnabledDesc: 'Mantener un historial de cambios de diseño para cada sesión.',
         settingsVersionHistoryInterval: 'Intervalo de instantáneas (minutos)',
         settingsVersionHistoryIntervalDesc: 'Con qué frecuencia verificar cambios de diseño y guardar una instantánea.',
-        settingsVersionHistoryCtrlRmb: 'Restauración rápida (Ctrl + clic derecho)',
-        settingsVersionHistoryCtrlRmbDesc: 'Haz clic derecho en la barra de estado mientras presionas Ctrl para restaurar el diseño anterior.',
+        settingsVersionHistoryCtrlRmb: platformLabel('Restauración rápida (Cmd + clic derecho)', 'Restauración rápida (Ctrl + clic derecho)'),
+        settingsVersionHistoryCtrlRmbDesc: platformLabel('Haz clic derecho en la barra de estado mientras presionas Cmd para restaurar el diseño anterior.', 'Haz clic derecho en la barra de estado mientras presionas Ctrl para restaurar el diseño anterior.'),
         settingsVersionHistoryConfirmRestore: 'Confirmar antes de restaurar',
         settingsVersionHistoryConfirmRestoreDesc: 'Mostrar un diálogo de confirmación antes de restaurar un diseño anterior.',
         rotationBackupSectionTitle: 'Copia de seguridad',
@@ -1023,7 +1077,7 @@ var STRINGS = {
     },
     fr: {
         settingsStatusBarModScrollSwitch: 'Mod + molette pour changer de session',
-        settingsStatusBarModScrollSwitchDesc: 'Sur l’élément de la barre d’état, maintenez Cmd/Ctrl et faites défiler verticalement pour changer de session. Utilise un seuil et un délai pour réduire les déclenchements accidentels du trackpad.',
+        settingsStatusBarModScrollSwitchDesc: 'Sur l’élément de la barre d’état, faites défiler verticalement en maintenant la touche modificatrice choisie pour changer de session. Utilise un seuil et un délai pour réduire les déclenchements accidentels du trackpad.',
         modalTitle: 'Gestion des sessions',
         savePlaceholder: 'Nom de la nouvelle session...',
         filterPlaceholder: 'Filtrer les sessions...',
@@ -1132,6 +1186,10 @@ var STRINGS = {
         statusBarSlotAltClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2325' : 'Alt') + ' + Clic'; },
         statusBarSlotModClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2318' : 'Ctrl') + ' + Clic'; },
         statusBarSlotShiftClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u21e7' : 'Shift') + ' + Clic'; },
+        statusBarSlotMiddleClick: 'Clic du milieu',
+        statusBarSlotAltMiddleClick: modifiedClickLabel('Clic du milieu', '\u2325', 'Alt'),
+        statusBarSlotModMiddleClick: modifiedClickLabel('Clic du milieu', '\u2318', 'Ctrl'),
+        statusBarSlotShiftMiddleClick: modifiedClickLabel('Clic du milieu', '\u21e7', 'Shift'),
         statusBarSlotRightClick: 'Clic droit',
         statusBarSlotAltRightClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2325' : 'Alt') + ' + Clic droit'; },
         statusBarSlotModRightClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2318' : 'Ctrl') + ' + Clic droit'; },
@@ -1231,8 +1289,8 @@ var STRINGS = {
         settingsVersionHistoryEnabledDesc: 'Conserver un historique des modifications de disposition pour chaque session.',
         settingsVersionHistoryInterval: 'Intervalle des instantanés (minutes)',
         settingsVersionHistoryIntervalDesc: 'Fréquence de vérification des modifications et de sauvegarde d\'un instantané.',
-        settingsVersionHistoryCtrlRmb: 'Restauration rapide (Ctrl + clic droit)',
-        settingsVersionHistoryCtrlRmbDesc: 'Cliquez droit sur la barre d\'état en maintenant Ctrl pour restaurer la disposition précédente.',
+        settingsVersionHistoryCtrlRmb: platformLabel('Restauration rapide (Cmd + clic droit)', 'Restauration rapide (Ctrl + clic droit)'),
+        settingsVersionHistoryCtrlRmbDesc: platformLabel('Cliquez droit sur la barre d\'état en maintenant Cmd pour restaurer la disposition précédente.', 'Cliquez droit sur la barre d\'état en maintenant Ctrl pour restaurer la disposition précédente.'),
         settingsVersionHistoryConfirmRestore: 'Confirmer avant de restaurer',
         settingsVersionHistoryConfirmRestoreDesc: 'Afficher une boîte de dialogue de confirmation avant de restaurer une disposition.',
         rotationBackupSectionTitle: 'Sauvegarde',
@@ -1250,7 +1308,7 @@ var STRINGS = {
     },
     ar: {
         settingsStatusBarModScrollSwitch: 'استخدم Mod + التمرير للتبديل بين الجلسات',
-        settingsStatusBarModScrollSwitchDesc: 'على عنصر شريط الحالة، اضغط مع الاستمرار على Cmd/Ctrl ثم مرر عموديًا للتبديل بين الجلسات. يستخدم حدًا أدنى وفترة تهدئة لتقليل تفعيلات لوحة اللمس غير المقصودة.',
+        settingsStatusBarModScrollSwitchDesc: 'على عنصر شريط الحالة، اضغط مع الاستمرار على مفتاح التعديل المحدد ثم مرر عموديًا للتبديل بين الجلسات. يستخدم حدًا أدنى وفترة تهدئة لتقليل تفعيلات لوحة اللمس غير المقصودة.',
         modalTitle: '\u0625\u062f\u0627\u0631\u0629 \u0627\u0644\u062c\u0644\u0633\u0627\u062a',
         savePlaceholder: '\u0627\u0633\u0645 \u0627\u0644\u062c\u0644\u0633\u0629 \u0627\u0644\u062c\u062f\u064a\u062f\u0629...',
         filterPlaceholder: '\u062a\u0635\u0641\u064a\u0629 \u0627\u0644\u062c\u0644\u0633\u0627\u062a...',
@@ -1363,6 +1421,10 @@ var STRINGS = {
         statusBarSlotAltRightClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2325' : 'Alt') + ' + \u0646\u0642\u0631 \u064a\u0645\u064a\u0646'; },
         statusBarSlotModRightClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2318' : 'Ctrl') + ' + \u0646\u0642\u0631 \u064a\u0645\u064a\u0646'; },
         statusBarSlotShiftRightClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u21e7' : 'Shift') + ' + \u0646\u0642\u0631 \u064a\u0645\u064a\u0646'; },
+        statusBarSlotMiddleClick: 'نقر بالزر الأوسط',
+        statusBarSlotAltMiddleClick: modifiedClickLabel('نقر بالزر الأوسط', '⌥', 'Alt'),
+        statusBarSlotModMiddleClick: modifiedClickLabel('نقر بالزر الأوسط', '⌘', 'Ctrl'),
+        statusBarSlotShiftMiddleClick: modifiedClickLabel('نقر بالزر الأوسط', '⇧', 'Shift'),
         statusBarActionNone: '\u0644\u0627 \u0634\u064a\u0621',
         statusBarActionQuickSwitcher: '\u0641\u062a\u062d \u0627\u0644\u0645\u0628\u062f\u0651\u0644 \u0627\u0644\u0633\u0631\u064a\u0639',
         statusBarActionSessionManager: '\u0641\u062a\u062d \u0645\u062f\u064a\u0631 \u0627\u0644\u062c\u0644\u0633\u0627\u062a',
@@ -1457,8 +1519,8 @@ var STRINGS = {
         settingsVersionHistoryEnabledDesc: 'الاحتفاظ بسجل تغييرات التخطيط لكل جلسة.',
         settingsVersionHistoryInterval: 'فترة اللقطات (بالدقائق)',
         settingsVersionHistoryIntervalDesc: 'عدد مرات التحقق من تغييرات التخطيط وحفظ لقطة.',
-        settingsVersionHistoryCtrlRmb: 'استعادة سريعة (Ctrl + نقر يمين)',
-        settingsVersionHistoryCtrlRmbDesc: 'انقر بزر الماوس الأيمن على شريط الحالة أثناء الضغط على Ctrl لاستعادة التخطيط السابق.',
+        settingsVersionHistoryCtrlRmb: platformLabel('استعادة سريعة (Cmd + نقر يمين)', 'استعادة سريعة (Ctrl + نقر يمين)'),
+        settingsVersionHistoryCtrlRmbDesc: platformLabel('انقر بزر الماوس الأيمن على شريط الحالة أثناء الضغط على Cmd لاستعادة التخطيط السابق.', 'انقر بزر الماوس الأيمن على شريط الحالة أثناء الضغط على Ctrl لاستعادة التخطيط السابق.'),
         settingsVersionHistoryConfirmRestore: 'تأكيد قبل الاستعادة',
         settingsVersionHistoryConfirmRestoreDesc: 'عرض مربع حوار تأكيد قبل استعادة تخطيط سابق.',
         rotationBackupSectionTitle: 'النسخ الاحتياطي',
@@ -1476,7 +1538,7 @@ var STRINGS = {
     },
     pt: {
         settingsStatusBarModScrollSwitch: 'Mod + rolagem para trocar de sessão',
-        settingsStatusBarModScrollSwitchDesc: 'No item da barra de status, segure Cmd/Ctrl e role verticalmente para trocar de sessão. Usa limiar e intervalo de espera para reduzir acionamentos acidentais do trackpad.',
+        settingsStatusBarModScrollSwitchDesc: 'No item da barra de status, segure a tecla modificadora selecionada e role verticalmente para trocar de sessão. Usa limiar e intervalo de espera para reduzir acionamentos acidentais do trackpad.',
         modalTitle: 'Gerenciar sessões',
         savePlaceholder: 'Nome da nova sessão...',
         filterPlaceholder: 'Filtrar sessões...',
@@ -1589,6 +1651,10 @@ var STRINGS = {
         statusBarSlotAltRightClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2325' : 'Alt') + ' + Clique direito'; },
         statusBarSlotModRightClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2318' : 'Ctrl') + ' + Clique direito'; },
         statusBarSlotShiftRightClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u21e7' : 'Shift') + ' + Clique direito'; },
+        statusBarSlotMiddleClick: 'Clique do meio',
+        statusBarSlotAltMiddleClick: modifiedClickLabel('Clique do meio', '⌥', 'Alt'),
+        statusBarSlotModMiddleClick: modifiedClickLabel('Clique do meio', '⌘', 'Ctrl'),
+        statusBarSlotShiftMiddleClick: modifiedClickLabel('Clique do meio', '⇧', 'Shift'),
         statusBarActionNone: 'N\u00e3o fazer nada',
         statusBarActionQuickSwitcher: 'Abrir seletor r\u00e1pido',
         statusBarActionSessionManager: 'Abrir gerenciador de sess\u00f5es',
@@ -1684,8 +1750,8 @@ var STRINGS = {
         settingsVersionHistoryEnabledDesc: 'Manter um histórico de alterações de layout para cada sessão.',
         settingsVersionHistoryInterval: 'Intervalo de snapshots (minutos)',
         settingsVersionHistoryIntervalDesc: 'Com que frequência verificar alterações de layout e salvar um snapshot.',
-        settingsVersionHistoryCtrlRmb: 'Restauração rápida (Ctrl + clique direito)',
-        settingsVersionHistoryCtrlRmbDesc: 'Clique com o botão direito na barra de status segurando Ctrl para restaurar o layout anterior.',
+        settingsVersionHistoryCtrlRmb: platformLabel('Restauração rápida (Cmd + clique direito)', 'Restauração rápida (Ctrl + clique direito)'),
+        settingsVersionHistoryCtrlRmbDesc: platformLabel('Clique com o botão direito na barra de status segurando Cmd para restaurar o layout anterior.', 'Clique com o botão direito na barra de status segurando Ctrl para restaurar o layout anterior.'),
         settingsVersionHistoryConfirmRestore: 'Confirmar antes de restaurar',
         settingsVersionHistoryConfirmRestoreDesc: 'Mostrar diálogo de confirmação antes de restaurar um layout anterior.',
         rotationBackupSectionTitle: 'Backup',
@@ -1703,7 +1769,7 @@ var STRINGS = {
     },
     ru: {
         settingsStatusBarModScrollSwitch: 'Mod + прокрутка для переключения сессий',
-        settingsStatusBarModScrollSwitchDesc: 'На элементе строки состояния удерживайте Cmd/Ctrl и прокручивайте вертикально, чтобы переключать сессии. Используются порог и задержка, чтобы уменьшить случайные срабатывания трекпада.',
+        settingsStatusBarModScrollSwitchDesc: 'На элементе строки состояния удерживайте выбранную клавишу-модификатор и прокручивайте вертикально, чтобы переключать сессии. Используются порог и задержка, чтобы уменьшить случайные срабатывания трекпада.',
         modalTitle: 'Управление сессиями',
         savePlaceholder: 'Имя новой сессии...',
         filterPlaceholder: 'Фильтр сессий...',
@@ -1816,6 +1882,10 @@ var STRINGS = {
         statusBarSlotAltRightClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2325' : 'Alt') + ' + \u041f\u0440\u0430\u0432\u044b\u0439 \u043a\u043b\u0438\u043a'; },
         statusBarSlotModRightClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2318' : 'Ctrl') + ' + \u041f\u0440\u0430\u0432\u044b\u0439 \u043a\u043b\u0438\u043a'; },
         statusBarSlotShiftRightClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u21e7' : 'Shift') + ' + \u041f\u0440\u0430\u0432\u044b\u0439 \u043a\u043b\u0438\u043a'; },
+        statusBarSlotMiddleClick: 'Средний клик',
+        statusBarSlotAltMiddleClick: modifiedClickLabel('Средний клик', '⌥', 'Alt'),
+        statusBarSlotModMiddleClick: modifiedClickLabel('Средний клик', '⌘', 'Ctrl'),
+        statusBarSlotShiftMiddleClick: modifiedClickLabel('Средний клик', '⇧', 'Shift'),
         statusBarActionNone: '\u041d\u0438\u0447\u0435\u0433\u043e \u043d\u0435 \u0434\u0435\u043b\u0430\u0442\u044c',
         statusBarActionQuickSwitcher: '\u041e\u0442\u043a\u0440\u044b\u0442\u044c \u0431\u044b\u0441\u0442\u0440\u043e\u0435 \u043f\u0435\u0440\u0435\u043a\u043b\u044e\u0447\u0435\u043d\u0438\u0435',
         statusBarActionSessionManager: '\u041e\u0442\u043a\u0440\u044b\u0442\u044c \u043c\u0435\u043d\u0435\u0434\u0436\u0435\u0440 \u0441\u0435\u0441\u0441\u0438\u0439',
@@ -1910,8 +1980,8 @@ var STRINGS = {
         settingsVersionHistoryEnabledDesc: 'Сохранять историю изменений макета для каждой сессии.',
         settingsVersionHistoryInterval: 'Интервал снимков (минуты)',
         settingsVersionHistoryIntervalDesc: 'Как часто проверять изменения макета и сохранять снимок.',
-        settingsVersionHistoryCtrlRmb: 'Быстрое восстановление (Ctrl + правый клик)',
-        settingsVersionHistoryCtrlRmbDesc: 'Щёлкните правой кнопкой мыши по строке состояния, удерживая Ctrl, для восстановления предыдущего макета.',
+        settingsVersionHistoryCtrlRmb: platformLabel('Быстрое восстановление (Cmd + правый клик)', 'Быстрое восстановление (Ctrl + правый клик)'),
+        settingsVersionHistoryCtrlRmbDesc: platformLabel('Щёлкните правой кнопкой мыши по строке состояния, удерживая Cmd, для восстановления предыдущего макета.', 'Щёлкните правой кнопкой мыши по строке состояния, удерживая Ctrl, для восстановления предыдущего макета.'),
         settingsVersionHistoryConfirmRestore: 'Подтверждать перед восстановлением',
         settingsVersionHistoryConfirmRestoreDesc: 'Показывать диалог подтверждения перед восстановлением макета.',
         rotationBackupSectionTitle: 'Резервное копирование',
@@ -1929,7 +1999,7 @@ var STRINGS = {
     },
     de: {
         settingsStatusBarModScrollSwitch: 'Mit Mod + Scroll zwischen Sitzungen wechseln',
-        settingsStatusBarModScrollSwitchDesc: 'Auf dem Statusleisten-Eintrag Cmd/Ctrl gedrückt halten und vertikal scrollen, um zwischen Sitzungen zu wechseln. Nutzt Schwelle und Abklingzeit, um versehentliche Trackpad-Auslöser zu reduzieren.',
+        settingsStatusBarModScrollSwitchDesc: 'Auf dem Statusleisten-Eintrag die ausgewählte Modifikatortaste gedrückt halten und vertikal scrollen, um zwischen Sitzungen zu wechseln. Nutzt Schwelle und Abklingzeit, um versehentliche Trackpad-Auslöser zu reduzieren.',
         modalTitle: 'Sitzungen verwalten',
         savePlaceholder: 'Neuer Sitzungsname...',
         filterPlaceholder: 'Sitzungen filtern...',
@@ -2042,6 +2112,10 @@ var STRINGS = {
         statusBarSlotAltRightClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2325' : 'Alt') + ' + Rechtsklick'; },
         statusBarSlotModRightClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2318' : 'Strg') + ' + Rechtsklick'; },
         statusBarSlotShiftRightClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u21e7' : 'Shift') + ' + Rechtsklick'; },
+        statusBarSlotMiddleClick: 'Mittelklick',
+        statusBarSlotAltMiddleClick: modifiedClickLabel('Mittelklick', '⌥', 'Alt'),
+        statusBarSlotModMiddleClick: modifiedClickLabel('Mittelklick', '⌘', 'Strg'),
+        statusBarSlotShiftMiddleClick: modifiedClickLabel('Mittelklick', '⇧', 'Shift'),
         statusBarActionNone: 'Nichts tun',
         statusBarActionQuickSwitcher: 'Schnellwechsel \u00f6ffnen',
         statusBarActionSessionManager: 'Sitzungsmanager \u00f6ffnen',
@@ -2136,8 +2210,8 @@ var STRINGS = {
         settingsVersionHistoryEnabledDesc: 'Einen Verlauf der Layoutänderungen für jede Sitzung speichern.',
         settingsVersionHistoryInterval: 'Snapshot-Intervall (Minuten)',
         settingsVersionHistoryIntervalDesc: 'Wie oft auf Layoutänderungen geprüft und ein Snapshot gespeichert wird.',
-        settingsVersionHistoryCtrlRmb: 'Schnellwiederherstellung (Strg + Rechtsklick)',
-        settingsVersionHistoryCtrlRmbDesc: 'Rechtsklicken Sie bei gedrückter Strg-Taste auf die Statusleiste, um das vorherige Layout wiederherzustellen.',
+        settingsVersionHistoryCtrlRmb: platformLabel('Schnellwiederherstellung (Cmd + Rechtsklick)', 'Schnellwiederherstellung (Strg + Rechtsklick)'),
+        settingsVersionHistoryCtrlRmbDesc: platformLabel('Klicken Sie bei gedrückter Cmd-Taste mit der rechten Maustaste auf die Statusleiste, um das vorherige Layout wiederherzustellen.', 'Rechtsklicken Sie bei gedrückter Strg-Taste auf die Statusleiste, um das vorherige Layout wiederherzustellen.'),
         settingsVersionHistoryConfirmRestore: 'Vor Wiederherstellung bestätigen',
         settingsVersionHistoryConfirmRestoreDesc: 'Einen Bestätigungsdialog vor der Wiederherstellung anzeigen.',
         rotationBackupSectionTitle: 'Sicherung',
@@ -2286,11 +2360,27 @@ var STRINGS = {
         settingsStatusBarScrollPresetCustom: 'Custom',
         settingsStatusBarScrollModifier: '必要な修飾キー',
         settingsStatusBarScrollModifierDesc: 'ステータスバー項目上でスクロールするときに必要な修飾キーを選びます。',
-        settingsStatusBarScrollModifierRecommended: 'Cmd/Ctrl または Option/Alt',
+        settingsStatusBarScrollModifierRecommended: function () {
+            return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1)
+                ? 'Cmd または Option'
+                : 'Ctrl または Alt';
+        },
         settingsStatusBarScrollModifierNone: 'なし',
-        settingsStatusBarScrollModifierModOnly: 'Cmd/Ctrl のみ',
-        settingsStatusBarScrollModifierAltOnly: 'Option/Alt のみ',
-        settingsStatusBarScrollModifierModOrAlt: 'Cmd/Ctrl または Option/Alt',
+        settingsStatusBarScrollModifierModOnly: function () {
+            return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1)
+                ? 'Cmd のみ'
+                : 'Ctrl のみ';
+        },
+        settingsStatusBarScrollModifierAltOnly: function () {
+            return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1)
+                ? 'Option のみ'
+                : 'Alt のみ';
+        },
+        settingsStatusBarScrollModifierModOrAlt: function () {
+            return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1)
+                ? 'Cmd または Option'
+                : 'Ctrl または Alt';
+        },
         settingsStatusBarScrollThreshold: '感度しきい値',
         settingsStatusBarScrollThresholdDesc: '小さいほど少しのスクロールで切り替わります。Custom プリセットのときだけ使います。',
         settingsStatusBarScrollCooldown: 'クールダウン',
@@ -2316,6 +2406,10 @@ var STRINGS = {
         statusBarSlotAltClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2325' : 'Alt') + ' + \u30af\u30ea\u30c3\u30af'; },
         statusBarSlotModClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2318' : 'Ctrl') + ' + \u30af\u30ea\u30c3\u30af'; },
         statusBarSlotShiftClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u21e7' : 'Shift') + ' + \u30af\u30ea\u30c3\u30af'; },
+        statusBarSlotMiddleClick: '\u30df\u30c9\u30eb\u30af\u30ea\u30c3\u30af',
+        statusBarSlotAltMiddleClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2325' : 'Alt') + ' + \u30df\u30c9\u30eb\u30af\u30ea\u30c3\u30af'; },
+        statusBarSlotModMiddleClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2318' : 'Ctrl') + ' + \u30df\u30c9\u30eb\u30af\u30ea\u30c3\u30af'; },
+        statusBarSlotShiftMiddleClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u21e7' : 'Shift') + ' + \u30df\u30c9\u30eb\u30af\u30ea\u30c3\u30af'; },
         statusBarSlotRightClick: '\u53f3\u30af\u30ea\u30c3\u30af',
         statusBarSlotAltRightClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2325' : 'Alt') + ' + \u53f3\u30af\u30ea\u30c3\u30af'; },
         statusBarSlotModRightClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2318' : 'Ctrl') + ' + \u53f3\u30af\u30ea\u30c3\u30af'; },
@@ -2453,8 +2547,12 @@ var STRINGS = {
         settingsVersionHistoryEnabledDesc: 'セッションごとにレイアウト変更の履歴を保持します。',
         settingsVersionHistoryInterval: 'スナップショット間隔（分）',
         settingsVersionHistoryIntervalDesc: 'レイアウトの変更を確認してスナップショットを保存する頻度。',
-        settingsVersionHistoryCtrlRmb: 'クイック復元 (Ctrl + 右クリック)',
-        settingsVersionHistoryCtrlRmbDesc: 'Ctrlキーを押しながらステータスバーを右クリックすると直前のレイアウトを復元します。',
+        settingsVersionHistoryCtrlRmb: function () {
+            return 'クイック復元 (' + ((typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1) ? 'Cmd' : 'Ctrl') + ' + 右クリック)';
+        },
+        settingsVersionHistoryCtrlRmbDesc: function () {
+            return ((typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1) ? 'Cmd' : 'Ctrl') + 'キーを押しながらステータスバーを右クリックすると直前のレイアウトを復元します。';
+        },
         settingsVersionHistoryConfirmRestore: '復元前に確認',
         settingsVersionHistoryConfirmRestoreDesc: 'レイアウトを復元する前に確認ダイアログを表示します。',
         rotationBackupSectionTitle: 'バックアップ',
@@ -2472,7 +2570,7 @@ var STRINGS = {
     },
     ko: {
         settingsStatusBarModScrollSwitch: 'Mod + 스크롤로 세션 전환',
-        settingsStatusBarModScrollSwitchDesc: '상태 표시줄 항목 위에서 Cmd/Ctrl 를 누른 채 세로 스크롤하면 세션을 전환합니다. 트랙패드 오작동을 줄이기 위해 임계값과 쿨다운을 사용합니다.',
+        settingsStatusBarModScrollSwitchDesc: '상태 표시줄 항목 위에서 선택한 보조 키를 누른 채 세로 스크롤하면 세션을 전환합니다. 트랙패드 오작동을 줄이기 위해 임계값과 쿨다운을 사용합니다.',
         modalTitle: '세션 관리',
         savePlaceholder: '새 세션 이름...',
         filterPlaceholder: '세션 필터...',
@@ -2585,6 +2683,10 @@ var STRINGS = {
         statusBarSlotAltRightClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2325' : 'Alt') + ' + \uc6b0\ud074\ub9ad'; },
         statusBarSlotModRightClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2318' : 'Ctrl') + ' + \uc6b0\ud074\ub9ad'; },
         statusBarSlotShiftRightClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u21e7' : 'Shift') + ' + \uc6b0\ud074\ub9ad'; },
+        statusBarSlotMiddleClick: '가운데 클릭',
+        statusBarSlotAltMiddleClick: modifiedClickLabel('가운데 클릭', '⌥', 'Alt'),
+        statusBarSlotModMiddleClick: modifiedClickLabel('가운데 클릭', '⌘', 'Ctrl'),
+        statusBarSlotShiftMiddleClick: modifiedClickLabel('가운데 클릭', '⇧', 'Shift'),
         statusBarActionNone: '\uc544\ubb34\uac83\ub3c4 \ud558\uc9c0 \uc54a\uc74c',
         statusBarActionQuickSwitcher: '\ube60\ub978 \uc804\ud658\uae30 \uc5f4\uae30',
         statusBarActionSessionManager: '\uc138\uc158 \uad00\ub9ac\uc790 \uc5f4\uae30',
@@ -2680,8 +2782,8 @@ var STRINGS = {
         settingsVersionHistoryEnabledDesc: '각 세션의 레이아웃 변경 기록을 유지합니다.',
         settingsVersionHistoryInterval: '스냅샷 간격 (분)',
         settingsVersionHistoryIntervalDesc: '레이아웃 변경을 확인하고 스냅샷을 저장하는 빈도.',
-        settingsVersionHistoryCtrlRmb: '빠른 복원 (Ctrl + 우클릭)',
-        settingsVersionHistoryCtrlRmbDesc: 'Ctrl 키를 누른 채 상태 표시줄을 우클릭하면 이전 레이아웃을 복원합니다.',
+        settingsVersionHistoryCtrlRmb: platformLabel('빠른 복원 (Cmd + 우클릭)', '빠른 복원 (Ctrl + 우클릭)'),
+        settingsVersionHistoryCtrlRmbDesc: platformLabel('Cmd 키를 누른 채 상태 표시줄을 우클릭하면 이전 레이아웃을 복원합니다.', 'Ctrl 키를 누른 채 상태 표시줄을 우클릭하면 이전 레이아웃을 복원합니다.'),
         settingsVersionHistoryConfirmRestore: '복원 전 확인',
         settingsVersionHistoryConfirmRestoreDesc: '이전 레이아웃을 복원하기 전에 확인 대화 상자를 표시합니다.',
         rotationBackupSectionTitle: '백업',
@@ -2699,7 +2801,7 @@ var STRINGS = {
     },
     it: {
         settingsStatusBarModScrollSwitch: 'Mod + rotellina per cambiare sessione',
-        settingsStatusBarModScrollSwitchDesc: 'Sull’elemento della barra di stato, tieni premuto Cmd/Ctrl e scorri verticalmente per cambiare sessione. Usa soglia e cooldown per ridurre gli attivamenti accidentali del trackpad.',
+        settingsStatusBarModScrollSwitchDesc: 'Sull’elemento della barra di stato, tieni premuto il tasto modificatore selezionato e scorri verticalmente per cambiare sessione. Usa soglia e cooldown per ridurre gli attivamenti accidentali del trackpad.',
         modalTitle: 'Gestione sessioni',
         savePlaceholder: 'Nome nuova sessione...',
         filterPlaceholder: 'Filtra sessioni...',
@@ -2812,6 +2914,10 @@ var STRINGS = {
         statusBarSlotAltRightClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2325' : 'Alt') + ' + Clic destro'; },
         statusBarSlotModRightClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2318' : 'Ctrl') + ' + Clic destro'; },
         statusBarSlotShiftRightClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u21e7' : 'Shift') + ' + Clic destro'; },
+        statusBarSlotMiddleClick: 'Clic centrale',
+        statusBarSlotAltMiddleClick: modifiedClickLabel('Clic centrale', '⌥', 'Alt'),
+        statusBarSlotModMiddleClick: modifiedClickLabel('Clic centrale', '⌘', 'Ctrl'),
+        statusBarSlotShiftMiddleClick: modifiedClickLabel('Clic centrale', '⇧', 'Shift'),
         statusBarActionNone: 'Non fare nulla',
         statusBarActionQuickSwitcher: 'Apri selettore rapido',
         statusBarActionSessionManager: 'Apri gestore sessioni',
@@ -2907,8 +3013,8 @@ var STRINGS = {
         settingsVersionHistoryEnabledDesc: 'Mantieni una cronologia delle modifiche al layout per ogni sessione.',
         settingsVersionHistoryInterval: 'Intervallo snapshot (minuti)',
         settingsVersionHistoryIntervalDesc: 'Con quale frequenza verificare le modifiche al layout e salvare uno snapshot.',
-        settingsVersionHistoryCtrlRmb: 'Ripristino rapido (Ctrl + clic destro)',
-        settingsVersionHistoryCtrlRmbDesc: 'Fai clic destro sulla barra di stato tenendo premuto Ctrl per ripristinare il layout precedente.',
+        settingsVersionHistoryCtrlRmb: platformLabel('Ripristino rapido (Cmd + clic destro)', 'Ripristino rapido (Ctrl + clic destro)'),
+        settingsVersionHistoryCtrlRmbDesc: platformLabel('Fai clic destro sulla barra di stato tenendo premuto Cmd per ripristinare il layout precedente.', 'Fai clic destro sulla barra di stato tenendo premuto Ctrl per ripristinare il layout precedente.'),
         settingsVersionHistoryConfirmRestore: 'Conferma prima del ripristino',
         settingsVersionHistoryConfirmRestoreDesc: 'Mostra una finestra di conferma prima di ripristinare un layout precedente.',
         rotationBackupSectionTitle: 'Backup',
@@ -2926,7 +3032,7 @@ var STRINGS = {
     },
     tr: {
         settingsStatusBarModScrollSwitch: 'Mod + kaydırma ile oturum değiştir',
-        settingsStatusBarModScrollSwitchDesc: 'Durum çubuğu öğesi üzerinde Cmd/Ctrl basılıyken dikey kaydırarak oturum değiştirin. Trackpad kaynaklı yanlış tetiklemeleri azaltmak için eşik ve bekleme süresi kullanır.',
+        settingsStatusBarModScrollSwitchDesc: 'Durum çubuğu öğesi üzerinde seçilen değiştirici tuşa basılı tutup dikey kaydırarak oturum değiştirin. Trackpad kaynaklı yanlış tetiklemeleri azaltmak için eşik ve bekleme süresi kullanır.',
         modalTitle: 'Oturumlar\u0131 y\u00f6net',
         savePlaceholder: 'Yeni oturum ad\u0131...',
         filterPlaceholder: 'Oturumları filtrele...',
@@ -3039,6 +3145,10 @@ var STRINGS = {
         statusBarSlotAltRightClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2325' : 'Alt') + ' + Sa\u011f t\u0131klama'; },
         statusBarSlotModRightClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2318' : 'Ctrl') + ' + Sa\u011f t\u0131klama'; },
         statusBarSlotShiftRightClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u21e7' : 'Shift') + ' + Sa\u011f t\u0131klama'; },
+        statusBarSlotMiddleClick: 'Orta tıklama',
+        statusBarSlotAltMiddleClick: modifiedClickLabel('Orta tıklama', '⌥', 'Alt'),
+        statusBarSlotModMiddleClick: modifiedClickLabel('Orta tıklama', '⌘', 'Ctrl'),
+        statusBarSlotShiftMiddleClick: modifiedClickLabel('Orta tıklama', '⇧', 'Shift'),
         statusBarActionNone: 'Hi\u00e7bir \u015fey yapma',
         statusBarActionQuickSwitcher: 'H\u0131zl\u0131 ge\u00e7i\u015fi a\u00e7',
         statusBarActionSessionManager: 'Oturum y\u00f6neticisini a\u00e7',
@@ -3133,8 +3243,8 @@ var STRINGS = {
         settingsVersionHistoryEnabledDesc: 'Her oturum için düzen değişikliklerinin geçmişini sakla.',
         settingsVersionHistoryInterval: 'Anlık görüntü aralığı (dakika)',
         settingsVersionHistoryIntervalDesc: 'Düzen değişikliklerini kontrol etme ve anlık görüntü kaydetme sıklığı.',
-        settingsVersionHistoryCtrlRmb: 'Hızlı geri yükleme (Ctrl + sağ tık)',
-        settingsVersionHistoryCtrlRmbDesc: 'Ctrl tuşunu basılı tutarak durum çubuğuna sağ tıklayarak önceki düzeni geri yükleyin.',
+        settingsVersionHistoryCtrlRmb: platformLabel('Hızlı geri yükleme (Cmd + sağ tık)', 'Hızlı geri yükleme (Ctrl + sağ tık)'),
+        settingsVersionHistoryCtrlRmbDesc: platformLabel('Cmd tuşunu basılı tutarak durum çubuğuna sağ tıklayarak önceki düzeni geri yükleyin.', 'Ctrl tuşunu basılı tutarak durum çubuğuna sağ tıklayarak önceki düzeni geri yükleyin.'),
         settingsVersionHistoryConfirmRestore: 'Geri yüklemeden önce onayla',
         settingsVersionHistoryConfirmRestoreDesc: 'Önceki bir düzeni geri yüklemeden önce onay iletişim kutusu göster.',
         rotationBackupSectionTitle: 'Yedekleme',
@@ -3152,7 +3262,7 @@ var STRINGS = {
     },
     id: {
         settingsStatusBarModScrollSwitch: 'Mod + gulir untuk berpindah sesi',
-        settingsStatusBarModScrollSwitchDesc: 'Pada item bilah status, tahan Cmd/Ctrl lalu gulir vertikal untuk berpindah sesi. Menggunakan ambang dan jeda untuk mengurangi pemicu trackpad yang tidak disengaja.',
+        settingsStatusBarModScrollSwitchDesc: 'Pada item bilah status, tahan tombol pengubah yang dipilih lalu gulir vertikal untuk berpindah sesi. Menggunakan ambang dan jeda untuk mengurangi pemicu trackpad yang tidak disengaja.',
         modalTitle: 'Kelola sesi',
         savePlaceholder: 'Nama sesi baru...',
         filterPlaceholder: 'Filter sesi...',
@@ -3265,6 +3375,10 @@ var STRINGS = {
         statusBarSlotAltRightClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2325' : 'Alt') + ' + Klik kanan'; },
         statusBarSlotModRightClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2318' : 'Ctrl') + ' + Klik kanan'; },
         statusBarSlotShiftRightClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u21e7' : 'Shift') + ' + Klik kanan'; },
+        statusBarSlotMiddleClick: 'Klik tengah',
+        statusBarSlotAltMiddleClick: modifiedClickLabel('Klik tengah', '⌥', 'Alt'),
+        statusBarSlotModMiddleClick: modifiedClickLabel('Klik tengah', '⌘', 'Ctrl'),
+        statusBarSlotShiftMiddleClick: modifiedClickLabel('Klik tengah', '⇧', 'Shift'),
         statusBarActionNone: 'Tidak melakukan apa-apa',
         statusBarActionQuickSwitcher: 'Buka pengalih cepat',
         statusBarActionSessionManager: 'Buka pengelola sesi',
@@ -3360,8 +3474,8 @@ var STRINGS = {
         settingsVersionHistoryEnabledDesc: 'Simpan riwayat perubahan tata letak untuk setiap sesi.',
         settingsVersionHistoryInterval: 'Interval snapshot (menit)',
         settingsVersionHistoryIntervalDesc: 'Seberapa sering memeriksa perubahan tata letak dan menyimpan snapshot.',
-        settingsVersionHistoryCtrlRmb: 'Pemulihan cepat (Ctrl + klik kanan)',
-        settingsVersionHistoryCtrlRmbDesc: 'Klik kanan bilah status sambil menahan Ctrl untuk memulihkan tata letak sebelumnya.',
+        settingsVersionHistoryCtrlRmb: platformLabel('Pemulihan cepat (Cmd + klik kanan)', 'Pemulihan cepat (Ctrl + klik kanan)'),
+        settingsVersionHistoryCtrlRmbDesc: platformLabel('Klik kanan bilah status sambil menahan Cmd untuk memulihkan tata letak sebelumnya.', 'Klik kanan bilah status sambil menahan Ctrl untuk memulihkan tata letak sebelumnya.'),
         settingsVersionHistoryConfirmRestore: 'Konfirmasi sebelum memulihkan',
         settingsVersionHistoryConfirmRestoreDesc: 'Tampilkan dialog konfirmasi sebelum memulihkan tata letak sebelumnya.',
         rotationBackupSectionTitle: 'Cadangan',
@@ -4156,11 +4270,11 @@ var SCROLL_SETTINGS_FALLBACK_STRINGS = {
     settingsStatusBarScrollPresetCustom: 'Custom',
     settingsStatusBarScrollModifier: 'Required modifier',
     settingsStatusBarScrollModifierDesc: 'Choose which modifier must be held while scrolling on the status bar item.',
-    settingsStatusBarScrollModifierRecommended: 'Cmd/Ctrl or Option/Alt',
+    settingsStatusBarScrollModifierRecommended: platformLabel('Cmd or Option', 'Ctrl or Alt'),
     settingsStatusBarScrollModifierNone: 'None',
-    settingsStatusBarScrollModifierModOnly: 'Cmd/Ctrl only',
-    settingsStatusBarScrollModifierAltOnly: 'Option/Alt only',
-    settingsStatusBarScrollModifierModOrAlt: 'Cmd/Ctrl or Option/Alt',
+    settingsStatusBarScrollModifierModOnly: platformLabel('Cmd only', 'Ctrl only'),
+    settingsStatusBarScrollModifierAltOnly: platformLabel('Option only', 'Alt only'),
+    settingsStatusBarScrollModifierModOrAlt: platformLabel('Cmd or Option', 'Ctrl or Alt'),
     settingsStatusBarScrollThreshold: 'Sensitivity threshold',
     settingsStatusBarScrollThresholdDesc: 'Lower values switch more easily. Used only when the preset is Custom.',
     settingsStatusBarScrollCooldown: 'Cooldown',
@@ -4169,6 +4283,10 @@ var SCROLL_SETTINGS_FALLBACK_STRINGS = {
     settingsStatusBarScrollResetWindowDesc: 'How long to keep combining small scroll deltas before resetting. Used only when the preset is Custom.',
     settingsStatusBarScrollInvert: 'Invert scroll direction',
     settingsStatusBarScrollInvertDesc: 'Reverse the previous/next direction for status bar scroll switching.',
+    statusBarSlotMiddleClick: 'Middle-click',
+    statusBarSlotAltMiddleClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2325' : 'Alt') + ' + Middle-click'; },
+    statusBarSlotModMiddleClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2318' : 'Ctrl') + ' + Middle-click'; },
+    statusBarSlotShiftMiddleClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u21e7' : 'Shift') + ' + Middle-click'; },
 };
 
 for (var fallbackLangIndex = 0; fallbackLangIndex < extendedLangs.length; fallbackLangIndex++) {
