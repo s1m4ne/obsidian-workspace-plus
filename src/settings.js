@@ -295,6 +295,20 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                 },
             });
 
+            new obsidian.Setting(contentEl)
+                .setName(L.settingsOverlayDefaultFocus)
+                .setDesc(L.settingsOverlayDefaultFocusDesc)
+                .addDropdown(function (dropdown) {
+                    dropdown.addOption('current-session', L.settingsOverlayFocusCurrentSession);
+                    dropdown.addOption('session-filter', L.settingsOverlayFocusSessionFilter);
+                    dropdown.addOption('session-create', L.settingsOverlayFocusSessionCreate);
+                    dropdown.setValue(self.plugin.data.overlayDefaultFocus || 'current-session');
+                    dropdown.onChange(function (value) {
+                        self.plugin.data.overlayDefaultFocus = value;
+                        self.plugin.persistData();
+                    });
+                });
+
             addSection(L.settingsSectionSwitching);
 
             var autoSaveOnSwitch = self.plugin.isAutoSaveOnSwitchEnabled();

@@ -14,6 +14,7 @@ module.exports = {
     statusBarQuickSwitcher: true,
     groupFeatureEnabled: true,
     showFilterInput: false,
+    overlayDefaultFocus: 'current-session',
     showActiveSwitchCommand: false,
     numberedSwitchCommands: true,
     searchOverlayPosition: null,
