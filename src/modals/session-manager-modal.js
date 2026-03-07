@@ -414,6 +414,25 @@ var SessionManagerModal = /** @class */ (function (_super) {
         };
         document.addEventListener('keydown', this.modalKeyHandler, true);
 
+        // Apply default focus setting (override Obsidian's auto-focus on first input)
+        var focusTarget = this.plugin.data.overlayDefaultFocus || 'current-session';
+        if (focusTarget !== 'session-create') {
+            var modalSelf = this;
+            setTimeout(function () {
+                if (focusTarget === 'session-filter' && modalSelf.filterInput) {
+                    modalSelf.filterInput.focus();
+                } else {
+                    // 'current-session': blur nameInput + restore focusedIndex to active session
+                    if (document.activeElement === modalSelf.nameInput) {
+                        modalSelf.nameInput.blur();
+                    }
+                    var navSessions = modalSelf.getNavigationSessions();
+                    modalSelf.focusedIndex = modalSelf.plugin.findActiveSessionIndex(navSessions);
+                    modalSelf.updateFocusUI();
+                }
+            }, 50);
+        }
+
     };
 
     SessionManagerModal.prototype.getVisibleSessions = function () {

@@ -1144,7 +1144,35 @@ function attachOverlayMethods(WorkspacePlusPlus) {
             document.addEventListener('mouseup', onUp);
         });
 
-        setTimeout(function () { overlay.focus(); }, 20);
+        var focusTarget = self.data.overlayDefaultFocus || 'current-session';
+        if (focusTarget !== 'session-create') {
+            var guardHandler = function (e) {
+                if (e.target === saveInput) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    if (focusTarget === 'session-filter' && self.data.showFilterInput) {
+                        searchInput.focus();
+                    } else {
+                        overlay.focus();
+                    }
+                }
+            };
+            overlay.addEventListener('focusin', guardHandler, true);
+            setTimeout(function () {
+                overlay.removeEventListener('focusin', guardHandler, true);
+            }, 300);
+        }
+
+        setTimeout(function () {
+            if (focusTarget === 'session-filter' && self.data.showFilterInput) {
+                searchInput.focus();
+                searchInput.select();
+            } else if (focusTarget === 'session-create') {
+                saveInput.focus();
+            } else {
+                overlay.focus();
+            }
+        }, 20);
     };
 
     WorkspacePlusPlus.prototype.showSwitchOverlay = function (ordered, activeIndex, viewGroupId) {

@@ -31,6 +31,7 @@ var SETTINGS_KEYS = [
     'warnOnUnsavedSwitch',
     'statusBarQuickSwitcher',
     'groupFeatureEnabled',
+    'overlayDefaultFocus',
     'searchOverlayPosition',
     'searchOverlaySize',
     'versionHistoryEnabled',
