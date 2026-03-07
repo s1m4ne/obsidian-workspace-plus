@@ -233,6 +233,28 @@ function attachSessionMethods(WorkspacePlusPlus) {
         }
     };
 
+    WorkspacePlusPlus.prototype.switchRelativeImmediate = function (offset, options) {
+        options = options || {};
+        var ordered = this.getOrderedSessions();
+        if (ordered.length === 0) {
+            if (options.showOverlay !== false) {
+                this.showSwitchOverlay(ordered, 0);
+            }
+            return Promise.resolve(false);
+        }
+        var currentIndex = this.findActiveSessionIndex(ordered);
+        if (currentIndex === -1) return Promise.resolve(false);
+
+        var next = (currentIndex + offset + ordered.length) % ordered.length;
+        if (options.showOverlay !== false) {
+            this.showSwitchOverlay(ordered, next);
+        }
+        if (next === currentIndex) {
+            return Promise.resolve(false);
+        }
+        return this.switchSession(ordered[next].id, { silent: true });
+    };
+
     WorkspacePlusPlus.prototype.getActiveSession = function () {
         if (!this.data.activeSessionId) return null;
         return this.data.sessions[this.data.activeSessionId] || null;

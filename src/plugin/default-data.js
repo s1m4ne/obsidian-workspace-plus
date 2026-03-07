@@ -27,6 +27,13 @@ module.exports = {
     versionHistorySnapshotInterval: 5,
     versionHistoryCtrlRmbRestore: true,
     versionHistoryConfirmRestore: true,
+    statusBarModScrollSwitch: true,
+    statusBarScrollPreset: 'trackpad',
+    statusBarScrollModifierMode: 'none',
+    statusBarScrollThreshold: 30,
+    statusBarScrollCooldownMs: 500,
+    statusBarScrollResetMs: 250,
+    statusBarScrollInvert: false,
     statusBarActions: {
         click:           'quickSwitcher',
         altClick:        'reloadWithoutSaving',

@@ -30,6 +30,7 @@ var SETTINGS_KEYS = [
     'autoSaveOnSwitch',
     'warnOnUnsavedSwitch',
     'statusBarQuickSwitcher',
+    'statusBarModScrollSwitch',
     'groupFeatureEnabled',
     'overlayDefaultFocus',
     'searchOverlayPosition',
@@ -38,6 +39,12 @@ var SETTINGS_KEYS = [
     'versionHistorySnapshotInterval',
     'versionHistoryCtrlRmbRestore',
     'versionHistoryConfirmRestore',
+    'statusBarScrollPreset',
+    'statusBarScrollModifierMode',
+    'statusBarScrollThreshold',
+    'statusBarScrollCooldownMs',
+    'statusBarScrollResetMs',
+    'statusBarScrollInvert',
 ];
 
 function pickKeys(data, keys) {

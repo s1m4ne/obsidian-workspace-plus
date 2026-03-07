@@ -16,6 +16,48 @@ var statusBarActions = require('./statusbar-actions');
 
 i18n.resolveLocale();
 
+var STATUS_BAR_SCROLL_PRESETS = {
+    trackpad: {
+        threshold: 30,
+        cooldownMs: 500,
+        resetMs: 250,
+    },
+    notchedWheel: {
+        threshold: 16,
+        cooldownMs: 350,
+        resetMs: 220,
+    },
+    freeSpinWheel: {
+        threshold: 48,
+        cooldownMs: 650,
+        resetMs: 320,
+    },
+};
+
+function getStatusBarScrollConfig(data) {
+    var presetId = (data && data.statusBarScrollPreset) || 'trackpad';
+    if (presetId === 'custom') {
+        return {
+            threshold: Number((data && data.statusBarScrollThreshold) || 30) || 30,
+            cooldownMs: Number((data && data.statusBarScrollCooldownMs) || 500) || 500,
+            resetMs: Number((data && data.statusBarScrollResetMs) || 250) || 250,
+        };
+    }
+    return STATUS_BAR_SCROLL_PRESETS[presetId] || STATUS_BAR_SCROLL_PRESETS.trackpad;
+}
+
+function matchesStatusBarScrollModifier(evt, isMac, mode) {
+    mode = mode || 'none';
+    var modPressed = isMac ? !!evt.metaKey : !!evt.ctrlKey;
+    var altPressed = !!evt.altKey;
+
+    if (mode === 'none') return !modPressed && !altPressed;
+    if (mode === 'modOnly') return modPressed;
+    if (mode === 'altOnly') return altPressed;
+    if (mode === 'modOrAlt') return modPressed || altPressed;
+    return modPressed || altPressed;
+}
+
 // ============================================================
 // Main Plugin
 // ============================================================
@@ -59,6 +101,9 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
             self.startupSettleUntil = 0;
             self.startupSettleTimer = null;
             self.startupFlushTimer = null;
+            self.statusBarScrollDelta = 0;
+            self.statusBarScrollEventAt = 0;
+            self.statusBarScrollSwitchAt = 0;
             self.syncSessionOrder();
             i18n.resolveLocale(self.data.language);
             var L = i18n.L;
@@ -92,6 +137,38 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
                 var action = (self.data.statusBarActions || {})[key] || 'none';
                 statusBarActions.executeStatusBarAction(self, action, evt);
             });
+            self.statusBarEl.addEventListener('wheel', function (evt) {
+                if (!self.data.statusBarModScrollSwitch) return;
+                var isMac = utils.isMacPlatform();
+                var cfg = getStatusBarScrollConfig(self.data);
+                if (!matchesStatusBarScrollModifier(evt, isMac, self.data.statusBarScrollModifierMode)) return;
+                if (Math.abs(evt.deltaY || 0) <= Math.abs(evt.deltaX || 0)) return;
+
+                evt.preventDefault();
+                evt.stopPropagation();
+
+                var now = Date.now();
+                if (self.isSwitchingSession) return;
+                if (now - self.statusBarScrollSwitchAt < cfg.cooldownMs) return;
+
+                if (now - self.statusBarScrollEventAt > cfg.resetMs) {
+                    self.statusBarScrollDelta = 0;
+                }
+                self.statusBarScrollEventAt = now;
+
+                var deltaY = evt.deltaY || 0;
+                if (evt.deltaMode === 1) deltaY *= 16;
+                else if (evt.deltaMode === 2) deltaY *= 240;
+                self.statusBarScrollDelta += deltaY;
+
+                if (Math.abs(self.statusBarScrollDelta) < cfg.threshold) return;
+
+                var direction = self.statusBarScrollDelta < 0 ? -1 : 1;
+                if (self.data.statusBarScrollInvert) direction *= -1;
+                self.statusBarScrollDelta = 0;
+                self.statusBarScrollSwitchAt = now;
+                self.switchRelativeImmediate(direction, { showOverlay: false }).catch(function () {});
+            }, { passive: false });
             self.updateStatusBar();
 
             // Commands
@@ -123,6 +200,9 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
         this.hideSearchOverlay();
         this.pendingSwitchRequest = null;
         this.isSwitchingSession = false;
+        this.statusBarScrollDelta = 0;
+        this.statusBarScrollEventAt = 0;
+        this.statusBarScrollSwitchAt = 0;
         this.startupSettleStartedAt = 0;
         if (this.startupSettleTimer) {
             clearTimeout(this.startupSettleTimer);
