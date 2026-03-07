@@ -156,11 +156,27 @@ var STRINGS = {
         settingsStatusBarScrollPresetCustom: 'Custom',
         settingsStatusBarScrollModifier: 'Required modifier',
         settingsStatusBarScrollModifierDesc: 'Choose which modifier must be held while scrolling on the status bar item.',
-        settingsStatusBarScrollModifierRecommended: 'Cmd/Ctrl or Option/Alt',
+        settingsStatusBarScrollModifierRecommended: function () {
+            return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1)
+                ? 'Cmd or Option'
+                : 'Ctrl or Alt';
+        },
         settingsStatusBarScrollModifierNone: 'None',
-        settingsStatusBarScrollModifierModOnly: 'Cmd/Ctrl only',
-        settingsStatusBarScrollModifierAltOnly: 'Option/Alt only',
-        settingsStatusBarScrollModifierModOrAlt: 'Cmd/Ctrl or Option/Alt',
+        settingsStatusBarScrollModifierModOnly: function () {
+            return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1)
+                ? 'Cmd only'
+                : 'Ctrl only';
+        },
+        settingsStatusBarScrollModifierAltOnly: function () {
+            return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1)
+                ? 'Option only'
+                : 'Alt only';
+        },
+        settingsStatusBarScrollModifierModOrAlt: function () {
+            return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1)
+                ? 'Cmd or Option'
+                : 'Ctrl or Alt';
+        },
         settingsStatusBarScrollThreshold: 'Sensitivity threshold',
         settingsStatusBarScrollThresholdDesc: 'Lower values switch more easily. Used only when the preset is Custom.',
         settingsStatusBarScrollCooldown: 'Cooldown',
@@ -186,6 +202,10 @@ var STRINGS = {
         statusBarSlotAltClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2325' : 'Alt') + ' + Click'; },
         statusBarSlotModClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2318' : 'Ctrl') + ' + Click'; },
         statusBarSlotShiftClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u21e7' : 'Shift') + ' + Click'; },
+        statusBarSlotMiddleClick: 'Middle-click',
+        statusBarSlotAltMiddleClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2325' : 'Alt') + ' + Middle-click'; },
+        statusBarSlotModMiddleClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2318' : 'Ctrl') + ' + Middle-click'; },
+        statusBarSlotShiftMiddleClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u21e7' : 'Shift') + ' + Middle-click'; },
         statusBarSlotRightClick: 'Right-click',
         statusBarSlotAltRightClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2325' : 'Alt') + ' + Right-click'; },
         statusBarSlotModRightClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2318' : 'Ctrl') + ' + Right-click'; },
@@ -323,8 +343,12 @@ var STRINGS = {
         settingsVersionHistoryEnabledDesc: 'Keep a history of layout changes for each session.',
         settingsVersionHistoryInterval: 'Snapshot interval (minutes)',
         settingsVersionHistoryIntervalDesc: 'How often to check for layout changes and save a snapshot.',
-        settingsVersionHistoryCtrlRmb: 'Quick restore (Ctrl + Right-click)',
-        settingsVersionHistoryCtrlRmbDesc: 'Right-click the status bar while holding Ctrl to restore the previous layout.',
+        settingsVersionHistoryCtrlRmb: function () {
+            return 'Quick restore (' + ((typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1) ? 'Cmd' : 'Ctrl') + ' + Right-click)';
+        },
+        settingsVersionHistoryCtrlRmbDesc: function () {
+            return 'Right-click the status bar while holding ' + ((typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1) ? 'Cmd' : 'Ctrl') + ' to restore the previous layout.';
+        },
         settingsVersionHistoryConfirmRestore: 'Confirm before restoring',
         settingsVersionHistoryConfirmRestoreDesc: 'Show a confirmation dialog before restoring a previous layout.',
         rotationBackupSectionTitle: 'Backup',
@@ -2286,11 +2310,27 @@ var STRINGS = {
         settingsStatusBarScrollPresetCustom: 'Custom',
         settingsStatusBarScrollModifier: '必要な修飾キー',
         settingsStatusBarScrollModifierDesc: 'ステータスバー項目上でスクロールするときに必要な修飾キーを選びます。',
-        settingsStatusBarScrollModifierRecommended: 'Cmd/Ctrl または Option/Alt',
+        settingsStatusBarScrollModifierRecommended: function () {
+            return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1)
+                ? 'Cmd または Option'
+                : 'Ctrl または Alt';
+        },
         settingsStatusBarScrollModifierNone: 'なし',
-        settingsStatusBarScrollModifierModOnly: 'Cmd/Ctrl のみ',
-        settingsStatusBarScrollModifierAltOnly: 'Option/Alt のみ',
-        settingsStatusBarScrollModifierModOrAlt: 'Cmd/Ctrl または Option/Alt',
+        settingsStatusBarScrollModifierModOnly: function () {
+            return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1)
+                ? 'Cmd のみ'
+                : 'Ctrl のみ';
+        },
+        settingsStatusBarScrollModifierAltOnly: function () {
+            return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1)
+                ? 'Option のみ'
+                : 'Alt のみ';
+        },
+        settingsStatusBarScrollModifierModOrAlt: function () {
+            return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1)
+                ? 'Cmd または Option'
+                : 'Ctrl または Alt';
+        },
         settingsStatusBarScrollThreshold: '感度しきい値',
         settingsStatusBarScrollThresholdDesc: '小さいほど少しのスクロールで切り替わります。Custom プリセットのときだけ使います。',
         settingsStatusBarScrollCooldown: 'クールダウン',
@@ -2316,6 +2356,10 @@ var STRINGS = {
         statusBarSlotAltClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2325' : 'Alt') + ' + \u30af\u30ea\u30c3\u30af'; },
         statusBarSlotModClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2318' : 'Ctrl') + ' + \u30af\u30ea\u30c3\u30af'; },
         statusBarSlotShiftClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u21e7' : 'Shift') + ' + \u30af\u30ea\u30c3\u30af'; },
+        statusBarSlotMiddleClick: '\u30df\u30c9\u30eb\u30af\u30ea\u30c3\u30af',
+        statusBarSlotAltMiddleClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2325' : 'Alt') + ' + \u30df\u30c9\u30eb\u30af\u30ea\u30c3\u30af'; },
+        statusBarSlotModMiddleClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2318' : 'Ctrl') + ' + \u30df\u30c9\u30eb\u30af\u30ea\u30c3\u30af'; },
+        statusBarSlotShiftMiddleClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u21e7' : 'Shift') + ' + \u30df\u30c9\u30eb\u30af\u30ea\u30c3\u30af'; },
         statusBarSlotRightClick: '\u53f3\u30af\u30ea\u30c3\u30af',
         statusBarSlotAltRightClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2325' : 'Alt') + ' + \u53f3\u30af\u30ea\u30c3\u30af'; },
         statusBarSlotModRightClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2318' : 'Ctrl') + ' + \u53f3\u30af\u30ea\u30c3\u30af'; },
@@ -2453,8 +2497,12 @@ var STRINGS = {
         settingsVersionHistoryEnabledDesc: 'セッションごとにレイアウト変更の履歴を保持します。',
         settingsVersionHistoryInterval: 'スナップショット間隔（分）',
         settingsVersionHistoryIntervalDesc: 'レイアウトの変更を確認してスナップショットを保存する頻度。',
-        settingsVersionHistoryCtrlRmb: 'クイック復元 (Ctrl + 右クリック)',
-        settingsVersionHistoryCtrlRmbDesc: 'Ctrlキーを押しながらステータスバーを右クリックすると直前のレイアウトを復元します。',
+        settingsVersionHistoryCtrlRmb: function () {
+            return 'クイック復元 (' + ((typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1) ? 'Cmd' : 'Ctrl') + ' + 右クリック)';
+        },
+        settingsVersionHistoryCtrlRmbDesc: function () {
+            return ((typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1) ? 'Cmd' : 'Ctrl') + 'キーを押しながらステータスバーを右クリックすると直前のレイアウトを復元します。';
+        },
         settingsVersionHistoryConfirmRestore: '復元前に確認',
         settingsVersionHistoryConfirmRestoreDesc: 'レイアウトを復元する前に確認ダイアログを表示します。',
         rotationBackupSectionTitle: 'バックアップ',
@@ -4169,6 +4217,10 @@ var SCROLL_SETTINGS_FALLBACK_STRINGS = {
     settingsStatusBarScrollResetWindowDesc: 'How long to keep combining small scroll deltas before resetting. Used only when the preset is Custom.',
     settingsStatusBarScrollInvert: 'Invert scroll direction',
     settingsStatusBarScrollInvertDesc: 'Reverse the previous/next direction for status bar scroll switching.',
+    statusBarSlotMiddleClick: 'Middle-click',
+    statusBarSlotAltMiddleClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2325' : 'Alt') + ' + Middle-click'; },
+    statusBarSlotModMiddleClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u2318' : 'Ctrl') + ' + Middle-click'; },
+    statusBarSlotShiftMiddleClick: function () { return (typeof navigator !== 'undefined' && navigator.platform.indexOf('Mac') !== -1 ? '\u21e7' : 'Shift') + ' + Middle-click'; },
 };
 
 for (var fallbackLangIndex = 0; fallbackLangIndex < extendedLangs.length; fallbackLangIndex++) {

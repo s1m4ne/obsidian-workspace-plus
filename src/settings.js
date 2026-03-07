@@ -67,12 +67,16 @@ function applyWarningStyle(btn) {
     }
 }
 
+function resolveSettingText(value) {
+    return typeof value === 'function' ? value() : value;
+}
+
 function addToggleSetting(parentEl, options) {
     var setting = new obsidian.Setting(parentEl)
-        .setName(options.name);
+        .setName(resolveSettingText(options.name));
 
     if (options.desc) {
-        setting.setDesc(options.desc);
+        setting.setDesc(resolveSettingText(options.desc));
     }
 
     setting.addToggle(function (toggle) {
@@ -90,16 +94,16 @@ function addToggleSetting(parentEl, options) {
 
 function addDropdownSetting(parentEl, options) {
     var setting = new obsidian.Setting(parentEl)
-        .setName(options.name);
+        .setName(resolveSettingText(options.name));
 
     if (options.desc) {
-        setting.setDesc(options.desc);
+        setting.setDesc(resolveSettingText(options.desc));
     }
 
     setting.addDropdown(function (dropdown) {
         var optionKeys = Object.keys(options.items || {});
         for (var i = 0; i < optionKeys.length; i++) {
-            dropdown.addOption(optionKeys[i], options.items[optionKeys[i]]);
+            dropdown.addOption(optionKeys[i], resolveSettingText(options.items[optionKeys[i]]));
         }
         dropdown.setValue(String(options.value));
         if (options.disabled && typeof dropdown.setDisabled === 'function') {
@@ -114,18 +118,18 @@ function addDropdownSetting(parentEl, options) {
 }
 
 function addSubsection(parentEl, title) {
-    var headingEl = parentEl.createEl('h4', { text: title });
+    var headingEl = parentEl.createEl('h4', { text: resolveSettingText(title) });
     headingEl.addClass('wpp-settings-subsection');
     return headingEl;
 }
 
 function addDangerResetSetting(parentEl, app, display, options) {
     new obsidian.Setting(parentEl)
-        .setName(options.name)
-        .setDesc(options.desc)
+        .setName(resolveSettingText(options.name))
+        .setDesc(resolveSettingText(options.desc))
         .addButton(function (btn) {
             var isRunning = false;
-            btn.setButtonText(options.buttonText);
+            btn.setButtonText(resolveSettingText(options.buttonText));
             applyWarningStyle(btn);
             btn.onClick(function () {
                 if (isRunning) return;
@@ -157,10 +161,10 @@ function addDangerResetSetting(parentEl, app, display, options) {
 
 function addAsyncActionSetting(parentEl, options) {
     new obsidian.Setting(parentEl)
-        .setName(options.name)
-        .setDesc(options.desc)
+        .setName(resolveSettingText(options.name))
+        .setDesc(resolveSettingText(options.desc))
         .addButton(function (btn) {
-            btn.setButtonText(options.buttonText);
+            btn.setButtonText(resolveSettingText(options.buttonText));
             if (options.disabled) {
                 btn.setDisabled(true);
             }
@@ -271,6 +275,10 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                 altClick: 'statusBarSlotAltClick',
                 modClick: 'statusBarSlotModClick',
                 shiftClick: 'statusBarSlotShiftClick',
+                middleClick: 'statusBarSlotMiddleClick',
+                altMiddleClick: 'statusBarSlotAltMiddleClick',
+                modMiddleClick: 'statusBarSlotModMiddleClick',
+                shiftMiddleClick: 'statusBarSlotShiftMiddleClick',
                 rightClick: 'statusBarSlotRightClick',
                 altRightClick: 'statusBarSlotAltRightClick',
                 modRightClick: 'statusBarSlotModRightClick',

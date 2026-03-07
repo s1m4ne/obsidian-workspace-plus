@@ -87,6 +87,7 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
                     self.data.statusBarActions.modRightClick = 'none';
                 }
             }
+            self.data.statusBarActions = Object.assign({}, DEFAULT_DATA.statusBarActions, self.data.statusBarActions || {});
 
             // Migrate: existing users keep filter visible (new default is OFF)
             if (saved && saved.showFilterInput === undefined) {
@@ -121,6 +122,19 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
                 if (evt.altKey) key = 'altClick';
                 else if (utils.isModPressed(evt)) key = 'modClick';
                 else if (evt.shiftKey) key = 'shiftClick';
+                var action = (self.data.statusBarActions || {})[key] || 'none';
+                if (action !== 'none') {
+                    evt.preventDefault();
+                    evt.stopPropagation();
+                }
+                statusBarActions.executeStatusBarAction(self, action, evt);
+            });
+            self.statusBarEl.addEventListener('auxclick', function (evt) {
+                if (evt.button !== 1) return;
+                var key = 'middleClick';
+                if (evt.altKey) key = 'altMiddleClick';
+                else if (utils.isModPressed(evt)) key = 'modMiddleClick';
+                else if (evt.shiftKey) key = 'shiftMiddleClick';
                 var action = (self.data.statusBarActions || {})[key] || 'none';
                 if (action !== 'none') {
                     evt.preventDefault();
