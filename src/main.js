@@ -55,6 +55,10 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
             self.isSwitchingSession = false;
             self.pendingSwitchRequest = null;
             self.switchLockAt = 0;
+            self.startupSettleStartedAt = 0;
+            self.startupSettleUntil = 0;
+            self.startupSettleTimer = null;
+            self.startupFlushTimer = null;
             self.syncSessionOrder();
             i18n.resolveLocale(self.data.language);
             var L = i18n.L;
@@ -97,11 +101,16 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
             self.settingTab = new settings.WorkspacePlusPlusSettingTab(self.app, self);
             self.addSettingTab(self.settingTab);
 
+            self.registerEvent(self.app.workspace.on('layout-change', function () {
+                self.noteStartupLayoutChange();
+            }));
+
             // Startup: ensure default session exists, then flush
             self.app.workspace.onLayoutReady(function () {
+                self.startStartupSettleWindow();
                 self.ensureDefaultSession();
                 self.syncSessionCommands();
-                self.flushOnStartup();
+                self.scheduleStartupFlush();
                 self.startHistorySnapshotTimer();
                 self.initRotationBackupTimestamp();
             });
@@ -114,6 +123,16 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
         this.hideSearchOverlay();
         this.pendingSwitchRequest = null;
         this.isSwitchingSession = false;
+        this.startupSettleStartedAt = 0;
+        if (this.startupSettleTimer) {
+            clearTimeout(this.startupSettleTimer);
+            this.startupSettleTimer = null;
+        }
+        if (this.startupFlushTimer) {
+            clearTimeout(this.startupFlushTimer);
+            this.startupFlushTimer = null;
+        }
+        this.startupSettleUntil = 0;
         return this.flushPendingPersistence();
     };
 

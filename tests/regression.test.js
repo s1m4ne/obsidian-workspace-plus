@@ -186,3 +186,52 @@ test('viewed-group session creation uses exclusive group assignment', async func
     assert.equal(addCalled, false);
     assert.equal(result.viewGroupId, 'g2');
 });
+
+test('switchSession waits for startup settle window before switching', async function () {
+    const plugin = createPlugin({
+        activeSessionId: 'a',
+        sessionOrder: ['a', 'b'],
+        sessions: {
+            a: { id: 'a', name: 'A', layout: { layout: 'a' }, modified: 1 },
+            b: { id: 'b', name: 'B', layout: { layout: 'b' }, modified: 1 },
+        },
+    });
+
+    let switchedAt = 0;
+    const startedAt = Date.now();
+
+    plugin.performSessionSwitch = function () {
+        switchedAt = Date.now();
+        return Promise.resolve(true);
+    };
+
+    plugin.startStartupSettleWindow(20);
+    const switched = await plugin.switchSession('b', { silent: true });
+
+    assert.equal(switched, true);
+    assert.ok(switchedAt >= startedAt + 15);
+});
+
+test('scheduleStartupFlush waits until startup settle completes', async function () {
+    const plugin = createPlugin({
+        activeSessionId: 'a',
+        sessionOrder: ['a'],
+        sessions: {
+            a: { id: 'a', name: 'A', layout: { layout: 'a' }, modified: 1 },
+        },
+        autoSaveOnSwitch: true,
+    });
+
+    const calls = [];
+    plugin.flushOnStartup = function () {
+        calls.push(Date.now());
+        return Promise.resolve(true);
+    };
+
+    const startedAt = Date.now();
+    plugin.startStartupSettleWindow(20);
+    await plugin.scheduleStartupFlush();
+
+    assert.equal(calls.length, 1);
+    assert.ok(calls[0] >= startedAt + 15);
+});
