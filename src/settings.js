@@ -88,6 +88,37 @@ function addToggleSetting(parentEl, options) {
     return setting;
 }
 
+function addDropdownSetting(parentEl, options) {
+    var setting = new obsidian.Setting(parentEl)
+        .setName(options.name);
+
+    if (options.desc) {
+        setting.setDesc(options.desc);
+    }
+
+    setting.addDropdown(function (dropdown) {
+        var optionKeys = Object.keys(options.items || {});
+        for (var i = 0; i < optionKeys.length; i++) {
+            dropdown.addOption(optionKeys[i], options.items[optionKeys[i]]);
+        }
+        dropdown.setValue(String(options.value));
+        if (options.disabled && typeof dropdown.setDisabled === 'function') {
+            dropdown.setDisabled(true);
+        }
+        dropdown.onChange(function (value) {
+            options.onChange(value);
+        });
+    });
+
+    return setting;
+}
+
+function addSubsection(parentEl, title) {
+    var headingEl = parentEl.createEl('h4', { text: title });
+    headingEl.addClass('wpp-settings-subsection');
+    return headingEl;
+}
+
 function addDangerResetSetting(parentEl, app, display, options) {
     new obsidian.Setting(parentEl)
         .setName(options.name)
@@ -283,33 +314,7 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
 
         // ── Sessions tab ──
         if (self.activeTab === 'sessions') {
-            addSection(L.settingsSectionSessionManager);
-
-            addToggleSetting(contentEl, {
-                name: L.settingsShowFilterInput,
-                desc: L.settingsShowFilterInputDesc,
-                value: !!self.plugin.data.showFilterInput,
-                onChange: function (value) {
-                    self.plugin.data.showFilterInput = value;
-                    self.plugin.persistData();
-                },
-            });
-
-            new obsidian.Setting(contentEl)
-                .setName(L.settingsOverlayDefaultFocus)
-                .setDesc(L.settingsOverlayDefaultFocusDesc)
-                .addDropdown(function (dropdown) {
-                    dropdown.addOption('current-session', L.settingsOverlayFocusCurrentSession);
-                    dropdown.addOption('session-filter', L.settingsOverlayFocusSessionFilter);
-                    dropdown.addOption('session-create', L.settingsOverlayFocusSessionCreate);
-                    dropdown.setValue(self.plugin.data.overlayDefaultFocus || 'current-session');
-                    dropdown.onChange(function (value) {
-                        self.plugin.data.overlayDefaultFocus = value;
-                        self.plugin.persistData();
-                    });
-                });
-
-            addSection(L.settingsSectionSwitching);
+            addSubsection(contentEl, L.settingsSubsectionAutoSaveMode);
 
             var autoSaveOnSwitch = self.plugin.isAutoSaveOnSwitchEnabled();
             new obsidian.Setting(contentEl)
@@ -346,7 +351,124 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                 });
             }
 
-            addSection(L.settingsSectionSwitchPreview);
+            addSubsection(contentEl, L.settingsSubsectionScrollSwitch);
+
+            addToggleSetting(contentEl, {
+                name: L.settingsStatusBarModScrollSwitch,
+                desc: L.settingsStatusBarModScrollSwitchDesc,
+                value: !!self.plugin.data.statusBarModScrollSwitch,
+                onChange: function (value) {
+                    self.plugin.data.statusBarModScrollSwitch = value;
+                    self.plugin.persistData();
+                    self.display();
+                },
+            });
+
+            if (self.plugin.data.statusBarModScrollSwitch) {
+                addDropdownSetting(contentEl, {
+                    name: L.settingsStatusBarScrollPreset,
+                    desc: L.settingsStatusBarScrollPresetDesc,
+                    value: self.plugin.data.statusBarScrollPreset || 'trackpad',
+                    items: {
+                        trackpad: L.settingsStatusBarScrollPresetTrackpad,
+                        notchedWheel: L.settingsStatusBarScrollPresetNotchedWheel,
+                        freeSpinWheel: L.settingsStatusBarScrollPresetFreeSpinWheel,
+                        custom: L.settingsStatusBarScrollPresetCustom,
+                    },
+                    onChange: function (value) {
+                        self.plugin.data.statusBarScrollPreset = value;
+                        self.plugin.persistData();
+                        self.display();
+                    },
+                });
+
+                addDropdownSetting(contentEl, {
+                    name: L.settingsStatusBarScrollModifier,
+                    desc: L.settingsStatusBarScrollModifierDesc,
+                    value: self.plugin.data.statusBarScrollModifierMode === 'recommended'
+                        ? 'modOrAlt'
+                        : (self.plugin.data.statusBarScrollModifierMode || 'none'),
+                    items: {
+                        none: L.settingsStatusBarScrollModifierNone,
+                        modOnly: L.settingsStatusBarScrollModifierModOnly,
+                        altOnly: L.settingsStatusBarScrollModifierAltOnly,
+                        modOrAlt: L.settingsStatusBarScrollModifierModOrAlt,
+                    },
+                    onChange: function (value) {
+                        self.plugin.data.statusBarScrollModifierMode = value;
+                        self.plugin.persistData();
+                    },
+                });
+
+                var useCustomScroll = (self.plugin.data.statusBarScrollPreset || 'trackpad') === 'custom';
+
+                addDropdownSetting(contentEl, {
+                    name: L.settingsStatusBarScrollThreshold,
+                    desc: L.settingsStatusBarScrollThresholdDesc,
+                    value: String(self.plugin.data.statusBarScrollThreshold || 30),
+                    disabled: !useCustomScroll,
+                    items: {
+                        '12': '12',
+                        '16': '16',
+                        '24': '24',
+                        '30': '30',
+                        '40': '40',
+                        '60': '60',
+                        '90': '90',
+                    },
+                    onChange: function (value) {
+                        self.plugin.data.statusBarScrollThreshold = Number(value) || 30;
+                        self.plugin.persistData();
+                    },
+                });
+
+                addDropdownSetting(contentEl, {
+                    name: L.settingsStatusBarScrollCooldown,
+                    desc: L.settingsStatusBarScrollCooldownDesc,
+                    value: String(self.plugin.data.statusBarScrollCooldownMs || 500),
+                    disabled: !useCustomScroll,
+                    items: {
+                        '200': '200 ms',
+                        '350': '350 ms',
+                        '500': '500 ms',
+                        '750': '750 ms',
+                        '1000': '1000 ms',
+                    },
+                    onChange: function (value) {
+                        self.plugin.data.statusBarScrollCooldownMs = Number(value) || 500;
+                        self.plugin.persistData();
+                    },
+                });
+
+                addDropdownSetting(contentEl, {
+                    name: L.settingsStatusBarScrollResetWindow,
+                    desc: L.settingsStatusBarScrollResetWindowDesc,
+                    value: String(self.plugin.data.statusBarScrollResetMs || 250),
+                    disabled: !useCustomScroll,
+                    items: {
+                        '150': '150 ms',
+                        '250': '250 ms',
+                        '400': '400 ms',
+                        '600': '600 ms',
+                    },
+                    onChange: function (value) {
+                        self.plugin.data.statusBarScrollResetMs = Number(value) || 250;
+                        self.plugin.persistData();
+                    },
+                });
+
+                addToggleSetting(contentEl, {
+                    name: L.settingsStatusBarScrollInvert,
+                    desc: L.settingsStatusBarScrollInvertDesc,
+                    value: !!self.plugin.data.statusBarScrollInvert,
+                    onChange: function (value) {
+                        self.plugin.data.statusBarScrollInvert = value;
+                        self.plugin.persistData();
+                    },
+                });
+            }
+
+            addSubsection(contentEl, L.settingsSubsectionSwitchCommands);
 
             addToggleSetting(contentEl, {
                 name: L.settingsShowActiveSwitchCommand,
@@ -368,6 +490,8 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                     self.plugin.syncSessionCommands();
                 },
             });
+
+            addSubsection(contentEl, L.settingsSubsectionSwitchPreview);
 
             // Preview before switching — master toggle with nested sub-toggles
             var allOn = !!self.plugin.data.previewNext && !!self.plugin.data.previewPrevious;
@@ -406,6 +530,32 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                         self.plugin.data.previewPrevious = value;
                         self.plugin.persistData();
                         self.display();
+                    });
+                });
+
+            addSection(L.settingsSectionSessionListSearch);
+
+            addToggleSetting(contentEl, {
+                name: L.settingsShowFilterInput,
+                desc: L.settingsShowFilterInputDesc,
+                value: !!self.plugin.data.showFilterInput,
+                onChange: function (value) {
+                    self.plugin.data.showFilterInput = value;
+                    self.plugin.persistData();
+                },
+            });
+
+            new obsidian.Setting(contentEl)
+                .setName(L.settingsOverlayDefaultFocus)
+                .setDesc(L.settingsOverlayDefaultFocusDesc)
+                .addDropdown(function (dropdown) {
+                    dropdown.addOption('current-session', L.settingsOverlayFocusCurrentSession);
+                    dropdown.addOption('session-filter', L.settingsOverlayFocusSessionFilter);
+                    dropdown.addOption('session-create', L.settingsOverlayFocusSessionCreate);
+                    dropdown.setValue(self.plugin.data.overlayDefaultFocus || 'current-session');
+                    dropdown.onChange(function (value) {
+                        self.plugin.data.overlayDefaultFocus = value;
+                        self.plugin.persistData();
                     });
                 });
 

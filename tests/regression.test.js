@@ -235,3 +235,34 @@ test('scheduleStartupFlush waits until startup settle completes', async function
     assert.equal(calls.length, 1);
     assert.ok(calls[0] >= startedAt + 15);
 });
+
+test('switchRelativeImmediate bypasses preview-only first step', async function () {
+    const plugin = createPlugin({
+        activeSessionId: 'a',
+        sessionOrder: ['a', 'b', 'c'],
+        sessions: {
+            a: { id: 'a', name: 'A', layout: { layout: 'a' }, modified: 1 },
+            b: { id: 'b', name: 'B', layout: { layout: 'b' }, modified: 1 },
+            c: { id: 'c', name: 'C', layout: { layout: 'c' }, modified: 1 },
+        },
+        previewNext: true,
+        previewPrevious: true,
+    });
+
+    const overlayCalls = [];
+    const switchCalls = [];
+
+    plugin.showSwitchOverlay = function (ordered, index) {
+        overlayCalls.push([ordered.map(function (s) { return s.id; }), index]);
+    };
+    plugin.switchSession = function (sessionId, options) {
+        switchCalls.push([sessionId, options]);
+        return Promise.resolve(true);
+    };
+
+    const switched = await plugin.switchRelativeImmediate(1);
+
+    assert.equal(switched, true);
+    assert.deepEqual(overlayCalls, [[['a', 'b', 'c'], 1]]);
+    assert.deepEqual(switchCalls, [['b', { silent: true }]]);
+});
