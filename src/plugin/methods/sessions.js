@@ -329,12 +329,11 @@ function attachSessionMethods(WorkspacePlusPlus) {
     };
 
     WorkspacePlusPlus.prototype.getDefaultSessionName = function () {
-        return i18n.L.defaultSessionName || 'default';
+        return i18n.L.defaultSessionName;
     };
 
     WorkspacePlusPlus.prototype.getAutoSessionName = function (n) {
-        if (i18n.L.sessionAutoName) return i18n.L.sessionAutoName(n);
-        return 'Session ' + n;
+        return i18n.L.sessionAutoName(n);
     };
 
     WorkspacePlusPlus.prototype.isActiveSessionDirty = function () {
