@@ -77,6 +77,8 @@ function createPlugin(initialData) {
     plugin.pushLayoutToHistory = function () {
         plugin._historyPushes += 1;
     };
+    plugin.showSwitchPreviewOverlay = function () {};
+    plugin.showSwitchFeedbackOverlay = function () {};
 
     return plugin;
 }
@@ -236,7 +238,37 @@ test('scheduleStartupFlush waits until startup settle completes', async function
     assert.ok(calls[0] >= startedAt + 15);
 });
 
-test('switchRelativeImmediate bypasses preview-only first step', async function () {
+test('switchRelative shows preview overlay before switching when preview is enabled', function () {
+    const plugin = createPlugin({
+        activeSessionId: 'a',
+        sessionOrder: ['a', 'b', 'c'],
+        sessions: {
+            a: { id: 'a', name: 'A', layout: { layout: 'a' }, modified: 1 },
+            b: { id: 'b', name: 'B', layout: { layout: 'b' }, modified: 1 },
+            c: { id: 'c', name: 'C', layout: { layout: 'c' }, modified: 1 },
+        },
+        previewNext: true,
+        previewPrevious: true,
+    });
+
+    const previewCalls = [];
+    let switchCalled = false;
+
+    plugin.showSwitchPreviewOverlay = function (ordered, index) {
+        previewCalls.push([ordered.map(function (s) { return s.id; }), index]);
+    };
+    plugin.switchSession = function () {
+        switchCalled = true;
+        return Promise.resolve(true);
+    };
+
+    plugin.switchRelative(1);
+
+    assert.deepEqual(previewCalls, [[['a', 'b', 'c'], 0]]);
+    assert.equal(switchCalled, false);
+});
+
+test('switchRelativeImmediate bypasses preview-only first step and uses feedback overlay', async function () {
     const plugin = createPlugin({
         activeSessionId: 'a',
         sessionOrder: ['a', 'b', 'c'],
@@ -252,7 +284,7 @@ test('switchRelativeImmediate bypasses preview-only first step', async function 
     const overlayCalls = [];
     const switchCalls = [];
 
-    plugin.showSwitchOverlay = function (ordered, index) {
+    plugin.showSwitchFeedbackOverlay = function (ordered, index) {
         overlayCalls.push([ordered.map(function (s) { return s.id; }), index]);
     };
     plugin.switchSession = function (sessionId, options) {
@@ -264,5 +296,35 @@ test('switchRelativeImmediate bypasses preview-only first step', async function 
 
     assert.equal(switched, true);
     assert.deepEqual(overlayCalls, [[['a', 'b', 'c'], 1]]);
+    assert.deepEqual(switchCalls, [['b', { silent: true }]]);
+});
+
+test('switchRelativeImmediate can suppress feedback overlay', async function () {
+    const plugin = createPlugin({
+        activeSessionId: 'a',
+        sessionOrder: ['a', 'b'],
+        sessions: {
+            a: { id: 'a', name: 'A', layout: { layout: 'a' }, modified: 1 },
+            b: { id: 'b', name: 'B', layout: { layout: 'b' }, modified: 1 },
+        },
+        previewNext: true,
+        previewPrevious: true,
+    });
+
+    let overlayCalled = false;
+    const switchCalls = [];
+
+    plugin.showSwitchFeedbackOverlay = function () {
+        overlayCalled = true;
+    };
+    plugin.switchSession = function (sessionId, options) {
+        switchCalls.push([sessionId, options]);
+        return Promise.resolve(true);
+    };
+
+    const switched = await plugin.switchRelativeImmediate(1, { showOverlay: false });
+
+    assert.equal(switched, true);
+    assert.equal(overlayCalled, false);
     assert.deepEqual(switchCalls, [['b', { silent: true }]]);
 });

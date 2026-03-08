@@ -202,10 +202,10 @@ function attachSessionMethods(WorkspacePlusPlus) {
         var ordered = this.getOrderedSessions();
         if (index >= ordered.length) return;
         if (ordered[index].id === this.data.activeSessionId) {
-            this.showSwitchOverlay(ordered, index);
+            this.showSwitchFeedbackOverlay(ordered, index);
             return;
         }
-        this.showSwitchOverlay(ordered, index);
+        this.showSwitchFeedbackOverlay(ordered, index);
         this.switchSession(ordered[index].id, { silent: true });
     };
 
@@ -213,7 +213,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
         var ordered = this.getOrderedSessions();
         if (ordered.length === 0) {
             // Empty group – still show overlay so user can switch groups via Tab
-            this.showSwitchOverlay(ordered, 0);
+            this.showSwitchPreviewOverlay(ordered, 0);
             return;
         }
         var currentIndex = this.findActiveSessionIndex(ordered);
@@ -222,12 +222,12 @@ function attachSessionMethods(WorkspacePlusPlus) {
         var previewEnabled = offset > 0 ? this.data.previewNext : this.data.previewPrevious;
 
         if (previewEnabled && !this.switchOverlayEl) {
-            this.showSwitchOverlay(ordered, currentIndex);
+            this.showSwitchPreviewOverlay(ordered, currentIndex);
             return;
         }
 
         var next = (currentIndex + offset + ordered.length) % ordered.length;
-        this.showSwitchOverlay(ordered, next);
+        this.showSwitchPreviewOverlay(ordered, next);
         if (next !== currentIndex) {
             this.switchSession(ordered[next].id, { silent: true });
         }
@@ -238,7 +238,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
         var ordered = this.getOrderedSessions();
         if (ordered.length === 0) {
             if (options.showOverlay !== false) {
-                this.showSwitchOverlay(ordered, 0);
+                this.showSwitchFeedbackOverlay(ordered, 0);
             }
             return Promise.resolve(false);
         }
@@ -247,7 +247,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
 
         var next = (currentIndex + offset + ordered.length) % ordered.length;
         if (options.showOverlay !== false) {
-            this.showSwitchOverlay(ordered, next);
+            this.showSwitchFeedbackOverlay(ordered, next);
         }
         if (next === currentIndex) {
             return Promise.resolve(false);
@@ -736,7 +736,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
                 if (!renamed) return;
                 var ordered = self.getOrderedSessions();
                 var activeIdx = self.getActiveSessionIndex(ordered);
-                self.showSwitchOverlay(ordered, activeIdx);
+                self.showSwitchFeedbackOverlay(ordered, activeIdx);
             });
         }, {
             emptyNotice: L.emptyName,
@@ -762,7 +762,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
                 new obsidian.Notice(L.deleted(session.name));
                 var ordered = self.getOrderedSessions();
                 var activeIdx = self.getActiveSessionIndex(ordered);
-                self.showSwitchOverlay(ordered, activeIdx);
+                self.showSwitchFeedbackOverlay(ordered, activeIdx);
             });
         };
 
@@ -855,7 +855,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
         this.syncSessionCommands();
         new obsidian.Notice(L.created(name));
         var ordered = this.getOrderedSessions();
-        this.showSwitchOverlay(ordered, ordered.length - 1);
+        this.showSwitchFeedbackOverlay(ordered, ordered.length - 1);
         return this.persistData();
     };
 
@@ -871,7 +871,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
         this.syncSessionCommands();
         new obsidian.Notice(L.duplicated(name));
         var ordered = this.getOrderedSessions();
-        this.showSwitchOverlay(ordered, ordered.length - 1);
+        this.showSwitchFeedbackOverlay(ordered, ordered.length - 1);
         return this.persistData();
     };
 
@@ -917,7 +917,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
                 new obsidian.Notice(L.savedAs(newName));
                 var ordered = self.getOrderedSessions();
                 var activeIndex = self.findActiveSessionIndex(ordered);
-                self.showSwitchOverlay(ordered, activeIndex);
+                self.showSwitchFeedbackOverlay(ordered, activeIndex);
                 self.persistData().then(function () {
                     resolve(true);
                 });
