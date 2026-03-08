@@ -1,6 +1,6 @@
 {
     "name": "obsidian-workspace-plus",
-    "version": "0.7.10",
+    "version": "0.7.11",
     "description": "Workspace session manager for Obsidian",
     "main": "main.js",
     "scripts": {
