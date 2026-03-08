@@ -138,14 +138,14 @@ var ACTIONS = [
         id: 'previousSession',
         labelKey: 'cmdPrevious',
         run: function (plugin) {
-            return plugin.switchRelativeImmediate(-1);
+            return plugin.switchRelativeFromStatusBar(-1);
         },
     },
     {
         id: 'nextSession',
         labelKey: 'cmdNext',
         run: function (plugin) {
-            return plugin.switchRelativeImmediate(1);
+            return plugin.switchRelativeFromStatusBar(1);
         },
     },
     {

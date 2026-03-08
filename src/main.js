@@ -105,6 +105,7 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
             self.statusBarScrollDelta = 0;
             self.statusBarScrollEventAt = 0;
             self.statusBarScrollSwitchAt = 0;
+            self.sessionSwitchNotice = null;
             self.syncSessionOrder();
             i18n.resolveLocale(self.data.language);
             var L = i18n.L;
@@ -181,7 +182,7 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
                 if (self.data.statusBarScrollInvert) direction *= -1;
                 self.statusBarScrollDelta = 0;
                 self.statusBarScrollSwitchAt = now;
-                self.switchRelativeImmediate(direction, { showOverlay: false }).catch(function () {});
+                self.switchRelativeFromScroll(direction).catch(function () {});
             }, { passive: false });
             self.updateStatusBar();
 
@@ -212,6 +213,7 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
         this.stopHistorySnapshotTimer();
         this.hideSwitchOverlay();
         this.hideSearchOverlay();
+        this.clearSessionSwitchNotice();
         this.pendingSwitchRequest = null;
         this.isSwitchingSession = false;
         this.statusBarScrollDelta = 0;

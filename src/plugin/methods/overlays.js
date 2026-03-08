@@ -1299,6 +1299,9 @@ function attachOverlayMethods(WorkspacePlusPlus) {
     WorkspacePlusPlus.prototype.showSwitchOverlay = function (ordered, activeIndex, viewGroupId, options) {
         options = options || {};
         var L = i18n.L;
+        if (this.clearSessionSwitchNotice) {
+            this.clearSessionSwitchNotice();
+        }
         this.hideSearchOverlay();
         // Clean up existing overlay and listeners
         this.cleanupOverlayListeners();

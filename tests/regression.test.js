@@ -9,6 +9,8 @@ function loadSessionMethods() {
         Modal: class {},
         Notice: class {
             constructor(_message) {}
+            hide() {}
+            setMessage() { return this; }
         },
         Plugin: class {},
         PluginSettingTab: class {},
@@ -296,7 +298,10 @@ test('switchRelativeImmediate bypasses preview-only first step and uses feedback
 
     assert.equal(switched, true);
     assert.deepEqual(overlayCalls, [[['a', 'b', 'c'], 1]]);
-    assert.deepEqual(switchCalls, [['b', { silent: true }]]);
+    assert.equal(switchCalls.length, 1);
+    assert.equal(switchCalls[0][0], 'b');
+    assert.equal(switchCalls[0][1].silent, true);
+    assert.equal(switchCalls[0][1].switchNoticeMode, undefined);
 });
 
 test('switchRelativeImmediate can suppress feedback overlay', async function () {
@@ -326,5 +331,144 @@ test('switchRelativeImmediate can suppress feedback overlay', async function () 
 
     assert.equal(switched, true);
     assert.equal(overlayCalled, false);
-    assert.deepEqual(switchCalls, [['b', { silent: true }]]);
+    assert.equal(switchCalls.length, 1);
+    assert.equal(switchCalls[0][0], 'b');
+    assert.equal(switchCalls[0][1].silent, true);
+    assert.equal(switchCalls[0][1].switchNoticeMode, undefined);
+});
+
+test('switchRelativeFromStatusBar bypasses preview-only first step and uses a replaceable notice', async function () {
+    const plugin = createPlugin({
+        activeSessionId: 'a',
+        sessionOrder: ['a', 'b', 'c'],
+        sessions: {
+            a: { id: 'a', name: 'A', layout: { layout: 'a' }, modified: 1 },
+            b: { id: 'b', name: 'B', layout: { layout: 'b' }, modified: 1 },
+            c: { id: 'c', name: 'C', layout: { layout: 'c' }, modified: 1 },
+        },
+        previewNext: true,
+        previewPrevious: true,
+    });
+
+    let previewCalled = false;
+    let feedbackCalled = false;
+    const switchCalls = [];
+
+    plugin.showSwitchPreviewOverlay = function () {
+        previewCalled = true;
+    };
+    plugin.showSwitchFeedbackOverlay = function () {
+        feedbackCalled = true;
+    };
+    plugin.switchSession = function (sessionId, options) {
+        switchCalls.push([sessionId, options]);
+        return Promise.resolve(true);
+    };
+
+    const switched = await plugin.switchRelativeFromStatusBar(1);
+
+    assert.equal(switched, true);
+    assert.equal(previewCalled, false);
+    assert.equal(feedbackCalled, false);
+    assert.equal(switchCalls.length, 1);
+    assert.equal(switchCalls[0][0], 'b');
+    assert.equal(switchCalls[0][1].silent, true);
+    assert.equal(switchCalls[0][1].switchNoticeMode, 'replace');
+});
+
+test('switchRelativeFromScroll switches without showing overlay', async function () {
+    const plugin = createPlugin({
+        activeSessionId: 'a',
+        sessionOrder: ['a', 'b'],
+        sessions: {
+            a: { id: 'a', name: 'A', layout: { layout: 'a' }, modified: 1 },
+            b: { id: 'b', name: 'B', layout: { layout: 'b' }, modified: 1 },
+        },
+        previewNext: true,
+        previewPrevious: true,
+    });
+
+    let previewCalled = false;
+    let feedbackCalled = false;
+    const switchCalls = [];
+
+    plugin.showSwitchPreviewOverlay = function () {
+        previewCalled = true;
+    };
+    plugin.showSwitchFeedbackOverlay = function () {
+        feedbackCalled = true;
+    };
+    plugin.switchSession = function (sessionId, options) {
+        switchCalls.push([sessionId, options]);
+        return Promise.resolve(true);
+    };
+
+    const switched = await plugin.switchRelativeFromScroll(1);
+
+    assert.equal(switched, true);
+    assert.equal(previewCalled, false);
+    assert.equal(feedbackCalled, false);
+    assert.equal(switchCalls.length, 1);
+    assert.equal(switchCalls[0][0], 'b');
+    assert.equal(switchCalls[0][1].silent, true);
+    assert.equal(switchCalls[0][1].switchNoticeMode, 'replace');
+});
+
+test('switchSessionByIdFromCommand uses overlay feedback without switch notice', async function () {
+    const plugin = createPlugin({
+        activeSessionId: 'a',
+        sessionOrder: ['a', 'b'],
+        sessions: {
+            a: { id: 'a', name: 'A', layout: { layout: 'a' }, modified: 1 },
+            b: { id: 'b', name: 'B', layout: { layout: 'b' }, modified: 1 },
+        },
+    });
+
+    const overlayCalls = [];
+    const switchCalls = [];
+
+    plugin.showSwitchFeedbackOverlay = function (ordered, index) {
+        overlayCalls.push([ordered.map(function (s) { return s.id; }), index]);
+    };
+    plugin.switchSession = function (sessionId, options) {
+        switchCalls.push([sessionId, options]);
+        return Promise.resolve(true);
+    };
+
+    const switched = await plugin.switchSessionByIdFromCommand('b');
+
+    assert.equal(switched, true);
+    assert.deepEqual(overlayCalls, [[['a', 'b'], 1]]);
+    assert.equal(switchCalls.length, 1);
+    assert.equal(switchCalls[0][0], 'b');
+    assert.equal(switchCalls[0][1].silent, true);
+    assert.equal(switchCalls[0][1].switchNoticeMode, undefined);
+});
+
+test('performSessionSwitch can emit a replaceable session switch notice', async function () {
+    const plugin = createPlugin({
+        activeSessionId: 'a',
+        sessionOrder: ['a', 'b'],
+        sessions: {
+            a: { id: 'a', name: 'A', layout: { layout: 'a' }, modified: 1 },
+            b: { id: 'b', name: 'B', layout: { layout: 'b' }, modified: 1 },
+        },
+    });
+
+    const noticeCalls = [];
+    plugin.showSessionSwitchNotice = function (sessionName, options) {
+        noticeCalls.push([sessionName, options]);
+    };
+    plugin.getCurrentWorkspaceLayout = function () {
+        return { layout: 'current' };
+    };
+
+    const switched = await plugin.performSessionSwitch('b', {
+        silent: true,
+        switchNoticeMode: 'replace',
+        switchNoticeDurationMs: 900,
+    });
+
+    assert.equal(switched, true);
+    assert.deepEqual(noticeCalls, [['B', { durationMs: 900 }]]);
 });

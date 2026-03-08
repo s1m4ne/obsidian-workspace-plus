@@ -9,6 +9,7 @@ var attachSessionValidationMethods = require('./sessions-validation');
 var STARTUP_SETTLE_MS = 1200;
 var STARTUP_LAYOUT_CHANGE_SETTLE_MS = 400;
 var STARTUP_SETTLE_MAX_MS = 5000;
+var SESSION_SWITCH_NOTICE_DURATION_MS = 1200;
 
 function attachSessionMethods(WorkspacePlusPlus) {
     attachSessionValidationMethods(WorkspacePlusPlus);
@@ -37,6 +38,35 @@ function attachSessionMethods(WorkspacePlusPlus) {
                 this.data.sessionOrder.push(missing[j]);
             }
         }
+    };
+
+    WorkspacePlusPlus.prototype.clearSessionSwitchNotice = function () {
+        if (!this.sessionSwitchNotice) return;
+        this.sessionSwitchNotice.hide();
+        this.sessionSwitchNotice = null;
+    };
+
+    WorkspacePlusPlus.prototype.showSessionSwitchNotice = function (sessionName, options) {
+        var self = this;
+        var L = i18n.L;
+        options = options || {};
+        var durationMs = typeof options.durationMs === 'number'
+            ? options.durationMs
+            : SESSION_SWITCH_NOTICE_DURATION_MS;
+
+        this.clearSessionSwitchNotice();
+        var notice = new obsidian.Notice(L.loaded(sessionName), durationMs);
+        this.sessionSwitchNotice = notice;
+
+        if (durationMs > 0) {
+            setTimeout(function () {
+                if (self.sessionSwitchNotice === notice) {
+                    self.sessionSwitchNotice = null;
+                }
+            }, durationMs + 50);
+        }
+
+        return notice;
     };
 
     WorkspacePlusPlus.prototype.getOrderedSessionsUnfiltered = function () {
@@ -185,74 +215,154 @@ function attachSessionMethods(WorkspacePlusPlus) {
                 self.addCommand({
                     id: cmdId,
                     name: L.cmdSwitchToNamed(session.name),
-                    checkCallback: function (checking) {
-                        if (!self.data.showActiveSwitchCommand) {
-                            if (session.id === self.data.activeSessionId) return false;
-                        }
-                        if (!checking) self.switchSession(session.id);
-                        return true;
-                    },
-                });
+                        checkCallback: function (checking) {
+                            if (!self.data.showActiveSwitchCommand) {
+                                if (session.id === self.data.activeSessionId) return false;
+                            }
+                            if (!checking) self.switchSessionByIdFromCommand(session.id);
+                            return true;
+                        },
+                    });
                 self._dynamicSessionCommandIds.push(cmdId);
             })(ordered[j]);
         }
     };
 
+    WorkspacePlusPlus.prototype.getRelativeSwitchContext = function (offset) {
+        var ordered = this.getOrderedSessions();
+        if (ordered.length === 0) {
+            return {
+                ordered: ordered,
+                currentIndex: -1,
+                targetIndex: 0,
+                isEmpty: true,
+            };
+        }
+        var currentIndex = this.findActiveSessionIndex(ordered);
+        if (currentIndex === -1) return null;
+
+        return {
+            ordered: ordered,
+            currentIndex: currentIndex,
+            targetIndex: (currentIndex + offset + ordered.length) % ordered.length,
+            isEmpty: false,
+        };
+    };
+
+    WorkspacePlusPlus.prototype.switchSessionAtOrderedIndex = function (ordered, index, options) {
+        options = options || {};
+        if (!ordered || index < 0 || index >= ordered.length) {
+            return Promise.resolve(false);
+        }
+
+        if (options.overlayMode === 'preview') {
+            this.showSwitchPreviewOverlay(ordered, index, options.viewGroupId);
+        } else if (options.overlayMode === 'feedback') {
+            this.showSwitchFeedbackOverlay(ordered, index, options.viewGroupId, options.overlayOptions);
+        }
+
+        if (!ordered[index]) {
+            return Promise.resolve(false);
+        }
+
+        if (ordered[index].id === this.data.activeSessionId) {
+            if (options.noticeMode === 'replace') {
+                this.showSessionSwitchNotice(ordered[index].name, {
+                    durationMs: options.switchNoticeDurationMs,
+                });
+            }
+            return Promise.resolve(false);
+        }
+
+        return this.switchSession(ordered[index].id, {
+            silent: options.silent !== false,
+            switchNoticeMode: options.noticeMode,
+            switchNoticeDurationMs: options.switchNoticeDurationMs,
+        });
+    };
+
     WorkspacePlusPlus.prototype.switchToIndex = function (index) {
         var ordered = this.getOrderedSessions();
-        if (index >= ordered.length) return;
-        if (ordered[index].id === this.data.activeSessionId) {
-            this.showSwitchFeedbackOverlay(ordered, index);
-            return;
+        return this.switchSessionAtOrderedIndex(ordered, index, {
+            overlayMode: 'feedback',
+            silent: true,
+        });
+    };
+
+    WorkspacePlusPlus.prototype.switchSessionByIdFromCommand = function (sessionId) {
+        var ordered = this.getOrderedSessions();
+        var index = this.findSessionIndex(ordered, sessionId);
+        return this.switchSessionAtOrderedIndex(ordered, index, {
+            overlayMode: 'feedback',
+            silent: true,
+        });
+    };
+
+    WorkspacePlusPlus.prototype.switchRelativeDirect = function (offset, options) {
+        options = options || {};
+        var context = this.getRelativeSwitchContext(offset);
+        if (!context) return Promise.resolve(false);
+
+        if (context.isEmpty) {
+            if (options.overlayMode === 'preview') {
+                this.showSwitchPreviewOverlay(context.ordered, 0, options.viewGroupId);
+            } else if (options.overlayMode === 'feedback') {
+                this.showSwitchFeedbackOverlay(context.ordered, 0, options.viewGroupId, options.overlayOptions);
+            }
+            return Promise.resolve(false);
         }
-        this.showSwitchFeedbackOverlay(ordered, index);
-        this.switchSession(ordered[index].id, { silent: true });
+
+        return this.switchSessionAtOrderedIndex(context.ordered, context.targetIndex, options);
+    };
+
+    WorkspacePlusPlus.prototype.switchRelativeFromCommand = function (offset) {
+        var context = this.getRelativeSwitchContext(offset);
+        if (!context) return Promise.resolve(false);
+        if (context.isEmpty) {
+            // Empty group – still show overlay so user can switch groups via Tab
+            this.showSwitchPreviewOverlay(context.ordered, 0);
+            return Promise.resolve(false);
+        }
+
+        var previewEnabled = offset > 0 ? this.data.previewNext : this.data.previewPrevious;
+        if (previewEnabled && !this.switchOverlayEl) {
+            this.showSwitchPreviewOverlay(context.ordered, context.currentIndex);
+            return Promise.resolve(false);
+        }
+
+        return this.switchSessionAtOrderedIndex(context.ordered, context.targetIndex, {
+            overlayMode: 'preview',
+            silent: true,
+        });
+    };
+
+    WorkspacePlusPlus.prototype.switchRelativeFromStatusBar = function (offset) {
+        return this.switchRelativeDirect(offset, {
+            overlayMode: 'none',
+            noticeMode: 'replace',
+            silent: true,
+        });
+    };
+
+    WorkspacePlusPlus.prototype.switchRelativeFromScroll = function (offset) {
+        return this.switchRelativeDirect(offset, {
+            overlayMode: 'none',
+            noticeMode: 'replace',
+            silent: true,
+        });
     };
 
     WorkspacePlusPlus.prototype.switchRelative = function (offset) {
-        var ordered = this.getOrderedSessions();
-        if (ordered.length === 0) {
-            // Empty group – still show overlay so user can switch groups via Tab
-            this.showSwitchPreviewOverlay(ordered, 0);
-            return;
-        }
-        var currentIndex = this.findActiveSessionIndex(ordered);
-        if (currentIndex === -1) return;
-
-        var previewEnabled = offset > 0 ? this.data.previewNext : this.data.previewPrevious;
-
-        if (previewEnabled && !this.switchOverlayEl) {
-            this.showSwitchPreviewOverlay(ordered, currentIndex);
-            return;
-        }
-
-        var next = (currentIndex + offset + ordered.length) % ordered.length;
-        this.showSwitchPreviewOverlay(ordered, next);
-        if (next !== currentIndex) {
-            this.switchSession(ordered[next].id, { silent: true });
-        }
+        return this.switchRelativeFromCommand(offset);
     };
 
     WorkspacePlusPlus.prototype.switchRelativeImmediate = function (offset, options) {
         options = options || {};
-        var ordered = this.getOrderedSessions();
-        if (ordered.length === 0) {
-            if (options.showOverlay !== false) {
-                this.showSwitchFeedbackOverlay(ordered, 0);
-            }
-            return Promise.resolve(false);
-        }
-        var currentIndex = this.findActiveSessionIndex(ordered);
-        if (currentIndex === -1) return Promise.resolve(false);
-
-        var next = (currentIndex + offset + ordered.length) % ordered.length;
-        if (options.showOverlay !== false) {
-            this.showSwitchFeedbackOverlay(ordered, next);
-        }
-        if (next === currentIndex) {
-            return Promise.resolve(false);
-        }
-        return this.switchSession(ordered[next].id, { silent: true });
+        return this.switchRelativeDirect(offset, {
+            overlayMode: options.showOverlay === false ? 'none' : 'feedback',
+            overlayOptions: options.overlayOptions,
+            silent: true,
+        });
     };
 
     WorkspacePlusPlus.prototype.getActiveSession = function () {
@@ -642,7 +752,11 @@ function attachSessionMethods(WorkspacePlusPlus) {
                 self.updateStatusBar();
                 return self.persistData();
             }).then(function () {
-                if (!options.silent) {
+                if (options.switchNoticeMode === 'replace') {
+                    self.showSessionSwitchNotice(target.name, {
+                        durationMs: options.switchNoticeDurationMs,
+                    });
+                } else if (!options.silent) {
                     new obsidian.Notice(L.loaded(target.name));
                 }
                 return true;
@@ -732,12 +846,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
         }
 
         new modals.RenameModal(this.app, session.name, function (newName) {
-            self.renameSessionById(session.id, newName).then(function (renamed) {
-                if (!renamed) return;
-                var ordered = self.getOrderedSessions();
-                var activeIdx = self.getActiveSessionIndex(ordered);
-                self.showSwitchFeedbackOverlay(ordered, activeIdx);
-            });
+            self.renameSessionById(session.id, newName);
         }, {
             emptyNotice: L.emptyName,
         }).open();
@@ -760,9 +869,6 @@ function attachSessionMethods(WorkspacePlusPlus) {
             return self.deleteSession(session.id).then(function (deleted) {
                 if (!deleted) return;
                 new obsidian.Notice(L.deleted(session.name));
-                var ordered = self.getOrderedSessions();
-                var activeIdx = self.getActiveSessionIndex(ordered);
-                self.showSwitchFeedbackOverlay(ordered, activeIdx);
             });
         };
 
@@ -854,8 +960,6 @@ function attachSessionMethods(WorkspacePlusPlus) {
         this.updateStatusBar();
         this.syncSessionCommands();
         new obsidian.Notice(L.created(name));
-        var ordered = this.getOrderedSessions();
-        this.showSwitchFeedbackOverlay(ordered, ordered.length - 1);
         return this.persistData();
     };
 
@@ -870,8 +974,6 @@ function attachSessionMethods(WorkspacePlusPlus) {
         this.updateStatusBar();
         this.syncSessionCommands();
         new obsidian.Notice(L.duplicated(name));
-        var ordered = this.getOrderedSessions();
-        this.showSwitchFeedbackOverlay(ordered, ordered.length - 1);
         return this.persistData();
     };
 
@@ -915,9 +1017,6 @@ function attachSessionMethods(WorkspacePlusPlus) {
                 self.updateStatusBar();
                 self.syncSessionCommands();
                 new obsidian.Notice(L.savedAs(newName));
-                var ordered = self.getOrderedSessions();
-                var activeIndex = self.findActiveSessionIndex(ordered);
-                self.showSwitchFeedbackOverlay(ordered, activeIndex);
                 self.persistData().then(function () {
                     resolve(true);
                 });

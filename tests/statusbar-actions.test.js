@@ -95,8 +95,8 @@ test('status bar actions delegate new direct actions to plugin methods', async f
             calls.push('duplicateCurrentSession');
             return Promise.resolve(true);
         },
-        switchRelativeImmediate: function (offset) {
-            calls.push(['switchRelativeImmediate', offset]);
+        switchRelativeFromStatusBar: function (offset) {
+            calls.push(['switchRelativeFromStatusBar', offset]);
             return Promise.resolve(true);
         },
         createEmptySession: function () {
@@ -121,8 +121,8 @@ test('status bar actions delegate new direct actions to plugin methods', async f
         'saveAsSession',
         'renameCurrentSession',
         'duplicateCurrentSession',
-        ['switchRelativeImmediate', -1],
-        ['switchRelativeImmediate', 1],
+        ['switchRelativeFromStatusBar', -1],
+        ['switchRelativeFromStatusBar', 1],
         'createEmptySession',
         ['toggleAutoSaveOnSwitch', { notify: true }],
     ]);
