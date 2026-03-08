@@ -81,11 +81,11 @@ function registerCommands(plugin) {
 
     // Previous / Next session
     addSimpleCommand('previous-session', L.cmdPrevious, function () {
-        plugin.switchRelative(-1);
+        plugin.switchRelativeFromCommand(-1);
     }, [{ modifiers: ['Mod', 'Shift'], key: ',' }]);
 
     addSimpleCommand('next-session', L.cmdNext, function () {
-        plugin.switchRelative(1);
+        plugin.switchRelativeFromCommand(1);
     }, [
         { modifiers: ['Mod', 'Shift'], key: 'Enter' },
         { modifiers: ['Mod', 'Shift'], key: '.' },

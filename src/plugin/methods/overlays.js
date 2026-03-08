@@ -1287,8 +1287,21 @@ function attachOverlayMethods(WorkspacePlusPlus) {
         }, 20);
     };
 
-    WorkspacePlusPlus.prototype.showSwitchOverlay = function (ordered, activeIndex, viewGroupId) {
+    WorkspacePlusPlus.prototype.showSwitchPreviewOverlay = function (ordered, activeIndex, viewGroupId) {
+        return this.showSwitchOverlay(ordered, activeIndex, viewGroupId, { mode: 'preview' });
+    };
+
+    WorkspacePlusPlus.prototype.showSwitchFeedbackOverlay = function (ordered, activeIndex, viewGroupId, options) {
+        options = Object.assign({}, options, { mode: 'feedback' });
+        return this.showSwitchOverlay(ordered, activeIndex, viewGroupId, options);
+    };
+
+    WorkspacePlusPlus.prototype.showSwitchOverlay = function (ordered, activeIndex, viewGroupId, options) {
+        options = options || {};
         var L = i18n.L;
+        if (this.clearSessionSwitchNotice) {
+            this.clearSessionSwitchNotice();
+        }
         this.hideSearchOverlay();
         // Clean up existing overlay and listeners
         this.cleanupOverlayListeners();
@@ -1306,13 +1319,15 @@ function attachOverlayMethods(WorkspacePlusPlus) {
         if (overlayGroupId && !(this.data.groups || {})[overlayGroupId]) {
             overlayGroupId = this.data.activeGroupId || null;
         }
+        var overlayMode = options.mode || 'preview';
+        var feedbackDurationMs = Math.max(0, Number(options.durationMs) || 400);
         this.switchOverlayViewGroupId = overlayGroupId;
         var self = this;
 
         function reopenOverlayForGroup(result) {
             var newOrdered = result.sessions;
             var newActiveIndex = self.getActiveSessionIndex(newOrdered);
-            self.showSwitchOverlay(newOrdered, newActiveIndex, result.resolvedGroupId);
+            self.showSwitchOverlay(newOrdered, newActiveIndex, result.resolvedGroupId, options);
         }
 
         function onGroupTabClick(targetGroupId, e) {
@@ -1488,6 +1503,18 @@ function attachOverlayMethods(WorkspacePlusPlus) {
 
         document.body.appendChild(overlay);
         this.switchOverlayEl = overlay;
+
+        if (overlayMode === 'feedback') {
+            this.overlayBlurHandler = function () {
+                self.hideSwitchOverlay();
+            };
+            window.addEventListener('blur', this.overlayBlurHandler);
+            this.switchOverlayTimer = setTimeout(function () {
+                if (!self.switchOverlayEl) return;
+                self.hideSwitchOverlay();
+            }, feedbackDurationMs);
+            return;
+        }
 
         // Dismiss when modifier keys are released
         var showTime = Date.now();

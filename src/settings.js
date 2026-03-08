@@ -284,17 +284,6 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                 modRightClick: 'statusBarSlotModRightClick',
                 shiftRightClick: 'statusBarSlotShiftRightClick',
             };
-            var actionLabelMap = {
-                none: 'statusBarActionNone',
-                quickSwitcher: 'statusBarActionQuickSwitcher',
-                sessionManager: 'statusBarActionSessionManager',
-                saveSession: 'statusBarActionSaveSession',
-                reloadWithoutSaving: 'statusBarActionReloadWithoutSaving',
-                versionHistory: 'statusBarActionVersionHistory',
-                restoreLatestHistory: 'statusBarActionRestoreLatestHistory',
-                sessionMenu: 'statusBarActionSessionMenu',
-                settingsMenu: 'statusBarActionSettingsMenu',
-            };
 
             for (var si = 0; si < slotKeys.length; si++) {
                 (function (slotKey) {
@@ -305,7 +294,7 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                         .addDropdown(function (dropdown) {
                             for (var ai = 0; ai < actionIds.length; ai++) {
                                 var aid = actionIds[ai];
-                                dropdown.addOption(aid, L[actionLabelMap[aid]]);
+                                dropdown.addOption(aid, statusBarActions.getActionLabel(L, aid));
                             }
                             dropdown.setValue((self.plugin.data.statusBarActions || {})[slotKey] || 'none');
                             dropdown.onChange(function (value) {
