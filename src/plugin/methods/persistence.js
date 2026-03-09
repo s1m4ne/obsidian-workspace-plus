@@ -45,6 +45,11 @@ var SETTINGS_KEYS = [
     'statusBarScrollCooldownMs',
     'statusBarScrollResetMs',
     'statusBarScrollInvert',
+    'statusBarActions',
+    'confirmQuickActions',
+    'showFilterInput',
+    'showActiveSwitchCommand',
+    'numberedSwitchCommands',
 ];
 
 function pickKeys(data, keys) {
