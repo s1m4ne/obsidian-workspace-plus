@@ -792,6 +792,7 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
         var self = this;
         var L = i18n.L;
         var loadedMain = null;
+        var rawSaved = null;
         var legacyMain = null;
         var hadLegacyInMain = false;
 
@@ -800,6 +801,7 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
                 return null;
             })
             .then(function (saved) {
+                rawSaved = saved;
                 loadedMain = saved || {};
                 self.globalSettings = Object.assign(
                     {},
@@ -856,6 +858,14 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
                     var effectiveSettings = self.isUsingLocalSettings()
                         ? Object.assign({}, self.globalSettings, localSettings)
                         : Object.assign({}, self.globalSettings);
+                    // Migrate: existing users keep filter visible (new default is OFF).
+                    // rawSaved is null for new installs; for existing users it is the raw
+                    // data.json object. Before showFilterInput was added to SETTINGS_KEYS
+                    // it was never written to disk, so rawSaved.showFilterInput is
+                    // undefined for any user who predates that setting.
+                    if (rawSaved !== null && rawSaved !== undefined && rawSaved.showFilterInput === undefined) {
+                        effectiveSettings.showFilterInput = true;
+                    }
                     var merged = Object.assign({}, self.getDefaultSessionData(), sessionData || {});
                     return Object.assign(merged, effectiveSettings);
                 });

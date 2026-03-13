@@ -89,11 +89,6 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
             }
             self.data.statusBarActions = Object.assign({}, DEFAULT_DATA.statusBarActions, self.data.statusBarActions || {});
 
-            // Migrate: existing users keep filter visible (new default is OFF)
-            if (saved && saved.showFilterInput === undefined) {
-                self.data.showFilterInput = true;
-            }
-
             self.normalizeGroupFeatureState();
             self.isSwitchingSession = false;
             self.pendingSwitchRequest = null;
