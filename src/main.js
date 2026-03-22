@@ -11,6 +11,7 @@ var attachOverlayMethods = require('./plugin/methods/overlays');
 var attachPersistenceMethods = require('./plugin/methods/persistence');
 var attachSessionMethods = require('./plugin/methods/sessions');
 var attachHistoryMethods = require('./plugin/methods/history');
+var attachFrontmatterMethods = require('./plugin/methods/frontmatter');
 var utils = require('./utils');
 var statusBarActions = require('./statusbar-actions');
 
@@ -200,6 +201,7 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
                 self.scheduleStartupFlush();
                 self.startHistorySnapshotTimer();
                 self.initRotationBackupTimestamp();
+                self.registerFrontmatterListeners();
             });
         });
     };
@@ -235,5 +237,6 @@ attachOverlayMethods(WorkspacePlusPlus);
 attachPersistenceMethods(WorkspacePlusPlus);
 attachSessionMethods(WorkspacePlusPlus);
 attachHistoryMethods(WorkspacePlusPlus);
+attachFrontmatterMethods(WorkspacePlusPlus);
 
 module.exports = WorkspacePlusPlus;

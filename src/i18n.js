@@ -381,6 +381,8 @@ var STRINGS = {
         rotationBackupRestoreFailed: 'Failed to restore from backup.',
         rotationBackupNone: 'No backups available.',
         rotationBackupGeneration: function (count) { return count + ' session' + (count !== 1 ? 's' : ''); },
+        frontmatterSessionNotFound: function (n) { return 'Session "' + n + '" not found (workspace-session)'; },
+        frontmatterAlreadyActive: function (n) { return 'Session "' + n + '" is already active'; },
     },
     zh: {
         settingsStatusBarModScrollSwitch: '按住 Ctrl/Cmd 并滚动以切换会话',
@@ -612,6 +614,8 @@ var STRINGS = {
         rotationBackupRestoreFailed: '从备份恢复失败。',
         rotationBackupNone: '没有可用的备份。',
         rotationBackupGeneration: function (count) { return count + ' 个会话'; },
+        frontmatterSessionNotFound: function (n) { return '\u4f1a\u8bdd\u201c' + n + '\u201d\u672a\u627e\u5230\uff08workspace-session\uff09'; },
+        frontmatterAlreadyActive: function (n) { return '\u4f1a\u8bdd\u201c' + n + '\u201d\u5df2\u5904\u4e8e\u6d3b\u52a8\u72b6\u6001'; },
     },
     'zh-TW': {
         settingsStatusBarModScrollSwitch: '按住 Ctrl/Cmd 並捲動以切換工作階段',
@@ -843,6 +847,8 @@ var STRINGS = {
         rotationBackupRestoreFailed: '從備份還原失敗。',
         rotationBackupNone: '沒有可用的備份。',
         rotationBackupGeneration: function (count) { return count + ' 個工作階段'; },
+        frontmatterSessionNotFound: function (n) { return '\u5de5\u4f5c\u968e\u6bb5\u300c' + n + '\u300d\u672a\u627e\u5230\uff08workspace-session\uff09'; },
+        frontmatterAlreadyActive: function (n) { return '\u5de5\u4f5c\u968e\u6bb5\u300c' + n + '\u300d\u5df2\u8655\u65bc\u6d3b\u52d5\u72c0\u614b'; },
     },
     es: {
         settingsStatusBarModScrollSwitch: 'Mod + rueda para cambiar de sesión',
@@ -1074,6 +1080,8 @@ var STRINGS = {
         rotationBackupRestoreFailed: 'Error al restaurar desde copia de seguridad.',
         rotationBackupNone: 'No hay copias de seguridad disponibles.',
         rotationBackupGeneration: function (count) { return count + ' sesión' + (count !== 1 ? 'es' : ''); },
+        frontmatterSessionNotFound: function (n) { return 'Sesi\u00f3n \u00ab' + n + '\u00bb no encontrada (workspace-session)'; },
+        frontmatterAlreadyActive: function (n) { return 'La sesi\u00f3n \u00ab' + n + '\u00bb ya est\u00e1 activa'; },
     },
     fr: {
         settingsStatusBarModScrollSwitch: 'Mod + molette pour changer de session',
@@ -1305,6 +1313,8 @@ var STRINGS = {
         rotationBackupRestoreFailed: 'Échec de la restauration depuis la sauvegarde.',
         rotationBackupNone: 'Aucune sauvegarde disponible.',
         rotationBackupGeneration: function (count) { return count + ' session' + (count !== 1 ? 's' : ''); },
+        frontmatterSessionNotFound: function (n) { return 'Session \u00ab\u00a0' + n + '\u00a0\u00bb introuvable (workspace-session)'; },
+        frontmatterAlreadyActive: function (n) { return 'La session \u00ab\u00a0' + n + '\u00a0\u00bb est d\u00e9j\u00e0 active'; },
     },
     ar: {
         settingsStatusBarModScrollSwitch: 'استخدم Mod + التمرير للتبديل بين الجلسات',
@@ -1535,6 +1545,8 @@ var STRINGS = {
         rotationBackupRestoreFailed: 'فشلت الاستعادة من النسخة الاحتياطية.',
         rotationBackupNone: 'لا توجد نسخ احتياطية متاحة.',
         rotationBackupGeneration: function (count) { return count + ' جلسة'; },
+        frontmatterSessionNotFound: function (n) { return '\u0627\u0644\u062c\u0644\u0633\u0629 \u201c' + n + '\u201d \u063a\u064a\u0631 \u0645\u0648\u062c\u0648\u062f\u0629 (workspace-session)'; },
+        frontmatterAlreadyActive: function (n) { return '\u0627\u0644\u062c\u0644\u0633\u0629 \u201c' + n + '\u201d \u0646\u0634\u0637\u0629 \u0628\u0627\u0644\u0641\u0639\u0644'; },
     },
     pt: {
         settingsStatusBarModScrollSwitch: 'Mod + rolagem para trocar de sessão',
@@ -1766,6 +1778,8 @@ var STRINGS = {
         rotationBackupRestoreFailed: 'Falha ao restaurar a partir do backup.',
         rotationBackupNone: 'Nenhum backup disponível.',
         rotationBackupGeneration: function (count) { return count + ' sessão' + (count !== 1 ? 'ões' : ''); },
+        frontmatterSessionNotFound: function (n) { return 'Sess\u00e3o \u201c' + n + '\u201d n\u00e3o encontrada (workspace-session)'; },
+        frontmatterAlreadyActive: function (n) { return 'A sess\u00e3o \u201c' + n + '\u201d j\u00e1 est\u00e1 ativa'; },
     },
     ru: {
         settingsStatusBarModScrollSwitch: 'Mod + прокрутка для переключения сессий',
@@ -1996,6 +2010,8 @@ var STRINGS = {
         rotationBackupRestoreFailed: 'Не удалось восстановить из резервной копии.',
         rotationBackupNone: 'Нет доступных резервных копий.',
         rotationBackupGeneration: function (count) { return count + ' сеанс' + (count === 1 ? '' : 'ов'); },
+        frontmatterSessionNotFound: function (n) { return '\u0421\u0435\u0430\u043d\u0441 \u00ab' + n + '\u00bb \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d (workspace-session)'; },
+        frontmatterAlreadyActive: function (n) { return '\u0421\u0435\u0430\u043d\u0441 \u00ab' + n + '\u00bb \u0443\u0436\u0435 \u0430\u043a\u0442\u0438\u0432\u0435\u043d'; },
     },
     de: {
         settingsStatusBarModScrollSwitch: 'Mit Mod + Scroll zwischen Sitzungen wechseln',
@@ -2226,6 +2242,8 @@ var STRINGS = {
         rotationBackupRestoreFailed: 'Wiederherstellung aus Sicherung fehlgeschlagen.',
         rotationBackupNone: 'Keine Sicherungen verfügbar.',
         rotationBackupGeneration: function (count) { return count + ' Sitzung' + (count !== 1 ? 'en' : ''); },
+        frontmatterSessionNotFound: function (n) { return 'Sitzung \u201e' + n + '\u201c nicht gefunden (workspace-session)'; },
+        frontmatterAlreadyActive: function (n) { return 'Sitzung \u201e' + n + '\u201c ist bereits aktiv'; },
     },
     ja: {
         modalTitle: 'セッション管理',
@@ -2567,6 +2585,8 @@ var STRINGS = {
         rotationBackupRestoreFailed: 'バックアップからの復元に失敗しました。',
         rotationBackupNone: 'バックアップはありません。',
         rotationBackupGeneration: function (count) { return count + ' セッション'; },
+        frontmatterSessionNotFound: function (n) { return 'セッション「' + n + '」が見つかりません（workspace-session）'; },
+        frontmatterAlreadyActive: function (n) { return 'セッション「' + n + '」は既にアクティブです'; },
     },
     ko: {
         settingsStatusBarModScrollSwitch: 'Mod + 스크롤로 세션 전환',
@@ -2798,6 +2818,8 @@ var STRINGS = {
         rotationBackupRestoreFailed: '백업에서 복원하지 못했습니다.',
         rotationBackupNone: '사용 가능한 백업이 없습니다.',
         rotationBackupGeneration: function (count) { return count + '개 세션'; },
+        frontmatterSessionNotFound: function (n) { return '\u201c' + n + '\u201d \uc138\uc158\uc744 \ucc3e\uc744 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4 (workspace-session)'; },
+        frontmatterAlreadyActive: function (n) { return '\u201c' + n + '\u201d \uc138\uc158\uc774 \uc774\ubbf8 \ud65c\uc131 \uc0c1\ud0dc\uc785\ub2c8\ub2e4'; },
     },
     it: {
         settingsStatusBarModScrollSwitch: 'Mod + rotellina per cambiare sessione',
@@ -3029,6 +3051,8 @@ var STRINGS = {
         rotationBackupRestoreFailed: 'Ripristino dal backup non riuscito.',
         rotationBackupNone: 'Nessun backup disponibile.',
         rotationBackupGeneration: function (count) { return count + ' session' + (count !== 1 ? 'i' : 'e'); },
+        frontmatterSessionNotFound: function (n) { return 'Sessione \u00ab' + n + '\u00bb non trovata (workspace-session)'; },
+        frontmatterAlreadyActive: function (n) { return 'La sessione \u00ab' + n + '\u00bb \u00e8 gi\u00e0 attiva'; },
     },
     tr: {
         settingsStatusBarModScrollSwitch: 'Mod + kaydırma ile oturum değiştir',
@@ -3259,6 +3283,8 @@ var STRINGS = {
         rotationBackupRestoreFailed: 'Yedekten geri yükleme başarısız.',
         rotationBackupNone: 'Kullanılabilir yedek yok.',
         rotationBackupGeneration: function (count) { return count + ' oturum'; },
+        frontmatterSessionNotFound: function (n) { return '\u201c' + n + '\u201d oturumu bulunamad\u0131 (workspace-session)'; },
+        frontmatterAlreadyActive: function (n) { return '\u201c' + n + '\u201d oturumu zaten aktif'; },
     },
     id: {
         settingsStatusBarModScrollSwitch: 'Mod + gulir untuk berpindah sesi',
@@ -3490,6 +3516,8 @@ var STRINGS = {
         rotationBackupRestoreFailed: 'Gagal memulihkan dari cadangan.',
         rotationBackupNone: 'Tidak ada cadangan tersedia.',
         rotationBackupGeneration: function (count) { return count + ' sesi'; },
+        frontmatterSessionNotFound: function (n) { return 'Sesi \u201c' + n + '\u201d tidak ditemukan (workspace-session)'; },
+        frontmatterAlreadyActive: function (n) { return 'Sesi \u201c' + n + '\u201d sudah aktif'; },
     },
 };
 

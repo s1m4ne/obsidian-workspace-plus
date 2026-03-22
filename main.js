@@ -472,6 +472,12 @@ var require_i18n = __commonJS({
         rotationBackupNone: "No backups available.",
         rotationBackupGeneration: function(count) {
           return count + " session" + (count !== 1 ? "s" : "");
+        },
+        frontmatterSessionNotFound: function(n) {
+          return 'Session "' + n + '" not found (workspace-session)';
+        },
+        frontmatterAlreadyActive: function(n) {
+          return 'Session "' + n + '" is already active';
         }
       },
       zh: {
@@ -796,6 +802,12 @@ var require_i18n = __commonJS({
         rotationBackupNone: "\u6CA1\u6709\u53EF\u7528\u7684\u5907\u4EFD\u3002",
         rotationBackupGeneration: function(count) {
           return count + " \u4E2A\u4F1A\u8BDD";
+        },
+        frontmatterSessionNotFound: function(n) {
+          return "\u4F1A\u8BDD\u201C" + n + "\u201D\u672A\u627E\u5230\uFF08workspace-session\uFF09";
+        },
+        frontmatterAlreadyActive: function(n) {
+          return "\u4F1A\u8BDD\u201C" + n + "\u201D\u5DF2\u5904\u4E8E\u6D3B\u52A8\u72B6\u6001";
         }
       },
       "zh-TW": {
@@ -1120,6 +1132,12 @@ var require_i18n = __commonJS({
         rotationBackupNone: "\u6C92\u6709\u53EF\u7528\u7684\u5099\u4EFD\u3002",
         rotationBackupGeneration: function(count) {
           return count + " \u500B\u5DE5\u4F5C\u968E\u6BB5";
+        },
+        frontmatterSessionNotFound: function(n) {
+          return "\u5DE5\u4F5C\u968E\u6BB5\u300C" + n + "\u300D\u672A\u627E\u5230\uFF08workspace-session\uFF09";
+        },
+        frontmatterAlreadyActive: function(n) {
+          return "\u5DE5\u4F5C\u968E\u6BB5\u300C" + n + "\u300D\u5DF2\u8655\u65BC\u6D3B\u52D5\u72C0\u614B";
         }
       },
       es: {
@@ -1444,6 +1462,12 @@ var require_i18n = __commonJS({
         rotationBackupNone: "No hay copias de seguridad disponibles.",
         rotationBackupGeneration: function(count) {
           return count + " sesi\xF3n" + (count !== 1 ? "es" : "");
+        },
+        frontmatterSessionNotFound: function(n) {
+          return "Sesi\xF3n \xAB" + n + "\xBB no encontrada (workspace-session)";
+        },
+        frontmatterAlreadyActive: function(n) {
+          return "La sesi\xF3n \xAB" + n + "\xBB ya est\xE1 activa";
         }
       },
       fr: {
@@ -1768,6 +1792,12 @@ var require_i18n = __commonJS({
         rotationBackupNone: "Aucune sauvegarde disponible.",
         rotationBackupGeneration: function(count) {
           return count + " session" + (count !== 1 ? "s" : "");
+        },
+        frontmatterSessionNotFound: function(n) {
+          return "Session \xAB\xA0" + n + "\xA0\xBB introuvable (workspace-session)";
+        },
+        frontmatterAlreadyActive: function(n) {
+          return "La session \xAB\xA0" + n + "\xA0\xBB est d\xE9j\xE0 active";
         }
       },
       ar: {
@@ -2092,6 +2122,12 @@ var require_i18n = __commonJS({
         rotationBackupNone: "\u0644\u0627 \u062A\u0648\u062C\u062F \u0646\u0633\u062E \u0627\u062D\u062A\u064A\u0627\u0637\u064A\u0629 \u0645\u062A\u0627\u062D\u0629.",
         rotationBackupGeneration: function(count) {
           return count + " \u062C\u0644\u0633\u0629";
+        },
+        frontmatterSessionNotFound: function(n) {
+          return "\u0627\u0644\u062C\u0644\u0633\u0629 \u201C" + n + "\u201D \u063A\u064A\u0631 \u0645\u0648\u062C\u0648\u062F\u0629 (workspace-session)";
+        },
+        frontmatterAlreadyActive: function(n) {
+          return "\u0627\u0644\u062C\u0644\u0633\u0629 \u201C" + n + "\u201D \u0646\u0634\u0637\u0629 \u0628\u0627\u0644\u0641\u0639\u0644";
         }
       },
       pt: {
@@ -2416,6 +2452,12 @@ var require_i18n = __commonJS({
         rotationBackupNone: "Nenhum backup dispon\xEDvel.",
         rotationBackupGeneration: function(count) {
           return count + " sess\xE3o" + (count !== 1 ? "\xF5es" : "");
+        },
+        frontmatterSessionNotFound: function(n) {
+          return "Sess\xE3o \u201C" + n + "\u201D n\xE3o encontrada (workspace-session)";
+        },
+        frontmatterAlreadyActive: function(n) {
+          return "A sess\xE3o \u201C" + n + "\u201D j\xE1 est\xE1 ativa";
         }
       },
       ru: {
@@ -2740,6 +2782,12 @@ var require_i18n = __commonJS({
         rotationBackupNone: "\u041D\u0435\u0442 \u0434\u043E\u0441\u0442\u0443\u043F\u043D\u044B\u0445 \u0440\u0435\u0437\u0435\u0440\u0432\u043D\u044B\u0445 \u043A\u043E\u043F\u0438\u0439.",
         rotationBackupGeneration: function(count) {
           return count + " \u0441\u0435\u0430\u043D\u0441" + (count === 1 ? "" : "\u043E\u0432");
+        },
+        frontmatterSessionNotFound: function(n) {
+          return "\u0421\u0435\u0430\u043D\u0441 \xAB" + n + "\xBB \u043D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D (workspace-session)";
+        },
+        frontmatterAlreadyActive: function(n) {
+          return "\u0421\u0435\u0430\u043D\u0441 \xAB" + n + "\xBB \u0443\u0436\u0435 \u0430\u043A\u0442\u0438\u0432\u0435\u043D";
         }
       },
       de: {
@@ -3064,6 +3112,12 @@ var require_i18n = __commonJS({
         rotationBackupNone: "Keine Sicherungen verf\xFCgbar.",
         rotationBackupGeneration: function(count) {
           return count + " Sitzung" + (count !== 1 ? "en" : "");
+        },
+        frontmatterSessionNotFound: function(n) {
+          return "Sitzung \u201E" + n + "\u201C nicht gefunden (workspace-session)";
+        },
+        frontmatterAlreadyActive: function(n) {
+          return "Sitzung \u201E" + n + "\u201C ist bereits aktiv";
         }
       },
       ja: {
@@ -3502,6 +3556,12 @@ var require_i18n = __commonJS({
         rotationBackupNone: "\u30D0\u30C3\u30AF\u30A2\u30C3\u30D7\u306F\u3042\u308A\u307E\u305B\u3093\u3002",
         rotationBackupGeneration: function(count) {
           return count + " \u30BB\u30C3\u30B7\u30E7\u30F3";
+        },
+        frontmatterSessionNotFound: function(n) {
+          return "\u30BB\u30C3\u30B7\u30E7\u30F3\u300C" + n + "\u300D\u304C\u898B\u3064\u304B\u308A\u307E\u305B\u3093\uFF08workspace-session\uFF09";
+        },
+        frontmatterAlreadyActive: function(n) {
+          return "\u30BB\u30C3\u30B7\u30E7\u30F3\u300C" + n + "\u300D\u306F\u65E2\u306B\u30A2\u30AF\u30C6\u30A3\u30D6\u3067\u3059";
         }
       },
       ko: {
@@ -3826,6 +3886,12 @@ var require_i18n = __commonJS({
         rotationBackupNone: "\uC0AC\uC6A9 \uAC00\uB2A5\uD55C \uBC31\uC5C5\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.",
         rotationBackupGeneration: function(count) {
           return count + "\uAC1C \uC138\uC158";
+        },
+        frontmatterSessionNotFound: function(n) {
+          return "\u201C" + n + "\u201D \uC138\uC158\uC744 \uCC3E\uC744 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4 (workspace-session)";
+        },
+        frontmatterAlreadyActive: function(n) {
+          return "\u201C" + n + "\u201D \uC138\uC158\uC774 \uC774\uBBF8 \uD65C\uC131 \uC0C1\uD0DC\uC785\uB2C8\uB2E4";
         }
       },
       it: {
@@ -4150,6 +4216,12 @@ var require_i18n = __commonJS({
         rotationBackupNone: "Nessun backup disponibile.",
         rotationBackupGeneration: function(count) {
           return count + " session" + (count !== 1 ? "i" : "e");
+        },
+        frontmatterSessionNotFound: function(n) {
+          return "Sessione \xAB" + n + "\xBB non trovata (workspace-session)";
+        },
+        frontmatterAlreadyActive: function(n) {
+          return "La sessione \xAB" + n + "\xBB \xE8 gi\xE0 attiva";
         }
       },
       tr: {
@@ -4474,6 +4546,12 @@ var require_i18n = __commonJS({
         rotationBackupNone: "Kullan\u0131labilir yedek yok.",
         rotationBackupGeneration: function(count) {
           return count + " oturum";
+        },
+        frontmatterSessionNotFound: function(n) {
+          return "\u201C" + n + "\u201D oturumu bulunamad\u0131 (workspace-session)";
+        },
+        frontmatterAlreadyActive: function(n) {
+          return "\u201C" + n + "\u201D oturumu zaten aktif";
         }
       },
       id: {
@@ -4798,6 +4876,12 @@ var require_i18n = __commonJS({
         rotationBackupNone: "Tidak ada cadangan tersedia.",
         rotationBackupGeneration: function(count) {
           return count + " sesi";
+        },
+        frontmatterSessionNotFound: function(n) {
+          return "Sesi \u201C" + n + "\u201D tidak ditemukan (workspace-session)";
+        },
+        frontmatterAlreadyActive: function(n) {
+          return "Sesi \u201C" + n + "\u201D sudah aktif";
         }
       }
     };
@@ -13445,6 +13529,102 @@ var require_history = __commonJS({
   }
 });
 
+// src/plugin/methods/frontmatter.js
+var require_frontmatter = __commonJS({
+  "src/plugin/methods/frontmatter.js"(exports2, module2) {
+    "use strict";
+    var obsidian2 = require("obsidian");
+    var i18n2 = require_i18n();
+    module2.exports = function attachFrontmatterMethods2(WorkspacePlusPlus2) {
+      WorkspacePlusPlus2.prototype.getFileFrontmatter = function(file) {
+        if (!file) return null;
+        var cache = this.app.metadataCache.getFileCache(file);
+        return cache && cache.frontmatter || null;
+      };
+      WorkspacePlusPlus2.prototype.parseWorkspaceSessionValue = function(value) {
+        if (!value || typeof value !== "string") return null;
+        value = value.trim();
+        if (!value) return null;
+        var slashIndex = value.indexOf("/");
+        if (slashIndex === -1) {
+          return { groupName: null, sessionName: value };
+        }
+        var candidateGroup = value.substring(0, slashIndex).trim();
+        var candidateSession = value.substring(slashIndex + 1).trim();
+        if (!candidateGroup || !candidateSession) {
+          return { groupName: null, sessionName: value };
+        }
+        var groups = this.data.groups || {};
+        var groupKeys = Object.keys(groups);
+        var matchedGroup = null;
+        for (var i = 0; i < groupKeys.length; i++) {
+          if (groups[groupKeys[i]].name === candidateGroup) {
+            matchedGroup = groups[groupKeys[i]];
+            break;
+          }
+        }
+        if (matchedGroup) {
+          return { groupName: candidateGroup, groupId: matchedGroup.id, sessionName: candidateSession };
+        }
+        return { groupName: null, sessionName: value };
+      };
+      WorkspacePlusPlus2.prototype.findSessionByName = function(name) {
+        if (!name) return null;
+        var sessions = this.data.sessions || {};
+        var keys = Object.keys(sessions);
+        for (var i = 0; i < keys.length; i++) {
+          if (sessions[keys[i]].name === name) {
+            return sessions[keys[i]];
+          }
+        }
+        return null;
+      };
+      WorkspacePlusPlus2.prototype.handleWorkspaceSessionProperty = function(value) {
+        var L = i18n2.L;
+        var parsed = this.parseWorkspaceSessionValue(value);
+        if (!parsed) return;
+        var session = this.findSessionByName(parsed.sessionName);
+        if (!session) {
+          new obsidian2.Notice(L.frontmatterSessionNotFound(parsed.sessionName));
+          return;
+        }
+        var alreadyOnSession = session.id === this.data.activeSessionId;
+        var alreadyOnGroup = !parsed.groupId || this.data.activeGroupId === parsed.groupId;
+        if (alreadyOnSession && alreadyOnGroup) {
+          new obsidian2.Notice(L.frontmatterAlreadyActive(parsed.sessionName));
+          return;
+        }
+        var self = this;
+        if (parsed.groupId && this.isGroupFeatureEnabled() && !alreadyOnGroup) {
+          this.setActiveGroup(parsed.groupId).then(function() {
+            if (session.id !== self.data.activeSessionId) {
+              self.switchSession(session.id);
+            }
+          });
+        } else if (!alreadyOnSession) {
+          this.switchSession(session.id);
+        }
+      };
+      WorkspacePlusPlus2.prototype.handleFrontmatterTriggers = function(file) {
+        var fm = this.getFileFrontmatter(file);
+        if (!fm) return;
+        if (fm["workspace-session"]) {
+          this.handleWorkspaceSessionProperty(fm["workspace-session"]);
+        }
+      };
+      WorkspacePlusPlus2.prototype.registerFrontmatterListeners = function() {
+        var self = this;
+        this.registerEvent(this.app.workspace.on("active-leaf-change", function(leaf) {
+          if (self.isSwitchingSession) return;
+          if (self.getStartupSettleRemainingMs() > 0) return;
+          if (!leaf || !leaf.view || !leaf.view.file) return;
+          self.handleFrontmatterTriggers(leaf.view.file);
+        }));
+      };
+    };
+  }
+});
+
 // src/main.js
 var obsidian = require("obsidian");
 var i18n = require_i18n();
@@ -13457,6 +13637,7 @@ var attachOverlayMethods = require_overlays();
 var attachPersistenceMethods = require_persistence();
 var attachSessionMethods = require_sessions();
 var attachHistoryMethods = require_history();
+var attachFrontmatterMethods = require_frontmatter();
 var utils = require_utils();
 var statusBarActions = require_statusbar_actions();
 i18n.resolveLocale();
@@ -13617,6 +13798,7 @@ var WorkspacePlusPlus = (
           self.scheduleStartupFlush();
           self.startHistorySnapshotTimer();
           self.initRotationBackupTimestamp();
+          self.registerFrontmatterListeners();
         });
       });
     };
@@ -13650,4 +13832,5 @@ attachOverlayMethods(WorkspacePlusPlus);
 attachPersistenceMethods(WorkspacePlusPlus);
 attachSessionMethods(WorkspacePlusPlus);
 attachHistoryMethods(WorkspacePlusPlus);
+attachFrontmatterMethods(WorkspacePlusPlus);
 module.exports = WorkspacePlusPlus;
