@@ -96,7 +96,7 @@ https://github.com/user-attachments/assets/6c2b5a13-cc9f-43ca-bff1-944c5b318a92
 3. Place the three files into that folder
 4. Open Obsidian **Settings** > **Community plugins** and enable **Workspace++**
 
-### From Community Plugins (coming soon)
+### From Community Plugins
 
 1. Open Obsidian **Settings** > **Community plugins**
 2. Click **Browse** and search for **Workspace++**

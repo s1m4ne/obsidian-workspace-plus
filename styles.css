@@ -142,7 +142,7 @@
 
 body.wpp-session-list-dragging,
 body.wpp-session-list-dragging * {
-    cursor: grabbing !important;
+    cursor: grabbing;
 }
 
 .wpp-drag-clone {
@@ -383,6 +383,7 @@ body.wpp-session-list-dragging * {
 
 .wpp-search-overlay {
     align-items: stretch;
+    cursor: grab;
     gap: 8px;
     width: min(370px, 95vw);
     height: min(400px, 80vh);
@@ -395,10 +396,6 @@ body.wpp-session-list-dragging * {
     right: 16px;
     bottom: 40px;
     transform: none;
-}
-
-.wpp-search-overlay {
-    cursor: grab;
 }
 
 .wpp-search-overlay.wpp-dragging {
