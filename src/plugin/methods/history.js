@@ -2,6 +2,7 @@
 
 var obsidian = require('obsidian');
 var i18n = require('../../i18n');
+var layoutUtils = require('../../layout-utils');
 
 var HOUR = 3600000;
 var DAY = 86400000;
@@ -134,7 +135,7 @@ function attachHistoryMethods(WorkspacePlusPlus) {
         }
 
         session.history.unshift({
-            layout: JSON.parse(JSON.stringify(session.layout)),
+            layout: layoutUtils.cloneLayout(session.layout),
             savedAt: Date.now(),
         });
 
@@ -155,7 +156,7 @@ function attachHistoryMethods(WorkspacePlusPlus) {
         this.pushLayoutToHistory(session);
 
         // Apply the historical layout
-        session.layout = JSON.parse(JSON.stringify(entry.layout));
+        session.layout = layoutUtils.cloneLayout(entry.layout);
         session.modified = Date.now();
 
         var self = this;

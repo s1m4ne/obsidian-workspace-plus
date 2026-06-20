@@ -9446,139 +9446,6 @@ var require_confirm_modal = __commonJS({
   }
 });
 
-// src/modals/history-modal.js
-var require_history_modal = __commonJS({
-  "src/modals/history-modal.js"(exports2, module2) {
-    "use strict";
-    var obsidian2 = require("obsidian");
-    var i18n2 = require_i18n();
-    var ConfirmModal = require_confirm_modal();
-    var DAY = 864e5;
-    var HistoryModal = (
-      /** @class */
-      function(_super) {
-        function HistoryModal2(app, plugin, session) {
-          var _this = _super.call(this, app) || this;
-          _this.plugin = plugin;
-          _this.session = session;
-          return _this;
-        }
-        HistoryModal2.prototype = Object.create(_super.prototype);
-        HistoryModal2.prototype.constructor = HistoryModal2;
-        HistoryModal2.prototype.onOpen = function() {
-          var L = i18n2.L;
-          var self = this;
-          var contentEl = this.contentEl;
-          contentEl.empty();
-          contentEl.addClass("wpp-modal", "wpp-history-modal");
-          this.titleEl.setText(L.historyTitle + " \u2014 " + self.session.name);
-          var history = self.session.history || [];
-          if (history.length === 0) {
-            contentEl.createEl("p", { text: L.historyEmpty, cls: "wpp-history-empty" });
-            return;
-          }
-          var groups = self.groupByDate(history);
-          var listEl = contentEl.createDiv({ cls: "wpp-history-list" });
-          for (var gi = 0; gi < groups.length; gi++) {
-            var group = groups[gi];
-            listEl.createEl("h4", { text: group.label, cls: "wpp-history-date-label" });
-            for (var ei = 0; ei < group.entries.length; ei++) {
-              self.renderEntry(listEl, group.entries[ei], group.indices[ei]);
-            }
-          }
-        };
-        HistoryModal2.prototype.renderEntry = function(listEl, entry, originalIndex) {
-          var L = i18n2.L;
-          var self = this;
-          var itemEl = listEl.createDiv({ cls: "wpp-history-item" });
-          var infoEl = itemEl.createDiv({ cls: "wpp-history-info" });
-          var time = new Date(entry.savedAt);
-          var timeStr = time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-          infoEl.createDiv({ text: timeStr, cls: "wpp-history-time" });
-          var filePaths = self.plugin.extractFilePathsFromLayout(entry.layout);
-          var paneCount = self.plugin.countPanesInLayout(entry.layout);
-          var fileNames = filePaths.map(function(p) {
-            var parts = p.split("/");
-            return parts[parts.length - 1];
-          });
-          var summary = L.historyPanes(paneCount);
-          if (fileNames.length > 0) {
-            var displayNames = fileNames.slice(0, 5).join(", ");
-            if (fileNames.length > 5) displayNames += " ...";
-            summary += " \xB7 " + displayNames;
-          }
-          infoEl.createDiv({ text: summary, cls: "wpp-history-summary" });
-          var btnEl = itemEl.createEl("button", {
-            text: L.historyRestore,
-            cls: "wpp-history-restore-btn"
-          });
-          btnEl.addEventListener("click", function() {
-            var doRestore = function() {
-              self.plugin.restoreFromHistoryEntry(
-                self.session.id,
-                originalIndex
-              ).then(function(ok) {
-                if (ok) {
-                  new obsidian2.Notice(L.historyRestored(self.session.name));
-                }
-                self.close();
-              });
-            };
-            if (self.plugin.isVersionHistoryConfirmRestoreEnabled()) {
-              new ConfirmModal(
-                self.app,
-                L.historyRestoreConfirm(self.session.name, timeStr),
-                doRestore,
-                { confirmText: L.historyRestore, confirmClass: "mod-cta" }
-              ).open();
-            } else {
-              doRestore();
-            }
-          });
-        };
-        HistoryModal2.prototype.groupByDate = function(history) {
-          var L = i18n2.L;
-          var now = /* @__PURE__ */ new Date();
-          var todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-          var yesterdayStart = todayStart - DAY;
-          var weekStart = todayStart - 6 * DAY;
-          var groups = {};
-          var groupOrder = [];
-          for (var i = 0; i < history.length; i++) {
-            var entry = history[i];
-            var t = entry.savedAt;
-            var label;
-            if (t >= todayStart) {
-              label = L.historyToday;
-            } else if (t >= yesterdayStart) {
-              label = L.historyYesterday;
-            } else if (t >= weekStart) {
-              label = L.historyThisWeek;
-            } else {
-              var d = new Date(t);
-              label = d.toLocaleDateString();
-            }
-            if (!groups[label]) {
-              groups[label] = { label, entries: [], indices: [] };
-              groupOrder.push(label);
-            }
-            groups[label].entries.push(entry);
-            groups[label].indices.push(i);
-          }
-          return groupOrder.map(function(k) {
-            return groups[k];
-          });
-        };
-        HistoryModal2.prototype.onClose = function() {
-          this.contentEl.empty();
-        };
-        return HistoryModal2;
-      }(obsidian2.Modal)
-    );
-    module2.exports = HistoryModal;
-  }
-});
-
 // src/modals/format-relative-time.js
 var require_format_relative_time = __commonJS({
   "src/modals/format-relative-time.js"(exports2, module2) {
@@ -10147,6 +10014,139 @@ var require_utils = __commonJS({
   }
 });
 
+// src/modals/history-modal.js
+var require_history_modal = __commonJS({
+  "src/modals/history-modal.js"(exports2, module2) {
+    "use strict";
+    var obsidian2 = require("obsidian");
+    var i18n2 = require_i18n();
+    var ConfirmModal = require_confirm_modal();
+    var DAY = 864e5;
+    var HistoryModal = (
+      /** @class */
+      function(_super) {
+        function HistoryModal2(app, plugin, session) {
+          var _this = _super.call(this, app) || this;
+          _this.plugin = plugin;
+          _this.session = session;
+          return _this;
+        }
+        HistoryModal2.prototype = Object.create(_super.prototype);
+        HistoryModal2.prototype.constructor = HistoryModal2;
+        HistoryModal2.prototype.onOpen = function() {
+          var L = i18n2.L;
+          var self = this;
+          var contentEl = this.contentEl;
+          contentEl.empty();
+          contentEl.addClass("wpp-modal", "wpp-history-modal");
+          this.titleEl.setText(L.historyTitle + " \u2014 " + self.session.name);
+          var history = self.session.history || [];
+          if (history.length === 0) {
+            contentEl.createEl("p", { text: L.historyEmpty, cls: "wpp-history-empty" });
+            return;
+          }
+          var groups = self.groupByDate(history);
+          var listEl = contentEl.createDiv({ cls: "wpp-history-list" });
+          for (var gi = 0; gi < groups.length; gi++) {
+            var group = groups[gi];
+            listEl.createEl("h4", { text: group.label, cls: "wpp-history-date-label" });
+            for (var ei = 0; ei < group.entries.length; ei++) {
+              self.renderEntry(listEl, group.entries[ei], group.indices[ei]);
+            }
+          }
+        };
+        HistoryModal2.prototype.renderEntry = function(listEl, entry, originalIndex) {
+          var L = i18n2.L;
+          var self = this;
+          var itemEl = listEl.createDiv({ cls: "wpp-history-item" });
+          var infoEl = itemEl.createDiv({ cls: "wpp-history-info" });
+          var time = new Date(entry.savedAt);
+          var timeStr = time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+          infoEl.createDiv({ text: timeStr, cls: "wpp-history-time" });
+          var filePaths = self.plugin.extractFilePathsFromLayout(entry.layout);
+          var paneCount = self.plugin.countPanesInLayout(entry.layout);
+          var fileNames = filePaths.map(function(p) {
+            var parts = p.split("/");
+            return parts[parts.length - 1];
+          });
+          var summary = L.historyPanes(paneCount);
+          if (fileNames.length > 0) {
+            var displayNames = fileNames.slice(0, 5).join(", ");
+            if (fileNames.length > 5) displayNames += " ...";
+            summary += " \xB7 " + displayNames;
+          }
+          infoEl.createDiv({ text: summary, cls: "wpp-history-summary" });
+          var btnEl = itemEl.createEl("button", {
+            text: L.historyRestore,
+            cls: "wpp-history-restore-btn"
+          });
+          btnEl.addEventListener("click", function() {
+            var doRestore = function() {
+              self.plugin.restoreFromHistoryEntry(
+                self.session.id,
+                originalIndex
+              ).then(function(ok) {
+                if (ok) {
+                  new obsidian2.Notice(L.historyRestored(self.session.name));
+                }
+                self.close();
+              });
+            };
+            if (self.plugin.isVersionHistoryConfirmRestoreEnabled()) {
+              new ConfirmModal(
+                self.app,
+                L.historyRestoreConfirm(self.session.name, timeStr),
+                doRestore,
+                { confirmText: L.historyRestore, confirmClass: "mod-cta" }
+              ).open();
+            } else {
+              doRestore();
+            }
+          });
+        };
+        HistoryModal2.prototype.groupByDate = function(history) {
+          var L = i18n2.L;
+          var now = /* @__PURE__ */ new Date();
+          var todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+          var yesterdayStart = todayStart - DAY;
+          var weekStart = todayStart - 6 * DAY;
+          var groups = {};
+          var groupOrder = [];
+          for (var i = 0; i < history.length; i++) {
+            var entry = history[i];
+            var t = entry.savedAt;
+            var label;
+            if (t >= todayStart) {
+              label = L.historyToday;
+            } else if (t >= yesterdayStart) {
+              label = L.historyYesterday;
+            } else if (t >= weekStart) {
+              label = L.historyThisWeek;
+            } else {
+              var d = new Date(t);
+              label = d.toLocaleDateString();
+            }
+            if (!groups[label]) {
+              groups[label] = { label, entries: [], indices: [] };
+              groupOrder.push(label);
+            }
+            groups[label].entries.push(entry);
+            groups[label].indices.push(i);
+          }
+          return groupOrder.map(function(k) {
+            return groups[k];
+          });
+        };
+        HistoryModal2.prototype.onClose = function() {
+          this.contentEl.empty();
+        };
+        return HistoryModal2;
+      }(obsidian2.Modal)
+    );
+    module2.exports = HistoryModal;
+  }
+});
+
 // src/session-context-menu.js
 var require_session_context_menu = __commonJS({
   "src/session-context-menu.js"(exports2, module2) {
@@ -10297,176 +10297,6 @@ var require_session_context_menu = __commonJS({
   }
 });
 
-// src/settings-context-menu.js
-var require_settings_context_menu = __commonJS({
-  "src/settings-context-menu.js"(exports2, module2) {
-    "use strict";
-    var obsidian2 = require("obsidian");
-    var i18n2 = require_i18n();
-    function openSettingsContextMenu(options) {
-      var L = i18n2.L;
-      options = options || {};
-      var plugin = options.plugin;
-      var app = options.app || (plugin ? plugin.app : null);
-      if (!plugin || !app) return;
-      var menu = new obsidian2.Menu();
-      var autoSaveOn = plugin.isAutoSaveOnSwitchEnabled();
-      menu.addItem(function(mi) {
-        mi.setTitle(L.settingsAutoSaveOnSwitch);
-        mi.setIcon("save");
-        if (autoSaveOn) mi.setChecked(true);
-        mi.onClick(function() {
-          plugin.setAutoSaveOnSwitch(!autoSaveOn, { notify: true }).then(function() {
-            if (typeof options.onChanged === "function") options.onChanged();
-          });
-        });
-      });
-      if (!autoSaveOn) {
-        menu.addItem(function(mi) {
-          mi.setTitle(L.settingsWarnUnsavedSwitch);
-          mi.setIcon("alert-triangle");
-          if (plugin.isWarnOnUnsavedSwitchEnabled()) mi.setChecked(true);
-          mi.onClick(function() {
-            plugin.data.warnOnUnsavedSwitch = !plugin.isWarnOnUnsavedSwitchEnabled();
-            plugin.persistData();
-            if (typeof options.onChanged === "function") options.onChanged();
-          });
-        });
-        menu.addItem(function(mi) {
-          mi.setTitle(L.settingsConfirmQuickActions);
-          mi.setIcon("check-circle");
-          if (plugin.data.confirmQuickActions) mi.setChecked(true);
-          mi.onClick(function() {
-            plugin.data.confirmQuickActions = !plugin.data.confirmQuickActions;
-            plugin.persistData();
-            if (typeof options.onChanged === "function") options.onChanged();
-          });
-        });
-      }
-      menu.addItem(function(mi) {
-        mi.setTitle(L.settingsConfirmDelete);
-        mi.setIcon("shield");
-        if (plugin.data.confirmDeleteByHotkey !== false) mi.setChecked(true);
-        mi.onClick(function() {
-          plugin.data.confirmDeleteByHotkey = !(plugin.data.confirmDeleteByHotkey !== false);
-          plugin.persistData();
-          if (typeof options.onChanged === "function") options.onChanged();
-        });
-      });
-      menu.addSeparator();
-      menu.addItem(function(mi) {
-        mi.setTitle(L.settingsVersionHistoryEnabled);
-        mi.setIcon("history");
-        if (plugin.isVersionHistoryEnabled()) mi.setChecked(true);
-        mi.onClick(function() {
-          var next = !plugin.isVersionHistoryEnabled();
-          plugin.data.versionHistoryEnabled = next;
-          plugin.persistData();
-          if (next) {
-            plugin.startHistorySnapshotTimer();
-          } else {
-            plugin.stopHistorySnapshotTimer();
-          }
-          if (typeof options.onChanged === "function") options.onChanged();
-        });
-      });
-      menu.addItem(function(mi) {
-        mi.setTitle(L.contextToggleGroups);
-        mi.setIcon("folder");
-        if (plugin.isGroupFeatureEnabled()) mi.setChecked(true);
-        mi.onClick(function() {
-          plugin.setGroupFeatureEnabled(!plugin.isGroupFeatureEnabled()).then(function() {
-            if (typeof options.onChanged === "function") options.onChanged();
-          });
-        });
-      });
-      menu.addItem(function(mi) {
-        mi.setTitle(L.settingsShowFilterInput);
-        mi.setIcon("search");
-        if (plugin.data.showFilterInput) mi.setChecked(true);
-        mi.onClick(function() {
-          plugin.data.showFilterInput = !plugin.data.showFilterInput;
-          plugin.persistData();
-          if (typeof options.onChanged === "function") options.onChanged();
-        });
-      });
-      menu.addSeparator();
-      menu.addItem(function(mi) {
-        mi.setTitle(L.rotationBackupCreate);
-        mi.setIcon("archive");
-        mi.onClick(function() {
-          var sessionData = plugin.extractSessionData(plugin.data);
-          sessionData._wppSavedAt = Date.now();
-          plugin.ensureDir(plugin.getBackupsDirPath()).then(function() {
-            return plugin.copyFileIfExists(
-              plugin.getRotationBackupPath(2),
-              plugin.getRotationBackupPath(3)
-            );
-          }).then(function() {
-            return plugin.copyFileIfExists(
-              plugin.getRotationBackupPath(1),
-              plugin.getRotationBackupPath(2)
-            );
-          }).then(function() {
-            return plugin.writeJson(
-              plugin.getRotationBackupPath(1),
-              sessionData
-            );
-          }).then(function() {
-            plugin._lastRotationBackupAt = Date.now();
-            new obsidian2.Notice(L.rotationBackupCreated);
-          }).catch(function() {
-            new obsidian2.Notice(L.rotationBackupFailed);
-          });
-        });
-      });
-      menu.addItem(function(mi) {
-        mi.setTitle(L.settingsHotkeysBtn);
-        mi.setIcon("keyboard");
-        mi.onClick(function() {
-          app.setting.open();
-          app.setting.openTabById("hotkeys");
-          var sc = app.setting.activeTab.searchComponent;
-          var pluginName = plugin.manifest && plugin.manifest.name ? plugin.manifest.name : "Workspace++";
-          sc.setValue(pluginName);
-          sc.inputEl.dispatchEvent(new Event("input"));
-        });
-      });
-      menu.addItem(function(mi) {
-        mi.setTitle(L.contextCustomizeClicks);
-        mi.setIcon("mouse-pointer-click");
-        mi.onClick(function() {
-          if (plugin.settingTab) plugin.settingTab.activeTab = "general";
-          app.setting.open();
-          app.setting.openTabById(plugin.manifest.id);
-        });
-      });
-      menu.addItem(function(mi) {
-        mi.setTitle(L.contextOpenSettings);
-        mi.setIcon("settings");
-        mi.onClick(function() {
-          app.setting.open();
-          app.setting.openTabById(plugin.manifest.id);
-        });
-      });
-      if (options.showResetOverlay) {
-        menu.addSeparator();
-        menu.addItem(function(mi) {
-          mi.setTitle(L.contextResetOverlayPosition);
-          mi.setIcon("rotate-ccw");
-          mi.onClick(function() {
-            if (typeof options.onResetOverlay === "function") options.onResetOverlay();
-          });
-        });
-      }
-      menu.showAtMouseEvent(options.event);
-    }
-    module2.exports = {
-      openSettingsContextMenu
-    };
-  }
-});
-
 // src/session-list-actions.js
 var require_session_list_actions = __commonJS({
   "src/session-list-actions.js"(exports2, module2) {
@@ -10549,6 +10379,334 @@ var require_session_list_actions = __commonJS({
   }
 });
 
+// src/session-context-actions.js
+var require_session_context_actions = __commonJS({
+  "src/session-context-actions.js"(exports2, module2) {
+    "use strict";
+    var obsidian2 = require("obsidian");
+    var i18n2 = require_i18n();
+    var HistoryModal = require_history_modal();
+    var sessionContextMenu = require_session_context_menu();
+    var sessionListActions = require_session_list_actions();
+    function hasOwn(options, key) {
+      return Object.prototype.hasOwnProperty.call(options, key);
+    }
+    function optionOrDefault(options, key, fallback) {
+      return hasOwn(options, key) ? options[key] : fallback;
+    }
+    function call(fn) {
+      if (typeof fn === "function") fn();
+    }
+    function callAfter(promise, fn) {
+      if (promise && typeof promise.then === "function") {
+        return promise.then(function(value) {
+          call(fn);
+          return value;
+        });
+      }
+      call(fn);
+      return promise;
+    }
+    function getGroupName(plugin, groupId) {
+      return ((plugin.data.groups || {})[groupId] || {}).name || "";
+    }
+    function shouldShowMoveToGroup(plugin) {
+      return !!(plugin && plugin.isGroupFeatureEnabled && plugin.isGroupFeatureEnabled() && plugin.getOrderedGroups && plugin.getOrderedGroups().length > 0);
+    }
+    function refreshSessions(options) {
+      call(options.onSessionsChanged);
+    }
+    function refreshGroups(options) {
+      call(options.onGroupsChanged);
+    }
+    function refreshGroupsAndSessions(options) {
+      refreshGroups(options);
+      refreshSessions(options);
+    }
+    function createSessionContextMenuOptions(options) {
+      var L = i18n2.L;
+      options = options || {};
+      var plugin = options.plugin;
+      var app = options.app || (plugin ? plugin.app : null);
+      var session = options.session;
+      if (!plugin || !app || !session) return null;
+      var isActive = hasOwn(options, "isActive") ? !!options.isActive : session.id === plugin.data.activeSessionId;
+      var getViewGroupId = typeof options.getViewGroupId === "function" ? options.getViewGroupId : function() {
+        return null;
+      };
+      function defaultSave() {
+        return callAfter(plugin.saveActiveSession(), function() {
+          refreshSessions(options);
+        });
+      }
+      function defaultReload() {
+        return plugin.reloadCurrentSessionWithoutSaving();
+      }
+      function defaultSaveAs() {
+        return callAfter(plugin.saveAsSession(), function() {
+          refreshSessions(options);
+        });
+      }
+      function defaultOverwriteWithCurrentLayout() {
+        return plugin.confirmOverwriteSessionWithCurrentLayout(session.id, {
+          onSaved: function() {
+            refreshSessions(options);
+          }
+        });
+      }
+      function defaultRename() {
+        return sessionListActions.renameSessionWithPrompt({
+          app,
+          plugin,
+          session,
+          onRenamed: function() {
+            refreshSessions(options);
+          }
+        });
+      }
+      function defaultDuplicate() {
+        return callAfter(plugin.duplicateSession(session.id), function() {
+          refreshSessions(options);
+        });
+      }
+      function defaultRemoveFromGroup() {
+        var groupId = getViewGroupId();
+        if (!groupId) return;
+        var groupName = getGroupName(plugin, groupId);
+        return plugin.removeSessionFromGroup(session.id, groupId).then(function() {
+          new obsidian2.Notice(L.groupRemovedSession(session.name, groupName));
+          refreshGroupsAndSessions(options);
+        });
+      }
+      function defaultMoveToGroup(groupId) {
+        var groupName = getGroupName(plugin, groupId);
+        return plugin.moveSessionToGroupExclusive(session.id, groupId).then(function(moved) {
+          if (!moved) return false;
+          new obsidian2.Notice(L.groupAddedSession(session.name, groupName));
+          refreshGroupsAndSessions(options);
+          return true;
+        });
+      }
+      function defaultDelete() {
+        var confirmMessage = hasOwn(options, "deleteConfirmMessage") ? options.deleteConfirmMessage : isActive ? L.confirmDeleteActive(session.name) : L.confirmDelete(session.name);
+        return sessionListActions.deleteSessionWithPrompt({
+          app,
+          plugin,
+          session,
+          isActive,
+          confirmMessage,
+          forceConfirm: !!options.forceDeleteConfirm,
+          notifyDeleted: options.notifyDeleted,
+          confirmOptions: options.deleteConfirmOptions,
+          onDeleted: function() {
+            refreshSessions(options);
+          }
+        });
+      }
+      function defaultVersionHistory() {
+        return new HistoryModal(app, plugin, session).open();
+      }
+      return {
+        plugin,
+        app,
+        session,
+        isActive,
+        event: options.event,
+        showSaveAs: !!options.showSaveAs,
+        showSwitch: !!options.showSwitch,
+        showRemoveFromGroup: optionOrDefault(options, "showRemoveFromGroup", !!getViewGroupId()),
+        showMoveToGroup: optionOrDefault(options, "showMoveToGroup", shouldShowMoveToGroup(plugin)),
+        showCustomizeClicks: !!options.showCustomizeClicks,
+        onSave: options.onSave || defaultSave,
+        onReload: options.onReload || defaultReload,
+        onSaveAs: options.onSaveAs || defaultSaveAs,
+        onOverwriteWithCurrentLayout: options.onOverwriteWithCurrentLayout || defaultOverwriteWithCurrentLayout,
+        onSwitch: options.onSwitch,
+        onRename: options.onRename || defaultRename,
+        onDuplicate: options.onDuplicate || defaultDuplicate,
+        onDelete: options.onDelete || defaultDelete,
+        onRemoveFromGroup: options.onRemoveFromGroup || defaultRemoveFromGroup,
+        onMoveToGroup: options.onMoveToGroup || defaultMoveToGroup,
+        onVersionHistory: options.onVersionHistory || defaultVersionHistory
+      };
+    }
+    function openSessionContextMenu(options) {
+      var menuOptions = createSessionContextMenuOptions(options);
+      if (!menuOptions) return;
+      sessionContextMenu.openSessionContextMenu(menuOptions);
+    }
+    module2.exports = {
+      createSessionContextMenuOptions,
+      openSessionContextMenu
+    };
+  }
+});
+
+// src/settings-context-menu.js
+var require_settings_context_menu = __commonJS({
+  "src/settings-context-menu.js"(exports2, module2) {
+    "use strict";
+    var obsidian2 = require("obsidian");
+    var i18n2 = require_i18n();
+    function openSettingsContextMenu(options) {
+      var L = i18n2.L;
+      options = options || {};
+      var plugin = options.plugin;
+      var app = options.app || (plugin ? plugin.app : null);
+      if (!plugin || !app) return;
+      var menu = new obsidian2.Menu();
+      var autoSaveOn = plugin.isAutoSaveOnSwitchEnabled();
+      menu.addItem(function(mi) {
+        mi.setTitle(L.settingsAutoSaveOnSwitch);
+        mi.setIcon("save");
+        if (autoSaveOn) mi.setChecked(true);
+        mi.onClick(function() {
+          plugin.setAutoSaveOnSwitch(!autoSaveOn, { notify: true }).then(function() {
+            if (typeof options.onChanged === "function") options.onChanged();
+          });
+        });
+      });
+      if (!autoSaveOn) {
+        menu.addItem(function(mi) {
+          mi.setTitle(L.settingsWarnUnsavedSwitch);
+          mi.setIcon("alert-triangle");
+          if (plugin.isWarnOnUnsavedSwitchEnabled()) mi.setChecked(true);
+          mi.onClick(function() {
+            plugin.setWarnOnUnsavedSwitch(!plugin.isWarnOnUnsavedSwitchEnabled()).then(function() {
+              if (typeof options.onChanged === "function") options.onChanged();
+            });
+          });
+        });
+        menu.addItem(function(mi) {
+          mi.setTitle(L.settingsConfirmQuickActions);
+          mi.setIcon("check-circle");
+          if (plugin.data.confirmQuickActions) mi.setChecked(true);
+          mi.onClick(function() {
+            plugin.setConfirmQuickActions(!plugin.data.confirmQuickActions).then(function() {
+              if (typeof options.onChanged === "function") options.onChanged();
+            });
+          });
+        });
+      }
+      menu.addItem(function(mi) {
+        mi.setTitle(L.settingsConfirmDelete);
+        mi.setIcon("shield");
+        if (plugin.data.confirmDeleteByHotkey !== false) mi.setChecked(true);
+        mi.onClick(function() {
+          plugin.setConfirmDeleteByHotkey(!(plugin.data.confirmDeleteByHotkey !== false)).then(function() {
+            if (typeof options.onChanged === "function") options.onChanged();
+          });
+        });
+      });
+      menu.addSeparator();
+      menu.addItem(function(mi) {
+        mi.setTitle(L.settingsVersionHistoryEnabled);
+        mi.setIcon("history");
+        if (plugin.isVersionHistoryEnabled()) mi.setChecked(true);
+        mi.onClick(function() {
+          var next = !plugin.isVersionHistoryEnabled();
+          plugin.setVersionHistoryEnabled(next).then(function() {
+            if (typeof options.onChanged === "function") options.onChanged();
+          });
+        });
+      });
+      menu.addItem(function(mi) {
+        mi.setTitle(L.contextToggleGroups);
+        mi.setIcon("folder");
+        if (plugin.isGroupFeatureEnabled()) mi.setChecked(true);
+        mi.onClick(function() {
+          plugin.setGroupFeatureEnabled(!plugin.isGroupFeatureEnabled()).then(function() {
+            if (typeof options.onChanged === "function") options.onChanged();
+          });
+        });
+      });
+      menu.addItem(function(mi) {
+        mi.setTitle(L.settingsShowFilterInput);
+        mi.setIcon("search");
+        if (plugin.data.showFilterInput) mi.setChecked(true);
+        mi.onClick(function() {
+          plugin.setShowFilterInput(!plugin.data.showFilterInput).then(function() {
+            if (typeof options.onChanged === "function") options.onChanged();
+          });
+        });
+      });
+      menu.addSeparator();
+      menu.addItem(function(mi) {
+        mi.setTitle(L.rotationBackupCreate);
+        mi.setIcon("archive");
+        mi.onClick(function() {
+          var sessionData = plugin.extractSessionData(plugin.data);
+          sessionData._wppSavedAt = Date.now();
+          plugin.ensureDir(plugin.getBackupsDirPath()).then(function() {
+            return plugin.copyFileIfExists(
+              plugin.getRotationBackupPath(2),
+              plugin.getRotationBackupPath(3)
+            );
+          }).then(function() {
+            return plugin.copyFileIfExists(
+              plugin.getRotationBackupPath(1),
+              plugin.getRotationBackupPath(2)
+            );
+          }).then(function() {
+            return plugin.writeJson(
+              plugin.getRotationBackupPath(1),
+              sessionData
+            );
+          }).then(function() {
+            plugin._lastRotationBackupAt = Date.now();
+            new obsidian2.Notice(L.rotationBackupCreated);
+          }).catch(function() {
+            new obsidian2.Notice(L.rotationBackupFailed);
+          });
+        });
+      });
+      menu.addItem(function(mi) {
+        mi.setTitle(L.settingsHotkeysBtn);
+        mi.setIcon("keyboard");
+        mi.onClick(function() {
+          app.setting.open();
+          app.setting.openTabById("hotkeys");
+          var sc = app.setting.activeTab.searchComponent;
+          var pluginName = plugin.manifest && plugin.manifest.name ? plugin.manifest.name : "Workspace++";
+          sc.setValue(pluginName);
+          sc.inputEl.dispatchEvent(new Event("input"));
+        });
+      });
+      menu.addItem(function(mi) {
+        mi.setTitle(L.contextCustomizeClicks);
+        mi.setIcon("mouse-pointer-click");
+        mi.onClick(function() {
+          if (plugin.settingTab) plugin.settingTab.activeTab = "general";
+          app.setting.open();
+          app.setting.openTabById(plugin.manifest.id);
+        });
+      });
+      menu.addItem(function(mi) {
+        mi.setTitle(L.contextOpenSettings);
+        mi.setIcon("settings");
+        mi.onClick(function() {
+          app.setting.open();
+          app.setting.openTabById(plugin.manifest.id);
+        });
+      });
+      if (options.showResetOverlay) {
+        menu.addSeparator();
+        menu.addItem(function(mi) {
+          mi.setTitle(L.contextResetOverlayPosition);
+          mi.setIcon("rotate-ccw");
+          mi.onClick(function() {
+            if (typeof options.onResetOverlay === "function") options.onResetOverlay();
+          });
+        });
+      }
+      menu.showAtMouseEvent(options.event);
+    }
+    module2.exports = {
+      openSettingsContextMenu
+    };
+  }
+});
+
 // src/modals/session-manager-modal.js
 var require_session_manager_modal = __commonJS({
   "src/modals/session-manager-modal.js"(exports2, module2) {
@@ -10556,12 +10714,11 @@ var require_session_manager_modal = __commonJS({
     var obsidian2 = require("obsidian");
     var i18n2 = require_i18n();
     var ConfirmModal = require_confirm_modal();
-    var HistoryModal = require_history_modal();
     var formatRelativeTime = require_format_relative_time();
     var groupTabUi = require_group_tab_ui();
     var navigationUtils = require_navigation_utils();
-    var utils2 = require_utils();
-    var sessionContextMenu = require_session_context_menu();
+    var utils = require_utils();
+    var sessionContextActions = require_session_context_actions();
     var settingsContextMenu = require_settings_context_menu();
     var sessionListActions = require_session_list_actions();
     function isElementVisible(el) {
@@ -11086,7 +11243,7 @@ var require_session_manager_modal = __commonJS({
             self.setKeyboardTarget({ zone: "session-action", rowIndex: index, actionKey: "load" });
             if (e.target.closest("button, .wpp-icon-btn")) return;
             self.blurFocusedControl();
-            var cmdKey = utils2.isModPressed(e);
+            var cmdKey = utils.isModPressed(e);
             if (cmdKey) {
               if (self.selectedIds.has(session.id)) {
                 self.selectedIds.delete(session.id);
@@ -11102,7 +11259,7 @@ var require_session_manager_modal = __commonJS({
           item.addEventListener("contextmenu", function(e) {
             e.preventDefault();
             var selectedGroupId = self.getModalGroupId();
-            sessionContextMenu.openSessionContextMenu({
+            sessionContextActions.openSessionContextMenu({
               plugin: self.plugin,
               app: self.app,
               session,
@@ -11110,58 +11267,19 @@ var require_session_manager_modal = __commonJS({
               event: e,
               showSwitch: true,
               showRemoveFromGroup: !!selectedGroupId,
-              onSave: function() {
-                self.plugin.saveActiveSession().then(function() {
-                  self.renderList();
-                });
-              },
-              onReload: function() {
-                self.plugin.reloadCurrentSessionWithoutSaving();
-              },
-              onOverwriteWithCurrentLayout: function() {
-                self.plugin.confirmOverwriteSessionWithCurrentLayout(session.id, {
-                  onSaved: function() {
-                    self.renderList();
-                  }
-                });
+              getViewGroupId: function() {
+                return self.getModalGroupId();
               },
               onSwitch: function() {
                 self.onLoad(session.id);
               },
-              onRename: function() {
-                self.onRename(session);
-              },
-              onDuplicate: function() {
-                self.plugin.duplicateSession(session.id).then(function() {
-                  self.renderList();
-                });
-              },
-              onRemoveFromGroup: function() {
-                var activeGid = self.getModalGroupId();
-                if (!activeGid) return;
-                var gName = (self.plugin.data.groups[activeGid] || {}).name || "";
-                self.plugin.removeSessionFromGroup(session.id, activeGid).then(function() {
-                  new obsidian2.Notice(L.groupRemovedSession(session.name, gName));
-                  self.renderGroupTabs();
-                  self.renderList();
-                });
-              },
               showMoveToGroup: self.plugin.isGroupFeatureEnabled() && self.plugin.getOrderedGroups().length > 0,
-              onMoveToGroup: function(groupId) {
-                var gName = (self.plugin.data.groups[groupId] || {}).name || "";
-                self.plugin.moveSessionToGroupExclusive(session.id, groupId).then(function(moved) {
-                  if (moved) {
-                    new obsidian2.Notice(L.groupAddedSession(session.name, gName));
-                    self.renderGroupTabs();
-                    self.renderList();
-                  }
-                });
+              forceDeleteConfirm: true,
+              onGroupsChanged: function() {
+                self.renderGroupTabs();
               },
-              onDelete: function() {
-                self.onDelete(session);
-              },
-              onVersionHistory: function() {
-                new HistoryModal(self.app, self.plugin, session).open();
+              onSessionsChanged: function() {
+                self.renderList();
               }
             });
           });
@@ -11229,7 +11347,7 @@ var require_session_manager_modal = __commonJS({
             item.addEventListener("mousedown", function(e) {
               if (e.button !== 0) return;
               if (e.target.closest("button, input, .wpp-icon-btn")) return;
-              if (utils2.isModPressed(e)) return;
+              if (utils.isModPressed(e)) return;
               var startX = e.clientX;
               var startY = e.clientY;
               var dragStarted = false;
@@ -11679,14 +11797,13 @@ var require_statusbar_actions = __commonJS({
     var obsidian2 = require("obsidian");
     var i18n2 = require_i18n();
     var modals2 = require_modals2();
-    var sessionContextMenu = require_session_context_menu();
+    var sessionContextActions = require_session_context_actions();
     var settingsContextMenu = require_settings_context_menu();
     function openSessionMenuAction(plugin, event) {
-      var L = i18n2.L;
       var app = plugin.app;
       var sess = plugin.getActiveSession();
       if (!sess) return;
-      sessionContextMenu.openSessionContextMenu({
+      sessionContextActions.openSessionContextMenu({
         plugin,
         app,
         session: sess,
@@ -11697,41 +11814,10 @@ var require_statusbar_actions = __commonJS({
         showRemoveFromGroup: false,
         showMoveToGroup: plugin.isGroupFeatureEnabled() && plugin.getOrderedGroups().length > 0,
         showCustomizeClicks: true,
-        onMoveToGroup: function(groupId) {
-          var gName = (plugin.data.groups[groupId] || {}).name || "";
-          plugin.moveSessionToGroupExclusive(sess.id, groupId).then(function(moved) {
-            if (moved) {
-              new obsidian2.Notice(L.groupAddedSession(sess.name, gName));
-              plugin.updateStatusBar();
-            }
-          });
-        },
-        onSave: function() {
-          plugin.saveActiveSession();
-        },
-        onReload: function() {
-          plugin.reloadCurrentSessionWithoutSaving();
-        },
-        onSaveAs: function() {
-          plugin.saveAsSession();
-        },
-        onRename: function() {
-          new modals2.RenameModal(app, sess.name, function(newName) {
-            plugin.renameSessionById(sess.id, newName);
-          }, {
-            emptyNotice: L.emptyName
-          }).open();
-        },
-        onDuplicate: function() {
-          plugin.duplicateSession(sess.id);
-        },
-        onDelete: function() {
-          new modals2.ConfirmModal(app, L.confirmDeleteActive(sess.name), function() {
-            plugin.deleteSession(sess.id);
-          }).open();
-        },
-        onVersionHistory: function() {
-          new modals2.HistoryModal(app, plugin, sess).open();
+        forceDeleteConfirm: true,
+        notifyDeleted: false,
+        onSessionsChanged: function() {
+          plugin.updateStatusBar();
         }
       });
     }
@@ -11933,73 +12019,13 @@ var require_statusbar_actions = __commonJS({
   }
 });
 
-// src/plugin/default-data.js
-var require_default_data = __commonJS({
-  "src/plugin/default-data.js"(exports2, module2) {
-    "use strict";
-    module2.exports = {
-      activeSessionId: null,
-      sessions: {},
-      sessionOrder: [],
-      language: "auto",
-      previewNext: true,
-      previewPrevious: true,
-      confirmDeleteByHotkey: true,
-      confirmQuickActions: false,
-      autoSaveOnSwitch: true,
-      warnOnUnsavedSwitch: true,
-      highlightUnsavedSessionChanges: true,
-      statusBarQuickSwitcher: true,
-      groupFeatureEnabled: true,
-      showFilterInput: false,
-      overlayDefaultFocus: "current-session",
-      showActiveSwitchCommand: false,
-      numberedSwitchCommands: true,
-      searchOverlayPosition: null,
-      searchOverlaySize: null,
-      groups: {},
-      groupOrder: [],
-      sessionGroups: {},
-      activeGroupId: null,
-      versionHistoryEnabled: true,
-      versionHistorySnapshotInterval: 5,
-      versionHistoryCtrlRmbRestore: true,
-      versionHistoryConfirmRestore: true,
-      statusBarModScrollSwitch: false,
-      statusBarScrollPreset: "trackpad",
-      statusBarScrollModifierMode: "none",
-      statusBarScrollThreshold: 30,
-      statusBarScrollCooldownMs: 500,
-      statusBarScrollResetMs: 250,
-      statusBarScrollInvert: false,
-      statusBarActions: {
-        click: "quickSwitcher",
-        altClick: "reloadWithoutSaving",
-        modClick: "saveSession",
-        shiftClick: "none",
-        middleClick: "none",
-        altMiddleClick: "none",
-        modMiddleClick: "reloadWithoutSaving",
-        shiftMiddleClick: "none",
-        rightClick: "sessionMenu",
-        altRightClick: "none",
-        modRightClick: "restoreLatestHistory",
-        shiftRightClick: "none"
-      }
-    };
-  }
-});
-
-// src/settings.js
-var require_settings = __commonJS({
-  "src/settings.js"(exports2) {
+// src/settings-ui.js
+var require_settings_ui = __commonJS({
+  "src/settings-ui.js"(exports2, module2) {
     "use strict";
     var obsidian2 = require("obsidian");
     var i18n2 = require_i18n();
     var modals2 = require_modals2();
-    var formatRelativeTime = require_format_relative_time();
-    var statusBarActions2 = require_statusbar_actions();
-    var DEFAULT_DATA2 = require_default_data();
     var GroupSessionsModal = (
       /** @class */
       function(_super) {
@@ -12140,6 +12166,35 @@ var require_settings = __commonJS({
         });
       });
     }
+    module2.exports = {
+      GroupSessionsModal,
+      resolveSettingText,
+      addToggleSetting,
+      addDropdownSetting,
+      addSubsection,
+      addDangerResetSetting,
+      addAsyncActionSetting
+    };
+  }
+});
+
+// src/settings.js
+var require_settings = __commonJS({
+  "src/settings.js"(exports2) {
+    "use strict";
+    var obsidian2 = require("obsidian");
+    var i18n2 = require_i18n();
+    var modals2 = require_modals2();
+    var formatRelativeTime = require_format_relative_time();
+    var statusBarActions = require_statusbar_actions();
+    var settingsUi = require_settings_ui();
+    var GroupSessionsModal = settingsUi.GroupSessionsModal;
+    var resolveSettingText = settingsUi.resolveSettingText;
+    var addToggleSetting = settingsUi.addToggleSetting;
+    var addDropdownSetting = settingsUi.addDropdownSetting;
+    var addSubsection = settingsUi.addSubsection;
+    var addDangerResetSetting = settingsUi.addDangerResetSetting;
+    var addAsyncActionSetting = settingsUi.addAsyncActionSetting;
     var WorkspacePlusPlusSettingTab = (
       /** @class */
       function(_super) {
@@ -12188,10 +12243,9 @@ var require_settings = __commonJS({
               }
               dropdown.setValue(self.plugin.data.language || "auto");
               dropdown.onChange(function(value) {
-                self.plugin.data.language = value;
-                i18n2.resolveLocale(value);
-                self.plugin.persistData();
-                self.display();
+                self.plugin.setLanguageSetting(value).then(function() {
+                  self.display();
+                });
               });
             });
             new obsidian2.Setting(contentEl).setName(L.settingsHotkeys).addButton(function(btn) {
@@ -12205,8 +12259,8 @@ var require_settings = __commonJS({
               });
             });
             addSection(L.settingsSectionStatusBar);
-            var slotKeys = statusBarActions2.SLOT_KEYS;
-            var actionIds = statusBarActions2.ACTION_IDS;
+            var slotKeys = statusBarActions.SLOT_KEYS;
+            var actionIds = statusBarActions.ACTION_IDS;
             var slotLabelMap = {
               click: "statusBarSlotClick",
               altClick: "statusBarSlotAltClick",
@@ -12228,15 +12282,11 @@ var require_settings = __commonJS({
                 new obsidian2.Setting(contentEl).setName(slotLabel).addDropdown(function(dropdown) {
                   for (var ai = 0; ai < actionIds.length; ai++) {
                     var aid = actionIds[ai];
-                    dropdown.addOption(aid, statusBarActions2.getActionLabel(L, aid));
+                    dropdown.addOption(aid, statusBarActions.getActionLabel(L, aid));
                   }
                   dropdown.setValue((self.plugin.data.statusBarActions || {})[slotKey] || "none");
                   dropdown.onChange(function(value) {
-                    if (!self.plugin.data.statusBarActions) {
-                      self.plugin.data.statusBarActions = Object.assign({}, DEFAULT_DATA2.statusBarActions);
-                    }
-                    self.plugin.data.statusBarActions[slotKey] = value;
-                    self.plugin.persistData();
+                    self.plugin.setStatusBarAction(slotKey, value);
                   });
                 });
               })(slotKeys[si]);
@@ -12259,8 +12309,7 @@ var require_settings = __commonJS({
                 desc: L.settingsWarnUnsavedSwitchDesc,
                 value: self.plugin.isWarnOnUnsavedSwitchEnabled(),
                 onChange: function(value) {
-                  self.plugin.data.warnOnUnsavedSwitch = value;
-                  self.plugin.persistData();
+                  self.plugin.setWarnOnUnsavedSwitch(value);
                 }
               });
               addToggleSetting(contentEl, {
@@ -12268,9 +12317,7 @@ var require_settings = __commonJS({
                 desc: L.settingsHighlightUnsavedSessionChangesDesc,
                 value: self.plugin.isUnsavedStatusBarHighlightEnabled(),
                 onChange: function(value) {
-                  self.plugin.data.highlightUnsavedSessionChanges = value;
-                  self.plugin.updateStatusBar();
-                  self.plugin.persistData();
+                  self.plugin.setUnsavedStatusBarHighlight(value);
                 }
               });
               addToggleSetting(contentEl, {
@@ -12278,8 +12325,7 @@ var require_settings = __commonJS({
                 desc: L.settingsConfirmQuickActionsDesc,
                 value: !!self.plugin.data.confirmQuickActions,
                 onChange: function(value) {
-                  self.plugin.data.confirmQuickActions = value;
-                  self.plugin.persistData();
+                  self.plugin.setConfirmQuickActions(value);
                 }
               });
             }
@@ -12289,9 +12335,9 @@ var require_settings = __commonJS({
               desc: L.settingsStatusBarModScrollSwitchDesc,
               value: !!self.plugin.data.statusBarModScrollSwitch,
               onChange: function(value) {
-                self.plugin.data.statusBarModScrollSwitch = value;
-                self.plugin.persistData();
-                self.display();
+                self.plugin.setStatusBarModScrollSwitch(value).then(function() {
+                  self.display();
+                });
               }
             });
             if (self.plugin.data.statusBarModScrollSwitch) {
@@ -12306,9 +12352,9 @@ var require_settings = __commonJS({
                   custom: L.settingsStatusBarScrollPresetCustom
                 },
                 onChange: function(value) {
-                  self.plugin.data.statusBarScrollPreset = value;
-                  self.plugin.persistData();
-                  self.display();
+                  self.plugin.setStatusBarScrollPreset(value).then(function() {
+                    self.display();
+                  });
                 }
               });
               addDropdownSetting(contentEl, {
@@ -12322,8 +12368,7 @@ var require_settings = __commonJS({
                   modOrAlt: L.settingsStatusBarScrollModifierModOrAlt
                 },
                 onChange: function(value) {
-                  self.plugin.data.statusBarScrollModifierMode = value;
-                  self.plugin.persistData();
+                  self.plugin.setStatusBarScrollModifierMode(value);
                 }
               });
               var useCustomScroll = (self.plugin.data.statusBarScrollPreset || "trackpad") === "custom";
@@ -12342,8 +12387,7 @@ var require_settings = __commonJS({
                   "90": "90"
                 },
                 onChange: function(value) {
-                  self.plugin.data.statusBarScrollThreshold = Number(value) || 30;
-                  self.plugin.persistData();
+                  self.plugin.setStatusBarScrollThreshold(value);
                 }
               });
               addDropdownSetting(contentEl, {
@@ -12359,8 +12403,7 @@ var require_settings = __commonJS({
                   "1000": "1000 ms"
                 },
                 onChange: function(value) {
-                  self.plugin.data.statusBarScrollCooldownMs = Number(value) || 500;
-                  self.plugin.persistData();
+                  self.plugin.setStatusBarScrollCooldownMs(value);
                 }
               });
               addDropdownSetting(contentEl, {
@@ -12375,8 +12418,7 @@ var require_settings = __commonJS({
                   "600": "600 ms"
                 },
                 onChange: function(value) {
-                  self.plugin.data.statusBarScrollResetMs = Number(value) || 250;
-                  self.plugin.persistData();
+                  self.plugin.setStatusBarScrollResetMs(value);
                 }
               });
               addToggleSetting(contentEl, {
@@ -12384,8 +12426,7 @@ var require_settings = __commonJS({
                 desc: L.settingsStatusBarScrollInvertDesc,
                 value: !!self.plugin.data.statusBarScrollInvert,
                 onChange: function(value) {
-                  self.plugin.data.statusBarScrollInvert = value;
-                  self.plugin.persistData();
+                  self.plugin.setStatusBarScrollInvert(value);
                 }
               });
             }
@@ -12395,8 +12436,7 @@ var require_settings = __commonJS({
               desc: L.settingsShowActiveSwitchCommandDesc,
               value: !!self.plugin.data.showActiveSwitchCommand,
               onChange: function(value) {
-                self.plugin.data.showActiveSwitchCommand = value;
-                self.plugin.persistData();
+                self.plugin.setShowActiveSwitchCommand(value);
               }
             });
             addToggleSetting(contentEl, {
@@ -12404,9 +12444,7 @@ var require_settings = __commonJS({
               desc: L.settingsNumberedSwitchCommandsDesc,
               value: !!self.plugin.data.numberedSwitchCommands,
               onChange: function(value) {
-                self.plugin.data.numberedSwitchCommands = value;
-                self.plugin.persistData();
-                self.plugin.syncSessionCommands();
+                self.plugin.setNumberedSwitchCommands(value);
               }
             });
             addSubsection(contentEl, L.settingsSubsectionSwitchPreview);
@@ -12414,10 +12452,9 @@ var require_settings = __commonJS({
             var masterSetting = new obsidian2.Setting(contentEl).setName(L.settingsPreviewHeading).setDesc(L.settingsPreviewDesc).addToggle(function(toggle) {
               toggle.setValue(allOn);
               toggle.onChange(function(value) {
-                self.plugin.data.previewNext = value;
-                self.plugin.data.previewPrevious = value;
-                self.plugin.persistData();
-                self.display();
+                self.plugin.setSwitchPreviewEnabled(value).then(function() {
+                  self.display();
+                });
               });
             });
             masterSetting.settingEl.addClass("wpp-has-nested");
@@ -12425,17 +12462,17 @@ var require_settings = __commonJS({
             new obsidian2.Setting(nestedDiv).setName(L.settingsPreviewNext).addToggle(function(toggle) {
               toggle.setValue(!!self.plugin.data.previewNext);
               toggle.onChange(function(value) {
-                self.plugin.data.previewNext = value;
-                self.plugin.persistData();
-                self.display();
+                self.plugin.setPreviewNext(value).then(function() {
+                  self.display();
+                });
               });
             });
             new obsidian2.Setting(nestedDiv).setName(L.settingsPreviewPrevious).addToggle(function(toggle) {
               toggle.setValue(!!self.plugin.data.previewPrevious);
               toggle.onChange(function(value) {
-                self.plugin.data.previewPrevious = value;
-                self.plugin.persistData();
-                self.display();
+                self.plugin.setPreviewPrevious(value).then(function() {
+                  self.display();
+                });
               });
             });
             addSection(L.settingsSectionSessionListSearch);
@@ -12444,8 +12481,7 @@ var require_settings = __commonJS({
               desc: L.settingsShowFilterInputDesc,
               value: !!self.plugin.data.showFilterInput,
               onChange: function(value) {
-                self.plugin.data.showFilterInput = value;
-                self.plugin.persistData();
+                self.plugin.setShowFilterInput(value);
               }
             });
             new obsidian2.Setting(contentEl).setName(L.settingsOverlayDefaultFocus).setDesc(L.settingsOverlayDefaultFocusDesc).addDropdown(function(dropdown) {
@@ -12454,8 +12490,7 @@ var require_settings = __commonJS({
               dropdown.addOption("session-create", L.settingsOverlayFocusSessionCreate);
               dropdown.setValue(self.plugin.data.overlayDefaultFocus || "current-session");
               dropdown.onChange(function(value) {
-                self.plugin.data.overlayDefaultFocus = value;
-                self.plugin.persistData();
+                self.plugin.setOverlayDefaultFocus(value);
               });
             });
             addSection(L.settingsSectionDeletion);
@@ -12464,8 +12499,7 @@ var require_settings = __commonJS({
               desc: L.settingsConfirmDeleteDesc,
               value: self.plugin.data.confirmDeleteByHotkey !== false,
               onChange: function(value) {
-                self.plugin.data.confirmDeleteByHotkey = value;
-                self.plugin.persistData();
+                self.plugin.setConfirmDeleteByHotkey(value);
               }
             });
             addSection(L.historyTitle);
@@ -12473,14 +12507,9 @@ var require_settings = __commonJS({
             var vhMasterSetting = new obsidian2.Setting(contentEl).setName(L.settingsVersionHistoryEnabled).setDesc(L.settingsVersionHistoryEnabledDesc).addToggle(function(toggle) {
               toggle.setValue(versionHistoryEnabled);
               toggle.onChange(function(value) {
-                self.plugin.data.versionHistoryEnabled = value;
-                self.plugin.persistData();
-                if (value) {
-                  self.plugin.startHistorySnapshotTimer();
-                } else {
-                  self.plugin.stopHistorySnapshotTimer();
-                }
-                self.display();
+                self.plugin.setVersionHistoryEnabled(value).then(function() {
+                  self.display();
+                });
               });
             });
             vhMasterSetting.settingEl.addClass("wpp-has-nested");
@@ -12496,9 +12525,7 @@ var require_settings = __commonJS({
                 dropdown.setValue(String(self.plugin.getVersionHistorySnapshotInterval()));
                 if (!versionHistoryEnabled) dropdown.setDisabled(true);
                 dropdown.onChange(function(value) {
-                  self.plugin.data.versionHistorySnapshotInterval = parseInt(value, 10);
-                  self.plugin.persistData();
-                  self.plugin.startHistorySnapshotTimer();
+                  self.plugin.setVersionHistorySnapshotInterval(value);
                 });
               });
             }
@@ -12508,8 +12535,7 @@ var require_settings = __commonJS({
               value: self.plugin.isVersionHistoryConfirmRestoreEnabled(),
               disabled: !versionHistoryEnabled,
               onChange: function(value) {
-                self.plugin.data.versionHistoryConfirmRestore = value;
-                self.plugin.persistData();
+                self.plugin.setVersionHistoryConfirmRestore(value);
               }
             });
             addSection(L.rotationBackupSectionTitle);
@@ -12809,6 +12835,63 @@ var require_settings = __commonJS({
   }
 });
 
+// src/plugin/default-data.js
+var require_default_data = __commonJS({
+  "src/plugin/default-data.js"(exports2, module2) {
+    "use strict";
+    module2.exports = {
+      activeSessionId: null,
+      sessions: {},
+      sessionOrder: [],
+      language: "auto",
+      previewNext: true,
+      previewPrevious: true,
+      confirmDeleteByHotkey: true,
+      confirmQuickActions: false,
+      autoSaveOnSwitch: true,
+      warnOnUnsavedSwitch: true,
+      highlightUnsavedSessionChanges: true,
+      statusBarQuickSwitcher: true,
+      groupFeatureEnabled: true,
+      showFilterInput: false,
+      overlayDefaultFocus: "current-session",
+      showActiveSwitchCommand: false,
+      numberedSwitchCommands: true,
+      searchOverlayPosition: null,
+      searchOverlaySize: null,
+      groups: {},
+      groupOrder: [],
+      sessionGroups: {},
+      activeGroupId: null,
+      versionHistoryEnabled: true,
+      versionHistorySnapshotInterval: 5,
+      versionHistoryCtrlRmbRestore: true,
+      versionHistoryConfirmRestore: true,
+      statusBarModScrollSwitch: false,
+      statusBarScrollPreset: "trackpad",
+      statusBarScrollModifierMode: "none",
+      statusBarScrollThreshold: 30,
+      statusBarScrollCooldownMs: 500,
+      statusBarScrollResetMs: 250,
+      statusBarScrollInvert: false,
+      statusBarActions: {
+        click: "quickSwitcher",
+        altClick: "reloadWithoutSaving",
+        modClick: "saveSession",
+        shiftClick: "none",
+        middleClick: "none",
+        altMiddleClick: "none",
+        modMiddleClick: "reloadWithoutSaving",
+        shiftMiddleClick: "none",
+        rightClick: "sessionMenu",
+        altRightClick: "none",
+        modRightClick: "restoreLatestHistory",
+        shiftRightClick: "none"
+      }
+    };
+  }
+});
+
 // src/plugin/register-commands.js
 var require_register_commands = __commonJS({
   "src/plugin/register-commands.js"(exports2, module2) {
@@ -13035,10 +13118,10 @@ var require_register_commands = __commonJS({
 var require_hotkeys = __commonJS({
   "src/plugin/methods/hotkeys.js"(exports2, module2) {
     "use strict";
-    var utils2 = require_utils();
-    function attachHotkeyMethods2(WorkspacePlusPlus2) {
+    var utils = require_utils();
+    function attachHotkeyMethods(WorkspacePlusPlus2) {
       WorkspacePlusPlus2.prototype.formatHotkey = function(hotkey) {
-        var isMac = utils2.isMacPlatform();
+        var isMac = utils.isMacPlatform();
         var parts = [];
         var mods = hotkey.modifiers || [];
         for (var i = 0; i < mods.length; i++) {
@@ -13076,24 +13159,19 @@ var require_hotkeys = __commonJS({
         }
       };
     }
-    module2.exports = attachHotkeyMethods2;
+    module2.exports = attachHotkeyMethods;
   }
 });
 
-// src/plugin/methods/overlays.js
-var require_overlays = __commonJS({
-  "src/plugin/methods/overlays.js"(exports2, module2) {
+// src/search-overlay-key-handler.js
+var require_search_overlay_key_handler = __commonJS({
+  "src/search-overlay-key-handler.js"(exports2, module2) {
     "use strict";
     var obsidian2 = require("obsidian");
     var i18n2 = require_i18n();
     var modals2 = require_modals2();
-    var formatRelativeTime = require_format_relative_time();
-    var groupTabUi = require_group_tab_ui();
     var navigationUtils = require_navigation_utils();
-    var utils2 = require_utils();
-    var sessionContextMenu = require_session_context_menu();
-    var settingsContextMenu = require_settings_context_menu();
-    var sessionListActions = require_session_list_actions();
+    var utils = require_utils();
     function hasBlockingModal() {
       return !!document.querySelector(".modal-container");
     }
@@ -13225,7 +13303,7 @@ var require_overlays = __commonJS({
         if (!plugin.searchOverlayEl) return;
         if (hasBlockingModal()) return;
         var activeEl = document.activeElement;
-        if (utils2.isModPressed(e)) {
+        if (utils.isModPressed(e)) {
           return;
         }
         if (e.key === "Escape") {
@@ -13261,7 +13339,30 @@ var require_overlays = __commonJS({
         }
       };
     }
-    function attachOverlayMethods2(WorkspacePlusPlus2) {
+    module2.exports = {
+      hasBlockingModal,
+      syncSearchOverlaySelectedIndex,
+      createSearchOverlayKeyHandler
+    };
+  }
+});
+
+// src/plugin/methods/overlays.js
+var require_overlays = __commonJS({
+  "src/plugin/methods/overlays.js"(exports2, module2) {
+    "use strict";
+    var obsidian2 = require("obsidian");
+    var i18n2 = require_i18n();
+    var modals2 = require_modals2();
+    var formatRelativeTime = require_format_relative_time();
+    var groupTabUi = require_group_tab_ui();
+    var navigationUtils = require_navigation_utils();
+    var utils = require_utils();
+    var searchOverlayKeys = require_search_overlay_key_handler();
+    var sessionContextActions = require_session_context_actions();
+    var settingsContextMenu = require_settings_context_menu();
+    var sessionListActions = require_session_list_actions();
+    function attachOverlayMethods(WorkspacePlusPlus2) {
       WorkspacePlusPlus2.prototype.filterSessionsByQuery = function(sessions, query) {
         var q = (query || "").trim().toLowerCase();
         if (!q) return sessions.slice();
@@ -13282,7 +13383,7 @@ var require_overlays = __commonJS({
         var selectedIndex = 0;
         var keyboardNav = false;
         function syncSelectedIndexToActive(options) {
-          selectedIndex = syncSearchOverlaySelectedIndex(self, filtered, selectedIndex, options || {});
+          selectedIndex = searchOverlayKeys.syncSearchOverlaySelectedIndex(self, filtered, selectedIndex, options || {});
         }
         syncSelectedIndexToActive();
         function getOverlayGroupId() {
@@ -13552,7 +13653,7 @@ var require_overlays = __commonJS({
               itemEl.addEventListener("contextmenu", function(e) {
                 e.preventDefault();
                 var selectedGroupId = getOverlayGroupId();
-                sessionContextMenu.openSessionContextMenu({
+                sessionContextActions.openSessionContextMenu({
                   plugin: self,
                   app: self.app,
                   session: sess,
@@ -13560,76 +13661,15 @@ var require_overlays = __commonJS({
                   event: e,
                   showSwitch: true,
                   showRemoveFromGroup: !!selectedGroupId,
-                  onSave: function() {
-                    self.saveActiveSession().then(function() {
-                      refreshOrderedSessions();
-                    });
-                  },
-                  onReload: function() {
-                    self.reloadCurrentSessionWithoutSaving();
-                  },
-                  onOverwriteWithCurrentLayout: function() {
-                    self.confirmOverwriteSessionWithCurrentLayout(sess.id, {
-                      onSaved: function() {
-                        refreshOrderedSessions();
-                      }
-                    });
-                  },
+                  getViewGroupId: getOverlayGroupId,
                   onSwitch: function() {
                     selectedIndex = idx;
                     switchSelected();
                   },
-                  onRename: function() {
-                    sessionListActions.renameSessionWithPrompt({
-                      app: self.app,
-                      plugin: self,
-                      session: sess,
-                      onRenamed: function() {
-                        refreshOrderedSessions();
-                      }
-                    });
-                  },
-                  onDuplicate: function() {
-                    self.duplicateSession(sess.id).then(function() {
-                      refreshOrderedSessions();
-                    });
-                  },
-                  onRemoveFromGroup: function() {
-                    var activeGid = getOverlayGroupId();
-                    if (!activeGid) return;
-                    var gName = (self.data.groups[activeGid] || {}).name || "";
-                    self.removeSessionFromGroup(sess.id, activeGid).then(function() {
-                      new obsidian2.Notice(L.groupRemovedSession(sess.name, gName));
-                      renderGroupTabs();
-                      refreshOrderedSessions();
-                    });
-                  },
                   showMoveToGroup: self.isGroupFeatureEnabled() && self.getOrderedGroups().length > 0,
-                  onMoveToGroup: function(groupId) {
-                    var gName = (self.data.groups[groupId] || {}).name || "";
-                    self.moveSessionToGroupExclusive(sess.id, groupId).then(function(moved) {
-                      if (moved) {
-                        new obsidian2.Notice(L.groupAddedSession(sess.name, gName));
-                        renderGroupTabs();
-                        refreshOrderedSessions();
-                      }
-                    });
-                  },
-                  onDelete: function() {
-                    sessionListActions.deleteSessionWithPrompt({
-                      app: self.app,
-                      plugin: self,
-                      session: sess,
-                      isActive: _isActive,
-                      confirmMessage: L.confirmDeleteActive(sess.name),
-                      onDeleted: function() {
-                        refreshOrderedSessions();
-                      }
-                    });
-                  },
-                  onVersionHistory: function() {
-                    new modals2.HistoryModal(self.app, self, sess).open();
-                  }
+                  deleteConfirmMessage: L.confirmDeleteActive(sess.name),
+                  onGroupsChanged: renderGroupTabs,
+                  onSessionsChanged: refreshOrderedSessions
                 });
               });
               if (_saveIcon) {
@@ -13893,7 +13933,7 @@ var require_overlays = __commonJS({
           syncSelectedIndexToActive();
           renderList();
         };
-        this.searchOverlayKeyHandler = createSearchOverlayKeyHandler({
+        this.searchOverlayKeyHandler = searchOverlayKeys.createSearchOverlayKeyHandler({
           plugin: self,
           overlay,
           saveInput,
@@ -13924,7 +13964,7 @@ var require_overlays = __commonJS({
         });
         this.searchOverlayClickOutsideHandler = function(e) {
           if (!self.searchOverlayEl) return;
-          if (hasBlockingModal()) return;
+          if (searchOverlayKeys.hasBlockingModal()) return;
           if (self.statusBarEl && self.statusBarEl.contains(e.target)) return;
           if (!self.searchOverlayEl.contains(e.target)) {
             self.hideSearchOverlay();
@@ -14379,7 +14419,7 @@ var require_overlays = __commonJS({
         }
         var showTime = Date.now();
         this.overlayKeyUpHandler = function(e) {
-          if (!utils2.isModShiftPressed(e)) {
+          if (!utils.isModShiftPressed(e)) {
             var elapsed = Date.now() - showTime;
             var minDelay = Math.max(0, 300 - elapsed);
             self.cleanupOverlayListeners();
@@ -14408,7 +14448,7 @@ var require_overlays = __commonJS({
             clearTimeout(self.switchOverlayTimer);
           }
           safetyCheck();
-          if (e.key === "Tab" && self.switchOverlayEl && !utils2.isModPressed(e)) {
+          if (e.key === "Tab" && self.switchOverlayEl && !utils.isModPressed(e)) {
             if (!self.isGroupFeatureEnabled() || self.getOrderedGroups().length === 0) return;
             e.preventDefault();
             e.stopImmediatePropagation();
@@ -14472,7 +14512,7 @@ var require_overlays = __commonJS({
         this._refreshOverlaySessions = null;
       };
     }
-    module2.exports = attachOverlayMethods2;
+    module2.exports = attachOverlayMethods;
   }
 });
 
@@ -14557,7 +14597,7 @@ var require_persistence = __commonJS({
       var d = new Date(ts);
       return String(d.getFullYear()) + pad2(d.getMonth() + 1) + pad2(d.getDate()) + "-" + pad2(d.getHours()) + pad2(d.getMinutes()) + pad2(d.getSeconds());
     }
-    function attachPersistenceMethods2(WorkspacePlusPlus2) {
+    function attachPersistenceMethods(WorkspacePlusPlus2) {
       WorkspacePlusPlus2.prototype.getBackupPath = function() {
         return this.manifest.dir + "/data.backup.json";
       };
@@ -15173,7 +15213,216 @@ var require_persistence = __commonJS({
         });
       };
     }
-    module2.exports = attachPersistenceMethods2;
+    module2.exports = attachPersistenceMethods;
+  }
+});
+
+// src/layout-utils.js
+var require_layout_utils = __commonJS({
+  "src/layout-utils.js"(exports2, module2) {
+    "use strict";
+    function serializeLayout(layout) {
+      try {
+        return JSON.stringify(layout || null);
+      } catch (e) {
+        return "";
+      }
+    }
+    function layoutsEqual(a, b) {
+      return serializeLayout(a) === serializeLayout(b);
+    }
+    function cloneLayout(layout) {
+      if (layout === void 0) return void 0;
+      return JSON.parse(JSON.stringify(layout));
+    }
+    function looksLikeWorkspaceItem(value) {
+      return value && typeof value === "object" && typeof value.id === "string" && typeof value.type === "string" && (Array.isArray(value.children) || value.state !== void 0 || value.currentTab !== void 0 || value.direction !== void 0 || value.collapsed !== void 0);
+    }
+    function normalizeLayoutForComparison(layout) {
+      var volatileKeys = {
+        eState: true,
+        lastOpenFiles: true,
+        left: true,
+        scroll: true,
+        top: true
+      };
+      function normalizeNode(value, depth) {
+        if (Array.isArray(value)) {
+          return value.map(function(item) {
+            return normalizeNode(item, depth + 1);
+          });
+        }
+        if (value && typeof value === "object") {
+          var normalized = {};
+          var isWorkspaceItem = looksLikeWorkspaceItem(value);
+          var keys = Object.keys(value).sort();
+          for (var i = 0; i < keys.length; i++) {
+            var key = keys[i];
+            if (volatileKeys[key]) continue;
+            if (key === "id" && isWorkspaceItem) continue;
+            if (key === "active" && depth === 0 && typeof value[key] === "string") continue;
+            normalized[key] = normalizeNode(value[key], depth + 1);
+          }
+          return normalized;
+        }
+        return value;
+      }
+      return normalizeNode(layout || null, 0);
+    }
+    function layoutsEqualStructural(a, b) {
+      try {
+        return JSON.stringify(normalizeLayoutForComparison(a)) === JSON.stringify(normalizeLayoutForComparison(b));
+      } catch (e) {
+        return layoutsEqual(a, b);
+      }
+    }
+    module2.exports = {
+      serializeLayout,
+      layoutsEqual,
+      cloneLayout,
+      normalizeLayoutForComparison,
+      layoutsEqualStructural
+    };
+  }
+});
+
+// src/plugin/methods/sessions.js
+var require_sessions = __commonJS({
+  "src/plugin/methods/sessions.js"(exports2, module2) {
+    "use strict";
+    var layoutUtils = require_layout_utils();
+    function attachSessionMethods(WorkspacePlusPlus2) {
+      WorkspacePlusPlus2.prototype.syncSessionOrder = function() {
+        var sessions = this.data.sessions;
+        var order = this.data.sessionOrder;
+        this.data.sessionOrder = order.filter(function(id) {
+          return !!sessions[id];
+        });
+        var inOrder = {};
+        for (var i = 0; i < this.data.sessionOrder.length; i++) {
+          inOrder[this.data.sessionOrder[i]] = true;
+        }
+        var missing = Object.keys(sessions).filter(function(id) {
+          return !inOrder[id];
+        });
+        missing.sort(function(a, b) {
+          if (sessions[a].isDefault) return -1;
+          if (sessions[b].isDefault) return 1;
+          return sessions[a].name.localeCompare(sessions[b].name);
+        });
+        for (var j = 0; j < missing.length; j++) {
+          if (sessions[missing[j]].isDefault) {
+            this.data.sessionOrder.unshift(missing[j]);
+          } else {
+            this.data.sessionOrder.push(missing[j]);
+          }
+        }
+      };
+      WorkspacePlusPlus2.prototype.getOrderedSessionsUnfiltered = function() {
+        var sessions = this.data.sessions;
+        return this.data.sessionOrder.map(function(id) {
+          return sessions[id];
+        }).filter(function(s) {
+          return !!s;
+        });
+      };
+      WorkspacePlusPlus2.prototype.getOrderedSessionsForGroup = function(groupId) {
+        var all = this.getOrderedSessionsUnfiltered();
+        if (!this.isGroupFeatureEnabled()) return all;
+        var targetGroupId = groupId || null;
+        if (!targetGroupId) return all;
+        var sessionGroups = this.data.sessionGroups || {};
+        return all.filter(function(s) {
+          var groups = sessionGroups[s.id];
+          return groups && groups.indexOf(targetGroupId) !== -1;
+        });
+      };
+      WorkspacePlusPlus2.prototype.getOrderedSessions = function() {
+        if (!this.isGroupFeatureEnabled()) {
+          return this.getOrderedSessionsUnfiltered();
+        }
+        return this.getOrderedSessionsForGroup(this.data.activeGroupId);
+      };
+      WorkspacePlusPlus2.prototype.mergeVisibleSessionOrder = function(visibleOrder) {
+        var fullOrder = Array.isArray(this.data.sessionOrder) ? this.data.sessionOrder : [];
+        var visible = Array.isArray(visibleOrder) ? visibleOrder : [];
+        var visibleSet = {};
+        for (var i = 0; i < visible.length; i++) {
+          visibleSet[visible[i]] = true;
+        }
+        var visibleIdx = 0;
+        var merged = [];
+        for (var fi = 0; fi < fullOrder.length; fi++) {
+          if (visibleSet[fullOrder[fi]]) {
+            merged.push(visible[visibleIdx++]);
+          } else {
+            merged.push(fullOrder[fi]);
+          }
+        }
+        while (visibleIdx < visible.length) {
+          merged.push(visible[visibleIdx++]);
+        }
+        return merged;
+      };
+      WorkspacePlusPlus2.prototype.setSessionOrderFromVisible = function(visibleOrder, options) {
+        var prev = Array.isArray(this.data.sessionOrder) ? this.data.sessionOrder : [];
+        var merged = this.mergeVisibleSessionOrder(visibleOrder);
+        var changed = prev.length !== merged.length;
+        if (!changed) {
+          for (var i = 0; i < prev.length; i++) {
+            if (prev[i] !== merged[i]) {
+              changed = true;
+              break;
+            }
+          }
+        }
+        this.data.sessionOrder = merged;
+        if (!(options && options.syncCommands === false)) {
+          this.syncSessionCommands();
+        }
+        if (options && options.persist === false) return Promise.resolve(changed);
+        if (!changed) return Promise.resolve(false);
+        return this.persistData().then(function() {
+          return true;
+        });
+      };
+      WorkspacePlusPlus2.prototype.getSessionIndex = function(sessions, sessionId) {
+        var idx = this.findSessionIndex(sessions, sessionId);
+        return idx === -1 ? 0 : idx;
+      };
+      WorkspacePlusPlus2.prototype.findSessionIndex = function(sessions, sessionId) {
+        if (!sessions || sessions.length === 0) return -1;
+        for (var i = 0; i < sessions.length; i++) {
+          if (sessions[i] && sessions[i].id === sessionId) {
+            return i;
+          }
+        }
+        return -1;
+      };
+      WorkspacePlusPlus2.prototype.findActiveSessionIndex = function(sessions) {
+        return this.findSessionIndex(sessions, this.data.activeSessionId);
+      };
+      WorkspacePlusPlus2.prototype.getActiveSessionIndex = function(sessions) {
+        return this.getSessionIndex(sessions, this.data.activeSessionId);
+      };
+      WorkspacePlusPlus2.prototype.getActiveSession = function() {
+        if (!this.data.activeSessionId) return null;
+        return this.data.sessions[this.data.activeSessionId] || null;
+      };
+      WorkspacePlusPlus2.prototype.getCurrentWorkspaceLayout = function() {
+        return this.app.workspace.getLayout();
+      };
+      WorkspacePlusPlus2.prototype.serializeLayout = function(layout) {
+        return layoutUtils.serializeLayout(layout);
+      };
+      WorkspacePlusPlus2.prototype.layoutsEqual = function(a, b) {
+        return layoutUtils.layoutsEqual(a, b);
+      };
+      WorkspacePlusPlus2.prototype.layoutsEqualStructural = function(a, b) {
+        return layoutUtils.layoutsEqualStructural(a, b);
+      };
+    }
+    module2.exports = attachSessionMethods;
   }
 });
 
@@ -15346,392 +15595,14 @@ var require_sessions_validation = __commonJS({
   }
 });
 
-// src/plugin/methods/sessions.js
-var require_sessions = __commonJS({
-  "src/plugin/methods/sessions.js"(exports2, module2) {
+// src/plugin/methods/groups.js
+var require_groups = __commonJS({
+  "src/plugin/methods/groups.js"(exports2, module2) {
     "use strict";
     var obsidian2 = require("obsidian");
     var i18n2 = require_i18n();
-    var utils2 = require_utils();
-    var modals2 = require_modals2();
-    var attachSessionValidationMethods = require_sessions_validation();
-    var STARTUP_SETTLE_MS = 1200;
-    var STARTUP_LAYOUT_CHANGE_SETTLE_MS = 400;
-    var STARTUP_SETTLE_MAX_MS = 5e3;
-    var SESSION_SWITCH_NOTICE_DURATION_MS = 1200;
-    function attachSessionMethods2(WorkspacePlusPlus2) {
-      attachSessionValidationMethods(WorkspacePlusPlus2);
-      WorkspacePlusPlus2.prototype.syncSessionOrder = function() {
-        var sessions = this.data.sessions;
-        var order = this.data.sessionOrder;
-        this.data.sessionOrder = order.filter(function(id) {
-          return !!sessions[id];
-        });
-        var inOrder = {};
-        for (var i = 0; i < this.data.sessionOrder.length; i++) {
-          inOrder[this.data.sessionOrder[i]] = true;
-        }
-        var missing = Object.keys(sessions).filter(function(id) {
-          return !inOrder[id];
-        });
-        missing.sort(function(a, b) {
-          if (sessions[a].isDefault) return -1;
-          if (sessions[b].isDefault) return 1;
-          return sessions[a].name.localeCompare(sessions[b].name);
-        });
-        for (var j = 0; j < missing.length; j++) {
-          if (sessions[missing[j]].isDefault) {
-            this.data.sessionOrder.unshift(missing[j]);
-          } else {
-            this.data.sessionOrder.push(missing[j]);
-          }
-        }
-      };
-      WorkspacePlusPlus2.prototype.clearSessionSwitchNotice = function() {
-        if (!this.sessionSwitchNotice) return;
-        this.sessionSwitchNotice.hide();
-        this.sessionSwitchNotice = null;
-      };
-      WorkspacePlusPlus2.prototype.showSessionSwitchNotice = function(sessionName, options) {
-        var self = this;
-        var L = i18n2.L;
-        options = options || {};
-        var durationMs = typeof options.durationMs === "number" ? options.durationMs : SESSION_SWITCH_NOTICE_DURATION_MS;
-        this.clearSessionSwitchNotice();
-        var notice = new obsidian2.Notice(L.loaded(sessionName), durationMs);
-        this.sessionSwitchNotice = notice;
-        if (durationMs > 0) {
-          setTimeout(function() {
-            if (self.sessionSwitchNotice === notice) {
-              self.sessionSwitchNotice = null;
-            }
-          }, durationMs + 50);
-        }
-        return notice;
-      };
-      WorkspacePlusPlus2.prototype.getOrderedSessionsUnfiltered = function() {
-        var sessions = this.data.sessions;
-        return this.data.sessionOrder.map(function(id) {
-          return sessions[id];
-        }).filter(function(s) {
-          return !!s;
-        });
-      };
-      WorkspacePlusPlus2.prototype.getOrderedSessionsForGroup = function(groupId) {
-        var all = this.getOrderedSessionsUnfiltered();
-        if (!this.isGroupFeatureEnabled()) return all;
-        var targetGroupId = groupId || null;
-        if (!targetGroupId) return all;
-        var sessionGroups = this.data.sessionGroups || {};
-        return all.filter(function(s) {
-          var groups = sessionGroups[s.id];
-          return groups && groups.indexOf(targetGroupId) !== -1;
-        });
-      };
-      WorkspacePlusPlus2.prototype.getOrderedSessions = function() {
-        if (!this.isGroupFeatureEnabled()) {
-          return this.getOrderedSessionsUnfiltered();
-        }
-        return this.getOrderedSessionsForGroup(this.data.activeGroupId);
-      };
-      WorkspacePlusPlus2.prototype.mergeVisibleSessionOrder = function(visibleOrder) {
-        var fullOrder = Array.isArray(this.data.sessionOrder) ? this.data.sessionOrder : [];
-        var visible = Array.isArray(visibleOrder) ? visibleOrder : [];
-        var visibleSet = {};
-        for (var i = 0; i < visible.length; i++) {
-          visibleSet[visible[i]] = true;
-        }
-        var visibleIdx = 0;
-        var merged = [];
-        for (var fi = 0; fi < fullOrder.length; fi++) {
-          if (visibleSet[fullOrder[fi]]) {
-            merged.push(visible[visibleIdx++]);
-          } else {
-            merged.push(fullOrder[fi]);
-          }
-        }
-        while (visibleIdx < visible.length) {
-          merged.push(visible[visibleIdx++]);
-        }
-        return merged;
-      };
-      WorkspacePlusPlus2.prototype.setSessionOrderFromVisible = function(visibleOrder, options) {
-        var prev = Array.isArray(this.data.sessionOrder) ? this.data.sessionOrder : [];
-        var merged = this.mergeVisibleSessionOrder(visibleOrder);
-        var changed = prev.length !== merged.length;
-        if (!changed) {
-          for (var i = 0; i < prev.length; i++) {
-            if (prev[i] !== merged[i]) {
-              changed = true;
-              break;
-            }
-          }
-        }
-        this.data.sessionOrder = merged;
-        if (!(options && options.syncCommands === false)) {
-          this.syncSessionCommands();
-        }
-        if (options && options.persist === false) return Promise.resolve(changed);
-        if (!changed) return Promise.resolve(false);
-        return this.persistData().then(function() {
-          return true;
-        });
-      };
-      WorkspacePlusPlus2.prototype.getSessionIndex = function(sessions, sessionId) {
-        var idx = this.findSessionIndex(sessions, sessionId);
-        return idx === -1 ? 0 : idx;
-      };
-      WorkspacePlusPlus2.prototype.findSessionIndex = function(sessions, sessionId) {
-        if (!sessions || sessions.length === 0) return -1;
-        for (var i = 0; i < sessions.length; i++) {
-          if (sessions[i] && sessions[i].id === sessionId) {
-            return i;
-          }
-        }
-        return -1;
-      };
-      WorkspacePlusPlus2.prototype.findActiveSessionIndex = function(sessions) {
-        return this.findSessionIndex(sessions, this.data.activeSessionId);
-      };
-      WorkspacePlusPlus2.prototype.getActiveSessionIndex = function(sessions) {
-        return this.getSessionIndex(sessions, this.data.activeSessionId);
-      };
-      WorkspacePlusPlus2.prototype.syncSessionCommands = function() {
-        var L = i18n2.L;
-        var ordered = this.getOrderedSessions();
-        var self = this;
-        var oldIds = this._dynamicSessionCommandIds || [];
-        for (var i = 0; i < oldIds.length; i++) {
-          this.removeCommand(oldIds[i]);
-        }
-        this._dynamicSessionCommandIds = [];
-        var dynamicStart;
-        if (self.data.numberedSwitchCommands) {
-          for (var n = 1; n <= 9; n++) {
-            (function(num) {
-              self.removeCommand("switch-to-" + num);
-              var session = ordered[num - 1];
-              self.addCommand({
-                id: "switch-to-" + num,
-                name: L.cmdSwitchTo(num, session ? session.name : void 0),
-                checkCallback: function(checking) {
-                  if (!self.data.showActiveSwitchCommand) {
-                    var currentOrdered = self.getOrderedSessions();
-                    var targetSession = currentOrdered[num - 1];
-                    if (targetSession && targetSession.id === self.data.activeSessionId) return false;
-                  }
-                  if (!checking) self.switchToIndex(num - 1);
-                  return true;
-                }
-              });
-            })(n);
-          }
-          dynamicStart = 9;
-        } else {
-          for (var n = 1; n <= 9; n++) {
-            self.removeCommand("switch-to-" + n);
-          }
-          dynamicStart = 0;
-        }
-        for (var j = dynamicStart; j < ordered.length; j++) {
-          (function(session) {
-            var cmdId = "switch-to-named-" + session.id;
-            self.addCommand({
-              id: cmdId,
-              name: L.cmdSwitchToNamed(session.name),
-              checkCallback: function(checking) {
-                if (!self.data.showActiveSwitchCommand) {
-                  if (session.id === self.data.activeSessionId) return false;
-                }
-                if (!checking) self.switchSessionByIdFromCommand(session.id);
-                return true;
-              }
-            });
-            self._dynamicSessionCommandIds.push(cmdId);
-          })(ordered[j]);
-        }
-      };
-      WorkspacePlusPlus2.prototype.getRelativeSwitchContext = function(offset) {
-        var ordered = this.getOrderedSessions();
-        if (ordered.length === 0) {
-          return {
-            ordered,
-            currentIndex: -1,
-            targetIndex: 0,
-            isEmpty: true
-          };
-        }
-        var currentIndex = this.findActiveSessionIndex(ordered);
-        if (currentIndex === -1) return null;
-        return {
-          ordered,
-          currentIndex,
-          targetIndex: (currentIndex + offset + ordered.length) % ordered.length,
-          isEmpty: false
-        };
-      };
-      WorkspacePlusPlus2.prototype.switchSessionAtOrderedIndex = function(ordered, index, options) {
-        options = options || {};
-        if (!ordered || index < 0 || index >= ordered.length) {
-          return Promise.resolve(false);
-        }
-        if (options.overlayMode === "preview") {
-          this.showSwitchPreviewOverlay(ordered, index, options.viewGroupId);
-        } else if (options.overlayMode === "feedback") {
-          this.showSwitchFeedbackOverlay(ordered, index, options.viewGroupId, options.overlayOptions);
-        }
-        if (!ordered[index]) {
-          return Promise.resolve(false);
-        }
-        if (ordered[index].id === this.data.activeSessionId) {
-          if (options.noticeMode === "replace") {
-            this.showSessionSwitchNotice(ordered[index].name, {
-              durationMs: options.switchNoticeDurationMs
-            });
-          }
-          return Promise.resolve(false);
-        }
-        return this.switchSession(ordered[index].id, {
-          silent: options.silent !== false,
-          switchNoticeMode: options.noticeMode,
-          switchNoticeDurationMs: options.switchNoticeDurationMs
-        });
-      };
-      WorkspacePlusPlus2.prototype.switchToIndex = function(index) {
-        var ordered = this.getOrderedSessions();
-        return this.switchSessionAtOrderedIndex(ordered, index, {
-          overlayMode: "feedback",
-          silent: true
-        });
-      };
-      WorkspacePlusPlus2.prototype.switchSessionByIdFromCommand = function(sessionId) {
-        var ordered = this.getOrderedSessions();
-        var index = this.findSessionIndex(ordered, sessionId);
-        return this.switchSessionAtOrderedIndex(ordered, index, {
-          overlayMode: "feedback",
-          silent: true
-        });
-      };
-      WorkspacePlusPlus2.prototype.switchRelativeDirect = function(offset, options) {
-        options = options || {};
-        var context = this.getRelativeSwitchContext(offset);
-        if (!context) return Promise.resolve(false);
-        if (context.isEmpty) {
-          if (options.overlayMode === "preview") {
-            this.showSwitchPreviewOverlay(context.ordered, 0, options.viewGroupId);
-          } else if (options.overlayMode === "feedback") {
-            this.showSwitchFeedbackOverlay(context.ordered, 0, options.viewGroupId, options.overlayOptions);
-          }
-          return Promise.resolve(false);
-        }
-        return this.switchSessionAtOrderedIndex(context.ordered, context.targetIndex, options);
-      };
-      WorkspacePlusPlus2.prototype.switchRelativeFromCommand = function(offset) {
-        var context = this.getRelativeSwitchContext(offset);
-        if (!context) return Promise.resolve(false);
-        if (context.isEmpty) {
-          this.showSwitchPreviewOverlay(context.ordered, 0);
-          return Promise.resolve(false);
-        }
-        var previewEnabled = offset > 0 ? this.data.previewNext : this.data.previewPrevious;
-        if (previewEnabled && !this.switchOverlayEl) {
-          this.showSwitchPreviewOverlay(context.ordered, context.currentIndex);
-          return Promise.resolve(false);
-        }
-        return this.switchSessionAtOrderedIndex(context.ordered, context.targetIndex, {
-          overlayMode: "preview",
-          silent: true
-        });
-      };
-      WorkspacePlusPlus2.prototype.switchRelativeFromStatusBar = function(offset) {
-        return this.switchRelativeDirect(offset, {
-          overlayMode: "none",
-          noticeMode: "replace",
-          silent: true
-        });
-      };
-      WorkspacePlusPlus2.prototype.switchRelativeFromScroll = function(offset) {
-        return this.switchRelativeDirect(offset, {
-          overlayMode: "none",
-          noticeMode: "replace",
-          silent: true
-        });
-      };
-      WorkspacePlusPlus2.prototype.switchRelative = function(offset) {
-        return this.switchRelativeFromCommand(offset);
-      };
-      WorkspacePlusPlus2.prototype.switchRelativeImmediate = function(offset, options) {
-        options = options || {};
-        return this.switchRelativeDirect(offset, {
-          overlayMode: options.showOverlay === false ? "none" : "feedback",
-          overlayOptions: options.overlayOptions,
-          silent: true
-        });
-      };
-      WorkspacePlusPlus2.prototype.getActiveSession = function() {
-        if (!this.data.activeSessionId) return null;
-        return this.data.sessions[this.data.activeSessionId] || null;
-      };
-      WorkspacePlusPlus2.prototype.getCurrentWorkspaceLayout = function() {
-        return this.app.workspace.getLayout();
-      };
-      WorkspacePlusPlus2.prototype.serializeLayout = function(layout) {
-        try {
-          return JSON.stringify(layout || null);
-        } catch (e) {
-          return "";
-        }
-      };
-      WorkspacePlusPlus2.prototype.layoutsEqual = function(a, b) {
-        return this.serializeLayout(a) === this.serializeLayout(b);
-      };
-      WorkspacePlusPlus2.prototype.layoutsEqualStructural = function(a, b) {
-        try {
-          var volatileKeys = {
-            eState: true,
-            lastOpenFiles: true,
-            left: true,
-            scroll: true,
-            top: true
-          };
-          var looksLikeWorkspaceItem = function(value) {
-            return value && typeof value === "object" && typeof value.id === "string" && typeof value.type === "string" && (Array.isArray(value.children) || value.state !== void 0 || value.currentTab !== void 0 || value.direction !== void 0 || value.collapsed !== void 0);
-          };
-          var normalizeNode = function(value, depth) {
-            if (Array.isArray(value)) {
-              return value.map(function(item) {
-                return normalizeNode(item, depth + 1);
-              });
-            }
-            if (value && typeof value === "object") {
-              var normalized = {};
-              var isWorkspaceItem = looksLikeWorkspaceItem(value);
-              var keys = Object.keys(value).sort();
-              for (var i = 0; i < keys.length; i++) {
-                var key = keys[i];
-                if (volatileKeys[key]) continue;
-                if (key === "id" && isWorkspaceItem) continue;
-                if (key === "active" && depth === 0 && typeof value[key] === "string") continue;
-                normalized[key] = normalizeNode(value[key], depth + 1);
-              }
-              return normalized;
-            }
-            return value;
-          };
-          return JSON.stringify(normalizeNode(a || null, 0)) === JSON.stringify(normalizeNode(b || null, 0));
-        } catch (e) {
-          return this.layoutsEqual(a, b);
-        }
-      };
-      WorkspacePlusPlus2.prototype.isAutoSaveOnSwitchEnabled = function() {
-        return this.data.autoSaveOnSwitch !== false;
-      };
-      WorkspacePlusPlus2.prototype.isWarnOnUnsavedSwitchEnabled = function() {
-        return this.data.warnOnUnsavedSwitch !== false;
-      };
-      WorkspacePlusPlus2.prototype.isUnsavedStatusBarHighlightEnabled = function() {
-        return this.data.highlightUnsavedSessionChanges !== false;
-      };
+    var utils = require_utils();
+    function attachGroupMethods(WorkspacePlusPlus2) {
       WorkspacePlusPlus2.prototype.isGroupFeatureEnabled = function() {
         return this.data.groupFeatureEnabled !== false;
       };
@@ -15758,192 +15629,6 @@ var require_sessions = __commonJS({
           return true;
         });
       };
-      WorkspacePlusPlus2.prototype.getDefaultSessionName = function() {
-        return i18n2.L.defaultSessionName;
-      };
-      WorkspacePlusPlus2.prototype.getAutoSessionName = function(n) {
-        return i18n2.L.sessionAutoName(n);
-      };
-      WorkspacePlusPlus2.prototype.isActiveSessionDirty = function() {
-        var session = this.getActiveSession();
-        if (!session) return false;
-        return !this.layoutsEqualStructural(session.layout, this.getCurrentWorkspaceLayout());
-      };
-      WorkspacePlusPlus2.prototype.shouldShowUnsavedStatusBarHighlight = function() {
-        return this.isUnsavedStatusBarHighlightEnabled() && !this.isAutoSaveOnSwitchEnabled() && this.isActiveSessionDirty();
-      };
-      WorkspacePlusPlus2.prototype.setAutoSaveOnSwitch = function(enabled, options) {
-        var L = i18n2.L;
-        options = options || {};
-        this.data.autoSaveOnSwitch = !!enabled;
-        var isOn = this.isAutoSaveOnSwitchEnabled();
-        if (isOn) {
-          this.startHistorySnapshotTimer();
-        } else {
-          this.stopHistorySnapshotTimer();
-        }
-        this.updateStatusBar();
-        return this.persistData().then(function() {
-          if (options.notify) {
-            new obsidian2.Notice(isOn ? L.autoSaveEnabled : L.autoSaveDisabled);
-          }
-          return isOn;
-        });
-      };
-      WorkspacePlusPlus2.prototype.toggleAutoSaveOnSwitch = function(options) {
-        var next = !this.isAutoSaveOnSwitchEnabled();
-        return this.setAutoSaveOnSwitch(next, options || {});
-      };
-      WorkspacePlusPlus2.prototype.saveActiveSession = function(options) {
-        var L = i18n2.L;
-        options = options || {};
-        var self = this;
-        var session = this.getActiveSession();
-        if (!session) {
-          if (!options.silent) new obsidian2.Notice(L.noSession);
-          return Promise.resolve(false);
-        }
-        if (!options.silent && session.isDefault && session.name === this.getDefaultSessionName()) {
-          var doSave = function(name2, resolve) {
-            session.name = name2;
-            self.pushLayoutToHistory(session);
-            session.layout = self.getCurrentWorkspaceLayout();
-            session.modified = Date.now();
-            self.updateStatusBar();
-            self.syncSessionCommands();
-            self.persistData().then(function() {
-              new obsidian2.Notice(L.savedSession(name2));
-              resolve(true);
-            });
-          };
-          return new Promise(function(resolve) {
-            new modals2.RenameModal(self.app, "", function(newName) {
-              doSave(newName, resolve);
-            }, {
-              title: L.nameSessionTitle,
-              placeholder: L.nameSessionPlaceholder,
-              buttonText: L.saveInline,
-              skipButtonText: L.saveWithoutNaming,
-              onSkip: function() {
-                doSave(session.name, resolve);
-              }
-            }).open();
-          });
-        }
-        var currentLayout = this.getCurrentWorkspaceLayout();
-        var changed = !this.layoutsEqualStructural(session.layout, currentLayout);
-        this.pushLayoutToHistory(session);
-        session.layout = currentLayout;
-        if (changed || options.touchModified) {
-          session.modified = Date.now();
-        }
-        this.updateStatusBar();
-        var name = session.name;
-        return this.persistData().then(function() {
-          if (!options.silent) {
-            if (changed) {
-              new obsidian2.Notice(L.savedSession(name));
-            } else {
-              new obsidian2.Notice(L.noChanges);
-            }
-          }
-          return changed;
-        });
-      };
-      WorkspacePlusPlus2.prototype.overwriteSessionWithCurrentLayout = function(sessionId, options) {
-        var L = i18n2.L;
-        options = options || {};
-        var session = this.data.sessions[sessionId];
-        if (!session) {
-          if (!options.silent) new obsidian2.Notice(L.noSession);
-          return Promise.resolve(false);
-        }
-        var currentLayout = this.getCurrentWorkspaceLayout();
-        var changed = !this.layoutsEqualStructural(session.layout, currentLayout);
-        this.pushLayoutToHistory(session);
-        session.layout = currentLayout;
-        if (changed || options.touchModified) {
-          session.modified = Date.now();
-        }
-        this.updateStatusBar();
-        return this.persistData().then(function() {
-          if (!options.silent) {
-            if (changed) {
-              new obsidian2.Notice(L.savedCurrentLayoutToSession(session.name));
-            } else {
-              new obsidian2.Notice(L.noChanges);
-            }
-          }
-          return changed;
-        });
-      };
-      WorkspacePlusPlus2.prototype.confirmOverwriteSessionWithCurrentLayout = function(sessionId, options) {
-        var L = i18n2.L;
-        options = options || {};
-        var self = this;
-        var session = this.data.sessions[sessionId];
-        if (!session) {
-          if (!options.silent) new obsidian2.Notice(L.noSession);
-          return false;
-        }
-        new modals2.ConfirmModal(this.app, L.confirmOverwriteSessionWithCurrentLayout(session.name), function() {
-          self.overwriteSessionWithCurrentLayout(sessionId, options).then(function(saved) {
-            if (saved && typeof options.onSaved === "function") options.onSaved(session);
-          });
-        }, {
-          confirmText: L.saveInline,
-          confirmClass: "mod-cta"
-        }).open();
-        return true;
-      };
-      WorkspacePlusPlus2.prototype.reloadCurrentSessionWithoutSaving = function(options) {
-        var L = i18n2.L;
-        options = options || {};
-        var session = this.getActiveSession();
-        if (!session) {
-          if (!options.silent) new obsidian2.Notice(L.noSession);
-          return Promise.resolve(false);
-        }
-        var applyLayout = session.layout ? this.app.workspace.changeLayout(session.layout).catch(function() {
-        }) : Promise.resolve();
-        var name = session.name;
-        return applyLayout.then(function() {
-          if (!options.silent) {
-            new obsidian2.Notice(L.reloadedSession(name));
-          }
-          return true;
-        }).catch(function() {
-          return false;
-        });
-      };
-      WorkspacePlusPlus2.prototype.updateStatusBar = function() {
-        var L = i18n2.L;
-        var session = this.getActiveSession();
-        if (!this.statusBarEl) return;
-        var showUnsavedHighlight = this.shouldShowUnsavedStatusBarHighlight();
-        this.statusBarEl.removeClass("wpp-status-bar-unsaved");
-        if (showUnsavedHighlight) {
-          this.statusBarEl.addClass("wpp-status-bar-unsaved");
-        }
-        this.statusBarEl.empty();
-        var icon = this.statusBarEl.createSpan({ cls: "wpp-status-icon" });
-        obsidian2.setIcon(icon, "panels-top-left");
-        var activeGroup = this.getActiveGroup();
-        if (activeGroup) {
-          this.statusBarEl.createSpan({
-            text: activeGroup.name,
-            cls: "wpp-status-group"
-          });
-          this.statusBarEl.createSpan({
-            text: " / ",
-            cls: "wpp-status-separator"
-          });
-        }
-        this.statusBarEl.createSpan({
-          text: session ? session.name : L.noSession,
-          cls: "wpp-status-name"
-        });
-      };
       WorkspacePlusPlus2.prototype.attachSessionToActiveGroup = function(sessionId) {
         if (!this.isGroupFeatureEnabled()) return;
         var activeGroupId = this.data.activeGroupId;
@@ -15955,474 +15640,6 @@ var require_sessions = __commonJS({
         if (this.data.sessionGroups[sessionId].indexOf(activeGroupId) === -1) {
           this.data.sessionGroups[sessionId].push(activeGroupId);
         }
-      };
-      WorkspacePlusPlus2.prototype.insertSessionAndActivate = function(session) {
-        this.data.sessions[session.id] = session;
-        this.data.sessionOrder.push(session.id);
-        this.data.activeSessionId = session.id;
-        this.attachSessionToActiveGroup(session.id);
-      };
-      WorkspacePlusPlus2.prototype.captureActiveSessionLayoutIfAutoSave = function() {
-        var current = this.getActiveSession();
-        if (!current || !this.isAutoSaveOnSwitchEnabled()) return;
-        this.pushLayoutToHistory(current);
-        current.layout = this.getCurrentWorkspaceLayout();
-        current.modified = Date.now();
-      };
-      WorkspacePlusPlus2.prototype.createSessionRecord = function(id, name, layout, options) {
-        options = options || {};
-        var record = {
-          id,
-          name,
-          modified: typeof options.modified === "number" ? options.modified : Date.now(),
-          layout
-        };
-        if (options.isDefault) {
-          record.isDefault = true;
-        }
-        return record;
-      };
-      WorkspacePlusPlus2.prototype.createSession = function(name) {
-        var id = utils2.generateId();
-        var layout = this.getCurrentWorkspaceLayout();
-        this.insertSessionAndActivate(this.createSessionRecord(id, name, layout));
-        this.updateStatusBar();
-        this.syncSessionCommands();
-        return this.persistData();
-      };
-      WorkspacePlusPlus2.prototype.runSwitchRequest = function(request) {
-        var self = this;
-        this.isSwitchingSession = true;
-        this.switchLockAt = Date.now();
-        this.performSessionSwitch(request.targetId, request.options || {}).then(function(ok) {
-          request.resolve(ok);
-        }).catch(function() {
-          request.resolve(false);
-        }).then(function() {
-          self.isSwitchingSession = false;
-          self.switchLockAt = 0;
-          if (!self.pendingSwitchRequest) return;
-          var next = self.pendingSwitchRequest;
-          self.pendingSwitchRequest = null;
-          self.runSwitchRequest(next);
-        });
-      };
-      WorkspacePlusPlus2.prototype.switchSession = function(targetId, options) {
-        var self = this;
-        options = options || {};
-        var startupDelayMs = this.getStartupSettleRemainingMs();
-        if (startupDelayMs > 0) {
-          return new Promise(function(resolve) {
-            setTimeout(function() {
-              self.switchSession(targetId, options).then(resolve);
-            }, startupDelayMs);
-          });
-        }
-        if (this.isSwitchingSession) {
-          var lockAt = this.switchLockAt || 0;
-          var elapsed = lockAt ? Date.now() - lockAt : Number.MAX_SAFE_INTEGER;
-          var hasBlockingUi = !!document.querySelector(".wpp-confirm-buttons") || !!document.querySelector(".wpp-switch-overlay");
-          if (!hasBlockingUi && elapsed > 5e3) {
-            this.isSwitchingSession = false;
-            this.switchLockAt = 0;
-            if (this.pendingSwitchRequest) {
-              this.pendingSwitchRequest.resolve(false);
-              this.pendingSwitchRequest = null;
-            }
-          }
-        }
-        if (!this.data.sessions[targetId]) return Promise.resolve(false);
-        if (targetId === this.data.activeSessionId && !this.isSwitchingSession) {
-          return Promise.resolve(false);
-        }
-        return new Promise(function(resolve) {
-          var request = {
-            targetId,
-            options,
-            resolve
-          };
-          if (self.isSwitchingSession) {
-            if (self.pendingSwitchRequest) {
-              self.pendingSwitchRequest.resolve(false);
-            }
-            self.pendingSwitchRequest = request;
-            return;
-          }
-          self.runSwitchRequest(request);
-        });
-      };
-      WorkspacePlusPlus2.prototype.performSessionSwitch = function(targetId, options) {
-        var L = i18n2.L;
-        var self = this;
-        options = options || {};
-        var target = this.data.sessions[targetId];
-        if (!target) return Promise.resolve(false);
-        if (target.id === this.data.activeSessionId) return Promise.resolve(false);
-        var performSwitch = function(skipCurrentSave) {
-          var current = self.getActiveSession();
-          if (current && !skipCurrentSave) {
-            self.pushLayoutToHistory(current);
-            current.layout = self.getCurrentWorkspaceLayout();
-            current.modified = Date.now();
-          }
-          self.data.activeSessionId = targetId;
-          var applyLayout = target.layout ? self.app.workspace.changeLayout(target.layout).catch(function() {
-          }) : Promise.resolve();
-          return applyLayout.then(function() {
-            self.updateStatusBar();
-            return self.persistData();
-          }).then(function() {
-            if (options.switchNoticeMode === "replace") {
-              self.showSessionSwitchNotice(target.name, {
-                durationMs: options.switchNoticeDurationMs
-              });
-            } else if (!options.silent) {
-              new obsidian2.Notice(L.loaded(target.name));
-            }
-            return true;
-          });
-        };
-        var autoSaveOnSwitch = this.isAutoSaveOnSwitchEnabled();
-        var shouldWarn = !autoSaveOnSwitch && !options.skipUnsavedWarning && this.isWarnOnUnsavedSwitchEnabled() && this.isActiveSessionDirty();
-        if (shouldWarn) {
-          return new Promise(function(resolve) {
-            new modals2.UnsavedSwitchModal(
-              self.app,
-              L.confirmUnsavedSwitch(target.name),
-              function() {
-                self.saveActiveSession({ silent: true, touchModified: true }).then(function() {
-                  return performSwitch(true);
-                }).then(function(ok) {
-                  resolve(ok);
-                }).catch(function() {
-                  resolve(false);
-                });
-              },
-              function() {
-                performSwitch(true).then(function(ok) {
-                  resolve(ok);
-                }).catch(function() {
-                  resolve(false);
-                });
-              },
-              function() {
-                resolve(false);
-              }
-            ).open();
-          });
-        }
-        return performSwitch(!autoSaveOnSwitch);
-      };
-      WorkspacePlusPlus2.prototype.deleteSession = function(sessionId) {
-        var session = this.data.sessions[sessionId];
-        if (!session || Object.keys(this.data.sessions).length <= 1) return Promise.resolve(false);
-        var wasActive = this.data.activeSessionId === sessionId;
-        var nextActiveId = null;
-        delete this.data.sessions[sessionId];
-        var orderIdx = this.data.sessionOrder.indexOf(sessionId);
-        if (orderIdx !== -1) this.data.sessionOrder.splice(orderIdx, 1);
-        if (this.data.sessionGroups && this.data.sessionGroups[sessionId]) {
-          delete this.data.sessionGroups[sessionId];
-        }
-        if (wasActive) {
-          var fallbackIdx = Math.min(orderIdx, this.data.sessionOrder.length - 1);
-          var remaining = this.data.sessionOrder[fallbackIdx] || Object.keys(this.data.sessions)[0];
-          nextActiveId = remaining || null;
-          this.data.activeSessionId = nextActiveId;
-        }
-        var applyNextLayout = Promise.resolve();
-        if (wasActive && nextActiveId) {
-          var nextSession = this.data.sessions[nextActiveId];
-          applyNextLayout = nextSession && nextSession.layout ? this.app.workspace.changeLayout(nextSession.layout).catch(function() {
-          }) : Promise.resolve();
-        }
-        this.updateStatusBar();
-        this.syncSessionCommands();
-        var self = this;
-        return applyNextLayout.then(function() {
-          return self.persistData();
-        }).then(function() {
-          return true;
-        });
-      };
-      WorkspacePlusPlus2.prototype.renameCurrentSession = function() {
-        var L = i18n2.L;
-        var self = this;
-        var session = this.getActiveSession();
-        if (!session) {
-          new obsidian2.Notice(L.noSession);
-          return;
-        }
-        new modals2.RenameModal(this.app, session.name, function(newName) {
-          self.renameSessionById(session.id, newName);
-        }, {
-          emptyNotice: L.emptyName
-        }).open();
-      };
-      WorkspacePlusPlus2.prototype.deleteCurrentSession = function() {
-        var L = i18n2.L;
-        var self = this;
-        var session = this.getActiveSession();
-        if (!session) {
-          new obsidian2.Notice(L.noSession);
-          return;
-        }
-        if (Object.keys(this.data.sessions).length <= 1) {
-          new obsidian2.Notice(L.cannotDeleteLast);
-          return;
-        }
-        var doDelete = function() {
-          return self.deleteSession(session.id).then(function(deleted) {
-            if (!deleted) return;
-            new obsidian2.Notice(L.deleted(session.name));
-          });
-        };
-        if (!this.data.confirmDeleteByHotkey) {
-          doDelete();
-          return;
-        }
-        new modals2.ConfirmModal(this.app, L.confirmDeleteActive(session.name), doDelete, {
-          hint: L.confirmDeleteSettingsHint,
-          onHintClick: function() {
-            self.app.setting.open();
-            self.app.setting.openTabById(self.manifest.id);
-          }
-        }).open();
-      };
-      WorkspacePlusPlus2.prototype.deleteAllInactiveSessions = function() {
-        var self = this;
-        var activeId = this.data.activeSessionId;
-        var ids = Object.keys(this.data.sessions || {}).filter(function(id) {
-          return id !== activeId;
-        });
-        var promises = ids.map(function(id) {
-          return self.deleteSession(id);
-        });
-        return Promise.all(promises).then(function(results) {
-          var deletedCount = 0;
-          for (var i = 0; i < results.length; i++) {
-            if (results[i]) deletedCount++;
-          }
-          return deletedCount;
-        });
-      };
-      WorkspacePlusPlus2.prototype.getNextSessionName = function() {
-        var sessions = this.data.sessions;
-        var existing = {};
-        var keys = Object.keys(sessions);
-        for (var i = 0; i < keys.length; i++) {
-          existing[sessions[keys[i]].name] = true;
-        }
-        var n = 1;
-        while (existing[this.getAutoSessionName(n)]) {
-          n++;
-        }
-        return this.getAutoSessionName(n);
-      };
-      WorkspacePlusPlus2.prototype.resetSessionsToDefault = function() {
-        var id = utils2.generateId();
-        this.hideSwitchOverlay();
-        this.data.sessions = {};
-        this.data.sessionOrder = [];
-        this.data.activeSessionId = null;
-        this.data.groups = {};
-        this.data.groupOrder = [];
-        this.data.sessionGroups = {};
-        this.data.activeGroupId = null;
-        this.data.sessions[id] = this.createSessionRecord(
-          id,
-          this.getDefaultSessionName(),
-          this.getCurrentWorkspaceLayout(),
-          { isDefault: true }
-        );
-        this.data.sessionOrder.push(id);
-        this.data.activeSessionId = id;
-        this.updateStatusBar();
-        this.syncSessionCommands();
-        return this.persistData();
-      };
-      WorkspacePlusPlus2.prototype.createEmptySession = function() {
-        var L = i18n2.L;
-        var name = this.getNextSessionName();
-        this.captureActiveSessionLayoutIfAutoSave();
-        var id = utils2.generateId();
-        var session = this.createSessionRecord(id, name, null);
-        this.insertSessionAndActivate(session);
-        var leaves = [];
-        this.app.workspace.iterateRootLeaves(function(leaf) {
-          leaves.push(leaf);
-        });
-        for (var i = 0; i < leaves.length; i++) {
-          leaves[i].detach();
-        }
-        session.layout = this.getCurrentWorkspaceLayout();
-        this.updateStatusBar();
-        this.syncSessionCommands();
-        new obsidian2.Notice(L.created(name));
-        return this.persistData();
-      };
-      WorkspacePlusPlus2.prototype.duplicateCurrentSession = function() {
-        var L = i18n2.L;
-        var name = this.getNextSessionName();
-        this.captureActiveSessionLayoutIfAutoSave();
-        var id = utils2.generateId();
-        this.insertSessionAndActivate(this.createSessionRecord(id, name, this.getCurrentWorkspaceLayout()));
-        this.updateStatusBar();
-        this.syncSessionCommands();
-        new obsidian2.Notice(L.duplicated(name));
-        return this.persistData();
-      };
-      WorkspacePlusPlus2.prototype.saveAsSession = function() {
-        var L = i18n2.L;
-        var self = this;
-        var session = this.getActiveSession();
-        if (!session) {
-          new obsidian2.Notice(L.noSession);
-          return Promise.resolve(false);
-        }
-        return new Promise(function(resolve) {
-          new modals2.RenameModal(self.app, "", function(newName) {
-            self.captureActiveSessionLayoutIfAutoSave();
-            var layout = self.getCurrentWorkspaceLayout();
-            var existing = null;
-            var allSessions = self.getOrderedSessionsUnfiltered();
-            for (var i = 0; i < allSessions.length; i++) {
-              if (allSessions[i].name === newName) {
-                existing = allSessions[i];
-                break;
-              }
-            }
-            if (existing) {
-              existing.layout = layout;
-              existing.modified = Date.now();
-              self.data.activeSessionId = existing.id;
-            } else {
-              var id = utils2.generateId();
-              self.insertSessionAndActivate(
-                self.createSessionRecord(id, newName, layout)
-              );
-            }
-            self.updateStatusBar();
-            self.syncSessionCommands();
-            new obsidian2.Notice(L.savedAs(newName));
-            self.persistData().then(function() {
-              resolve(true);
-            });
-          }, {
-            title: L.nameSessionTitle,
-            placeholder: L.nameSessionPlaceholder,
-            buttonText: L.saveInline,
-            emptyNotice: L.emptyName
-          }).open();
-        });
-      };
-      WorkspacePlusPlus2.prototype.duplicateSession = function(sessionId) {
-        var L = i18n2.L;
-        var source = this.data.sessions[sessionId];
-        if (!source) return Promise.resolve();
-        var name = this.getNextSessionName();
-        var newId = utils2.generateId();
-        this.data.sessions[newId] = this.createSessionRecord(
-          newId,
-          name,
-          JSON.parse(JSON.stringify(source.layout))
-        );
-        this.data.sessionOrder.push(newId);
-        var groups = (this.data.sessionGroups || {})[sessionId];
-        if (groups && groups.length > 0) {
-          if (!this.data.sessionGroups) this.data.sessionGroups = {};
-          this.data.sessionGroups[newId] = groups.slice();
-        }
-        this.syncSessionCommands();
-        new obsidian2.Notice(L.duplicated(name));
-        return this.persistData();
-      };
-      WorkspacePlusPlus2.prototype.ensureDefaultSession = function() {
-        var hasDefault = Object.values(this.data.sessions).some(function(s) {
-          return s.isDefault;
-        });
-        if (hasDefault) return;
-        var id = utils2.generateId();
-        this.data.sessions[id] = this.createSessionRecord(
-          id,
-          this.getDefaultSessionName(),
-          this.getCurrentWorkspaceLayout(),
-          { isDefault: true }
-        );
-        this.data.sessionOrder.unshift(id);
-        this.data.activeSessionId = id;
-        this.updateStatusBar();
-        this.syncSessionCommands();
-        this.persistData();
-      };
-      WorkspacePlusPlus2.prototype.setStartupSettleDeadline = function(deadlineMs) {
-        var self = this;
-        var nextDeadline = typeof deadlineMs === "number" ? deadlineMs : 0;
-        if (this.startupSettleTimer) {
-          clearTimeout(this.startupSettleTimer);
-          this.startupSettleTimer = null;
-        }
-        if (nextDeadline <= Date.now()) {
-          this.startupSettleStartedAt = 0;
-          this.startupSettleUntil = 0;
-          return 0;
-        }
-        this.startupSettleUntil = nextDeadline;
-        this.startupSettleTimer = setTimeout(function() {
-          self.startupSettleStartedAt = 0;
-          self.startupSettleUntil = 0;
-          self.startupSettleTimer = null;
-        }, nextDeadline - Date.now());
-        return this.startupSettleUntil;
-      };
-      WorkspacePlusPlus2.prototype.startStartupSettleWindow = function(durationMs) {
-        var startedAt = Date.now();
-        var duration = typeof durationMs === "number" && durationMs > 0 ? durationMs : STARTUP_SETTLE_MS;
-        this.startupSettleStartedAt = startedAt;
-        return this.setStartupSettleDeadline(startedAt + duration);
-      };
-      WorkspacePlusPlus2.prototype.getStartupSettleRemainingMs = function() {
-        var remaining = (this.startupSettleUntil || 0) - Date.now();
-        return remaining > 0 ? remaining : 0;
-      };
-      WorkspacePlusPlus2.prototype.isStartupSettling = function() {
-        return this.getStartupSettleRemainingMs() > 0;
-      };
-      WorkspacePlusPlus2.prototype.noteStartupLayoutChange = function() {
-        if (!this.isStartupSettling()) return;
-        var startedAt = this.startupSettleStartedAt || Date.now();
-        var maxDeadline = startedAt + STARTUP_SETTLE_MAX_MS;
-        var nextDeadline = Math.min(maxDeadline, Date.now() + STARTUP_LAYOUT_CHANGE_SETTLE_MS);
-        if (nextDeadline <= (this.startupSettleUntil || 0)) return;
-        this.setStartupSettleDeadline(nextDeadline);
-        this.scheduleStartupFlush();
-      };
-      WorkspacePlusPlus2.prototype.scheduleStartupFlush = function() {
-        var self = this;
-        if (this.startupFlushTimer) {
-          clearTimeout(this.startupFlushTimer);
-          this.startupFlushTimer = null;
-        }
-        if (!this.isAutoSaveOnSwitchEnabled()) return Promise.resolve(false);
-        var delayMs = this.getStartupSettleRemainingMs();
-        if (delayMs <= 0) {
-          return Promise.resolve(this.flushOnStartup());
-        }
-        return new Promise(function(resolve) {
-          self.startupFlushTimer = setTimeout(function() {
-            self.startupFlushTimer = null;
-            resolve(self.flushOnStartup());
-          }, delayMs);
-        });
-      };
-      WorkspacePlusPlus2.prototype.flushOnStartup = function() {
-        if (!this.isAutoSaveOnSwitchEnabled()) return;
-        var session = this.getActiveSession();
-        if (!session) return;
-        this.pushLayoutToHistory(session);
-        session.layout = this.getCurrentWorkspaceLayout();
-        session.modified = Date.now();
-        return this.persistData();
       };
       WorkspacePlusPlus2.prototype.getOrderedGroups = function() {
         if (!this.isGroupFeatureEnabled()) return [];
@@ -16490,7 +15707,7 @@ var require_sessions = __commonJS({
       };
       WorkspacePlusPlus2.prototype.createGroup = function(name) {
         var L = i18n2.L;
-        var id = utils2.generateId();
+        var id = utils.generateId();
         if (!this.data.groups) this.data.groups = {};
         this.data.groups[id] = { id, name };
         var nextOrder = Array.isArray(this.data.groupOrder) ? this.data.groupOrder.slice() : [];
@@ -16722,7 +15939,949 @@ var require_sessions = __commonJS({
         return result;
       };
     }
-    module2.exports = attachSessionMethods2;
+    module2.exports = attachGroupMethods;
+  }
+});
+
+// src/plugin/methods/session-crud.js
+var require_session_crud = __commonJS({
+  "src/plugin/methods/session-crud.js"(exports2, module2) {
+    "use strict";
+    var obsidian2 = require("obsidian");
+    var i18n2 = require_i18n();
+    var utils = require_utils();
+    var layoutUtils = require_layout_utils();
+    var modals2 = require_modals2();
+    function attachSessionCrudMethods(WorkspacePlusPlus2) {
+      WorkspacePlusPlus2.prototype.getDefaultSessionName = function() {
+        return i18n2.L.defaultSessionName;
+      };
+      WorkspacePlusPlus2.prototype.getAutoSessionName = function(n) {
+        return i18n2.L.sessionAutoName(n);
+      };
+      WorkspacePlusPlus2.prototype.insertSessionAndActivate = function(session) {
+        this.data.sessions[session.id] = session;
+        this.data.sessionOrder.push(session.id);
+        this.data.activeSessionId = session.id;
+        this.attachSessionToActiveGroup(session.id);
+      };
+      WorkspacePlusPlus2.prototype.createSessionRecord = function(id, name, layout, options) {
+        options = options || {};
+        var record = {
+          id,
+          name,
+          modified: typeof options.modified === "number" ? options.modified : Date.now(),
+          layout
+        };
+        if (options.isDefault) {
+          record.isDefault = true;
+        }
+        return record;
+      };
+      WorkspacePlusPlus2.prototype.createSession = function(name) {
+        var id = utils.generateId();
+        var layout = this.getCurrentWorkspaceLayout();
+        this.insertSessionAndActivate(this.createSessionRecord(id, name, layout));
+        this.updateStatusBar();
+        this.syncSessionCommands();
+        return this.persistData();
+      };
+      WorkspacePlusPlus2.prototype.deleteSession = function(sessionId) {
+        var session = this.data.sessions[sessionId];
+        if (!session || Object.keys(this.data.sessions).length <= 1) return Promise.resolve(false);
+        var wasActive = this.data.activeSessionId === sessionId;
+        var nextActiveId = null;
+        delete this.data.sessions[sessionId];
+        var orderIdx = this.data.sessionOrder.indexOf(sessionId);
+        if (orderIdx !== -1) this.data.sessionOrder.splice(orderIdx, 1);
+        if (this.data.sessionGroups && this.data.sessionGroups[sessionId]) {
+          delete this.data.sessionGroups[sessionId];
+        }
+        if (wasActive) {
+          var fallbackIdx = Math.min(orderIdx, this.data.sessionOrder.length - 1);
+          var remaining = this.data.sessionOrder[fallbackIdx] || Object.keys(this.data.sessions)[0];
+          nextActiveId = remaining || null;
+          this.data.activeSessionId = nextActiveId;
+        }
+        var applyNextLayout = Promise.resolve();
+        if (wasActive && nextActiveId) {
+          var nextSession = this.data.sessions[nextActiveId];
+          applyNextLayout = nextSession && nextSession.layout ? this.app.workspace.changeLayout(nextSession.layout).catch(function() {
+          }) : Promise.resolve();
+        }
+        this.updateStatusBar();
+        this.syncSessionCommands();
+        var self = this;
+        return applyNextLayout.then(function() {
+          return self.persistData();
+        }).then(function() {
+          return true;
+        });
+      };
+      WorkspacePlusPlus2.prototype.renameCurrentSession = function() {
+        var L = i18n2.L;
+        var self = this;
+        var session = this.getActiveSession();
+        if (!session) {
+          new obsidian2.Notice(L.noSession);
+          return;
+        }
+        new modals2.RenameModal(this.app, session.name, function(newName) {
+          self.renameSessionById(session.id, newName);
+        }, {
+          emptyNotice: L.emptyName
+        }).open();
+      };
+      WorkspacePlusPlus2.prototype.deleteCurrentSession = function() {
+        var L = i18n2.L;
+        var self = this;
+        var session = this.getActiveSession();
+        if (!session) {
+          new obsidian2.Notice(L.noSession);
+          return;
+        }
+        if (Object.keys(this.data.sessions).length <= 1) {
+          new obsidian2.Notice(L.cannotDeleteLast);
+          return;
+        }
+        var doDelete = function() {
+          return self.deleteSession(session.id).then(function(deleted) {
+            if (!deleted) return;
+            new obsidian2.Notice(L.deleted(session.name));
+          });
+        };
+        if (!this.data.confirmDeleteByHotkey) {
+          doDelete();
+          return;
+        }
+        new modals2.ConfirmModal(this.app, L.confirmDeleteActive(session.name), doDelete, {
+          hint: L.confirmDeleteSettingsHint,
+          onHintClick: function() {
+            self.app.setting.open();
+            self.app.setting.openTabById(self.manifest.id);
+          }
+        }).open();
+      };
+      WorkspacePlusPlus2.prototype.deleteAllInactiveSessions = function() {
+        var self = this;
+        var activeId = this.data.activeSessionId;
+        var ids = Object.keys(this.data.sessions || {}).filter(function(id) {
+          return id !== activeId;
+        });
+        var promises = ids.map(function(id) {
+          return self.deleteSession(id);
+        });
+        return Promise.all(promises).then(function(results) {
+          var deletedCount = 0;
+          for (var i = 0; i < results.length; i++) {
+            if (results[i]) deletedCount++;
+          }
+          return deletedCount;
+        });
+      };
+      WorkspacePlusPlus2.prototype.getNextSessionName = function() {
+        var sessions = this.data.sessions;
+        var existing = {};
+        var keys = Object.keys(sessions);
+        for (var i = 0; i < keys.length; i++) {
+          existing[sessions[keys[i]].name] = true;
+        }
+        var n = 1;
+        while (existing[this.getAutoSessionName(n)]) {
+          n++;
+        }
+        return this.getAutoSessionName(n);
+      };
+      WorkspacePlusPlus2.prototype.resetSessionsToDefault = function() {
+        var id = utils.generateId();
+        this.hideSwitchOverlay();
+        this.data.sessions = {};
+        this.data.sessionOrder = [];
+        this.data.activeSessionId = null;
+        this.data.groups = {};
+        this.data.groupOrder = [];
+        this.data.sessionGroups = {};
+        this.data.activeGroupId = null;
+        this.data.sessions[id] = this.createSessionRecord(
+          id,
+          this.getDefaultSessionName(),
+          this.getCurrentWorkspaceLayout(),
+          { isDefault: true }
+        );
+        this.data.sessionOrder.push(id);
+        this.data.activeSessionId = id;
+        this.updateStatusBar();
+        this.syncSessionCommands();
+        return this.persistData();
+      };
+      WorkspacePlusPlus2.prototype.createEmptySession = function() {
+        var L = i18n2.L;
+        var name = this.getNextSessionName();
+        this.captureActiveSessionLayoutIfAutoSave();
+        var id = utils.generateId();
+        var session = this.createSessionRecord(id, name, null);
+        this.insertSessionAndActivate(session);
+        var leaves = [];
+        this.app.workspace.iterateRootLeaves(function(leaf) {
+          leaves.push(leaf);
+        });
+        for (var i = 0; i < leaves.length; i++) {
+          leaves[i].detach();
+        }
+        session.layout = this.getCurrentWorkspaceLayout();
+        this.updateStatusBar();
+        this.syncSessionCommands();
+        new obsidian2.Notice(L.created(name));
+        return this.persistData();
+      };
+      WorkspacePlusPlus2.prototype.duplicateCurrentSession = function() {
+        var L = i18n2.L;
+        var name = this.getNextSessionName();
+        this.captureActiveSessionLayoutIfAutoSave();
+        var id = utils.generateId();
+        this.insertSessionAndActivate(this.createSessionRecord(id, name, this.getCurrentWorkspaceLayout()));
+        this.updateStatusBar();
+        this.syncSessionCommands();
+        new obsidian2.Notice(L.duplicated(name));
+        return this.persistData();
+      };
+      WorkspacePlusPlus2.prototype.duplicateSession = function(sessionId) {
+        var L = i18n2.L;
+        var source = this.data.sessions[sessionId];
+        if (!source) return Promise.resolve();
+        var name = this.getNextSessionName();
+        var newId = utils.generateId();
+        this.data.sessions[newId] = this.createSessionRecord(
+          newId,
+          name,
+          layoutUtils.cloneLayout(source.layout)
+        );
+        this.data.sessionOrder.push(newId);
+        var groups = (this.data.sessionGroups || {})[sessionId];
+        if (groups && groups.length > 0) {
+          if (!this.data.sessionGroups) this.data.sessionGroups = {};
+          this.data.sessionGroups[newId] = groups.slice();
+        }
+        this.syncSessionCommands();
+        new obsidian2.Notice(L.duplicated(name));
+        return this.persistData();
+      };
+      WorkspacePlusPlus2.prototype.ensureDefaultSession = function() {
+        var hasDefault = Object.values(this.data.sessions).some(function(s) {
+          return s.isDefault;
+        });
+        if (hasDefault) return;
+        var id = utils.generateId();
+        this.data.sessions[id] = this.createSessionRecord(
+          id,
+          this.getDefaultSessionName(),
+          this.getCurrentWorkspaceLayout(),
+          { isDefault: true }
+        );
+        this.data.sessionOrder.unshift(id);
+        this.data.activeSessionId = id;
+        this.updateStatusBar();
+        this.syncSessionCommands();
+        this.persistData();
+      };
+    }
+    module2.exports = attachSessionCrudMethods;
+  }
+});
+
+// src/plugin/methods/session-saving.js
+var require_session_saving = __commonJS({
+  "src/plugin/methods/session-saving.js"(exports2, module2) {
+    "use strict";
+    var obsidian2 = require("obsidian");
+    var i18n2 = require_i18n();
+    var utils = require_utils();
+    var modals2 = require_modals2();
+    function attachSessionSavingMethods(WorkspacePlusPlus2) {
+      WorkspacePlusPlus2.prototype.isAutoSaveOnSwitchEnabled = function() {
+        return this.data.autoSaveOnSwitch !== false;
+      };
+      WorkspacePlusPlus2.prototype.isWarnOnUnsavedSwitchEnabled = function() {
+        return this.data.warnOnUnsavedSwitch !== false;
+      };
+      WorkspacePlusPlus2.prototype.isUnsavedStatusBarHighlightEnabled = function() {
+        return this.data.highlightUnsavedSessionChanges !== false;
+      };
+      WorkspacePlusPlus2.prototype.isActiveSessionDirty = function() {
+        var session = this.getActiveSession();
+        if (!session) return false;
+        var currentLayout;
+        try {
+          currentLayout = this.getCurrentWorkspaceLayout();
+        } catch (e) {
+          return false;
+        }
+        return !this.layoutsEqualStructural(session.layout, currentLayout);
+      };
+      WorkspacePlusPlus2.prototype.shouldShowUnsavedStatusBarHighlight = function() {
+        return this.isUnsavedStatusBarHighlightEnabled() && !this.isAutoSaveOnSwitchEnabled() && this.isActiveSessionDirty();
+      };
+      WorkspacePlusPlus2.prototype.setAutoSaveOnSwitch = function(enabled, options) {
+        var L = i18n2.L;
+        options = options || {};
+        this.data.autoSaveOnSwitch = !!enabled;
+        var isOn = this.isAutoSaveOnSwitchEnabled();
+        if (isOn) {
+          this.startHistorySnapshotTimer();
+        } else {
+          this.stopHistorySnapshotTimer();
+        }
+        this.updateStatusBar();
+        return this.persistData().then(function() {
+          if (options.notify) {
+            new obsidian2.Notice(isOn ? L.autoSaveEnabled : L.autoSaveDisabled);
+          }
+          return isOn;
+        });
+      };
+      WorkspacePlusPlus2.prototype.toggleAutoSaveOnSwitch = function(options) {
+        var next = !this.isAutoSaveOnSwitchEnabled();
+        return this.setAutoSaveOnSwitch(next, options || {});
+      };
+      WorkspacePlusPlus2.prototype.saveActiveSession = function(options) {
+        var L = i18n2.L;
+        options = options || {};
+        var self = this;
+        var session = this.getActiveSession();
+        if (!session) {
+          if (!options.silent) new obsidian2.Notice(L.noSession);
+          return Promise.resolve(false);
+        }
+        if (!options.silent && session.isDefault && session.name === this.getDefaultSessionName()) {
+          var doSave = function(name2, resolve) {
+            session.name = name2;
+            self.pushLayoutToHistory(session);
+            session.layout = self.getCurrentWorkspaceLayout();
+            session.modified = Date.now();
+            self.updateStatusBar();
+            self.syncSessionCommands();
+            self.persistData().then(function() {
+              new obsidian2.Notice(L.savedSession(name2));
+              resolve(true);
+            });
+          };
+          return new Promise(function(resolve) {
+            new modals2.RenameModal(self.app, "", function(newName) {
+              doSave(newName, resolve);
+            }, {
+              title: L.nameSessionTitle,
+              placeholder: L.nameSessionPlaceholder,
+              buttonText: L.saveInline,
+              skipButtonText: L.saveWithoutNaming,
+              onSkip: function() {
+                doSave(session.name, resolve);
+              }
+            }).open();
+          });
+        }
+        var currentLayout = this.getCurrentWorkspaceLayout();
+        var changed = !this.layoutsEqualStructural(session.layout, currentLayout);
+        this.pushLayoutToHistory(session);
+        session.layout = currentLayout;
+        if (changed || options.touchModified) {
+          session.modified = Date.now();
+        }
+        this.updateStatusBar();
+        var name = session.name;
+        return this.persistData().then(function() {
+          if (!options.silent) {
+            if (changed) {
+              new obsidian2.Notice(L.savedSession(name));
+            } else {
+              new obsidian2.Notice(L.noChanges);
+            }
+          }
+          return changed;
+        });
+      };
+      WorkspacePlusPlus2.prototype.overwriteSessionWithCurrentLayout = function(sessionId, options) {
+        var L = i18n2.L;
+        options = options || {};
+        var session = this.data.sessions[sessionId];
+        if (!session) {
+          if (!options.silent) new obsidian2.Notice(L.noSession);
+          return Promise.resolve(false);
+        }
+        var currentLayout = this.getCurrentWorkspaceLayout();
+        var changed = !this.layoutsEqualStructural(session.layout, currentLayout);
+        this.pushLayoutToHistory(session);
+        session.layout = currentLayout;
+        if (changed || options.touchModified) {
+          session.modified = Date.now();
+        }
+        this.updateStatusBar();
+        return this.persistData().then(function() {
+          if (!options.silent) {
+            if (changed) {
+              new obsidian2.Notice(L.savedCurrentLayoutToSession(session.name));
+            } else {
+              new obsidian2.Notice(L.noChanges);
+            }
+          }
+          return changed;
+        });
+      };
+      WorkspacePlusPlus2.prototype.confirmOverwriteSessionWithCurrentLayout = function(sessionId, options) {
+        var L = i18n2.L;
+        options = options || {};
+        var self = this;
+        var session = this.data.sessions[sessionId];
+        if (!session) {
+          if (!options.silent) new obsidian2.Notice(L.noSession);
+          return false;
+        }
+        new modals2.ConfirmModal(this.app, L.confirmOverwriteSessionWithCurrentLayout(session.name), function() {
+          self.overwriteSessionWithCurrentLayout(sessionId, options).then(function(saved) {
+            if (saved && typeof options.onSaved === "function") options.onSaved(session);
+          });
+        }, {
+          confirmText: L.saveInline,
+          confirmClass: "mod-cta"
+        }).open();
+        return true;
+      };
+      WorkspacePlusPlus2.prototype.reloadCurrentSessionWithoutSaving = function(options) {
+        var L = i18n2.L;
+        options = options || {};
+        var session = this.getActiveSession();
+        if (!session) {
+          if (!options.silent) new obsidian2.Notice(L.noSession);
+          return Promise.resolve(false);
+        }
+        var applyLayout = session.layout ? this.app.workspace.changeLayout(session.layout).catch(function() {
+        }) : Promise.resolve();
+        var name = session.name;
+        return applyLayout.then(function() {
+          if (!options.silent) {
+            new obsidian2.Notice(L.reloadedSession(name));
+          }
+          return true;
+        }).catch(function() {
+          return false;
+        });
+      };
+      WorkspacePlusPlus2.prototype.captureActiveSessionLayoutIfAutoSave = function() {
+        var current = this.getActiveSession();
+        if (!current || !this.isAutoSaveOnSwitchEnabled()) return;
+        this.pushLayoutToHistory(current);
+        current.layout = this.getCurrentWorkspaceLayout();
+        current.modified = Date.now();
+      };
+      WorkspacePlusPlus2.prototype.saveAsSession = function() {
+        var L = i18n2.L;
+        var self = this;
+        var session = this.getActiveSession();
+        if (!session) {
+          new obsidian2.Notice(L.noSession);
+          return Promise.resolve(false);
+        }
+        return new Promise(function(resolve) {
+          new modals2.RenameModal(self.app, "", function(newName) {
+            self.captureActiveSessionLayoutIfAutoSave();
+            var layout = self.getCurrentWorkspaceLayout();
+            var existing = null;
+            var allSessions = self.getOrderedSessionsUnfiltered();
+            for (var i = 0; i < allSessions.length; i++) {
+              if (allSessions[i].name === newName) {
+                existing = allSessions[i];
+                break;
+              }
+            }
+            if (existing) {
+              existing.layout = layout;
+              existing.modified = Date.now();
+              self.data.activeSessionId = existing.id;
+            } else {
+              var id = utils.generateId();
+              self.insertSessionAndActivate(
+                self.createSessionRecord(id, newName, layout)
+              );
+            }
+            self.updateStatusBar();
+            self.syncSessionCommands();
+            new obsidian2.Notice(L.savedAs(newName));
+            self.persistData().then(function() {
+              resolve(true);
+            });
+          }, {
+            title: L.nameSessionTitle,
+            placeholder: L.nameSessionPlaceholder,
+            buttonText: L.saveInline,
+            emptyNotice: L.emptyName
+          }).open();
+        });
+      };
+    }
+    module2.exports = attachSessionSavingMethods;
+  }
+});
+
+// src/plugin/methods/session-statusbar.js
+var require_session_statusbar = __commonJS({
+  "src/plugin/methods/session-statusbar.js"(exports2, module2) {
+    "use strict";
+    var obsidian2 = require("obsidian");
+    var i18n2 = require_i18n();
+    function attachSessionStatusBarMethods(WorkspacePlusPlus2) {
+      WorkspacePlusPlus2.prototype.updateStatusBar = function() {
+        var L = i18n2.L;
+        var session = this.getActiveSession();
+        if (!this.statusBarEl) return;
+        var showUnsavedHighlight = this.shouldShowUnsavedStatusBarHighlight();
+        this.statusBarEl.removeClass("wpp-status-bar-unsaved");
+        if (showUnsavedHighlight) {
+          this.statusBarEl.addClass("wpp-status-bar-unsaved");
+        }
+        this.statusBarEl.empty();
+        var icon = this.statusBarEl.createSpan({ cls: "wpp-status-icon" });
+        obsidian2.setIcon(icon, "panels-top-left");
+        var activeGroup = this.getActiveGroup();
+        if (activeGroup) {
+          this.statusBarEl.createSpan({
+            text: activeGroup.name,
+            cls: "wpp-status-group"
+          });
+          this.statusBarEl.createSpan({
+            text: " / ",
+            cls: "wpp-status-separator"
+          });
+        }
+        this.statusBarEl.createSpan({
+          text: session ? session.name : L.noSession,
+          cls: "wpp-status-name"
+        });
+      };
+    }
+    module2.exports = attachSessionStatusBarMethods;
+  }
+});
+
+// src/plugin/methods/session-startup.js
+var require_session_startup = __commonJS({
+  "src/plugin/methods/session-startup.js"(exports2, module2) {
+    "use strict";
+    var STARTUP_SETTLE_MS = 1200;
+    var STARTUP_LAYOUT_CHANGE_SETTLE_MS = 400;
+    var STARTUP_SETTLE_MAX_MS = 5e3;
+    function attachSessionStartupMethods(WorkspacePlusPlus2) {
+      WorkspacePlusPlus2.prototype.setStartupSettleDeadline = function(deadlineMs) {
+        var self = this;
+        var nextDeadline = typeof deadlineMs === "number" ? deadlineMs : 0;
+        if (this.startupSettleTimer) {
+          clearTimeout(this.startupSettleTimer);
+          this.startupSettleTimer = null;
+        }
+        if (nextDeadline <= Date.now()) {
+          this.startupSettleStartedAt = 0;
+          this.startupSettleUntil = 0;
+          return 0;
+        }
+        this.startupSettleUntil = nextDeadline;
+        this.startupSettleTimer = setTimeout(function() {
+          self.startupSettleStartedAt = 0;
+          self.startupSettleUntil = 0;
+          self.startupSettleTimer = null;
+        }, nextDeadline - Date.now());
+        return this.startupSettleUntil;
+      };
+      WorkspacePlusPlus2.prototype.startStartupSettleWindow = function(durationMs) {
+        var startedAt = Date.now();
+        var duration = typeof durationMs === "number" && durationMs > 0 ? durationMs : STARTUP_SETTLE_MS;
+        this.startupSettleStartedAt = startedAt;
+        return this.setStartupSettleDeadline(startedAt + duration);
+      };
+      WorkspacePlusPlus2.prototype.getStartupSettleRemainingMs = function() {
+        var remaining = (this.startupSettleUntil || 0) - Date.now();
+        return remaining > 0 ? remaining : 0;
+      };
+      WorkspacePlusPlus2.prototype.isStartupSettling = function() {
+        return this.getStartupSettleRemainingMs() > 0;
+      };
+      WorkspacePlusPlus2.prototype.noteStartupLayoutChange = function() {
+        if (!this.isStartupSettling()) return;
+        var startedAt = this.startupSettleStartedAt || Date.now();
+        var maxDeadline = startedAt + STARTUP_SETTLE_MAX_MS;
+        var nextDeadline = Math.min(maxDeadline, Date.now() + STARTUP_LAYOUT_CHANGE_SETTLE_MS);
+        if (nextDeadline <= (this.startupSettleUntil || 0)) return;
+        this.setStartupSettleDeadline(nextDeadline);
+        this.scheduleStartupFlush();
+      };
+      WorkspacePlusPlus2.prototype.scheduleStartupFlush = function() {
+        var self = this;
+        if (this.startupFlushTimer) {
+          clearTimeout(this.startupFlushTimer);
+          this.startupFlushTimer = null;
+        }
+        if (!this.isAutoSaveOnSwitchEnabled()) return Promise.resolve(false);
+        var delayMs = this.getStartupSettleRemainingMs();
+        if (delayMs <= 0) {
+          return Promise.resolve(this.flushOnStartup());
+        }
+        return new Promise(function(resolve) {
+          self.startupFlushTimer = setTimeout(function() {
+            self.startupFlushTimer = null;
+            resolve(self.flushOnStartup());
+          }, delayMs);
+        });
+      };
+      WorkspacePlusPlus2.prototype.flushOnStartup = function() {
+        if (!this.isAutoSaveOnSwitchEnabled()) return;
+        var session = this.getActiveSession();
+        if (!session) return;
+        this.pushLayoutToHistory(session);
+        session.layout = this.getCurrentWorkspaceLayout();
+        session.modified = Date.now();
+        return this.persistData();
+      };
+    }
+    module2.exports = attachSessionStartupMethods;
+  }
+});
+
+// src/plugin/methods/session-switching.js
+var require_session_switching = __commonJS({
+  "src/plugin/methods/session-switching.js"(exports2, module2) {
+    "use strict";
+    var obsidian2 = require("obsidian");
+    var i18n2 = require_i18n();
+    var UnsavedSwitchModal = require_unsaved_switch_modal();
+    var SESSION_SWITCH_NOTICE_DURATION_MS = 1200;
+    function attachSessionSwitchingMethods(WorkspacePlusPlus2) {
+      WorkspacePlusPlus2.prototype.clearSessionSwitchNotice = function() {
+        if (!this.sessionSwitchNotice) return;
+        this.sessionSwitchNotice.hide();
+        this.sessionSwitchNotice = null;
+      };
+      WorkspacePlusPlus2.prototype.showSessionSwitchNotice = function(sessionName, options) {
+        var self = this;
+        var L = i18n2.L;
+        options = options || {};
+        var durationMs = typeof options.durationMs === "number" ? options.durationMs : SESSION_SWITCH_NOTICE_DURATION_MS;
+        this.clearSessionSwitchNotice();
+        var notice = new obsidian2.Notice(L.loaded(sessionName), durationMs);
+        this.sessionSwitchNotice = notice;
+        if (durationMs > 0) {
+          setTimeout(function() {
+            if (self.sessionSwitchNotice === notice) {
+              self.sessionSwitchNotice = null;
+            }
+          }, durationMs + 50);
+        }
+        return notice;
+      };
+      WorkspacePlusPlus2.prototype.getRelativeSwitchContext = function(offset) {
+        var ordered = this.getOrderedSessions();
+        if (ordered.length === 0) {
+          return {
+            ordered,
+            currentIndex: -1,
+            targetIndex: 0,
+            isEmpty: true
+          };
+        }
+        var currentIndex = this.findActiveSessionIndex(ordered);
+        if (currentIndex === -1) return null;
+        return {
+          ordered,
+          currentIndex,
+          targetIndex: (currentIndex + offset + ordered.length) % ordered.length,
+          isEmpty: false
+        };
+      };
+      WorkspacePlusPlus2.prototype.switchSessionAtOrderedIndex = function(ordered, index, options) {
+        options = options || {};
+        if (!ordered || index < 0 || index >= ordered.length) {
+          return Promise.resolve(false);
+        }
+        if (options.overlayMode === "preview") {
+          this.showSwitchPreviewOverlay(ordered, index, options.viewGroupId);
+        } else if (options.overlayMode === "feedback") {
+          this.showSwitchFeedbackOverlay(ordered, index, options.viewGroupId, options.overlayOptions);
+        }
+        if (!ordered[index]) {
+          return Promise.resolve(false);
+        }
+        if (ordered[index].id === this.data.activeSessionId) {
+          if (options.noticeMode === "replace") {
+            this.showSessionSwitchNotice(ordered[index].name, {
+              durationMs: options.switchNoticeDurationMs
+            });
+          }
+          return Promise.resolve(false);
+        }
+        return this.switchSession(ordered[index].id, {
+          silent: options.silent !== false,
+          switchNoticeMode: options.noticeMode,
+          switchNoticeDurationMs: options.switchNoticeDurationMs
+        });
+      };
+      WorkspacePlusPlus2.prototype.switchToIndex = function(index) {
+        var ordered = this.getOrderedSessions();
+        return this.switchSessionAtOrderedIndex(ordered, index, {
+          overlayMode: "feedback",
+          silent: true
+        });
+      };
+      WorkspacePlusPlus2.prototype.switchSessionByIdFromCommand = function(sessionId) {
+        var ordered = this.getOrderedSessions();
+        var index = this.findSessionIndex(ordered, sessionId);
+        return this.switchSessionAtOrderedIndex(ordered, index, {
+          overlayMode: "feedback",
+          silent: true
+        });
+      };
+      WorkspacePlusPlus2.prototype.switchRelativeDirect = function(offset, options) {
+        options = options || {};
+        var context = this.getRelativeSwitchContext(offset);
+        if (!context) return Promise.resolve(false);
+        if (context.isEmpty) {
+          if (options.overlayMode === "preview") {
+            this.showSwitchPreviewOverlay(context.ordered, 0, options.viewGroupId);
+          } else if (options.overlayMode === "feedback") {
+            this.showSwitchFeedbackOverlay(context.ordered, 0, options.viewGroupId, options.overlayOptions);
+          }
+          return Promise.resolve(false);
+        }
+        return this.switchSessionAtOrderedIndex(context.ordered, context.targetIndex, options);
+      };
+      WorkspacePlusPlus2.prototype.switchRelativeFromCommand = function(offset) {
+        var context = this.getRelativeSwitchContext(offset);
+        if (!context) return Promise.resolve(false);
+        if (context.isEmpty) {
+          this.showSwitchPreviewOverlay(context.ordered, 0);
+          return Promise.resolve(false);
+        }
+        var previewEnabled = offset > 0 ? this.data.previewNext : this.data.previewPrevious;
+        if (previewEnabled && !this.switchOverlayEl) {
+          this.showSwitchPreviewOverlay(context.ordered, context.currentIndex);
+          return Promise.resolve(false);
+        }
+        return this.switchSessionAtOrderedIndex(context.ordered, context.targetIndex, {
+          overlayMode: "preview",
+          silent: true
+        });
+      };
+      WorkspacePlusPlus2.prototype.switchRelativeFromStatusBar = function(offset) {
+        return this.switchRelativeDirect(offset, {
+          overlayMode: "none",
+          noticeMode: "replace",
+          silent: true
+        });
+      };
+      WorkspacePlusPlus2.prototype.switchRelativeFromScroll = function(offset) {
+        return this.switchRelativeDirect(offset, {
+          overlayMode: "none",
+          noticeMode: "replace",
+          silent: true
+        });
+      };
+      WorkspacePlusPlus2.prototype.switchRelative = function(offset) {
+        return this.switchRelativeFromCommand(offset);
+      };
+      WorkspacePlusPlus2.prototype.switchRelativeImmediate = function(offset, options) {
+        options = options || {};
+        return this.switchRelativeDirect(offset, {
+          overlayMode: options.showOverlay === false ? "none" : "feedback",
+          overlayOptions: options.overlayOptions,
+          silent: true
+        });
+      };
+      WorkspacePlusPlus2.prototype.runSwitchRequest = function(request) {
+        var self = this;
+        this.isSwitchingSession = true;
+        this.switchLockAt = Date.now();
+        this.performSessionSwitch(request.targetId, request.options || {}).then(function(ok) {
+          request.resolve(ok);
+        }).catch(function() {
+          request.resolve(false);
+        }).then(function() {
+          self.isSwitchingSession = false;
+          self.switchLockAt = 0;
+          if (!self.pendingSwitchRequest) return;
+          var next = self.pendingSwitchRequest;
+          self.pendingSwitchRequest = null;
+          self.runSwitchRequest(next);
+        });
+      };
+      WorkspacePlusPlus2.prototype.switchSession = function(targetId, options) {
+        var self = this;
+        options = options || {};
+        var startupDelayMs = this.getStartupSettleRemainingMs();
+        if (startupDelayMs > 0) {
+          return new Promise(function(resolve) {
+            setTimeout(function() {
+              self.switchSession(targetId, options).then(resolve);
+            }, startupDelayMs);
+          });
+        }
+        if (this.isSwitchingSession) {
+          var lockAt = this.switchLockAt || 0;
+          var elapsed = lockAt ? Date.now() - lockAt : Number.MAX_SAFE_INTEGER;
+          var hasBlockingUi = !!document.querySelector(".wpp-confirm-buttons") || !!document.querySelector(".wpp-switch-overlay");
+          if (!hasBlockingUi && elapsed > 5e3) {
+            this.isSwitchingSession = false;
+            this.switchLockAt = 0;
+            if (this.pendingSwitchRequest) {
+              this.pendingSwitchRequest.resolve(false);
+              this.pendingSwitchRequest = null;
+            }
+          }
+        }
+        if (!this.data.sessions[targetId]) return Promise.resolve(false);
+        if (targetId === this.data.activeSessionId && !this.isSwitchingSession) {
+          return Promise.resolve(false);
+        }
+        return new Promise(function(resolve) {
+          var request = {
+            targetId,
+            options,
+            resolve
+          };
+          if (self.isSwitchingSession) {
+            if (self.pendingSwitchRequest) {
+              self.pendingSwitchRequest.resolve(false);
+            }
+            self.pendingSwitchRequest = request;
+            return;
+          }
+          self.runSwitchRequest(request);
+        });
+      };
+      WorkspacePlusPlus2.prototype.performSessionSwitch = function(targetId, options) {
+        var L = i18n2.L;
+        var self = this;
+        options = options || {};
+        var target = this.data.sessions[targetId];
+        if (!target) return Promise.resolve(false);
+        if (target.id === this.data.activeSessionId) return Promise.resolve(false);
+        var performSwitch = function(skipCurrentSave) {
+          var current = self.getActiveSession();
+          if (current && !skipCurrentSave) {
+            self.pushLayoutToHistory(current);
+            current.layout = self.getCurrentWorkspaceLayout();
+            current.modified = Date.now();
+          }
+          self.data.activeSessionId = targetId;
+          var applyLayout = target.layout ? self.app.workspace.changeLayout(target.layout).catch(function() {
+          }) : Promise.resolve();
+          return applyLayout.then(function() {
+            self.updateStatusBar();
+            return self.persistData();
+          }).then(function() {
+            if (options.switchNoticeMode === "replace") {
+              self.showSessionSwitchNotice(target.name, {
+                durationMs: options.switchNoticeDurationMs
+              });
+            } else if (!options.silent) {
+              new obsidian2.Notice(L.loaded(target.name));
+            }
+            return true;
+          });
+        };
+        var autoSaveOnSwitch = this.isAutoSaveOnSwitchEnabled();
+        var shouldWarn = !autoSaveOnSwitch && !options.skipUnsavedWarning && this.isWarnOnUnsavedSwitchEnabled() && this.isActiveSessionDirty();
+        if (shouldWarn) {
+          return new Promise(function(resolve) {
+            new UnsavedSwitchModal(
+              self.app,
+              L.confirmUnsavedSwitch(target.name),
+              function() {
+                self.saveActiveSession({ silent: true, touchModified: true }).then(function() {
+                  return performSwitch(true);
+                }).then(function(ok) {
+                  resolve(ok);
+                }).catch(function() {
+                  resolve(false);
+                });
+              },
+              function() {
+                performSwitch(true).then(function(ok) {
+                  resolve(ok);
+                }).catch(function() {
+                  resolve(false);
+                });
+              },
+              function() {
+                resolve(false);
+              }
+            ).open();
+          });
+        }
+        return performSwitch(!autoSaveOnSwitch);
+      };
+    }
+    module2.exports = attachSessionSwitchingMethods;
+  }
+});
+
+// src/plugin/methods/session-commands.js
+var require_session_commands = __commonJS({
+  "src/plugin/methods/session-commands.js"(exports2, module2) {
+    "use strict";
+    var i18n2 = require_i18n();
+    function attachSessionCommandMethods(WorkspacePlusPlus2) {
+      WorkspacePlusPlus2.prototype.syncSessionCommands = function() {
+        var L = i18n2.L;
+        var ordered = this.getOrderedSessions();
+        var self = this;
+        var oldIds = this._dynamicSessionCommandIds || [];
+        for (var i = 0; i < oldIds.length; i++) {
+          this.removeCommand(oldIds[i]);
+        }
+        this._dynamicSessionCommandIds = [];
+        var dynamicStart;
+        if (self.data.numberedSwitchCommands) {
+          for (var n = 1; n <= 9; n++) {
+            (function(num) {
+              self.removeCommand("switch-to-" + num);
+              var session = ordered[num - 1];
+              self.addCommand({
+                id: "switch-to-" + num,
+                name: L.cmdSwitchTo(num, session ? session.name : void 0),
+                checkCallback: function(checking) {
+                  if (!self.data.showActiveSwitchCommand) {
+                    var currentOrdered = self.getOrderedSessions();
+                    var targetSession = currentOrdered[num - 1];
+                    if (targetSession && targetSession.id === self.data.activeSessionId) return false;
+                  }
+                  if (!checking) self.switchToIndex(num - 1);
+                  return true;
+                }
+              });
+            })(n);
+          }
+          dynamicStart = 9;
+        } else {
+          for (var n = 1; n <= 9; n++) {
+            self.removeCommand("switch-to-" + n);
+          }
+          dynamicStart = 0;
+        }
+        for (var j = dynamicStart; j < ordered.length; j++) {
+          (function(session) {
+            var cmdId = "switch-to-named-" + session.id;
+            self.addCommand({
+              id: cmdId,
+              name: L.cmdSwitchToNamed(session.name),
+              checkCallback: function(checking) {
+                if (!self.data.showActiveSwitchCommand) {
+                  if (session.id === self.data.activeSessionId) return false;
+                }
+                if (!checking) self.switchSessionByIdFromCommand(session.id);
+                return true;
+              }
+            });
+            self._dynamicSessionCommandIds.push(cmdId);
+          })(ordered[j]);
+        }
+      };
+    }
+    module2.exports = attachSessionCommandMethods;
   }
 });
 
@@ -16732,11 +16891,12 @@ var require_history = __commonJS({
     "use strict";
     var obsidian2 = require("obsidian");
     var i18n2 = require_i18n();
+    var layoutUtils = require_layout_utils();
     var HOUR = 36e5;
     var DAY = 864e5;
     var WEEK = 7 * DAY;
     var MAX_HISTORY = 45;
-    function attachHistoryMethods2(WorkspacePlusPlus2) {
+    function attachHistoryMethods(WorkspacePlusPlus2) {
       WorkspacePlusPlus2.prototype.isVersionHistoryEnabled = function() {
         return !!this.data.versionHistoryEnabled;
       };
@@ -16834,7 +16994,7 @@ var require_history = __commonJS({
           return;
         }
         session.history.unshift({
-          layout: JSON.parse(JSON.stringify(session.layout)),
+          layout: layoutUtils.cloneLayout(session.layout),
           savedAt: Date.now()
         });
         session.history = this.compactHistory(session.history);
@@ -16846,7 +17006,7 @@ var require_history = __commonJS({
         }
         var entry = session.history[entryIndex];
         this.pushLayoutToHistory(session);
-        session.layout = JSON.parse(JSON.stringify(entry.layout));
+        session.layout = layoutUtils.cloneLayout(entry.layout);
         session.modified = Date.now();
         var self = this;
         var isActive = session.id === this.data.activeSessionId;
@@ -16902,7 +17062,7 @@ var require_history = __commonJS({
         }
       };
     }
-    module2.exports = attachHistoryMethods2;
+    module2.exports = attachHistoryMethods;
   }
 });
 
@@ -16912,7 +17072,7 @@ var require_frontmatter = __commonJS({
     "use strict";
     var obsidian2 = require("obsidian");
     var i18n2 = require_i18n();
-    module2.exports = function attachFrontmatterMethods2(WorkspacePlusPlus2) {
+    module2.exports = function attachFrontmatterMethods(WorkspacePlusPlus2) {
       WorkspacePlusPlus2.prototype.getFileFrontmatter = function(file) {
         if (!file) return null;
         var cache = this.app.metadataCache.getFileCache(file);
@@ -17002,6 +17162,308 @@ var require_frontmatter = __commonJS({
   }
 });
 
+// src/plugin/methods/settings-state.js
+var require_settings_state = __commonJS({
+  "src/plugin/methods/settings-state.js"(exports2, module2) {
+    "use strict";
+    var i18n2 = require_i18n();
+    var DEFAULT_DATA2 = require_default_data();
+    function persistIfNeeded(plugin, options) {
+      options = options || {};
+      if (options.persist === false) return Promise.resolve(true);
+      return plugin.persistData();
+    }
+    function numberOrFallback(value, fallback) {
+      var parsed = Number(value);
+      return parsed || fallback;
+    }
+    function attachSettingsStateMethods(WorkspacePlusPlus2) {
+      WorkspacePlusPlus2.prototype.setLanguageSetting = function(value, options) {
+        this.data.language = value || "auto";
+        i18n2.resolveLocale(this.data.language);
+        return persistIfNeeded(this, options);
+      };
+      WorkspacePlusPlus2.prototype.setStatusBarAction = function(slotKey, actionId, options) {
+        if (!this.data.statusBarActions) {
+          this.data.statusBarActions = Object.assign({}, DEFAULT_DATA2.statusBarActions);
+        }
+        this.data.statusBarActions[slotKey] = actionId;
+        return persistIfNeeded(this, options);
+      };
+      WorkspacePlusPlus2.prototype.setWarnOnUnsavedSwitch = function(enabled, options) {
+        this.data.warnOnUnsavedSwitch = !!enabled;
+        return persistIfNeeded(this, options);
+      };
+      WorkspacePlusPlus2.prototype.setUnsavedStatusBarHighlight = function(enabled, options) {
+        this.data.highlightUnsavedSessionChanges = !!enabled;
+        this.updateStatusBar();
+        return persistIfNeeded(this, options);
+      };
+      WorkspacePlusPlus2.prototype.setConfirmQuickActions = function(enabled, options) {
+        this.data.confirmQuickActions = !!enabled;
+        return persistIfNeeded(this, options);
+      };
+      WorkspacePlusPlus2.prototype.setStatusBarModScrollSwitch = function(enabled, options) {
+        this.data.statusBarModScrollSwitch = !!enabled;
+        return persistIfNeeded(this, options);
+      };
+      WorkspacePlusPlus2.prototype.setStatusBarScrollPreset = function(value, options) {
+        this.data.statusBarScrollPreset = value || "trackpad";
+        return persistIfNeeded(this, options);
+      };
+      WorkspacePlusPlus2.prototype.setStatusBarScrollModifierMode = function(value, options) {
+        this.data.statusBarScrollModifierMode = value || "none";
+        return persistIfNeeded(this, options);
+      };
+      WorkspacePlusPlus2.prototype.setStatusBarScrollThreshold = function(value, options) {
+        this.data.statusBarScrollThreshold = numberOrFallback(value, 30);
+        return persistIfNeeded(this, options);
+      };
+      WorkspacePlusPlus2.prototype.setStatusBarScrollCooldownMs = function(value, options) {
+        this.data.statusBarScrollCooldownMs = numberOrFallback(value, 500);
+        return persistIfNeeded(this, options);
+      };
+      WorkspacePlusPlus2.prototype.setStatusBarScrollResetMs = function(value, options) {
+        this.data.statusBarScrollResetMs = numberOrFallback(value, 250);
+        return persistIfNeeded(this, options);
+      };
+      WorkspacePlusPlus2.prototype.setStatusBarScrollInvert = function(enabled, options) {
+        this.data.statusBarScrollInvert = !!enabled;
+        return persistIfNeeded(this, options);
+      };
+      WorkspacePlusPlus2.prototype.setShowActiveSwitchCommand = function(enabled, options) {
+        this.data.showActiveSwitchCommand = !!enabled;
+        return persistIfNeeded(this, options);
+      };
+      WorkspacePlusPlus2.prototype.setNumberedSwitchCommands = function(enabled, options) {
+        this.data.numberedSwitchCommands = !!enabled;
+        this.syncSessionCommands();
+        return persistIfNeeded(this, options);
+      };
+      WorkspacePlusPlus2.prototype.setSwitchPreviewEnabled = function(enabled, options) {
+        this.data.previewNext = !!enabled;
+        this.data.previewPrevious = !!enabled;
+        return persistIfNeeded(this, options);
+      };
+      WorkspacePlusPlus2.prototype.setPreviewNext = function(enabled, options) {
+        this.data.previewNext = !!enabled;
+        return persistIfNeeded(this, options);
+      };
+      WorkspacePlusPlus2.prototype.setPreviewPrevious = function(enabled, options) {
+        this.data.previewPrevious = !!enabled;
+        return persistIfNeeded(this, options);
+      };
+      WorkspacePlusPlus2.prototype.setShowFilterInput = function(enabled, options) {
+        this.data.showFilterInput = !!enabled;
+        return persistIfNeeded(this, options);
+      };
+      WorkspacePlusPlus2.prototype.setOverlayDefaultFocus = function(value, options) {
+        this.data.overlayDefaultFocus = value || "current-session";
+        return persistIfNeeded(this, options);
+      };
+      WorkspacePlusPlus2.prototype.setConfirmDeleteByHotkey = function(enabled, options) {
+        this.data.confirmDeleteByHotkey = !!enabled;
+        return persistIfNeeded(this, options);
+      };
+      WorkspacePlusPlus2.prototype.setVersionHistoryEnabled = function(enabled, options) {
+        this.data.versionHistoryEnabled = !!enabled;
+        if (this.data.versionHistoryEnabled) {
+          this.startHistorySnapshotTimer();
+        } else {
+          this.stopHistorySnapshotTimer();
+        }
+        return persistIfNeeded(this, options);
+      };
+      WorkspacePlusPlus2.prototype.setVersionHistorySnapshotInterval = function(value, options) {
+        this.data.versionHistorySnapshotInterval = parseInt(value, 10);
+        this.startHistorySnapshotTimer();
+        return persistIfNeeded(this, options);
+      };
+      WorkspacePlusPlus2.prototype.setVersionHistoryConfirmRestore = function(enabled, options) {
+        this.data.versionHistoryConfirmRestore = !!enabled;
+        return persistIfNeeded(this, options);
+      };
+    }
+    module2.exports = attachSettingsStateMethods;
+  }
+});
+
+// src/plugin/methods/index.js
+var require_methods = __commonJS({
+  "src/plugin/methods/index.js"(exports2, module2) {
+    "use strict";
+    var attachHotkeyMethods = require_hotkeys();
+    var attachOverlayMethods = require_overlays();
+    var attachPersistenceMethods = require_persistence();
+    var attachSessionMethods = require_sessions();
+    var attachSessionValidationMethods = require_sessions_validation();
+    var attachGroupMethods = require_groups();
+    var attachSessionCrudMethods = require_session_crud();
+    var attachSessionSavingMethods = require_session_saving();
+    var attachSessionStatusBarMethods = require_session_statusbar();
+    var attachSessionStartupMethods = require_session_startup();
+    var attachSessionSwitchingMethods = require_session_switching();
+    var attachSessionCommandMethods = require_session_commands();
+    var attachHistoryMethods = require_history();
+    var attachFrontmatterMethods = require_frontmatter();
+    var attachSettingsStateMethods = require_settings_state();
+    function attachPluginMethods2(WorkspacePlusPlus2) {
+      attachHotkeyMethods(WorkspacePlusPlus2);
+      attachOverlayMethods(WorkspacePlusPlus2);
+      attachPersistenceMethods(WorkspacePlusPlus2);
+      attachSessionMethods(WorkspacePlusPlus2);
+      attachSessionValidationMethods(WorkspacePlusPlus2);
+      attachGroupMethods(WorkspacePlusPlus2);
+      attachSessionCrudMethods(WorkspacePlusPlus2);
+      attachSessionSavingMethods(WorkspacePlusPlus2);
+      attachSessionStatusBarMethods(WorkspacePlusPlus2);
+      attachSessionStartupMethods(WorkspacePlusPlus2);
+      attachSessionSwitchingMethods(WorkspacePlusPlus2);
+      attachSessionCommandMethods(WorkspacePlusPlus2);
+      attachHistoryMethods(WorkspacePlusPlus2);
+      attachFrontmatterMethods(WorkspacePlusPlus2);
+      attachSettingsStateMethods(WorkspacePlusPlus2);
+    }
+    module2.exports = attachPluginMethods2;
+  }
+});
+
+// src/statusbar-controller.js
+var require_statusbar_controller = __commonJS({
+  "src/statusbar-controller.js"(exports2, module2) {
+    "use strict";
+    var utils = require_utils();
+    var statusBarActions = require_statusbar_actions();
+    var STATUS_BAR_SCROLL_PRESETS = {
+      trackpad: {
+        threshold: 30,
+        cooldownMs: 500,
+        resetMs: 250
+      },
+      notchedWheel: {
+        threshold: 16,
+        cooldownMs: 350,
+        resetMs: 220
+      },
+      freeSpinWheel: {
+        threshold: 48,
+        cooldownMs: 650,
+        resetMs: 320
+      }
+    };
+    function getStatusBarScrollConfig(data) {
+      var presetId = data && data.statusBarScrollPreset || "trackpad";
+      if (presetId === "custom") {
+        return {
+          threshold: Number(data && data.statusBarScrollThreshold || 30) || 30,
+          cooldownMs: Number(data && data.statusBarScrollCooldownMs || 500) || 500,
+          resetMs: Number(data && data.statusBarScrollResetMs || 250) || 250
+        };
+      }
+      return STATUS_BAR_SCROLL_PRESETS[presetId] || STATUS_BAR_SCROLL_PRESETS.trackpad;
+    }
+    function matchesStatusBarScrollModifier(evt, isMac, mode) {
+      mode = mode || "none";
+      var modPressed = isMac ? !!evt.metaKey : !!evt.ctrlKey;
+      var altPressed = !!evt.altKey;
+      if (mode === "none") return !modPressed && !altPressed;
+      if (mode === "modOnly") return modPressed;
+      if (mode === "altOnly") return altPressed;
+      if (mode === "modOrAlt") return modPressed || altPressed;
+      return modPressed || altPressed;
+    }
+    function getModifiedStatusBarSlot(evt, baseSlot) {
+      var baseName = baseSlot.charAt(0).toUpperCase() + baseSlot.slice(1);
+      if (evt.altKey) return "alt" + baseName;
+      if (utils.isModPressed(evt)) return "mod" + baseName;
+      if (evt.shiftKey) return "shift" + baseName;
+      return baseSlot;
+    }
+    function getClickSlot(evt) {
+      return getModifiedStatusBarSlot(evt, "click");
+    }
+    function getMiddleClickSlot(evt) {
+      return getModifiedStatusBarSlot(evt, "middleClick");
+    }
+    function getRightClickSlot(evt) {
+      return getModifiedStatusBarSlot(evt, "rightClick");
+    }
+    function getStatusBarAction(plugin, slotKey) {
+      return (plugin.data && plugin.data.statusBarActions || {})[slotKey] || "none";
+    }
+    function executeStatusBarSlot(plugin, slotKey, evt, options) {
+      options = options || {};
+      var action = getStatusBarAction(plugin, slotKey);
+      if (action !== "none" && options.preventDefault !== false) {
+        evt.preventDefault();
+        evt.stopPropagation();
+      }
+      return statusBarActions.executeStatusBarAction(plugin, action, evt);
+    }
+    function normalizeWheelDeltaY(evt) {
+      var deltaY = evt.deltaY || 0;
+      if (evt.deltaMode === 1) return deltaY * 16;
+      if (evt.deltaMode === 2) return deltaY * 240;
+      return deltaY;
+    }
+    function handleStatusBarWheel(plugin, evt, now) {
+      if (!plugin.data.statusBarModScrollSwitch) return false;
+      var isMac = utils.isMacPlatform();
+      var cfg = getStatusBarScrollConfig(plugin.data);
+      if (!matchesStatusBarScrollModifier(evt, isMac, plugin.data.statusBarScrollModifierMode)) return false;
+      if (Math.abs(evt.deltaY || 0) <= Math.abs(evt.deltaX || 0)) return false;
+      evt.preventDefault();
+      evt.stopPropagation();
+      now = typeof now === "number" ? now : Date.now();
+      if (plugin.isSwitchingSession) return false;
+      if (now - plugin.statusBarScrollSwitchAt < cfg.cooldownMs) return false;
+      if (now - plugin.statusBarScrollEventAt > cfg.resetMs) {
+        plugin.statusBarScrollDelta = 0;
+      }
+      plugin.statusBarScrollEventAt = now;
+      plugin.statusBarScrollDelta += normalizeWheelDeltaY(evt);
+      if (Math.abs(plugin.statusBarScrollDelta) < cfg.threshold) return false;
+      var direction = plugin.statusBarScrollDelta < 0 ? -1 : 1;
+      if (plugin.data.statusBarScrollInvert) direction *= -1;
+      plugin.statusBarScrollDelta = 0;
+      plugin.statusBarScrollSwitchAt = now;
+      plugin.switchRelativeFromScroll(direction).catch(function() {
+      });
+      return true;
+    }
+    function setupStatusBar(plugin) {
+      plugin.statusBarEl = plugin.addStatusBarItem();
+      plugin.statusBarEl.addClass("wpp-status-bar");
+      plugin.statusBarEl.addEventListener("click", function(evt) {
+        executeStatusBarSlot(plugin, getClickSlot(evt), evt);
+      });
+      plugin.statusBarEl.addEventListener("auxclick", function(evt) {
+        if (evt.button !== 1) return;
+        executeStatusBarSlot(plugin, getMiddleClickSlot(evt), evt);
+      });
+      plugin.statusBarEl.addEventListener("contextmenu", function(evt) {
+        evt.preventDefault();
+        var action = getStatusBarAction(plugin, getRightClickSlot(evt));
+        statusBarActions.executeStatusBarAction(plugin, action, evt);
+      });
+      plugin.statusBarEl.addEventListener("wheel", function(evt) {
+        handleStatusBarWheel(plugin, evt);
+      }, { passive: false });
+      plugin.updateStatusBar();
+      return plugin.statusBarEl;
+    }
+    module2.exports = {
+      getStatusBarScrollConfig,
+      matchesStatusBarScrollModifier,
+      getClickSlot,
+      getMiddleClickSlot,
+      getRightClickSlot,
+      handleStatusBarWheel,
+      setupStatusBar
+    };
+  }
+});
+
 // src/main.js
 var obsidian = require("obsidian");
 var i18n = require_i18n();
@@ -17009,53 +17471,9 @@ var modals = require_modals2();
 var settings = require_settings();
 var DEFAULT_DATA = require_default_data();
 var registerCommands = require_register_commands();
-var attachHotkeyMethods = require_hotkeys();
-var attachOverlayMethods = require_overlays();
-var attachPersistenceMethods = require_persistence();
-var attachSessionMethods = require_sessions();
-var attachHistoryMethods = require_history();
-var attachFrontmatterMethods = require_frontmatter();
-var utils = require_utils();
-var statusBarActions = require_statusbar_actions();
+var attachPluginMethods = require_methods();
+var statusBarController = require_statusbar_controller();
 i18n.resolveLocale();
-var STATUS_BAR_SCROLL_PRESETS = {
-  trackpad: {
-    threshold: 30,
-    cooldownMs: 500,
-    resetMs: 250
-  },
-  notchedWheel: {
-    threshold: 16,
-    cooldownMs: 350,
-    resetMs: 220
-  },
-  freeSpinWheel: {
-    threshold: 48,
-    cooldownMs: 650,
-    resetMs: 320
-  }
-};
-function getStatusBarScrollConfig(data) {
-  var presetId = data && data.statusBarScrollPreset || "trackpad";
-  if (presetId === "custom") {
-    return {
-      threshold: Number(data && data.statusBarScrollThreshold || 30) || 30,
-      cooldownMs: Number(data && data.statusBarScrollCooldownMs || 500) || 500,
-      resetMs: Number(data && data.statusBarScrollResetMs || 250) || 250
-    };
-  }
-  return STATUS_BAR_SCROLL_PRESETS[presetId] || STATUS_BAR_SCROLL_PRESETS.trackpad;
-}
-function matchesStatusBarScrollModifier(evt, isMac, mode) {
-  mode = mode || "none";
-  var modPressed = isMac ? !!evt.metaKey : !!evt.ctrlKey;
-  var altPressed = !!evt.altKey;
-  if (mode === "none") return !modPressed && !altPressed;
-  if (mode === "modOnly") return modPressed;
-  if (mode === "altOnly") return altPressed;
-  if (mode === "modOrAlt") return modPressed || altPressed;
-  return modPressed || altPressed;
-}
 var WorkspacePlusPlus = (
   /** @class */
   function(_super) {
@@ -17098,70 +17516,7 @@ var WorkspacePlusPlus = (
         self.addRibbonIcon("panels-top-left", L.ribbonTooltip, function() {
           new modals.SessionManagerModal(self.app, self).open();
         });
-        self.statusBarEl = self.addStatusBarItem();
-        self.statusBarEl.addClass("wpp-status-bar");
-        self.statusBarEl.addEventListener("click", function(evt) {
-          var key = "click";
-          if (evt.altKey) key = "altClick";
-          else if (utils.isModPressed(evt)) key = "modClick";
-          else if (evt.shiftKey) key = "shiftClick";
-          var action = (self.data.statusBarActions || {})[key] || "none";
-          if (action !== "none") {
-            evt.preventDefault();
-            evt.stopPropagation();
-          }
-          statusBarActions.executeStatusBarAction(self, action, evt);
-        });
-        self.statusBarEl.addEventListener("auxclick", function(evt) {
-          if (evt.button !== 1) return;
-          var key = "middleClick";
-          if (evt.altKey) key = "altMiddleClick";
-          else if (utils.isModPressed(evt)) key = "modMiddleClick";
-          else if (evt.shiftKey) key = "shiftMiddleClick";
-          var action = (self.data.statusBarActions || {})[key] || "none";
-          if (action !== "none") {
-            evt.preventDefault();
-            evt.stopPropagation();
-          }
-          statusBarActions.executeStatusBarAction(self, action, evt);
-        });
-        self.statusBarEl.addEventListener("contextmenu", function(evt) {
-          evt.preventDefault();
-          var key = "rightClick";
-          if (evt.altKey) key = "altRightClick";
-          else if (utils.isModPressed(evt)) key = "modRightClick";
-          else if (evt.shiftKey) key = "shiftRightClick";
-          var action = (self.data.statusBarActions || {})[key] || "none";
-          statusBarActions.executeStatusBarAction(self, action, evt);
-        });
-        self.statusBarEl.addEventListener("wheel", function(evt) {
-          if (!self.data.statusBarModScrollSwitch) return;
-          var isMac = utils.isMacPlatform();
-          var cfg = getStatusBarScrollConfig(self.data);
-          if (!matchesStatusBarScrollModifier(evt, isMac, self.data.statusBarScrollModifierMode)) return;
-          if (Math.abs(evt.deltaY || 0) <= Math.abs(evt.deltaX || 0)) return;
-          evt.preventDefault();
-          evt.stopPropagation();
-          var now = Date.now();
-          if (self.isSwitchingSession) return;
-          if (now - self.statusBarScrollSwitchAt < cfg.cooldownMs) return;
-          if (now - self.statusBarScrollEventAt > cfg.resetMs) {
-            self.statusBarScrollDelta = 0;
-          }
-          self.statusBarScrollEventAt = now;
-          var deltaY = evt.deltaY || 0;
-          if (evt.deltaMode === 1) deltaY *= 16;
-          else if (evt.deltaMode === 2) deltaY *= 240;
-          self.statusBarScrollDelta += deltaY;
-          if (Math.abs(self.statusBarScrollDelta) < cfg.threshold) return;
-          var direction = self.statusBarScrollDelta < 0 ? -1 : 1;
-          if (self.data.statusBarScrollInvert) direction *= -1;
-          self.statusBarScrollDelta = 0;
-          self.statusBarScrollSwitchAt = now;
-          self.switchRelativeFromScroll(direction).catch(function() {
-          });
-        }, { passive: false });
-        self.updateStatusBar();
+        statusBarController.setupStatusBar(self);
         registerCommands(self);
         self.settingTab = new settings.WorkspacePlusPlusSettingTab(self.app, self);
         self.addSettingTab(self.settingTab);
@@ -17211,10 +17566,5 @@ var WorkspacePlusPlus = (
     return WorkspacePlusPlus2;
   }(obsidian.Plugin)
 );
-attachHotkeyMethods(WorkspacePlusPlus);
-attachOverlayMethods(WorkspacePlusPlus);
-attachPersistenceMethods(WorkspacePlusPlus);
-attachSessionMethods(WorkspacePlusPlus);
-attachHistoryMethods(WorkspacePlusPlus);
-attachFrontmatterMethods(WorkspacePlusPlus);
+attachPluginMethods(WorkspacePlusPlus);
 module.exports = WorkspacePlusPlus;

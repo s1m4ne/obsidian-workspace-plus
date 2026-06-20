@@ -43,9 +43,9 @@ function openSettingsContextMenu(options) {
             mi.setIcon('alert-triangle');
             if (plugin.isWarnOnUnsavedSwitchEnabled()) mi.setChecked(true);
             mi.onClick(function () {
-                plugin.data.warnOnUnsavedSwitch = !plugin.isWarnOnUnsavedSwitchEnabled();
-                plugin.persistData();
-                if (typeof options.onChanged === 'function') options.onChanged();
+                plugin.setWarnOnUnsavedSwitch(!plugin.isWarnOnUnsavedSwitchEnabled()).then(function () {
+                    if (typeof options.onChanged === 'function') options.onChanged();
+                });
             });
         });
 
@@ -54,9 +54,9 @@ function openSettingsContextMenu(options) {
             mi.setIcon('check-circle');
             if (plugin.data.confirmQuickActions) mi.setChecked(true);
             mi.onClick(function () {
-                plugin.data.confirmQuickActions = !plugin.data.confirmQuickActions;
-                plugin.persistData();
-                if (typeof options.onChanged === 'function') options.onChanged();
+                plugin.setConfirmQuickActions(!plugin.data.confirmQuickActions).then(function () {
+                    if (typeof options.onChanged === 'function') options.onChanged();
+                });
             });
         });
     }
@@ -66,9 +66,9 @@ function openSettingsContextMenu(options) {
         mi.setIcon('shield');
         if (plugin.data.confirmDeleteByHotkey !== false) mi.setChecked(true);
         mi.onClick(function () {
-            plugin.data.confirmDeleteByHotkey = !(plugin.data.confirmDeleteByHotkey !== false);
-            plugin.persistData();
-            if (typeof options.onChanged === 'function') options.onChanged();
+            plugin.setConfirmDeleteByHotkey(!(plugin.data.confirmDeleteByHotkey !== false)).then(function () {
+                if (typeof options.onChanged === 'function') options.onChanged();
+            });
         });
     });
 
@@ -81,14 +81,9 @@ function openSettingsContextMenu(options) {
         if (plugin.isVersionHistoryEnabled()) mi.setChecked(true);
         mi.onClick(function () {
             var next = !plugin.isVersionHistoryEnabled();
-            plugin.data.versionHistoryEnabled = next;
-            plugin.persistData();
-            if (next) {
-                plugin.startHistorySnapshotTimer();
-            } else {
-                plugin.stopHistorySnapshotTimer();
-            }
-            if (typeof options.onChanged === 'function') options.onChanged();
+            plugin.setVersionHistoryEnabled(next).then(function () {
+                if (typeof options.onChanged === 'function') options.onChanged();
+            });
         });
     });
 
@@ -108,9 +103,9 @@ function openSettingsContextMenu(options) {
         mi.setIcon('search');
         if (plugin.data.showFilterInput) mi.setChecked(true);
         mi.onClick(function () {
-            plugin.data.showFilterInput = !plugin.data.showFilterInput;
-            plugin.persistData();
-            if (typeof options.onChanged === 'function') options.onChanged();
+            plugin.setShowFilterInput(!plugin.data.showFilterInput).then(function () {
+                if (typeof options.onChanged === 'function') options.onChanged();
+            });
         });
     });
 

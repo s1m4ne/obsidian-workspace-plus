@@ -5,182 +5,15 @@ var i18n = require('./i18n');
 var modals = require('./modals');
 var formatRelativeTime = require('./modals/format-relative-time');
 var statusBarActions = require('./statusbar-actions');
-var DEFAULT_DATA = require('./plugin/default-data');
+var settingsUi = require('./settings-ui');
 
-// ============================================================
-// Group Sessions Modal — checkbox list to toggle session membership
-// ============================================================
-var GroupSessionsModal = /** @class */ (function (_super) {
-    function GroupSessionsModal(app, plugin, group) {
-        var _this = _super.call(this, app) || this;
-        _this.plugin = plugin;
-        _this.group = group;
-        return _this;
-    }
-
-    GroupSessionsModal.prototype = Object.create(_super.prototype);
-    GroupSessionsModal.prototype.constructor = GroupSessionsModal;
-
-    GroupSessionsModal.prototype.onOpen = function () {
-        var L = i18n.L;
-        var self = this;
-        var contentEl = this.contentEl;
-        contentEl.empty();
-        contentEl.createEl('h3', { text: self.group.name + ' — ' + L.settingsGroupManageSessions });
-
-        var allSessions = self.plugin.getOrderedSessionsUnfiltered();
-        var memberIds = self.plugin.getGroupSessionIds(self.group.id);
-
-        for (var i = 0; i < allSessions.length; i++) {
-            (function (session) {
-                var isMember = memberIds.indexOf(session.id) !== -1;
-                new obsidian.Setting(contentEl)
-                    .setName(session.name)
-                    .addToggle(function (toggle) {
-                        toggle.setValue(isMember);
-                        toggle.onChange(function (value) {
-                            if (value) {
-                                self.plugin.addSessionToGroup(session.id, self.group.id);
-                            } else {
-                                self.plugin.removeSessionFromGroup(session.id, self.group.id);
-                            }
-                        });
-                    });
-            })(allSessions[i]);
-        }
-    };
-
-    GroupSessionsModal.prototype.onClose = function () {
-        this.contentEl.empty();
-    };
-
-    return GroupSessionsModal;
-})(obsidian.Modal);
-
-function applyWarningStyle(btn) {
-    if (typeof btn.setWarning === 'function') {
-        btn.setWarning();
-        return;
-    }
-    if (btn.buttonEl) {
-        btn.buttonEl.addClass('mod-warning');
-    }
-}
-
-function resolveSettingText(value) {
-    return typeof value === 'function' ? value() : value;
-}
-
-function addToggleSetting(parentEl, options) {
-    var setting = new obsidian.Setting(parentEl)
-        .setName(resolveSettingText(options.name));
-
-    if (options.desc) {
-        setting.setDesc(resolveSettingText(options.desc));
-    }
-
-    setting.addToggle(function (toggle) {
-        toggle.setValue(!!options.value);
-        if (options.disabled && typeof toggle.setDisabled === 'function') {
-            toggle.setDisabled(true);
-        }
-        toggle.onChange(function (value) {
-            options.onChange(value);
-        });
-    });
-
-    return setting;
-}
-
-function addDropdownSetting(parentEl, options) {
-    var setting = new obsidian.Setting(parentEl)
-        .setName(resolveSettingText(options.name));
-
-    if (options.desc) {
-        setting.setDesc(resolveSettingText(options.desc));
-    }
-
-    setting.addDropdown(function (dropdown) {
-        var optionKeys = Object.keys(options.items || {});
-        for (var i = 0; i < optionKeys.length; i++) {
-            dropdown.addOption(optionKeys[i], resolveSettingText(options.items[optionKeys[i]]));
-        }
-        dropdown.setValue(String(options.value));
-        if (options.disabled && typeof dropdown.setDisabled === 'function') {
-            dropdown.setDisabled(true);
-        }
-        dropdown.onChange(function (value) {
-            options.onChange(value);
-        });
-    });
-
-    return setting;
-}
-
-function addSubsection(parentEl, title) {
-    var headingEl = parentEl.createEl('h4', { text: resolveSettingText(title) });
-    headingEl.addClass('wpp-settings-subsection');
-    return headingEl;
-}
-
-function addDangerResetSetting(parentEl, app, display, options) {
-    new obsidian.Setting(parentEl)
-        .setName(resolveSettingText(options.name))
-        .setDesc(resolveSettingText(options.desc))
-        .addButton(function (btn) {
-            var isRunning = false;
-            btn.setButtonText(resolveSettingText(options.buttonText));
-            applyWarningStyle(btn);
-            btn.onClick(function () {
-                if (isRunning) return;
-                var confirmOptions = {
-                    confirmText: options.buttonText,
-                };
-                if (options.confirmHint) {
-                    confirmOptions.hint = options.confirmHint;
-                }
-                new modals.ConfirmModal(app, options.confirmMessage, function () {
-                    isRunning = true;
-                    btn.setDisabled(true);
-                    return options.run()
-                        .then(function () {
-                            new obsidian.Notice(options.successNotice);
-                        })
-                        .catch(function () {
-                            new obsidian.Notice(options.failureNotice);
-                        })
-                        .then(function () {
-                            isRunning = false;
-                            btn.setDisabled(false);
-                            display();
-                        });
-                }, confirmOptions).open();
-            });
-        });
-}
-
-function addAsyncActionSetting(parentEl, options) {
-    new obsidian.Setting(parentEl)
-        .setName(resolveSettingText(options.name))
-        .setDesc(resolveSettingText(options.desc))
-        .addButton(function (btn) {
-            btn.setButtonText(resolveSettingText(options.buttonText));
-            if (options.disabled) {
-                btn.setDisabled(true);
-            }
-            btn.onClick(function () {
-                options.run()
-                    .then(function () {
-                        if (options.onSuccess) options.onSuccess();
-                    })
-                    .catch(function () {
-                        if (options.failureNotice) {
-                            new obsidian.Notice(options.failureNotice);
-                        }
-                    });
-            });
-        });
-}
+var GroupSessionsModal = settingsUi.GroupSessionsModal;
+var resolveSettingText = settingsUi.resolveSettingText;
+var addToggleSetting = settingsUi.addToggleSetting;
+var addDropdownSetting = settingsUi.addDropdownSetting;
+var addSubsection = settingsUi.addSubsection;
+var addDangerResetSetting = settingsUi.addDangerResetSetting;
+var addAsyncActionSetting = settingsUi.addAsyncActionSetting;
 
 // ============================================================
 // Settings Tab
@@ -243,10 +76,9 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                     }
                     dropdown.setValue(self.plugin.data.language || 'auto');
                     dropdown.onChange(function (value) {
-                        self.plugin.data.language = value;
-                        i18n.resolveLocale(value);
-                        self.plugin.persistData();
-                        self.display();
+                        self.plugin.setLanguageSetting(value).then(function () {
+                            self.display();
+                        });
                     });
                 });
 
@@ -298,11 +130,7 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                             }
                             dropdown.setValue((self.plugin.data.statusBarActions || {})[slotKey] || 'none');
                             dropdown.onChange(function (value) {
-                                if (!self.plugin.data.statusBarActions) {
-                                    self.plugin.data.statusBarActions = Object.assign({}, DEFAULT_DATA.statusBarActions);
-                                }
-                                self.plugin.data.statusBarActions[slotKey] = value;
-                                self.plugin.persistData();
+                                self.plugin.setStatusBarAction(slotKey, value);
                             });
                         });
                 })(slotKeys[si]);
@@ -332,8 +160,7 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                     desc: L.settingsWarnUnsavedSwitchDesc,
                     value: self.plugin.isWarnOnUnsavedSwitchEnabled(),
                     onChange: function (value) {
-                        self.plugin.data.warnOnUnsavedSwitch = value;
-                        self.plugin.persistData();
+                        self.plugin.setWarnOnUnsavedSwitch(value);
                     },
                 });
 
@@ -342,9 +169,7 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                     desc: L.settingsHighlightUnsavedSessionChangesDesc,
                     value: self.plugin.isUnsavedStatusBarHighlightEnabled(),
                     onChange: function (value) {
-                        self.plugin.data.highlightUnsavedSessionChanges = value;
-                        self.plugin.updateStatusBar();
-                        self.plugin.persistData();
+                        self.plugin.setUnsavedStatusBarHighlight(value);
                     },
                 });
 
@@ -353,8 +178,7 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                     desc: L.settingsConfirmQuickActionsDesc,
                     value: !!self.plugin.data.confirmQuickActions,
                     onChange: function (value) {
-                        self.plugin.data.confirmQuickActions = value;
-                        self.plugin.persistData();
+                        self.plugin.setConfirmQuickActions(value);
                     },
                 });
             }
@@ -366,9 +190,9 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                 desc: L.settingsStatusBarModScrollSwitchDesc,
                 value: !!self.plugin.data.statusBarModScrollSwitch,
                 onChange: function (value) {
-                    self.plugin.data.statusBarModScrollSwitch = value;
-                    self.plugin.persistData();
-                    self.display();
+                    self.plugin.setStatusBarModScrollSwitch(value).then(function () {
+                        self.display();
+                    });
                 },
             });
 
@@ -384,9 +208,9 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                         custom: L.settingsStatusBarScrollPresetCustom,
                     },
                     onChange: function (value) {
-                        self.plugin.data.statusBarScrollPreset = value;
-                        self.plugin.persistData();
-                        self.display();
+                        self.plugin.setStatusBarScrollPreset(value).then(function () {
+                            self.display();
+                        });
                     },
                 });
 
@@ -403,8 +227,7 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                         modOrAlt: L.settingsStatusBarScrollModifierModOrAlt,
                     },
                     onChange: function (value) {
-                        self.plugin.data.statusBarScrollModifierMode = value;
-                        self.plugin.persistData();
+                        self.plugin.setStatusBarScrollModifierMode(value);
                     },
                 });
 
@@ -425,8 +248,7 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                         '90': '90',
                     },
                     onChange: function (value) {
-                        self.plugin.data.statusBarScrollThreshold = Number(value) || 30;
-                        self.plugin.persistData();
+                        self.plugin.setStatusBarScrollThreshold(value);
                     },
                 });
 
@@ -443,8 +265,7 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                         '1000': '1000 ms',
                     },
                     onChange: function (value) {
-                        self.plugin.data.statusBarScrollCooldownMs = Number(value) || 500;
-                        self.plugin.persistData();
+                        self.plugin.setStatusBarScrollCooldownMs(value);
                     },
                 });
 
@@ -460,8 +281,7 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                         '600': '600 ms',
                     },
                     onChange: function (value) {
-                        self.plugin.data.statusBarScrollResetMs = Number(value) || 250;
-                        self.plugin.persistData();
+                        self.plugin.setStatusBarScrollResetMs(value);
                     },
                 });
 
@@ -470,8 +290,7 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                     desc: L.settingsStatusBarScrollInvertDesc,
                     value: !!self.plugin.data.statusBarScrollInvert,
                     onChange: function (value) {
-                        self.plugin.data.statusBarScrollInvert = value;
-                        self.plugin.persistData();
+                        self.plugin.setStatusBarScrollInvert(value);
                     },
                 });
             }
@@ -483,8 +302,7 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                 desc: L.settingsShowActiveSwitchCommandDesc,
                 value: !!self.plugin.data.showActiveSwitchCommand,
                 onChange: function (value) {
-                    self.plugin.data.showActiveSwitchCommand = value;
-                    self.plugin.persistData();
+                    self.plugin.setShowActiveSwitchCommand(value);
                 },
             });
 
@@ -493,9 +311,7 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                 desc: L.settingsNumberedSwitchCommandsDesc,
                 value: !!self.plugin.data.numberedSwitchCommands,
                 onChange: function (value) {
-                    self.plugin.data.numberedSwitchCommands = value;
-                    self.plugin.persistData();
-                    self.plugin.syncSessionCommands();
+                    self.plugin.setNumberedSwitchCommands(value);
                 },
             });
 
@@ -509,10 +325,9 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                 .addToggle(function (toggle) {
                     toggle.setValue(allOn);
                     toggle.onChange(function (value) {
-                        self.plugin.data.previewNext = value;
-                        self.plugin.data.previewPrevious = value;
-                        self.plugin.persistData();
-                        self.display();
+                        self.plugin.setSwitchPreviewEnabled(value).then(function () {
+                            self.display();
+                        });
                     });
                 });
 
@@ -524,9 +339,9 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                 .addToggle(function (toggle) {
                     toggle.setValue(!!self.plugin.data.previewNext);
                     toggle.onChange(function (value) {
-                        self.plugin.data.previewNext = value;
-                        self.plugin.persistData();
-                        self.display();
+                        self.plugin.setPreviewNext(value).then(function () {
+                            self.display();
+                        });
                     });
                 });
 
@@ -535,9 +350,9 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                 .addToggle(function (toggle) {
                     toggle.setValue(!!self.plugin.data.previewPrevious);
                     toggle.onChange(function (value) {
-                        self.plugin.data.previewPrevious = value;
-                        self.plugin.persistData();
-                        self.display();
+                        self.plugin.setPreviewPrevious(value).then(function () {
+                            self.display();
+                        });
                     });
                 });
 
@@ -548,8 +363,7 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                 desc: L.settingsShowFilterInputDesc,
                 value: !!self.plugin.data.showFilterInput,
                 onChange: function (value) {
-                    self.plugin.data.showFilterInput = value;
-                    self.plugin.persistData();
+                    self.plugin.setShowFilterInput(value);
                 },
             });
 
@@ -562,8 +376,7 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                     dropdown.addOption('session-create', L.settingsOverlayFocusSessionCreate);
                     dropdown.setValue(self.plugin.data.overlayDefaultFocus || 'current-session');
                     dropdown.onChange(function (value) {
-                        self.plugin.data.overlayDefaultFocus = value;
-                        self.plugin.persistData();
+                        self.plugin.setOverlayDefaultFocus(value);
                     });
                 });
 
@@ -574,8 +387,7 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                 desc: L.settingsConfirmDeleteDesc,
                 value: self.plugin.data.confirmDeleteByHotkey !== false,
                 onChange: function (value) {
-                    self.plugin.data.confirmDeleteByHotkey = value;
-                    self.plugin.persistData();
+                    self.plugin.setConfirmDeleteByHotkey(value);
                 },
             });
 
@@ -589,14 +401,9 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                 .addToggle(function (toggle) {
                     toggle.setValue(versionHistoryEnabled);
                     toggle.onChange(function (value) {
-                        self.plugin.data.versionHistoryEnabled = value;
-                        self.plugin.persistData();
-                        if (value) {
-                            self.plugin.startHistorySnapshotTimer();
-                        } else {
-                            self.plugin.stopHistorySnapshotTimer();
-                        }
-                        self.display();
+                        self.plugin.setVersionHistoryEnabled(value).then(function () {
+                            self.display();
+                        });
                     });
                 });
 
@@ -617,9 +424,7 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                         dropdown.setValue(String(self.plugin.getVersionHistorySnapshotInterval()));
                         if (!versionHistoryEnabled) dropdown.setDisabled(true);
                         dropdown.onChange(function (value) {
-                            self.plugin.data.versionHistorySnapshotInterval = parseInt(value, 10);
-                            self.plugin.persistData();
-                            self.plugin.startHistorySnapshotTimer();
+                            self.plugin.setVersionHistorySnapshotInterval(value);
                         });
                     });
             }
@@ -630,8 +435,7 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                 value: self.plugin.isVersionHistoryConfirmRestoreEnabled(),
                 disabled: !versionHistoryEnabled,
                 onChange: function (value) {
-                    self.plugin.data.versionHistoryConfirmRestore = value;
-                    self.plugin.persistData();
+                    self.plugin.setVersionHistoryConfirmRestore(value);
                 },
             });
 
