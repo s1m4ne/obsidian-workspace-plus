@@ -655,6 +655,13 @@ var SessionManagerModal = /** @class */ (function (_super) {
                 onReload: function () {
                     self.plugin.reloadCurrentSessionWithoutSaving();
                 },
+                onOverwriteWithCurrentLayout: function () {
+                    self.plugin.confirmOverwriteSessionWithCurrentLayout(session.id, {
+                        onSaved: function () {
+                            self.renderList();
+                        },
+                    });
+                },
                 onSwitch: function () {
                     self.onLoad(session.id);
                 },

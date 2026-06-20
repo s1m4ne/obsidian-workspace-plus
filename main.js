@@ -90,6 +90,9 @@ var require_i18n = __commonJS({
         confirmSaveSession: function(n) {
           return 'Save session "' + n + '"?';
         },
+        confirmOverwriteSessionWithCurrentLayout: function(n) {
+          return 'Overwrite "' + n + '" with the current layout?';
+        },
         confirmReloadSession: function(n) {
           return 'Reload session "' + n + '"? Unsaved changes will be lost.';
         },
@@ -134,6 +137,7 @@ var require_i18n = __commonJS({
         cmdNext: "Next session",
         cmdSaveCurrent: "Save current session",
         cmdSaveAs: "Save current session as...",
+        cmdSaveCurrentLayoutToSession: "Save current layout to session...",
         cmdReloadCurrentWithoutSaving: "Reload current session (without saving)",
         cmdToggleAutoSave: "Toggle auto-save on switch",
         cmdEnableAutoSave: "Enable auto-save on switch",
@@ -150,6 +154,9 @@ var require_i18n = __commonJS({
         },
         savedAs: function(n) {
           return 'Saved as "' + n + '"';
+        },
+        savedCurrentLayoutToSession: function(n) {
+          return 'Saved current layout to "' + n + '"';
         },
         noChanges: "No changes to save",
         reloadedSession: function(n) {
@@ -172,6 +179,7 @@ var require_i18n = __commonJS({
         noFilteredSessions: "No matching sessions",
         noGroupSessions: "No sessions in this group",
         searchOverlayPlaceholder: "Type to filter sessions...",
+        saveCurrentLayoutToSessionPlaceholder: "Select a session to overwrite...",
         searchOverlayHelp: "\u2191\u2193 move  /  Enter switch  /  \u21E7Enter save  /  \u232B delete  /  Esc close",
         backupRestored: "Workspace++: Restored sessions from backup.",
         sessionDataMigrated: "Workspace++: Session data moved to .workspace-plus-plus/sessions.json.",
@@ -400,6 +408,7 @@ var require_i18n = __commonJS({
         contextDuplicateSession: "Duplicate this session",
         contextReloadSession: "Reload this session",
         contextSaveSession: "Save this session",
+        contextSaveCurrentLayoutToThisSession: "Save current layout to this session",
         groupRemoveAllSessions: "Remove all sessions from this group",
         confirmRemoveAllFromGroup: function(g, n) {
           return "Remove all " + n + ' sessions from "' + g + '"?';
@@ -3174,6 +3183,9 @@ var require_i18n = __commonJS({
         confirmSaveSession: function(n) {
           return '\u30BB\u30C3\u30B7\u30E7\u30F3 "' + n + '" \u3092\u4FDD\u5B58\u3057\u307E\u3059\u304B\uFF1F';
         },
+        confirmOverwriteSessionWithCurrentLayout: function(n) {
+          return "\u300C" + n + "\u300D\u3092\u73FE\u5728\u306E\u30EC\u30A4\u30A2\u30A6\u30C8\u3067\u4E0A\u66F8\u304D\u3057\u307E\u3059\u304B\uFF1F";
+        },
         confirmReloadSession: function(n) {
           return '\u30BB\u30C3\u30B7\u30E7\u30F3 "' + n + '" \u3092\u518D\u8AAD\u307F\u8FBC\u307F\u3057\u307E\u3059\u304B\uFF1F\u4FDD\u5B58\u3055\u308C\u3066\u3044\u306A\u3044\u5909\u66F4\u306F\u5931\u308F\u308C\u307E\u3059\u3002';
         },
@@ -3218,6 +3230,7 @@ var require_i18n = __commonJS({
         cmdNext: "\u6B21\u306E\u30BB\u30C3\u30B7\u30E7\u30F3",
         cmdSaveCurrent: "\u73FE\u5728\u306E\u30BB\u30C3\u30B7\u30E7\u30F3\u3092\u4FDD\u5B58",
         cmdSaveAs: "\u73FE\u5728\u306E\u30BB\u30C3\u30B7\u30E7\u30F3\u3092\u5225\u540D\u3067\u4FDD\u5B58...",
+        cmdSaveCurrentLayoutToSession: "\u73FE\u5728\u306E\u30EC\u30A4\u30A2\u30A6\u30C8\u3092\u30BB\u30C3\u30B7\u30E7\u30F3\u306B\u4FDD\u5B58...",
         cmdReloadCurrentWithoutSaving: "\u73FE\u5728\u306E\u30BB\u30C3\u30B7\u30E7\u30F3\u3092\u4FDD\u5B58\u305B\u305A\u518D\u8AAD\u307F\u8FBC\u307F",
         cmdToggleAutoSave: "\u30BB\u30C3\u30B7\u30E7\u30F3\u5207\u66FF\u6642\u306E\u81EA\u52D5\u4FDD\u5B58\u3092\u5207\u308A\u66FF\u3048",
         cmdEnableAutoSave: "\u30BB\u30C3\u30B7\u30E7\u30F3\u5207\u66FF\u6642\u306E\u81EA\u52D5\u4FDD\u5B58\u3092\u6709\u52B9\u5316",
@@ -3234,6 +3247,9 @@ var require_i18n = __commonJS({
         },
         savedAs: function(n) {
           return "\u300C" + n + "\u300D\u3068\u3057\u3066\u4FDD\u5B58\u3057\u307E\u3057\u305F";
+        },
+        savedCurrentLayoutToSession: function(n) {
+          return "\u73FE\u5728\u306E\u30EC\u30A4\u30A2\u30A6\u30C8\u3092\u300C" + n + "\u300D\u306B\u4FDD\u5B58\u3057\u307E\u3057\u305F";
         },
         noChanges: "\u5909\u66F4\u306F\u3042\u308A\u307E\u305B\u3093",
         reloadedSession: function(n) {
@@ -3256,6 +3272,7 @@ var require_i18n = __commonJS({
         noFilteredSessions: "\u4E00\u81F4\u3059\u308B\u30BB\u30C3\u30B7\u30E7\u30F3\u304C\u3042\u308A\u307E\u305B\u3093",
         noGroupSessions: "\u3053\u306E\u30B0\u30EB\u30FC\u30D7\u306B\u30BB\u30C3\u30B7\u30E7\u30F3\u306F\u3042\u308A\u307E\u305B\u3093",
         searchOverlayPlaceholder: "\u5165\u529B\u3057\u3066\u30BB\u30C3\u30B7\u30E7\u30F3\u3092\u7D5E\u308A\u8FBC\u307F...",
+        saveCurrentLayoutToSessionPlaceholder: "\u4E0A\u66F8\u304D\u3059\u308B\u30BB\u30C3\u30B7\u30E7\u30F3\u3092\u9078\u629E...",
         searchOverlayHelp: "\u2191\u2193 \u79FB\u52D5  /  Enter \u5207\u66FF  /  \u21E7Enter \u4FDD\u5B58  /  \u232B \u524A\u9664  /  Esc \u9589\u3058\u308B",
         backupRestored: "Workspace++: \u30D0\u30C3\u30AF\u30A2\u30C3\u30D7\u304B\u3089\u30BB\u30C3\u30B7\u30E7\u30F3\u3092\u5FA9\u5143\u3057\u307E\u3057\u305F\u3002",
         sessionDataMigrated: "Workspace++: \u30BB\u30C3\u30B7\u30E7\u30F3\u30C7\u30FC\u30BF\u3092 .workspace-plus-plus/sessions.json \u306B\u79FB\u884C\u3057\u307E\u3057\u305F\u3002",
@@ -3484,6 +3501,7 @@ var require_i18n = __commonJS({
         contextDuplicateSession: "\u3053\u306E\u30BB\u30C3\u30B7\u30E7\u30F3\u3092\u8907\u88FD",
         contextReloadSession: "\u3053\u306E\u30BB\u30C3\u30B7\u30E7\u30F3\u3092\u518D\u8AAD\u307F\u8FBC\u307F",
         contextSaveSession: "\u3053\u306E\u30BB\u30C3\u30B7\u30E7\u30F3\u3092\u4FDD\u5B58",
+        contextSaveCurrentLayoutToThisSession: "\u73FE\u5728\u306E\u30EC\u30A4\u30A2\u30A6\u30C8\u3092\u3053\u306E\u30BB\u30C3\u30B7\u30E7\u30F3\u306B\u4FDD\u5B58",
         groupRemoveAllSessions: "\u3059\u3079\u3066\u306E\u30BB\u30C3\u30B7\u30E7\u30F3\u3092\u3053\u306E\u30B0\u30EB\u30FC\u30D7\u304B\u3089\u5916\u3059",
         confirmRemoveAllFromGroup: function(g, n) {
           return "\u300C" + g + "\u300D\u304B\u3089 " + n + " \u4EF6\u306E\u30BB\u30C3\u30B7\u30E7\u30F3\u3092\u3059\u3079\u3066\u5916\u3057\u307E\u3059\u304B\uFF1F";
@@ -4887,6 +4905,15 @@ var require_i18n = __commonJS({
     };
     var EXTENDED_STRINGS = {
       zh: {
+        confirmOverwriteSessionWithCurrentLayout: function(n) {
+          return "\u7528\u5F53\u524D\u5E03\u5C40\u8986\u76D6\u201C" + n + "\u201D\uFF1F";
+        },
+        cmdSaveCurrentLayoutToSession: "\u5C06\u5F53\u524D\u5E03\u5C40\u4FDD\u5B58\u5230\u4F1A\u8BDD...",
+        savedCurrentLayoutToSession: function(n) {
+          return "\u5DF2\u5C06\u5F53\u524D\u5E03\u5C40\u4FDD\u5B58\u5230\u201C" + n + "\u201D";
+        },
+        saveCurrentLayoutToSessionPlaceholder: "\u9009\u62E9\u8981\u8986\u76D6\u7684\u4F1A\u8BDD...",
+        contextSaveCurrentLayoutToThisSession: "\u5C06\u5F53\u524D\u5E03\u5C40\u4FDD\u5B58\u5230\u6B64\u4F1A\u8BDD",
         cmdExportSessions: "\u5BFC\u51FA\u4F1A\u8BDD\u5FEB\u7167",
         cmdImportSessions: "\u5BFC\u5165\u6700\u65B0\u4F1A\u8BDD\u5FEB\u7167",
         cmdReloadCurrentWithoutSaving: "\u91CD\u65B0\u52A0\u8F7D\u5F53\u524D\u4F1A\u8BDD\uFF08\u4E0D\u4FDD\u5B58\uFF09",
@@ -4985,6 +5012,15 @@ var require_i18n = __commonJS({
         resetSessionsAndSettingsFailed: "\u91CD\u7F6E\u4F1A\u8BDD\u548C\u8BBE\u7F6E\u5931\u8D25\u3002"
       },
       "zh-TW": {
+        confirmOverwriteSessionWithCurrentLayout: function(n) {
+          return "\u8981\u7528\u76EE\u524D\u4F48\u5C40\u8986\u5BEB\u300C" + n + "\u300D\u55CE\uFF1F";
+        },
+        cmdSaveCurrentLayoutToSession: "\u5C07\u76EE\u524D\u4F48\u5C40\u5132\u5B58\u5230\u5DE5\u4F5C\u968E\u6BB5...",
+        savedCurrentLayoutToSession: function(n) {
+          return "\u5DF2\u5C07\u76EE\u524D\u4F48\u5C40\u5132\u5B58\u5230\u300C" + n + "\u300D";
+        },
+        saveCurrentLayoutToSessionPlaceholder: "\u9078\u64C7\u8981\u8986\u5BEB\u7684\u5DE5\u4F5C\u968E\u6BB5...",
+        contextSaveCurrentLayoutToThisSession: "\u5C07\u76EE\u524D\u4F48\u5C40\u5132\u5B58\u5230\u6B64\u5DE5\u4F5C\u968E\u6BB5",
         cmdExportSessions: "\u532F\u51FA\u5DE5\u4F5C\u968E\u6BB5\u5FEB\u7167",
         cmdImportSessions: "\u532F\u5165\u6700\u65B0\u5DE5\u4F5C\u968E\u6BB5\u5FEB\u7167",
         cmdReloadCurrentWithoutSaving: "\u91CD\u65B0\u8F09\u5165\u76EE\u524D\u5DE5\u4F5C\u968E\u6BB5\uFF08\u4E0D\u5132\u5B58\uFF09",
@@ -5083,6 +5119,15 @@ var require_i18n = __commonJS({
         resetSessionsAndSettingsFailed: "\u91CD\u8A2D\u5DE5\u4F5C\u968E\u6BB5\u8207\u8A2D\u5B9A\u5931\u6557\u3002"
       },
       es: {
+        confirmOverwriteSessionWithCurrentLayout: function(n) {
+          return "\xBFSobrescribir \xAB" + n + "\xBB con el dise\xF1o actual?";
+        },
+        cmdSaveCurrentLayoutToSession: "Guardar dise\xF1o actual en una sesi\xF3n...",
+        savedCurrentLayoutToSession: function(n) {
+          return "Dise\xF1o actual guardado en \xAB" + n + "\xBB";
+        },
+        saveCurrentLayoutToSessionPlaceholder: "Selecciona una sesi\xF3n para sobrescribir...",
+        contextSaveCurrentLayoutToThisSession: "Guardar dise\xF1o actual en esta sesi\xF3n",
         cmdExportSessions: "Exportar instant\xE1nea de sesiones",
         cmdImportSessions: "Importar la instant\xE1nea m\xE1s reciente de sesiones",
         cmdReloadCurrentWithoutSaving: "Recargar sesi\xF3n actual (sin guardar)",
@@ -5181,6 +5226,15 @@ var require_i18n = __commonJS({
         resetSessionsAndSettingsFailed: "No se pudieron restablecer las sesiones y los ajustes."
       },
       fr: {
+        confirmOverwriteSessionWithCurrentLayout: function(n) {
+          return "Remplacer \xAB " + n + " \xBB par la disposition actuelle ?";
+        },
+        cmdSaveCurrentLayoutToSession: "Enregistrer la disposition actuelle dans une session...",
+        savedCurrentLayoutToSession: function(n) {
+          return "Disposition actuelle enregistr\xE9e dans \xAB " + n + " \xBB";
+        },
+        saveCurrentLayoutToSessionPlaceholder: "S\xE9lectionnez une session \xE0 remplacer...",
+        contextSaveCurrentLayoutToThisSession: "Enregistrer la disposition actuelle dans cette session",
         cmdExportSessions: "Exporter un instantan\xE9 des sessions",
         cmdImportSessions: "Importer le dernier instantan\xE9 des sessions",
         cmdReloadCurrentWithoutSaving: "Recharger la session en cours (sans enregistrer)",
@@ -5279,6 +5333,15 @@ var require_i18n = __commonJS({
         resetSessionsAndSettingsFailed: "\xC9chec de la r\xE9initialisation des sessions et des param\xE8tres."
       },
       ar: {
+        confirmOverwriteSessionWithCurrentLayout: function(n) {
+          return '\u0627\u0644\u0643\u062A\u0627\u0628\u0629 \u0641\u0648\u0642 "' + n + '" \u0628\u0627\u0644\u062A\u062E\u0637\u064A\u0637 \u0627\u0644\u062D\u0627\u0644\u064A\u061F';
+        },
+        cmdSaveCurrentLayoutToSession: "\u062D\u0641\u0638 \u0627\u0644\u062A\u062E\u0637\u064A\u0637 \u0627\u0644\u062D\u0627\u0644\u064A \u0641\u064A \u062C\u0644\u0633\u0629...",
+        savedCurrentLayoutToSession: function(n) {
+          return '\u062A\u0645 \u062D\u0641\u0638 \u0627\u0644\u062A\u062E\u0637\u064A\u0637 \u0627\u0644\u062D\u0627\u0644\u064A \u0641\u064A "' + n + '"';
+        },
+        saveCurrentLayoutToSessionPlaceholder: "\u0627\u062E\u062A\u0631 \u062C\u0644\u0633\u0629 \u0644\u0644\u0643\u062A\u0627\u0628\u0629 \u0641\u0648\u0642\u0647\u0627...",
+        contextSaveCurrentLayoutToThisSession: "\u062D\u0641\u0638 \u0627\u0644\u062A\u062E\u0637\u064A\u0637 \u0627\u0644\u062D\u0627\u0644\u064A \u0641\u064A \u0647\u0630\u0647 \u0627\u0644\u062C\u0644\u0633\u0629",
         cmdExportSessions: "\u062A\u0635\u062F\u064A\u0631 \u0644\u0642\u0637\u0629 \u0627\u0644\u062C\u0644\u0633\u0627\u062A",
         cmdImportSessions: "\u0627\u0633\u062A\u064A\u0631\u0627\u062F \u0623\u062D\u062F\u062B \u0644\u0642\u0637\u0629 \u0644\u0644\u062C\u0644\u0633\u0627\u062A",
         cmdReloadCurrentWithoutSaving: "\u0625\u0639\u0627\u062F\u0629 \u062A\u062D\u0645\u064A\u0644 \u0627\u0644\u062C\u0644\u0633\u0629 \u0627\u0644\u062D\u0627\u0644\u064A\u0629 (\u0628\u062F\u0648\u0646 \u062D\u0641\u0638)",
@@ -5377,6 +5440,15 @@ var require_i18n = __commonJS({
         resetSessionsAndSettingsFailed: "\u0641\u0634\u0644\u062A \u0625\u0639\u0627\u062F\u0629 \u062A\u0639\u064A\u064A\u0646 \u0627\u0644\u062C\u0644\u0633\u0627\u062A \u0648\u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A."
       },
       pt: {
+        confirmOverwriteSessionWithCurrentLayout: function(n) {
+          return 'Sobrescrever "' + n + '" com o layout atual?';
+        },
+        cmdSaveCurrentLayoutToSession: "Salvar layout atual em uma sess\xE3o...",
+        savedCurrentLayoutToSession: function(n) {
+          return 'Layout atual salvo em "' + n + '"';
+        },
+        saveCurrentLayoutToSessionPlaceholder: "Selecione uma sess\xE3o para sobrescrever...",
+        contextSaveCurrentLayoutToThisSession: "Salvar layout atual nesta sess\xE3o",
         cmdExportSessions: "Exportar snapshot de sess\xF5es",
         cmdImportSessions: "Importar snapshot mais recente de sess\xF5es",
         cmdReloadCurrentWithoutSaving: "Recarregar sess\xE3o atual (sem salvar)",
@@ -5475,6 +5547,15 @@ var require_i18n = __commonJS({
         resetSessionsAndSettingsFailed: "Falha ao redefinir sess\xF5es e configura\xE7\xF5es."
       },
       ru: {
+        confirmOverwriteSessionWithCurrentLayout: function(n) {
+          return "\u041F\u0435\u0440\u0435\u0437\u0430\u043F\u0438\u0441\u0430\u0442\u044C \xAB" + n + "\xBB \u0442\u0435\u043A\u0443\u0449\u0438\u043C \u043C\u0430\u043A\u0435\u0442\u043E\u043C?";
+        },
+        cmdSaveCurrentLayoutToSession: "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0442\u0435\u043A\u0443\u0449\u0438\u0439 \u043C\u0430\u043A\u0435\u0442 \u0432 \u0441\u0435\u0441\u0441\u0438\u044E...",
+        savedCurrentLayoutToSession: function(n) {
+          return "\u0422\u0435\u043A\u0443\u0449\u0438\u0439 \u043C\u0430\u043A\u0435\u0442 \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D \u0432 \xAB" + n + "\xBB";
+        },
+        saveCurrentLayoutToSessionPlaceholder: "\u0412\u044B\u0431\u0435\u0440\u0438\u0442\u0435 \u0441\u0435\u0441\u0441\u0438\u044E \u0434\u043B\u044F \u043F\u0435\u0440\u0435\u0437\u0430\u043F\u0438\u0441\u0438...",
+        contextSaveCurrentLayoutToThisSession: "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0442\u0435\u043A\u0443\u0449\u0438\u0439 \u043C\u0430\u043A\u0435\u0442 \u0432 \u044D\u0442\u0443 \u0441\u0435\u0441\u0441\u0438\u044E",
         cmdExportSessions: "\u042D\u043A\u0441\u043F\u043E\u0440\u0442\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u0441\u043D\u0438\u043C\u043E\u043A \u0441\u0435\u0441\u0441\u0438\u0439",
         cmdImportSessions: "\u0418\u043C\u043F\u043E\u0440\u0442\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u043F\u043E\u0441\u043B\u0435\u0434\u043D\u0438\u0439 \u0441\u043D\u0438\u043C\u043E\u043A \u0441\u0435\u0441\u0441\u0438\u0439",
         cmdReloadCurrentWithoutSaving: "\u041F\u0435\u0440\u0435\u0437\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044C \u0442\u0435\u043A\u0443\u0449\u0443\u044E \u0441\u0435\u0441\u0441\u0438\u044E (\u0431\u0435\u0437 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u044F)",
@@ -5573,6 +5654,15 @@ var require_i18n = __commonJS({
         resetSessionsAndSettingsFailed: "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0441\u0431\u0440\u043E\u0441\u0438\u0442\u044C \u0441\u0435\u0441\u0441\u0438\u0438 \u0438 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438."
       },
       de: {
+        confirmOverwriteSessionWithCurrentLayout: function(n) {
+          return "Sitzung \u201E" + n + "\u201C mit aktuellem Layout \xFCberschreiben?";
+        },
+        cmdSaveCurrentLayoutToSession: "Aktuelles Layout in Sitzung speichern...",
+        savedCurrentLayoutToSession: function(n) {
+          return "Aktuelles Layout in \u201E" + n + "\u201C gespeichert";
+        },
+        saveCurrentLayoutToSessionPlaceholder: "Zu \xFCberschreibende Sitzung ausw\xE4hlen...",
+        contextSaveCurrentLayoutToThisSession: "Aktuelles Layout in diese Sitzung speichern",
         cmdExportSessions: "Sitzungs-Snapshot exportieren",
         cmdImportSessions: "Neueste Sitzungs-Snapshot importieren",
         cmdReloadCurrentWithoutSaving: "Aktuelle Sitzung neu laden (ohne Speichern)",
@@ -5671,6 +5761,15 @@ var require_i18n = __commonJS({
         resetSessionsAndSettingsFailed: "Sitzungen und Einstellungen konnten nicht zur\xFCckgesetzt werden."
       },
       ko: {
+        confirmOverwriteSessionWithCurrentLayout: function(n) {
+          return '"' + n + '" \uC138\uC158\uC744 \uD604\uC7AC \uB808\uC774\uC544\uC6C3\uC73C\uB85C \uB36E\uC5B4\uC4F0\uC2DC\uACA0\uC2B5\uB2C8\uAE4C?';
+        },
+        cmdSaveCurrentLayoutToSession: "\uD604\uC7AC \uB808\uC774\uC544\uC6C3\uC744 \uC138\uC158\uC5D0 \uC800\uC7A5...",
+        savedCurrentLayoutToSession: function(n) {
+          return '\uD604\uC7AC \uB808\uC774\uC544\uC6C3\uC744 "' + n + '"\uC5D0 \uC800\uC7A5\uD588\uC2B5\uB2C8\uB2E4';
+        },
+        saveCurrentLayoutToSessionPlaceholder: "\uB36E\uC5B4\uC4F8 \uC138\uC158 \uC120\uD0DD...",
+        contextSaveCurrentLayoutToThisSession: "\uD604\uC7AC \uB808\uC774\uC544\uC6C3\uC744 \uC774 \uC138\uC158\uC5D0 \uC800\uC7A5",
         cmdExportSessions: "\uC138\uC158 \uC2A4\uB0C5\uC0F7 \uB0B4\uBCF4\uB0B4\uAE30",
         cmdImportSessions: "\uCD5C\uC2E0 \uC138\uC158 \uC2A4\uB0C5\uC0F7 \uAC00\uC838\uC624\uAE30",
         cmdReloadCurrentWithoutSaving: "\uD604\uC7AC \uC138\uC158 \uB2E4\uC2DC \uBD88\uB7EC\uC624\uAE30 (\uC800\uC7A5 \uC548 \uD568)",
@@ -5769,6 +5868,15 @@ var require_i18n = __commonJS({
         resetSessionsAndSettingsFailed: "\uC138\uC158\uACFC \uC124\uC815 \uCD08\uAE30\uD654\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4."
       },
       it: {
+        confirmOverwriteSessionWithCurrentLayout: function(n) {
+          return 'Sovrascrivere "' + n + '" con il layout attuale?';
+        },
+        cmdSaveCurrentLayoutToSession: "Salva layout attuale in una sessione...",
+        savedCurrentLayoutToSession: function(n) {
+          return 'Layout attuale salvato in "' + n + '"';
+        },
+        saveCurrentLayoutToSessionPlaceholder: "Seleziona una sessione da sovrascrivere...",
+        contextSaveCurrentLayoutToThisSession: "Salva layout attuale in questa sessione",
         cmdExportSessions: "Esporta snapshot delle sessioni",
         cmdImportSessions: "Importa ultimo snapshot delle sessioni",
         cmdReloadCurrentWithoutSaving: "Ricarica sessione corrente (senza salvare)",
@@ -5867,6 +5975,15 @@ var require_i18n = __commonJS({
         resetSessionsAndSettingsFailed: "Impossibile reimpostare sessioni e impostazioni."
       },
       tr: {
+        confirmOverwriteSessionWithCurrentLayout: function(n) {
+          return '"' + n + '" ge\xE7erli d\xFCzenle \xFCzerine yaz\u0131ls\u0131n m\u0131?';
+        },
+        cmdSaveCurrentLayoutToSession: "Ge\xE7erli d\xFCzeni oturuma kaydet...",
+        savedCurrentLayoutToSession: function(n) {
+          return 'Ge\xE7erli d\xFCzen "' + n + '" oturumuna kaydedildi';
+        },
+        saveCurrentLayoutToSessionPlaceholder: "\xDCzerine yaz\u0131lacak oturumu se\xE7...",
+        contextSaveCurrentLayoutToThisSession: "Ge\xE7erli d\xFCzeni bu oturuma kaydet",
         cmdExportSessions: "Oturum anl\u0131k g\xF6r\xFCnt\xFCs\xFCn\xFC d\u0131\u015Fa aktar",
         cmdImportSessions: "En son oturum anl\u0131k g\xF6r\xFCnt\xFCs\xFCn\xFC i\xE7e aktar",
         cmdReloadCurrentWithoutSaving: "Ge\xE7erli oturumu yeniden y\xFCkle (kaydetmeden)",
@@ -5965,6 +6082,15 @@ var require_i18n = __commonJS({
         resetSessionsAndSettingsFailed: "Oturumlar ve ayarlar s\u0131f\u0131rlanamad\u0131."
       },
       id: {
+        confirmOverwriteSessionWithCurrentLayout: function(n) {
+          return 'Timpa "' + n + '" dengan tata letak saat ini?';
+        },
+        cmdSaveCurrentLayoutToSession: "Simpan tata letak saat ini ke sesi...",
+        savedCurrentLayoutToSession: function(n) {
+          return 'Tata letak saat ini disimpan ke "' + n + '"';
+        },
+        saveCurrentLayoutToSessionPlaceholder: "Pilih sesi untuk ditimpa...",
+        contextSaveCurrentLayoutToThisSession: "Simpan tata letak saat ini ke sesi ini",
         cmdExportSessions: "Ekspor snapshot sesi",
         cmdImportSessions: "Impor snapshot sesi terbaru",
         cmdReloadCurrentWithoutSaving: "Muat ulang sesi saat ini (tanpa menyimpan)",
@@ -6941,8 +7067,11 @@ var require_session_context_menu = __commonJS({
       var session = options.session;
       if (!plugin || !app || !session) return;
       var isActive = !!options.isActive;
+      var manualSaveMode = !plugin.isAutoSaveOnSwitchEnabled();
+      var showOverwriteWithCurrentLayout = !isActive && manualSaveMode && typeof options.onOverwriteWithCurrentLayout === "function";
       var menu = new obsidian2.Menu();
-      if (isActive && !plugin.isAutoSaveOnSwitchEnabled()) {
+      var addedSaveGroup = false;
+      if (isActive && manualSaveMode) {
         menu.addItem(function(mi) {
           mi.setTitle(L.contextSaveSession);
           mi.setIcon("save");
@@ -6966,6 +7095,9 @@ var require_session_context_menu = __commonJS({
             });
           });
         }
+        addedSaveGroup = true;
+      }
+      if (addedSaveGroup) {
         menu.addSeparator();
       }
       if (options.showSwitch && !isActive) {
@@ -7029,6 +7161,16 @@ var require_session_context_menu = __commonJS({
               });
             })(groups[gi]);
           }
+        });
+      }
+      if (showOverwriteWithCurrentLayout) {
+        menu.addSeparator();
+        menu.addItem(function(mi) {
+          mi.setTitle(L.contextSaveCurrentLayoutToThisSession);
+          mi.setIcon("save");
+          mi.onClick(function() {
+            if (typeof options.onOverwriteWithCurrentLayout === "function") options.onOverwriteWithCurrentLayout();
+          });
         });
       }
       if (options.showCustomizeClicks) {
@@ -7881,6 +8023,13 @@ var require_session_manager_modal = __commonJS({
               },
               onReload: function() {
                 self.plugin.reloadCurrentSessionWithoutSaving();
+              },
+              onOverwriteWithCurrentLayout: function() {
+                self.plugin.confirmOverwriteSessionWithCurrentLayout(session.id, {
+                  onSaved: function() {
+                    self.renderList();
+                  }
+                });
               },
               onSwitch: function() {
                 self.onLoad(session.id);
@@ -9581,6 +9730,25 @@ var require_register_commands = __commonJS({
           new obsidian2.Notice(failureNotice);
         });
       }
+      function openSaveCurrentLayoutToSessionModal() {
+        var sessions = plugin.getOrderedSessionsUnfiltered();
+        if (!sessions || sessions.length === 0) {
+          new obsidian2.Notice(L.noSession);
+          return;
+        }
+        var modal = new obsidian2.FuzzySuggestModal(plugin.app);
+        modal.setPlaceholder(L.saveCurrentLayoutToSessionPlaceholder);
+        modal.getItems = function() {
+          return sessions;
+        };
+        modal.getItemText = function(session) {
+          return session.name || "";
+        };
+        modal.onChooseItem = function(session) {
+          plugin.confirmOverwriteSessionWithCurrentLayout(session.id);
+        };
+        modal.open();
+      }
       addSimpleCommand("manage-sessions", L.cmdManage, function() {
         new modals2.SessionManagerModal(plugin.app, plugin).open();
       });
@@ -9637,6 +9805,15 @@ var require_register_commands = __commonJS({
       }, [{ modifiers: ["Mod", "Shift"], key: "S" }]);
       addSimpleCommand("save-as-session", L.cmdSaveAs, function() {
         plugin.saveAsSession();
+      });
+      addCommand({
+        id: "save-current-layout-to-session",
+        name: L.cmdSaveCurrentLayoutToSession,
+        checkCallback: function(checking) {
+          if (plugin.isAutoSaveOnSwitchEnabled()) return false;
+          if (!checking) openSaveCurrentLayoutToSessionModal();
+          return true;
+        }
       });
       addSimpleCommand("reload-current-session-without-saving", L.cmdReloadCurrentWithoutSaving, function() {
         plugin.reloadCurrentSessionWithoutSaving();
@@ -10285,6 +10462,13 @@ var require_overlays = __commonJS({
                   },
                   onReload: function() {
                     self.reloadCurrentSessionWithoutSaving();
+                  },
+                  onOverwriteWithCurrentLayout: function() {
+                    self.confirmOverwriteSessionWithCurrentLayout(sess.id, {
+                      onSaved: function() {
+                        refreshOrderedSessions();
+                      }
+                    });
                   },
                   onSwitch: function() {
                     selectedIndex = idx;
@@ -12524,6 +12708,52 @@ var require_sessions = __commonJS({
           }
           return changed;
         });
+      };
+      WorkspacePlusPlus2.prototype.overwriteSessionWithCurrentLayout = function(sessionId, options) {
+        var L = i18n2.L;
+        options = options || {};
+        var session = this.data.sessions[sessionId];
+        if (!session) {
+          if (!options.silent) new obsidian2.Notice(L.noSession);
+          return Promise.resolve(false);
+        }
+        var currentLayout = this.getCurrentWorkspaceLayout();
+        var changed = !this.layoutsEqualStructural(session.layout, currentLayout);
+        this.pushLayoutToHistory(session);
+        session.layout = currentLayout;
+        if (changed || options.touchModified) {
+          session.modified = Date.now();
+        }
+        this.updateStatusBar();
+        return this.persistData().then(function() {
+          if (!options.silent) {
+            if (changed) {
+              new obsidian2.Notice(L.savedCurrentLayoutToSession(session.name));
+            } else {
+              new obsidian2.Notice(L.noChanges);
+            }
+          }
+          return changed;
+        });
+      };
+      WorkspacePlusPlus2.prototype.confirmOverwriteSessionWithCurrentLayout = function(sessionId, options) {
+        var L = i18n2.L;
+        options = options || {};
+        var self = this;
+        var session = this.data.sessions[sessionId];
+        if (!session) {
+          if (!options.silent) new obsidian2.Notice(L.noSession);
+          return false;
+        }
+        new modals2.ConfirmModal(this.app, L.confirmOverwriteSessionWithCurrentLayout(session.name), function() {
+          self.overwriteSessionWithCurrentLayout(sessionId, options).then(function(saved) {
+            if (saved && typeof options.onSaved === "function") options.onSaved(session);
+          });
+        }, {
+          confirmText: L.saveInline,
+          confirmClass: "mod-cta"
+        }).open();
+        return true;
       };
       WorkspacePlusPlus2.prototype.reloadCurrentSessionWithoutSaving = function(options) {
         var L = i18n2.L;

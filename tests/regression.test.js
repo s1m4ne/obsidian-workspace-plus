@@ -59,6 +59,7 @@ function createPlugin(initialData) {
     plugin._persistCalls = 0;
     plugin._changeLayoutCalls = [];
     plugin._historyPushes = 0;
+    plugin._historyPushTargets = [];
 
     plugin.app = {
         workspace: {
@@ -76,8 +77,9 @@ function createPlugin(initialData) {
 
     plugin.updateStatusBar = function () {};
     plugin.syncSessionCommands = function () {};
-    plugin.pushLayoutToHistory = function () {
+    plugin.pushLayoutToHistory = function (session) {
         plugin._historyPushes += 1;
+        plugin._historyPushTargets.push(session ? session.id : null);
     };
     plugin.showSwitchPreviewOverlay = function () {};
     plugin.showSwitchFeedbackOverlay = function () {};
@@ -109,6 +111,33 @@ test('session switch auto-saves current layout and applies target layout', async
     assert.equal(plugin._persistCalls, 1);
     assert.equal(plugin._changeLayoutCalls.length, 1);
     assert.deepEqual(plugin._changeLayoutCalls[0], { layout: 'target-b' });
+});
+
+test('overwriteSessionWithCurrentLayout saves current layout to selected session without switching', async function () {
+    const currentLayout = { layout: 'current' };
+    const plugin = createPlugin({
+        activeSessionId: 'a',
+        sessionOrder: ['a', 'b'],
+        sessions: {
+            a: { id: 'a', name: 'A', layout: { layout: 'active-a' }, modified: 1 },
+            b: { id: 'b', name: 'B', layout: { layout: 'old-b' }, modified: 1 },
+        },
+        autoSaveOnSwitch: false,
+    });
+    plugin.getCurrentWorkspaceLayout = function () {
+        return currentLayout;
+    };
+
+    const saved = await plugin.overwriteSessionWithCurrentLayout('b', { silent: true });
+
+    assert.equal(saved, true);
+    assert.equal(plugin.data.activeSessionId, 'a');
+    assert.deepEqual(plugin.data.sessions.a.layout, { layout: 'active-a' });
+    assert.deepEqual(plugin.data.sessions.b.layout, currentLayout);
+    assert.notEqual(plugin.data.sessions.b.modified, 1);
+    assert.deepEqual(plugin._historyPushTargets, ['b']);
+    assert.equal(plugin._persistCalls, 1);
+    assert.equal(plugin._changeLayoutCalls.length, 0);
 });
 
 test('deleting active session applies fallback active layout', async function () {

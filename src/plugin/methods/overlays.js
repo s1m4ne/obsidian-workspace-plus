@@ -579,6 +579,13 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                             onReload: function () {
                                 self.reloadCurrentSessionWithoutSaving();
                             },
+                            onOverwriteWithCurrentLayout: function () {
+                                self.confirmOverwriteSessionWithCurrentLayout(sess.id, {
+                                    onSaved: function () {
+                                        refreshOrderedSessions();
+                                    },
+                                });
+                            },
                             onSwitch: function () {
                                 selectedIndex = idx;
                                 switchSelected();

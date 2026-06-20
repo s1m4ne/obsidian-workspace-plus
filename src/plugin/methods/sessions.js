@@ -543,6 +543,57 @@ function attachSessionMethods(WorkspacePlusPlus) {
         });
     };
 
+    WorkspacePlusPlus.prototype.overwriteSessionWithCurrentLayout = function (sessionId, options) {
+        var L = i18n.L;
+        options = options || {};
+        var session = this.data.sessions[sessionId];
+        if (!session) {
+            if (!options.silent) new obsidian.Notice(L.noSession);
+            return Promise.resolve(false);
+        }
+
+        var currentLayout = this.getCurrentWorkspaceLayout();
+        var changed = !this.layoutsEqualStructural(session.layout, currentLayout);
+        this.pushLayoutToHistory(session);
+        session.layout = currentLayout;
+        if (changed || options.touchModified) {
+            session.modified = Date.now();
+        }
+        this.updateStatusBar();
+
+        return this.persistData().then(function () {
+            if (!options.silent) {
+                if (changed) {
+                    new obsidian.Notice(L.savedCurrentLayoutToSession(session.name));
+                } else {
+                    new obsidian.Notice(L.noChanges);
+                }
+            }
+            return changed;
+        });
+    };
+
+    WorkspacePlusPlus.prototype.confirmOverwriteSessionWithCurrentLayout = function (sessionId, options) {
+        var L = i18n.L;
+        options = options || {};
+        var self = this;
+        var session = this.data.sessions[sessionId];
+        if (!session) {
+            if (!options.silent) new obsidian.Notice(L.noSession);
+            return false;
+        }
+
+        new modals.ConfirmModal(this.app, L.confirmOverwriteSessionWithCurrentLayout(session.name), function () {
+            self.overwriteSessionWithCurrentLayout(sessionId, options).then(function (saved) {
+                if (saved && typeof options.onSaved === 'function') options.onSaved(session);
+            });
+        }, {
+            confirmText: L.saveInline,
+            confirmClass: 'mod-cta',
+        }).open();
+        return true;
+    };
+
     WorkspacePlusPlus.prototype.reloadCurrentSessionWithoutSaving = function (options) {
         var L = i18n.L;
         options = options || {};

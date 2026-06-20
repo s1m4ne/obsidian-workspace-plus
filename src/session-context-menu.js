@@ -20,6 +20,7 @@ var i18n = require('./i18n');
  * @param {Function} [options.onSave]
  * @param {Function} [options.onReload]
  * @param {Function} [options.onSaveAs]
+ * @param {Function} [options.onOverwriteWithCurrentLayout]
  * @param {Function} [options.onSwitch]
  * @param {Function} [options.onRename]
  * @param {Function} [options.onDuplicate]
@@ -37,10 +38,15 @@ function openSessionContextMenu(options) {
     if (!plugin || !app || !session) return;
 
     var isActive = !!options.isActive;
+    var manualSaveMode = !plugin.isAutoSaveOnSwitchEnabled();
+    var showOverwriteWithCurrentLayout = !isActive &&
+        manualSaveMode &&
+        typeof options.onOverwriteWithCurrentLayout === 'function';
     var menu = new obsidian.Menu();
+    var addedSaveGroup = false;
 
     // --- Save group (only when active and auto-save is off) ---
-    if (isActive && !plugin.isAutoSaveOnSwitchEnabled()) {
+    if (isActive && manualSaveMode) {
         // Save
         menu.addItem(function (mi) {
             mi.setTitle(L.contextSaveSession);
@@ -70,6 +76,10 @@ function openSessionContextMenu(options) {
             });
         }
 
+        addedSaveGroup = true;
+    }
+
+    if (addedSaveGroup) {
         menu.addSeparator();
     }
 
@@ -146,6 +156,17 @@ function openSessionContextMenu(options) {
                     });
                 })(groups[gi]);
             }
+        });
+    }
+
+    if (showOverwriteWithCurrentLayout) {
+        menu.addSeparator();
+        menu.addItem(function (mi) {
+            mi.setTitle(L.contextSaveCurrentLayoutToThisSession);
+            mi.setIcon('save');
+            mi.onClick(function () {
+                if (typeof options.onOverwriteWithCurrentLayout === 'function') options.onOverwriteWithCurrentLayout();
+            });
         });
     }
 
