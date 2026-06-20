@@ -3,16 +3,15 @@
 var obsidian = require('obsidian');
 var i18n = require('./i18n');
 var modals = require('./modals');
-var sessionContextMenu = require('./session-context-menu');
+var sessionContextActions = require('./session-context-actions');
 var settingsContextMenu = require('./settings-context-menu');
 
 function openSessionMenuAction(plugin, event) {
-    var L = i18n.L;
     var app = plugin.app;
     var sess = plugin.getActiveSession();
     if (!sess) return;
 
-    sessionContextMenu.openSessionContextMenu({
+    sessionContextActions.openSessionContextMenu({
         plugin: plugin,
         app: app,
         session: sess,
@@ -23,41 +22,10 @@ function openSessionMenuAction(plugin, event) {
         showRemoveFromGroup: false,
         showMoveToGroup: plugin.isGroupFeatureEnabled() && plugin.getOrderedGroups().length > 0,
         showCustomizeClicks: true,
-        onMoveToGroup: function (groupId) {
-            var gName = (plugin.data.groups[groupId] || {}).name || '';
-            plugin.moveSessionToGroupExclusive(sess.id, groupId).then(function (moved) {
-                if (moved) {
-                    new obsidian.Notice(L.groupAddedSession(sess.name, gName));
-                    plugin.updateStatusBar();
-                }
-            });
-        },
-        onSave: function () {
-            plugin.saveActiveSession();
-        },
-        onReload: function () {
-            plugin.reloadCurrentSessionWithoutSaving();
-        },
-        onSaveAs: function () {
-            plugin.saveAsSession();
-        },
-        onRename: function () {
-            new modals.RenameModal(app, sess.name, function (newName) {
-                plugin.renameSessionById(sess.id, newName);
-            }, {
-                emptyNotice: L.emptyName,
-            }).open();
-        },
-        onDuplicate: function () {
-            plugin.duplicateSession(sess.id);
-        },
-        onDelete: function () {
-            new modals.ConfirmModal(app, L.confirmDeleteActive(sess.name), function () {
-                plugin.deleteSession(sess.id);
-            }).open();
-        },
-        onVersionHistory: function () {
-            new modals.HistoryModal(app, plugin, sess).open();
+        forceDeleteConfirm: true,
+        notifyDeleted: false,
+        onSessionsChanged: function () {
+            plugin.updateStatusBar();
         },
     });
 }

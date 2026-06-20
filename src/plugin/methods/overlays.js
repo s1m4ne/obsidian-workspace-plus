@@ -7,200 +7,10 @@ var formatRelativeTime = require('../../modals/format-relative-time');
 var groupTabUi = require('../../group-tab-ui');
 var navigationUtils = require('../../navigation-utils');
 var utils = require('../../utils');
-var sessionContextMenu = require('../../session-context-menu');
+var searchOverlayKeys = require('../../search-overlay-key-handler');
+var sessionContextActions = require('../../session-context-actions');
 var settingsContextMenu = require('../../settings-context-menu');
 var sessionListActions = require('../../session-list-actions');
-
-function hasBlockingModal() {
-    return !!document.querySelector('.modal-container');
-}
-
-function syncSearchOverlaySelectedIndex(plugin, filtered, currentIndex, options) {
-    options = options || {};
-    if (!filtered || filtered.length === 0) {
-        return -1;
-    }
-
-    var activeIdx = plugin.findActiveSessionIndex(filtered);
-    if (activeIdx !== -1) {
-        return activeIdx;
-    }
-
-    if (options.preserveWhenMissing) {
-        if (currentIndex >= filtered.length) {
-            return filtered.length - 1;
-        }
-        return currentIndex < 0 ? 0 : currentIndex;
-    }
-
-    return 0;
-}
-
-function handleSearchOverlayHorizontalKey(e, activeEl, options) {
-    if (activeEl === options.saveInput && e.key === 'ArrowRight') {
-        if (navigationUtils.isTextInputCursorAtEnd(options.saveInput)) {
-            e.preventDefault();
-            e.stopImmediatePropagation();
-            options.saveBtn.focus();
-        }
-        return true;
-    }
-    if (activeEl === options.saveBtn && e.key === 'ArrowLeft') {
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        options.focusSaveInput();
-        return true;
-    }
-    return false;
-}
-
-function handleSearchOverlayVerticalKey(e, activeEl, options) {
-    if (activeEl === options.searchInput) {
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        if (e.key === 'ArrowDown') {
-            options.focusFirstResult();
-        } else {
-            options.focusSaveInput();
-        }
-        return true;
-    }
-    if (activeEl === options.saveInput || activeEl === options.saveBtn) {
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        if (e.key === 'ArrowDown') {
-            if (options.hasSearchInput()) {
-                options.focusSearchInput();
-            } else {
-                options.focusFirstResult();
-            }
-        } else {
-            options.focusLastResult();
-        }
-        return true;
-    }
-
-    var filtered = options.getFiltered();
-    e.preventDefault();
-    if (filtered.length === 0) return true;
-    options.setKeyboardNav(true);
-    var dir = e.key === 'ArrowUp' ? -1 : 1;
-    var selectedIndex = options.getSelectedIndex();
-    var nextIndex = selectedIndex + dir;
-    if (nextIndex < 0) {
-        if (options.hasSearchInput()) {
-            options.focusSearchInput();
-        } else {
-            options.focusSaveInput();
-        }
-        return true;
-    }
-    if (nextIndex >= filtered.length) {
-        options.focusSaveInput();
-        return true;
-    }
-    options.setSelectedIndex(nextIndex);
-    options.updateSelection();
-    return true;
-}
-
-function handleSearchOverlayEnterKey(e, activeEl, options) {
-    if (activeEl === options.saveInput || activeEl === options.saveBtn) return false;
-    e.preventDefault();
-    e.stopImmediatePropagation();
-    options.switchSelected({ shiftKey: e.shiftKey });
-    return true;
-}
-
-function handleSearchOverlayDeleteKey(e, activeEl, options) {
-    var searchInput = options.searchInput;
-    if (activeEl === searchInput && searchInput.value.length > 0) return false;
-    if (activeEl === options.saveInput || activeEl === options.saveBtn) return false;
-    e.preventDefault();
-
-    var filteredForDelete = options.getFiltered();
-    var selectedForDelete = options.getSelectedIndex();
-    if (selectedForDelete < 0 || selectedForDelete >= filteredForDelete.length) return true;
-    var sess = filteredForDelete[selectedForDelete];
-    if (Object.keys(options.plugin.data.sessions).length <= 1) {
-        new obsidian.Notice(i18n.L.cannotDeleteLast);
-        return true;
-    }
-
-    var doDelete = function () {
-        options.plugin.deleteSession(sess.id).then(function (deleted) {
-            if (!deleted) return;
-            new obsidian.Notice(i18n.L.deleted(sess.name));
-            options.refreshOrderedSessions();
-        });
-    };
-
-    if (options.plugin.data.confirmDeleteByHotkey !== false) {
-        new modals.ConfirmModal(options.plugin.app, i18n.L.confirmDeleteActive(sess.name), doDelete).open();
-    } else {
-        doDelete();
-    }
-    return true;
-}
-
-function handleSearchOverlaySlashKey(e, activeEl, options) {
-    if (activeEl === options.searchInput || activeEl === options.saveInput || activeEl === options.saveBtn) return false;
-    e.preventDefault();
-    navigationUtils.focusTextInputSelect(options.searchInput);
-    return true;
-}
-
-function createSearchOverlayKeyHandler(options) {
-    return function (e) {
-        var plugin = options.plugin;
-        if (!plugin.searchOverlayEl) return;
-        if (hasBlockingModal()) return;
-        var activeEl = document.activeElement;
-
-        // Let global command hotkeys (e.g. Mod+Shift+Enter/Tab) flow through.
-        if (utils.isModPressed(e)) {
-            return;
-        }
-
-        if (e.key === 'Escape') {
-            e.preventDefault();
-            e.stopImmediatePropagation();
-            plugin.hideSearchOverlay();
-            return;
-        }
-
-        if (e.key === 'Tab') {
-            if (activeEl === options.saveInput || activeEl === options.saveBtn) return;
-            if (!plugin.isGroupFeatureEnabled() || plugin.getOrderedGroups().length === 0) return;
-            e.preventDefault();
-            e.stopImmediatePropagation();
-            var nextGroupId = plugin.getRelativeGroupId(options.getOverlayGroupId(), e.shiftKey ? -1 : 1);
-            if (typeof nextGroupId === 'undefined') return;
-            options.applyOverlayGroupSelection(nextGroupId);
-            return;
-        }
-
-        if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-            if (handleSearchOverlayHorizontalKey(e, activeEl, options)) return;
-        }
-
-        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-            if (handleSearchOverlayVerticalKey(e, activeEl, options)) return;
-        }
-
-        if (e.key === 'Enter' && !e.isComposing) {
-            if (handleSearchOverlayEnterKey(e, activeEl, options)) return;
-        }
-
-        if (e.key === 'Delete' || e.key === 'Backspace') {
-            if (handleSearchOverlayDeleteKey(e, activeEl, options)) return;
-        }
-
-        if (e.key === '/' && activeEl !== options.searchInput && activeEl !== options.saveInput && activeEl !== options.saveBtn) {
-            if (handleSearchOverlaySlashKey(e, activeEl, options)) return;
-        }
-    };
-}
 
 function attachOverlayMethods(WorkspacePlusPlus) {
     // --- Switch overlay ---
@@ -231,7 +41,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
         var keyboardNav = false;
 
         function syncSelectedIndexToActive(options) {
-            selectedIndex = syncSearchOverlaySelectedIndex(self, filtered, selectedIndex, options || {});
+            selectedIndex = searchOverlayKeys.syncSearchOverlaySelectedIndex(self, filtered, selectedIndex, options || {});
         }
         syncSelectedIndexToActive();
 
@@ -563,7 +373,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                     itemEl.addEventListener('contextmenu', function (e) {
                         e.preventDefault();
                         var selectedGroupId = getOverlayGroupId();
-                        sessionContextMenu.openSessionContextMenu({
+                        sessionContextActions.openSessionContextMenu({
                             plugin: self,
                             app: self.app,
                             session: sess,
@@ -571,76 +381,15 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                             event: e,
                             showSwitch: true,
                             showRemoveFromGroup: !!selectedGroupId,
-                            onSave: function () {
-                                self.saveActiveSession().then(function () {
-                                    refreshOrderedSessions();
-                                });
-                            },
-                            onReload: function () {
-                                self.reloadCurrentSessionWithoutSaving();
-                            },
-                            onOverwriteWithCurrentLayout: function () {
-                                self.confirmOverwriteSessionWithCurrentLayout(sess.id, {
-                                    onSaved: function () {
-                                        refreshOrderedSessions();
-                                    },
-                                });
-                            },
+                            getViewGroupId: getOverlayGroupId,
                             onSwitch: function () {
                                 selectedIndex = idx;
                                 switchSelected();
                             },
-                            onRename: function () {
-                                sessionListActions.renameSessionWithPrompt({
-                                    app: self.app,
-                                    plugin: self,
-                                    session: sess,
-                                    onRenamed: function () {
-                                        refreshOrderedSessions();
-                                    },
-                                });
-                            },
-                            onDuplicate: function () {
-                                self.duplicateSession(sess.id).then(function () {
-                                    refreshOrderedSessions();
-                                });
-                            },
-                            onRemoveFromGroup: function () {
-                                var activeGid = getOverlayGroupId();
-                                if (!activeGid) return;
-                                var gName = (self.data.groups[activeGid] || {}).name || '';
-                                self.removeSessionFromGroup(sess.id, activeGid).then(function () {
-                                    new obsidian.Notice(L.groupRemovedSession(sess.name, gName));
-                                    renderGroupTabs();
-                                    refreshOrderedSessions();
-                                });
-                            },
                             showMoveToGroup: self.isGroupFeatureEnabled() && self.getOrderedGroups().length > 0,
-                            onMoveToGroup: function (groupId) {
-                                var gName = (self.data.groups[groupId] || {}).name || '';
-                                self.moveSessionToGroupExclusive(sess.id, groupId).then(function (moved) {
-                                    if (moved) {
-                                        new obsidian.Notice(L.groupAddedSession(sess.name, gName));
-                                        renderGroupTabs();
-                                        refreshOrderedSessions();
-                                    }
-                                });
-                            },
-                            onDelete: function () {
-                                sessionListActions.deleteSessionWithPrompt({
-                                    app: self.app,
-                                    plugin: self,
-                                    session: sess,
-                                    isActive: _isActive,
-                                    confirmMessage: L.confirmDeleteActive(sess.name),
-                                    onDeleted: function () {
-                                        refreshOrderedSessions();
-                                    },
-                                });
-                            },
-                            onVersionHistory: function () {
-                                new modals.HistoryModal(self.app, self, sess).open();
-                            },
+                            deleteConfirmMessage: L.confirmDeleteActive(sess.name),
+                            onGroupsChanged: renderGroupTabs,
+                            onSessionsChanged: refreshOrderedSessions,
                         });
                     });
 
@@ -950,7 +699,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
             renderList();
         };
 
-        this.searchOverlayKeyHandler = createSearchOverlayKeyHandler({
+        this.searchOverlayKeyHandler = searchOverlayKeys.createSearchOverlayKeyHandler({
             plugin: self,
             overlay: overlay,
             saveInput: saveInput,
@@ -975,7 +724,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
         this.searchOverlayClickOutsideHandler = function (e) {
             if (!self.searchOverlayEl) return;
             // Don't close if a modal (rename/confirm) is open
-            if (hasBlockingModal()) return;
+            if (searchOverlayKeys.hasBlockingModal()) return;
             // Let status bar handle its own toggle
             if (self.statusBarEl && self.statusBarEl.contains(e.target)) return;
             if (!self.searchOverlayEl.contains(e.target)) {

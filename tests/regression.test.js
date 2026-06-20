@@ -4,7 +4,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const Module = require('module');
 
-function loadSessionMethods() {
+function loadPluginMethod(modulePath) {
     const obsidianStub = {
         Modal: class {},
         Notice: class {
@@ -31,17 +31,33 @@ function loadSessionMethods() {
     };
 
     try {
-        return require('../src/plugin/methods/sessions');
+        return require(modulePath);
     } finally {
         Module._load = originalLoad;
     }
 }
 
-const attachSessionMethods = loadSessionMethods();
+const attachSessionMethods = loadPluginMethod('../src/plugin/methods/sessions');
+const attachSessionValidationMethods = loadPluginMethod('../src/plugin/methods/sessions-validation');
+const attachGroupMethods = loadPluginMethod('../src/plugin/methods/groups');
+const attachSessionCrudMethods = loadPluginMethod('../src/plugin/methods/session-crud');
+const attachSessionSavingMethods = loadPluginMethod('../src/plugin/methods/session-saving');
+const attachSessionStatusBarMethods = loadPluginMethod('../src/plugin/methods/session-statusbar');
+const attachSessionStartupMethods = loadPluginMethod('../src/plugin/methods/session-startup');
+const attachSessionSwitchingMethods = loadPluginMethod('../src/plugin/methods/session-switching');
+const attachSessionCommandMethods = loadPluginMethod('../src/plugin/methods/session-commands');
 
 function createPlugin(initialData) {
     function PluginMock() {}
     attachSessionMethods(PluginMock);
+    attachSessionValidationMethods(PluginMock);
+    attachGroupMethods(PluginMock);
+    attachSessionCrudMethods(PluginMock);
+    attachSessionSavingMethods(PluginMock);
+    attachSessionStatusBarMethods(PluginMock);
+    attachSessionStartupMethods(PluginMock);
+    attachSessionSwitchingMethods(PluginMock);
+    attachSessionCommandMethods(PluginMock);
     const plugin = new PluginMock();
 
     plugin.data = Object.assign({

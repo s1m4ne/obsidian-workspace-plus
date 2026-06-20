@@ -3,12 +3,11 @@
 var obsidian = require('obsidian');
 var i18n = require('../i18n');
 var ConfirmModal = require('./confirm-modal');
-var HistoryModal = require('./history-modal');
 var formatRelativeTime = require('./format-relative-time');
 var groupTabUi = require('../group-tab-ui');
 var navigationUtils = require('../navigation-utils');
 var utils = require('../utils');
-var sessionContextMenu = require('../session-context-menu');
+var sessionContextActions = require('../session-context-actions');
 var settingsContextMenu = require('../settings-context-menu');
 var sessionListActions = require('../session-list-actions');
 
@@ -639,7 +638,7 @@ var SessionManagerModal = /** @class */ (function (_super) {
         item.addEventListener('contextmenu', function (e) {
             e.preventDefault();
             var selectedGroupId = self.getModalGroupId();
-            sessionContextMenu.openSessionContextMenu({
+            sessionContextActions.openSessionContextMenu({
                 plugin: self.plugin,
                 app: self.app,
                 session: session,
@@ -647,58 +646,19 @@ var SessionManagerModal = /** @class */ (function (_super) {
                 event: e,
                 showSwitch: true,
                 showRemoveFromGroup: !!selectedGroupId,
-                onSave: function () {
-                    self.plugin.saveActiveSession().then(function () {
-                        self.renderList();
-                    });
-                },
-                onReload: function () {
-                    self.plugin.reloadCurrentSessionWithoutSaving();
-                },
-                onOverwriteWithCurrentLayout: function () {
-                    self.plugin.confirmOverwriteSessionWithCurrentLayout(session.id, {
-                        onSaved: function () {
-                            self.renderList();
-                        },
-                    });
+                getViewGroupId: function () {
+                    return self.getModalGroupId();
                 },
                 onSwitch: function () {
                     self.onLoad(session.id);
                 },
-                onRename: function () {
-                    self.onRename(session);
-                },
-                onDuplicate: function () {
-                    self.plugin.duplicateSession(session.id).then(function () {
-                        self.renderList();
-                    });
-                },
-                onRemoveFromGroup: function () {
-                    var activeGid = self.getModalGroupId();
-                    if (!activeGid) return;
-                    var gName = (self.plugin.data.groups[activeGid] || {}).name || '';
-                    self.plugin.removeSessionFromGroup(session.id, activeGid).then(function () {
-                        new obsidian.Notice(L.groupRemovedSession(session.name, gName));
-                        self.renderGroupTabs();
-                        self.renderList();
-                    });
-                },
                 showMoveToGroup: self.plugin.isGroupFeatureEnabled() && self.plugin.getOrderedGroups().length > 0,
-                onMoveToGroup: function (groupId) {
-                    var gName = (self.plugin.data.groups[groupId] || {}).name || '';
-                    self.plugin.moveSessionToGroupExclusive(session.id, groupId).then(function (moved) {
-                        if (moved) {
-                            new obsidian.Notice(L.groupAddedSession(session.name, gName));
-                            self.renderGroupTabs();
-                            self.renderList();
-                        }
-                    });
+                forceDeleteConfirm: true,
+                onGroupsChanged: function () {
+                    self.renderGroupTabs();
                 },
-                onDelete: function () {
-                    self.onDelete(session);
-                },
-                onVersionHistory: function () {
-                    new HistoryModal(self.app, self.plugin, session).open();
+                onSessionsChanged: function () {
+                    self.renderList();
                 },
             });
         });
