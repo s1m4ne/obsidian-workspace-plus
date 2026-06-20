@@ -27,6 +27,27 @@ function registerCommands(plugin) {
         });
     }
 
+    function openSaveCurrentLayoutToSessionModal() {
+        var sessions = plugin.getOrderedSessionsUnfiltered();
+        if (!sessions || sessions.length === 0) {
+            new obsidian.Notice(L.noSession);
+            return;
+        }
+
+        var modal = new obsidian.FuzzySuggestModal(plugin.app);
+        modal.setPlaceholder(L.saveCurrentLayoutToSessionPlaceholder);
+        modal.getItems = function () {
+            return sessions;
+        };
+        modal.getItemText = function (session) {
+            return session.name || '';
+        };
+        modal.onChooseItem = function (session) {
+            plugin.confirmOverwriteSessionWithCurrentLayout(session.id);
+        };
+        modal.open();
+    }
+
     addSimpleCommand('manage-sessions', L.cmdManage, function () {
         new modals.SessionManagerModal(plugin.app, plugin).open();
     });
@@ -97,6 +118,16 @@ function registerCommands(plugin) {
 
     addSimpleCommand('save-as-session', L.cmdSaveAs, function () {
         plugin.saveAsSession();
+    });
+
+    addCommand({
+        id: 'save-current-layout-to-session',
+        name: L.cmdSaveCurrentLayoutToSession,
+        checkCallback: function (checking) {
+            if (plugin.isAutoSaveOnSwitchEnabled()) return false;
+            if (!checking) openSaveCurrentLayoutToSessionModal();
+            return true;
+        },
     });
 
     addSimpleCommand('reload-current-session-without-saving', L.cmdReloadCurrentWithoutSaving, function () {
