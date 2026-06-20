@@ -4901,6 +4901,440 @@ var require_i18n = __commonJS({
         frontmatterAlreadyActive: function(n) {
           return "Sesi \u201C" + n + "\u201D sudah aktif";
         }
+      },
+      vi: {
+        modalTitle: "Qu\u1EA3n l\xFD phi\xEAn l\xE0m vi\u1EC7c",
+        savePlaceholder: "T\xEAn phi\xEAn l\xE0m vi\u1EC7c m\u1EDBi...",
+        filterPlaceholder: "L\u1ECDc phi\xEAn l\xE0m vi\u1EC7c...",
+        settingsShowFilterInput: "Hi\u1EC3n th\u1ECB b\u1ED9 l\u1ECDc phi\xEAn l\xE0m vi\u1EC7c",
+        settingsShowFilterInputDesc: "Hi\u1EC3n th\u1ECB b\u1ED9 l\u1ECDc v\u0103n b\u1EA3n trong tr\xECnh qu\u1EA3n l\xFD phi\xEAn l\xE0m vi\u1EC7c \u0111\u1EC3 t\xECm nhanh phi\xEAn l\xE0m vi\u1EC7c.",
+        settingsOverlayDefaultFocus: "Ti\xEAu \u0111i\u1EC3m l\u1EDBp ph\u1EE7 m\u1EB7c \u0111\u1ECBnh",
+        settingsOverlayDefaultFocusDesc: "Ch\u1ECDn ph\u1EA7n t\u1EED nh\u1EADn ti\xEAu \u0111i\u1EC3m khi tr\xECnh qu\u1EA3n l\xFD phi\xEAn l\xE0m vi\u1EC7c m\u1EDF.",
+        settingsOverlayFocusCurrentSession: "Phi\xEAn l\xE0m vi\u1EC7c hi\u1EC7n t\u1EA1i",
+        settingsOverlayFocusSessionFilter: "B\u1ED9 l\u1ECDc phi\xEAn l\xE0m vi\u1EC7c",
+        settingsOverlayFocusSessionCreate: "T\u1EA1o phi\xEAn l\xE0m vi\u1EC7c",
+        settingsSectionSessionManager: "Danh s\xE1ch v\xE0 t\xECm ki\u1EBFm phi\xEAn l\xE0m vi\u1EC7c",
+        settingsSectionSessionListSearch: "Danh s\xE1ch v\xE0 t\xECm ki\u1EBFm phi\xEAn l\xE0m vi\u1EC7c",
+        settingsShowActiveSwitchCommand: "Hi\u1EC3n th\u1ECB phi\xEAn \u0111ang ho\u1EA1t \u0111\u1ED9ng trong b\u1EA3ng l\u1EC7nh",
+        settingsShowActiveSwitchCommandDesc: "Hi\u1EC3n th\u1ECB l\u1EC7nh chuy\u1EC3n t\u1EDBi phi\xEAn \u0111ang ho\u1EA1t \u0111\u1ED9ng trong b\u1EA3ng l\u1EC7nh. Ph\xEDm t\u1EAFt lu\xF4n ho\u1EA1t \u0111\u1ED9ng b\u1EA5t k\u1EC3 c\xE0i \u0111\u1EB7t n\xE0y.",
+        settingsNumberedSwitchCommands: "L\u1EC7nh chuy\u1EC3n phi\xEAn \u0111\u01B0\u1EE3c \u0111\xE1nh s\u1ED1",
+        settingsNumberedSwitchCommandsDesc: "\u0110\u0103ng k\xFD c\xE1c l\u1EC7nh chuy\u1EC3n v\u1EDBi v\u1ECB tr\xED \u0111\u01B0\u1EE3c \u0111\xE1nh s\u1ED1 (1\u20139) \u0111\u1EC3 g\xE1n ph\xEDm t\u1EAFt. Khi t\u1EAFt, t\u1EA5t c\u1EA3 phi\xEAn s\u1EBD d\xF9ng l\u1EC7nh theo t\xEAn.",
+        save: "T\u1EA1o",
+        load: "Chuy\u1EC3n",
+        saveInline: "L\u01B0u",
+        active: "\u0110ANG HO\u1EA0T \u0110\u1ED8NG",
+        modifiedJustNow: "V\u1EEBa s\u1EEDa \u0111\u1ED5i",
+        modifiedMinutes: function(n) {
+          return "\u0110\xE3 s\u1EEDa \u0111\u1ED5i " + n + " ph\xFAt tr\u01B0\u1EDBc";
+        },
+        modifiedHours: function(n) {
+          return "\u0110\xE3 s\u1EEDa \u0111\u1ED5i " + n + " gi\u1EDD tr\u01B0\u1EDBc";
+        },
+        modifiedDays: function(n) {
+          return "\u0110\xE3 s\u1EEDa \u0111\u1ED5i " + n + " ng\xE0y tr\u01B0\u1EDBc";
+        },
+        duplicateName: "\u0110\xE3 c\xF3 phi\xEAn l\xE0m vi\u1EC7c v\u1EDBi t\xEAn n\xE0y.",
+        emptyName: "T\xEAn phi\xEAn l\xE0m vi\u1EC7c kh\xF4ng \u0111\u01B0\u1EE3c \u0111\u1EC3 tr\u1ED1ng.",
+        created: function(n) {
+          return '\u0110\xE3 t\u1EA1o phi\xEAn l\xE0m vi\u1EC7c "' + n + '"';
+        },
+        deleted: function(n) {
+          return '\u0110\xE3 x\xF3a phi\xEAn l\xE0m vi\u1EC7c "' + n + '"';
+        },
+        loaded: function(n) {
+          return '\u0110\xE3 chuy\u1EC3n sang "' + n + '"';
+        },
+        renamed: function(o, n) {
+          return '\u0110\xE3 \u0111\u1ED5i t\xEAn "' + o + '" th\xE0nh "' + n + '"';
+        },
+        confirmDelete: function(n) {
+          return 'X\xF3a phi\xEAn l\xE0m vi\u1EC7c "' + n + '"?';
+        },
+        confirmDeleteActive: function(n) {
+          return '"' + n + '" l\xE0 phi\xEAn \u0111ang ho\u1EA1t \u0111\u1ED9ng. V\u1EABn x\xF3a?';
+        },
+        confirmSaveSession: function(n) {
+          return 'L\u01B0u phi\xEAn l\xE0m vi\u1EC7c "' + n + '"?';
+        },
+        confirmOverwriteSessionWithCurrentLayout: function(n) {
+          return 'Ghi \u0111\xE8 "' + n + '" b\u1EB1ng b\u1ED1 c\u1EE5c hi\u1EC7n t\u1EA1i?';
+        },
+        confirmReloadSession: function(n) {
+          return 'T\u1EA3i l\u1EA1i phi\xEAn l\xE0m vi\u1EC7c "' + n + '"? C\xE1c thay \u0111\u1ED5i ch\u01B0a l\u01B0u s\u1EBD b\u1ECB m\u1EA5t.';
+        },
+        renameTitle: "\u0110\u1ED5i t\xEAn phi\xEAn l\xE0m vi\u1EC7c",
+        renamePlaceholder: "T\xEAn m\u1EDBi...",
+        noSession: "Kh\xF4ng c\xF3 phi\xEAn l\xE0m vi\u1EC7c",
+        cannotDeleteLast: "Kh\xF4ng th\u1EC3 x\xF3a phi\xEAn l\xE0m vi\u1EC7c cu\u1ED1i c\xF9ng.",
+        confirmBulkDelete: function(n) {
+          return "X\xF3a " + n + " phi\xEAn l\xE0m vi\u1EC7c?";
+        },
+        bulkDeleted: function(n) {
+          return "\u0110\xE3 x\xF3a " + n + " phi\xEAn l\xE0m vi\u1EC7c";
+        },
+        bulkDelete: function(n) {
+          return "X\xF3a " + n + " phi\xEAn l\xE0m vi\u1EC7c";
+        },
+        cmdManage: "Qu\u1EA3n l\xFD phi\xEAn l\xE0m vi\u1EC7c",
+        cmdCreate: "T\u1EA1o phi\xEAn l\xE0m vi\u1EC7c m\u1EDBi",
+        cmdRename: "\u0110\u1ED5i t\xEAn phi\xEAn l\xE0m vi\u1EC7c hi\u1EC7n t\u1EA1i",
+        cmdDelete: "X\xF3a phi\xEAn l\xE0m vi\u1EC7c hi\u1EC7n t\u1EA1i",
+        cmdNewEmpty: "T\u1EA1o phi\xEAn l\xE0m vi\u1EC7c tr\u1ED1ng",
+        cmdDuplicate: "Nh\xE2n b\u1EA3n phi\xEAn l\xE0m vi\u1EC7c hi\u1EC7n t\u1EA1i",
+        duplicated: function(n) {
+          return '\u0110\xE3 nh\xE2n b\u1EA3n th\xE0nh "' + n + '"';
+        },
+        deselect: "B\u1ECF ch\u1ECDn",
+        footerDragReorder: "K\xE9o \u0111\u1EC3 s\u1EAFp x\u1EBFp l\u1EA1i",
+        footerDragToGroup: "K\xE9o v\xE0o tab nh\xF3m \u0111\u1EC3 di chuy\u1EC3n",
+        defaultLabel: "(m\u1EB7c \u0111\u1ECBnh)",
+        rename: "\u0110\u1ED5i t\xEAn",
+        delete: "X\xF3a",
+        remove: "G\u1EE1",
+        cancel: "H\u1EE7y",
+        ribbonTooltip: "Workspace++",
+        cmdSwitchTo: function(n, name) {
+          return name ? "Chuy\u1EC3n sang phi\xEAn " + n + ": " + name : "Chuy\u1EC3n sang phi\xEAn " + n;
+        },
+        cmdSwitchToNamed: function(name) {
+          return 'Chuy\u1EC3n sang "' + name + '"';
+        },
+        cmdPrevious: "Phi\xEAn tr\u01B0\u1EDBc",
+        cmdNext: "Phi\xEAn ti\u1EBFp theo",
+        cmdSaveCurrent: "L\u01B0u phi\xEAn hi\u1EC7n t\u1EA1i",
+        cmdSaveAs: "L\u01B0u phi\xEAn hi\u1EC7n t\u1EA1i th\xE0nh...",
+        cmdSaveCurrentLayoutToSession: "L\u01B0u b\u1ED1 c\u1EE5c hi\u1EC7n t\u1EA1i v\xE0o phi\xEAn...",
+        cmdReloadCurrentWithoutSaving: "T\u1EA3i l\u1EA1i phi\xEAn hi\u1EC7n t\u1EA1i (kh\xF4ng l\u01B0u)",
+        cmdToggleAutoSave: "B\u1EADt/t\u1EAFt t\u1EF1 \u0111\u1ED9ng l\u01B0u khi chuy\u1EC3n phi\xEAn",
+        cmdEnableAutoSave: "B\u1EADt t\u1EF1 \u0111\u1ED9ng l\u01B0u khi chuy\u1EC3n phi\xEAn",
+        cmdDisableAutoSave: "T\u1EAFt t\u1EF1 \u0111\u1ED9ng l\u01B0u khi chuy\u1EC3n phi\xEAn",
+        cmdSearchOverlay: "T\xECm ki\u1EBFm phi\xEAn l\xE0m vi\u1EC7c",
+        cmdExportSessions: "Xu\u1EA5t b\u1EA3n ch\u1EE5p nhanh phi\xEAn l\xE0m vi\u1EC7c",
+        cmdImportSessions: "Nh\u1EADp b\u1EA3n ch\u1EE5p nhanh phi\xEAn l\xE0m vi\u1EC7c m\u1EDBi nh\u1EA5t",
+        switchLeft: "Tr\xE1i",
+        switchRight: "Ph\u1EA3i",
+        switchGroup: "Nh\xF3m",
+        keyTab: "Tab",
+        savedSession: function(n) {
+          return '\u0110\xE3 l\u01B0u "' + n + '"';
+        },
+        savedAs: function(n) {
+          return '\u0110\xE3 l\u01B0u th\xE0nh "' + n + '"';
+        },
+        savedCurrentLayoutToSession: function(n) {
+          return '\u0110\xE3 l\u01B0u b\u1ED1 c\u1EE5c hi\u1EC7n t\u1EA1i v\xE0o "' + n + '"';
+        },
+        noChanges: "Kh\xF4ng c\xF3 thay \u0111\u1ED5i \u0111\u1EC3 l\u01B0u",
+        reloadedSession: function(n) {
+          return '\u0110\xE3 t\u1EA3i l\u1EA1i "' + n + '"';
+        },
+        autoSaveEnabled: "\u0110\xE3 b\u1EADt t\u1EF1 \u0111\u1ED9ng l\u01B0u khi chuy\u1EC3n phi\xEAn.",
+        autoSaveDisabled: "\u0110\xE3 t\u1EAFt t\u1EF1 \u0111\u1ED9ng l\u01B0u khi chuy\u1EC3n phi\xEAn.",
+        confirmUnsavedSwitch: function(n) {
+          return 'Phi\xEAn hi\u1EC7n t\u1EA1i c\xF3 thay \u0111\u1ED5i ch\u01B0a l\u01B0u. Chuy\u1EC3n sang "' + n + '"?';
+        },
+        saveAndSwitch: "L\u01B0u v\xE0 chuy\u1EC3n",
+        switchWithoutSaving: "Chuy\u1EC3n m\xE0 kh\xF4ng l\u01B0u",
+        defaultSessionName: "m\u1EB7c \u0111\u1ECBnh",
+        nameSessionTitle: "L\u01B0u v\u1EDBi t\xEAn phi\xEAn l\xE0m vi\u1EC7c",
+        nameSessionPlaceholder: "T\xEAn phi\xEAn l\xE0m vi\u1EC7c...",
+        saveWithoutNaming: "L\u01B0u m\xE0 kh\xF4ng \u0111\u1EB7t t\xEAn",
+        sessionAutoName: function(n) {
+          return "Phi\xEAn l\xE0m vi\u1EC7c m\u1EDBi " + n;
+        },
+        noFilteredSessions: "Kh\xF4ng c\xF3 phi\xEAn l\xE0m vi\u1EC7c ph\xF9 h\u1EE3p",
+        noGroupSessions: "Kh\xF4ng c\xF3 phi\xEAn l\xE0m vi\u1EC7c trong nh\xF3m n\xE0y",
+        searchOverlayPlaceholder: "Nh\u1EADp \u0111\u1EC3 l\u1ECDc phi\xEAn l\xE0m vi\u1EC7c...",
+        saveCurrentLayoutToSessionPlaceholder: "Ch\u1ECDn phi\xEAn l\xE0m vi\u1EC7c \u0111\u1EC3 ghi \u0111\xE8...",
+        searchOverlayHelp: "\u2191\u2193 di chuy\u1EC3n  /  Enter chuy\u1EC3n  /  \u21E7Enter l\u01B0u  /  \u232B x\xF3a  /  Esc \u0111\xF3ng",
+        backupRestored: "Workspace++: \u0110\xE3 kh\xF4i ph\u1EE5c phi\xEAn l\xE0m vi\u1EC7c t\u1EEB b\u1EA3n sao l\u01B0u.",
+        sessionDataMigrated: "Workspace++: D\u1EEF li\u1EC7u phi\xEAn l\xE0m vi\u1EC7c \u0111\xE3 \u0111\u01B0\u1EE3c chuy\u1EC3n sang .workspace-plus-plus/sessions.json.",
+        sessionDataMigrationFailed: "Workspace++: Kh\xF4ng th\u1EC3 chuy\u1EC3n d\u1EEF li\u1EC7u phi\xEAn l\xE0m vi\u1EC7c. D\u1EEF li\u1EC7u c\u0169 v\u1EABn \u0111\u01B0\u1EE3c gi\u1EEF l\u1EA1i.",
+        localSettingsEnabled: "Workspace++: \u0110\xE3 b\u1EADt c\xE0i \u0111\u1EB7t ri\xEAng cho vault.",
+        localSettingsDisabled: "Workspace++: \u0110\xE3 t\u1EAFt c\xE0i \u0111\u1EB7t ri\xEAng cho vault.",
+        localSettingsCopied: "Workspace++: \u0110\xE3 sao ch\xE9p c\xE0i \u0111\u1EB7t to\xE0n c\u1EE5c sang c\xE0i \u0111\u1EB7t ri\xEAng cho vault.",
+        localSettingsLoadFailed: "Workspace++: Kh\xF4ng th\u1EC3 t\u1EA3i c\xE0i \u0111\u1EB7t ri\xEAng cho vault. S\u1EBD d\xF9ng c\xE0i \u0111\u1EB7t to\xE0n c\u1EE5c.",
+        localSettingsOperationFailed: "Workspace++: Kh\xF4ng th\u1EC3 c\u1EADp nh\u1EADt c\xE0i \u0111\u1EB7t ri\xEAng cho vault.",
+        exportSessionsDone: function(path) {
+          return "Workspace++: \u0110\xE3 xu\u1EA5t phi\xEAn l\xE0m vi\u1EC7c t\u1EDBi " + path;
+        },
+        exportSessionsFailed: "Workspace++: Kh\xF4ng th\u1EC3 xu\u1EA5t phi\xEAn l\xE0m vi\u1EC7c.",
+        importSessionsDone: function(path) {
+          return "Workspace++: \u0110\xE3 nh\u1EADp phi\xEAn l\xE0m vi\u1EC7c t\u1EEB " + path;
+        },
+        importSessionsNoFile: "Workspace++: Kh\xF4ng t\xECm th\u1EA5y t\u1EC7p xu\u1EA5t trong .workspace-plus-plus/exports.",
+        importSessionsFailed: "Workspace++: Kh\xF4ng th\u1EC3 nh\u1EADp phi\xEAn l\xE0m vi\u1EC7c.",
+        settingsLanguage: "Ng\xF4n ng\u1EEF",
+        settingsLanguageDesc: "Ng\xF4n ng\u1EEF giao di\u1EC7n c\u1EE7a plugin. Kh\u1EDFi \u0111\u1ED9ng l\u1EA1i Obsidian \u0111\u1EC3 \xE1p d\u1EE5ng cho t\xEAn l\u1EC7nh.",
+        settingsSectionGeneral: "Chung",
+        settingsTabSessions: "Phi\xEAn l\xE0m vi\u1EC7c",
+        settingsSectionSwitching: "Chuy\u1EC3n phi\xEAn l\xE0m vi\u1EC7c",
+        settingsSectionSwitchCommands: "L\u1EC7nh chuy\u1EC3n phi\xEAn",
+        settingsSectionScrollSwitch: "Chuy\u1EC3n phi\xEAn b\u1EB1ng cu\u1ED9n",
+        settingsSectionSwitchPreview: "Xem tr\u01B0\u1EDBc tr\u01B0\u1EDBc khi chuy\u1EC3n",
+        settingsSubsectionSwitchSaving: "L\u01B0u khi chuy\u1EC3n phi\xEAn l\xE0m vi\u1EC7c",
+        settingsSubsectionAutoSaveMode: "Ch\u1EBF \u0111\u1ED9 t\u1EF1 \u0111\u1ED9ng l\u01B0u phi\xEAn",
+        settingsSubsectionSwitchCommands: "L\u1EC7nh chuy\u1EC3n phi\xEAn l\xE0m vi\u1EC7c",
+        settingsSubsectionScrollSwitch: "Chuy\u1EC3n phi\xEAn l\xE0m vi\u1EC7c b\u1EB1ng cu\u1ED9n",
+        settingsSubsectionSwitchPreview: "Xem tr\u01B0\u1EDBc tr\u01B0\u1EDBc khi chuy\u1EC3n phi\xEAn",
+        settingsSectionDeletion: "X\xF3a phi\xEAn l\xE0m vi\u1EC7c",
+        settingsSectionAdvanced: "N\xE2ng cao",
+        settingsSectionReset: "\u0110\u1EB7t l\u1EA1i",
+        settingsStatusBarModScrollSwitch: "B\u1EADt chuy\u1EC3n phi\xEAn t\u1EEB thanh tr\u1EA1ng th\xE1i",
+        settingsStatusBarModScrollSwitchDesc: "Tr\xEAn m\u1EE5c thanh tr\u1EA1ng th\xE1i, cu\u1ED9n d\u1ECDc trong khi gi\u1EEF ph\xEDm b\u1ED5 tr\u1EE3 \u0111\xE3 ch\u1ECDn \u0111\u1EC3 chuy\u1EC3n phi\xEAn. Ng\u01B0\u1EE1ng v\xE0 th\u1EDDi gian ch\u1EDD gi\xFAp gi\u1EA3m k\xEDch ho\u1EA1t nh\u1EA7m t\u1EEB trackpad.",
+        settingsStatusBarScrollPreset: "C\u1EA5u h\xECnh cu\u1ED9n",
+        settingsStatusBarScrollPresetDesc: "Ch\u1ECDn c\u1EA5u h\xECnh ph\xF9 h\u1EE3p v\u1EDBi thi\u1EBFt b\u1ECB, ho\u1EB7c chuy\u1EC3n sang T\xF9y ch\u1EC9nh \u0111\u1EC3 t\u1EF1 ch\u1EC9nh c\xE1c gi\xE1 tr\u1ECB.",
+        settingsStatusBarScrollPresetTrackpad: "Trackpad",
+        settingsStatusBarScrollPresetNotchedWheel: "Con l\u0103n chu\u1ED9t c\xF3 n\u1EA5c",
+        settingsStatusBarScrollPresetFreeSpinWheel: "Con l\u0103n chu\u1ED9t quay t\u1EF1 do",
+        settingsStatusBarScrollPresetCustom: "T\xF9y ch\u1EC9nh",
+        settingsStatusBarScrollModifier: "Ph\xEDm b\u1ED5 tr\u1EE3 b\u1EAFt bu\u1ED9c",
+        settingsStatusBarScrollModifierDesc: "Ch\u1ECDn ph\xEDm b\u1ED5 tr\u1EE3 c\u1EA7n gi\u1EEF khi cu\u1ED9n tr\xEAn m\u1EE5c thanh tr\u1EA1ng th\xE1i.",
+        settingsStatusBarScrollModifierRecommended: "Cmd ho\u1EB7c Option",
+        settingsStatusBarScrollModifierNone: "Kh\xF4ng",
+        settingsStatusBarScrollModifierModOnly: "Ch\u1EC9 Cmd",
+        settingsStatusBarScrollModifierAltOnly: "Ch\u1EC9 Option",
+        settingsStatusBarScrollModifierModOrAlt: "Cmd ho\u1EB7c Option",
+        settingsStatusBarScrollThreshold: "Ng\u01B0\u1EE1ng \u0111\u1ED9 nh\u1EA1y",
+        settingsStatusBarScrollThresholdDesc: "Gi\xE1 tr\u1ECB th\u1EA5p h\u01A1n s\u1EBD chuy\u1EC3n phi\xEAn d\u1EC5 h\u01A1n. Ch\u1EC9 d\xF9ng khi c\u1EA5u h\xECnh l\xE0 T\xF9y ch\u1EC9nh.",
+        settingsStatusBarScrollCooldown: "Th\u1EDDi gian ch\u1EDD",
+        settingsStatusBarScrollCooldownDesc: "Th\u1EDDi gian t\u1ED1i thi\u1EC3u gi\u1EEFa c\xE1c l\u1EA7n chuy\u1EC3n phi\xEAn do cu\u1ED9n. Ch\u1EC9 d\xF9ng khi c\u1EA5u h\xECnh l\xE0 T\xF9y ch\u1EC9nh.",
+        settingsStatusBarScrollResetWindow: "Kho\u1EA3ng \u0111\u1EB7t l\u1EA1i t\xEDch l\u0169y",
+        settingsStatusBarScrollResetWindowDesc: "Th\u1EDDi gian c\u1ED9ng d\u1ED3n c\xE1c b\u01B0\u1EDBc cu\u1ED9n nh\u1ECF tr\u01B0\u1EDBc khi \u0111\u1EB7t l\u1EA1i. Ch\u1EC9 d\xF9ng khi c\u1EA5u h\xECnh l\xE0 T\xF9y ch\u1EC9nh.",
+        settingsStatusBarScrollInvert: "\u0110\u1EA3o chi\u1EC1u cu\u1ED9n",
+        settingsStatusBarScrollInvertDesc: "\u0110\u1EA3o h\u01B0\u1EDBng tr\u01B0\u1EDBc/ti\u1EBFp theo khi chuy\u1EC3n phi\xEAn b\u1EB1ng cu\u1ED9n tr\xEAn thanh tr\u1EA1ng th\xE1i.",
+        settingsLangAuto: "T\u1EF1 \u0111\u1ED9ng (ng\xF4n ng\u1EEF h\u1EC7 th\u1ED1ng)",
+        settingsGitHubLink: "GitHub",
+        settingsTranslationHelp: "Th\u1EA5y l\u1ED7i d\u1ECBch thu\u1EADt? Vui l\xF2ng m\u1EDF issue ho\u1EB7c pull request tr\xEAn GitHub.",
+        settingsPreviewHeading: "B\u1EADt xem tr\u01B0\u1EDBc tr\u01B0\u1EDBc khi chuy\u1EC3n phi\xEAn",
+        settingsPreviewDesc: "Khi chuy\u1EC3n phi\xEAn b\u1EB1ng ph\xEDm t\u1EAFt, l\u1EA7n nh\u1EA5n \u0111\u1EA7u ti\xEAn ch\u1EC9 hi\u1EC3n th\u1ECB v\u1ECB tr\xED hi\u1EC7n t\u1EA1i m\xE0 kh\xF4ng chuy\u1EC3n.",
+        settingsPreviewNext: "Phi\xEAn ti\u1EBFp theo",
+        settingsPreviewPrevious: "Phi\xEAn tr\u01B0\u1EDBc",
+        settingsHotkeys: "Ph\xEDm t\u1EAFt",
+        settingsHotkeysBtn: "M\u1EDF c\xE0i \u0111\u1EB7t ph\xEDm t\u1EAFt",
+        contextOpenSettings: "M\u1EDF c\xE0i \u0111\u1EB7t",
+        contextCustomizeClicks: "T\xF9y ch\u1EC9nh thao t\xE1c nh\u1EA5p",
+        settingsSectionStatusBar: "Thao t\xE1c nh\u1EA5p tr\xEAn thanh tr\u1EA1ng th\xE1i",
+        statusBarSlotClick: "Nh\u1EA5p",
+        statusBarSlotAltClick: function() {
+          return (typeof navigator !== "undefined" && navigator.platform.indexOf("Mac") !== -1 ? "\u2325" : "Alt") + " + Nh\u1EA5p";
+        },
+        statusBarSlotModClick: function() {
+          return (typeof navigator !== "undefined" && navigator.platform.indexOf("Mac") !== -1 ? "\u2318" : "Ctrl") + " + Nh\u1EA5p";
+        },
+        statusBarSlotShiftClick: function() {
+          return (typeof navigator !== "undefined" && navigator.platform.indexOf("Mac") !== -1 ? "\u21E7" : "Shift") + " + Nh\u1EA5p";
+        },
+        statusBarSlotMiddleClick: "Nh\u1EA5p chu\u1ED9t gi\u1EEFa",
+        statusBarSlotAltMiddleClick: modifiedClickLabel("Nh\u1EA5p chu\u1ED9t gi\u1EEFa", "\u2325", "Alt"),
+        statusBarSlotModMiddleClick: modifiedClickLabel("Nh\u1EA5p chu\u1ED9t gi\u1EEFa", "\u2318", "Ctrl"),
+        statusBarSlotShiftMiddleClick: modifiedClickLabel("Nh\u1EA5p chu\u1ED9t gi\u1EEFa", "\u21E7", "Shift"),
+        statusBarSlotRightClick: "Nh\u1EA5p chu\u1ED9t ph\u1EA3i",
+        statusBarSlotAltRightClick: function() {
+          return (typeof navigator !== "undefined" && navigator.platform.indexOf("Mac") !== -1 ? "\u2325" : "Alt") + " + Nh\u1EA5p chu\u1ED9t ph\u1EA3i";
+        },
+        statusBarSlotModRightClick: function() {
+          return (typeof navigator !== "undefined" && navigator.platform.indexOf("Mac") !== -1 ? "\u2318" : "Ctrl") + " + Nh\u1EA5p chu\u1ED9t ph\u1EA3i";
+        },
+        statusBarSlotShiftRightClick: function() {
+          return (typeof navigator !== "undefined" && navigator.platform.indexOf("Mac") !== -1 ? "\u21E7" : "Shift") + " + Nh\u1EA5p chu\u1ED9t ph\u1EA3i";
+        },
+        statusBarActionNone: "Kh\xF4ng l\xE0m g\xEC",
+        statusBarActionQuickSwitcher: "M\u1EDF tr\xECnh chuy\u1EC3n nhanh",
+        statusBarActionSessionManager: "M\u1EDF tr\xECnh qu\u1EA3n l\xFD phi\xEAn l\xE0m vi\u1EC7c",
+        statusBarActionSaveSession: "L\u01B0u phi\xEAn l\xE0m vi\u1EC7c",
+        statusBarActionReloadWithoutSaving: "T\u1EA3i l\u1EA1i m\xE0 kh\xF4ng l\u01B0u",
+        statusBarActionVersionHistory: "Hi\u1EC3n th\u1ECB l\u1ECBch s\u1EED phi\xEAn b\u1EA3n",
+        statusBarActionRestoreLatestHistory: "Kh\xF4i ph\u1EE5c l\u1ECBch s\u1EED m\u1EDBi nh\u1EA5t",
+        statusBarActionSessionMenu: "Menu ng\u1EEF c\u1EA3nh phi\xEAn",
+        statusBarActionSettingsMenu: "Menu ng\u1EEF c\u1EA3nh c\xE0i \u0111\u1EB7t",
+        contextResetOverlayPosition: "\u0110\u1EB7t l\u1EA1i v\u1ECB tr\xED v\xE0 k\xEDch th\u01B0\u1EDBc",
+        settingsConfirmDelete: "X\xE1c nh\u1EADn tr\u01B0\u1EDBc khi x\xF3a phi\xEAn",
+        settingsConfirmDeleteDesc: "Hi\u1EC3n th\u1ECB h\u1ED9p tho\u1EA1i x\xE1c nh\u1EADn tr\u01B0\u1EDBc khi x\xF3a phi\xEAn l\xE0m vi\u1EC7c.",
+        settingsConfirmQuickActions: "X\xE1c nh\u1EADn l\u01B0u/t\u1EA3i l\u1EA1i trong tr\xECnh chuy\u1EC3n nhanh",
+        settingsConfirmQuickActionsDesc: "Hi\u1EC3n th\u1ECB h\u1ED9p tho\u1EA1i x\xE1c nh\u1EADn tr\u01B0\u1EDBc khi l\u01B0u ho\u1EB7c t\u1EA3i l\u1EA1i phi\xEAn t\u1EEB l\u1EDBp ph\u1EE7 tr\xECnh chuy\u1EC3n nhanh.",
+        settingsAutoSaveOnSwitch: "Ch\u1EBF \u0111\u1ED9 t\u1EF1 \u0111\u1ED9ng l\u01B0u",
+        settingsAutoSaveOnSwitchDesc: "T\u1EF1 \u0111\u1ED9ng l\u01B0u phi\xEAn hi\u1EC7n t\u1EA1i khi chuy\u1EC3n phi\xEAn (m\u1EB7c \u0111\u1ECBnh: B\u1EACT). Khi T\u1EAET, b\u1EA1n c\xF3 th\u1EC3 l\u01B0u v\xE0 t\u1EA3i l\u1EA1i phi\xEAn th\u1EE7 c\xF4ng.",
+        settingsWarnUnsavedSwitch: "C\u1EA3nh b\xE1o tr\u01B0\u1EDBc khi chuy\u1EC3n m\xE0 kh\xF4ng l\u01B0u",
+        settingsWarnUnsavedSwitchDesc: "Khi t\u1EF1 \u0111\u1ED9ng l\u01B0u b\u1ECB t\u1EAFt v\xE0 phi\xEAn hi\u1EC7n t\u1EA1i c\xF3 thay \u0111\u1ED5i ch\u01B0a l\u01B0u, hi\u1EC3n th\u1ECB c\u1EA3nh b\xE1o tr\u01B0\u1EDBc khi chuy\u1EC3n.",
+        settingsStatusBarQuickSwitcher: "M\u1EDF tr\xECnh chuy\u1EC3n nhanh khi nh\u1EA5p thanh tr\u1EA1ng th\xE1i",
+        settingsStatusBarQuickSwitcherDesc: "Khi b\u1EADt, nh\u1EA5p v\xE0o thanh tr\u1EA1ng th\xE1i s\u1EBD m\u1EDF l\u1EDBp ph\u1EE7 tr\xECnh chuy\u1EC3n nhanh thay v\xEC tr\xECnh qu\u1EA3n l\xFD phi\xEAn \u0111\u1EA7y \u0111\u1EE7.",
+        settingsUseLocalSettings: "D\xF9ng c\xE0i \u0111\u1EB7t ri\xEAng cho vault",
+        settingsUseLocalSettingsDesc: "B\u1EADt t\xF9y ch\u1ECDn n\xE0y n\u1EBFu b\u1EA1n \u0111\u1ED3ng b\u1ED9 .obsidian gi\u1EEFa nhi\u1EC1u vault (v\xED d\u1EE5 b\u1EB1ng Settings Profiles) v\xE0 mu\u1ED1n c\xE0i \u0111\u1EB7t Workspace++ kh\xE1c nhau theo t\u1EEBng vault.",
+        settingsCopyGlobalToLocal: "Sao ch\xE9p c\xE0i \u0111\u1EB7t to\xE0n c\u1EE5c v\xE0o vault n\xE0y",
+        settingsCopyGlobalToLocalDesc: "Ghi \u0111\xE8 c\xE0i \u0111\u1EB7t ri\xEAng cho vault b\u1EB1ng c\xE0i \u0111\u1EB7t to\xE0n c\u1EE5c hi\u1EC7n t\u1EA1i.",
+        settingsCopyGlobalToLocalBtn: "Sao ch\xE9p",
+        settingsResetLocalSettings: "\u0110\u1EB7t l\u1EA1i c\xE0i \u0111\u1EB7t ri\xEAng cho vault",
+        settingsResetLocalSettingsDesc: "\u0110\u1EB7t l\u1EA1i c\xE0i \u0111\u1EB7t ri\xEAng cho vault v\u1EC1 c\xE0i \u0111\u1EB7t to\xE0n c\u1EE5c.",
+        settingsResetLocalSettingsBtn: "\u0110\u1EB7t l\u1EA1i c\u1EE5c b\u1ED9",
+        settingsAdvancedStorageSubsection: "H\xE0nh vi l\u01B0u tr\u1EEF",
+        settingsAdvancedTransferSubsection: "Chuy\u1EC3n d\u1EEF li\u1EC7u",
+        settingsDeveloperSection: "C\xF4ng c\u1EE5 nh\xE0 ph\xE1t tri\u1EC3n",
+        settingsStorageDiagnostics: "Ch\u1EA9n \u0111o\xE1n l\u01B0u tr\u1EEF",
+        settingsStorageDiagnosticsDesc: "Th\xF4ng tin l\u01B0u tr\u1EEF Workspace++ \u0111ang d\xF9ng.",
+        settingsStorageFieldSessions: "T\u1EC7p phi\xEAn l\xE0m vi\u1EC7c",
+        settingsStorageFieldSessionsBackup: "B\u1EA3n sao l\u01B0u phi\xEAn",
+        settingsStorageFieldLocalSettings: "T\u1EC7p c\xE0i \u0111\u1EB7t c\u1EE5c b\u1ED9",
+        settingsStorageFieldGlobalSettings: "T\u1EC7p c\xE0i \u0111\u1EB7t to\xE0n c\u1EE5c",
+        settingsStorageFieldSessionCount: "S\u1ED1 phi\xEAn",
+        settingsStorageFieldUpdatedAt: "C\u1EADp nh\u1EADt l\xFAc",
+        settingsExportSessions: "Xu\u1EA5t phi\xEAn l\xE0m vi\u1EC7c",
+        settingsExportSessionsDesc: "L\u01B0u b\u1EA3n ch\u1EE5p nhanh v\xE0o .workspace-plus-plus/exports.",
+        settingsExportSessionsBtn: "Xu\u1EA5t",
+        settingsImportSessions: "Nh\u1EADp phi\xEAn l\xE0m vi\u1EC7c",
+        settingsImportSessionsDesc: "Nh\u1EADp b\u1EA3n ch\u1EE5p nhanh m\u1EDBi nh\u1EA5t t\u1EEB .workspace-plus-plus/exports.",
+        settingsImportSessionsBtn: "Nh\u1EADp m\u1EDBi nh\u1EA5t",
+        confirmImportSessions: "Nh\u1EADp phi\xEAn l\xE0m vi\u1EC7c \u0111\xE3 xu\u1EA5t m\u1EDBi nh\u1EA5t? Phi\xEAn hi\u1EC7n t\u1EA1i s\u1EBD b\u1ECB thay th\u1EBF.",
+        settingsResetSettings: "\u0110\u1EB7t l\u1EA1i c\xE0i \u0111\u1EB7t",
+        settingsResetSettingsDesc: "\u0110\u1EB7t l\u1EA1i c\xE0i \u0111\u1EB7t Workspace++ cho ph\u1EA1m vi c\xE0i \u0111\u1EB7t hi\u1EC7n t\u1EA1i.",
+        settingsResetSettingsBtn: "\u0110\u1EB7t l\u1EA1i c\xE0i \u0111\u1EB7t",
+        confirmResetSettings: "\u0110\u1EB7t l\u1EA1i c\xE0i \u0111\u1EB7t Workspace++ v\u1EC1 m\u1EB7c \u0111\u1ECBnh?",
+        resetSettingsDone: "\u0110\xE3 \u0111\u1EB7t l\u1EA1i c\xE0i \u0111\u1EB7t Workspace++.",
+        resetSettingsFailed: "Kh\xF4ng th\u1EC3 \u0111\u1EB7t l\u1EA1i c\xE0i \u0111\u1EB7t Workspace++.",
+        settingsResetSessions: "\u0110\u1EB7t l\u1EA1i phi\xEAn l\xE0m vi\u1EC7c",
+        settingsResetSessionsDesc: "X\xF3a t\u1EA5t c\u1EA3 phi\xEAn \u0111\xE3 l\u01B0u v\xE0 ch\u1EC9 gi\u1EEF m\u1ED9t phi\xEAn m\u1EB7c \u0111\u1ECBnh m\u1EDBi t\u1EEB b\u1ED1 c\u1EE5c hi\u1EC7n t\u1EA1i.",
+        settingsResetSessionsBtn: "\u0110\u1EB7t l\u1EA1i",
+        confirmResetSessions: "\u0110\u1EB7t l\u1EA1i t\u1EA5t c\u1EA3 phi\xEAn v\u1EC1 m\u1EB7c \u0111\u1ECBnh? Kh\xF4ng th\u1EC3 ho\xE0n t\xE1c thao t\xE1c n\xE0y.",
+        resetSessionsHint: "Thao t\xE1c n\xE0y s\u1EBD x\xF3a m\u1ECDi phi\xEAn \u0111\xE3 l\u01B0u v\xE0 ch\u1EC9 gi\u1EEF l\u1EA1i m\u1ED9t phi\xEAn m\u1EB7c \u0111\u1ECBnh.",
+        resetSessionsDone: "\u0110\xE3 \u0111\u1EB7t l\u1EA1i phi\xEAn l\xE0m vi\u1EC7c v\u1EC1 m\u1EB7c \u0111\u1ECBnh.",
+        resetSessionsFailed: "Kh\xF4ng th\u1EC3 \u0111\u1EB7t l\u1EA1i phi\xEAn l\xE0m vi\u1EC7c.",
+        settingsResetSessionsAndSettings: "\u0110\u1EB7t l\u1EA1i phi\xEAn v\xE0 c\xE0i \u0111\u1EB7t",
+        settingsResetSessionsAndSettingsDesc: "\u0110\u1EB7t l\u1EA1i c\u1EA3 phi\xEAn \u0111\xE3 l\u01B0u v\xE0 c\xE0i \u0111\u1EB7t Workspace++ c\xF9ng l\xFAc.",
+        settingsResetSessionsAndSettingsBtn: "\u0110\u1EB7t l\u1EA1i c\u1EA3 hai",
+        confirmResetSessionsAndSettings: "\u0110\u1EB7t l\u1EA1i c\u1EA3 phi\xEAn v\xE0 c\xE0i \u0111\u1EB7t? Kh\xF4ng th\u1EC3 ho\xE0n t\xE1c thao t\xE1c n\xE0y.",
+        resetSessionsAndSettingsDone: "\u0110\xE3 \u0111\u1EB7t l\u1EA1i phi\xEAn v\xE0 c\xE0i \u0111\u1EB7t.",
+        resetSessionsAndSettingsFailed: "Kh\xF4ng th\u1EC3 \u0111\u1EB7t l\u1EA1i phi\xEAn v\xE0 c\xE0i \u0111\u1EB7t.",
+        confirmDeleteSettingsHint: "\u0110\u1EC3 t\u1EAFt x\xE1c nh\u1EADn n\xE0y, h\xE3y v\xE0o C\xE0i \u0111\u1EB7t.",
+        groupCreated: function(n) {
+          return '\u0110\xE3 t\u1EA1o nh\xF3m "' + n + '"';
+        },
+        groupDeleted: function(n) {
+          return '\u0110\xE3 x\xF3a nh\xF3m "' + n + '"';
+        },
+        groupRenamed: function(o, n) {
+          return '\u0110\xE3 \u0111\u1ED5i t\xEAn nh\xF3m: "' + o + '" \u2192 "' + n + '"';
+        },
+        groupAll: "T\u1EA5t c\u1EA3",
+        groupDuplicateName: "\u0110\xE3 c\xF3 nh\xF3m v\u1EDBi t\xEAn n\xE0y.",
+        groupEmptyName: "T\xEAn nh\xF3m kh\xF4ng \u0111\u01B0\u1EE3c \u0111\u1EC3 tr\u1ED1ng.",
+        cmdSwitchGroup: "Chuy\u1EC3n nh\xF3m",
+        cmdExitGroup: "Hi\u1EC3n th\u1ECB t\u1EA5t c\u1EA3 phi\xEAn (tho\xE1t nh\xF3m)",
+        cmdNextGroup: "Nh\xF3m ti\u1EBFp theo",
+        cmdPreviousGroup: "Nh\xF3m tr\u01B0\u1EDBc",
+        searchOverlayHelpWithGroups: "\u2191\u2193 di chuy\u1EC3n  /  Tab nh\xF3m  /  Enter chuy\u1EC3n  /  \u21E7Enter l\u01B0u  /  \u232B x\xF3a  /  Esc \u0111\xF3ng",
+        settingsSectionGroups: "Nh\xF3m phi\xEAn l\xE0m vi\u1EC7c",
+        contextToggleGroups: "B\u1EADt nh\xF3m phi\xEAn l\xE0m vi\u1EC7c",
+        settingsSectionGroupsDesc: "D\xF9ng nh\xF3m \u0111\u1EC3 s\u1EAFp x\u1EBFp phi\xEAn l\xE0m vi\u1EC7c. T\u1EAFt t\xF9y ch\u1ECDn n\xE0y \u0111\u1EC3 \u1EA9n tab nh\xF3m v\xE0 thao t\xE1c chuy\u1EC3n nh\xF3m.",
+        settingsGroupCreate: "T\u1EA1o nh\xF3m",
+        settingsGroupCreateDesc: "T\u1EA1o nh\xF3m phi\xEAn l\xE0m vi\u1EC7c m\u1EDBi.",
+        settingsGroupCreatePlaceholder: "T\xEAn nh\xF3m...",
+        settingsGroupCreateBtn: "T\u1EA1o",
+        settingsGroupManageSessions: "Qu\u1EA3n l\xFD phi\xEAn l\xE0m vi\u1EC7c",
+        settingsGroupManageSessionsDesc: "Th\xEAm ho\u1EB7c g\u1EE1 phi\xEAn l\xE0m vi\u1EC7c kh\u1ECFi nh\xF3m n\xE0y.",
+        settingsGroupSessionCount: function(n) {
+          return n + " phi\xEAn l\xE0m vi\u1EC7c";
+        },
+        settingsGroupDelete: "X\xF3a nh\xF3m",
+        settingsGroupDeleteConfirm: function(n) {
+          return 'X\xF3a nh\xF3m "' + n + '"? Phi\xEAn l\xE0m vi\u1EC7c s\u1EBD kh\xF4ng b\u1ECB x\xF3a.';
+        },
+        confirmDeleteGroup: function(n) {
+          return 'X\xF3a nh\xF3m "' + n + '"? Phi\xEAn l\xE0m vi\u1EC7c trong nh\xF3m s\u1EBD KH\xD4NG b\u1ECB x\xF3a.';
+        },
+        groupAddedSession: function(s, g) {
+          return '\u0110\xE3 th\xEAm "' + s + '" v\xE0o "' + g + '"';
+        },
+        groupRemovedSession: function(s, g) {
+          return '\u0110\xE3 g\u1EE1 "' + s + '" kh\u1ECFi "' + g + '"';
+        },
+        groupRemoveFromGroup: "G\u1EE1 kh\u1ECFi nh\xF3m",
+        groupMoveToGroup: "Di chuy\u1EC3n v\xE0o nh\xF3m",
+        groupCreateNew: "Nh\xF3m m\u1EDBi",
+        groupCreatePlaceholder: "T\xEAn nh\xF3m...",
+        groupContextRename: "\u0110\u1ED5i t\xEAn nh\xF3m",
+        groupContextDelete: "X\xF3a nh\xF3m",
+        contextSwitchSession: "Chuy\u1EC3n sang phi\xEAn n\xE0y",
+        contextRenameSession: "\u0110\u1ED5i t\xEAn phi\xEAn n\xE0y",
+        contextDeleteSession: "X\xF3a phi\xEAn n\xE0y",
+        contextDuplicateSession: "Nh\xE2n b\u1EA3n phi\xEAn n\xE0y",
+        contextReloadSession: "T\u1EA3i l\u1EA1i phi\xEAn n\xE0y",
+        contextSaveSession: "L\u01B0u phi\xEAn n\xE0y",
+        contextSaveCurrentLayoutToThisSession: "L\u01B0u b\u1ED1 c\u1EE5c hi\u1EC7n t\u1EA1i v\xE0o phi\xEAn n\xE0y",
+        groupRemoveAllSessions: "G\u1EE1 t\u1EA5t c\u1EA3 phi\xEAn kh\u1ECFi nh\xF3m n\xE0y",
+        confirmRemoveAllFromGroup: function(g, n) {
+          return "G\u1EE1 t\u1EA5t c\u1EA3 " + n + ' phi\xEAn kh\u1ECFi "' + g + '"?';
+        },
+        groupRemovedAllSessions: function(g) {
+          return '\u0110\xE3 g\u1EE1 t\u1EA5t c\u1EA3 phi\xEAn kh\u1ECFi "' + g + '"';
+        },
+        contextDeleteAllGroups: "X\xF3a t\u1EA5t c\u1EA3 nh\xF3m",
+        confirmDeleteAllGroups: function(n) {
+          return "X\xF3a t\u1EA5t c\u1EA3 " + n + " nh\xF3m? Phi\xEAn l\xE0m vi\u1EC7c s\u1EBD kh\xF4ng b\u1ECB x\xF3a.";
+        },
+        deletedAllGroups: function(n) {
+          return "\u0110\xE3 x\xF3a " + n + " nh\xF3m";
+        },
+        contextDeleteAllSessions: "X\xF3a t\u1EA5t c\u1EA3 phi\xEAn",
+        confirmDeleteAllSessions: function(n) {
+          return "X\xF3a " + n + " phi\xEAn? Phi\xEAn \u0111ang ho\u1EA1t \u0111\u1ED9ng s\u1EBD \u0111\u01B0\u1EE3c gi\u1EEF l\u1EA1i.";
+        },
+        deletedAllSessions: function(n) {
+          return "\u0110\xE3 x\xF3a " + n + " phi\xEAn";
+        },
+        contextVersionHistory: "L\u1ECBch s\u1EED phi\xEAn b\u1EA3n",
+        cmdVersionHistory: "Xem l\u1ECBch s\u1EED phi\xEAn b\u1EA3n c\u1EE7a phi\xEAn",
+        historyTitle: "L\u1ECBch s\u1EED phi\xEAn b\u1EA3n",
+        historyEmpty: "Kh\xF4ng c\xF3 l\u1ECBch s\u1EED phi\xEAn b\u1EA3n cho phi\xEAn n\xE0y.",
+        historyRestore: "Kh\xF4i ph\u1EE5c",
+        historyRestoreConfirm: function(name, time) {
+          return 'Kh\xF4i ph\u1EE5c b\u1ED1 c\u1EE5c "' + name + '" t\u1EEB ' + time + "?";
+        },
+        historyRestored: function(name) {
+          return '\u0110\xE3 kh\xF4i ph\u1EE5c b\u1ED1 c\u1EE5c cho "' + name + '"';
+        },
+        historyQuickRestored: function(name) {
+          return '\u0110\xE3 kh\xF4i ph\u1EE5c nhanh b\u1ED1 c\u1EE5c tr\u01B0\u1EDBc \u0111\xF3 cho "' + name + '"';
+        },
+        historyNoEntries: "Kh\xF4ng c\xF3 b\u1ED1 c\u1EE5c tr\u01B0\u1EDBc \u0111\xF3 \u0111\u1EC3 kh\xF4i ph\u1EE5c.",
+        historyToday: "H\xF4m nay",
+        historyYesterday: "H\xF4m qua",
+        historyThisWeek: "Tu\u1EA7n n\xE0y",
+        historyFiles: function(n) {
+          return n + " t\u1EC7p";
+        },
+        historyPanes: function(n) {
+          return n + " khung";
+        },
+        settingsVersionHistoryEnabled: "B\u1EADt l\u1ECBch s\u1EED phi\xEAn b\u1EA3n",
+        settingsVersionHistoryEnabledDesc: "Gi\u1EEF l\u1ECBch s\u1EED thay \u0111\u1ED5i b\u1ED1 c\u1EE5c cho t\u1EEBng phi\xEAn.",
+        settingsVersionHistoryInterval: "Kho\u1EA3ng th\u1EDDi gian ch\u1EE5p nhanh (ph\xFAt)",
+        settingsVersionHistoryIntervalDesc: "T\u1EA7n su\u1EA5t ki\u1EC3m tra thay \u0111\u1ED5i b\u1ED1 c\u1EE5c v\xE0 l\u01B0u b\u1EA3n ch\u1EE5p nhanh.",
+        settingsVersionHistoryCtrlRmb: platformLabel("Kh\xF4i ph\u1EE5c nhanh (Cmd + nh\u1EA5p ph\u1EA3i)", "Kh\xF4i ph\u1EE5c nhanh (Ctrl + nh\u1EA5p ph\u1EA3i)"),
+        settingsVersionHistoryCtrlRmbDesc: platformLabel("Nh\u1EA5p chu\u1ED9t ph\u1EA3i v\xE0o thanh tr\u1EA1ng th\xE1i trong khi gi\u1EEF Cmd \u0111\u1EC3 kh\xF4i ph\u1EE5c b\u1ED1 c\u1EE5c tr\u01B0\u1EDBc \u0111\xF3.", "Nh\u1EA5p chu\u1ED9t ph\u1EA3i v\xE0o thanh tr\u1EA1ng th\xE1i trong khi gi\u1EEF Ctrl \u0111\u1EC3 kh\xF4i ph\u1EE5c b\u1ED1 c\u1EE5c tr\u01B0\u1EDBc \u0111\xF3."),
+        settingsVersionHistoryConfirmRestore: "X\xE1c nh\u1EADn tr\u01B0\u1EDBc khi kh\xF4i ph\u1EE5c",
+        settingsVersionHistoryConfirmRestoreDesc: "Hi\u1EC3n th\u1ECB h\u1ED9p tho\u1EA1i x\xE1c nh\u1EADn tr\u01B0\u1EDBc khi kh\xF4i ph\u1EE5c b\u1ED1 c\u1EE5c tr\u01B0\u1EDBc \u0111\xF3.",
+        rotationBackupSectionTitle: "Sao l\u01B0u",
+        rotationBackupCreate: "T\u1EA1o b\u1EA3n sao l\u01B0u",
+        rotationBackupCreateBtn: "Sao l\u01B0u ngay",
+        rotationBackupCreated: "\u0110\xE3 t\u1EA1o b\u1EA3n sao l\u01B0u.",
+        rotationBackupFailed: "Kh\xF4ng th\u1EC3 t\u1EA1o b\u1EA3n sao l\u01B0u.",
+        rotationBackupDesc: "B\u1EA3n sao l\u01B0u t\u1EF1 \u0111\u1ED9ng \u0111\u01B0\u1EE3c t\u1EA1o khi l\u01B0u (m\u1ED7i gi\u1EDD, t\u1ED1i \u0111a 3 th\u1EBF h\u1EC7).",
+        rotationBackupRestore: "Kh\xF4i ph\u1EE5c",
+        rotationBackupRestoreConfirm: function(time, count) {
+          return "Kh\xF4i ph\u1EE5c t\u1EEB b\u1EA3n sao l\u01B0u l\xFAc " + time + " (" + count + " phi\xEAn)? D\u1EEF li\u1EC7u hi\u1EC7n t\u1EA1i s\u1EBD b\u1ECB ghi \u0111\xE8.";
+        },
+        rotationBackupRestored: "\u0110\xE3 kh\xF4i ph\u1EE5c t\u1EEB b\u1EA3n sao l\u01B0u.",
+        rotationBackupRestoreFailed: "Kh\xF4ng th\u1EC3 kh\xF4i ph\u1EE5c t\u1EEB b\u1EA3n sao l\u01B0u.",
+        rotationBackupNone: "Kh\xF4ng c\xF3 b\u1EA3n sao l\u01B0u.",
+        rotationBackupGeneration: function(count) {
+          return count + " phi\xEAn";
+        },
+        frontmatterSessionNotFound: function(n) {
+          return 'Kh\xF4ng t\xECm th\u1EA5y phi\xEAn "' + n + '" (workspace-session)';
+        },
+        frontmatterAlreadyActive: function(n) {
+          return 'Phi\xEAn "' + n + '" \u0111\xE3 l\xE0 phi\xEAn \u0111ang ho\u1EA1t \u0111\u1ED9ng';
+        }
       }
     };
     var EXTENDED_STRINGS = {
@@ -6220,7 +6654,8 @@ var require_i18n = __commonJS({
       ko: "\uD55C\uAD6D\uC5B4",
       it: "Italiano",
       tr: "T\xFCrk\xE7e",
-      id: "Bahasa Indonesia"
+      id: "Bahasa Indonesia",
+      vi: "Ti\u1EBFng Vi\u1EC7t"
     };
     var LANG_ORDER = [
       "en",
@@ -6236,7 +6671,8 @@ var require_i18n = __commonJS({
       "de",
       "it",
       "tr",
-      "id"
+      "id",
+      "vi"
     ];
     exports2.LANG_OPTIONS = LANG_OPTIONS;
     exports2.LANG_ORDER = LANG_ORDER;
