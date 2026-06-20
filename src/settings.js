@@ -227,7 +227,7 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
         var contentEl = containerEl.createDiv({ cls: 'wpp-settings-tab-content' });
 
         function addSection(title) {
-            contentEl.createEl('h3', { text: title, cls: 'wpp-settings-section-title' });
+            contentEl.createEl('h3', { text: resolveSettingText(title), cls: 'wpp-settings-section-title' });
         }
 
         // ── General tab ──
@@ -333,6 +333,17 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                     value: self.plugin.isWarnOnUnsavedSwitchEnabled(),
                     onChange: function (value) {
                         self.plugin.data.warnOnUnsavedSwitch = value;
+                        self.plugin.persistData();
+                    },
+                });
+
+                addToggleSetting(contentEl, {
+                    name: L.settingsHighlightUnsavedSessionChanges,
+                    desc: L.settingsHighlightUnsavedSessionChangesDesc,
+                    value: self.plugin.isUnsavedStatusBarHighlightEnabled(),
+                    onChange: function (value) {
+                        self.plugin.data.highlightUnsavedSessionChanges = value;
+                        self.plugin.updateStatusBar();
                         self.plugin.persistData();
                     },
                 });

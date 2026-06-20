@@ -386,14 +386,49 @@ function attachSessionMethods(WorkspacePlusPlus) {
         return this.serializeLayout(a) === this.serializeLayout(b);
     };
 
-    // Compare layouts ignoring volatile scroll/position state (left, top, scroll)
+    // Compare layouts ignoring volatile workspace state such as ids, focus, and scroll.
     WorkspacePlusPlus.prototype.layoutsEqualStructural = function (a, b) {
         try {
-            var normalize = function (layout) {
-                return JSON.stringify(layout || null)
-                    .replace(/"(?:left|top|scroll)":-?\d+(?:\.\d+)?/g, '"_":0');
+            var volatileKeys = {
+                eState: true,
+                lastOpenFiles: true,
+                left: true,
+                scroll: true,
+                top: true,
             };
-            return normalize(a) === normalize(b);
+            var looksLikeWorkspaceItem = function (value) {
+                return value
+                    && typeof value === 'object'
+                    && typeof value.id === 'string'
+                    && typeof value.type === 'string'
+                    && (
+                        Array.isArray(value.children)
+                        || value.state !== undefined
+                        || value.currentTab !== undefined
+                        || value.direction !== undefined
+                        || value.collapsed !== undefined
+                    );
+            };
+            var normalizeNode = function (value, depth) {
+                if (Array.isArray(value)) {
+                    return value.map(function (item) { return normalizeNode(item, depth + 1); });
+                }
+                if (value && typeof value === 'object') {
+                    var normalized = {};
+                    var isWorkspaceItem = looksLikeWorkspaceItem(value);
+                    var keys = Object.keys(value).sort();
+                    for (var i = 0; i < keys.length; i++) {
+                        var key = keys[i];
+                        if (volatileKeys[key]) continue;
+                        if (key === 'id' && isWorkspaceItem) continue;
+                        if (key === 'active' && depth === 0 && typeof value[key] === 'string') continue;
+                        normalized[key] = normalizeNode(value[key], depth + 1);
+                    }
+                    return normalized;
+                }
+                return value;
+            };
+            return JSON.stringify(normalizeNode(a || null, 0)) === JSON.stringify(normalizeNode(b || null, 0));
         } catch (e) {
             return this.layoutsEqual(a, b);
         }
@@ -405,6 +440,10 @@ function attachSessionMethods(WorkspacePlusPlus) {
 
     WorkspacePlusPlus.prototype.isWarnOnUnsavedSwitchEnabled = function () {
         return this.data.warnOnUnsavedSwitch !== false;
+    };
+
+    WorkspacePlusPlus.prototype.isUnsavedStatusBarHighlightEnabled = function () {
+        return this.data.highlightUnsavedSessionChanges !== false;
     };
 
     WorkspacePlusPlus.prototype.isGroupFeatureEnabled = function () {
@@ -449,7 +488,13 @@ function attachSessionMethods(WorkspacePlusPlus) {
     WorkspacePlusPlus.prototype.isActiveSessionDirty = function () {
         var session = this.getActiveSession();
         if (!session) return false;
-        return !this.layoutsEqual(session.layout, this.getCurrentWorkspaceLayout());
+        return !this.layoutsEqualStructural(session.layout, this.getCurrentWorkspaceLayout());
+    };
+
+    WorkspacePlusPlus.prototype.shouldShowUnsavedStatusBarHighlight = function () {
+        return this.isUnsavedStatusBarHighlightEnabled()
+            && !this.isAutoSaveOnSwitchEnabled()
+            && this.isActiveSessionDirty();
     };
 
     WorkspacePlusPlus.prototype.setAutoSaveOnSwitch = function (enabled, options) {
@@ -464,6 +509,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
         } else {
             this.stopHistorySnapshotTimer();
         }
+        this.updateStatusBar();
 
         return this.persistData().then(function () {
             if (options.notify) {
@@ -621,6 +667,14 @@ function attachSessionMethods(WorkspacePlusPlus) {
     WorkspacePlusPlus.prototype.updateStatusBar = function () {
         var L = i18n.L;
         var session = this.getActiveSession();
+        if (!this.statusBarEl) return;
+        var showUnsavedHighlight = this.shouldShowUnsavedStatusBarHighlight();
+
+        this.statusBarEl.removeClass('wpp-status-bar-unsaved');
+        if (showUnsavedHighlight) {
+            this.statusBarEl.addClass('wpp-status-bar-unsaved');
+        }
+
         this.statusBarEl.empty();
         var icon = this.statusBarEl.createSpan({ cls: 'wpp-status-icon' });
         obsidian.setIcon(icon, 'panels-top-left');

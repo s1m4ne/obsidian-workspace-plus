@@ -191,6 +191,13 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
 
             self.registerEvent(self.app.workspace.on('layout-change', function () {
                 self.noteStartupLayoutChange();
+                self.updateStatusBar();
+            }));
+            self.registerEvent(self.app.workspace.on('active-leaf-change', function () {
+                if (self.isSwitchingSession) return;
+                setTimeout(function () {
+                    self.updateStatusBar();
+                }, 0);
             }));
 
             // Startup: ensure default session exists, then flush
