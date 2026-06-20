@@ -5,6 +5,49 @@ var i18n = require('../../i18n');
 var utils = require('../../utils');
 var modals = require('../../modals');
 
+function findSessionByName(data, name) {
+    var sessions = (data && data.sessions) || {};
+    var keys = Object.keys(sessions);
+    for (var i = 0; i < keys.length; i++) {
+        if (sessions[keys[i]] && sessions[keys[i]].name === name) {
+            return sessions[keys[i]];
+        }
+    }
+    return null;
+}
+
+function isGroupFeatureEnabled(plugin) {
+    if (typeof plugin.isGroupFeatureEnabled === 'function') {
+        return plugin.isGroupFeatureEnabled();
+    }
+    return !plugin.data || plugin.data.groupFeatureEnabled !== false;
+}
+
+function chooseSessionGroupForView(plugin, sessionId) {
+    if (!isGroupFeatureEnabled(plugin)) return undefined;
+
+    var data = plugin.data || {};
+    var groups = data.groups || {};
+    var sessionGroups = data.sessionGroups || {};
+    var groupIds = Array.isArray(sessionGroups[sessionId]) ? sessionGroups[sessionId] : [];
+    var validGroupIds = groupIds.filter(function (groupId) {
+        return !!groups[groupId];
+    });
+
+    if (validGroupIds.length === 0) return null;
+    if (validGroupIds.indexOf(data.activeGroupId) !== -1) return data.activeGroupId;
+
+    var ordered = typeof plugin.getOrderedGroupTabIds === 'function'
+        ? plugin.getOrderedGroupTabIds()
+        : (Array.isArray(data.groupOrder) ? data.groupOrder : []);
+
+    for (var i = 0; i < ordered.length; i++) {
+        if (ordered[i] === '__all__') continue;
+        if (validGroupIds.indexOf(ordered[i]) !== -1) return ordered[i];
+    }
+    return validGroupIds[0];
+}
+
 function attachSessionSavingMethods(WorkspacePlusPlus) {
     WorkspacePlusPlus.prototype.isAutoSaveOnSwitchEnabled = function () {
         return this.data.autoSaveOnSwitch !== false;
@@ -155,6 +198,72 @@ function attachSessionSavingMethods(WorkspacePlusPlus) {
                 }
             }
             return changed;
+        });
+    };
+
+    WorkspacePlusPlus.prototype.saveCurrentLayoutAsSessionName = function (name, options) {
+        var L = i18n.L;
+        options = options || {};
+        var sessionName = typeof name === 'string' ? name.trim() : '';
+        if (!sessionName) {
+            if (!options.silent) new obsidian.Notice(L.emptyName);
+            return Promise.resolve({
+                saved: false,
+                created: false,
+                overwritten: false,
+                sessionId: null,
+                name: sessionName,
+            });
+        }
+
+        var previousActiveId = this.data.activeSessionId || null;
+        if (this.isAutoSaveOnSwitchEnabled()) {
+            this.captureActiveSessionLayoutIfAutoSave();
+        }
+
+        var currentLayout = this.getCurrentWorkspaceLayout();
+        var existing = findSessionByName(this.data, sessionName);
+        var session;
+        var created = false;
+        var overwritten = false;
+        var changed = true;
+
+        if (existing) {
+            session = existing;
+            changed = !this.layoutsEqualStructural(session.layout, currentLayout);
+            if (!(this.isAutoSaveOnSwitchEnabled() && session.id === previousActiveId)) {
+                this.pushLayoutToHistory(session);
+            }
+            session.layout = currentLayout;
+            session.modified = Date.now();
+            this.data.activeSessionId = session.id;
+            var preferredGroupId = chooseSessionGroupForView(this, session.id);
+            if (typeof preferredGroupId !== 'undefined') {
+                this.data.activeGroupId = preferredGroupId;
+            }
+            overwritten = true;
+        } else {
+            var id = utils.generateId();
+            session = this.createSessionRecord(id, sessionName, currentLayout);
+            this.insertSessionAndActivate(session);
+            created = true;
+        }
+
+        this.updateStatusBar();
+        this.syncSessionCommands();
+
+        return this.persistData().then(function () {
+            if (!options.silent) {
+                new obsidian.Notice(L.savedAs(sessionName));
+            }
+            return {
+                saved: true,
+                created: created,
+                overwritten: overwritten,
+                changed: changed,
+                sessionId: session.id,
+                name: sessionName,
+            };
         });
     };
 

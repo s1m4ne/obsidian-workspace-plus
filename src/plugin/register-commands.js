@@ -120,6 +120,10 @@ function registerCommands(plugin) {
         plugin.saveAsSession();
     });
 
+    addSimpleCommand('save-current-note-name-as-session', L.cmdSaveCurrentNoteNameAsSession, function () {
+        plugin.saveCurrentNoteNameAsSession();
+    });
+
     addCommand({
         id: 'save-current-layout-to-session',
         name: L.cmdSaveCurrentLayoutToSession,

@@ -25,6 +25,62 @@ module.exports = function attachFrontmatterMethods(WorkspacePlusPlus) {
         return (cache && cache.frontmatter) || null;
     };
 
+    WorkspacePlusPlus.prototype.isMarkdownNoteFile = function (file) {
+        return !!file && String(file.extension || '').toLowerCase() === 'md';
+    };
+
+    WorkspacePlusPlus.prototype.getSessionNameFromNoteFile = function (file) {
+        if (!this.isMarkdownNoteFile(file)) return '';
+        if (typeof file.basename === 'string' && file.basename.trim()) {
+            return file.basename.trim();
+        }
+        var name = typeof file.name === 'string' ? file.name : '';
+        if (!name && typeof file.path === 'string') {
+            var parts = file.path.split('/');
+            name = parts[parts.length - 1] || '';
+        }
+        return name.replace(/\.md$/i, '').trim();
+    };
+
+    WorkspacePlusPlus.prototype.setWorkspaceSessionFrontmatter = function (file, sessionName) {
+        if (!this.app.fileManager || typeof this.app.fileManager.processFrontMatter !== 'function') {
+            return Promise.reject(new Error('processFrontMatter unavailable'));
+        }
+        return this.app.fileManager.processFrontMatter(file, function (frontmatter) {
+            frontmatter['workspace-session'] = sessionName;
+        });
+    };
+
+    WorkspacePlusPlus.prototype.saveCurrentNoteNameAsSession = function (options) {
+        var L = i18n.L;
+        options = options || {};
+        var file = this.app.workspace.getActiveFile ? this.app.workspace.getActiveFile() : null;
+        var sessionName = this.getSessionNameFromNoteFile(file);
+        var self = this;
+
+        if (!file || !sessionName) {
+            if (!options.silent) new obsidian.Notice(L.noActiveMarkdownFile);
+            return Promise.resolve(false);
+        }
+
+        return this.setWorkspaceSessionFrontmatter(file, sessionName)
+            .then(function () {
+                return self.saveCurrentLayoutAsSessionName(sessionName, { silent: true });
+            })
+            .then(function (result) {
+                if (!options.silent) {
+                    new obsidian.Notice(L.savedCurrentNoteNameAsSession(sessionName));
+                }
+                return result;
+            })
+            .catch(function () {
+                if (!options.silent) {
+                    new obsidian.Notice(L.saveCurrentNoteNameAsSessionFailed);
+                }
+                return false;
+            });
+    };
+
     // ----------------------------------------------------------
     // workspace-session property
     // ----------------------------------------------------------
@@ -127,7 +183,7 @@ module.exports = function attachFrontmatterMethods(WorkspacePlusPlus) {
     };
 
     // ----------------------------------------------------------
-    // Dispatcher: called on active-leaf-change
+    // Dispatcher: called on file-open
     // ----------------------------------------------------------
 
     /**
@@ -149,24 +205,61 @@ module.exports = function attachFrontmatterMethods(WorkspacePlusPlus) {
         // if (fm['workspace-xxx']) { ... }
     };
 
+    WorkspacePlusPlus.prototype.getFrontmatterTriggerLeafId = function () {
+        var activeLeaf = this.app.workspace.activeLeaf || null;
+        return activeLeaf && activeLeaf.id ? activeLeaf.id : 'active';
+    };
+
+    WorkspacePlusPlus.prototype.markCurrentFrontmatterFilesLoaded = function () {
+        var loadedByLeaf = {};
+        if (typeof this.app.workspace.iterateAllLeaves === 'function') {
+            this.app.workspace.iterateAllLeaves(function (leaf) {
+                var file = leaf && leaf.view && leaf.view.file;
+                if (!leaf || !leaf.id || !file || !file.path) return;
+                loadedByLeaf[leaf.id] = file.path;
+            });
+        }
+        this.frontmatterLoadedFilePathsByLeaf = loadedByLeaf;
+    };
+
+    WorkspacePlusPlus.prototype.clearFrontmatterFileForActiveLeaf = function () {
+        if (!this.frontmatterLoadedFilePathsByLeaf) return;
+        delete this.frontmatterLoadedFilePathsByLeaf[this.getFrontmatterTriggerLeafId()];
+    };
+
+    WorkspacePlusPlus.prototype.shouldHandleFrontmatterFileOpen = function (file) {
+        var filePath = file && file.path ? file.path : '';
+        if (!filePath) return false;
+        var leafId = this.getFrontmatterTriggerLeafId();
+        if (!this.frontmatterLoadedFilePathsByLeaf) this.frontmatterLoadedFilePathsByLeaf = {};
+        if (this.frontmatterLoadedFilePathsByLeaf[leafId] === filePath) return false;
+        this.frontmatterLoadedFilePathsByLeaf[leafId] = filePath;
+        return true;
+    };
+
     // ----------------------------------------------------------
     // Event registration
     // ----------------------------------------------------------
 
     /**
-     * Register the active-leaf-change listener.
+     * Register the file-open listener.
      * Should be called once during plugin onload().
      */
     WorkspacePlusPlus.prototype.registerFrontmatterListeners = function () {
         var self = this;
+        this.markCurrentFrontmatterFilesLoaded();
 
-        this.registerEvent(this.app.workspace.on('active-leaf-change', function (leaf) {
+        this.registerEvent(this.app.workspace.on('file-open', function (file) {
             // Guard: don't trigger during session switch or startup settle
             if (self.isSwitchingSession) return;
             if (self.getStartupSettleRemainingMs() > 0) return;
 
-            if (!leaf || !leaf.view || !leaf.view.file) return;
-            self.handleFrontmatterTriggers(leaf.view.file);
+            if (!file) {
+                self.clearFrontmatterFileForActiveLeaf();
+                return;
+            }
+            if (!self.shouldHandleFrontmatterFileOpen(file)) return;
+            self.handleFrontmatterTriggers(file);
         }));
     };
 };
