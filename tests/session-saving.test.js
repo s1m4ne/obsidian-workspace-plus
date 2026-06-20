@@ -38,6 +38,7 @@ function createPlugin(initialData) {
     const plugin = new PluginMock();
     plugin.data = Object.assign({
         activeSessionId: 'a',
+        sessionOrder: ['a', 'b'],
         autoSaveOnSwitch: true,
         warnOnUnsavedSwitch: true,
         highlightUnsavedSessionChanges: true,
@@ -77,6 +78,20 @@ function createPlugin(initialData) {
     plugin.persistData = function () {
         plugin.persistCalls += 1;
         return Promise.resolve(true);
+    };
+    plugin.createSessionRecord = function (id, name, layout, options) {
+        options = options || {};
+        return {
+            id,
+            name,
+            layout,
+            modified: typeof options.modified === 'number' ? options.modified : Date.now(),
+        };
+    };
+    plugin.insertSessionAndActivate = function (session) {
+        plugin.data.sessions[session.id] = session;
+        plugin.data.sessionOrder.push(session.id);
+        plugin.data.activeSessionId = session.id;
     };
     plugin.startHistorySnapshotTimer = function () {
         plugin.historyStarts += 1;
@@ -142,6 +157,102 @@ test('session saving saves active session and reports whether layout changed', a
     assert.deepEqual(plugin.historyPushes, ['a', 'a']);
     assert.equal(plugin.statusBarUpdates, 2);
     assert.equal(plugin.persistCalls, 2);
+});
+
+test('session saving saves current layout as a new named session', async function () {
+    const plugin = createPlugin({
+        activeSessionId: 'a',
+        sessionOrder: ['a'],
+        sessions: {
+            a: { id: 'a', name: 'A', layout: { layout: 'old' }, modified: 1 },
+        },
+    });
+
+    const result = await plugin.saveCurrentLayoutAsSessionName('Project Note', { silent: true });
+    const created = plugin.data.sessions[result.sessionId];
+
+    assert.equal(result.saved, true);
+    assert.equal(result.created, true);
+    assert.equal(result.overwritten, false);
+    assert.equal(created.name, 'Project Note');
+    assert.deepEqual(created.layout, { layout: 'current' });
+    assert.equal(plugin.data.activeSessionId, result.sessionId);
+    assert.equal(plugin.persistCalls, 1);
+});
+
+test('session saving overwrites an existing named session from current layout', async function () {
+    const plugin = createPlugin({
+        activeSessionId: 'a',
+        sessionOrder: ['a', 'b'],
+        sessions: {
+            a: { id: 'a', name: 'A', layout: { layout: 'old-a' }, modified: 1 },
+            b: { id: 'b', name: 'Project Note', layout: { layout: 'old-b' }, modified: 1 },
+        },
+        autoSaveOnSwitch: true,
+    });
+
+    const result = await plugin.saveCurrentLayoutAsSessionName('Project Note', { silent: true });
+
+    assert.equal(result.saved, true);
+    assert.equal(result.created, false);
+    assert.equal(result.overwritten, true);
+    assert.equal(result.sessionId, 'b');
+    assert.equal(plugin.data.activeSessionId, 'b');
+    assert.deepEqual(plugin.data.sessions.a.layout, { layout: 'current' });
+    assert.deepEqual(plugin.data.sessions.b.layout, { layout: 'current' });
+    assert.deepEqual(plugin.historyPushes, ['a', 'b']);
+    assert.equal(plugin.persistCalls, 1);
+});
+
+test('session saving preserves existing session group membership and switches view to that group', async function () {
+    const plugin = createPlugin({
+        activeSessionId: 'a',
+        activeGroupId: 'g1',
+        groupOrder: ['__all__', 'g1', 'g2'],
+        groups: {
+            g1: { id: 'g1', name: 'One' },
+            g2: { id: 'g2', name: 'Two' },
+        },
+        sessionGroups: {
+            b: ['g2'],
+        },
+        sessionOrder: ['a', 'b'],
+        sessions: {
+            a: { id: 'a', name: 'A', layout: { layout: 'old-a' }, modified: 1 },
+            b: { id: 'b', name: 'Project Note', layout: { layout: 'old-b' }, modified: 1 },
+        },
+    });
+
+    const result = await plugin.saveCurrentLayoutAsSessionName('Project Note', { silent: true });
+
+    assert.equal(result.sessionId, 'b');
+    assert.equal(plugin.data.activeGroupId, 'g2');
+    assert.deepEqual(plugin.data.sessionGroups.b, ['g2']);
+});
+
+test('session saving switches to all sessions view when overwriting an ungrouped session', async function () {
+    const plugin = createPlugin({
+        activeSessionId: 'a',
+        activeGroupId: 'g1',
+        groupOrder: ['__all__', 'g1'],
+        groups: {
+            g1: { id: 'g1', name: 'One' },
+        },
+        sessionGroups: {
+            a: ['g1'],
+        },
+        sessionOrder: ['a', 'b'],
+        sessions: {
+            a: { id: 'a', name: 'A', layout: { layout: 'old-a' }, modified: 1 },
+            b: { id: 'b', name: 'Project Note', layout: { layout: 'old-b' }, modified: 1 },
+        },
+    });
+
+    const result = await plugin.saveCurrentLayoutAsSessionName('Project Note', { silent: true });
+
+    assert.equal(result.sessionId, 'b');
+    assert.equal(plugin.data.activeGroupId, null);
+    assert.equal(plugin.data.sessionGroups.b, undefined);
 });
 
 test('session saving reloads current session layout without persisting', async function () {

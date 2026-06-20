@@ -14,6 +14,7 @@ function loadStatusBarActions() {
         L: {
             statusBarActionNone: 'Do nothing',
             cmdSaveAs: 'Save current session as...',
+            cmdSaveCurrentNoteNameAsSession: 'Save current note name as session',
             cmdRename: 'Rename current session',
             cmdDuplicate: 'Duplicate current session',
             cmdPrevious: 'Previous session',
@@ -67,6 +68,7 @@ test('status bar actions expose first-pass direct action ids', function () {
 
     const expected = [
         'saveAsSession',
+        'saveCurrentNoteNameAsSession',
         'renameSession',
         'duplicateSession',
         'previousSession',
@@ -86,6 +88,10 @@ test('status bar actions delegate new direct actions to plugin methods', async f
     const plugin = {
         saveAsSession: function () {
             calls.push('saveAsSession');
+            return Promise.resolve(true);
+        },
+        saveCurrentNoteNameAsSession: function () {
+            calls.push('saveCurrentNoteNameAsSession');
             return Promise.resolve(true);
         },
         renameCurrentSession: function () {
@@ -110,6 +116,7 @@ test('status bar actions delegate new direct actions to plugin methods', async f
     };
 
     await statusBarActions.executeStatusBarAction(plugin, 'saveAsSession');
+    await statusBarActions.executeStatusBarAction(plugin, 'saveCurrentNoteNameAsSession');
     await statusBarActions.executeStatusBarAction(plugin, 'renameSession');
     await statusBarActions.executeStatusBarAction(plugin, 'duplicateSession');
     await statusBarActions.executeStatusBarAction(plugin, 'previousSession');
@@ -119,6 +126,7 @@ test('status bar actions delegate new direct actions to plugin methods', async f
 
     assert.deepEqual(calls, [
         'saveAsSession',
+        'saveCurrentNoteNameAsSession',
         'renameCurrentSession',
         'duplicateCurrentSession',
         ['switchRelativeFromStatusBar', -1],
@@ -133,6 +141,7 @@ test('status bar action labels reuse existing localized command labels', functio
     const L = {
         statusBarActionNone: 'Do nothing',
         cmdSaveAs: 'Save current session as...',
+        cmdSaveCurrentNoteNameAsSession: 'Save current note name as session',
         cmdRename: 'Rename current session',
         cmdDuplicate: 'Duplicate current session',
         cmdPrevious: 'Previous session',
@@ -142,6 +151,10 @@ test('status bar action labels reuse existing localized command labels', functio
     };
 
     assert.equal(statusBarActions.getActionLabel(L, 'saveAsSession'), 'Save current session as...');
+    assert.equal(
+        statusBarActions.getActionLabel(L, 'saveCurrentNoteNameAsSession'),
+        'Save current note name as session'
+    );
     assert.equal(statusBarActions.getActionLabel(L, 'renameSession'), 'Rename current session');
     assert.equal(statusBarActions.getActionLabel(L, 'duplicateSession'), 'Duplicate current session');
     assert.equal(statusBarActions.getActionLabel(L, 'previousSession'), 'Previous session');

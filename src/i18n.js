@@ -7015,6 +7015,146 @@ var EXTENDED_STRINGS = {
     },
 };
 
+var NOTE_SESSION_STRINGS = {
+    en: {
+        cmdSaveCurrentNoteNameAsSession: 'Save current note name as session',
+        noActiveMarkdownFile: 'No active Markdown note.',
+        savedCurrentNoteNameAsSession: function (n) { return 'Saved current note as session "' + n + '"'; },
+        saveCurrentNoteNameAsSessionFailed: 'Failed to save current note name as session.',
+    },
+    zh: {
+        cmdSaveCurrentNoteNameAsSession: '将当前笔记名保存为会话',
+        noActiveMarkdownFile: '没有活动的 Markdown 笔记。',
+        savedCurrentNoteNameAsSession: function (n) { return '已将当前笔记保存为会话“' + n + '”'; },
+        saveCurrentNoteNameAsSessionFailed: '无法将当前笔记名保存为会话。',
+    },
+    'zh-TW': {
+        cmdSaveCurrentNoteNameAsSession: '將目前筆記名稱儲存為工作階段',
+        noActiveMarkdownFile: '沒有作用中的 Markdown 筆記。',
+        savedCurrentNoteNameAsSession: function (n) { return '已將目前筆記儲存為工作階段「' + n + '」'; },
+        saveCurrentNoteNameAsSessionFailed: '無法將目前筆記名稱儲存為工作階段。',
+    },
+    es: {
+        cmdSaveCurrentNoteNameAsSession: 'Guardar nombre de nota actual como sesión',
+        noActiveMarkdownFile: 'No hay una nota Markdown activa.',
+        savedCurrentNoteNameAsSession: function (n) { return 'Nota actual guardada como sesión «' + n + '»'; },
+        saveCurrentNoteNameAsSessionFailed: 'No se pudo guardar el nombre de la nota actual como sesión.',
+    },
+    fr: {
+        cmdSaveCurrentNoteNameAsSession: 'Enregistrer le nom de la note comme session',
+        noActiveMarkdownFile: 'Aucune note Markdown active.',
+        savedCurrentNoteNameAsSession: function (n) { return 'Note actuelle enregistrée comme session « ' + n + ' »'; },
+        saveCurrentNoteNameAsSessionFailed: 'Impossible d’enregistrer le nom de la note comme session.',
+    },
+    ar: {
+        cmdSaveCurrentNoteNameAsSession: 'حفظ اسم الملاحظة الحالية كجلسة',
+        noActiveMarkdownFile: 'لا توجد ملاحظة Markdown نشطة.',
+        savedCurrentNoteNameAsSession: function (n) { return 'تم حفظ الملاحظة الحالية كجلسة "' + n + '"'; },
+        saveCurrentNoteNameAsSessionFailed: 'فشل حفظ اسم الملاحظة الحالية كجلسة.',
+    },
+    pt: {
+        cmdSaveCurrentNoteNameAsSession: 'Salvar nome da nota atual como sessão',
+        noActiveMarkdownFile: 'Nenhuma nota Markdown ativa.',
+        savedCurrentNoteNameAsSession: function (n) { return 'Nota atual salva como sessão "' + n + '"'; },
+        saveCurrentNoteNameAsSessionFailed: 'Falha ao salvar o nome da nota atual como sessão.',
+    },
+    ru: {
+        cmdSaveCurrentNoteNameAsSession: 'Сохранить имя текущей заметки как сессию',
+        noActiveMarkdownFile: 'Нет активной Markdown-заметки.',
+        savedCurrentNoteNameAsSession: function (n) { return 'Текущая заметка сохранена как сессия «' + n + '»'; },
+        saveCurrentNoteNameAsSessionFailed: 'Не удалось сохранить имя текущей заметки как сессию.',
+    },
+    de: {
+        cmdSaveCurrentNoteNameAsSession: 'Aktuellen Notiznamen als Sitzung speichern',
+        noActiveMarkdownFile: 'Keine aktive Markdown-Notiz.',
+        savedCurrentNoteNameAsSession: function (n) { return 'Aktuelle Notiz als Sitzung „' + n + '“ gespeichert'; },
+        saveCurrentNoteNameAsSessionFailed: 'Aktueller Notizname konnte nicht als Sitzung gespeichert werden.',
+    },
+    ja: {
+        cmdSaveCurrentNoteNameAsSession: '現在のノート名でセッションを保存',
+        noActiveMarkdownFile: 'アクティブなMarkdownノートがありません。',
+        savedCurrentNoteNameAsSession: function (n) { return '現在のノートをセッション「' + n + '」として保存しました'; },
+        saveCurrentNoteNameAsSessionFailed: '現在のノート名でセッションを保存できませんでした。',
+    },
+    ko: {
+        cmdSaveCurrentNoteNameAsSession: '현재 노트 이름으로 세션 저장',
+        noActiveMarkdownFile: '활성 Markdown 노트가 없습니다.',
+        savedCurrentNoteNameAsSession: function (n) { return '현재 노트를 "' + n + '" 세션으로 저장했습니다'; },
+        saveCurrentNoteNameAsSessionFailed: '현재 노트 이름으로 세션을 저장하지 못했습니다.',
+    },
+    it: {
+        cmdSaveCurrentNoteNameAsSession: 'Salva nome nota corrente come sessione',
+        noActiveMarkdownFile: 'Nessuna nota Markdown attiva.',
+        savedCurrentNoteNameAsSession: function (n) { return 'Nota corrente salvata come sessione «' + n + '»'; },
+        saveCurrentNoteNameAsSessionFailed: 'Impossibile salvare il nome della nota corrente come sessione.',
+    },
+    tr: {
+        cmdSaveCurrentNoteNameAsSession: 'Geçerli not adını oturum olarak kaydet',
+        noActiveMarkdownFile: 'Etkin Markdown notu yok.',
+        savedCurrentNoteNameAsSession: function (n) { return 'Geçerli not "' + n + '" oturumu olarak kaydedildi'; },
+        saveCurrentNoteNameAsSessionFailed: 'Geçerli not adı oturum olarak kaydedilemedi.',
+    },
+    id: {
+        cmdSaveCurrentNoteNameAsSession: 'Simpan nama catatan saat ini sebagai sesi',
+        noActiveMarkdownFile: 'Tidak ada catatan Markdown aktif.',
+        savedCurrentNoteNameAsSession: function (n) { return 'Catatan saat ini disimpan sebagai sesi "' + n + '"'; },
+        saveCurrentNoteNameAsSessionFailed: 'Gagal menyimpan nama catatan saat ini sebagai sesi.',
+    },
+    vi: {
+        cmdSaveCurrentNoteNameAsSession: 'Lưu tên ghi chú hiện tại thành phiên',
+        noActiveMarkdownFile: 'Không có ghi chú Markdown đang hoạt động.',
+        savedCurrentNoteNameAsSession: function (n) { return 'Đã lưu ghi chú hiện tại thành phiên "' + n + '"'; },
+        saveCurrentNoteNameAsSessionFailed: 'Không thể lưu tên ghi chú hiện tại thành phiên.',
+    },
+    th: {
+        cmdSaveCurrentNoteNameAsSession: 'บันทึกชื่อโน้ตปัจจุบันเป็นเซสชัน',
+        noActiveMarkdownFile: 'ไม่มีโน้ต Markdown ที่ใช้งานอยู่',
+        savedCurrentNoteNameAsSession: function (n) { return 'บันทึกโน้ตปัจจุบันเป็นเซสชัน "' + n + '" แล้ว'; },
+        saveCurrentNoteNameAsSessionFailed: 'ไม่สามารถบันทึกชื่อโน้ตปัจจุบันเป็นเซสชันได้',
+    },
+    hi: {
+        cmdSaveCurrentNoteNameAsSession: 'वर्तमान नोट नाम को सत्र के रूप में सहेजें',
+        noActiveMarkdownFile: 'कोई सक्रिय Markdown नोट नहीं है।',
+        savedCurrentNoteNameAsSession: function (n) { return 'वर्तमान नोट "' + n + '" सत्र के रूप में सहेजा गया'; },
+        saveCurrentNoteNameAsSessionFailed: 'वर्तमान नोट नाम को सत्र के रूप में सहेजा नहीं जा सका।',
+    },
+    bn: {
+        cmdSaveCurrentNoteNameAsSession: 'বর্তমান নোটের নাম সেশন হিসেবে সংরক্ষণ করুন',
+        noActiveMarkdownFile: 'কোনো সক্রিয় Markdown নোট নেই।',
+        savedCurrentNoteNameAsSession: function (n) { return 'বর্তমান নোট "' + n + '" সেশন হিসেবে সংরক্ষিত হয়েছে'; },
+        saveCurrentNoteNameAsSessionFailed: 'বর্তমান নোটের নাম সেশন হিসেবে সংরক্ষণ করা যায়নি।',
+    },
+    fa: {
+        cmdSaveCurrentNoteNameAsSession: 'ذخیره نام یادداشت فعلی به عنوان نشست',
+        noActiveMarkdownFile: 'هیچ یادداشت Markdown فعالی وجود ندارد.',
+        savedCurrentNoteNameAsSession: function (n) { return 'یادداشت فعلی به عنوان نشست "' + n + '" ذخیره شد'; },
+        saveCurrentNoteNameAsSessionFailed: 'ذخیره نام یادداشت فعلی به عنوان نشست ناموفق بود.',
+    },
+    ms: {
+        cmdSaveCurrentNoteNameAsSession: 'Simpan nama nota semasa sebagai sesi',
+        noActiveMarkdownFile: 'Tiada nota Markdown aktif.',
+        savedCurrentNoteNameAsSession: function (n) { return 'Nota semasa disimpan sebagai sesi "' + n + '"'; },
+        saveCurrentNoteNameAsSessionFailed: 'Gagal menyimpan nama nota semasa sebagai sesi.',
+    },
+    pl: {
+        cmdSaveCurrentNoteNameAsSession: 'Zapisz nazwę bieżącej notatki jako sesję',
+        noActiveMarkdownFile: 'Brak aktywnej notatki Markdown.',
+        savedCurrentNoteNameAsSession: function (n) { return 'Zapisano bieżącą notatkę jako sesję "' + n + '"'; },
+        saveCurrentNoteNameAsSessionFailed: 'Nie udało się zapisać nazwy bieżącej notatki jako sesji.',
+    },
+};
+
+var noteSessionLangs = Object.keys(NOTE_SESSION_STRINGS);
+for (var noteSessionLangIndex = 0; noteSessionLangIndex < noteSessionLangs.length; noteSessionLangIndex++) {
+    var noteSessionLang = noteSessionLangs[noteSessionLangIndex];
+    if (!EXTENDED_STRINGS[noteSessionLang]) EXTENDED_STRINGS[noteSessionLang] = {};
+    var noteSessionKeys = Object.keys(NOTE_SESSION_STRINGS[noteSessionLang]);
+    for (var noteSessionKeyIndex = 0; noteSessionKeyIndex < noteSessionKeys.length; noteSessionKeyIndex++) {
+        var noteSessionKey = noteSessionKeys[noteSessionKeyIndex];
+        EXTENDED_STRINGS[noteSessionLang][noteSessionKey] = NOTE_SESSION_STRINGS[noteSessionLang][noteSessionKey];
+    }
+}
+
 var extendedLangs = Object.keys(EXTENDED_STRINGS);
 
 for (var extendedLangIndex = 0; extendedLangIndex < extendedLangs.length; extendedLangIndex++) {

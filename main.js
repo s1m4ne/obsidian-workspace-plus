@@ -9269,6 +9269,191 @@ var require_i18n = __commonJS({
         resetSessionsAndSettingsFailed: "Gagal menyetel ulang sesi dan pengaturan."
       }
     };
+    var NOTE_SESSION_STRINGS = {
+      en: {
+        cmdSaveCurrentNoteNameAsSession: "Save current note name as session",
+        noActiveMarkdownFile: "No active Markdown note.",
+        savedCurrentNoteNameAsSession: function(n) {
+          return 'Saved current note as session "' + n + '"';
+        },
+        saveCurrentNoteNameAsSessionFailed: "Failed to save current note name as session."
+      },
+      zh: {
+        cmdSaveCurrentNoteNameAsSession: "\u5C06\u5F53\u524D\u7B14\u8BB0\u540D\u4FDD\u5B58\u4E3A\u4F1A\u8BDD",
+        noActiveMarkdownFile: "\u6CA1\u6709\u6D3B\u52A8\u7684 Markdown \u7B14\u8BB0\u3002",
+        savedCurrentNoteNameAsSession: function(n) {
+          return "\u5DF2\u5C06\u5F53\u524D\u7B14\u8BB0\u4FDD\u5B58\u4E3A\u4F1A\u8BDD\u201C" + n + "\u201D";
+        },
+        saveCurrentNoteNameAsSessionFailed: "\u65E0\u6CD5\u5C06\u5F53\u524D\u7B14\u8BB0\u540D\u4FDD\u5B58\u4E3A\u4F1A\u8BDD\u3002"
+      },
+      "zh-TW": {
+        cmdSaveCurrentNoteNameAsSession: "\u5C07\u76EE\u524D\u7B46\u8A18\u540D\u7A31\u5132\u5B58\u70BA\u5DE5\u4F5C\u968E\u6BB5",
+        noActiveMarkdownFile: "\u6C92\u6709\u4F5C\u7528\u4E2D\u7684 Markdown \u7B46\u8A18\u3002",
+        savedCurrentNoteNameAsSession: function(n) {
+          return "\u5DF2\u5C07\u76EE\u524D\u7B46\u8A18\u5132\u5B58\u70BA\u5DE5\u4F5C\u968E\u6BB5\u300C" + n + "\u300D";
+        },
+        saveCurrentNoteNameAsSessionFailed: "\u7121\u6CD5\u5C07\u76EE\u524D\u7B46\u8A18\u540D\u7A31\u5132\u5B58\u70BA\u5DE5\u4F5C\u968E\u6BB5\u3002"
+      },
+      es: {
+        cmdSaveCurrentNoteNameAsSession: "Guardar nombre de nota actual como sesi\xF3n",
+        noActiveMarkdownFile: "No hay una nota Markdown activa.",
+        savedCurrentNoteNameAsSession: function(n) {
+          return "Nota actual guardada como sesi\xF3n \xAB" + n + "\xBB";
+        },
+        saveCurrentNoteNameAsSessionFailed: "No se pudo guardar el nombre de la nota actual como sesi\xF3n."
+      },
+      fr: {
+        cmdSaveCurrentNoteNameAsSession: "Enregistrer le nom de la note comme session",
+        noActiveMarkdownFile: "Aucune note Markdown active.",
+        savedCurrentNoteNameAsSession: function(n) {
+          return "Note actuelle enregistr\xE9e comme session \xAB " + n + " \xBB";
+        },
+        saveCurrentNoteNameAsSessionFailed: "Impossible d\u2019enregistrer le nom de la note comme session."
+      },
+      ar: {
+        cmdSaveCurrentNoteNameAsSession: "\u062D\u0641\u0638 \u0627\u0633\u0645 \u0627\u0644\u0645\u0644\u0627\u062D\u0638\u0629 \u0627\u0644\u062D\u0627\u0644\u064A\u0629 \u0643\u062C\u0644\u0633\u0629",
+        noActiveMarkdownFile: "\u0644\u0627 \u062A\u0648\u062C\u062F \u0645\u0644\u0627\u062D\u0638\u0629 Markdown \u0646\u0634\u0637\u0629.",
+        savedCurrentNoteNameAsSession: function(n) {
+          return '\u062A\u0645 \u062D\u0641\u0638 \u0627\u0644\u0645\u0644\u0627\u062D\u0638\u0629 \u0627\u0644\u062D\u0627\u0644\u064A\u0629 \u0643\u062C\u0644\u0633\u0629 "' + n + '"';
+        },
+        saveCurrentNoteNameAsSessionFailed: "\u0641\u0634\u0644 \u062D\u0641\u0638 \u0627\u0633\u0645 \u0627\u0644\u0645\u0644\u0627\u062D\u0638\u0629 \u0627\u0644\u062D\u0627\u0644\u064A\u0629 \u0643\u062C\u0644\u0633\u0629."
+      },
+      pt: {
+        cmdSaveCurrentNoteNameAsSession: "Salvar nome da nota atual como sess\xE3o",
+        noActiveMarkdownFile: "Nenhuma nota Markdown ativa.",
+        savedCurrentNoteNameAsSession: function(n) {
+          return 'Nota atual salva como sess\xE3o "' + n + '"';
+        },
+        saveCurrentNoteNameAsSessionFailed: "Falha ao salvar o nome da nota atual como sess\xE3o."
+      },
+      ru: {
+        cmdSaveCurrentNoteNameAsSession: "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0438\u043C\u044F \u0442\u0435\u043A\u0443\u0449\u0435\u0439 \u0437\u0430\u043C\u0435\u0442\u043A\u0438 \u043A\u0430\u043A \u0441\u0435\u0441\u0441\u0438\u044E",
+        noActiveMarkdownFile: "\u041D\u0435\u0442 \u0430\u043A\u0442\u0438\u0432\u043D\u043E\u0439 Markdown-\u0437\u0430\u043C\u0435\u0442\u043A\u0438.",
+        savedCurrentNoteNameAsSession: function(n) {
+          return "\u0422\u0435\u043A\u0443\u0449\u0430\u044F \u0437\u0430\u043C\u0435\u0442\u043A\u0430 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0430 \u043A\u0430\u043A \u0441\u0435\u0441\u0441\u0438\u044F \xAB" + n + "\xBB";
+        },
+        saveCurrentNoteNameAsSessionFailed: "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0441\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0438\u043C\u044F \u0442\u0435\u043A\u0443\u0449\u0435\u0439 \u0437\u0430\u043C\u0435\u0442\u043A\u0438 \u043A\u0430\u043A \u0441\u0435\u0441\u0441\u0438\u044E."
+      },
+      de: {
+        cmdSaveCurrentNoteNameAsSession: "Aktuellen Notiznamen als Sitzung speichern",
+        noActiveMarkdownFile: "Keine aktive Markdown-Notiz.",
+        savedCurrentNoteNameAsSession: function(n) {
+          return "Aktuelle Notiz als Sitzung \u201E" + n + "\u201C gespeichert";
+        },
+        saveCurrentNoteNameAsSessionFailed: "Aktueller Notizname konnte nicht als Sitzung gespeichert werden."
+      },
+      ja: {
+        cmdSaveCurrentNoteNameAsSession: "\u73FE\u5728\u306E\u30CE\u30FC\u30C8\u540D\u3067\u30BB\u30C3\u30B7\u30E7\u30F3\u3092\u4FDD\u5B58",
+        noActiveMarkdownFile: "\u30A2\u30AF\u30C6\u30A3\u30D6\u306AMarkdown\u30CE\u30FC\u30C8\u304C\u3042\u308A\u307E\u305B\u3093\u3002",
+        savedCurrentNoteNameAsSession: function(n) {
+          return "\u73FE\u5728\u306E\u30CE\u30FC\u30C8\u3092\u30BB\u30C3\u30B7\u30E7\u30F3\u300C" + n + "\u300D\u3068\u3057\u3066\u4FDD\u5B58\u3057\u307E\u3057\u305F";
+        },
+        saveCurrentNoteNameAsSessionFailed: "\u73FE\u5728\u306E\u30CE\u30FC\u30C8\u540D\u3067\u30BB\u30C3\u30B7\u30E7\u30F3\u3092\u4FDD\u5B58\u3067\u304D\u307E\u305B\u3093\u3067\u3057\u305F\u3002"
+      },
+      ko: {
+        cmdSaveCurrentNoteNameAsSession: "\uD604\uC7AC \uB178\uD2B8 \uC774\uB984\uC73C\uB85C \uC138\uC158 \uC800\uC7A5",
+        noActiveMarkdownFile: "\uD65C\uC131 Markdown \uB178\uD2B8\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.",
+        savedCurrentNoteNameAsSession: function(n) {
+          return '\uD604\uC7AC \uB178\uD2B8\uB97C "' + n + '" \uC138\uC158\uC73C\uB85C \uC800\uC7A5\uD588\uC2B5\uB2C8\uB2E4';
+        },
+        saveCurrentNoteNameAsSessionFailed: "\uD604\uC7AC \uB178\uD2B8 \uC774\uB984\uC73C\uB85C \uC138\uC158\uC744 \uC800\uC7A5\uD558\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4."
+      },
+      it: {
+        cmdSaveCurrentNoteNameAsSession: "Salva nome nota corrente come sessione",
+        noActiveMarkdownFile: "Nessuna nota Markdown attiva.",
+        savedCurrentNoteNameAsSession: function(n) {
+          return "Nota corrente salvata come sessione \xAB" + n + "\xBB";
+        },
+        saveCurrentNoteNameAsSessionFailed: "Impossibile salvare il nome della nota corrente come sessione."
+      },
+      tr: {
+        cmdSaveCurrentNoteNameAsSession: "Ge\xE7erli not ad\u0131n\u0131 oturum olarak kaydet",
+        noActiveMarkdownFile: "Etkin Markdown notu yok.",
+        savedCurrentNoteNameAsSession: function(n) {
+          return 'Ge\xE7erli not "' + n + '" oturumu olarak kaydedildi';
+        },
+        saveCurrentNoteNameAsSessionFailed: "Ge\xE7erli not ad\u0131 oturum olarak kaydedilemedi."
+      },
+      id: {
+        cmdSaveCurrentNoteNameAsSession: "Simpan nama catatan saat ini sebagai sesi",
+        noActiveMarkdownFile: "Tidak ada catatan Markdown aktif.",
+        savedCurrentNoteNameAsSession: function(n) {
+          return 'Catatan saat ini disimpan sebagai sesi "' + n + '"';
+        },
+        saveCurrentNoteNameAsSessionFailed: "Gagal menyimpan nama catatan saat ini sebagai sesi."
+      },
+      vi: {
+        cmdSaveCurrentNoteNameAsSession: "L\u01B0u t\xEAn ghi ch\xFA hi\u1EC7n t\u1EA1i th\xE0nh phi\xEAn",
+        noActiveMarkdownFile: "Kh\xF4ng c\xF3 ghi ch\xFA Markdown \u0111ang ho\u1EA1t \u0111\u1ED9ng.",
+        savedCurrentNoteNameAsSession: function(n) {
+          return '\u0110\xE3 l\u01B0u ghi ch\xFA hi\u1EC7n t\u1EA1i th\xE0nh phi\xEAn "' + n + '"';
+        },
+        saveCurrentNoteNameAsSessionFailed: "Kh\xF4ng th\u1EC3 l\u01B0u t\xEAn ghi ch\xFA hi\u1EC7n t\u1EA1i th\xE0nh phi\xEAn."
+      },
+      th: {
+        cmdSaveCurrentNoteNameAsSession: "\u0E1A\u0E31\u0E19\u0E17\u0E36\u0E01\u0E0A\u0E37\u0E48\u0E2D\u0E42\u0E19\u0E49\u0E15\u0E1B\u0E31\u0E08\u0E08\u0E38\u0E1A\u0E31\u0E19\u0E40\u0E1B\u0E47\u0E19\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19",
+        noActiveMarkdownFile: "\u0E44\u0E21\u0E48\u0E21\u0E35\u0E42\u0E19\u0E49\u0E15 Markdown \u0E17\u0E35\u0E48\u0E43\u0E0A\u0E49\u0E07\u0E32\u0E19\u0E2D\u0E22\u0E39\u0E48",
+        savedCurrentNoteNameAsSession: function(n) {
+          return '\u0E1A\u0E31\u0E19\u0E17\u0E36\u0E01\u0E42\u0E19\u0E49\u0E15\u0E1B\u0E31\u0E08\u0E08\u0E38\u0E1A\u0E31\u0E19\u0E40\u0E1B\u0E47\u0E19\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19 "' + n + '" \u0E41\u0E25\u0E49\u0E27';
+        },
+        saveCurrentNoteNameAsSessionFailed: "\u0E44\u0E21\u0E48\u0E2A\u0E32\u0E21\u0E32\u0E23\u0E16\u0E1A\u0E31\u0E19\u0E17\u0E36\u0E01\u0E0A\u0E37\u0E48\u0E2D\u0E42\u0E19\u0E49\u0E15\u0E1B\u0E31\u0E08\u0E08\u0E38\u0E1A\u0E31\u0E19\u0E40\u0E1B\u0E47\u0E19\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E44\u0E14\u0E49"
+      },
+      hi: {
+        cmdSaveCurrentNoteNameAsSession: "\u0935\u0930\u094D\u0924\u092E\u093E\u0928 \u0928\u094B\u091F \u0928\u093E\u092E \u0915\u094B \u0938\u0924\u094D\u0930 \u0915\u0947 \u0930\u0942\u092A \u092E\u0947\u0902 \u0938\u0939\u0947\u091C\u0947\u0902",
+        noActiveMarkdownFile: "\u0915\u094B\u0908 \u0938\u0915\u094D\u0930\u093F\u092F Markdown \u0928\u094B\u091F \u0928\u0939\u0940\u0902 \u0939\u0948\u0964",
+        savedCurrentNoteNameAsSession: function(n) {
+          return '\u0935\u0930\u094D\u0924\u092E\u093E\u0928 \u0928\u094B\u091F "' + n + '" \u0938\u0924\u094D\u0930 \u0915\u0947 \u0930\u0942\u092A \u092E\u0947\u0902 \u0938\u0939\u0947\u091C\u093E \u0917\u092F\u093E';
+        },
+        saveCurrentNoteNameAsSessionFailed: "\u0935\u0930\u094D\u0924\u092E\u093E\u0928 \u0928\u094B\u091F \u0928\u093E\u092E \u0915\u094B \u0938\u0924\u094D\u0930 \u0915\u0947 \u0930\u0942\u092A \u092E\u0947\u0902 \u0938\u0939\u0947\u091C\u093E \u0928\u0939\u0940\u0902 \u091C\u093E \u0938\u0915\u093E\u0964"
+      },
+      bn: {
+        cmdSaveCurrentNoteNameAsSession: "\u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u09A8\u09CB\u099F\u09C7\u09B0 \u09A8\u09BE\u09AE \u09B8\u09C7\u09B6\u09A8 \u09B9\u09BF\u09B8\u09C7\u09AC\u09C7 \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3 \u0995\u09B0\u09C1\u09A8",
+        noActiveMarkdownFile: "\u0995\u09CB\u09A8\u09CB \u09B8\u0995\u09CD\u09B0\u09BF\u09AF\u09BC Markdown \u09A8\u09CB\u099F \u09A8\u09C7\u0987\u0964",
+        savedCurrentNoteNameAsSession: function(n) {
+          return '\u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u09A8\u09CB\u099F "' + n + '" \u09B8\u09C7\u09B6\u09A8 \u09B9\u09BF\u09B8\u09C7\u09AC\u09C7 \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09BF\u09A4 \u09B9\u09AF\u09BC\u09C7\u099B\u09C7';
+        },
+        saveCurrentNoteNameAsSessionFailed: "\u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u09A8\u09CB\u099F\u09C7\u09B0 \u09A8\u09BE\u09AE \u09B8\u09C7\u09B6\u09A8 \u09B9\u09BF\u09B8\u09C7\u09AC\u09C7 \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3 \u0995\u09B0\u09BE \u09AF\u09BE\u09AF\u09BC\u09A8\u09BF\u0964"
+      },
+      fa: {
+        cmdSaveCurrentNoteNameAsSession: "\u0630\u062E\u06CC\u0631\u0647 \u0646\u0627\u0645 \u06CC\u0627\u062F\u062F\u0627\u0634\u062A \u0641\u0639\u0644\u06CC \u0628\u0647 \u0639\u0646\u0648\u0627\u0646 \u0646\u0634\u0633\u062A",
+        noActiveMarkdownFile: "\u0647\u06CC\u0686 \u06CC\u0627\u062F\u062F\u0627\u0634\u062A Markdown \u0641\u0639\u0627\u0644\u06CC \u0648\u062C\u0648\u062F \u0646\u062F\u0627\u0631\u062F.",
+        savedCurrentNoteNameAsSession: function(n) {
+          return '\u06CC\u0627\u062F\u062F\u0627\u0634\u062A \u0641\u0639\u0644\u06CC \u0628\u0647 \u0639\u0646\u0648\u0627\u0646 \u0646\u0634\u0633\u062A "' + n + '" \u0630\u062E\u06CC\u0631\u0647 \u0634\u062F';
+        },
+        saveCurrentNoteNameAsSessionFailed: "\u0630\u062E\u06CC\u0631\u0647 \u0646\u0627\u0645 \u06CC\u0627\u062F\u062F\u0627\u0634\u062A \u0641\u0639\u0644\u06CC \u0628\u0647 \u0639\u0646\u0648\u0627\u0646 \u0646\u0634\u0633\u062A \u0646\u0627\u0645\u0648\u0641\u0642 \u0628\u0648\u062F."
+      },
+      ms: {
+        cmdSaveCurrentNoteNameAsSession: "Simpan nama nota semasa sebagai sesi",
+        noActiveMarkdownFile: "Tiada nota Markdown aktif.",
+        savedCurrentNoteNameAsSession: function(n) {
+          return 'Nota semasa disimpan sebagai sesi "' + n + '"';
+        },
+        saveCurrentNoteNameAsSessionFailed: "Gagal menyimpan nama nota semasa sebagai sesi."
+      },
+      pl: {
+        cmdSaveCurrentNoteNameAsSession: "Zapisz nazw\u0119 bie\u017C\u0105cej notatki jako sesj\u0119",
+        noActiveMarkdownFile: "Brak aktywnej notatki Markdown.",
+        savedCurrentNoteNameAsSession: function(n) {
+          return 'Zapisano bie\u017C\u0105c\u0105 notatk\u0119 jako sesj\u0119 "' + n + '"';
+        },
+        saveCurrentNoteNameAsSessionFailed: "Nie uda\u0142o si\u0119 zapisa\u0107 nazwy bie\u017C\u0105cej notatki jako sesji."
+      }
+    };
+    var noteSessionLangs = Object.keys(NOTE_SESSION_STRINGS);
+    for (noteSessionLangIndex = 0; noteSessionLangIndex < noteSessionLangs.length; noteSessionLangIndex++) {
+      noteSessionLang = noteSessionLangs[noteSessionLangIndex];
+      if (!EXTENDED_STRINGS[noteSessionLang]) EXTENDED_STRINGS[noteSessionLang] = {};
+      noteSessionKeys = Object.keys(NOTE_SESSION_STRINGS[noteSessionLang]);
+      for (noteSessionKeyIndex = 0; noteSessionKeyIndex < noteSessionKeys.length; noteSessionKeyIndex++) {
+        noteSessionKey = noteSessionKeys[noteSessionKeyIndex];
+        EXTENDED_STRINGS[noteSessionLang][noteSessionKey] = NOTE_SESSION_STRINGS[noteSessionLang][noteSessionKey];
+      }
+    }
+    var noteSessionLang;
+    var noteSessionKeys;
+    var noteSessionKey;
+    var noteSessionKeyIndex;
+    var noteSessionLangIndex;
     var extendedLangs = Object.keys(EXTENDED_STRINGS);
     for (extendedLangIndex = 0; extendedLangIndex < extendedLangs.length; extendedLangIndex++) {
       extendedLang = extendedLangs[extendedLangIndex];
@@ -11870,6 +12055,13 @@ var require_statusbar_actions = __commonJS({
         }
       },
       {
+        id: "saveCurrentNoteNameAsSession",
+        labelKey: "cmdSaveCurrentNoteNameAsSession",
+        run: function(plugin) {
+          return plugin.saveCurrentNoteNameAsSession();
+        }
+      },
+      {
         id: "reloadWithoutSaving",
         labelKey: "statusBarActionReloadWithoutSaving",
         run: function(plugin) {
@@ -12993,6 +13185,9 @@ var require_register_commands = __commonJS({
       }, [{ modifiers: ["Mod", "Shift"], key: "S" }]);
       addSimpleCommand("save-as-session", L.cmdSaveAs, function() {
         plugin.saveAsSession();
+      });
+      addSimpleCommand("save-current-note-name-as-session", L.cmdSaveCurrentNoteNameAsSession, function() {
+        plugin.saveCurrentNoteNameAsSession();
       });
       addCommand({
         id: "save-current-layout-to-session",
@@ -16197,6 +16392,40 @@ var require_session_saving = __commonJS({
     var i18n2 = require_i18n();
     var utils = require_utils();
     var modals2 = require_modals2();
+    function findSessionByName(data, name) {
+      var sessions = data && data.sessions || {};
+      var keys = Object.keys(sessions);
+      for (var i = 0; i < keys.length; i++) {
+        if (sessions[keys[i]] && sessions[keys[i]].name === name) {
+          return sessions[keys[i]];
+        }
+      }
+      return null;
+    }
+    function isGroupFeatureEnabled(plugin) {
+      if (typeof plugin.isGroupFeatureEnabled === "function") {
+        return plugin.isGroupFeatureEnabled();
+      }
+      return !plugin.data || plugin.data.groupFeatureEnabled !== false;
+    }
+    function chooseSessionGroupForView(plugin, sessionId) {
+      if (!isGroupFeatureEnabled(plugin)) return void 0;
+      var data = plugin.data || {};
+      var groups = data.groups || {};
+      var sessionGroups = data.sessionGroups || {};
+      var groupIds = Array.isArray(sessionGroups[sessionId]) ? sessionGroups[sessionId] : [];
+      var validGroupIds = groupIds.filter(function(groupId) {
+        return !!groups[groupId];
+      });
+      if (validGroupIds.length === 0) return null;
+      if (validGroupIds.indexOf(data.activeGroupId) !== -1) return data.activeGroupId;
+      var ordered = typeof plugin.getOrderedGroupTabIds === "function" ? plugin.getOrderedGroupTabIds() : Array.isArray(data.groupOrder) ? data.groupOrder : [];
+      for (var i = 0; i < ordered.length; i++) {
+        if (ordered[i] === "__all__") continue;
+        if (validGroupIds.indexOf(ordered[i]) !== -1) return ordered[i];
+      }
+      return validGroupIds[0];
+    }
     function attachSessionSavingMethods(WorkspacePlusPlus2) {
       WorkspacePlusPlus2.prototype.isAutoSaveOnSwitchEnabled = function() {
         return this.data.autoSaveOnSwitch !== false;
@@ -16324,6 +16553,66 @@ var require_session_saving = __commonJS({
             }
           }
           return changed;
+        });
+      };
+      WorkspacePlusPlus2.prototype.saveCurrentLayoutAsSessionName = function(name, options) {
+        var L = i18n2.L;
+        options = options || {};
+        var sessionName = typeof name === "string" ? name.trim() : "";
+        if (!sessionName) {
+          if (!options.silent) new obsidian2.Notice(L.emptyName);
+          return Promise.resolve({
+            saved: false,
+            created: false,
+            overwritten: false,
+            sessionId: null,
+            name: sessionName
+          });
+        }
+        var previousActiveId = this.data.activeSessionId || null;
+        if (this.isAutoSaveOnSwitchEnabled()) {
+          this.captureActiveSessionLayoutIfAutoSave();
+        }
+        var currentLayout = this.getCurrentWorkspaceLayout();
+        var existing = findSessionByName(this.data, sessionName);
+        var session;
+        var created = false;
+        var overwritten = false;
+        var changed = true;
+        if (existing) {
+          session = existing;
+          changed = !this.layoutsEqualStructural(session.layout, currentLayout);
+          if (!(this.isAutoSaveOnSwitchEnabled() && session.id === previousActiveId)) {
+            this.pushLayoutToHistory(session);
+          }
+          session.layout = currentLayout;
+          session.modified = Date.now();
+          this.data.activeSessionId = session.id;
+          var preferredGroupId = chooseSessionGroupForView(this, session.id);
+          if (typeof preferredGroupId !== "undefined") {
+            this.data.activeGroupId = preferredGroupId;
+          }
+          overwritten = true;
+        } else {
+          var id = utils.generateId();
+          session = this.createSessionRecord(id, sessionName, currentLayout);
+          this.insertSessionAndActivate(session);
+          created = true;
+        }
+        this.updateStatusBar();
+        this.syncSessionCommands();
+        return this.persistData().then(function() {
+          if (!options.silent) {
+            new obsidian2.Notice(L.savedAs(sessionName));
+          }
+          return {
+            saved: true,
+            created,
+            overwritten,
+            changed,
+            sessionId: session.id,
+            name: sessionName
+          };
         });
       };
       WorkspacePlusPlus2.prototype.confirmOverwriteSessionWithCurrentLayout = function(sessionId, options) {
@@ -17078,6 +17367,53 @@ var require_frontmatter = __commonJS({
         var cache = this.app.metadataCache.getFileCache(file);
         return cache && cache.frontmatter || null;
       };
+      WorkspacePlusPlus2.prototype.isMarkdownNoteFile = function(file) {
+        return !!file && String(file.extension || "").toLowerCase() === "md";
+      };
+      WorkspacePlusPlus2.prototype.getSessionNameFromNoteFile = function(file) {
+        if (!this.isMarkdownNoteFile(file)) return "";
+        if (typeof file.basename === "string" && file.basename.trim()) {
+          return file.basename.trim();
+        }
+        var name = typeof file.name === "string" ? file.name : "";
+        if (!name && typeof file.path === "string") {
+          var parts = file.path.split("/");
+          name = parts[parts.length - 1] || "";
+        }
+        return name.replace(/\.md$/i, "").trim();
+      };
+      WorkspacePlusPlus2.prototype.setWorkspaceSessionFrontmatter = function(file, sessionName) {
+        if (!this.app.fileManager || typeof this.app.fileManager.processFrontMatter !== "function") {
+          return Promise.reject(new Error("processFrontMatter unavailable"));
+        }
+        return this.app.fileManager.processFrontMatter(file, function(frontmatter) {
+          frontmatter["workspace-session"] = sessionName;
+        });
+      };
+      WorkspacePlusPlus2.prototype.saveCurrentNoteNameAsSession = function(options) {
+        var L = i18n2.L;
+        options = options || {};
+        var file = this.app.workspace.getActiveFile ? this.app.workspace.getActiveFile() : null;
+        var sessionName = this.getSessionNameFromNoteFile(file);
+        var self = this;
+        if (!file || !sessionName) {
+          if (!options.silent) new obsidian2.Notice(L.noActiveMarkdownFile);
+          return Promise.resolve(false);
+        }
+        return this.setWorkspaceSessionFrontmatter(file, sessionName).then(function() {
+          return self.saveCurrentLayoutAsSessionName(sessionName, { silent: true });
+        }).then(function(result) {
+          if (!options.silent) {
+            new obsidian2.Notice(L.savedCurrentNoteNameAsSession(sessionName));
+          }
+          return result;
+        }).catch(function() {
+          if (!options.silent) {
+            new obsidian2.Notice(L.saveCurrentNoteNameAsSessionFailed);
+          }
+          return false;
+        });
+      };
       WorkspacePlusPlus2.prototype.parseWorkspaceSessionValue = function(value) {
         if (!value || typeof value !== "string") return null;
         value = value.trim();
@@ -17149,13 +17485,46 @@ var require_frontmatter = __commonJS({
           this.handleWorkspaceSessionProperty(fm["workspace-session"]);
         }
       };
+      WorkspacePlusPlus2.prototype.getFrontmatterTriggerLeafId = function() {
+        var activeLeaf = this.app.workspace.activeLeaf || null;
+        return activeLeaf && activeLeaf.id ? activeLeaf.id : "active";
+      };
+      WorkspacePlusPlus2.prototype.markCurrentFrontmatterFilesLoaded = function() {
+        var loadedByLeaf = {};
+        if (typeof this.app.workspace.iterateAllLeaves === "function") {
+          this.app.workspace.iterateAllLeaves(function(leaf) {
+            var file = leaf && leaf.view && leaf.view.file;
+            if (!leaf || !leaf.id || !file || !file.path) return;
+            loadedByLeaf[leaf.id] = file.path;
+          });
+        }
+        this.frontmatterLoadedFilePathsByLeaf = loadedByLeaf;
+      };
+      WorkspacePlusPlus2.prototype.clearFrontmatterFileForActiveLeaf = function() {
+        if (!this.frontmatterLoadedFilePathsByLeaf) return;
+        delete this.frontmatterLoadedFilePathsByLeaf[this.getFrontmatterTriggerLeafId()];
+      };
+      WorkspacePlusPlus2.prototype.shouldHandleFrontmatterFileOpen = function(file) {
+        var filePath = file && file.path ? file.path : "";
+        if (!filePath) return false;
+        var leafId = this.getFrontmatterTriggerLeafId();
+        if (!this.frontmatterLoadedFilePathsByLeaf) this.frontmatterLoadedFilePathsByLeaf = {};
+        if (this.frontmatterLoadedFilePathsByLeaf[leafId] === filePath) return false;
+        this.frontmatterLoadedFilePathsByLeaf[leafId] = filePath;
+        return true;
+      };
       WorkspacePlusPlus2.prototype.registerFrontmatterListeners = function() {
         var self = this;
-        this.registerEvent(this.app.workspace.on("active-leaf-change", function(leaf) {
+        this.markCurrentFrontmatterFilesLoaded();
+        this.registerEvent(this.app.workspace.on("file-open", function(file) {
           if (self.isSwitchingSession) return;
           if (self.getStartupSettleRemainingMs() > 0) return;
-          if (!leaf || !leaf.view || !leaf.view.file) return;
-          self.handleFrontmatterTriggers(leaf.view.file);
+          if (!file) {
+            self.clearFrontmatterFileForActiveLeaf();
+            return;
+          }
+          if (!self.shouldHandleFrontmatterFileOpen(file)) return;
+          self.handleFrontmatterTriggers(file);
         }));
       };
     };
