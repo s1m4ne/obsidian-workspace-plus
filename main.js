@@ -5769,6 +5769,2176 @@ var require_i18n = __commonJS({
         frontmatterAlreadyActive: function(n) {
           return '\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19 "' + n + '" \u0E43\u0E0A\u0E49\u0E07\u0E32\u0E19\u0E2D\u0E22\u0E39\u0E48\u0E41\u0E25\u0E49\u0E27';
         }
+      },
+      hi: {
+        modalTitle: "\u0938\u0924\u094D\u0930 \u092A\u094D\u0930\u092C\u0902\u0927\u093F\u0924 \u0915\u0930\u0947\u0902",
+        savePlaceholder: "\u0928\u090F \u0938\u0924\u094D\u0930 \u0915\u093E \u0928\u093E\u092E...",
+        filterPlaceholder: "\u0938\u0924\u094D\u0930 \u092B\u093C\u093F\u0932\u094D\u091F\u0930 \u0915\u0930\u0947\u0902...",
+        settingsShowFilterInput: "\u0938\u0924\u094D\u0930 \u092B\u093C\u093F\u0932\u094D\u091F\u0930 \u0926\u093F\u0916\u093E\u090F\u0901",
+        settingsShowFilterInputDesc: "\u0938\u0924\u094D\u0930 \u092A\u094D\u0930\u092C\u0902\u0927\u0915 \u092E\u0947\u0902 \u091F\u0947\u0915\u094D\u0938\u094D\u091F \u092B\u093C\u093F\u0932\u094D\u091F\u0930 \u0926\u093F\u0916\u093E\u090F\u0901 \u0924\u093E\u0915\u093F \u0938\u0924\u094D\u0930 \u091C\u0932\u094D\u0926\u0940 \u092E\u093F\u0932 \u0938\u0915\u0947\u0902\u0964",
+        settingsOverlayDefaultFocus: "\u0913\u0935\u0930\u0932\u0947 \u0915\u093E \u0921\u093F\u092B\u093C\u0949\u0932\u094D\u091F \u092B\u093C\u094B\u0915\u0938",
+        settingsOverlayDefaultFocusDesc: "\u0938\u0924\u094D\u0930 \u092A\u094D\u0930\u092C\u0902\u0927\u0915 \u0916\u0941\u0932\u0928\u0947 \u092A\u0930 \u0915\u093F\u0938 \u0924\u0924\u094D\u0935 \u0915\u094B \u092B\u093C\u094B\u0915\u0938 \u092E\u093F\u0932\u0947, \u092F\u0939 \u091A\u0941\u0928\u0947\u0902\u0964",
+        settingsOverlayFocusCurrentSession: "\u0935\u0930\u094D\u0924\u092E\u093E\u0928 \u0938\u0924\u094D\u0930",
+        settingsOverlayFocusSessionFilter: "\u0938\u0924\u094D\u0930 \u092B\u093C\u093F\u0932\u094D\u091F\u0930",
+        settingsOverlayFocusSessionCreate: "\u0938\u0924\u094D\u0930 \u092C\u0928\u093E\u0928\u093E",
+        settingsSectionSessionManager: "\u0938\u0924\u094D\u0930 \u0938\u0942\u091A\u0940 \u0914\u0930 \u0916\u094B\u091C",
+        settingsSectionSessionListSearch: "\u0938\u0924\u094D\u0930 \u0938\u0942\u091A\u0940 \u0914\u0930 \u0916\u094B\u091C",
+        settingsShowActiveSwitchCommand: "\u0915\u092E\u093E\u0902\u0921 \u092A\u0948\u0932\u0947\u091F \u092E\u0947\u0902 \u0938\u0915\u094D\u0930\u093F\u092F \u0938\u0924\u094D\u0930 \u0926\u093F\u0916\u093E\u090F\u0901",
+        settingsShowActiveSwitchCommandDesc: "\u0915\u092E\u093E\u0902\u0921 \u092A\u0948\u0932\u0947\u091F \u092E\u0947\u0902 \u0935\u0930\u094D\u0924\u092E\u093E\u0928 \u0938\u0915\u094D\u0930\u093F\u092F \u0938\u0924\u094D\u0930 \u092A\u0930 \u0938\u094D\u0935\u093F\u091A \u0915\u0930\u0928\u0947 \u0915\u093E \u0915\u092E\u093E\u0902\u0921 \u0926\u093F\u0916\u093E\u090F\u0901\u0964 \u0939\u0949\u091F\u0915\u0940 \u0907\u0938 \u0938\u0947\u091F\u093F\u0902\u0917 \u0938\u0947 \u0905\u0932\u0917 \u0939\u092E\u0947\u0936\u093E \u0915\u093E\u092E \u0915\u0930\u0924\u0940 \u0939\u0948\u0902\u0964",
+        settingsNumberedSwitchCommands: "\u0915\u094D\u0930\u092E\u093E\u0902\u0915\u093F\u0924 \u0938\u0924\u094D\u0930 \u0938\u094D\u0935\u093F\u091A \u0915\u092E\u093E\u0902\u0921",
+        settingsNumberedSwitchCommandsDesc: "\u0915\u094D\u0930\u092E\u093E\u0902\u0915\u093F\u0924 \u0938\u094D\u0932\u0949\u091F (1\u20139) \u0935\u093E\u0932\u0947 \u0938\u094D\u0935\u093F\u091A \u0915\u092E\u093E\u0902\u0921 \u092A\u0902\u091C\u0940\u0915\u0943\u0924 \u0915\u0930\u0947\u0902 \u091C\u093F\u0928\u094D\u0939\u0947\u0902 \u0939\u0949\u091F\u0915\u0940 \u0938\u0947 \u092C\u093E\u0901\u0927\u093E \u091C\u093E \u0938\u0915\u0924\u093E \u0939\u0948\u0964 \u092C\u0902\u0926 \u0939\u094B\u0928\u0947 \u092A\u0930 \u0938\u092D\u0940 \u0938\u0924\u094D\u0930 \u0928\u093E\u092E-\u0906\u0927\u093E\u0930\u093F\u0924 \u0915\u092E\u093E\u0902\u0921 \u0907\u0938\u094D\u0924\u0947\u092E\u093E\u0932 \u0915\u0930\u0947\u0902\u0917\u0947\u0964",
+        save: "\u092C\u0928\u093E\u090F\u0901",
+        load: "\u0938\u094D\u0935\u093F\u091A \u0915\u0930\u0947\u0902",
+        saveInline: "\u0938\u0939\u0947\u091C\u0947\u0902",
+        active: "\u0938\u0915\u094D\u0930\u093F\u092F",
+        modifiedJustNow: "\u0905\u092D\u0940 \u0938\u0902\u0936\u094B\u0927\u093F\u0924",
+        modifiedMinutes: function(n) {
+          return n + " \u092E\u093F\u0928\u091F \u092A\u0939\u0932\u0947 \u0938\u0902\u0936\u094B\u0927\u093F\u0924";
+        },
+        modifiedHours: function(n) {
+          return n + " \u0918\u0902\u091F\u0947 \u092A\u0939\u0932\u0947 \u0938\u0902\u0936\u094B\u0927\u093F\u0924";
+        },
+        modifiedDays: function(n) {
+          return n + " \u0926\u093F\u0928 \u092A\u0939\u0932\u0947 \u0938\u0902\u0936\u094B\u0927\u093F\u0924";
+        },
+        duplicateName: "\u0907\u0938 \u0928\u093E\u092E \u0915\u093E \u0938\u0924\u094D\u0930 \u092A\u0939\u0932\u0947 \u0938\u0947 \u092E\u094C\u091C\u0942\u0926 \u0939\u0948\u0964",
+        emptyName: "\u0938\u0924\u094D\u0930 \u0915\u093E \u0928\u093E\u092E \u0916\u093E\u0932\u0940 \u0928\u0939\u0940\u0902 \u0939\u094B \u0938\u0915\u0924\u093E\u0964",
+        created: function(n) {
+          return '\u0938\u0924\u094D\u0930 "' + n + '" \u092C\u0928\u093E\u092F\u093E \u0917\u092F\u093E';
+        },
+        deleted: function(n) {
+          return '\u0938\u0924\u094D\u0930 "' + n + '" \u0939\u091F\u093E\u092F\u093E \u0917\u092F\u093E';
+        },
+        loaded: function(n) {
+          return '"' + n + '" \u092A\u0930 \u0938\u094D\u0935\u093F\u091A \u0915\u093F\u092F\u093E \u0917\u092F\u093E';
+        },
+        renamed: function(o, n) {
+          return '"' + o + '" \u0915\u093E \u0928\u093E\u092E \u092C\u0926\u0932\u0915\u0930 "' + n + '" \u0915\u093F\u092F\u093E \u0917\u092F\u093E';
+        },
+        confirmDelete: function(n) {
+          return '\u0938\u0924\u094D\u0930 "' + n + '" \u0939\u091F\u093E\u090F\u0901?';
+        },
+        confirmDeleteActive: function(n) {
+          return '"' + n + '" \u0938\u0915\u094D\u0930\u093F\u092F \u0938\u0924\u094D\u0930 \u0939\u0948\u0964 \u092B\u093F\u0930 \u092D\u0940 \u0939\u091F\u093E\u090F\u0901?';
+        },
+        confirmSaveSession: function(n) {
+          return '\u0938\u0924\u094D\u0930 "' + n + '" \u0938\u0939\u0947\u091C\u0947\u0902?';
+        },
+        confirmOverwriteSessionWithCurrentLayout: function(n) {
+          return '"' + n + '" \u0915\u094B \u0935\u0930\u094D\u0924\u092E\u093E\u0928 \u0932\u0947\u0906\u0909\u091F \u0938\u0947 \u0913\u0935\u0930\u0930\u093E\u0907\u091F \u0915\u0930\u0947\u0902?';
+        },
+        confirmReloadSession: function(n) {
+          return '\u0938\u0924\u094D\u0930 "' + n + '" \u092B\u093F\u0930 \u0938\u0947 \u0932\u094B\u0921 \u0915\u0930\u0947\u0902? \u0905\u0938\u0939\u0947\u091C\u0947 \u092C\u0926\u0932\u093E\u0935 \u0916\u094B \u091C\u093E\u090F\u0901\u0917\u0947\u0964';
+        },
+        renameTitle: "\u0938\u0924\u094D\u0930 \u0915\u093E \u0928\u093E\u092E \u092C\u0926\u0932\u0947\u0902",
+        renamePlaceholder: "\u0928\u092F\u093E \u0928\u093E\u092E...",
+        noSession: "\u0915\u094B\u0908 \u0938\u0924\u094D\u0930 \u0928\u0939\u0940\u0902",
+        cannotDeleteLast: "\u0905\u0902\u0924\u093F\u092E \u0938\u0924\u094D\u0930 \u0939\u091F\u093E\u092F\u093E \u0928\u0939\u0940\u0902 \u091C\u093E \u0938\u0915\u0924\u093E\u0964",
+        confirmBulkDelete: function(n) {
+          return n + " \u0938\u0924\u094D\u0930 \u0939\u091F\u093E\u090F\u0901?";
+        },
+        bulkDeleted: function(n) {
+          return n + " \u0938\u0924\u094D\u0930 \u0939\u091F\u093E\u090F \u0917\u090F";
+        },
+        bulkDelete: function(n) {
+          return n + " \u0938\u0924\u094D\u0930 \u0939\u091F\u093E\u090F\u0901";
+        },
+        cmdManage: "\u0938\u0924\u094D\u0930 \u092A\u094D\u0930\u092C\u0902\u0927\u093F\u0924 \u0915\u0930\u0947\u0902",
+        cmdCreate: "\u0928\u092F\u093E \u0938\u0924\u094D\u0930 \u092C\u0928\u093E\u090F\u0901",
+        cmdRename: "\u0935\u0930\u094D\u0924\u092E\u093E\u0928 \u0938\u0924\u094D\u0930 \u0915\u093E \u0928\u093E\u092E \u092C\u0926\u0932\u0947\u0902",
+        cmdDelete: "\u0935\u0930\u094D\u0924\u092E\u093E\u0928 \u0938\u0924\u094D\u0930 \u0939\u091F\u093E\u090F\u0901",
+        cmdNewEmpty: "\u0916\u093E\u0932\u0940 \u0938\u0924\u094D\u0930 \u092C\u0928\u093E\u090F\u0901",
+        cmdDuplicate: "\u0935\u0930\u094D\u0924\u092E\u093E\u0928 \u0938\u0924\u094D\u0930 \u0915\u0940 \u092A\u094D\u0930\u0924\u093F \u092C\u0928\u093E\u090F\u0901",
+        duplicated: function(n) {
+          return '"' + n + '" \u0915\u0947 \u0930\u0942\u092A \u092E\u0947\u0902 \u092A\u094D\u0930\u0924\u093F \u092C\u0928\u093E\u0908 \u0917\u0908';
+        },
+        deselect: "\u091A\u092F\u0928 \u0939\u091F\u093E\u090F\u0901",
+        footerDragReorder: "\u0915\u094D\u0930\u092E \u092C\u0926\u0932\u0928\u0947 \u0915\u0947 \u0932\u093F\u090F \u0916\u0940\u0902\u091A\u0947\u0902",
+        footerDragToGroup: "\u0938\u094D\u0925\u093E\u0928\u093E\u0902\u0924\u0930\u093F\u0924 \u0915\u0930\u0928\u0947 \u0915\u0947 \u0932\u093F\u090F \u0938\u092E\u0942\u0939 \u091F\u0948\u092C \u092A\u0930 \u0916\u0940\u0902\u091A\u0947\u0902",
+        defaultLabel: "(\u0921\u093F\u092B\u093C\u0949\u0932\u094D\u091F)",
+        rename: "\u0928\u093E\u092E \u092C\u0926\u0932\u0947\u0902",
+        delete: "\u0939\u091F\u093E\u090F\u0901",
+        remove: "\u0928\u093F\u0915\u093E\u0932\u0947\u0902",
+        cancel: "\u0930\u0926\u094D\u0926 \u0915\u0930\u0947\u0902",
+        ribbonTooltip: "Workspace++",
+        cmdSwitchTo: function(n, name) {
+          return name ? "\u0938\u0924\u094D\u0930 " + n + " \u092A\u0930 \u0938\u094D\u0935\u093F\u091A \u0915\u0930\u0947\u0902: " + name : "\u0938\u0924\u094D\u0930 " + n + " \u092A\u0930 \u0938\u094D\u0935\u093F\u091A \u0915\u0930\u0947\u0902";
+        },
+        cmdSwitchToNamed: function(name) {
+          return '"' + name + '" \u092A\u0930 \u0938\u094D\u0935\u093F\u091A \u0915\u0930\u0947\u0902';
+        },
+        cmdPrevious: "\u092A\u093F\u091B\u0932\u093E \u0938\u0924\u094D\u0930",
+        cmdNext: "\u0905\u0917\u0932\u093E \u0938\u0924\u094D\u0930",
+        cmdSaveCurrent: "\u0935\u0930\u094D\u0924\u092E\u093E\u0928 \u0938\u0924\u094D\u0930 \u0938\u0939\u0947\u091C\u0947\u0902",
+        cmdSaveAs: "\u0935\u0930\u094D\u0924\u092E\u093E\u0928 \u0938\u0924\u094D\u0930 \u0915\u094B \u0907\u0938 \u0930\u0942\u092A \u092E\u0947\u0902 \u0938\u0939\u0947\u091C\u0947\u0902...",
+        cmdSaveCurrentLayoutToSession: "\u0935\u0930\u094D\u0924\u092E\u093E\u0928 \u0932\u0947\u0906\u0909\u091F \u0915\u094B \u0938\u0924\u094D\u0930 \u092E\u0947\u0902 \u0938\u0939\u0947\u091C\u0947\u0902...",
+        cmdReloadCurrentWithoutSaving: "\u0935\u0930\u094D\u0924\u092E\u093E\u0928 \u0938\u0924\u094D\u0930 \u092B\u093F\u0930 \u0938\u0947 \u0932\u094B\u0921 \u0915\u0930\u0947\u0902 (\u092C\u093F\u0928\u093E \u0938\u0939\u0947\u091C\u0947)",
+        cmdToggleAutoSave: "\u0938\u0924\u094D\u0930 \u0938\u094D\u0935\u093F\u091A \u092A\u0930 \u0911\u091F\u094B-\u0938\u0947\u0935 \u091F\u0949\u0917\u0932 \u0915\u0930\u0947\u0902",
+        cmdEnableAutoSave: "\u0938\u0924\u094D\u0930 \u0938\u094D\u0935\u093F\u091A \u092A\u0930 \u0911\u091F\u094B-\u0938\u0947\u0935 \u091A\u093E\u0932\u0942 \u0915\u0930\u0947\u0902",
+        cmdDisableAutoSave: "\u0938\u0924\u094D\u0930 \u0938\u094D\u0935\u093F\u091A \u092A\u0930 \u0911\u091F\u094B-\u0938\u0947\u0935 \u092C\u0902\u0926 \u0915\u0930\u0947\u0902",
+        cmdSearchOverlay: "\u0938\u0924\u094D\u0930 \u0916\u094B\u091C\u0947\u0902",
+        cmdExportSessions: "\u0938\u0924\u094D\u0930 \u0938\u094D\u0928\u0948\u092A\u0936\u0949\u091F \u0928\u093F\u0930\u094D\u092F\u093E\u0924 \u0915\u0930\u0947\u0902",
+        cmdImportSessions: "\u0928\u0935\u0940\u0928\u0924\u092E \u0938\u0924\u094D\u0930 \u0938\u094D\u0928\u0948\u092A\u0936\u0949\u091F \u0906\u092F\u093E\u0924 \u0915\u0930\u0947\u0902",
+        switchLeft: "\u092C\u093E\u090F\u0901",
+        switchRight: "\u0926\u093E\u090F\u0901",
+        switchGroup: "\u0938\u092E\u0942\u0939",
+        keyTab: "Tab",
+        savedSession: function(n) {
+          return '"' + n + '" \u0938\u0939\u0947\u091C\u093E \u0917\u092F\u093E';
+        },
+        savedAs: function(n) {
+          return '"' + n + '" \u0915\u0947 \u0930\u0942\u092A \u092E\u0947\u0902 \u0938\u0939\u0947\u091C\u093E \u0917\u092F\u093E';
+        },
+        savedCurrentLayoutToSession: function(n) {
+          return '\u0935\u0930\u094D\u0924\u092E\u093E\u0928 \u0932\u0947\u0906\u0909\u091F "' + n + '" \u092E\u0947\u0902 \u0938\u0939\u0947\u091C\u093E \u0917\u092F\u093E';
+        },
+        noChanges: "\u0938\u0939\u0947\u091C\u0928\u0947 \u0915\u0947 \u0932\u093F\u090F \u0915\u094B\u0908 \u092C\u0926\u0932\u093E\u0935 \u0928\u0939\u0940\u0902",
+        reloadedSession: function(n) {
+          return '"' + n + '" \u092B\u093F\u0930 \u0938\u0947 \u0932\u094B\u0921 \u0915\u093F\u092F\u093E \u0917\u092F\u093E';
+        },
+        autoSaveEnabled: "\u0938\u0924\u094D\u0930 \u0938\u094D\u0935\u093F\u091A \u092A\u0930 \u0911\u091F\u094B-\u0938\u0947\u0935 \u091A\u093E\u0932\u0942 \u0915\u093F\u092F\u093E \u0917\u092F\u093E\u0964",
+        autoSaveDisabled: "\u0938\u0924\u094D\u0930 \u0938\u094D\u0935\u093F\u091A \u092A\u0930 \u0911\u091F\u094B-\u0938\u0947\u0935 \u092C\u0902\u0926 \u0915\u093F\u092F\u093E \u0917\u092F\u093E\u0964",
+        confirmUnsavedSwitch: function(n) {
+          return '\u0935\u0930\u094D\u0924\u092E\u093E\u0928 \u0938\u0924\u094D\u0930 \u092E\u0947\u0902 \u0905\u0938\u0939\u0947\u091C\u0947 \u092C\u0926\u0932\u093E\u0935 \u0939\u0948\u0902\u0964 "' + n + '" \u092A\u0930 \u0938\u094D\u0935\u093F\u091A \u0915\u0930\u0947\u0902?';
+        },
+        saveAndSwitch: "\u0938\u0939\u0947\u091C\u0947\u0902 \u0914\u0930 \u0938\u094D\u0935\u093F\u091A \u0915\u0930\u0947\u0902",
+        switchWithoutSaving: "\u092C\u093F\u0928\u093E \u0938\u0939\u0947\u091C\u0947 \u0938\u094D\u0935\u093F\u091A \u0915\u0930\u0947\u0902",
+        defaultSessionName: "\u0921\u093F\u092B\u093C\u0949\u0932\u094D\u091F",
+        nameSessionTitle: "\u0938\u0924\u094D\u0930 \u0928\u093E\u092E \u0915\u0947 \u0938\u093E\u0925 \u0938\u0939\u0947\u091C\u0947\u0902",
+        nameSessionPlaceholder: "\u0938\u0924\u094D\u0930 \u0915\u093E \u0928\u093E\u092E...",
+        saveWithoutNaming: "\u0928\u093E\u092E \u0926\u093F\u090F \u092C\u093F\u0928\u093E \u0938\u0939\u0947\u091C\u0947\u0902",
+        sessionAutoName: function(n) {
+          return "\u0928\u092F\u093E \u0938\u0924\u094D\u0930 " + n;
+        },
+        noFilteredSessions: "\u0915\u094B\u0908 \u092E\u0947\u0932 \u0916\u093E\u0924\u093E \u0938\u0924\u094D\u0930 \u0928\u0939\u0940\u0902",
+        noGroupSessions: "\u0907\u0938 \u0938\u092E\u0942\u0939 \u092E\u0947\u0902 \u0915\u094B\u0908 \u0938\u0924\u094D\u0930 \u0928\u0939\u0940\u0902",
+        searchOverlayPlaceholder: "\u0938\u0924\u094D\u0930 \u092B\u093C\u093F\u0932\u094D\u091F\u0930 \u0915\u0930\u0928\u0947 \u0915\u0947 \u0932\u093F\u090F \u091F\u093E\u0907\u092A \u0915\u0930\u0947\u0902...",
+        saveCurrentLayoutToSessionPlaceholder: "\u0913\u0935\u0930\u0930\u093E\u0907\u091F \u0915\u0930\u0928\u0947 \u0915\u0947 \u0932\u093F\u090F \u0938\u0924\u094D\u0930 \u091A\u0941\u0928\u0947\u0902...",
+        searchOverlayHelp: "\u2191\u2193 \u091C\u093E\u090F\u0901  /  Enter \u0938\u094D\u0935\u093F\u091A  /  \u21E7Enter \u0938\u0939\u0947\u091C\u0947\u0902  /  \u232B \u0939\u091F\u093E\u090F\u0901  /  Esc \u092C\u0902\u0926",
+        backupRestored: "Workspace++: \u092C\u0948\u0915\u0905\u092A \u0938\u0947 \u0938\u0924\u094D\u0930 \u092A\u0941\u0928\u0930\u094D\u0938\u094D\u0925\u093E\u092A\u093F\u0924 \u0915\u093F\u090F \u0917\u090F\u0964",
+        sessionDataMigrated: "Workspace++: \u0938\u0924\u094D\u0930 \u0921\u0947\u091F\u093E .workspace-plus-plus/sessions.json \u092E\u0947\u0902 \u0938\u094D\u0925\u093E\u0928\u093E\u0902\u0924\u0930\u093F\u0924 \u0915\u093F\u092F\u093E \u0917\u092F\u093E\u0964",
+        sessionDataMigrationFailed: "Workspace++: \u0938\u0924\u094D\u0930 \u0921\u0947\u091F\u093E \u0938\u094D\u0925\u093E\u0928\u093E\u0902\u0924\u0930\u093F\u0924 \u0928\u0939\u0940\u0902 \u0939\u094B \u0938\u0915\u093E\u0964 \u092A\u0941\u0930\u093E\u0928\u093E \u0921\u0947\u091F\u093E \u0905\u092D\u0940 \u092D\u0940 \u0930\u0916\u093E \u0917\u092F\u093E \u0939\u0948\u0964",
+        localSettingsEnabled: "Workspace++: vault-\u0935\u093F\u0936\u093F\u0937\u094D\u091F \u0938\u0947\u091F\u093F\u0902\u0917 \u091A\u093E\u0932\u0942 \u0915\u0940 \u0917\u0908\u0964",
+        localSettingsDisabled: "Workspace++: vault-\u0935\u093F\u0936\u093F\u0937\u094D\u091F \u0938\u0947\u091F\u093F\u0902\u0917 \u092C\u0902\u0926 \u0915\u0940 \u0917\u0908\u0964",
+        localSettingsCopied: "Workspace++: \u0935\u0948\u0936\u094D\u0935\u093F\u0915 \u0938\u0947\u091F\u093F\u0902\u0917 \u0915\u094B vault-\u0935\u093F\u0936\u093F\u0937\u094D\u091F \u0938\u0947\u091F\u093F\u0902\u0917 \u092E\u0947\u0902 \u0915\u0949\u092A\u0940 \u0915\u093F\u092F\u093E \u0917\u092F\u093E\u0964",
+        localSettingsLoadFailed: "Workspace++: vault-\u0935\u093F\u0936\u093F\u0937\u094D\u091F \u0938\u0947\u091F\u093F\u0902\u0917 \u0932\u094B\u0921 \u0928\u0939\u0940\u0902 \u0939\u094B \u0938\u0915\u0940\u0964 \u0935\u0948\u0936\u094D\u0935\u093F\u0915 \u0938\u0947\u091F\u093F\u0902\u0917 \u0907\u0938\u094D\u0924\u0947\u092E\u093E\u0932 \u0939\u094B\u0917\u0940\u0964",
+        localSettingsOperationFailed: "Workspace++: vault-\u0935\u093F\u0936\u093F\u0937\u094D\u091F \u0938\u0947\u091F\u093F\u0902\u0917 \u0905\u092A\u0921\u0947\u091F \u0928\u0939\u0940\u0902 \u0939\u094B \u0938\u0915\u0940\u0964",
+        exportSessionsDone: function(path) {
+          return "Workspace++: \u0938\u0924\u094D\u0930 " + path + " \u092E\u0947\u0902 \u0928\u093F\u0930\u094D\u092F\u093E\u0924 \u0915\u093F\u090F \u0917\u090F";
+        },
+        exportSessionsFailed: "Workspace++: \u0938\u0924\u094D\u0930 \u0928\u093F\u0930\u094D\u092F\u093E\u0924 \u0928\u0939\u0940\u0902 \u0939\u094B \u0938\u0915\u0947\u0964",
+        importSessionsDone: function(path) {
+          return "Workspace++: \u0938\u0924\u094D\u0930 " + path + " \u0938\u0947 \u0906\u092F\u093E\u0924 \u0915\u093F\u090F \u0917\u090F";
+        },
+        importSessionsNoFile: "Workspace++: .workspace-plus-plus/exports \u092E\u0947\u0902 \u0915\u094B\u0908 \u0928\u093F\u0930\u094D\u092F\u093E\u0924 \u092B\u093C\u093E\u0907\u0932 \u0928\u0939\u0940\u0902 \u092E\u093F\u0932\u0940\u0964",
+        importSessionsFailed: "Workspace++: \u0938\u0924\u094D\u0930 \u0906\u092F\u093E\u0924 \u0928\u0939\u0940\u0902 \u0939\u094B \u0938\u0915\u0947\u0964",
+        settingsLanguage: "\u092D\u093E\u0937\u093E",
+        settingsLanguageDesc: "\u092A\u094D\u0932\u0917\u0907\u0928 UI \u092D\u093E\u0937\u093E\u0964 \u0915\u092E\u093E\u0902\u0921 \u0928\u093E\u092E\u094B\u0902 \u092A\u0930 \u0932\u093E\u0917\u0942 \u0915\u0930\u0928\u0947 \u0915\u0947 \u0932\u093F\u090F Obsidian \u0915\u094B \u0930\u0940\u0938\u094D\u091F\u093E\u0930\u094D\u091F \u0915\u0930\u0947\u0902\u0964",
+        settingsSectionGeneral: "\u0938\u093E\u092E\u093E\u0928\u094D\u092F",
+        settingsTabSessions: "\u0938\u0924\u094D\u0930",
+        settingsSectionSwitching: "\u0938\u0924\u094D\u0930 \u0938\u094D\u0935\u093F\u091A\u093F\u0902\u0917",
+        settingsSectionSwitchCommands: "\u0938\u094D\u0935\u093F\u091A \u0915\u092E\u093E\u0902\u0921",
+        settingsSectionScrollSwitch: "\u0938\u094D\u0915\u094D\u0930\u0949\u0932 \u0938\u094D\u0935\u093F\u091A\u093F\u0902\u0917",
+        settingsSectionSwitchPreview: "\u0938\u094D\u0935\u093F\u091A \u0915\u0930\u0928\u0947 \u0938\u0947 \u092A\u0939\u0932\u0947 \u092A\u0942\u0930\u094D\u0935\u093E\u0935\u0932\u094B\u0915\u0928",
+        settingsSubsectionSwitchSaving: "\u0938\u0924\u094D\u0930 \u0938\u094D\u0935\u093F\u091A \u0915\u0930\u0924\u0947 \u0938\u092E\u092F \u0938\u0939\u0947\u091C\u0928\u093E",
+        settingsSubsectionAutoSaveMode: "\u0938\u0924\u094D\u0930 \u0911\u091F\u094B-\u0938\u0947\u0935 \u092E\u094B\u0921",
+        settingsSubsectionSwitchCommands: "\u0938\u0924\u094D\u0930 \u0938\u094D\u0935\u093F\u091A\u093F\u0902\u0917 \u0915\u092E\u093E\u0902\u0921",
+        settingsSubsectionScrollSwitch: "\u0938\u094D\u0915\u094D\u0930\u0949\u0932 \u0938\u0947 \u0938\u0924\u094D\u0930 \u0938\u094D\u0935\u093F\u091A\u093F\u0902\u0917",
+        settingsSubsectionSwitchPreview: "\u0938\u0924\u094D\u0930 \u0938\u094D\u0935\u093F\u091A \u0915\u0930\u0928\u0947 \u0938\u0947 \u092A\u0939\u0932\u0947 \u092A\u0942\u0930\u094D\u0935\u093E\u0935\u0932\u094B\u0915\u0928",
+        settingsSectionDeletion: "\u0938\u0924\u094D\u0930 \u0939\u091F\u093E\u0928\u093E",
+        settingsSectionAdvanced: "\u0909\u0928\u094D\u0928\u0924",
+        settingsSectionReset: "\u0930\u0940\u0938\u0947\u091F",
+        settingsStatusBarModScrollSwitch: "\u0938\u094D\u091F\u0947\u091F\u0938 \u092C\u093E\u0930 \u0938\u0947 \u0938\u0924\u094D\u0930 \u0938\u094D\u0935\u093F\u091A\u093F\u0902\u0917 \u091A\u093E\u0932\u0942 \u0915\u0930\u0947\u0902",
+        settingsStatusBarModScrollSwitchDesc: "\u0938\u094D\u091F\u0947\u091F\u0938 \u092C\u093E\u0930 \u0906\u0907\u091F\u092E \u092A\u0930 \u091A\u0941\u0928\u0940 \u0917\u0908 \u092E\u0949\u0921\u093F\u092B\u093C\u093E\u092F\u0930 \u0915\u0941\u0902\u091C\u0940 \u0926\u092C\u093E\u090F \u0930\u0916\u0924\u0947 \u0939\u0941\u090F \u0932\u0902\u092C\u0935\u0924 \u0938\u094D\u0915\u094D\u0930\u0949\u0932 \u0915\u0930\u0915\u0947 \u0938\u0924\u094D\u0930 \u0938\u094D\u0935\u093F\u091A \u0915\u0930\u0947\u0902\u0964 \u0925\u094D\u0930\u0947\u0936\u0939\u094B\u0932\u094D\u0921 \u0914\u0930 \u0915\u0942\u0932\u0921\u093E\u0909\u0928 \u091F\u094D\u0930\u0948\u0915\u092A\u0948\u0921 \u0938\u0947 \u0906\u0915\u0938\u094D\u092E\u093F\u0915 \u091F\u094D\u0930\u093F\u0917\u0930 \u0915\u092E \u0915\u0930\u0924\u0947 \u0939\u0948\u0902\u0964",
+        settingsStatusBarScrollPreset: "\u0938\u094D\u0915\u094D\u0930\u0949\u0932 \u0907\u0928\u092A\u0941\u091F \u092A\u094D\u0930\u0940\u0938\u0947\u091F",
+        settingsStatusBarScrollPresetDesc: "\u0905\u092A\u0928\u0947 \u0921\u093F\u0935\u093E\u0907\u0938 \u0915\u0947 \u0932\u093F\u090F \u091F\u094D\u092F\u0942\u0928 \u0915\u093F\u092F\u093E \u0917\u092F\u093E \u092A\u094D\u0930\u0940\u0938\u0947\u091F \u091A\u0941\u0928\u0947\u0902, \u092F\u093E \u0938\u0902\u0916\u094D\u092F\u093E\u090F\u0901 \u0938\u094D\u0935\u092F\u0902 \u092C\u0926\u0932\u0928\u0947 \u0915\u0947 \u0932\u093F\u090F \u0915\u0938\u094D\u091F\u092E \u091A\u0941\u0928\u0947\u0902\u0964",
+        settingsStatusBarScrollPresetTrackpad: "\u091F\u094D\u0930\u0948\u0915\u092A\u0948\u0921",
+        settingsStatusBarScrollPresetNotchedWheel: "\u0928\u0949\u091A \u0935\u093E\u0932\u093E \u092E\u093E\u0909\u0938 \u0935\u094D\u0939\u0940\u0932",
+        settingsStatusBarScrollPresetFreeSpinWheel: "\u092B\u094D\u0930\u0940-\u0938\u094D\u092A\u093F\u0928 \u092E\u093E\u0909\u0938 \u0935\u094D\u0939\u0940\u0932",
+        settingsStatusBarScrollPresetCustom: "\u0915\u0938\u094D\u091F\u092E",
+        settingsStatusBarScrollModifier: "\u0906\u0935\u0936\u094D\u092F\u0915 \u092E\u0949\u0921\u093F\u092B\u093C\u093E\u092F\u0930",
+        settingsStatusBarScrollModifierDesc: "\u0938\u094D\u091F\u0947\u091F\u0938 \u092C\u093E\u0930 \u0906\u0907\u091F\u092E \u092A\u0930 \u0938\u094D\u0915\u094D\u0930\u0949\u0932 \u0915\u0930\u0924\u0947 \u0938\u092E\u092F \u0915\u094C\u0928-\u0938\u0940 \u092E\u0949\u0921\u093F\u092B\u093C\u093E\u092F\u0930 \u0915\u0941\u0902\u091C\u0940 \u0926\u092C\u093E\u090F \u0930\u0916\u0928\u0940 \u0939\u0948, \u092F\u0939 \u091A\u0941\u0928\u0947\u0902\u0964",
+        settingsStatusBarScrollModifierRecommended: "Cmd \u092F\u093E Option",
+        settingsStatusBarScrollModifierNone: "\u0915\u094B\u0908 \u0928\u0939\u0940\u0902",
+        settingsStatusBarScrollModifierModOnly: "\u0915\u0947\u0935\u0932 Cmd",
+        settingsStatusBarScrollModifierAltOnly: "\u0915\u0947\u0935\u0932 Option",
+        settingsStatusBarScrollModifierModOrAlt: "Cmd \u092F\u093E Option",
+        settingsStatusBarScrollThreshold: "\u0938\u0902\u0935\u0947\u0926\u0928\u0936\u0940\u0932\u0924\u093E \u0925\u094D\u0930\u0947\u0936\u0939\u094B\u0932\u094D\u0921",
+        settingsStatusBarScrollThresholdDesc: "\u0915\u092E \u092E\u093E\u0928 \u0938\u0947 \u0938\u094D\u0935\u093F\u091A \u0915\u0930\u0928\u093E \u0906\u0938\u093E\u0928 \u0939\u094B\u0917\u093E\u0964 \u0915\u0947\u0935\u0932 \u0915\u0938\u094D\u091F\u092E \u092A\u094D\u0930\u0940\u0938\u0947\u091F \u092E\u0947\u0902 \u0907\u0938\u094D\u0924\u0947\u092E\u093E\u0932 \u0939\u094B\u0924\u093E \u0939\u0948\u0964",
+        settingsStatusBarScrollCooldown: "\u0915\u0942\u0932\u0921\u093E\u0909\u0928",
+        settingsStatusBarScrollCooldownDesc: "\u0938\u094D\u0915\u094D\u0930\u0949\u0932 \u0938\u0947 \u0939\u094B\u0928\u0947 \u0935\u093E\u0932\u0947 \u0938\u0924\u094D\u0930 \u0938\u094D\u0935\u093F\u091A \u0915\u0947 \u092C\u0940\u091A \u0928\u094D\u092F\u0942\u0928\u0924\u092E \u0938\u092E\u092F\u0964 \u0915\u0947\u0935\u0932 \u0915\u0938\u094D\u091F\u092E \u092A\u094D\u0930\u0940\u0938\u0947\u091F \u092E\u0947\u0902 \u0907\u0938\u094D\u0924\u0947\u092E\u093E\u0932 \u0939\u094B\u0924\u093E \u0939\u0948\u0964",
+        settingsStatusBarScrollResetWindow: "\u0938\u0902\u091A\u092F \u0930\u0940\u0938\u0947\u091F \u0935\u093F\u0902\u0921\u094B",
+        settingsStatusBarScrollResetWindowDesc: "\u0930\u0940\u0938\u0947\u091F \u0938\u0947 \u092A\u0939\u0932\u0947 \u091B\u094B\u091F\u0947 \u0938\u094D\u0915\u094D\u0930\u0949\u0932 \u0905\u0902\u0924\u0930\u094B\u0902 \u0915\u094B \u0915\u093F\u0924\u0928\u0940 \u0926\u0947\u0930 \u0924\u0915 \u091C\u094B\u0921\u093C\u0947 \u0930\u0916\u0928\u093E \u0939\u0948\u0964 \u0915\u0947\u0935\u0932 \u0915\u0938\u094D\u091F\u092E \u092A\u094D\u0930\u0940\u0938\u0947\u091F \u092E\u0947\u0902 \u0907\u0938\u094D\u0924\u0947\u092E\u093E\u0932 \u0939\u094B\u0924\u093E \u0939\u0948\u0964",
+        settingsStatusBarScrollInvert: "\u0938\u094D\u0915\u094D\u0930\u0949\u0932 \u0926\u093F\u0936\u093E \u0909\u0932\u091F\u0947\u0902",
+        settingsStatusBarScrollInvertDesc: "\u0938\u094D\u091F\u0947\u091F\u0938 \u092C\u093E\u0930 \u0938\u094D\u0915\u094D\u0930\u0949\u0932 \u0938\u094D\u0935\u093F\u091A\u093F\u0902\u0917 \u0915\u0947 \u0932\u093F\u090F \u092A\u093F\u091B\u0932\u093E/\u0905\u0917\u0932\u093E \u0926\u093F\u0936\u093E \u0909\u0932\u091F\u0947\u0902\u0964",
+        settingsLangAuto: "\u0911\u091F\u094B (\u0938\u093F\u0938\u094D\u091F\u092E \u092D\u093E\u0937\u093E)",
+        settingsGitHubLink: "GitHub",
+        settingsTranslationHelp: "\u0905\u0928\u0941\u0935\u093E\u0926 \u092E\u0947\u0902 \u0917\u0932\u0924\u0940 \u092E\u093F\u0932\u0940? \u0915\u0943\u092A\u092F\u093E GitHub \u092A\u0930 issue \u092F\u093E pull request \u0916\u094B\u0932\u0947\u0902\u0964",
+        settingsPreviewHeading: "\u0938\u0924\u094D\u0930 \u0938\u094D\u0935\u093F\u091A \u0915\u0930\u0928\u0947 \u0938\u0947 \u092A\u0939\u0932\u0947 \u092A\u0942\u0930\u094D\u0935\u093E\u0935\u0932\u094B\u0915\u0928 \u091A\u093E\u0932\u0942 \u0915\u0930\u0947\u0902",
+        settingsPreviewDesc: "\u0939\u0949\u091F\u0915\u0940 \u0938\u0947 \u0938\u0924\u094D\u0930 \u0938\u094D\u0935\u093F\u091A \u0915\u0930\u0924\u0947 \u0938\u092E\u092F, \u092A\u0939\u0932\u0940 \u092C\u093E\u0930 \u0926\u092C\u093E\u0928\u0947 \u092A\u0930 \u0938\u094D\u0935\u093F\u091A \u0915\u093F\u090F \u092C\u093F\u0928\u093E \u0906\u092A\u0915\u0940 \u0935\u0930\u094D\u0924\u092E\u093E\u0928 \u0938\u094D\u0925\u093F\u0924\u093F \u0926\u093F\u0916\u093E\u0908 \u091C\u093E\u0924\u0940 \u0939\u0948\u0964",
+        settingsPreviewNext: "\u0905\u0917\u0932\u093E \u0938\u0924\u094D\u0930",
+        settingsPreviewPrevious: "\u092A\u093F\u091B\u0932\u093E \u0938\u0924\u094D\u0930",
+        settingsHotkeys: "\u0939\u0949\u091F\u0915\u0940",
+        settingsHotkeysBtn: "\u0939\u0949\u091F\u0915\u0940 \u0938\u0947\u091F\u093F\u0902\u0917 \u0916\u094B\u0932\u0947\u0902",
+        contextOpenSettings: "\u0938\u0947\u091F\u093F\u0902\u0917 \u0916\u094B\u0932\u0947\u0902",
+        contextCustomizeClicks: "\u0915\u094D\u0932\u093F\u0915 \u0915\u094D\u0930\u093F\u092F\u093E\u090F\u0901 \u0905\u0928\u0941\u0915\u0942\u0932\u093F\u0924 \u0915\u0930\u0947\u0902",
+        settingsSectionStatusBar: "\u0938\u094D\u091F\u0947\u091F\u0938 \u092C\u093E\u0930 \u0915\u094D\u0932\u093F\u0915 \u0915\u094D\u0930\u093F\u092F\u093E\u090F\u0901",
+        statusBarSlotClick: "\u0915\u094D\u0932\u093F\u0915",
+        statusBarSlotAltClick: function() {
+          return (typeof navigator !== "undefined" && navigator.platform.indexOf("Mac") !== -1 ? "\u2325" : "Alt") + " + \u0915\u094D\u0932\u093F\u0915";
+        },
+        statusBarSlotModClick: function() {
+          return (typeof navigator !== "undefined" && navigator.platform.indexOf("Mac") !== -1 ? "\u2318" : "Ctrl") + " + \u0915\u094D\u0932\u093F\u0915";
+        },
+        statusBarSlotShiftClick: function() {
+          return (typeof navigator !== "undefined" && navigator.platform.indexOf("Mac") !== -1 ? "\u21E7" : "Shift") + " + \u0915\u094D\u0932\u093F\u0915";
+        },
+        statusBarSlotMiddleClick: "\u092E\u093F\u0921\u093F\u0932-\u0915\u094D\u0932\u093F\u0915",
+        statusBarSlotAltMiddleClick: modifiedClickLabel("\u092E\u093F\u0921\u093F\u0932-\u0915\u094D\u0932\u093F\u0915", "\u2325", "Alt"),
+        statusBarSlotModMiddleClick: modifiedClickLabel("\u092E\u093F\u0921\u093F\u0932-\u0915\u094D\u0932\u093F\u0915", "\u2318", "Ctrl"),
+        statusBarSlotShiftMiddleClick: modifiedClickLabel("\u092E\u093F\u0921\u093F\u0932-\u0915\u094D\u0932\u093F\u0915", "\u21E7", "Shift"),
+        statusBarSlotRightClick: "\u0930\u093E\u0907\u091F-\u0915\u094D\u0932\u093F\u0915",
+        statusBarSlotAltRightClick: function() {
+          return (typeof navigator !== "undefined" && navigator.platform.indexOf("Mac") !== -1 ? "\u2325" : "Alt") + " + \u0930\u093E\u0907\u091F-\u0915\u094D\u0932\u093F\u0915";
+        },
+        statusBarSlotModRightClick: function() {
+          return (typeof navigator !== "undefined" && navigator.platform.indexOf("Mac") !== -1 ? "\u2318" : "Ctrl") + " + \u0930\u093E\u0907\u091F-\u0915\u094D\u0932\u093F\u0915";
+        },
+        statusBarSlotShiftRightClick: function() {
+          return (typeof navigator !== "undefined" && navigator.platform.indexOf("Mac") !== -1 ? "\u21E7" : "Shift") + " + \u0930\u093E\u0907\u091F-\u0915\u094D\u0932\u093F\u0915";
+        },
+        statusBarActionNone: "\u0915\u0941\u091B \u0928 \u0915\u0930\u0947\u0902",
+        statusBarActionQuickSwitcher: "\u0915\u094D\u0935\u093F\u0915 \u0938\u094D\u0935\u093F\u091A\u0930 \u0916\u094B\u0932\u0947\u0902",
+        statusBarActionSessionManager: "\u0938\u0924\u094D\u0930 \u092A\u094D\u0930\u092C\u0902\u0927\u0915 \u0916\u094B\u0932\u0947\u0902",
+        statusBarActionSaveSession: "\u0938\u0924\u094D\u0930 \u0938\u0939\u0947\u091C\u0947\u0902",
+        statusBarActionReloadWithoutSaving: "\u092C\u093F\u0928\u093E \u0938\u0939\u0947\u091C\u0947 \u092B\u093F\u0930 \u0938\u0947 \u0932\u094B\u0921 \u0915\u0930\u0947\u0902",
+        statusBarActionVersionHistory: "\u0935\u0930\u094D\u0936\u0928 \u0907\u0924\u093F\u0939\u093E\u0938 \u0926\u093F\u0916\u093E\u090F\u0901",
+        statusBarActionRestoreLatestHistory: "\u0928\u0935\u0940\u0928\u0924\u092E \u0907\u0924\u093F\u0939\u093E\u0938 \u092A\u0941\u0928\u0930\u094D\u0938\u094D\u0925\u093E\u092A\u093F\u0924 \u0915\u0930\u0947\u0902",
+        statusBarActionSessionMenu: "\u0938\u0924\u094D\u0930 \u0938\u0902\u0926\u0930\u094D\u092D \u092E\u0947\u0928\u0942",
+        statusBarActionSettingsMenu: "\u0938\u0947\u091F\u093F\u0902\u0917 \u0938\u0902\u0926\u0930\u094D\u092D \u092E\u0947\u0928\u0942",
+        contextResetOverlayPosition: "\u0938\u094D\u0925\u093F\u0924\u093F \u0914\u0930 \u0906\u0915\u093E\u0930 \u0930\u0940\u0938\u0947\u091F \u0915\u0930\u0947\u0902",
+        settingsConfirmDelete: "\u0938\u0924\u094D\u0930 \u0939\u091F\u093E\u0928\u0947 \u0938\u0947 \u092A\u0939\u0932\u0947 \u092A\u0941\u0937\u094D\u091F\u093F \u0915\u0930\u0947\u0902",
+        settingsConfirmDeleteDesc: "\u0938\u0924\u094D\u0930 \u0939\u091F\u093E\u0928\u0947 \u0938\u0947 \u092A\u0939\u0932\u0947 \u092A\u0941\u0937\u094D\u091F\u093F \u0938\u0902\u0935\u093E\u0926 \u0926\u093F\u0916\u093E\u090F\u0901\u0964",
+        settingsConfirmQuickActions: "\u0915\u094D\u0935\u093F\u0915 \u0938\u094D\u0935\u093F\u091A\u0930 \u092E\u0947\u0902 \u0938\u0939\u0947\u091C\u0928\u0947/\u0930\u0940\u0932\u094B\u0921 \u0915\u0930\u0928\u0947 \u0938\u0947 \u092A\u0939\u0932\u0947 \u092A\u0941\u0937\u094D\u091F\u093F \u0915\u0930\u0947\u0902",
+        settingsConfirmQuickActionsDesc: "\u0915\u094D\u0935\u093F\u0915 \u0938\u094D\u0935\u093F\u091A\u0930 \u0913\u0935\u0930\u0932\u0947 \u0938\u0947 \u0938\u0924\u094D\u0930 \u0938\u0939\u0947\u091C\u0928\u0947 \u092F\u093E \u092B\u093F\u0930 \u0938\u0947 \u0932\u094B\u0921 \u0915\u0930\u0928\u0947 \u0938\u0947 \u092A\u0939\u0932\u0947 \u092A\u0941\u0937\u094D\u091F\u093F \u0938\u0902\u0935\u093E\u0926 \u0926\u093F\u0916\u093E\u090F\u0901\u0964",
+        settingsAutoSaveOnSwitch: "\u0911\u091F\u094B-\u0938\u0947\u0935 \u092E\u094B\u0921",
+        settingsAutoSaveOnSwitchDesc: "\u0938\u0924\u094D\u0930 \u0938\u094D\u0935\u093F\u091A \u0915\u0930\u0924\u0947 \u0938\u092E\u092F \u0935\u0930\u094D\u0924\u092E\u093E\u0928 \u0938\u0924\u094D\u0930 \u0905\u092A\u0928\u0947 \u0906\u092A \u0938\u0939\u0947\u091C\u0924\u093E \u0939\u0948 (\u0921\u093F\u092B\u093C\u0949\u0932\u094D\u091F: \u091A\u093E\u0932\u0942)\u0964 \u092C\u0902\u0926 \u0939\u094B\u0928\u0947 \u092A\u0930 \u0906\u092A \u0938\u0924\u094D\u0930\u094B\u0902 \u0915\u094B \u092E\u0948\u0928\u094D\u092F\u0941\u0905\u0932 \u0930\u0942\u092A \u0938\u0947 \u0938\u0939\u0947\u091C \u0914\u0930 \u092B\u093F\u0930 \u0938\u0947 \u0932\u094B\u0921 \u0915\u0930 \u0938\u0915\u0924\u0947 \u0939\u0948\u0902\u0964",
+        settingsWarnUnsavedSwitch: "\u092C\u093F\u0928\u093E \u0938\u0939\u0947\u091C\u0947 \u0938\u094D\u0935\u093F\u091A \u0915\u0930\u0928\u0947 \u0938\u0947 \u092A\u0939\u0932\u0947 \u091A\u0947\u0924\u093E\u0935\u0928\u0940 \u0926\u0947\u0902",
+        settingsWarnUnsavedSwitchDesc: "\u091C\u092C \u0911\u091F\u094B-\u0938\u0947\u0935 \u092C\u0902\u0926 \u0939\u094B \u0914\u0930 \u0935\u0930\u094D\u0924\u092E\u093E\u0928 \u0938\u0924\u094D\u0930 \u092E\u0947\u0902 \u0905\u0938\u0939\u0947\u091C\u0947 \u092C\u0926\u0932\u093E\u0935 \u0939\u094B\u0902, \u0924\u094B \u0938\u094D\u0935\u093F\u091A \u0915\u0930\u0928\u0947 \u0938\u0947 \u092A\u0939\u0932\u0947 \u091A\u0947\u0924\u093E\u0935\u0928\u0940 \u0926\u093F\u0916\u093E\u090F\u0901\u0964",
+        settingsStatusBarQuickSwitcher: "\u0938\u094D\u091F\u0947\u091F\u0938 \u092C\u093E\u0930 \u0915\u094D\u0932\u093F\u0915 \u092A\u0930 \u0915\u094D\u0935\u093F\u0915 \u0938\u094D\u0935\u093F\u091A\u0930",
+        settingsStatusBarQuickSwitcherDesc: "\u091A\u093E\u0932\u0942 \u0939\u094B\u0928\u0947 \u092A\u0930, \u0938\u094D\u091F\u0947\u091F\u0938 \u092C\u093E\u0930 \u0915\u094D\u0932\u093F\u0915 \u0915\u0930\u0928\u0947 \u0938\u0947 \u092A\u0942\u0930\u094D\u0923 \u0938\u0924\u094D\u0930 \u092A\u094D\u0930\u092C\u0902\u0927\u0915 \u0915\u0947 \u092C\u091C\u093E\u092F \u0915\u094D\u0935\u093F\u0915 \u0938\u094D\u0935\u093F\u091A\u0930 \u0913\u0935\u0930\u0932\u0947 \u0916\u0941\u0932\u0924\u093E \u0939\u0948\u0964",
+        settingsUseLocalSettings: "vault-\u0935\u093F\u0936\u093F\u0937\u094D\u091F \u0938\u0947\u091F\u093F\u0902\u0917 \u0907\u0938\u094D\u0924\u0947\u092E\u093E\u0932 \u0915\u0930\u0947\u0902",
+        settingsUseLocalSettingsDesc: "\u092F\u0926\u093F \u0906\u092A \u0915\u0908 vault \u0915\u0947 \u092C\u0940\u091A .obsidian \u0938\u093F\u0902\u0915 \u0915\u0930\u0924\u0947 \u0939\u0948\u0902 (\u0909\u0926\u093E\u0939\u0930\u0923: Settings Profiles \u0938\u0947) \u0914\u0930 Workspace++ \u0938\u0947\u091F\u093F\u0902\u0917 \u0939\u0930 vault \u092E\u0947\u0902 \u0905\u0932\u0917 \u0930\u0916\u0928\u093E \u091A\u093E\u0939\u0924\u0947 \u0939\u0948\u0902, \u0924\u094B \u0907\u0938\u0947 \u091A\u093E\u0932\u0942 \u0915\u0930\u0947\u0902\u0964",
+        settingsCopyGlobalToLocal: "\u0935\u0948\u0936\u094D\u0935\u093F\u0915 \u0938\u0947\u091F\u093F\u0902\u0917 \u0907\u0938 vault \u092E\u0947\u0902 \u0915\u0949\u092A\u0940 \u0915\u0930\u0947\u0902",
+        settingsCopyGlobalToLocalDesc: "\u0935\u0930\u094D\u0924\u092E\u093E\u0928 \u0935\u0948\u0936\u094D\u0935\u093F\u0915 \u0938\u0947\u091F\u093F\u0902\u0917 \u0938\u0947 vault-\u0935\u093F\u0936\u093F\u0937\u094D\u091F \u0938\u0947\u091F\u093F\u0902\u0917 \u0913\u0935\u0930\u0930\u093E\u0907\u091F \u0915\u0930\u0947\u0902\u0964",
+        settingsCopyGlobalToLocalBtn: "\u0915\u0949\u092A\u0940 \u0915\u0930\u0947\u0902",
+        settingsResetLocalSettings: "vault-\u0935\u093F\u0936\u093F\u0937\u094D\u091F \u0938\u0947\u091F\u093F\u0902\u0917 \u0930\u0940\u0938\u0947\u091F \u0915\u0930\u0947\u0902",
+        settingsResetLocalSettingsDesc: "vault-\u0935\u093F\u0936\u093F\u0937\u094D\u091F \u0938\u0947\u091F\u093F\u0902\u0917 \u0915\u094B \u0935\u093E\u092A\u0938 \u0935\u0948\u0936\u094D\u0935\u093F\u0915 \u0938\u0947\u091F\u093F\u0902\u0917 \u092A\u0930 \u0930\u0940\u0938\u0947\u091F \u0915\u0930\u0947\u0902\u0964",
+        settingsResetLocalSettingsBtn: "\u0932\u094B\u0915\u0932 \u0930\u0940\u0938\u0947\u091F",
+        settingsAdvancedStorageSubsection: "\u0938\u094D\u091F\u094B\u0930\u0947\u091C \u0935\u094D\u092F\u0935\u0939\u093E\u0930",
+        settingsAdvancedTransferSubsection: "\u0921\u0947\u091F\u093E \u0938\u094D\u0925\u093E\u0928\u093E\u0902\u0924\u0930\u0923",
+        settingsDeveloperSection: "\u0921\u0947\u0935\u0932\u092A\u0930 \u091F\u0942\u0932",
+        settingsStorageDiagnostics: "\u0938\u094D\u091F\u094B\u0930\u0947\u091C \u0928\u093F\u0926\u093E\u0928",
+        settingsStorageDiagnosticsDesc: "Workspace++ \u0926\u094D\u0935\u093E\u0930\u093E \u0905\u092D\u0940 \u0907\u0938\u094D\u0924\u0947\u092E\u093E\u0932 \u0939\u094B \u0930\u0939\u0940 \u0938\u094D\u091F\u094B\u0930\u0947\u091C \u091C\u093E\u0928\u0915\u093E\u0930\u0940\u0964",
+        settingsStorageFieldSessions: "\u0938\u0924\u094D\u0930 \u092B\u093C\u093E\u0907\u0932",
+        settingsStorageFieldSessionsBackup: "\u0938\u0924\u094D\u0930 \u092C\u0948\u0915\u0905\u092A",
+        settingsStorageFieldLocalSettings: "\u0932\u094B\u0915\u0932 \u0938\u0947\u091F\u093F\u0902\u0917 \u092B\u093C\u093E\u0907\u0932",
+        settingsStorageFieldGlobalSettings: "\u0935\u0948\u0936\u094D\u0935\u093F\u0915 \u0938\u0947\u091F\u093F\u0902\u0917 \u092B\u093C\u093E\u0907\u0932",
+        settingsStorageFieldSessionCount: "\u0938\u0924\u094D\u0930 \u0938\u0902\u0916\u094D\u092F\u093E",
+        settingsStorageFieldUpdatedAt: "\u0905\u092A\u0921\u0947\u091F \u0938\u092E\u092F",
+        settingsExportSessions: "\u0938\u0924\u094D\u0930 \u0928\u093F\u0930\u094D\u092F\u093E\u0924 \u0915\u0930\u0947\u0902",
+        settingsExportSessionsDesc: ".workspace-plus-plus/exports \u092E\u0947\u0902 \u0938\u094D\u0928\u0948\u092A\u0936\u0949\u091F \u0938\u0939\u0947\u091C\u0947\u0902\u0964",
+        settingsExportSessionsBtn: "\u0928\u093F\u0930\u094D\u092F\u093E\u0924",
+        settingsImportSessions: "\u0938\u0924\u094D\u0930 \u0906\u092F\u093E\u0924 \u0915\u0930\u0947\u0902",
+        settingsImportSessionsDesc: ".workspace-plus-plus/exports \u0938\u0947 \u0928\u0935\u0940\u0928\u0924\u092E \u0938\u094D\u0928\u0948\u092A\u0936\u0949\u091F \u0906\u092F\u093E\u0924 \u0915\u0930\u0947\u0902\u0964",
+        settingsImportSessionsBtn: "\u0928\u0935\u0940\u0928\u0924\u092E \u0906\u092F\u093E\u0924 \u0915\u0930\u0947\u0902",
+        confirmImportSessions: "\u0928\u0935\u0940\u0928\u0924\u092E \u0928\u093F\u0930\u094D\u092F\u093E\u0924 \u0915\u093F\u090F \u0917\u090F \u0938\u0924\u094D\u0930 \u0906\u092F\u093E\u0924 \u0915\u0930\u0947\u0902? \u0935\u0930\u094D\u0924\u092E\u093E\u0928 \u0938\u0924\u094D\u0930 \u092C\u0926\u0932 \u0926\u093F\u090F \u091C\u093E\u090F\u0901\u0917\u0947\u0964",
+        settingsResetSettings: "\u0938\u0947\u091F\u093F\u0902\u0917 \u0930\u0940\u0938\u0947\u091F \u0915\u0930\u0947\u0902",
+        settingsResetSettingsDesc: "\u0935\u0930\u094D\u0924\u092E\u093E\u0928 \u0938\u0947\u091F\u093F\u0902\u0917 \u0926\u093E\u092F\u0930\u0947 \u0915\u0947 \u0932\u093F\u090F Workspace++ \u0938\u0947\u091F\u093F\u0902\u0917 \u0930\u0940\u0938\u0947\u091F \u0915\u0930\u0947\u0902\u0964",
+        settingsResetSettingsBtn: "\u0938\u0947\u091F\u093F\u0902\u0917 \u0930\u0940\u0938\u0947\u091F \u0915\u0930\u0947\u0902",
+        confirmResetSettings: "Workspace++ \u0938\u0947\u091F\u093F\u0902\u0917 \u0915\u094B \u0921\u093F\u092B\u093C\u0949\u0932\u094D\u091F \u092A\u0930 \u0930\u0940\u0938\u0947\u091F \u0915\u0930\u0947\u0902?",
+        resetSettingsDone: "Workspace++ \u0938\u0947\u091F\u093F\u0902\u0917 \u0930\u0940\u0938\u0947\u091F \u0915\u0930 \u0926\u0940 \u0917\u0908\u0964",
+        resetSettingsFailed: "Workspace++ \u0938\u0947\u091F\u093F\u0902\u0917 \u0930\u0940\u0938\u0947\u091F \u0928\u0939\u0940\u0902 \u0939\u094B \u0938\u0915\u0940\u0964",
+        settingsResetSessions: "\u0938\u0924\u094D\u0930 \u0930\u0940\u0938\u0947\u091F \u0915\u0930\u0947\u0902",
+        settingsResetSessionsDesc: "\u0938\u092D\u0940 \u0938\u0939\u0947\u091C\u0947 \u0917\u090F \u0938\u0924\u094D\u0930 \u0939\u091F\u093E\u090F\u0901 \u0914\u0930 \u0935\u0930\u094D\u0924\u092E\u093E\u0928 \u0932\u0947\u0906\u0909\u091F \u0938\u0947 \u0915\u0947\u0935\u0932 \u090F\u0915 \u0928\u092F\u093E \u0921\u093F\u092B\u093C\u0949\u0932\u094D\u091F \u0938\u0924\u094D\u0930 \u0930\u0916\u0947\u0902\u0964",
+        settingsResetSessionsBtn: "\u0930\u0940\u0938\u0947\u091F",
+        confirmResetSessions: "\u0938\u092D\u0940 \u0938\u0924\u094D\u0930\u094B\u0902 \u0915\u094B \u0921\u093F\u092B\u093C\u0949\u0932\u094D\u091F \u092A\u0930 \u0930\u0940\u0938\u0947\u091F \u0915\u0930\u0947\u0902? \u0907\u0938\u0947 \u092A\u0942\u0930\u094D\u0935\u0935\u0924 \u0928\u0939\u0940\u0902 \u0915\u093F\u092F\u093E \u091C\u093E \u0938\u0915\u0924\u093E\u0964",
+        resetSessionsHint: "\u092F\u0939 \u0939\u0930 \u0938\u0939\u0947\u091C\u0947 \u0917\u090F \u0938\u0924\u094D\u0930 \u0915\u094B \u0939\u091F\u093E \u0926\u0947\u0917\u093E \u0914\u0930 \u0915\u0947\u0935\u0932 \u090F\u0915 \u0921\u093F\u092B\u093C\u0949\u0932\u094D\u091F \u0938\u0924\u094D\u0930 \u0930\u0916\u0947\u0917\u093E\u0964",
+        resetSessionsDone: "\u0938\u0924\u094D\u0930 \u0921\u093F\u092B\u093C\u0949\u0932\u094D\u091F \u092A\u0930 \u0930\u0940\u0938\u0947\u091F \u0915\u0930 \u0926\u093F\u090F \u0917\u090F\u0964",
+        resetSessionsFailed: "\u0938\u0924\u094D\u0930 \u0930\u0940\u0938\u0947\u091F \u0928\u0939\u0940\u0902 \u0939\u094B \u0938\u0915\u0947\u0964",
+        settingsResetSessionsAndSettings: "\u0938\u0924\u094D\u0930 \u0914\u0930 \u0938\u0947\u091F\u093F\u0902\u0917 \u0930\u0940\u0938\u0947\u091F \u0915\u0930\u0947\u0902",
+        settingsResetSessionsAndSettingsDesc: "\u0938\u0939\u0947\u091C\u0947 \u0917\u090F \u0938\u0924\u094D\u0930 \u0914\u0930 Workspace++ \u0938\u0947\u091F\u093F\u0902\u0917 \u0926\u094B\u0928\u094B\u0902 \u0915\u094B \u090F\u0915 \u0938\u093E\u0925 \u0930\u0940\u0938\u0947\u091F \u0915\u0930\u0947\u0902\u0964",
+        settingsResetSessionsAndSettingsBtn: "\u0926\u094B\u0928\u094B\u0902 \u0930\u0940\u0938\u0947\u091F \u0915\u0930\u0947\u0902",
+        confirmResetSessionsAndSettings: "\u0938\u0924\u094D\u0930 \u0914\u0930 \u0938\u0947\u091F\u093F\u0902\u0917 \u0926\u094B\u0928\u094B\u0902 \u0930\u0940\u0938\u0947\u091F \u0915\u0930\u0947\u0902? \u0907\u0938\u0947 \u092A\u0942\u0930\u094D\u0935\u0935\u0924 \u0928\u0939\u0940\u0902 \u0915\u093F\u092F\u093E \u091C\u093E \u0938\u0915\u0924\u093E\u0964",
+        resetSessionsAndSettingsDone: "\u0938\u0924\u094D\u0930 \u0914\u0930 \u0938\u0947\u091F\u093F\u0902\u0917 \u0930\u0940\u0938\u0947\u091F \u0915\u0930 \u0926\u093F\u090F \u0917\u090F\u0964",
+        resetSessionsAndSettingsFailed: "\u0938\u0924\u094D\u0930 \u0914\u0930 \u0938\u0947\u091F\u093F\u0902\u0917 \u0930\u0940\u0938\u0947\u091F \u0928\u0939\u0940\u0902 \u0939\u094B \u0938\u0915\u0947\u0964",
+        confirmDeleteSettingsHint: "\u092F\u0939 \u092A\u0941\u0937\u094D\u091F\u093F \u092C\u0902\u0926 \u0915\u0930\u0928\u0947 \u0915\u0947 \u0932\u093F\u090F \u0938\u0947\u091F\u093F\u0902\u0917 \u092E\u0947\u0902 \u091C\u093E\u090F\u0901\u0964",
+        groupCreated: function(n) {
+          return '\u0938\u092E\u0942\u0939 "' + n + '" \u092C\u0928\u093E\u092F\u093E \u0917\u092F\u093E';
+        },
+        groupDeleted: function(n) {
+          return '\u0938\u092E\u0942\u0939 "' + n + '" \u0939\u091F\u093E\u092F\u093E \u0917\u092F\u093E';
+        },
+        groupRenamed: function(o, n) {
+          return '\u0938\u092E\u0942\u0939 \u0915\u093E \u0928\u093E\u092E \u092C\u0926\u0932\u093E \u0917\u092F\u093E: "' + o + '" \u2192 "' + n + '"';
+        },
+        groupAll: "\u0938\u092D\u0940",
+        groupDuplicateName: "\u0907\u0938 \u0928\u093E\u092E \u0915\u093E \u0938\u092E\u0942\u0939 \u092A\u0939\u0932\u0947 \u0938\u0947 \u092E\u094C\u091C\u0942\u0926 \u0939\u0948\u0964",
+        groupEmptyName: "\u0938\u092E\u0942\u0939 \u0915\u093E \u0928\u093E\u092E \u0916\u093E\u0932\u0940 \u0928\u0939\u0940\u0902 \u0939\u094B \u0938\u0915\u0924\u093E\u0964",
+        cmdSwitchGroup: "\u0938\u092E\u0942\u0939 \u092C\u0926\u0932\u0947\u0902",
+        cmdExitGroup: "\u0938\u092D\u0940 \u0938\u0924\u094D\u0930 \u0926\u093F\u0916\u093E\u090F\u0901 (\u0938\u092E\u0942\u0939 \u0938\u0947 \u092C\u093E\u0939\u0930)",
+        cmdNextGroup: "\u0905\u0917\u0932\u093E \u0938\u092E\u0942\u0939",
+        cmdPreviousGroup: "\u092A\u093F\u091B\u0932\u093E \u0938\u092E\u0942\u0939",
+        searchOverlayHelpWithGroups: "\u2191\u2193 \u091C\u093E\u090F\u0901  /  Tab \u0938\u092E\u0942\u0939  /  Enter \u0938\u094D\u0935\u093F\u091A  /  \u21E7Enter \u0938\u0939\u0947\u091C\u0947\u0902  /  \u232B \u0939\u091F\u093E\u090F\u0901  /  Esc \u092C\u0902\u0926",
+        settingsSectionGroups: "\u0938\u0924\u094D\u0930 \u0938\u092E\u0942\u0939",
+        contextToggleGroups: "\u0938\u0924\u094D\u0930 \u0938\u092E\u0942\u0939 \u091A\u093E\u0932\u0942 \u0915\u0930\u0947\u0902",
+        settingsSectionGroupsDesc: "\u0938\u0924\u094D\u0930 \u0935\u094D\u092F\u0935\u0938\u094D\u0925\u093F\u0924 \u0915\u0930\u0928\u0947 \u0915\u0947 \u0932\u093F\u090F \u0938\u092E\u0942\u0939 \u0907\u0938\u094D\u0924\u0947\u092E\u093E\u0932 \u0915\u0930\u0947\u0902\u0964 \u0907\u0938\u0947 \u092C\u0902\u0926 \u0915\u0930\u0928\u0947 \u092A\u0930 \u0938\u092E\u0942\u0939 \u091F\u0948\u092C \u0914\u0930 \u0938\u092E\u0942\u0939-\u0938\u094D\u0935\u093F\u091A \u0915\u094D\u0930\u093F\u092F\u093E\u090F\u0901 \u091B\u093F\u092A \u091C\u093E\u090F\u0901\u0917\u0940\u0964",
+        settingsGroupCreate: "\u0938\u092E\u0942\u0939 \u092C\u0928\u093E\u090F\u0901",
+        settingsGroupCreateDesc: "\u0928\u092F\u093E \u0938\u0924\u094D\u0930 \u0938\u092E\u0942\u0939 \u092C\u0928\u093E\u090F\u0901\u0964",
+        settingsGroupCreatePlaceholder: "\u0938\u092E\u0942\u0939 \u0915\u093E \u0928\u093E\u092E...",
+        settingsGroupCreateBtn: "\u092C\u0928\u093E\u090F\u0901",
+        settingsGroupManageSessions: "\u0938\u0924\u094D\u0930 \u092A\u094D\u0930\u092C\u0902\u0927\u093F\u0924 \u0915\u0930\u0947\u0902",
+        settingsGroupManageSessionsDesc: "\u0907\u0938 \u0938\u092E\u0942\u0939 \u092E\u0947\u0902 \u0938\u0924\u094D\u0930 \u091C\u094B\u0921\u093C\u0947\u0902 \u092F\u093E \u0907\u0938\u0938\u0947 \u0928\u093F\u0915\u093E\u0932\u0947\u0902\u0964",
+        settingsGroupSessionCount: function(n) {
+          return n + " \u0938\u0924\u094D\u0930";
+        },
+        settingsGroupDelete: "\u0938\u092E\u0942\u0939 \u0939\u091F\u093E\u090F\u0901",
+        settingsGroupDeleteConfirm: function(n) {
+          return '\u0938\u092E\u0942\u0939 "' + n + '" \u0939\u091F\u093E\u090F\u0901? \u0938\u0924\u094D\u0930 \u0939\u091F\u093E\u090F \u0928\u0939\u0940\u0902 \u091C\u093E\u090F\u0901\u0917\u0947\u0964';
+        },
+        confirmDeleteGroup: function(n) {
+          return '\u0938\u092E\u0942\u0939 "' + n + '" \u0939\u091F\u093E\u090F\u0901? \u0907\u0938 \u0938\u092E\u0942\u0939 \u0915\u0947 \u0905\u0902\u0926\u0930 \u0915\u0947 \u0938\u0924\u094D\u0930 \u0939\u091F\u093E\u090F \u0928\u0939\u0940\u0902 \u091C\u093E\u090F\u0901\u0917\u0947\u0964';
+        },
+        groupAddedSession: function(s, g) {
+          return '"' + s + '" \u0915\u094B "' + g + '" \u092E\u0947\u0902 \u091C\u094B\u0921\u093C\u093E \u0917\u092F\u093E';
+        },
+        groupRemovedSession: function(s, g) {
+          return '"' + s + '" \u0915\u094B "' + g + '" \u0938\u0947 \u0928\u093F\u0915\u093E\u0932\u093E \u0917\u092F\u093E';
+        },
+        groupRemoveFromGroup: "\u0938\u092E\u0942\u0939 \u0938\u0947 \u0928\u093F\u0915\u093E\u0932\u0947\u0902",
+        groupMoveToGroup: "\u0938\u092E\u0942\u0939 \u092E\u0947\u0902 \u0932\u0947 \u091C\u093E\u090F\u0901",
+        groupCreateNew: "\u0928\u092F\u093E \u0938\u092E\u0942\u0939",
+        groupCreatePlaceholder: "\u0938\u092E\u0942\u0939 \u0915\u093E \u0928\u093E\u092E...",
+        groupContextRename: "\u0938\u092E\u0942\u0939 \u0915\u093E \u0928\u093E\u092E \u092C\u0926\u0932\u0947\u0902",
+        groupContextDelete: "\u0938\u092E\u0942\u0939 \u0939\u091F\u093E\u090F\u0901",
+        contextSwitchSession: "\u0907\u0938 \u0938\u0924\u094D\u0930 \u092A\u0930 \u0938\u094D\u0935\u093F\u091A \u0915\u0930\u0947\u0902",
+        contextRenameSession: "\u0907\u0938 \u0938\u0924\u094D\u0930 \u0915\u093E \u0928\u093E\u092E \u092C\u0926\u0932\u0947\u0902",
+        contextDeleteSession: "\u092F\u0939 \u0938\u0924\u094D\u0930 \u0939\u091F\u093E\u090F\u0901",
+        contextDuplicateSession: "\u0907\u0938 \u0938\u0924\u094D\u0930 \u0915\u0940 \u092A\u094D\u0930\u0924\u093F \u092C\u0928\u093E\u090F\u0901",
+        contextReloadSession: "\u092F\u0939 \u0938\u0924\u094D\u0930 \u092B\u093F\u0930 \u0938\u0947 \u0932\u094B\u0921 \u0915\u0930\u0947\u0902",
+        contextSaveSession: "\u092F\u0939 \u0938\u0924\u094D\u0930 \u0938\u0939\u0947\u091C\u0947\u0902",
+        contextSaveCurrentLayoutToThisSession: "\u0935\u0930\u094D\u0924\u092E\u093E\u0928 \u0932\u0947\u0906\u0909\u091F \u0915\u094B \u0907\u0938 \u0938\u0924\u094D\u0930 \u092E\u0947\u0902 \u0938\u0939\u0947\u091C\u0947\u0902",
+        groupRemoveAllSessions: "\u0907\u0938 \u0938\u092E\u0942\u0939 \u0938\u0947 \u0938\u092D\u0940 \u0938\u0924\u094D\u0930 \u0928\u093F\u0915\u093E\u0932\u0947\u0902",
+        confirmRemoveAllFromGroup: function(g, n) {
+          return '"' + g + '" \u0938\u0947 \u0938\u092D\u0940 ' + n + " \u0938\u0924\u094D\u0930 \u0928\u093F\u0915\u093E\u0932\u0947\u0902?";
+        },
+        groupRemovedAllSessions: function(g) {
+          return '"' + g + '" \u0938\u0947 \u0938\u092D\u0940 \u0938\u0924\u094D\u0930 \u0928\u093F\u0915\u093E\u0932\u0947 \u0917\u090F';
+        },
+        contextDeleteAllGroups: "\u0938\u092D\u0940 \u0938\u092E\u0942\u0939 \u0939\u091F\u093E\u090F\u0901",
+        confirmDeleteAllGroups: function(n) {
+          return "\u0938\u092D\u0940 " + n + " \u0938\u092E\u0942\u0939 \u0939\u091F\u093E\u090F\u0901? \u0938\u0924\u094D\u0930 \u0939\u091F\u093E\u090F \u0928\u0939\u0940\u0902 \u091C\u093E\u090F\u0901\u0917\u0947\u0964";
+        },
+        deletedAllGroups: function(n) {
+          return n + " \u0938\u092E\u0942\u0939 \u0939\u091F\u093E\u090F \u0917\u090F";
+        },
+        contextDeleteAllSessions: "\u0938\u092D\u0940 \u0938\u0924\u094D\u0930 \u0939\u091F\u093E\u090F\u0901",
+        confirmDeleteAllSessions: function(n) {
+          return n + " \u0938\u0924\u094D\u0930 \u0939\u091F\u093E\u090F\u0901? \u0938\u0915\u094D\u0930\u093F\u092F \u0938\u0924\u094D\u0930 \u0930\u0916\u093E \u091C\u093E\u090F\u0917\u093E\u0964";
+        },
+        deletedAllSessions: function(n) {
+          return n + " \u0938\u0924\u094D\u0930 \u0939\u091F\u093E\u090F \u0917\u090F";
+        },
+        contextVersionHistory: "\u0935\u0930\u094D\u0936\u0928 \u0907\u0924\u093F\u0939\u093E\u0938",
+        cmdVersionHistory: "\u0938\u0924\u094D\u0930 \u0935\u0930\u094D\u0936\u0928 \u0907\u0924\u093F\u0939\u093E\u0938 \u0926\u0947\u0916\u0947\u0902",
+        historyTitle: "\u0935\u0930\u094D\u0936\u0928 \u0907\u0924\u093F\u0939\u093E\u0938",
+        historyEmpty: "\u0907\u0938 \u0938\u0924\u094D\u0930 \u0915\u0947 \u0932\u093F\u090F \u0915\u094B\u0908 \u0935\u0930\u094D\u0936\u0928 \u0907\u0924\u093F\u0939\u093E\u0938 \u0928\u0939\u0940\u0902 \u0939\u0948\u0964",
+        historyRestore: "\u092A\u0941\u0928\u0930\u094D\u0938\u094D\u0925\u093E\u092A\u093F\u0924 \u0915\u0930\u0947\u0902",
+        historyRestoreConfirm: function(name, time) {
+          return '"' + name + '" \u0915\u093E \u0932\u0947\u0906\u0909\u091F ' + time + " \u0935\u093E\u0932\u0947 \u0938\u094D\u0928\u0948\u092A\u0936\u0949\u091F \u0938\u0947 \u092A\u0941\u0928\u0930\u094D\u0938\u094D\u0925\u093E\u092A\u093F\u0924 \u0915\u0930\u0947\u0902?";
+        },
+        historyRestored: function(name) {
+          return '"' + name + '" \u0915\u093E \u0932\u0947\u0906\u0909\u091F \u092A\u0941\u0928\u0930\u094D\u0938\u094D\u0925\u093E\u092A\u093F\u0924 \u0915\u093F\u092F\u093E \u0917\u092F\u093E';
+        },
+        historyQuickRestored: function(name) {
+          return '"' + name + '" \u0915\u093E \u092A\u093F\u091B\u0932\u093E \u0932\u0947\u0906\u0909\u091F \u0924\u0941\u0930\u0902\u0924 \u092A\u0941\u0928\u0930\u094D\u0938\u094D\u0925\u093E\u092A\u093F\u0924 \u0915\u093F\u092F\u093E \u0917\u092F\u093E';
+        },
+        historyNoEntries: "\u092A\u0941\u0928\u0930\u094D\u0938\u094D\u0925\u093E\u092A\u093F\u0924 \u0915\u0930\u0928\u0947 \u0915\u0947 \u0932\u093F\u090F \u0915\u094B\u0908 \u092A\u093F\u091B\u0932\u093E \u0932\u0947\u0906\u0909\u091F \u0928\u0939\u0940\u0902\u0964",
+        historyToday: "\u0906\u091C",
+        historyYesterday: "\u0915\u0932",
+        historyThisWeek: "\u0907\u0938 \u0938\u092A\u094D\u0924\u093E\u0939",
+        historyFiles: function(n) {
+          return n + " \u092B\u093C\u093E\u0907\u0932\u0947\u0902";
+        },
+        historyPanes: function(n) {
+          return n + " \u092A\u0947\u0928";
+        },
+        settingsVersionHistoryEnabled: "\u0935\u0930\u094D\u0936\u0928 \u0907\u0924\u093F\u0939\u093E\u0938 \u091A\u093E\u0932\u0942 \u0915\u0930\u0947\u0902",
+        settingsVersionHistoryEnabledDesc: "\u0939\u0930 \u0938\u0924\u094D\u0930 \u0915\u0947 \u0932\u093F\u090F \u0932\u0947\u0906\u0909\u091F \u092C\u0926\u0932\u093E\u0935\u094B\u0902 \u0915\u093E \u0907\u0924\u093F\u0939\u093E\u0938 \u0930\u0916\u0947\u0902\u0964",
+        settingsVersionHistoryInterval: "\u0938\u094D\u0928\u0948\u092A\u0936\u0949\u091F \u0905\u0902\u0924\u0930\u093E\u0932 (\u092E\u093F\u0928\u091F)",
+        settingsVersionHistoryIntervalDesc: "\u0932\u0947\u0906\u0909\u091F \u092C\u0926\u0932\u093E\u0935\u094B\u0902 \u0915\u0940 \u091C\u093E\u0901\u091A \u0914\u0930 \u0938\u094D\u0928\u0948\u092A\u0936\u0949\u091F \u0938\u0939\u0947\u091C\u0928\u0947 \u0915\u0940 \u0906\u0935\u0943\u0924\u094D\u0924\u093F\u0964",
+        settingsVersionHistoryCtrlRmb: platformLabel("\u0924\u094D\u0935\u0930\u093F\u0924 \u092A\u0941\u0928\u0930\u094D\u0938\u094D\u0925\u093E\u092A\u0928\u093E (Cmd + \u0930\u093E\u0907\u091F-\u0915\u094D\u0932\u093F\u0915)", "\u0924\u094D\u0935\u0930\u093F\u0924 \u092A\u0941\u0928\u0930\u094D\u0938\u094D\u0925\u093E\u092A\u0928\u093E (Ctrl + \u0930\u093E\u0907\u091F-\u0915\u094D\u0932\u093F\u0915)"),
+        settingsVersionHistoryCtrlRmbDesc: platformLabel("\u092A\u093F\u091B\u0932\u093E \u0932\u0947\u0906\u0909\u091F \u092A\u0941\u0928\u0930\u094D\u0938\u094D\u0925\u093E\u092A\u093F\u0924 \u0915\u0930\u0928\u0947 \u0915\u0947 \u0932\u093F\u090F Cmd \u0926\u092C\u093E\u090F \u0930\u0916\u0924\u0947 \u0939\u0941\u090F \u0938\u094D\u091F\u0947\u091F\u0938 \u092C\u093E\u0930 \u092A\u0930 \u0930\u093E\u0907\u091F-\u0915\u094D\u0932\u093F\u0915 \u0915\u0930\u0947\u0902\u0964", "\u092A\u093F\u091B\u0932\u093E \u0932\u0947\u0906\u0909\u091F \u092A\u0941\u0928\u0930\u094D\u0938\u094D\u0925\u093E\u092A\u093F\u0924 \u0915\u0930\u0928\u0947 \u0915\u0947 \u0932\u093F\u090F Ctrl \u0926\u092C\u093E\u090F \u0930\u0916\u0924\u0947 \u0939\u0941\u090F \u0938\u094D\u091F\u0947\u091F\u0938 \u092C\u093E\u0930 \u092A\u0930 \u0930\u093E\u0907\u091F-\u0915\u094D\u0932\u093F\u0915 \u0915\u0930\u0947\u0902\u0964"),
+        settingsVersionHistoryConfirmRestore: "\u092A\u0941\u0928\u0930\u094D\u0938\u094D\u0925\u093E\u092A\u093F\u0924 \u0915\u0930\u0928\u0947 \u0938\u0947 \u092A\u0939\u0932\u0947 \u092A\u0941\u0937\u094D\u091F\u093F \u0915\u0930\u0947\u0902",
+        settingsVersionHistoryConfirmRestoreDesc: "\u092A\u093F\u091B\u0932\u093E \u0932\u0947\u0906\u0909\u091F \u092A\u0941\u0928\u0930\u094D\u0938\u094D\u0925\u093E\u092A\u093F\u0924 \u0915\u0930\u0928\u0947 \u0938\u0947 \u092A\u0939\u0932\u0947 \u092A\u0941\u0937\u094D\u091F\u093F \u0938\u0902\u0935\u093E\u0926 \u0926\u093F\u0916\u093E\u090F\u0901\u0964",
+        rotationBackupSectionTitle: "\u092C\u0948\u0915\u0905\u092A",
+        rotationBackupCreate: "\u092C\u0948\u0915\u0905\u092A \u092C\u0928\u093E\u090F\u0901",
+        rotationBackupCreateBtn: "\u0905\u092D\u0940 \u092C\u0948\u0915\u0905\u092A \u0932\u0947\u0902",
+        rotationBackupCreated: "\u092C\u0948\u0915\u0905\u092A \u092C\u0928\u093E\u092F\u093E \u0917\u092F\u093E\u0964",
+        rotationBackupFailed: "\u092C\u0948\u0915\u0905\u092A \u0928\u0939\u0940\u0902 \u092C\u0928 \u0938\u0915\u093E\u0964",
+        rotationBackupDesc: "\u0938\u0939\u0947\u091C\u0924\u0947 \u0938\u092E\u092F \u0911\u091F\u094B\u092E\u0948\u091F\u093F\u0915 \u092C\u0948\u0915\u0905\u092A \u092C\u0928\u093E\u090F \u091C\u093E\u0924\u0947 \u0939\u0948\u0902 (\u0939\u0930 \u0918\u0902\u091F\u0947, \u0905\u0927\u093F\u0915\u0924\u092E 3 \u092A\u0940\u0922\u093C\u093F\u092F\u093E\u0901)\u0964",
+        rotationBackupRestore: "\u092A\u0941\u0928\u0930\u094D\u0938\u094D\u0925\u093E\u092A\u093F\u0924 \u0915\u0930\u0947\u0902",
+        rotationBackupRestoreConfirm: function(time, count) {
+          return '\u092C\u0948\u0915\u0905\u092A "' + time + '" \u0938\u0947 \u092A\u0941\u0928\u0930\u094D\u0938\u094D\u0925\u093E\u092A\u093F\u0924 \u0915\u0930\u0947\u0902 (' + count + " \u0938\u0924\u094D\u0930)? \u0935\u0930\u094D\u0924\u092E\u093E\u0928 \u0921\u0947\u091F\u093E \u0913\u0935\u0930\u0930\u093E\u0907\u091F \u0939\u094B \u091C\u093E\u090F\u0917\u093E\u0964";
+        },
+        rotationBackupRestored: "\u092C\u0948\u0915\u0905\u092A \u0938\u0947 \u092A\u0941\u0928\u0930\u094D\u0938\u094D\u0925\u093E\u092A\u093F\u0924 \u0915\u093F\u092F\u093E \u0917\u092F\u093E\u0964",
+        rotationBackupRestoreFailed: "\u092C\u0948\u0915\u0905\u092A \u0938\u0947 \u092A\u0941\u0928\u0930\u094D\u0938\u094D\u0925\u093E\u092A\u093F\u0924 \u0928\u0939\u0940\u0902 \u0939\u094B \u0938\u0915\u093E\u0964",
+        rotationBackupNone: "\u0915\u094B\u0908 \u092C\u0948\u0915\u0905\u092A \u0909\u092A\u0932\u092C\u094D\u0927 \u0928\u0939\u0940\u0902\u0964",
+        rotationBackupGeneration: function(count) {
+          return count + " \u0938\u0924\u094D\u0930";
+        },
+        frontmatterSessionNotFound: function(n) {
+          return '\u0938\u0924\u094D\u0930 "' + n + '" \u0928\u0939\u0940\u0902 \u092E\u093F\u0932\u093E (workspace-session)';
+        },
+        frontmatterAlreadyActive: function(n) {
+          return '\u0938\u0924\u094D\u0930 "' + n + '" \u092A\u0939\u0932\u0947 \u0938\u0947 \u0938\u0915\u094D\u0930\u093F\u092F \u0939\u0948';
+        }
+      },
+      bn: {
+        modalTitle: "\u09B8\u09C7\u09B6\u09A8 \u09AA\u09B0\u09BF\u099A\u09BE\u09B2\u09A8\u09BE",
+        savePlaceholder: "\u09A8\u09A4\u09C1\u09A8 \u09B8\u09C7\u09B6\u09A8\u09C7\u09B0 \u09A8\u09BE\u09AE...",
+        filterPlaceholder: "\u09B8\u09C7\u09B6\u09A8 \u09AB\u09BF\u09B2\u09CD\u099F\u09BE\u09B0 \u0995\u09B0\u09C1\u09A8...",
+        settingsShowFilterInput: "\u09B8\u09C7\u09B6\u09A8 \u09AB\u09BF\u09B2\u09CD\u099F\u09BE\u09B0 \u09A6\u09C7\u0996\u09BE\u09A8",
+        settingsShowFilterInputDesc: "\u09B8\u09C7\u09B6\u09A8 \u09A6\u09CD\u09B0\u09C1\u09A4 \u0996\u09C1\u0981\u099C\u09A4\u09C7 \u09B8\u09C7\u09B6\u09A8 \u09AE\u09CD\u09AF\u09BE\u09A8\u09C7\u099C\u09BE\u09B0\u09C7 \u098F\u0995\u099F\u09BF \u099F\u09C7\u0995\u09CD\u09B8\u099F \u09AB\u09BF\u09B2\u09CD\u099F\u09BE\u09B0 \u09A6\u09C7\u0996\u09BE\u09A8\u0964",
+        settingsOverlayDefaultFocus: "\u0993\u09AD\u09BE\u09B0\u09B2\u09C7\u09B0 \u09A1\u09BF\u09AB\u09B2\u09CD\u099F \u09AB\u09CB\u0995\u09BE\u09B8",
+        settingsOverlayDefaultFocusDesc: "\u09B8\u09C7\u09B6\u09A8 \u09AE\u09CD\u09AF\u09BE\u09A8\u09C7\u099C\u09BE\u09B0 \u0996\u09CB\u09B2\u09BE\u09B0 \u09B8\u09AE\u09AF\u09BC \u0995\u09CB\u09A8 \u0989\u09AA\u09BE\u09A6\u09BE\u09A8 \u09AB\u09CB\u0995\u09BE\u09B8 \u09AA\u09BE\u09AC\u09C7 \u09A4\u09BE \u09AC\u09C7\u099B\u09C7 \u09A8\u09BF\u09A8\u0964",
+        settingsOverlayFocusCurrentSession: "\u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u09B8\u09C7\u09B6\u09A8",
+        settingsOverlayFocusSessionFilter: "\u09B8\u09C7\u09B6\u09A8 \u09AB\u09BF\u09B2\u09CD\u099F\u09BE\u09B0",
+        settingsOverlayFocusSessionCreate: "\u09B8\u09C7\u09B6\u09A8 \u09A4\u09C8\u09B0\u09BF",
+        settingsSectionSessionManager: "\u09B8\u09C7\u09B6\u09A8 \u09A4\u09BE\u09B2\u09BF\u0995\u09BE \u0993 \u0996\u09CB\u0981\u099C\u09BE",
+        settingsSectionSessionListSearch: "\u09B8\u09C7\u09B6\u09A8 \u09A4\u09BE\u09B2\u09BF\u0995\u09BE \u0993 \u0996\u09CB\u0981\u099C\u09BE",
+        settingsShowActiveSwitchCommand: "\u0995\u09AE\u09BE\u09A8\u09CD\u09A1 \u09AA\u09CD\u09AF\u09BE\u09B2\u09C7\u099F\u09C7 \u09B8\u0995\u09CD\u09B0\u09BF\u09AF\u09BC \u09B8\u09C7\u09B6\u09A8 \u09A6\u09C7\u0996\u09BE\u09A8",
+        settingsShowActiveSwitchCommandDesc: "\u0995\u09AE\u09BE\u09A8\u09CD\u09A1 \u09AA\u09CD\u09AF\u09BE\u09B2\u09C7\u099F\u09C7 \u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8\u09C7 \u09B8\u0995\u09CD\u09B0\u09BF\u09AF\u09BC \u09B8\u09C7\u09B6\u09A8\u09C7 \u09B8\u09C1\u0987\u099A \u0995\u09B0\u09BE\u09B0 \u0995\u09AE\u09BE\u09A8\u09CD\u09A1 \u09A6\u09C7\u0996\u09BE\u09A8\u0964 \u098F\u0987 \u09B8\u09C7\u099F\u09BF\u0982 \u09AF\u09BE\u0987 \u09B9\u09CB\u0995, \u09B9\u099F\u0995\u09BF \u09B8\u09AC \u09B8\u09AE\u09AF\u09BC \u0995\u09BE\u099C \u0995\u09B0\u09C7\u0964",
+        settingsNumberedSwitchCommands: "\u09A8\u09AE\u09CD\u09AC\u09B0\u09AF\u09C1\u0995\u09CD\u09A4 \u09B8\u09C7\u09B6\u09A8 \u09B8\u09C1\u0987\u099A \u0995\u09AE\u09BE\u09A8\u09CD\u09A1",
+        settingsNumberedSwitchCommandsDesc: "\u09A8\u09AE\u09CD\u09AC\u09B0\u09AF\u09C1\u0995\u09CD\u09A4 \u09B8\u09CD\u09B2\u099F (1\u20139) \u09B8\u09B9 \u09B8\u09C1\u0987\u099A \u0995\u09AE\u09BE\u09A8\u09CD\u09A1 \u09A8\u09BF\u09AC\u09A8\u09CD\u09A7\u09A8 \u0995\u09B0\u09C1\u09A8, \u09AF\u09C7\u0997\u09C1\u09B2\u09CB\u09A4\u09C7 \u09B9\u099F\u0995\u09BF \u09AC\u09BE\u0981\u09A7\u09BE \u09AF\u09BE\u09AF\u09BC\u0964 \u09AC\u09A8\u09CD\u09A7 \u09A5\u09BE\u0995\u09B2\u09C7 \u09B8\u09AC \u09B8\u09C7\u09B6\u09A8 \u09A8\u09BE\u09AE-\u09AD\u09BF\u09A4\u09CD\u09A4\u09BF\u0995 \u0995\u09AE\u09BE\u09A8\u09CD\u09A1 \u09AC\u09CD\u09AF\u09AC\u09B9\u09BE\u09B0 \u0995\u09B0\u09AC\u09C7\u0964",
+        save: "\u09A4\u09C8\u09B0\u09BF \u0995\u09B0\u09C1\u09A8",
+        load: "\u09B8\u09C1\u0987\u099A \u0995\u09B0\u09C1\u09A8",
+        saveInline: "\u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3",
+        active: "\u09B8\u0995\u09CD\u09B0\u09BF\u09AF\u09BC",
+        modifiedJustNow: "\u098F\u0987\u09AE\u09BE\u09A4\u09CD\u09B0 \u09AA\u09B0\u09BF\u09AC\u09B0\u09CD\u09A4\u09BF\u09A4",
+        modifiedMinutes: function(n) {
+          return n + " \u09AE\u09BF\u09A8\u09BF\u099F \u0986\u0997\u09C7 \u09AA\u09B0\u09BF\u09AC\u09B0\u09CD\u09A4\u09BF\u09A4";
+        },
+        modifiedHours: function(n) {
+          return n + " \u0998\u09A3\u09CD\u099F\u09BE \u0986\u0997\u09C7 \u09AA\u09B0\u09BF\u09AC\u09B0\u09CD\u09A4\u09BF\u09A4";
+        },
+        modifiedDays: function(n) {
+          return n + " \u09A6\u09BF\u09A8 \u0986\u0997\u09C7 \u09AA\u09B0\u09BF\u09AC\u09B0\u09CD\u09A4\u09BF\u09A4";
+        },
+        duplicateName: "\u098F\u0987 \u09A8\u09BE\u09AE\u09C7 \u098F\u0995\u099F\u09BF \u09B8\u09C7\u09B6\u09A8 \u0987\u09A4\u09BF\u09AE\u09A7\u09CD\u09AF\u09C7\u0987 \u0986\u099B\u09C7\u0964",
+        emptyName: "\u09B8\u09C7\u09B6\u09A8\u09C7\u09B0 \u09A8\u09BE\u09AE \u0996\u09BE\u09B2\u09BF \u09B0\u09BE\u0996\u09BE \u09AF\u09BE\u09AC\u09C7 \u09A8\u09BE\u0964",
+        created: function(n) {
+          return '\u09B8\u09C7\u09B6\u09A8 "' + n + '" \u09A4\u09C8\u09B0\u09BF \u09B9\u09AF\u09BC\u09C7\u099B\u09C7';
+        },
+        deleted: function(n) {
+          return '\u09B8\u09C7\u09B6\u09A8 "' + n + '" \u09AE\u09C1\u099B\u09C7 \u09AB\u09C7\u09B2\u09BE \u09B9\u09AF\u09BC\u09C7\u099B\u09C7';
+        },
+        loaded: function(n) {
+          return '"' + n + '"-\u098F \u09B8\u09C1\u0987\u099A \u0995\u09B0\u09BE \u09B9\u09AF\u09BC\u09C7\u099B\u09C7';
+        },
+        renamed: function(o, n) {
+          return '"' + o + '"-\u098F\u09B0 \u09A8\u09BE\u09AE \u09AC\u09A6\u09B2\u09C7 "' + n + '" \u0995\u09B0\u09BE \u09B9\u09AF\u09BC\u09C7\u099B\u09C7';
+        },
+        confirmDelete: function(n) {
+          return '\u09B8\u09C7\u09B6\u09A8 "' + n + '" \u09AE\u09C1\u099B\u09AC\u09C7\u09A8?';
+        },
+        confirmDeleteActive: function(n) {
+          return '"' + n + '" \u09B8\u0995\u09CD\u09B0\u09BF\u09AF\u09BC \u09B8\u09C7\u09B6\u09A8\u0964 \u09A4\u09AC\u09C1\u0993 \u09AE\u09C1\u099B\u09AC\u09C7\u09A8?';
+        },
+        confirmSaveSession: function(n) {
+          return '\u09B8\u09C7\u09B6\u09A8 "' + n + '" \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3 \u0995\u09B0\u09AC\u09C7\u09A8?';
+        },
+        confirmOverwriteSessionWithCurrentLayout: function(n) {
+          return '"' + n + '"-\u0995\u09C7 \u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u09B2\u09C7\u0986\u0989\u099F \u09A6\u09BF\u09AF\u09BC\u09C7 \u0993\u09AD\u09BE\u09B0\u09B0\u09BE\u0987\u099F \u0995\u09B0\u09AC\u09C7\u09A8?';
+        },
+        confirmReloadSession: function(n) {
+          return '\u09B8\u09C7\u09B6\u09A8 "' + n + '" \u09AA\u09C1\u09A8\u09B0\u09BE\u09AF\u09BC \u09B2\u09CB\u09A1 \u0995\u09B0\u09AC\u09C7\u09A8? \u0985\u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09BF\u09A4 \u09AA\u09B0\u09BF\u09AC\u09B0\u09CD\u09A4\u09A8 \u09B9\u09BE\u09B0\u09BF\u09AF\u09BC\u09C7 \u09AF\u09BE\u09AC\u09C7\u0964';
+        },
+        renameTitle: "\u09B8\u09C7\u09B6\u09A8\u09C7\u09B0 \u09A8\u09BE\u09AE \u09AC\u09A6\u09B2\u09BE\u09A8",
+        renamePlaceholder: "\u09A8\u09A4\u09C1\u09A8 \u09A8\u09BE\u09AE...",
+        noSession: "\u0995\u09CB\u09A8\u09CB \u09B8\u09C7\u09B6\u09A8 \u09A8\u09C7\u0987",
+        cannotDeleteLast: "\u09B6\u09C7\u09B7 \u09B8\u09C7\u09B6\u09A8\u099F\u09BF \u09AE\u09C1\u099B\u09C7 \u09AB\u09C7\u09B2\u09BE \u09AF\u09BE\u09AC\u09C7 \u09A8\u09BE\u0964",
+        confirmBulkDelete: function(n) {
+          return n + "\u099F\u09BF \u09B8\u09C7\u09B6\u09A8 \u09AE\u09C1\u099B\u09AC\u09C7\u09A8?";
+        },
+        bulkDeleted: function(n) {
+          return n + "\u099F\u09BF \u09B8\u09C7\u09B6\u09A8 \u09AE\u09C1\u099B\u09C7 \u09AB\u09C7\u09B2\u09BE \u09B9\u09AF\u09BC\u09C7\u099B\u09C7";
+        },
+        bulkDelete: function(n) {
+          return n + "\u099F\u09BF \u09B8\u09C7\u09B6\u09A8 \u09AE\u09C1\u099B\u09C1\u09A8";
+        },
+        cmdManage: "\u09B8\u09C7\u09B6\u09A8 \u09AA\u09B0\u09BF\u099A\u09BE\u09B2\u09A8\u09BE",
+        cmdCreate: "\u09A8\u09A4\u09C1\u09A8 \u09B8\u09C7\u09B6\u09A8 \u09A4\u09C8\u09B0\u09BF \u0995\u09B0\u09C1\u09A8",
+        cmdRename: "\u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u09B8\u09C7\u09B6\u09A8\u09C7\u09B0 \u09A8\u09BE\u09AE \u09AC\u09A6\u09B2\u09BE\u09A8",
+        cmdDelete: "\u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u09B8\u09C7\u09B6\u09A8 \u09AE\u09C1\u099B\u09C1\u09A8",
+        cmdNewEmpty: "\u0996\u09BE\u09B2\u09BF \u09B8\u09C7\u09B6\u09A8 \u09A4\u09C8\u09B0\u09BF \u0995\u09B0\u09C1\u09A8",
+        cmdDuplicate: "\u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u09B8\u09C7\u09B6\u09A8 \u09A1\u09C1\u09AA\u09CD\u09B2\u09BF\u0995\u09C7\u099F \u0995\u09B0\u09C1\u09A8",
+        duplicated: function(n) {
+          return '"' + n + '" \u09A8\u09BE\u09AE\u09C7 \u09A1\u09C1\u09AA\u09CD\u09B2\u09BF\u0995\u09C7\u099F \u0995\u09B0\u09BE \u09B9\u09AF\u09BC\u09C7\u099B\u09C7';
+        },
+        deselect: "\u09A8\u09BF\u09B0\u09CD\u09AC\u09BE\u099A\u09A8 \u09B8\u09B0\u09BE\u09A8",
+        footerDragReorder: "\u09AA\u09C1\u09A8\u09B0\u09BE\u09AF\u09BC \u09B8\u09BE\u099C\u09BE\u09A4\u09C7 \u099F\u09C7\u09A8\u09C7 \u0986\u09A8\u09C1\u09A8",
+        footerDragToGroup: "\u09B8\u09B0\u09BE\u09A4\u09C7 \u0997\u09CD\u09B0\u09C1\u09AA \u099F\u09CD\u09AF\u09BE\u09AC\u09C7 \u099F\u09C7\u09A8\u09C7 \u0986\u09A8\u09C1\u09A8",
+        defaultLabel: "(\u09A1\u09BF\u09AB\u09B2\u09CD\u099F)",
+        rename: "\u09A8\u09BE\u09AE \u09AC\u09A6\u09B2\u09BE\u09A8",
+        delete: "\u09AE\u09C1\u099B\u09C1\u09A8",
+        remove: "\u09B8\u09B0\u09BE\u09A8",
+        cancel: "\u09AC\u09BE\u09A4\u09BF\u09B2",
+        ribbonTooltip: "Workspace++",
+        cmdSwitchTo: function(n, name) {
+          return name ? "\u09B8\u09C7\u09B6\u09A8 " + n + "-\u098F \u09B8\u09C1\u0987\u099A \u0995\u09B0\u09C1\u09A8: " + name : "\u09B8\u09C7\u09B6\u09A8 " + n + "-\u098F \u09B8\u09C1\u0987\u099A \u0995\u09B0\u09C1\u09A8";
+        },
+        cmdSwitchToNamed: function(name) {
+          return '"' + name + '"-\u098F \u09B8\u09C1\u0987\u099A \u0995\u09B0\u09C1\u09A8';
+        },
+        cmdPrevious: "\u0986\u0997\u09C7\u09B0 \u09B8\u09C7\u09B6\u09A8",
+        cmdNext: "\u09AA\u09B0\u09C7\u09B0 \u09B8\u09C7\u09B6\u09A8",
+        cmdSaveCurrent: "\u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u09B8\u09C7\u09B6\u09A8 \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3 \u0995\u09B0\u09C1\u09A8",
+        cmdSaveAs: "\u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u09B8\u09C7\u09B6\u09A8 \u098F\u0987 \u09A8\u09BE\u09AE\u09C7 \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3 \u0995\u09B0\u09C1\u09A8...",
+        cmdSaveCurrentLayoutToSession: "\u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u09B2\u09C7\u0986\u0989\u099F \u09B8\u09C7\u09B6\u09A8\u09C7 \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3 \u0995\u09B0\u09C1\u09A8...",
+        cmdReloadCurrentWithoutSaving: "\u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u09B8\u09C7\u09B6\u09A8 \u09AA\u09C1\u09A8\u09B0\u09BE\u09AF\u09BC \u09B2\u09CB\u09A1 \u0995\u09B0\u09C1\u09A8 (\u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3 \u099B\u09BE\u09A1\u09BC\u09BE)",
+        cmdToggleAutoSave: "\u09B8\u09C7\u09B6\u09A8 \u09B8\u09C1\u0987\u099A\u09C7 \u0985\u099F\u09CB-\u09B8\u09C7\u09AD \u099F\u0997\u09B2 \u0995\u09B0\u09C1\u09A8",
+        cmdEnableAutoSave: "\u09B8\u09C7\u09B6\u09A8 \u09B8\u09C1\u0987\u099A\u09C7 \u0985\u099F\u09CB-\u09B8\u09C7\u09AD \u099A\u09BE\u09B2\u09C1 \u0995\u09B0\u09C1\u09A8",
+        cmdDisableAutoSave: "\u09B8\u09C7\u09B6\u09A8 \u09B8\u09C1\u0987\u099A\u09C7 \u0985\u099F\u09CB-\u09B8\u09C7\u09AD \u09AC\u09A8\u09CD\u09A7 \u0995\u09B0\u09C1\u09A8",
+        cmdSearchOverlay: "\u09B8\u09C7\u09B6\u09A8 \u0996\u09C1\u0981\u099C\u09C1\u09A8",
+        cmdExportSessions: "\u09B8\u09C7\u09B6\u09A8 \u09B8\u09CD\u09A8\u09CD\u09AF\u09BE\u09AA\u09B6\u099F \u098F\u0995\u09CD\u09B8\u09AA\u09CB\u09B0\u09CD\u099F \u0995\u09B0\u09C1\u09A8",
+        cmdImportSessions: "\u09B8\u09B0\u09CD\u09AC\u09B6\u09C7\u09B7 \u09B8\u09C7\u09B6\u09A8 \u09B8\u09CD\u09A8\u09CD\u09AF\u09BE\u09AA\u09B6\u099F \u0987\u09AE\u09AA\u09CB\u09B0\u09CD\u099F \u0995\u09B0\u09C1\u09A8",
+        switchLeft: "\u09AC\u09BE\u09AE",
+        switchRight: "\u09A1\u09BE\u09A8",
+        switchGroup: "\u0997\u09CD\u09B0\u09C1\u09AA",
+        keyTab: "Tab",
+        savedSession: function(n) {
+          return '"' + n + '" \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09BF\u09A4 \u09B9\u09AF\u09BC\u09C7\u099B\u09C7';
+        },
+        savedAs: function(n) {
+          return '"' + n + '" \u09A8\u09BE\u09AE\u09C7 \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09BF\u09A4 \u09B9\u09AF\u09BC\u09C7\u099B\u09C7';
+        },
+        savedCurrentLayoutToSession: function(n) {
+          return '\u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u09B2\u09C7\u0986\u0989\u099F "' + n + '"-\u098F \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09BF\u09A4 \u09B9\u09AF\u09BC\u09C7\u099B\u09C7';
+        },
+        noChanges: "\u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3 \u0995\u09B0\u09BE\u09B0 \u09AE\u09A4\u09CB \u0995\u09CB\u09A8\u09CB \u09AA\u09B0\u09BF\u09AC\u09B0\u09CD\u09A4\u09A8 \u09A8\u09C7\u0987",
+        reloadedSession: function(n) {
+          return '"' + n + '" \u09AA\u09C1\u09A8\u09B0\u09BE\u09AF\u09BC \u09B2\u09CB\u09A1 \u09B9\u09AF\u09BC\u09C7\u099B\u09C7';
+        },
+        autoSaveEnabled: "\u09B8\u09C7\u09B6\u09A8 \u09B8\u09C1\u0987\u099A\u09C7 \u0985\u099F\u09CB-\u09B8\u09C7\u09AD \u099A\u09BE\u09B2\u09C1 \u09B9\u09AF\u09BC\u09C7\u099B\u09C7\u0964",
+        autoSaveDisabled: "\u09B8\u09C7\u09B6\u09A8 \u09B8\u09C1\u0987\u099A\u09C7 \u0985\u099F\u09CB-\u09B8\u09C7\u09AD \u09AC\u09A8\u09CD\u09A7 \u09B9\u09AF\u09BC\u09C7\u099B\u09C7\u0964",
+        confirmUnsavedSwitch: function(n) {
+          return '\u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u09B8\u09C7\u09B6\u09A8\u09C7 \u0985\u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09BF\u09A4 \u09AA\u09B0\u09BF\u09AC\u09B0\u09CD\u09A4\u09A8 \u0986\u099B\u09C7\u0964 "' + n + '"-\u098F \u09B8\u09C1\u0987\u099A \u0995\u09B0\u09AC\u09C7\u09A8?';
+        },
+        saveAndSwitch: "\u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3 \u0995\u09B0\u09C7 \u09B8\u09C1\u0987\u099A \u0995\u09B0\u09C1\u09A8",
+        switchWithoutSaving: "\u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3 \u09A8\u09BE \u0995\u09B0\u09C7 \u09B8\u09C1\u0987\u099A \u0995\u09B0\u09C1\u09A8",
+        defaultSessionName: "\u09A1\u09BF\u09AB\u09B2\u09CD\u099F",
+        nameSessionTitle: "\u09B8\u09C7\u09B6\u09A8\u09C7\u09B0 \u09A8\u09BE\u09AE \u09A6\u09BF\u09AF\u09BC\u09C7 \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3",
+        nameSessionPlaceholder: "\u09B8\u09C7\u09B6\u09A8\u09C7\u09B0 \u09A8\u09BE\u09AE...",
+        saveWithoutNaming: "\u09A8\u09BE\u09AE \u09A8\u09BE \u09A6\u09BF\u09AF\u09BC\u09C7 \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3",
+        sessionAutoName: function(n) {
+          return "\u09A8\u09A4\u09C1\u09A8 \u09B8\u09C7\u09B6\u09A8 " + n;
+        },
+        noFilteredSessions: "\u09AE\u09BF\u09B2 \u09A5\u09BE\u0995\u09BE \u0995\u09CB\u09A8\u09CB \u09B8\u09C7\u09B6\u09A8 \u09A8\u09C7\u0987",
+        noGroupSessions: "\u098F\u0987 \u0997\u09CD\u09B0\u09C1\u09AA\u09C7 \u0995\u09CB\u09A8\u09CB \u09B8\u09C7\u09B6\u09A8 \u09A8\u09C7\u0987",
+        searchOverlayPlaceholder: "\u09B8\u09C7\u09B6\u09A8 \u09AB\u09BF\u09B2\u09CD\u099F\u09BE\u09B0 \u0995\u09B0\u09A4\u09C7 \u099F\u09BE\u0987\u09AA \u0995\u09B0\u09C1\u09A8...",
+        saveCurrentLayoutToSessionPlaceholder: "\u0993\u09AD\u09BE\u09B0\u09B0\u09BE\u0987\u099F \u0995\u09B0\u09BE\u09B0 \u09B8\u09C7\u09B6\u09A8 \u09AC\u09C7\u099B\u09C7 \u09A8\u09BF\u09A8...",
+        searchOverlayHelp: "\u2191\u2193 \u09B8\u09B0\u09BE\u09A8  /  Enter \u09B8\u09C1\u0987\u099A  /  \u21E7Enter \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3  /  \u232B \u09AE\u09C1\u099B\u09C1\u09A8  /  Esc \u09AC\u09A8\u09CD\u09A7",
+        backupRestored: "Workspace++: \u09AC\u09CD\u09AF\u09BE\u0995\u0986\u09AA \u09A5\u09C7\u0995\u09C7 \u09B8\u09C7\u09B6\u09A8 \u09AA\u09C1\u09A8\u09B0\u09C1\u09A6\u09CD\u09A7\u09BE\u09B0 \u0995\u09B0\u09BE \u09B9\u09AF\u09BC\u09C7\u099B\u09C7\u0964",
+        sessionDataMigrated: "Workspace++: \u09B8\u09C7\u09B6\u09A8 \u09A1\u09C7\u099F\u09BE .workspace-plus-plus/sessions.json-\u098F \u09B8\u09B0\u09BE\u09A8\u09CB \u09B9\u09AF\u09BC\u09C7\u099B\u09C7\u0964",
+        sessionDataMigrationFailed: "Workspace++: \u09B8\u09C7\u09B6\u09A8 \u09A1\u09C7\u099F\u09BE \u09B8\u09B0\u09BE\u09A8\u09CB \u09AF\u09BE\u09AF\u09BC\u09A8\u09BF\u0964 \u09AA\u09C1\u09B0\u09CB\u09A8\u09CB \u09A1\u09C7\u099F\u09BE \u098F\u0996\u09A8\u0993 \u09B0\u09BE\u0996\u09BE \u09B9\u09AF\u09BC\u09C7\u099B\u09C7\u0964",
+        localSettingsEnabled: "Workspace++: vault-\u09A8\u09BF\u09B0\u09CD\u09A6\u09BF\u09B7\u09CD\u099F \u09B8\u09C7\u099F\u09BF\u0982 \u099A\u09BE\u09B2\u09C1 \u09B9\u09AF\u09BC\u09C7\u099B\u09C7\u0964",
+        localSettingsDisabled: "Workspace++: vault-\u09A8\u09BF\u09B0\u09CD\u09A6\u09BF\u09B7\u09CD\u099F \u09B8\u09C7\u099F\u09BF\u0982 \u09AC\u09A8\u09CD\u09A7 \u09B9\u09AF\u09BC\u09C7\u099B\u09C7\u0964",
+        localSettingsCopied: "Workspace++: \u0997\u09CD\u09B2\u09CB\u09AC\u09BE\u09B2 \u09B8\u09C7\u099F\u09BF\u0982 vault-\u09A8\u09BF\u09B0\u09CD\u09A6\u09BF\u09B7\u09CD\u099F \u09B8\u09C7\u099F\u09BF\u0982\u09AF\u09BC\u09C7 \u0995\u09AA\u09BF \u0995\u09B0\u09BE \u09B9\u09AF\u09BC\u09C7\u099B\u09C7\u0964",
+        localSettingsLoadFailed: "Workspace++: vault-\u09A8\u09BF\u09B0\u09CD\u09A6\u09BF\u09B7\u09CD\u099F \u09B8\u09C7\u099F\u09BF\u0982 \u09B2\u09CB\u09A1 \u0995\u09B0\u09BE \u09AF\u09BE\u09AF\u09BC\u09A8\u09BF\u0964 \u0997\u09CD\u09B2\u09CB\u09AC\u09BE\u09B2 \u09B8\u09C7\u099F\u09BF\u0982 \u09AC\u09CD\u09AF\u09AC\u09B9\u09BE\u09B0 \u0995\u09B0\u09BE \u09B9\u09AC\u09C7\u0964",
+        localSettingsOperationFailed: "Workspace++: vault-\u09A8\u09BF\u09B0\u09CD\u09A6\u09BF\u09B7\u09CD\u099F \u09B8\u09C7\u099F\u09BF\u0982 \u0986\u09AA\u09A1\u09C7\u099F \u0995\u09B0\u09BE \u09AF\u09BE\u09AF\u09BC\u09A8\u09BF\u0964",
+        exportSessionsDone: function(path) {
+          return "Workspace++: \u09B8\u09C7\u09B6\u09A8 " + path + "-\u098F \u098F\u0995\u09CD\u09B8\u09AA\u09CB\u09B0\u09CD\u099F \u0995\u09B0\u09BE \u09B9\u09AF\u09BC\u09C7\u099B\u09C7";
+        },
+        exportSessionsFailed: "Workspace++: \u09B8\u09C7\u09B6\u09A8 \u098F\u0995\u09CD\u09B8\u09AA\u09CB\u09B0\u09CD\u099F \u0995\u09B0\u09BE \u09AF\u09BE\u09AF\u09BC\u09A8\u09BF\u0964",
+        importSessionsDone: function(path) {
+          return "Workspace++: \u09B8\u09C7\u09B6\u09A8 " + path + " \u09A5\u09C7\u0995\u09C7 \u0987\u09AE\u09AA\u09CB\u09B0\u09CD\u099F \u0995\u09B0\u09BE \u09B9\u09AF\u09BC\u09C7\u099B\u09C7";
+        },
+        importSessionsNoFile: "Workspace++: .workspace-plus-plus/exports-\u098F \u0995\u09CB\u09A8\u09CB \u098F\u0995\u09CD\u09B8\u09AA\u09CB\u09B0\u09CD\u099F \u09AB\u09BE\u0987\u09B2 \u09AA\u09BE\u0993\u09AF\u09BC\u09BE \u09AF\u09BE\u09AF\u09BC\u09A8\u09BF\u0964",
+        importSessionsFailed: "Workspace++: \u09B8\u09C7\u09B6\u09A8 \u0987\u09AE\u09AA\u09CB\u09B0\u09CD\u099F \u0995\u09B0\u09BE \u09AF\u09BE\u09AF\u09BC\u09A8\u09BF\u0964",
+        settingsLanguage: "\u09AD\u09BE\u09B7\u09BE",
+        settingsLanguageDesc: "\u09AA\u09CD\u09B2\u09BE\u0997\u0987\u09A8 UI \u09AD\u09BE\u09B7\u09BE\u0964 \u0995\u09AE\u09BE\u09A8\u09CD\u09A1 \u09A8\u09BE\u09AE\u0997\u09C1\u09B2\u09CB\u09A4\u09C7 \u09AA\u09CD\u09B0\u09AF\u09BC\u09CB\u0997 \u0995\u09B0\u09A4\u09C7 Obsidian \u09AA\u09C1\u09A8\u09B0\u09BE\u09AF\u09BC \u099A\u09BE\u09B2\u09C1 \u0995\u09B0\u09C1\u09A8\u0964",
+        settingsSectionGeneral: "\u09B8\u09BE\u09A7\u09BE\u09B0\u09A3",
+        settingsTabSessions: "\u09B8\u09C7\u09B6\u09A8",
+        settingsSectionSwitching: "\u09B8\u09C7\u09B6\u09A8 \u09B8\u09C1\u0987\u099A\u09BF\u0982",
+        settingsSectionSwitchCommands: "\u09B8\u09C1\u0987\u099A \u0995\u09AE\u09BE\u09A8\u09CD\u09A1",
+        settingsSectionScrollSwitch: "\u09B8\u09CD\u0995\u09CD\u09B0\u09B2 \u09B8\u09C1\u0987\u099A\u09BF\u0982",
+        settingsSectionSwitchPreview: "\u09B8\u09C1\u0987\u099A \u0995\u09B0\u09BE\u09B0 \u0986\u0997\u09C7 \u09AA\u09CD\u09B0\u09BF\u09AD\u09BF\u0989",
+        settingsSubsectionSwitchSaving: "\u09B8\u09C7\u09B6\u09A8 \u09B8\u09C1\u0987\u099A \u0995\u09B0\u09BE\u09B0 \u09B8\u09AE\u09AF\u09BC \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3",
+        settingsSubsectionAutoSaveMode: "\u09B8\u09C7\u09B6\u09A8 \u0985\u099F\u09CB-\u09B8\u09C7\u09AD \u09AE\u09CB\u09A1",
+        settingsSubsectionSwitchCommands: "\u09B8\u09C7\u09B6\u09A8 \u09B8\u09C1\u0987\u099A\u09BF\u0982 \u0995\u09AE\u09BE\u09A8\u09CD\u09A1",
+        settingsSubsectionScrollSwitch: "\u09B8\u09CD\u0995\u09CD\u09B0\u09B2 \u09A6\u09BF\u09AF\u09BC\u09C7 \u09B8\u09C7\u09B6\u09A8 \u09B8\u09C1\u0987\u099A\u09BF\u0982",
+        settingsSubsectionSwitchPreview: "\u09B8\u09C7\u09B6\u09A8 \u09B8\u09C1\u0987\u099A \u0995\u09B0\u09BE\u09B0 \u0986\u0997\u09C7 \u09AA\u09CD\u09B0\u09BF\u09AD\u09BF\u0989",
+        settingsSectionDeletion: "\u09B8\u09C7\u09B6\u09A8 \u09AE\u09C1\u099B\u09C7 \u09AB\u09C7\u09B2\u09BE",
+        settingsSectionAdvanced: "\u0989\u09A8\u09CD\u09A8\u09A4",
+        settingsSectionReset: "\u09B0\u09BF\u09B8\u09C7\u099F",
+        settingsStatusBarModScrollSwitch: "\u09B8\u09CD\u099F\u09C7\u099F\u09BE\u09B8 \u09AC\u09BE\u09B0 \u09A5\u09C7\u0995\u09C7 \u09B8\u09C7\u09B6\u09A8 \u09B8\u09C1\u0987\u099A\u09BF\u0982 \u099A\u09BE\u09B2\u09C1 \u0995\u09B0\u09C1\u09A8",
+        settingsStatusBarModScrollSwitchDesc: "\u09B8\u09CD\u099F\u09C7\u099F\u09BE\u09B8 \u09AC\u09BE\u09B0 \u0986\u0987\u099F\u09C7\u09AE\u09C7\u09B0 \u0993\u09AA\u09B0 \u09A8\u09BF\u09B0\u09CD\u09AC\u09BE\u099A\u09BF\u09A4 \u09AE\u09A1\u09BF\u09AB\u09BE\u09AF\u09BC\u09BE\u09B0 \u0995\u09C0 \u09A7\u09B0\u09C7 \u09B0\u09C7\u0996\u09C7 \u0989\u09B2\u09CD\u09B2\u09AE\u09CD\u09AC\u09AD\u09BE\u09AC\u09C7 \u09B8\u09CD\u0995\u09CD\u09B0\u09B2 \u0995\u09B0\u09B2\u09C7 \u09B8\u09C7\u09B6\u09A8 \u09B8\u09C1\u0987\u099A \u09B9\u09AC\u09C7\u0964 \u09A5\u09CD\u09B0\u09C7\u09B6\u09B9\u09CB\u09B2\u09CD\u09A1 \u0993 \u0995\u09C1\u09B2\u09A1\u09BE\u0989\u09A8 \u099F\u09CD\u09B0\u09CD\u09AF\u09BE\u0995\u09AA\u09CD\u09AF\u09BE\u09A1\u09C7\u09B0 \u09AD\u09C1\u09B2 \u099F\u09CD\u09B0\u09BF\u0997\u09BE\u09B0 \u0995\u09AE\u09BE\u09AF\u09BC\u0964",
+        settingsStatusBarScrollPreset: "\u09B8\u09CD\u0995\u09CD\u09B0\u09B2 \u0987\u09A8\u09AA\u09C1\u099F \u09AA\u09CD\u09B0\u09BF\u09B8\u09C7\u099F",
+        settingsStatusBarScrollPresetDesc: "\u0986\u09AA\u09A8\u09BE\u09B0 \u09A1\u09BF\u09AD\u09BE\u0987\u09B8\u09C7\u09B0 \u099C\u09A8\u09CD\u09AF \u099F\u09BF\u0989\u09A8 \u0995\u09B0\u09BE \u09AA\u09CD\u09B0\u09BF\u09B8\u09C7\u099F \u09AC\u09C7\u099B\u09C7 \u09A8\u09BF\u09A8, \u0985\u09A5\u09AC\u09BE \u09A8\u09BF\u099C\u09C7 \u09AE\u09BE\u09A8 \u09AC\u09A6\u09B2\u09BE\u09A4\u09C7 \u0995\u09BE\u09B8\u09CD\u099F\u09AE \u09AC\u09C7\u099B\u09C7 \u09A8\u09BF\u09A8\u0964",
+        settingsStatusBarScrollPresetTrackpad: "\u099F\u09CD\u09B0\u09CD\u09AF\u09BE\u0995\u09AA\u09CD\u09AF\u09BE\u09A1",
+        settingsStatusBarScrollPresetNotchedWheel: "\u09A8\u099A\u09AF\u09C1\u0995\u09CD\u09A4 \u09AE\u09BE\u0989\u09B8 \u09B9\u09C1\u0987\u09B2",
+        settingsStatusBarScrollPresetFreeSpinWheel: "\u09AB\u09CD\u09B0\u09BF-\u09B8\u09CD\u09AA\u09BF\u09A8 \u09AE\u09BE\u0989\u09B8 \u09B9\u09C1\u0987\u09B2",
+        settingsStatusBarScrollPresetCustom: "\u0995\u09BE\u09B8\u09CD\u099F\u09AE",
+        settingsStatusBarScrollModifier: "\u09AA\u09CD\u09B0\u09AF\u09BC\u09CB\u099C\u09A8\u09C0\u09AF\u09BC \u09AE\u09A1\u09BF\u09AB\u09BE\u09AF\u09BC\u09BE\u09B0",
+        settingsStatusBarScrollModifierDesc: "\u09B8\u09CD\u099F\u09C7\u099F\u09BE\u09B8 \u09AC\u09BE\u09B0 \u0986\u0987\u099F\u09C7\u09AE\u09C7 \u09B8\u09CD\u0995\u09CD\u09B0\u09B2 \u0995\u09B0\u09BE\u09B0 \u09B8\u09AE\u09AF\u09BC \u0995\u09CB\u09A8 \u09AE\u09A1\u09BF\u09AB\u09BE\u09AF\u09BC\u09BE\u09B0 \u0995\u09C0 \u09A7\u09B0\u09C7 \u09B0\u09BE\u0996\u09A4\u09C7 \u09B9\u09AC\u09C7 \u09A4\u09BE \u09AC\u09C7\u099B\u09C7 \u09A8\u09BF\u09A8\u0964",
+        settingsStatusBarScrollModifierRecommended: "Cmd \u09AC\u09BE Option",
+        settingsStatusBarScrollModifierNone: "\u0995\u09CB\u09A8\u09CB\u099F\u09BF \u09A8\u09AF\u09BC",
+        settingsStatusBarScrollModifierModOnly: "\u09B6\u09C1\u09A7\u09C1 Cmd",
+        settingsStatusBarScrollModifierAltOnly: "\u09B6\u09C1\u09A7\u09C1 Option",
+        settingsStatusBarScrollModifierModOrAlt: "Cmd \u09AC\u09BE Option",
+        settingsStatusBarScrollThreshold: "\u09B8\u0982\u09AC\u09C7\u09A6\u09A8\u09B6\u09C0\u09B2\u09A4\u09BE\u09B0 \u09A5\u09CD\u09B0\u09C7\u09B6\u09B9\u09CB\u09B2\u09CD\u09A1",
+        settingsStatusBarScrollThresholdDesc: "\u09AE\u09BE\u09A8 \u0995\u09AE \u09B9\u09B2\u09C7 \u09B8\u09B9\u099C\u09C7 \u09B8\u09C1\u0987\u099A \u09B9\u09AC\u09C7\u0964 \u09B6\u09C1\u09A7\u09C1 \u0995\u09BE\u09B8\u09CD\u099F\u09AE \u09AA\u09CD\u09B0\u09BF\u09B8\u09C7\u099F\u09C7 \u09AC\u09CD\u09AF\u09AC\u09B9\u09C3\u09A4 \u09B9\u09AF\u09BC\u0964",
+        settingsStatusBarScrollCooldown: "\u0995\u09C1\u09B2\u09A1\u09BE\u0989\u09A8",
+        settingsStatusBarScrollCooldownDesc: "\u09B8\u09CD\u0995\u09CD\u09B0\u09B2-\u099F\u09CD\u09B0\u09BF\u0997\u09BE\u09B0 \u0995\u09B0\u09BE \u09B8\u09C7\u09B6\u09A8 \u09B8\u09C1\u0987\u099A\u09C7\u09B0 \u09AE\u09A7\u09CD\u09AF\u09C7 \u09A8\u09CD\u09AF\u09C2\u09A8\u09A4\u09AE \u09B8\u09AE\u09AF\u09BC\u0964 \u09B6\u09C1\u09A7\u09C1 \u0995\u09BE\u09B8\u09CD\u099F\u09AE \u09AA\u09CD\u09B0\u09BF\u09B8\u09C7\u099F\u09C7 \u09AC\u09CD\u09AF\u09AC\u09B9\u09C3\u09A4 \u09B9\u09AF\u09BC\u0964",
+        settingsStatusBarScrollResetWindow: "\u09B8\u099E\u09CD\u099A\u09AF\u09BC \u09B0\u09BF\u09B8\u09C7\u099F \u0989\u0987\u09A8\u09CD\u09A1\u09CB",
+        settingsStatusBarScrollResetWindowDesc: "\u09B0\u09BF\u09B8\u09C7\u099F \u0995\u09B0\u09BE\u09B0 \u0986\u0997\u09C7 \u099B\u09CB\u099F \u09B8\u09CD\u0995\u09CD\u09B0\u09B2 \u09AA\u09BE\u09B0\u09CD\u09A5\u0995\u09CD\u09AF \u0995\u09A4\u0995\u09CD\u09B7\u09A3 \u098F\u0995\u09B8\u0999\u09CD\u0997\u09C7 \u099C\u09AE\u09BE \u09B0\u09BE\u0996\u09BE \u09B9\u09AC\u09C7\u0964 \u09B6\u09C1\u09A7\u09C1 \u0995\u09BE\u09B8\u09CD\u099F\u09AE \u09AA\u09CD\u09B0\u09BF\u09B8\u09C7\u099F\u09C7 \u09AC\u09CD\u09AF\u09AC\u09B9\u09C3\u09A4 \u09B9\u09AF\u09BC\u0964",
+        settingsStatusBarScrollInvert: "\u09B8\u09CD\u0995\u09CD\u09B0\u09B2\u09C7\u09B0 \u09A6\u09BF\u0995 \u0989\u09B2\u09CD\u099F\u09BE\u09A8",
+        settingsStatusBarScrollInvertDesc: "\u09B8\u09CD\u099F\u09C7\u099F\u09BE\u09B8 \u09AC\u09BE\u09B0 \u09B8\u09CD\u0995\u09CD\u09B0\u09B2 \u09B8\u09C1\u0987\u099A\u09BF\u0982\u09AF\u09BC\u09C7 \u0986\u0997\u09C7\u09B0/\u09AA\u09B0\u09C7\u09B0 \u09A6\u09BF\u0995 \u0989\u09B2\u09CD\u099F\u09C7 \u09A6\u09BF\u09A8\u0964",
+        settingsLangAuto: "\u09B8\u09CD\u09AC\u09AF\u09BC\u0982\u0995\u09CD\u09B0\u09BF\u09AF\u09BC (\u09B8\u09BF\u09B8\u09CD\u099F\u09C7\u09AE \u09AD\u09BE\u09B7\u09BE)",
+        settingsGitHubLink: "GitHub",
+        settingsTranslationHelp: "\u0985\u09A8\u09C1\u09AC\u09BE\u09A6\u09C7 \u09AD\u09C1\u09B2 \u09AA\u09C7\u09AF\u09BC\u09C7\u099B\u09C7\u09A8? \u0985\u09A8\u09C1\u0997\u09CD\u09B0\u09B9 \u0995\u09B0\u09C7 GitHub-\u098F issue \u09AC\u09BE pull request \u0996\u09C1\u09B2\u09C1\u09A8\u0964",
+        settingsPreviewHeading: "\u09B8\u09C7\u09B6\u09A8 \u09B8\u09C1\u0987\u099A \u0995\u09B0\u09BE\u09B0 \u0986\u0997\u09C7 \u09AA\u09CD\u09B0\u09BF\u09AD\u09BF\u0989 \u099A\u09BE\u09B2\u09C1 \u0995\u09B0\u09C1\u09A8",
+        settingsPreviewDesc: "\u09B9\u099F\u0995\u09BF \u09A6\u09BF\u09AF\u09BC\u09C7 \u09B8\u09C7\u09B6\u09A8 \u09B8\u09C1\u0987\u099A \u0995\u09B0\u09BE\u09B0 \u09B8\u09AE\u09AF\u09BC \u09AA\u09CD\u09B0\u09A5\u09AE \u099A\u09BE\u09AA \u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u0985\u09AC\u09B8\u09CD\u09A5\u09BE\u09A8 \u09A6\u09C7\u0996\u09BE\u09AF\u09BC, \u09B8\u09C1\u0987\u099A \u0995\u09B0\u09C7 \u09A8\u09BE\u0964",
+        settingsPreviewNext: "\u09AA\u09B0\u09C7\u09B0 \u09B8\u09C7\u09B6\u09A8",
+        settingsPreviewPrevious: "\u0986\u0997\u09C7\u09B0 \u09B8\u09C7\u09B6\u09A8",
+        settingsHotkeys: "\u09B9\u099F\u0995\u09BF",
+        settingsHotkeysBtn: "\u09B9\u099F\u0995\u09BF \u09B8\u09C7\u099F\u09BF\u0982 \u0996\u09C1\u09B2\u09C1\u09A8",
+        contextOpenSettings: "\u09B8\u09C7\u099F\u09BF\u0982 \u0996\u09C1\u09B2\u09C1\u09A8",
+        contextCustomizeClicks: "\u0995\u09CD\u09B2\u09BF\u0995 \u0985\u09CD\u09AF\u09BE\u0995\u09B6\u09A8 \u0995\u09BE\u09B8\u09CD\u099F\u09AE\u09BE\u0987\u099C \u0995\u09B0\u09C1\u09A8",
+        settingsSectionStatusBar: "\u09B8\u09CD\u099F\u09C7\u099F\u09BE\u09B8 \u09AC\u09BE\u09B0 \u0995\u09CD\u09B2\u09BF\u0995 \u0985\u09CD\u09AF\u09BE\u0995\u09B6\u09A8",
+        statusBarSlotClick: "\u0995\u09CD\u09B2\u09BF\u0995",
+        statusBarSlotAltClick: function() {
+          return (typeof navigator !== "undefined" && navigator.platform.indexOf("Mac") !== -1 ? "\u2325" : "Alt") + " + \u0995\u09CD\u09B2\u09BF\u0995";
+        },
+        statusBarSlotModClick: function() {
+          return (typeof navigator !== "undefined" && navigator.platform.indexOf("Mac") !== -1 ? "\u2318" : "Ctrl") + " + \u0995\u09CD\u09B2\u09BF\u0995";
+        },
+        statusBarSlotShiftClick: function() {
+          return (typeof navigator !== "undefined" && navigator.platform.indexOf("Mac") !== -1 ? "\u21E7" : "Shift") + " + \u0995\u09CD\u09B2\u09BF\u0995";
+        },
+        statusBarSlotMiddleClick: "\u09AE\u09BF\u09A1\u09B2-\u0995\u09CD\u09B2\u09BF\u0995",
+        statusBarSlotAltMiddleClick: modifiedClickLabel("\u09AE\u09BF\u09A1\u09B2-\u0995\u09CD\u09B2\u09BF\u0995", "\u2325", "Alt"),
+        statusBarSlotModMiddleClick: modifiedClickLabel("\u09AE\u09BF\u09A1\u09B2-\u0995\u09CD\u09B2\u09BF\u0995", "\u2318", "Ctrl"),
+        statusBarSlotShiftMiddleClick: modifiedClickLabel("\u09AE\u09BF\u09A1\u09B2-\u0995\u09CD\u09B2\u09BF\u0995", "\u21E7", "Shift"),
+        statusBarSlotRightClick: "\u09B0\u09BE\u0987\u099F-\u0995\u09CD\u09B2\u09BF\u0995",
+        statusBarSlotAltRightClick: function() {
+          return (typeof navigator !== "undefined" && navigator.platform.indexOf("Mac") !== -1 ? "\u2325" : "Alt") + " + \u09B0\u09BE\u0987\u099F-\u0995\u09CD\u09B2\u09BF\u0995";
+        },
+        statusBarSlotModRightClick: function() {
+          return (typeof navigator !== "undefined" && navigator.platform.indexOf("Mac") !== -1 ? "\u2318" : "Ctrl") + " + \u09B0\u09BE\u0987\u099F-\u0995\u09CD\u09B2\u09BF\u0995";
+        },
+        statusBarSlotShiftRightClick: function() {
+          return (typeof navigator !== "undefined" && navigator.platform.indexOf("Mac") !== -1 ? "\u21E7" : "Shift") + " + \u09B0\u09BE\u0987\u099F-\u0995\u09CD\u09B2\u09BF\u0995";
+        },
+        statusBarActionNone: "\u0995\u09BF\u099B\u09C1 \u0995\u09B0\u09AC\u09C7\u09A8 \u09A8\u09BE",
+        statusBarActionQuickSwitcher: "\u0995\u09C1\u0987\u0995 \u09B8\u09C1\u0987\u099A\u09BE\u09B0 \u0996\u09C1\u09B2\u09C1\u09A8",
+        statusBarActionSessionManager: "\u09B8\u09C7\u09B6\u09A8 \u09AE\u09CD\u09AF\u09BE\u09A8\u09C7\u099C\u09BE\u09B0 \u0996\u09C1\u09B2\u09C1\u09A8",
+        statusBarActionSaveSession: "\u09B8\u09C7\u09B6\u09A8 \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3 \u0995\u09B0\u09C1\u09A8",
+        statusBarActionReloadWithoutSaving: "\u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3 \u099B\u09BE\u09A1\u09BC\u09BE \u09AA\u09C1\u09A8\u09B0\u09BE\u09AF\u09BC \u09B2\u09CB\u09A1",
+        statusBarActionVersionHistory: "\u09AD\u09BE\u09B0\u09CD\u09B8\u09A8 \u0987\u09A4\u09BF\u09B9\u09BE\u09B8 \u09A6\u09C7\u0996\u09BE\u09A8",
+        statusBarActionRestoreLatestHistory: "\u09B8\u09B0\u09CD\u09AC\u09B6\u09C7\u09B7 \u0987\u09A4\u09BF\u09B9\u09BE\u09B8 \u09AA\u09C1\u09A8\u09B0\u09C1\u09A6\u09CD\u09A7\u09BE\u09B0 \u0995\u09B0\u09C1\u09A8",
+        statusBarActionSessionMenu: "\u09B8\u09C7\u09B6\u09A8 \u09AA\u09CD\u09B0\u09B8\u0999\u09CD\u0997 \u09AE\u09C7\u09A8\u09C1",
+        statusBarActionSettingsMenu: "\u09B8\u09C7\u099F\u09BF\u0982 \u09AA\u09CD\u09B0\u09B8\u0999\u09CD\u0997 \u09AE\u09C7\u09A8\u09C1",
+        contextResetOverlayPosition: "\u0985\u09AC\u09B8\u09CD\u09A5\u09BE\u09A8 \u0993 \u0986\u0995\u09BE\u09B0 \u09B0\u09BF\u09B8\u09C7\u099F \u0995\u09B0\u09C1\u09A8",
+        settingsConfirmDelete: "\u09B8\u09C7\u09B6\u09A8 \u09AE\u09C1\u099B\u09BE\u09B0 \u0986\u0997\u09C7 \u09A8\u09BF\u09B6\u09CD\u099A\u09BF\u09A4 \u0995\u09B0\u09C1\u09A8",
+        settingsConfirmDeleteDesc: "\u09B8\u09C7\u09B6\u09A8 \u09AE\u09C1\u099B\u09BE\u09B0 \u0986\u0997\u09C7 \u098F\u0995\u099F\u09BF \u09A8\u09BF\u09B6\u09CD\u099A\u09BF\u09A4\u0995\u09B0\u09A3 \u09A1\u09BE\u09AF\u09BC\u09BE\u09B2\u0997 \u09A6\u09C7\u0996\u09BE\u09A8\u0964",
+        settingsConfirmQuickActions: "\u0995\u09C1\u0987\u0995 \u09B8\u09C1\u0987\u099A\u09BE\u09B0\u09C7 \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3/\u09B0\u09BF\u09B2\u09CB\u09A1\u09C7\u09B0 \u0986\u0997\u09C7 \u09A8\u09BF\u09B6\u09CD\u099A\u09BF\u09A4 \u0995\u09B0\u09C1\u09A8",
+        settingsConfirmQuickActionsDesc: "\u0995\u09C1\u0987\u0995 \u09B8\u09C1\u0987\u099A\u09BE\u09B0 \u0993\u09AD\u09BE\u09B0\u09B2\u09C7 \u09A5\u09C7\u0995\u09C7 \u09B8\u09C7\u09B6\u09A8 \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3 \u09AC\u09BE \u09AA\u09C1\u09A8\u09B0\u09BE\u09AF\u09BC \u09B2\u09CB\u09A1 \u0995\u09B0\u09BE\u09B0 \u0986\u0997\u09C7 \u09A8\u09BF\u09B6\u09CD\u099A\u09BF\u09A4\u0995\u09B0\u09A3 \u09A1\u09BE\u09AF\u09BC\u09BE\u09B2\u0997 \u09A6\u09C7\u0996\u09BE\u09A8\u0964",
+        settingsAutoSaveOnSwitch: "\u0985\u099F\u09CB-\u09B8\u09C7\u09AD \u09AE\u09CB\u09A1",
+        settingsAutoSaveOnSwitchDesc: "\u09B8\u09C7\u09B6\u09A8 \u09B8\u09C1\u0987\u099A \u0995\u09B0\u09BE\u09B0 \u09B8\u09AE\u09AF\u09BC \u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u09B8\u09C7\u09B6\u09A8 \u09B8\u09CD\u09AC\u09AF\u09BC\u0982\u0995\u09CD\u09B0\u09BF\u09AF\u09BC\u09AD\u09BE\u09AC\u09C7 \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3 \u0995\u09B0\u09C7 (\u09A1\u09BF\u09AB\u09B2\u09CD\u099F: \u099A\u09BE\u09B2\u09C1)\u0964 \u09AC\u09A8\u09CD\u09A7 \u09A5\u09BE\u0995\u09B2\u09C7 \u0986\u09AA\u09A8\u09BF \u09B8\u09C7\u09B6\u09A8 \u09AE\u09CD\u09AF\u09BE\u09A8\u09C1\u09AF\u09BC\u09BE\u09B2\u09BF \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3 \u0993 \u09AA\u09C1\u09A8\u09B0\u09BE\u09AF\u09BC \u09B2\u09CB\u09A1 \u0995\u09B0\u09A4\u09C7 \u09AA\u09BE\u09B0\u09AC\u09C7\u09A8\u0964",
+        settingsWarnUnsavedSwitch: "\u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3 \u099B\u09BE\u09A1\u09BC\u09BE \u09B8\u09C1\u0987\u099A \u0995\u09B0\u09BE\u09B0 \u0986\u0997\u09C7 \u09B8\u09A4\u09B0\u09CD\u0995 \u0995\u09B0\u09C1\u09A8",
+        settingsWarnUnsavedSwitchDesc: "\u0985\u099F\u09CB-\u09B8\u09C7\u09AD \u09AC\u09A8\u09CD\u09A7 \u09A5\u09BE\u0995\u09B2\u09C7 \u098F\u09AC\u0982 \u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u09B8\u09C7\u09B6\u09A8\u09C7 \u0985\u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09BF\u09A4 \u09AA\u09B0\u09BF\u09AC\u09B0\u09CD\u09A4\u09A8 \u09A5\u09BE\u0995\u09B2\u09C7 \u09B8\u09C1\u0987\u099A \u0995\u09B0\u09BE\u09B0 \u0986\u0997\u09C7 \u09B8\u09A4\u09B0\u09CD\u0995\u09A4\u09BE \u09A6\u09C7\u0996\u09BE\u09A8\u0964",
+        settingsStatusBarQuickSwitcher: "\u09B8\u09CD\u099F\u09C7\u099F\u09BE\u09B8 \u09AC\u09BE\u09B0 \u0995\u09CD\u09B2\u09BF\u0995\u09C7 \u0995\u09C1\u0987\u0995 \u09B8\u09C1\u0987\u099A\u09BE\u09B0",
+        settingsStatusBarQuickSwitcherDesc: "\u099A\u09BE\u09B2\u09C1 \u09A5\u09BE\u0995\u09B2\u09C7, \u09B8\u09CD\u099F\u09C7\u099F\u09BE\u09B8 \u09AC\u09BE\u09B0\u09C7 \u0995\u09CD\u09B2\u09BF\u0995 \u0995\u09B0\u09B2\u09C7 \u09AA\u09C2\u09B0\u09CD\u09A3 \u09B8\u09C7\u09B6\u09A8 \u09AE\u09CD\u09AF\u09BE\u09A8\u09C7\u099C\u09BE\u09B0\u09C7\u09B0 \u09AC\u09A6\u09B2\u09C7 \u0995\u09C1\u0987\u0995 \u09B8\u09C1\u0987\u099A\u09BE\u09B0 \u0993\u09AD\u09BE\u09B0\u09B2\u09C7 \u0996\u09C1\u09B2\u09AC\u09C7\u0964",
+        settingsUseLocalSettings: "vault-\u09A8\u09BF\u09B0\u09CD\u09A6\u09BF\u09B7\u09CD\u099F \u09B8\u09C7\u099F\u09BF\u0982 \u09AC\u09CD\u09AF\u09AC\u09B9\u09BE\u09B0 \u0995\u09B0\u09C1\u09A8",
+        settingsUseLocalSettingsDesc: "\u0986\u09AA\u09A8\u09BF \u09AF\u09A6\u09BF \u098F\u0995\u09BE\u09A7\u09BF\u0995 vault-\u098F\u09B0 \u09AE\u09A7\u09CD\u09AF\u09C7 .obsidian \u09B8\u09BF\u0999\u09CD\u0995 \u0995\u09B0\u09C7\u09A8 (\u09AF\u09C7\u09AE\u09A8 Settings Profiles \u09A6\u09BF\u09AF\u09BC\u09C7) \u098F\u09AC\u0982 Workspace++ \u09B8\u09C7\u099F\u09BF\u0982 \u09AA\u09CD\u09B0\u09A4\u09BF\u099F\u09BF vault-\u098F \u0986\u09B2\u09BE\u09A6\u09BE \u09B0\u09BE\u0996\u09A4\u09C7 \u099A\u09BE\u09A8, \u098F\u099F\u09BF \u099A\u09BE\u09B2\u09C1 \u0995\u09B0\u09C1\u09A8\u0964",
+        settingsCopyGlobalToLocal: "\u0997\u09CD\u09B2\u09CB\u09AC\u09BE\u09B2 \u09B8\u09C7\u099F\u09BF\u0982 \u098F\u0987 vault-\u098F \u0995\u09AA\u09BF \u0995\u09B0\u09C1\u09A8",
+        settingsCopyGlobalToLocalDesc: "\u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u0997\u09CD\u09B2\u09CB\u09AC\u09BE\u09B2 \u09B8\u09C7\u099F\u09BF\u0982 \u09A6\u09BF\u09AF\u09BC\u09C7 vault-\u09A8\u09BF\u09B0\u09CD\u09A6\u09BF\u09B7\u09CD\u099F \u09B8\u09C7\u099F\u09BF\u0982 \u0993\u09AD\u09BE\u09B0\u09B0\u09BE\u0987\u099F \u0995\u09B0\u09C1\u09A8\u0964",
+        settingsCopyGlobalToLocalBtn: "\u0995\u09AA\u09BF",
+        settingsResetLocalSettings: "vault-\u09A8\u09BF\u09B0\u09CD\u09A6\u09BF\u09B7\u09CD\u099F \u09B8\u09C7\u099F\u09BF\u0982 \u09B0\u09BF\u09B8\u09C7\u099F \u0995\u09B0\u09C1\u09A8",
+        settingsResetLocalSettingsDesc: "vault-\u09A8\u09BF\u09B0\u09CD\u09A6\u09BF\u09B7\u09CD\u099F \u09B8\u09C7\u099F\u09BF\u0982 \u0986\u09AC\u09BE\u09B0 \u0997\u09CD\u09B2\u09CB\u09AC\u09BE\u09B2 \u09B8\u09C7\u099F\u09BF\u0982\u09AF\u09BC\u09C7 \u09AB\u09BF\u09B0\u09BF\u09AF\u09BC\u09C7 \u09A6\u09BF\u09A8\u0964",
+        settingsResetLocalSettingsBtn: "\u09B2\u09CB\u0995\u09BE\u09B2 \u09B0\u09BF\u09B8\u09C7\u099F",
+        settingsAdvancedStorageSubsection: "\u09B8\u09CD\u099F\u09CB\u09B0\u09C7\u099C \u0986\u099A\u09B0\u09A3",
+        settingsAdvancedTransferSubsection: "\u09A1\u09C7\u099F\u09BE \u09B8\u09CD\u09A5\u09BE\u09A8\u09BE\u09A8\u09CD\u09A4\u09B0",
+        settingsDeveloperSection: "\u09A1\u09C7\u09AD\u09C7\u09B2\u09AA\u09BE\u09B0 \u099F\u09C1\u09B2",
+        settingsStorageDiagnostics: "\u09B8\u09CD\u099F\u09CB\u09B0\u09C7\u099C \u09A1\u09BE\u09AF\u09BC\u09BE\u0997\u09A8\u09B8\u09CD\u099F\u09BF\u0995",
+        settingsStorageDiagnosticsDesc: "Workspace++ \u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8\u09C7 \u09AF\u09C7 \u09B8\u09CD\u099F\u09CB\u09B0\u09C7\u099C \u09A4\u09A5\u09CD\u09AF \u09AC\u09CD\u09AF\u09AC\u09B9\u09BE\u09B0 \u0995\u09B0\u099B\u09C7\u0964",
+        settingsStorageFieldSessions: "\u09B8\u09C7\u09B6\u09A8 \u09AB\u09BE\u0987\u09B2",
+        settingsStorageFieldSessionsBackup: "\u09B8\u09C7\u09B6\u09A8 \u09AC\u09CD\u09AF\u09BE\u0995\u0986\u09AA",
+        settingsStorageFieldLocalSettings: "\u09B2\u09CB\u0995\u09BE\u09B2 \u09B8\u09C7\u099F\u09BF\u0982 \u09AB\u09BE\u0987\u09B2",
+        settingsStorageFieldGlobalSettings: "\u0997\u09CD\u09B2\u09CB\u09AC\u09BE\u09B2 \u09B8\u09C7\u099F\u09BF\u0982 \u09AB\u09BE\u0987\u09B2",
+        settingsStorageFieldSessionCount: "\u09B8\u09C7\u09B6\u09A8 \u09B8\u0982\u0996\u09CD\u09AF\u09BE",
+        settingsStorageFieldUpdatedAt: "\u0986\u09AA\u09A1\u09C7\u099F \u09B8\u09AE\u09AF\u09BC",
+        settingsExportSessions: "\u09B8\u09C7\u09B6\u09A8 \u098F\u0995\u09CD\u09B8\u09AA\u09CB\u09B0\u09CD\u099F \u0995\u09B0\u09C1\u09A8",
+        settingsExportSessionsDesc: ".workspace-plus-plus/exports-\u098F \u098F\u0995\u099F\u09BF \u09B8\u09CD\u09A8\u09CD\u09AF\u09BE\u09AA\u09B6\u099F \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3 \u0995\u09B0\u09C1\u09A8\u0964",
+        settingsExportSessionsBtn: "\u098F\u0995\u09CD\u09B8\u09AA\u09CB\u09B0\u09CD\u099F",
+        settingsImportSessions: "\u09B8\u09C7\u09B6\u09A8 \u0987\u09AE\u09AA\u09CB\u09B0\u09CD\u099F \u0995\u09B0\u09C1\u09A8",
+        settingsImportSessionsDesc: ".workspace-plus-plus/exports \u09A5\u09C7\u0995\u09C7 \u09B8\u09B0\u09CD\u09AC\u09B6\u09C7\u09B7 \u09B8\u09CD\u09A8\u09CD\u09AF\u09BE\u09AA\u09B6\u099F \u0987\u09AE\u09AA\u09CB\u09B0\u09CD\u099F \u0995\u09B0\u09C1\u09A8\u0964",
+        settingsImportSessionsBtn: "\u09B8\u09B0\u09CD\u09AC\u09B6\u09C7\u09B7 \u0987\u09AE\u09AA\u09CB\u09B0\u09CD\u099F",
+        confirmImportSessions: "\u09B8\u09B0\u09CD\u09AC\u09B6\u09C7\u09B7 \u098F\u0995\u09CD\u09B8\u09AA\u09CB\u09B0\u09CD\u099F \u0995\u09B0\u09BE \u09B8\u09C7\u09B6\u09A8 \u0987\u09AE\u09AA\u09CB\u09B0\u09CD\u099F \u0995\u09B0\u09AC\u09C7\u09A8? \u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u09B8\u09C7\u09B6\u09A8\u0997\u09C1\u09B2\u09CB \u09AA\u09CD\u09B0\u09A4\u09BF\u09B8\u09CD\u09A5\u09BE\u09AA\u09BF\u09A4 \u09B9\u09AC\u09C7\u0964",
+        settingsResetSettings: "\u09B8\u09C7\u099F\u09BF\u0982 \u09B0\u09BF\u09B8\u09C7\u099F \u0995\u09B0\u09C1\u09A8",
+        settingsResetSettingsDesc: "\u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u09B8\u09C7\u099F\u09BF\u0982 \u09B8\u09CD\u0995\u09CB\u09AA\u09C7\u09B0 \u099C\u09A8\u09CD\u09AF Workspace++ \u09B8\u09C7\u099F\u09BF\u0982 \u09B0\u09BF\u09B8\u09C7\u099F \u0995\u09B0\u09C1\u09A8\u0964",
+        settingsResetSettingsBtn: "\u09B8\u09C7\u099F\u09BF\u0982 \u09B0\u09BF\u09B8\u09C7\u099F",
+        confirmResetSettings: "Workspace++ \u09B8\u09C7\u099F\u09BF\u0982 \u09A1\u09BF\u09AB\u09B2\u09CD\u099F\u09C7 \u09B0\u09BF\u09B8\u09C7\u099F \u0995\u09B0\u09AC\u09C7\u09A8?",
+        resetSettingsDone: "Workspace++ \u09B8\u09C7\u099F\u09BF\u0982 \u09B0\u09BF\u09B8\u09C7\u099F \u0995\u09B0\u09BE \u09B9\u09AF\u09BC\u09C7\u099B\u09C7\u0964",
+        resetSettingsFailed: "Workspace++ \u09B8\u09C7\u099F\u09BF\u0982 \u09B0\u09BF\u09B8\u09C7\u099F \u0995\u09B0\u09BE \u09AF\u09BE\u09AF\u09BC\u09A8\u09BF\u0964",
+        settingsResetSessions: "\u09B8\u09C7\u09B6\u09A8 \u09B0\u09BF\u09B8\u09C7\u099F \u0995\u09B0\u09C1\u09A8",
+        settingsResetSessionsDesc: "\u09B8\u09AC \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09BF\u09A4 \u09B8\u09C7\u09B6\u09A8 \u09AE\u09C1\u099B\u09C7 \u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u09B2\u09C7\u0986\u0989\u099F \u09A5\u09C7\u0995\u09C7 \u09B6\u09C1\u09A7\u09C1 \u098F\u0995\u099F\u09BF \u09A8\u09A4\u09C1\u09A8 \u09A1\u09BF\u09AB\u09B2\u09CD\u099F \u09B8\u09C7\u09B6\u09A8 \u09B0\u09BE\u0996\u09C1\u09A8\u0964",
+        settingsResetSessionsBtn: "\u09B0\u09BF\u09B8\u09C7\u099F",
+        confirmResetSessions: "\u09B8\u09AC \u09B8\u09C7\u09B6\u09A8 \u09A1\u09BF\u09AB\u09B2\u09CD\u099F\u09C7 \u09B0\u09BF\u09B8\u09C7\u099F \u0995\u09B0\u09AC\u09C7\u09A8? \u098F\u099F\u09BF \u09AB\u09BF\u09B0\u09BF\u09AF\u09BC\u09C7 \u0986\u09A8\u09BE \u09AF\u09BE\u09AC\u09C7 \u09A8\u09BE\u0964",
+        resetSessionsHint: "\u098F\u099F\u09BF \u09B8\u09AC \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09BF\u09A4 \u09B8\u09C7\u09B6\u09A8 \u09AE\u09C1\u099B\u09C7 \u09B6\u09C1\u09A7\u09C1 \u098F\u0995\u099F\u09BF \u09A1\u09BF\u09AB\u09B2\u09CD\u099F \u09B8\u09C7\u09B6\u09A8 \u09B0\u09BE\u0996\u09AC\u09C7\u0964",
+        resetSessionsDone: "\u09B8\u09C7\u09B6\u09A8\u0997\u09C1\u09B2\u09CB \u09A1\u09BF\u09AB\u09B2\u09CD\u099F\u09C7 \u09B0\u09BF\u09B8\u09C7\u099F \u0995\u09B0\u09BE \u09B9\u09AF\u09BC\u09C7\u099B\u09C7\u0964",
+        resetSessionsFailed: "\u09B8\u09C7\u09B6\u09A8 \u09B0\u09BF\u09B8\u09C7\u099F \u0995\u09B0\u09BE \u09AF\u09BE\u09AF\u09BC\u09A8\u09BF\u0964",
+        settingsResetSessionsAndSettings: "\u09B8\u09C7\u09B6\u09A8 \u0993 \u09B8\u09C7\u099F\u09BF\u0982 \u09B0\u09BF\u09B8\u09C7\u099F \u0995\u09B0\u09C1\u09A8",
+        settingsResetSessionsAndSettingsDesc: "\u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09BF\u09A4 \u09B8\u09C7\u09B6\u09A8 \u098F\u09AC\u0982 Workspace++ \u09B8\u09C7\u099F\u09BF\u0982 \u098F\u0995\u09B8\u0999\u09CD\u0997\u09C7 \u09B0\u09BF\u09B8\u09C7\u099F \u0995\u09B0\u09C1\u09A8\u0964",
+        settingsResetSessionsAndSettingsBtn: "\u09A6\u09C1\u099F\u09BF\u0987 \u09B0\u09BF\u09B8\u09C7\u099F \u0995\u09B0\u09C1\u09A8",
+        confirmResetSessionsAndSettings: "\u09B8\u09C7\u09B6\u09A8 \u0993 \u09B8\u09C7\u099F\u09BF\u0982 \u09A6\u09C1\u099F\u09BF\u0987 \u09B0\u09BF\u09B8\u09C7\u099F \u0995\u09B0\u09AC\u09C7\u09A8? \u098F\u099F\u09BF \u09AB\u09BF\u09B0\u09BF\u09AF\u09BC\u09C7 \u0986\u09A8\u09BE \u09AF\u09BE\u09AC\u09C7 \u09A8\u09BE\u0964",
+        resetSessionsAndSettingsDone: "\u09B8\u09C7\u09B6\u09A8 \u0993 \u09B8\u09C7\u099F\u09BF\u0982 \u09B0\u09BF\u09B8\u09C7\u099F \u0995\u09B0\u09BE \u09B9\u09AF\u09BC\u09C7\u099B\u09C7\u0964",
+        resetSessionsAndSettingsFailed: "\u09B8\u09C7\u09B6\u09A8 \u0993 \u09B8\u09C7\u099F\u09BF\u0982 \u09B0\u09BF\u09B8\u09C7\u099F \u0995\u09B0\u09BE \u09AF\u09BE\u09AF\u09BC\u09A8\u09BF\u0964",
+        confirmDeleteSettingsHint: "\u098F\u0987 \u09A8\u09BF\u09B6\u09CD\u099A\u09BF\u09A4\u0995\u09B0\u09A3 \u09AC\u09A8\u09CD\u09A7 \u0995\u09B0\u09A4\u09C7 \u09B8\u09C7\u099F\u09BF\u0982\u09B8\u09C7 \u09AF\u09BE\u09A8\u0964",
+        groupCreated: function(n) {
+          return '\u0997\u09CD\u09B0\u09C1\u09AA "' + n + '" \u09A4\u09C8\u09B0\u09BF \u09B9\u09AF\u09BC\u09C7\u099B\u09C7';
+        },
+        groupDeleted: function(n) {
+          return '\u0997\u09CD\u09B0\u09C1\u09AA "' + n + '" \u09AE\u09C1\u099B\u09C7 \u09AB\u09C7\u09B2\u09BE \u09B9\u09AF\u09BC\u09C7\u099B\u09C7';
+        },
+        groupRenamed: function(o, n) {
+          return '\u0997\u09CD\u09B0\u09C1\u09AA\u09C7\u09B0 \u09A8\u09BE\u09AE \u09AC\u09A6\u09B2\u09BE\u09A8\u09CB \u09B9\u09AF\u09BC\u09C7\u099B\u09C7: "' + o + '" \u2192 "' + n + '"';
+        },
+        groupAll: "\u09B8\u09AC",
+        groupDuplicateName: "\u098F\u0987 \u09A8\u09BE\u09AE\u09C7 \u098F\u0995\u099F\u09BF \u0997\u09CD\u09B0\u09C1\u09AA \u0987\u09A4\u09BF\u09AE\u09A7\u09CD\u09AF\u09C7\u0987 \u0986\u099B\u09C7\u0964",
+        groupEmptyName: "\u0997\u09CD\u09B0\u09C1\u09AA\u09C7\u09B0 \u09A8\u09BE\u09AE \u0996\u09BE\u09B2\u09BF \u09B0\u09BE\u0996\u09BE \u09AF\u09BE\u09AC\u09C7 \u09A8\u09BE\u0964",
+        cmdSwitchGroup: "\u0997\u09CD\u09B0\u09C1\u09AA \u09AC\u09A6\u09B2\u09BE\u09A8",
+        cmdExitGroup: "\u09B8\u09AC \u09B8\u09C7\u09B6\u09A8 \u09A6\u09C7\u0996\u09BE\u09A8 (\u0997\u09CD\u09B0\u09C1\u09AA \u09A5\u09C7\u0995\u09C7 \u09AC\u09C7\u09B0 \u09B9\u09A8)",
+        cmdNextGroup: "\u09AA\u09B0\u09C7\u09B0 \u0997\u09CD\u09B0\u09C1\u09AA",
+        cmdPreviousGroup: "\u0986\u0997\u09C7\u09B0 \u0997\u09CD\u09B0\u09C1\u09AA",
+        searchOverlayHelpWithGroups: "\u2191\u2193 \u09B8\u09B0\u09BE\u09A8  /  Tab \u0997\u09CD\u09B0\u09C1\u09AA  /  Enter \u09B8\u09C1\u0987\u099A  /  \u21E7Enter \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3  /  \u232B \u09AE\u09C1\u099B\u09C1\u09A8  /  Esc \u09AC\u09A8\u09CD\u09A7",
+        settingsSectionGroups: "\u09B8\u09C7\u09B6\u09A8 \u0997\u09CD\u09B0\u09C1\u09AA",
+        contextToggleGroups: "\u09B8\u09C7\u09B6\u09A8 \u0997\u09CD\u09B0\u09C1\u09AA \u099A\u09BE\u09B2\u09C1 \u0995\u09B0\u09C1\u09A8",
+        settingsSectionGroupsDesc: "\u09B8\u09C7\u09B6\u09A8 \u09B8\u09BE\u099C\u09BE\u09A4\u09C7 \u0997\u09CD\u09B0\u09C1\u09AA \u09AC\u09CD\u09AF\u09AC\u09B9\u09BE\u09B0 \u0995\u09B0\u09C1\u09A8\u0964 \u098F\u099F\u09BF \u09AC\u09A8\u09CD\u09A7 \u0995\u09B0\u09B2\u09C7 \u0997\u09CD\u09B0\u09C1\u09AA \u099F\u09CD\u09AF\u09BE\u09AC \u098F\u09AC\u0982 \u0997\u09CD\u09B0\u09C1\u09AA-\u09B8\u09C1\u0987\u099A \u0985\u09CD\u09AF\u09BE\u0995\u09B6\u09A8 \u09B2\u09C1\u0995\u09BE\u09A8\u09CB \u09B9\u09AC\u09C7\u0964",
+        settingsGroupCreate: "\u0997\u09CD\u09B0\u09C1\u09AA \u09A4\u09C8\u09B0\u09BF \u0995\u09B0\u09C1\u09A8",
+        settingsGroupCreateDesc: "\u09A8\u09A4\u09C1\u09A8 \u09B8\u09C7\u09B6\u09A8 \u0997\u09CD\u09B0\u09C1\u09AA \u09A4\u09C8\u09B0\u09BF \u0995\u09B0\u09C1\u09A8\u0964",
+        settingsGroupCreatePlaceholder: "\u0997\u09CD\u09B0\u09C1\u09AA\u09C7\u09B0 \u09A8\u09BE\u09AE...",
+        settingsGroupCreateBtn: "\u09A4\u09C8\u09B0\u09BF \u0995\u09B0\u09C1\u09A8",
+        settingsGroupManageSessions: "\u09B8\u09C7\u09B6\u09A8 \u09AA\u09B0\u09BF\u099A\u09BE\u09B2\u09A8\u09BE",
+        settingsGroupManageSessionsDesc: "\u098F\u0987 \u0997\u09CD\u09B0\u09C1\u09AA\u09C7 \u09B8\u09C7\u09B6\u09A8 \u09AF\u09CB\u0997 \u0995\u09B0\u09C1\u09A8 \u09AC\u09BE \u098F\u0996\u09BE\u09A8 \u09A5\u09C7\u0995\u09C7 \u09B8\u09B0\u09BE\u09A8\u0964",
+        settingsGroupSessionCount: function(n) {
+          return n + "\u099F\u09BF \u09B8\u09C7\u09B6\u09A8";
+        },
+        settingsGroupDelete: "\u0997\u09CD\u09B0\u09C1\u09AA \u09AE\u09C1\u099B\u09C1\u09A8",
+        settingsGroupDeleteConfirm: function(n) {
+          return '\u0997\u09CD\u09B0\u09C1\u09AA "' + n + '" \u09AE\u09C1\u099B\u09AC\u09C7\u09A8? \u09B8\u09C7\u09B6\u09A8\u0997\u09C1\u09B2\u09CB \u09AE\u09C1\u099B\u09C7 \u09AB\u09C7\u09B2\u09BE \u09B9\u09AC\u09C7 \u09A8\u09BE\u0964';
+        },
+        confirmDeleteGroup: function(n) {
+          return '\u0997\u09CD\u09B0\u09C1\u09AA "' + n + '" \u09AE\u09C1\u099B\u09AC\u09C7\u09A8? \u098F\u0987 \u0997\u09CD\u09B0\u09C1\u09AA\u09C7\u09B0 \u09B8\u09C7\u09B6\u09A8\u0997\u09C1\u09B2\u09CB \u09AE\u09C1\u099B\u09C7 \u09AB\u09C7\u09B2\u09BE \u09B9\u09AC\u09C7 \u09A8\u09BE\u0964';
+        },
+        groupAddedSession: function(s, g) {
+          return '"' + s + '"-\u0995\u09C7 "' + g + '"-\u098F \u09AF\u09CB\u0997 \u0995\u09B0\u09BE \u09B9\u09AF\u09BC\u09C7\u099B\u09C7';
+        },
+        groupRemovedSession: function(s, g) {
+          return '"' + s + '"-\u0995\u09C7 "' + g + '" \u09A5\u09C7\u0995\u09C7 \u09B8\u09B0\u09BE\u09A8\u09CB \u09B9\u09AF\u09BC\u09C7\u099B\u09C7';
+        },
+        groupRemoveFromGroup: "\u0997\u09CD\u09B0\u09C1\u09AA \u09A5\u09C7\u0995\u09C7 \u09B8\u09B0\u09BE\u09A8",
+        groupMoveToGroup: "\u0997\u09CD\u09B0\u09C1\u09AA\u09C7 \u09B8\u09B0\u09BE\u09A8",
+        groupCreateNew: "\u09A8\u09A4\u09C1\u09A8 \u0997\u09CD\u09B0\u09C1\u09AA",
+        groupCreatePlaceholder: "\u0997\u09CD\u09B0\u09C1\u09AA\u09C7\u09B0 \u09A8\u09BE\u09AE...",
+        groupContextRename: "\u0997\u09CD\u09B0\u09C1\u09AA\u09C7\u09B0 \u09A8\u09BE\u09AE \u09AC\u09A6\u09B2\u09BE\u09A8",
+        groupContextDelete: "\u0997\u09CD\u09B0\u09C1\u09AA \u09AE\u09C1\u099B\u09C1\u09A8",
+        contextSwitchSession: "\u098F\u0987 \u09B8\u09C7\u09B6\u09A8\u09C7 \u09B8\u09C1\u0987\u099A \u0995\u09B0\u09C1\u09A8",
+        contextRenameSession: "\u098F\u0987 \u09B8\u09C7\u09B6\u09A8\u09C7\u09B0 \u09A8\u09BE\u09AE \u09AC\u09A6\u09B2\u09BE\u09A8",
+        contextDeleteSession: "\u098F\u0987 \u09B8\u09C7\u09B6\u09A8 \u09AE\u09C1\u099B\u09C1\u09A8",
+        contextDuplicateSession: "\u098F\u0987 \u09B8\u09C7\u09B6\u09A8 \u09A1\u09C1\u09AA\u09CD\u09B2\u09BF\u0995\u09C7\u099F \u0995\u09B0\u09C1\u09A8",
+        contextReloadSession: "\u098F\u0987 \u09B8\u09C7\u09B6\u09A8 \u09AA\u09C1\u09A8\u09B0\u09BE\u09AF\u09BC \u09B2\u09CB\u09A1 \u0995\u09B0\u09C1\u09A8",
+        contextSaveSession: "\u098F\u0987 \u09B8\u09C7\u09B6\u09A8 \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3 \u0995\u09B0\u09C1\u09A8",
+        contextSaveCurrentLayoutToThisSession: "\u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u09B2\u09C7\u0986\u0989\u099F \u098F\u0987 \u09B8\u09C7\u09B6\u09A8\u09C7 \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3 \u0995\u09B0\u09C1\u09A8",
+        groupRemoveAllSessions: "\u098F\u0987 \u0997\u09CD\u09B0\u09C1\u09AA \u09A5\u09C7\u0995\u09C7 \u09B8\u09AC \u09B8\u09C7\u09B6\u09A8 \u09B8\u09B0\u09BE\u09A8",
+        confirmRemoveAllFromGroup: function(g, n) {
+          return '"' + g + '" \u09A5\u09C7\u0995\u09C7 ' + n + "\u099F\u09BF \u09B8\u09C7\u09B6\u09A8\u0987 \u09B8\u09B0\u09BE\u09AC\u09C7\u09A8?";
+        },
+        groupRemovedAllSessions: function(g) {
+          return '"' + g + '" \u09A5\u09C7\u0995\u09C7 \u09B8\u09AC \u09B8\u09C7\u09B6\u09A8 \u09B8\u09B0\u09BE\u09A8\u09CB \u09B9\u09AF\u09BC\u09C7\u099B\u09C7';
+        },
+        contextDeleteAllGroups: "\u09B8\u09AC \u0997\u09CD\u09B0\u09C1\u09AA \u09AE\u09C1\u099B\u09C1\u09A8",
+        confirmDeleteAllGroups: function(n) {
+          return "\u09B8\u09AC " + n + "\u099F\u09BF \u0997\u09CD\u09B0\u09C1\u09AA \u09AE\u09C1\u099B\u09AC\u09C7\u09A8? \u09B8\u09C7\u09B6\u09A8\u0997\u09C1\u09B2\u09CB \u09AE\u09C1\u099B\u09C7 \u09AB\u09C7\u09B2\u09BE \u09B9\u09AC\u09C7 \u09A8\u09BE\u0964";
+        },
+        deletedAllGroups: function(n) {
+          return n + "\u099F\u09BF \u0997\u09CD\u09B0\u09C1\u09AA \u09AE\u09C1\u099B\u09C7 \u09AB\u09C7\u09B2\u09BE \u09B9\u09AF\u09BC\u09C7\u099B\u09C7";
+        },
+        contextDeleteAllSessions: "\u09B8\u09AC \u09B8\u09C7\u09B6\u09A8 \u09AE\u09C1\u099B\u09C1\u09A8",
+        confirmDeleteAllSessions: function(n) {
+          return n + "\u099F\u09BF \u09B8\u09C7\u09B6\u09A8 \u09AE\u09C1\u099B\u09AC\u09C7\u09A8? \u09B8\u0995\u09CD\u09B0\u09BF\u09AF\u09BC \u09B8\u09C7\u09B6\u09A8 \u09B0\u09BE\u0996\u09BE \u09B9\u09AC\u09C7\u0964";
+        },
+        deletedAllSessions: function(n) {
+          return n + "\u099F\u09BF \u09B8\u09C7\u09B6\u09A8 \u09AE\u09C1\u099B\u09C7 \u09AB\u09C7\u09B2\u09BE \u09B9\u09AF\u09BC\u09C7\u099B\u09C7";
+        },
+        contextVersionHistory: "\u09AD\u09BE\u09B0\u09CD\u09B8\u09A8 \u0987\u09A4\u09BF\u09B9\u09BE\u09B8",
+        cmdVersionHistory: "\u09B8\u09C7\u09B6\u09A8\u09C7\u09B0 \u09AD\u09BE\u09B0\u09CD\u09B8\u09A8 \u0987\u09A4\u09BF\u09B9\u09BE\u09B8 \u09A6\u09C7\u0996\u09C1\u09A8",
+        historyTitle: "\u09AD\u09BE\u09B0\u09CD\u09B8\u09A8 \u0987\u09A4\u09BF\u09B9\u09BE\u09B8",
+        historyEmpty: "\u098F\u0987 \u09B8\u09C7\u09B6\u09A8\u09C7\u09B0 \u099C\u09A8\u09CD\u09AF \u0995\u09CB\u09A8\u09CB \u09AD\u09BE\u09B0\u09CD\u09B8\u09A8 \u0987\u09A4\u09BF\u09B9\u09BE\u09B8 \u09A8\u09C7\u0987\u0964",
+        historyRestore: "\u09AA\u09C1\u09A8\u09B0\u09C1\u09A6\u09CD\u09A7\u09BE\u09B0 \u0995\u09B0\u09C1\u09A8",
+        historyRestoreConfirm: function(name, time) {
+          return '"' + name + '"-\u098F\u09B0 \u09B2\u09C7\u0986\u0989\u099F \u09B8\u09CD\u09A8\u09CD\u09AF\u09BE\u09AA\u09B6\u099F "' + time + '" \u09A5\u09C7\u0995\u09C7 \u09AA\u09C1\u09A8\u09B0\u09C1\u09A6\u09CD\u09A7\u09BE\u09B0 \u0995\u09B0\u09AC\u09C7\u09A8?';
+        },
+        historyRestored: function(name) {
+          return '"' + name + '"-\u098F\u09B0 \u09B2\u09C7\u0986\u0989\u099F \u09AA\u09C1\u09A8\u09B0\u09C1\u09A6\u09CD\u09A7\u09BE\u09B0 \u0995\u09B0\u09BE \u09B9\u09AF\u09BC\u09C7\u099B\u09C7';
+        },
+        historyQuickRestored: function(name) {
+          return '"' + name + '"-\u098F\u09B0 \u0986\u0997\u09C7\u09B0 \u09B2\u09C7\u0986\u0989\u099F \u09A6\u09CD\u09B0\u09C1\u09A4 \u09AA\u09C1\u09A8\u09B0\u09C1\u09A6\u09CD\u09A7\u09BE\u09B0 \u0995\u09B0\u09BE \u09B9\u09AF\u09BC\u09C7\u099B\u09C7';
+        },
+        historyNoEntries: "\u09AA\u09C1\u09A8\u09B0\u09C1\u09A6\u09CD\u09A7\u09BE\u09B0 \u0995\u09B0\u09BE\u09B0 \u09AE\u09A4\u09CB \u0986\u0997\u09C7\u09B0 \u0995\u09CB\u09A8\u09CB \u09B2\u09C7\u0986\u0989\u099F \u09A8\u09C7\u0987\u0964",
+        historyToday: "\u0986\u099C",
+        historyYesterday: "\u0997\u09A4\u0995\u09BE\u09B2",
+        historyThisWeek: "\u098F\u0987 \u09B8\u09AA\u09CD\u09A4\u09BE\u09B9",
+        historyFiles: function(n) {
+          return n + "\u099F\u09BF \u09AB\u09BE\u0987\u09B2";
+        },
+        historyPanes: function(n) {
+          return n + "\u099F\u09BF \u09AA\u09C7\u09A8";
+        },
+        settingsVersionHistoryEnabled: "\u09AD\u09BE\u09B0\u09CD\u09B8\u09A8 \u0987\u09A4\u09BF\u09B9\u09BE\u09B8 \u099A\u09BE\u09B2\u09C1 \u0995\u09B0\u09C1\u09A8",
+        settingsVersionHistoryEnabledDesc: "\u09AA\u09CD\u09B0\u09A4\u09BF\u099F\u09BF \u09B8\u09C7\u09B6\u09A8\u09C7\u09B0 \u09B2\u09C7\u0986\u0989\u099F \u09AA\u09B0\u09BF\u09AC\u09B0\u09CD\u09A4\u09A8\u09C7\u09B0 \u0987\u09A4\u09BF\u09B9\u09BE\u09B8 \u09B0\u09BE\u0996\u09C1\u09A8\u0964",
+        settingsVersionHistoryInterval: "\u09B8\u09CD\u09A8\u09CD\u09AF\u09BE\u09AA\u09B6\u099F \u09AC\u09BF\u09B0\u09A4\u09BF (\u09AE\u09BF\u09A8\u09BF\u099F)",
+        settingsVersionHistoryIntervalDesc: "\u0995\u09A4 \u0998\u09A8\u0998\u09A8 \u09B2\u09C7\u0986\u0989\u099F \u09AA\u09B0\u09BF\u09AC\u09B0\u09CD\u09A4\u09A8 \u09AA\u09B0\u09C0\u0995\u09CD\u09B7\u09BE \u0995\u09B0\u09C7 \u09B8\u09CD\u09A8\u09CD\u09AF\u09BE\u09AA\u09B6\u099F \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3 \u0995\u09B0\u09BE \u09B9\u09AC\u09C7\u0964",
+        settingsVersionHistoryCtrlRmb: platformLabel("\u09A6\u09CD\u09B0\u09C1\u09A4 \u09AA\u09C1\u09A8\u09B0\u09C1\u09A6\u09CD\u09A7\u09BE\u09B0 (Cmd + \u09B0\u09BE\u0987\u099F-\u0995\u09CD\u09B2\u09BF\u0995)", "\u09A6\u09CD\u09B0\u09C1\u09A4 \u09AA\u09C1\u09A8\u09B0\u09C1\u09A6\u09CD\u09A7\u09BE\u09B0 (Ctrl + \u09B0\u09BE\u0987\u099F-\u0995\u09CD\u09B2\u09BF\u0995)"),
+        settingsVersionHistoryCtrlRmbDesc: platformLabel("\u0986\u0997\u09C7\u09B0 \u09B2\u09C7\u0986\u0989\u099F \u09AA\u09C1\u09A8\u09B0\u09C1\u09A6\u09CD\u09A7\u09BE\u09B0 \u0995\u09B0\u09A4\u09C7 Cmd \u09A7\u09B0\u09C7 \u09B8\u09CD\u099F\u09C7\u099F\u09BE\u09B8 \u09AC\u09BE\u09B0\u09C7 \u09B0\u09BE\u0987\u099F-\u0995\u09CD\u09B2\u09BF\u0995 \u0995\u09B0\u09C1\u09A8\u0964", "\u0986\u0997\u09C7\u09B0 \u09B2\u09C7\u0986\u0989\u099F \u09AA\u09C1\u09A8\u09B0\u09C1\u09A6\u09CD\u09A7\u09BE\u09B0 \u0995\u09B0\u09A4\u09C7 Ctrl \u09A7\u09B0\u09C7 \u09B8\u09CD\u099F\u09C7\u099F\u09BE\u09B8 \u09AC\u09BE\u09B0\u09C7 \u09B0\u09BE\u0987\u099F-\u0995\u09CD\u09B2\u09BF\u0995 \u0995\u09B0\u09C1\u09A8\u0964"),
+        settingsVersionHistoryConfirmRestore: "\u09AA\u09C1\u09A8\u09B0\u09C1\u09A6\u09CD\u09A7\u09BE\u09B0\u09C7\u09B0 \u0986\u0997\u09C7 \u09A8\u09BF\u09B6\u09CD\u099A\u09BF\u09A4 \u0995\u09B0\u09C1\u09A8",
+        settingsVersionHistoryConfirmRestoreDesc: "\u0986\u0997\u09C7\u09B0 \u09B2\u09C7\u0986\u0989\u099F \u09AA\u09C1\u09A8\u09B0\u09C1\u09A6\u09CD\u09A7\u09BE\u09B0\u09C7\u09B0 \u0986\u0997\u09C7 \u09A8\u09BF\u09B6\u09CD\u099A\u09BF\u09A4\u0995\u09B0\u09A3 \u09A1\u09BE\u09AF\u09BC\u09BE\u09B2\u0997 \u09A6\u09C7\u0996\u09BE\u09A8\u0964",
+        rotationBackupSectionTitle: "\u09AC\u09CD\u09AF\u09BE\u0995\u0986\u09AA",
+        rotationBackupCreate: "\u09AC\u09CD\u09AF\u09BE\u0995\u0986\u09AA \u09A4\u09C8\u09B0\u09BF \u0995\u09B0\u09C1\u09A8",
+        rotationBackupCreateBtn: "\u098F\u0996\u09A8\u0987 \u09AC\u09CD\u09AF\u09BE\u0995\u0986\u09AA",
+        rotationBackupCreated: "\u09AC\u09CD\u09AF\u09BE\u0995\u0986\u09AA \u09A4\u09C8\u09B0\u09BF \u09B9\u09AF\u09BC\u09C7\u099B\u09C7\u0964",
+        rotationBackupFailed: "\u09AC\u09CD\u09AF\u09BE\u0995\u0986\u09AA \u09A4\u09C8\u09B0\u09BF \u0995\u09B0\u09BE \u09AF\u09BE\u09AF\u09BC\u09A8\u09BF\u0964",
+        rotationBackupDesc: "\u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3\u09C7\u09B0 \u09B8\u09AE\u09AF\u09BC \u09B8\u09CD\u09AC\u09AF\u09BC\u0982\u0995\u09CD\u09B0\u09BF\u09AF\u09BC \u09AC\u09CD\u09AF\u09BE\u0995\u0986\u09AA \u09A4\u09C8\u09B0\u09BF \u09B9\u09AF\u09BC (\u09AA\u09CD\u09B0\u09A4\u09BF \u0998\u09A3\u09CD\u099F\u09BE\u09AF\u09BC, \u09B8\u09B0\u09CD\u09AC\u09CB\u099A\u09CD\u099A 3 \u09AA\u09CD\u09B0\u099C\u09A8\u09CD\u09AE)\u0964",
+        rotationBackupRestore: "\u09AA\u09C1\u09A8\u09B0\u09C1\u09A6\u09CD\u09A7\u09BE\u09B0 \u0995\u09B0\u09C1\u09A8",
+        rotationBackupRestoreConfirm: function(time, count) {
+          return '\u09AC\u09CD\u09AF\u09BE\u0995\u0986\u09AA "' + time + '" \u09A5\u09C7\u0995\u09C7 \u09AA\u09C1\u09A8\u09B0\u09C1\u09A6\u09CD\u09A7\u09BE\u09B0 \u0995\u09B0\u09AC\u09C7\u09A8 (' + count + "\u099F\u09BF \u09B8\u09C7\u09B6\u09A8)? \u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u09A1\u09C7\u099F\u09BE \u0993\u09AD\u09BE\u09B0\u09B0\u09BE\u0987\u099F \u09B9\u09AC\u09C7\u0964";
+        },
+        rotationBackupRestored: "\u09AC\u09CD\u09AF\u09BE\u0995\u0986\u09AA \u09A5\u09C7\u0995\u09C7 \u09AA\u09C1\u09A8\u09B0\u09C1\u09A6\u09CD\u09A7\u09BE\u09B0 \u0995\u09B0\u09BE \u09B9\u09AF\u09BC\u09C7\u099B\u09C7\u0964",
+        rotationBackupRestoreFailed: "\u09AC\u09CD\u09AF\u09BE\u0995\u0986\u09AA \u09A5\u09C7\u0995\u09C7 \u09AA\u09C1\u09A8\u09B0\u09C1\u09A6\u09CD\u09A7\u09BE\u09B0 \u0995\u09B0\u09BE \u09AF\u09BE\u09AF\u09BC\u09A8\u09BF\u0964",
+        rotationBackupNone: "\u0995\u09CB\u09A8\u09CB \u09AC\u09CD\u09AF\u09BE\u0995\u0986\u09AA \u09A8\u09C7\u0987\u0964",
+        rotationBackupGeneration: function(count) {
+          return count + "\u099F\u09BF \u09B8\u09C7\u09B6\u09A8";
+        },
+        frontmatterSessionNotFound: function(n) {
+          return '\u09B8\u09C7\u09B6\u09A8 "' + n + '" \u09AA\u09BE\u0993\u09AF\u09BC\u09BE \u09AF\u09BE\u09AF\u09BC\u09A8\u09BF (workspace-session)';
+        },
+        frontmatterAlreadyActive: function(n) {
+          return '\u09B8\u09C7\u09B6\u09A8 "' + n + '" \u0987\u09A4\u09BF\u09AE\u09A7\u09CD\u09AF\u09C7\u0987 \u09B8\u0995\u09CD\u09B0\u09BF\u09AF\u09BC';
+        }
+      },
+      fa: {
+        modalTitle: "\u0645\u062F\u06CC\u0631\u06CC\u062A \u0646\u0634\u0633\u062A\u200C\u0647\u0627",
+        savePlaceholder: "\u0646\u0627\u0645 \u0646\u0634\u0633\u062A \u062C\u062F\u06CC\u062F...",
+        filterPlaceholder: "\u0641\u06CC\u0644\u062A\u0631 \u06A9\u0631\u062F\u0646 \u0646\u0634\u0633\u062A\u200C\u0647\u0627...",
+        settingsShowFilterInput: "\u0646\u0645\u0627\u06CC\u0634 \u0641\u06CC\u0644\u062A\u0631 \u0646\u0634\u0633\u062A",
+        settingsShowFilterInputDesc: "\u06CC\u06A9 \u0641\u06CC\u0644\u062A\u0631 \u0645\u062A\u0646\u06CC \u062F\u0631 \u0645\u062F\u06CC\u0631 \u0646\u0634\u0633\u062A \u0646\u0645\u0627\u06CC\u0634 \u0645\u06CC\u200C\u062F\u0647\u062F \u062A\u0627 \u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u0631\u0627 \u0633\u0631\u06CC\u0639 \u067E\u06CC\u062F\u0627 \u06A9\u0646\u06CC\u062F.",
+        settingsOverlayDefaultFocus: "\u0641\u0648\u06A9\u0648\u0633 \u067E\u06CC\u0634\u200C\u0641\u0631\u0636 \u067E\u0648\u0634\u0634",
+        settingsOverlayDefaultFocusDesc: "\u0627\u0646\u062A\u062E\u0627\u0628 \u06A9\u0646\u06CC\u062F \u0647\u0646\u06AF\u0627\u0645 \u0628\u0627\u0632 \u0634\u062F\u0646 \u0645\u062F\u06CC\u0631 \u0646\u0634\u0633\u062A\u060C \u06A9\u062F\u0627\u0645 \u0639\u0646\u0635\u0631 \u0641\u0648\u06A9\u0648\u0633 \u0628\u06AF\u06CC\u0631\u062F.",
+        settingsOverlayFocusCurrentSession: "\u0646\u0634\u0633\u062A \u0641\u0639\u0644\u06CC",
+        settingsOverlayFocusSessionFilter: "\u0641\u06CC\u0644\u062A\u0631 \u0646\u0634\u0633\u062A",
+        settingsOverlayFocusSessionCreate: "\u0633\u0627\u062E\u062A \u0646\u0634\u0633\u062A",
+        settingsSectionSessionManager: "\u0641\u0647\u0631\u0633\u062A \u0648 \u062C\u0633\u062A\u062C\u0648\u06CC \u0646\u0634\u0633\u062A\u200C\u0647\u0627",
+        settingsSectionSessionListSearch: "\u0641\u0647\u0631\u0633\u062A \u0648 \u062C\u0633\u062A\u062C\u0648\u06CC \u0646\u0634\u0633\u062A\u200C\u0647\u0627",
+        settingsShowActiveSwitchCommand: "\u0646\u0645\u0627\u06CC\u0634 \u0646\u0634\u0633\u062A \u0641\u0639\u0627\u0644 \u062F\u0631 \u067E\u0627\u0644\u062A \u0641\u0631\u0645\u0627\u0646",
+        settingsShowActiveSwitchCommandDesc: "\u0641\u0631\u0645\u0627\u0646 \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u0628\u0647 \u0646\u0634\u0633\u062A \u0641\u0639\u0627\u0644 \u0641\u0639\u0644\u06CC \u0631\u0627 \u062F\u0631 \u067E\u0627\u0644\u062A \u0641\u0631\u0645\u0627\u0646 \u0646\u0645\u0627\u06CC\u0634 \u0645\u06CC\u200C\u062F\u0647\u062F. \u0645\u06CC\u0627\u0646\u0628\u0631\u0647\u0627 \u062C\u062F\u0627 \u0627\u0632 \u0627\u06CC\u0646 \u062A\u0646\u0638\u06CC\u0645 \u0647\u0645\u06CC\u0634\u0647 \u06A9\u0627\u0631 \u0645\u06CC\u200C\u06A9\u0646\u0646\u062F.",
+        settingsNumberedSwitchCommands: "\u0641\u0631\u0645\u0627\u0646\u200C\u0647\u0627\u06CC \u0634\u0645\u0627\u0631\u0647\u200C\u062F\u0627\u0631 \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u0646\u0634\u0633\u062A",
+        settingsNumberedSwitchCommandsDesc: "\u0641\u0631\u0645\u0627\u0646\u200C\u0647\u0627\u06CC \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u0628\u0627 \u062C\u0627\u06CC\u06AF\u0627\u0647\u200C\u0647\u0627\u06CC \u0634\u0645\u0627\u0631\u0647\u200C\u062F\u0627\u0631 (1\u20139) \u062B\u0628\u062A \u0645\u06CC\u200C\u06A9\u0646\u062F \u06A9\u0647 \u0645\u06CC\u200C\u062A\u0648\u0627\u0646 \u0628\u0647 \u0622\u0646\u200C\u0647\u0627 \u0645\u06CC\u0627\u0646\u0628\u0631 \u062F\u0627\u062F. \u0627\u06AF\u0631 \u062E\u0627\u0645\u0648\u0634 \u0628\u0627\u0634\u062F\u060C \u0647\u0645\u0647 \u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u0627\u0632 \u0641\u0631\u0645\u0627\u0646\u200C\u0647\u0627\u06CC \u0645\u0628\u062A\u0646\u06CC \u0628\u0631 \u0646\u0627\u0645 \u0627\u0633\u062A\u0641\u0627\u062F\u0647 \u0645\u06CC\u200C\u06A9\u0646\u0646\u062F.",
+        save: "\u0627\u06CC\u062C\u0627\u062F",
+        load: "\u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC",
+        saveInline: "\u0630\u062E\u06CC\u0631\u0647",
+        active: "\u0641\u0639\u0627\u0644",
+        modifiedJustNow: "\u0647\u0645\u06CC\u0646 \u062D\u0627\u0644\u0627 \u062A\u063A\u06CC\u06CC\u0631 \u06A9\u0631\u062F",
+        modifiedMinutes: function(n) {
+          return n + " \u062F\u0642\u06CC\u0642\u0647 \u067E\u06CC\u0634 \u062A\u063A\u06CC\u06CC\u0631 \u06A9\u0631\u062F";
+        },
+        modifiedHours: function(n) {
+          return n + " \u0633\u0627\u0639\u062A \u067E\u06CC\u0634 \u062A\u063A\u06CC\u06CC\u0631 \u06A9\u0631\u062F";
+        },
+        modifiedDays: function(n) {
+          return n + " \u0631\u0648\u0632 \u067E\u06CC\u0634 \u062A\u063A\u06CC\u06CC\u0631 \u06A9\u0631\u062F";
+        },
+        duplicateName: "\u0646\u0634\u0633\u062A\u06CC \u0628\u0627 \u0627\u06CC\u0646 \u0646\u0627\u0645 \u0627\u0632 \u0642\u0628\u0644 \u0648\u062C\u0648\u062F \u062F\u0627\u0631\u062F.",
+        emptyName: "\u0646\u0627\u0645 \u0646\u0634\u0633\u062A \u0646\u0645\u06CC\u200C\u062A\u0648\u0627\u0646\u062F \u062E\u0627\u0644\u06CC \u0628\u0627\u0634\u062F.",
+        created: function(n) {
+          return '\u0646\u0634\u0633\u062A "' + n + '" \u0627\u06CC\u062C\u0627\u062F \u0634\u062F';
+        },
+        deleted: function(n) {
+          return '\u0646\u0634\u0633\u062A "' + n + '" \u062D\u0630\u0641 \u0634\u062F';
+        },
+        loaded: function(n) {
+          return '\u0628\u0647 "' + n + '" \u062C\u0627\u0628\u0647\u200C\u062C\u0627 \u0634\u062F';
+        },
+        renamed: function(o, n) {
+          return '\u0646\u0627\u0645 "' + o + '" \u0628\u0647 "' + n + '" \u062A\u063A\u06CC\u06CC\u0631 \u06A9\u0631\u062F';
+        },
+        confirmDelete: function(n) {
+          return '\u0646\u0634\u0633\u062A "' + n + '" \u062D\u0630\u0641 \u0634\u0648\u062F\u061F';
+        },
+        confirmDeleteActive: function(n) {
+          return '"' + n + '" \u0646\u0634\u0633\u062A \u0641\u0639\u0627\u0644 \u0627\u0633\u062A. \u0628\u0627 \u0627\u06CC\u0646 \u062D\u0627\u0644 \u062D\u0630\u0641 \u0634\u0648\u062F\u061F';
+        },
+        confirmSaveSession: function(n) {
+          return '\u0646\u0634\u0633\u062A "' + n + '" \u0630\u062E\u06CC\u0631\u0647 \u0634\u0648\u062F\u061F';
+        },
+        confirmOverwriteSessionWithCurrentLayout: function(n) {
+          return '"' + n + '" \u0628\u0627 \u0686\u06CC\u062F\u0645\u0627\u0646 \u0641\u0639\u0644\u06CC \u0628\u0627\u0632\u0646\u0648\u06CC\u0633\u06CC \u0634\u0648\u062F\u061F';
+        },
+        confirmReloadSession: function(n) {
+          return '\u0646\u0634\u0633\u062A "' + n + '" \u062F\u0648\u0628\u0627\u0631\u0647 \u0628\u0627\u0631\u06AF\u0630\u0627\u0631\u06CC \u0634\u0648\u062F\u061F \u062A\u063A\u06CC\u06CC\u0631\u0627\u062A \u0630\u062E\u06CC\u0631\u0647\u200C\u0646\u0634\u062F\u0647 \u0627\u0632 \u062F\u0633\u062A \u0645\u06CC\u200C\u0631\u0648\u0646\u062F.';
+        },
+        renameTitle: "\u062A\u063A\u06CC\u06CC\u0631 \u0646\u0627\u0645 \u0646\u0634\u0633\u062A",
+        renamePlaceholder: "\u0646\u0627\u0645 \u062C\u062F\u06CC\u062F...",
+        noSession: "\u0628\u062F\u0648\u0646 \u0646\u0634\u0633\u062A",
+        cannotDeleteLast: "\u0622\u062E\u0631\u06CC\u0646 \u0646\u0634\u0633\u062A \u0631\u0627 \u0646\u0645\u06CC\u200C\u062A\u0648\u0627\u0646 \u062D\u0630\u0641 \u06A9\u0631\u062F.",
+        confirmBulkDelete: function(n) {
+          return n + " \u0646\u0634\u0633\u062A \u062D\u0630\u0641 \u0634\u0648\u062F\u061F";
+        },
+        bulkDeleted: function(n) {
+          return n + " \u0646\u0634\u0633\u062A \u062D\u0630\u0641 \u0634\u062F";
+        },
+        bulkDelete: function(n) {
+          return "\u062D\u0630\u0641 " + n + " \u0646\u0634\u0633\u062A";
+        },
+        cmdManage: "\u0645\u062F\u06CC\u0631\u06CC\u062A \u0646\u0634\u0633\u062A\u200C\u0647\u0627",
+        cmdCreate: "\u0627\u06CC\u062C\u0627\u062F \u0646\u0634\u0633\u062A \u062C\u062F\u06CC\u062F",
+        cmdRename: "\u062A\u063A\u06CC\u06CC\u0631 \u0646\u0627\u0645 \u0646\u0634\u0633\u062A \u0641\u0639\u0644\u06CC",
+        cmdDelete: "\u062D\u0630\u0641 \u0646\u0634\u0633\u062A \u0641\u0639\u0644\u06CC",
+        cmdNewEmpty: "\u0627\u06CC\u062C\u0627\u062F \u0646\u0634\u0633\u062A \u062E\u0627\u0644\u06CC",
+        cmdDuplicate: "\u062A\u06A9\u062B\u06CC\u0631 \u0646\u0634\u0633\u062A \u0641\u0639\u0644\u06CC",
+        duplicated: function(n) {
+          return '\u0628\u0647\u200C\u0639\u0646\u0648\u0627\u0646 "' + n + '" \u062A\u06A9\u062B\u06CC\u0631 \u0634\u062F';
+        },
+        deselect: "\u0644\u063A\u0648 \u0627\u0646\u062A\u062E\u0627\u0628",
+        footerDragReorder: "\u0628\u0631\u0627\u06CC \u0628\u0627\u0632\u0686\u06CC\u0646\u06CC \u0628\u06A9\u0634\u06CC\u062F",
+        footerDragToGroup: "\u0628\u0631\u0627\u06CC \u0627\u0646\u062A\u0642\u0627\u0644\u060C \u0628\u0647 \u0632\u0628\u0627\u0646\u0647 \u06AF\u0631\u0648\u0647 \u0628\u06A9\u0634\u06CC\u062F",
+        defaultLabel: "(\u067E\u06CC\u0634\u200C\u0641\u0631\u0636)",
+        rename: "\u062A\u063A\u06CC\u06CC\u0631 \u0646\u0627\u0645",
+        delete: "\u062D\u0630\u0641",
+        remove: "\u0628\u0631\u062F\u0627\u0634\u062A\u0646",
+        cancel: "\u0644\u063A\u0648",
+        ribbonTooltip: "Workspace++",
+        cmdSwitchTo: function(n, name) {
+          return name ? "\u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u0628\u0647 \u0646\u0634\u0633\u062A " + n + ": " + name : "\u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u0628\u0647 \u0646\u0634\u0633\u062A " + n;
+        },
+        cmdSwitchToNamed: function(name) {
+          return '\u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u0628\u0647 "' + name + '"';
+        },
+        cmdPrevious: "\u0646\u0634\u0633\u062A \u0642\u0628\u0644\u06CC",
+        cmdNext: "\u0646\u0634\u0633\u062A \u0628\u0639\u062F\u06CC",
+        cmdSaveCurrent: "\u0630\u062E\u06CC\u0631\u0647 \u0646\u0634\u0633\u062A \u0641\u0639\u0644\u06CC",
+        cmdSaveAs: "\u0630\u062E\u06CC\u0631\u0647 \u0646\u0634\u0633\u062A \u0641\u0639\u0644\u06CC \u0628\u0627 \u0646\u0627\u0645...",
+        cmdSaveCurrentLayoutToSession: "\u0630\u062E\u06CC\u0631\u0647 \u0686\u06CC\u062F\u0645\u0627\u0646 \u0641\u0639\u0644\u06CC \u062F\u0631 \u0646\u0634\u0633\u062A...",
+        cmdReloadCurrentWithoutSaving: "\u0628\u0627\u0631\u06AF\u0630\u0627\u0631\u06CC \u062F\u0648\u0628\u0627\u0631\u0647 \u0646\u0634\u0633\u062A \u0641\u0639\u0644\u06CC (\u0628\u062F\u0648\u0646 \u0630\u062E\u06CC\u0631\u0647)",
+        cmdToggleAutoSave: "\u062A\u063A\u06CC\u06CC\u0631 \u0648\u0636\u0639\u06CC\u062A \u0630\u062E\u06CC\u0631\u0647 \u062E\u0648\u062F\u06A9\u0627\u0631 \u0647\u0646\u06AF\u0627\u0645 \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u0646\u0634\u0633\u062A",
+        cmdEnableAutoSave: "\u0641\u0639\u0627\u0644 \u06A9\u0631\u062F\u0646 \u0630\u062E\u06CC\u0631\u0647 \u062E\u0648\u062F\u06A9\u0627\u0631 \u0647\u0646\u06AF\u0627\u0645 \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u0646\u0634\u0633\u062A",
+        cmdDisableAutoSave: "\u063A\u06CC\u0631\u0641\u0639\u0627\u0644 \u06A9\u0631\u062F\u0646 \u0630\u062E\u06CC\u0631\u0647 \u062E\u0648\u062F\u06A9\u0627\u0631 \u0647\u0646\u06AF\u0627\u0645 \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u0646\u0634\u0633\u062A",
+        cmdSearchOverlay: "\u062C\u0633\u062A\u062C\u0648\u06CC \u0646\u0634\u0633\u062A\u200C\u0647\u0627",
+        cmdExportSessions: "\u062E\u0631\u0648\u062C\u06CC \u06AF\u0631\u0641\u062A\u0646 \u0627\u0632 \u0627\u0633\u0646\u067E\u200C\u0634\u0627\u062A \u0646\u0634\u0633\u062A\u200C\u0647\u0627",
+        cmdImportSessions: "\u0648\u0627\u0631\u062F \u06A9\u0631\u062F\u0646 \u0622\u062E\u0631\u06CC\u0646 \u0627\u0633\u0646\u067E\u200C\u0634\u0627\u062A \u0646\u0634\u0633\u062A\u200C\u0647\u0627",
+        switchLeft: "\u0686\u067E",
+        switchRight: "\u0631\u0627\u0633\u062A",
+        switchGroup: "\u06AF\u0631\u0648\u0647",
+        keyTab: "Tab",
+        savedSession: function(n) {
+          return '"' + n + '" \u0630\u062E\u06CC\u0631\u0647 \u0634\u062F';
+        },
+        savedAs: function(n) {
+          return '\u0628\u0627 \u0646\u0627\u0645 "' + n + '" \u0630\u062E\u06CC\u0631\u0647 \u0634\u062F';
+        },
+        savedCurrentLayoutToSession: function(n) {
+          return '\u0686\u06CC\u062F\u0645\u0627\u0646 \u0641\u0639\u0644\u06CC \u062F\u0631 "' + n + '" \u0630\u062E\u06CC\u0631\u0647 \u0634\u062F';
+        },
+        noChanges: "\u062A\u063A\u06CC\u06CC\u0631\u06CC \u0628\u0631\u0627\u06CC \u0630\u062E\u06CC\u0631\u0647 \u0648\u062C\u0648\u062F \u0646\u062F\u0627\u0631\u062F",
+        reloadedSession: function(n) {
+          return '"' + n + '" \u062F\u0648\u0628\u0627\u0631\u0647 \u0628\u0627\u0631\u06AF\u0630\u0627\u0631\u06CC \u0634\u062F';
+        },
+        autoSaveEnabled: "\u0630\u062E\u06CC\u0631\u0647 \u062E\u0648\u062F\u06A9\u0627\u0631 \u0647\u0646\u06AF\u0627\u0645 \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u0646\u0634\u0633\u062A \u0641\u0639\u0627\u0644 \u0634\u062F.",
+        autoSaveDisabled: "\u0630\u062E\u06CC\u0631\u0647 \u062E\u0648\u062F\u06A9\u0627\u0631 \u0647\u0646\u06AF\u0627\u0645 \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u0646\u0634\u0633\u062A \u063A\u06CC\u0631\u0641\u0639\u0627\u0644 \u0634\u062F.",
+        confirmUnsavedSwitch: function(n) {
+          return '\u0646\u0634\u0633\u062A \u0641\u0639\u0644\u06CC \u062A\u063A\u06CC\u06CC\u0631\u0627\u062A \u0630\u062E\u06CC\u0631\u0647\u200C\u0646\u0634\u062F\u0647 \u062F\u0627\u0631\u062F. \u0628\u0647 "' + n + '" \u062C\u0627\u0628\u0647\u200C\u062C\u0627 \u0634\u0648\u062F\u061F';
+        },
+        saveAndSwitch: "\u0630\u062E\u06CC\u0631\u0647 \u0648 \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC",
+        switchWithoutSaving: "\u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u0628\u062F\u0648\u0646 \u0630\u062E\u06CC\u0631\u0647",
+        defaultSessionName: "\u067E\u06CC\u0634\u200C\u0641\u0631\u0636",
+        nameSessionTitle: "\u0630\u062E\u06CC\u0631\u0647 \u0628\u0627 \u0646\u0627\u0645 \u0646\u0634\u0633\u062A",
+        nameSessionPlaceholder: "\u0646\u0627\u0645 \u0646\u0634\u0633\u062A...",
+        saveWithoutNaming: "\u0630\u062E\u06CC\u0631\u0647 \u0628\u062F\u0648\u0646 \u0646\u0627\u0645\u200C\u06AF\u0630\u0627\u0631\u06CC",
+        sessionAutoName: function(n) {
+          return "\u0646\u0634\u0633\u062A \u062C\u062F\u06CC\u062F " + n;
+        },
+        noFilteredSessions: "\u0646\u0634\u0633\u062A \u0645\u0637\u0627\u0628\u0642\u06CC \u0648\u062C\u0648\u062F \u0646\u062F\u0627\u0631\u062F",
+        noGroupSessions: "\u062F\u0631 \u0627\u06CC\u0646 \u06AF\u0631\u0648\u0647 \u0646\u0634\u0633\u062A\u06CC \u0648\u062C\u0648\u062F \u0646\u062F\u0627\u0631\u062F",
+        searchOverlayPlaceholder: "\u0628\u0631\u0627\u06CC \u0641\u06CC\u0644\u062A\u0631 \u06A9\u0631\u062F\u0646 \u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u062A\u0627\u06CC\u067E \u06A9\u0646\u06CC\u062F...",
+        saveCurrentLayoutToSessionPlaceholder: "\u0646\u0634\u0633\u062A\u06CC \u0631\u0627 \u0628\u0631\u0627\u06CC \u0628\u0627\u0632\u0646\u0648\u06CC\u0633\u06CC \u0627\u0646\u062A\u062E\u0627\u0628 \u06A9\u0646\u06CC\u062F...",
+        searchOverlayHelp: "\u2191\u2193 \u062D\u0631\u06A9\u062A  /  Enter \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC  /  \u21E7Enter \u0630\u062E\u06CC\u0631\u0647  /  \u232B \u062D\u0630\u0641  /  Esc \u0628\u0633\u062A\u0646",
+        backupRestored: "Workspace++: \u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u0627\u0632 \u067E\u0634\u062A\u06CC\u0628\u0627\u0646 \u0628\u0627\u0632\u06CC\u0627\u0628\u06CC \u0634\u062F\u0646\u062F.",
+        sessionDataMigrated: "Workspace++: \u062F\u0627\u062F\u0647 \u0646\u0634\u0633\u062A \u0628\u0647 .workspace-plus-plus/sessions.json \u0645\u0646\u062A\u0642\u0644 \u0634\u062F.",
+        sessionDataMigrationFailed: "Workspace++: \u0627\u0646\u062A\u0642\u0627\u0644 \u062F\u0627\u062F\u0647 \u0646\u0634\u0633\u062A \u0646\u0627\u0645\u0648\u0641\u0642 \u0628\u0648\u062F. \u062F\u0627\u062F\u0647 \u0642\u062F\u06CC\u0645\u06CC \u0647\u0645\u0686\u0646\u0627\u0646 \u0646\u06AF\u0647 \u062F\u0627\u0634\u062A\u0647 \u0634\u062F\u0647 \u0627\u0633\u062A.",
+        localSettingsEnabled: "Workspace++: \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u062E\u0635\u0648\u0635 vault \u0641\u0639\u0627\u0644 \u0634\u062F.",
+        localSettingsDisabled: "Workspace++: \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u062E\u0635\u0648\u0635 vault \u063A\u06CC\u0631\u0641\u0639\u0627\u0644 \u0634\u062F.",
+        localSettingsCopied: "Workspace++: \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0633\u0631\u0627\u0633\u0631\u06CC \u062F\u0631 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u062E\u0635\u0648\u0635 vault \u06A9\u067E\u06CC \u0634\u062F.",
+        localSettingsLoadFailed: "Workspace++: \u0628\u0627\u0631\u06AF\u0630\u0627\u0631\u06CC \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u062E\u0635\u0648\u0635 vault \u0646\u0627\u0645\u0648\u0641\u0642 \u0628\u0648\u062F. \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0633\u0631\u0627\u0633\u0631\u06CC \u0627\u0633\u062A\u0641\u0627\u062F\u0647 \u0645\u06CC\u200C\u0634\u0648\u062F.",
+        localSettingsOperationFailed: "Workspace++: \u0628\u0647\u200C\u0631\u0648\u0632\u0631\u0633\u0627\u0646\u06CC \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u062E\u0635\u0648\u0635 vault \u0646\u0627\u0645\u0648\u0641\u0642 \u0628\u0648\u062F.",
+        exportSessionsDone: function(path) {
+          return "Workspace++: \u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u0628\u0647 " + path + " \u062E\u0631\u0648\u062C\u06CC \u06AF\u0631\u0641\u062A\u0647 \u0634\u062F\u0646\u062F";
+        },
+        exportSessionsFailed: "Workspace++: \u062E\u0631\u0648\u062C\u06CC \u06AF\u0631\u0641\u062A\u0646 \u0627\u0632 \u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u0646\u0627\u0645\u0648\u0641\u0642 \u0628\u0648\u062F.",
+        importSessionsDone: function(path) {
+          return "Workspace++: \u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u0627\u0632 " + path + " \u0648\u0627\u0631\u062F \u0634\u062F\u0646\u062F";
+        },
+        importSessionsNoFile: "Workspace++: \u062F\u0631 .workspace-plus-plus/exports \u0641\u0627\u06CC\u0644 \u062E\u0631\u0648\u062C\u06CC \u067E\u06CC\u062F\u0627 \u0646\u0634\u062F.",
+        importSessionsFailed: "Workspace++: \u0648\u0627\u0631\u062F \u06A9\u0631\u062F\u0646 \u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u0646\u0627\u0645\u0648\u0641\u0642 \u0628\u0648\u062F.",
+        settingsLanguage: "\u0632\u0628\u0627\u0646",
+        settingsLanguageDesc: "\u0632\u0628\u0627\u0646 \u0631\u0627\u0628\u0637 \u0627\u0641\u0632\u0648\u0646\u0647. \u0628\u0631\u0627\u06CC \u0627\u0639\u0645\u0627\u0644 \u0631\u0648\u06CC \u0646\u0627\u0645 \u0641\u0631\u0645\u0627\u0646\u200C\u0647\u0627\u060C Obsidian \u0631\u0627 \u062F\u0648\u0628\u0627\u0631\u0647 \u0631\u0627\u0647\u200C\u0627\u0646\u062F\u0627\u0632\u06CC \u06A9\u0646\u06CC\u062F.",
+        settingsSectionGeneral: "\u0639\u0645\u0648\u0645\u06CC",
+        settingsTabSessions: "\u0646\u0634\u0633\u062A\u200C\u0647\u0627",
+        settingsSectionSwitching: "\u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u0646\u0634\u0633\u062A",
+        settingsSectionSwitchCommands: "\u0641\u0631\u0645\u0627\u0646\u200C\u0647\u0627\u06CC \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC",
+        settingsSectionScrollSwitch: "\u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u0628\u0627 \u0627\u0633\u06A9\u0631\u0648\u0644",
+        settingsSectionSwitchPreview: "\u067E\u06CC\u0634\u200C\u0646\u0645\u0627\u06CC\u0634 \u067E\u06CC\u0634 \u0627\u0632 \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC",
+        settingsSubsectionSwitchSaving: "\u0630\u062E\u06CC\u0631\u0647 \u0647\u0646\u06AF\u0627\u0645 \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u0646\u0634\u0633\u062A\u200C\u0647\u0627",
+        settingsSubsectionAutoSaveMode: "\u062D\u0627\u0644\u062A \u0630\u062E\u06CC\u0631\u0647 \u062E\u0648\u062F\u06A9\u0627\u0631 \u0646\u0634\u0633\u062A",
+        settingsSubsectionSwitchCommands: "\u0641\u0631\u0645\u0627\u0646\u200C\u0647\u0627\u06CC \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u0646\u0634\u0633\u062A",
+        settingsSubsectionScrollSwitch: "\u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u0646\u0634\u0633\u062A \u0628\u0627 \u0627\u0633\u06A9\u0631\u0648\u0644",
+        settingsSubsectionSwitchPreview: "\u067E\u06CC\u0634\u200C\u0646\u0645\u0627\u06CC\u0634 \u067E\u06CC\u0634 \u0627\u0632 \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u0646\u0634\u0633\u062A",
+        settingsSectionDeletion: "\u062D\u0630\u0641 \u0646\u0634\u0633\u062A\u200C\u0647\u0627",
+        settingsSectionAdvanced: "\u067E\u06CC\u0634\u0631\u0641\u062A\u0647",
+        settingsSectionReset: "\u0628\u0627\u0632\u0646\u0634\u0627\u0646\u06CC",
+        settingsStatusBarModScrollSwitch: "\u0641\u0639\u0627\u0644 \u06A9\u0631\u062F\u0646 \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u0646\u0634\u0633\u062A \u0627\u0632 \u0646\u0648\u0627\u0631 \u0648\u0636\u0639\u06CC\u062A",
+        settingsStatusBarModScrollSwitchDesc: "\u0631\u0648\u06CC \u0622\u06CC\u062A\u0645 \u0646\u0648\u0627\u0631 \u0648\u0636\u0639\u06CC\u062A\u060C \u0647\u0646\u06AF\u0627\u0645 \u0646\u06AF\u0647 \u062F\u0627\u0634\u062A\u0646 \u06A9\u0644\u06CC\u062F \u062A\u063A\u06CC\u06CC\u0631\u062F\u0647\u0646\u062F\u0647 \u0627\u0646\u062A\u062E\u0627\u0628\u200C\u0634\u062F\u0647\u060C \u0639\u0645\u0648\u062F\u06CC \u0627\u0633\u06A9\u0631\u0648\u0644 \u06A9\u0646\u06CC\u062F \u062A\u0627 \u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u062C\u0627\u0628\u0647\u200C\u062C\u0627 \u0634\u0648\u0646\u062F. \u0622\u0633\u062A\u0627\u0646\u0647 \u0648 \u0645\u06A9\u062B\u060C \u062A\u062D\u0631\u06CC\u06A9\u200C\u0647\u0627\u06CC \u0646\u0627\u062E\u0648\u0627\u0633\u062A\u0647 \u062A\u0631\u06A9\u200C\u067E\u062F \u0631\u0627 \u06A9\u0627\u0647\u0634 \u0645\u06CC\u200C\u062F\u0647\u0646\u062F.",
+        settingsStatusBarScrollPreset: "\u067E\u06CC\u0634\u200C\u062A\u0646\u0638\u06CC\u0645 \u0648\u0631\u0648\u062F\u06CC \u0627\u0633\u06A9\u0631\u0648\u0644",
+        settingsStatusBarScrollPresetDesc: "\u067E\u06CC\u0634\u200C\u062A\u0646\u0638\u06CC\u0645\u06CC \u0645\u0646\u0627\u0633\u0628 \u062F\u0633\u062A\u06AF\u0627\u0647 \u062E\u0648\u062F \u0627\u0646\u062A\u062E\u0627\u0628 \u06A9\u0646\u06CC\u062F\u060C \u06CC\u0627 \u0628\u0631\u0627\u06CC \u062A\u0646\u0638\u06CC\u0645 \u062F\u0633\u062A\u06CC \u0639\u062F\u062F\u0647\u0627 \u0628\u0647 \u0633\u0641\u0627\u0631\u0634\u06CC \u0628\u0631\u0648\u06CC\u062F.",
+        settingsStatusBarScrollPresetTrackpad: "\u062A\u0631\u06A9\u200C\u067E\u062F",
+        settingsStatusBarScrollPresetNotchedWheel: "\u0686\u0631\u062E \u0645\u0627\u0648\u0633 \u067E\u0644\u0647\u200C\u0627\u06CC",
+        settingsStatusBarScrollPresetFreeSpinWheel: "\u0686\u0631\u062E \u0645\u0627\u0648\u0633 \u0622\u0632\u0627\u062F\u0686\u0631\u062E",
+        settingsStatusBarScrollPresetCustom: "\u0633\u0641\u0627\u0631\u0634\u06CC",
+        settingsStatusBarScrollModifier: "\u06A9\u0644\u06CC\u062F \u062A\u063A\u06CC\u06CC\u0631\u062F\u0647\u0646\u062F\u0647 \u0644\u0627\u0632\u0645",
+        settingsStatusBarScrollModifierDesc: "\u0627\u0646\u062A\u062E\u0627\u0628 \u06A9\u0646\u06CC\u062F \u0647\u0646\u06AF\u0627\u0645 \u0627\u0633\u06A9\u0631\u0648\u0644 \u0631\u0648\u06CC \u0622\u06CC\u062A\u0645 \u0646\u0648\u0627\u0631 \u0648\u0636\u0639\u06CC\u062A\u060C \u06A9\u062F\u0627\u0645 \u06A9\u0644\u06CC\u062F \u062A\u063A\u06CC\u06CC\u0631\u062F\u0647\u0646\u062F\u0647 \u0628\u0627\u06CC\u062F \u0646\u06AF\u0647 \u062F\u0627\u0634\u062A\u0647 \u0634\u0648\u062F.",
+        settingsStatusBarScrollModifierRecommended: "Cmd \u06CC\u0627 Option",
+        settingsStatusBarScrollModifierNone: "\u0647\u06CC\u0686\u200C\u06A9\u062F\u0627\u0645",
+        settingsStatusBarScrollModifierModOnly: "\u0641\u0642\u0637 Cmd",
+        settingsStatusBarScrollModifierAltOnly: "\u0641\u0642\u0637 Option",
+        settingsStatusBarScrollModifierModOrAlt: "Cmd \u06CC\u0627 Option",
+        settingsStatusBarScrollThreshold: "\u0622\u0633\u062A\u0627\u0646\u0647 \u062D\u0633\u0627\u0633\u06CC\u062A",
+        settingsStatusBarScrollThresholdDesc: "\u0645\u0642\u0627\u062F\u06CC\u0631 \u06A9\u0645\u062A\u0631 \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u0631\u0627 \u0622\u0633\u0627\u0646\u200C\u062A\u0631 \u0645\u06CC\u200C\u06A9\u0646\u0646\u062F. \u0641\u0642\u0637 \u0648\u0642\u062A\u06CC \u067E\u06CC\u0634\u200C\u062A\u0646\u0638\u06CC\u0645 \u0633\u0641\u0627\u0631\u0634\u06CC \u0628\u0627\u0634\u062F \u0627\u0633\u062A\u0641\u0627\u062F\u0647 \u0645\u06CC\u200C\u0634\u0648\u062F.",
+        settingsStatusBarScrollCooldown: "\u0645\u06A9\u062B",
+        settingsStatusBarScrollCooldownDesc: "\u062D\u062F\u0627\u0642\u0644 \u0632\u0645\u0627\u0646 \u0628\u06CC\u0646 \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC\u200C\u0647\u0627\u06CC \u0646\u0634\u0633\u062A \u06A9\u0647 \u0628\u0627 \u0627\u0633\u06A9\u0631\u0648\u0644 \u0641\u0639\u0627\u0644 \u0645\u06CC\u200C\u0634\u0648\u0646\u062F. \u0641\u0642\u0637 \u0648\u0642\u062A\u06CC \u067E\u06CC\u0634\u200C\u062A\u0646\u0638\u06CC\u0645 \u0633\u0641\u0627\u0631\u0634\u06CC \u0628\u0627\u0634\u062F \u0627\u0633\u062A\u0641\u0627\u062F\u0647 \u0645\u06CC\u200C\u0634\u0648\u062F.",
+        settingsStatusBarScrollResetWindow: "\u0628\u0627\u0632\u0647 \u0628\u0627\u0632\u0646\u0634\u0627\u0646\u06CC \u062A\u062C\u0645\u0639",
+        settingsStatusBarScrollResetWindowDesc: "\u0645\u062F\u062A \u0632\u0645\u0627\u0646\u06CC \u06A9\u0647 \u062A\u063A\u06CC\u06CC\u0631\u0627\u062A \u06A9\u0648\u0686\u06A9 \u0627\u0633\u06A9\u0631\u0648\u0644 \u067E\u06CC\u0634 \u0627\u0632 \u0628\u0627\u0632\u0646\u0634\u0627\u0646\u06CC \u0628\u0627 \u0647\u0645 \u062C\u0645\u0639 \u0645\u06CC\u200C\u0634\u0648\u0646\u062F. \u0641\u0642\u0637 \u0648\u0642\u062A\u06CC \u067E\u06CC\u0634\u200C\u062A\u0646\u0638\u06CC\u0645 \u0633\u0641\u0627\u0631\u0634\u06CC \u0628\u0627\u0634\u062F \u0627\u0633\u062A\u0641\u0627\u062F\u0647 \u0645\u06CC\u200C\u0634\u0648\u062F.",
+        settingsStatusBarScrollInvert: "\u0648\u0627\u0631\u0648\u0646\u0647 \u06A9\u0631\u062F\u0646 \u062C\u0647\u062A \u0627\u0633\u06A9\u0631\u0648\u0644",
+        settingsStatusBarScrollInvertDesc: "\u062C\u0647\u062A \u0642\u0628\u0644\u06CC/\u0628\u0639\u062F\u06CC \u0631\u0627 \u0628\u0631\u0627\u06CC \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u0646\u0634\u0633\u062A \u0628\u0627 \u0627\u0633\u06A9\u0631\u0648\u0644 \u0631\u0648\u06CC \u0646\u0648\u0627\u0631 \u0648\u0636\u0639\u06CC\u062A \u0648\u0627\u0631\u0648\u0646\u0647 \u0645\u06CC\u200C\u06A9\u0646\u062F.",
+        settingsLangAuto: "\u062E\u0648\u062F\u06A9\u0627\u0631 (\u0632\u0628\u0627\u0646 \u0633\u06CC\u0633\u062A\u0645)",
+        settingsGitHubLink: "GitHub",
+        settingsTranslationHelp: "\u062E\u0637\u0627\u06CC \u062A\u0631\u062C\u0645\u0647 \u067E\u06CC\u062F\u0627 \u06A9\u0631\u062F\u06CC\u062F\u061F \u0644\u0637\u0641\u0627 \u062F\u0631 GitHub \u06CC\u06A9 issue \u06CC\u0627 pull request \u0628\u0627\u0632 \u06A9\u0646\u06CC\u062F.",
+        settingsPreviewHeading: "\u0641\u0639\u0627\u0644 \u06A9\u0631\u062F\u0646 \u067E\u06CC\u0634\u200C\u0646\u0645\u0627\u06CC\u0634 \u067E\u06CC\u0634 \u0627\u0632 \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u0646\u0634\u0633\u062A",
+        settingsPreviewDesc: "\u0647\u0646\u06AF\u0627\u0645 \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u0646\u0634\u0633\u062A \u0628\u0627 \u0645\u06CC\u0627\u0646\u0628\u0631\u060C \u0641\u0634\u0627\u0631 \u0627\u0648\u0644 \u0641\u0642\u0637 \u0645\u0648\u0642\u0639\u06CC\u062A \u0641\u0639\u0644\u06CC \u0631\u0627 \u0646\u0634\u0627\u0646 \u0645\u06CC\u200C\u062F\u0647\u062F \u0648 \u062C\u0627\u0628\u0647\u200C\u062C\u0627 \u0646\u0645\u06CC\u200C\u06A9\u0646\u062F.",
+        settingsPreviewNext: "\u0646\u0634\u0633\u062A \u0628\u0639\u062F\u06CC",
+        settingsPreviewPrevious: "\u0646\u0634\u0633\u062A \u0642\u0628\u0644\u06CC",
+        settingsHotkeys: "\u0645\u06CC\u0627\u0646\u0628\u0631\u0647\u0627",
+        settingsHotkeysBtn: "\u0628\u0627\u0632 \u06A9\u0631\u062F\u0646 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u06CC\u0627\u0646\u0628\u0631",
+        contextOpenSettings: "\u0628\u0627\u0632 \u06A9\u0631\u062F\u0646 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A",
+        contextCustomizeClicks: "\u0633\u0641\u0627\u0631\u0634\u06CC \u06A9\u0631\u062F\u0646 \u06A9\u0646\u0634\u200C\u0647\u0627\u06CC \u06A9\u0644\u06CC\u06A9",
+        settingsSectionStatusBar: "\u06A9\u0646\u0634\u200C\u0647\u0627\u06CC \u06A9\u0644\u06CC\u06A9 \u0646\u0648\u0627\u0631 \u0648\u0636\u0639\u06CC\u062A",
+        statusBarSlotClick: "\u06A9\u0644\u06CC\u06A9",
+        statusBarSlotAltClick: function() {
+          return (typeof navigator !== "undefined" && navigator.platform.indexOf("Mac") !== -1 ? "\u2325" : "Alt") + " + \u06A9\u0644\u06CC\u06A9";
+        },
+        statusBarSlotModClick: function() {
+          return (typeof navigator !== "undefined" && navigator.platform.indexOf("Mac") !== -1 ? "\u2318" : "Ctrl") + " + \u06A9\u0644\u06CC\u06A9";
+        },
+        statusBarSlotShiftClick: function() {
+          return (typeof navigator !== "undefined" && navigator.platform.indexOf("Mac") !== -1 ? "\u21E7" : "Shift") + " + \u06A9\u0644\u06CC\u06A9";
+        },
+        statusBarSlotMiddleClick: "\u06A9\u0644\u06CC\u06A9 \u0645\u06CC\u0627\u0646\u06CC",
+        statusBarSlotAltMiddleClick: modifiedClickLabel("\u06A9\u0644\u06CC\u06A9 \u0645\u06CC\u0627\u0646\u06CC", "\u2325", "Alt"),
+        statusBarSlotModMiddleClick: modifiedClickLabel("\u06A9\u0644\u06CC\u06A9 \u0645\u06CC\u0627\u0646\u06CC", "\u2318", "Ctrl"),
+        statusBarSlotShiftMiddleClick: modifiedClickLabel("\u06A9\u0644\u06CC\u06A9 \u0645\u06CC\u0627\u0646\u06CC", "\u21E7", "Shift"),
+        statusBarSlotRightClick: "\u0631\u0627\u0633\u062A\u200C\u06A9\u0644\u06CC\u06A9",
+        statusBarSlotAltRightClick: function() {
+          return (typeof navigator !== "undefined" && navigator.platform.indexOf("Mac") !== -1 ? "\u2325" : "Alt") + " + \u0631\u0627\u0633\u062A\u200C\u06A9\u0644\u06CC\u06A9";
+        },
+        statusBarSlotModRightClick: function() {
+          return (typeof navigator !== "undefined" && navigator.platform.indexOf("Mac") !== -1 ? "\u2318" : "Ctrl") + " + \u0631\u0627\u0633\u062A\u200C\u06A9\u0644\u06CC\u06A9";
+        },
+        statusBarSlotShiftRightClick: function() {
+          return (typeof navigator !== "undefined" && navigator.platform.indexOf("Mac") !== -1 ? "\u21E7" : "Shift") + " + \u0631\u0627\u0633\u062A\u200C\u06A9\u0644\u06CC\u06A9";
+        },
+        statusBarActionNone: "\u0647\u06CC\u0686 \u06A9\u0627\u0631\u06CC \u0646\u06A9\u0646",
+        statusBarActionQuickSwitcher: "\u0628\u0627\u0632 \u06A9\u0631\u062F\u0646 \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06A9\u0646\u0646\u062F\u0647 \u0633\u0631\u06CC\u0639",
+        statusBarActionSessionManager: "\u0628\u0627\u0632 \u06A9\u0631\u062F\u0646 \u0645\u062F\u06CC\u0631 \u0646\u0634\u0633\u062A",
+        statusBarActionSaveSession: "\u0630\u062E\u06CC\u0631\u0647 \u0646\u0634\u0633\u062A",
+        statusBarActionReloadWithoutSaving: "\u0628\u0627\u0631\u06AF\u0630\u0627\u0631\u06CC \u062F\u0648\u0628\u0627\u0631\u0647 \u0628\u062F\u0648\u0646 \u0630\u062E\u06CC\u0631\u0647",
+        statusBarActionVersionHistory: "\u0646\u0645\u0627\u06CC\u0634 \u062A\u0627\u0631\u06CC\u062E\u0686\u0647 \u0646\u0633\u062E\u0647",
+        statusBarActionRestoreLatestHistory: "\u0628\u0627\u0632\u06CC\u0627\u0628\u06CC \u0622\u062E\u0631\u06CC\u0646 \u062A\u0627\u0631\u06CC\u062E\u0686\u0647",
+        statusBarActionSessionMenu: "\u0645\u0646\u0648\u06CC \u0632\u0645\u06CC\u0646\u0647 \u0646\u0634\u0633\u062A",
+        statusBarActionSettingsMenu: "\u0645\u0646\u0648\u06CC \u0632\u0645\u06CC\u0646\u0647 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A",
+        contextResetOverlayPosition: "\u0628\u0627\u0632\u0646\u0634\u0627\u0646\u06CC \u0645\u0648\u0642\u0639\u06CC\u062A \u0648 \u0627\u0646\u062F\u0627\u0632\u0647",
+        settingsConfirmDelete: "\u062A\u0627\u06CC\u06CC\u062F \u067E\u06CC\u0634 \u0627\u0632 \u062D\u0630\u0641 \u0646\u0634\u0633\u062A",
+        settingsConfirmDeleteDesc: "\u067E\u06CC\u0634 \u0627\u0632 \u062D\u0630\u0641 \u0646\u0634\u0633\u062A\u060C \u06AF\u0641\u062A\u200C\u0648\u06AF\u0648\u06CC \u062A\u0627\u06CC\u06CC\u062F \u0646\u0634\u0627\u0646 \u062F\u0647\u06CC\u062F.",
+        settingsConfirmQuickActions: "\u062A\u0627\u06CC\u06CC\u062F \u0630\u062E\u06CC\u0631\u0647/\u0628\u0627\u0631\u06AF\u0630\u0627\u0631\u06CC \u062F\u0648\u0628\u0627\u0631\u0647 \u062F\u0631 \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06A9\u0646\u0646\u062F\u0647 \u0633\u0631\u06CC\u0639",
+        settingsConfirmQuickActionsDesc: "\u067E\u06CC\u0634 \u0627\u0632 \u0630\u062E\u06CC\u0631\u0647 \u06CC\u0627 \u0628\u0627\u0631\u06AF\u0630\u0627\u0631\u06CC \u062F\u0648\u0628\u0627\u0631\u0647 \u0646\u0634\u0633\u062A \u0627\u0632 \u067E\u0648\u0634\u0634 \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06A9\u0646\u0646\u062F\u0647 \u0633\u0631\u06CC\u0639\u060C \u06AF\u0641\u062A\u200C\u0648\u06AF\u0648\u06CC \u062A\u0627\u06CC\u06CC\u062F \u0646\u0634\u0627\u0646 \u062F\u0647\u06CC\u062F.",
+        settingsAutoSaveOnSwitch: "\u062D\u0627\u0644\u062A \u0630\u062E\u06CC\u0631\u0647 \u062E\u0648\u062F\u06A9\u0627\u0631",
+        settingsAutoSaveOnSwitchDesc: "\u0647\u0646\u06AF\u0627\u0645 \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u0646\u0634\u0633\u062A\u060C \u0646\u0634\u0633\u062A \u0641\u0639\u0644\u06CC \u0631\u0627 \u062E\u0648\u062F\u06A9\u0627\u0631 \u0630\u062E\u06CC\u0631\u0647 \u0645\u06CC\u200C\u06A9\u0646\u062F (\u067E\u06CC\u0634\u200C\u0641\u0631\u0636: \u0631\u0648\u0634\u0646). \u0648\u0642\u062A\u06CC \u062E\u0627\u0645\u0648\u0634 \u0628\u0627\u0634\u062F\u060C \u0645\u06CC\u200C\u062A\u0648\u0627\u0646\u06CC\u062F \u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u0631\u0627 \u062F\u0633\u062A\u06CC \u0630\u062E\u06CC\u0631\u0647 \u0648 \u062F\u0648\u0628\u0627\u0631\u0647 \u0628\u0627\u0631\u06AF\u0630\u0627\u0631\u06CC \u06A9\u0646\u06CC\u062F.",
+        settingsWarnUnsavedSwitch: "\u0647\u0634\u062F\u0627\u0631 \u067E\u06CC\u0634 \u0627\u0632 \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u0628\u062F\u0648\u0646 \u0630\u062E\u06CC\u0631\u0647",
+        settingsWarnUnsavedSwitchDesc: "\u0648\u0642\u062A\u06CC \u0630\u062E\u06CC\u0631\u0647 \u062E\u0648\u062F\u06A9\u0627\u0631 \u062E\u0627\u0645\u0648\u0634 \u0627\u0633\u062A \u0648 \u0646\u0634\u0633\u062A \u0641\u0639\u0644\u06CC \u062A\u063A\u06CC\u06CC\u0631\u0627\u062A \u0630\u062E\u06CC\u0631\u0647\u200C\u0646\u0634\u062F\u0647 \u062F\u0627\u0631\u062F\u060C \u067E\u06CC\u0634 \u0627\u0632 \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u0647\u0634\u062F\u0627\u0631 \u0646\u0634\u0627\u0646 \u062F\u0647\u06CC\u062F.",
+        settingsStatusBarQuickSwitcher: "\u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06A9\u0646\u0646\u062F\u0647 \u0633\u0631\u06CC\u0639 \u0628\u0627 \u06A9\u0644\u06CC\u06A9 \u0646\u0648\u0627\u0631 \u0648\u0636\u0639\u06CC\u062A",
+        settingsStatusBarQuickSwitcherDesc: "\u0627\u06AF\u0631 \u0641\u0639\u0627\u0644 \u0628\u0627\u0634\u062F\u060C \u06A9\u0644\u06CC\u06A9 \u0631\u0648\u06CC \u0646\u0648\u0627\u0631 \u0648\u0636\u0639\u06CC\u062A \u0628\u0647\u200C\u062C\u0627\u06CC \u0645\u062F\u06CC\u0631 \u0646\u0634\u0633\u062A \u06A9\u0627\u0645\u0644\u060C \u067E\u0648\u0634\u0634 \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06A9\u0646\u0646\u062F\u0647 \u0633\u0631\u06CC\u0639 \u0631\u0627 \u0628\u0627\u0632 \u0645\u06CC\u200C\u06A9\u0646\u062F.",
+        settingsUseLocalSettings: "\u0627\u0633\u062A\u0641\u0627\u062F\u0647 \u0627\u0632 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u062E\u0635\u0648\u0635 vault",
+        settingsUseLocalSettingsDesc: "\u0627\u06AF\u0631 .obsidian \u0631\u0627 \u0628\u06CC\u0646 \u0686\u0646\u062F vault \u0647\u0645\u06AF\u0627\u0645 \u0645\u06CC\u200C\u06A9\u0646\u06CC\u062F (\u0645\u062B\u0644\u0627 \u0628\u0627 Settings Profiles) \u0648 \u0645\u06CC\u200C\u062E\u0648\u0627\u0647\u06CC\u062F \u062A\u0646\u0638\u06CC\u0645\u0627\u062A Workspace++ \u0628\u0631\u0627\u06CC \u0647\u0631 vault \u062C\u062F\u0627 \u0628\u0645\u0627\u0646\u062F\u060C \u0627\u06CC\u0646 \u0631\u0627 \u0631\u0648\u0634\u0646 \u06A9\u0646\u06CC\u062F.",
+        settingsCopyGlobalToLocal: "\u06A9\u067E\u06CC \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0633\u0631\u0627\u0633\u0631\u06CC \u0628\u0647 \u0627\u06CC\u0646 vault",
+        settingsCopyGlobalToLocalDesc: "\u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u062E\u0635\u0648\u0635 vault \u0631\u0627 \u0628\u0627 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0633\u0631\u0627\u0633\u0631\u06CC \u0641\u0639\u0644\u06CC \u0628\u0627\u0632\u0646\u0648\u06CC\u0633\u06CC \u0645\u06CC\u200C\u06A9\u0646\u062F.",
+        settingsCopyGlobalToLocalBtn: "\u06A9\u067E\u06CC",
+        settingsResetLocalSettings: "\u0628\u0627\u0632\u0646\u0634\u0627\u0646\u06CC \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u062E\u0635\u0648\u0635 vault",
+        settingsResetLocalSettingsDesc: "\u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u062E\u0635\u0648\u0635 vault \u0631\u0627 \u0628\u0647 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0633\u0631\u0627\u0633\u0631\u06CC \u0628\u0631\u0645\u06CC\u200C\u06AF\u0631\u062F\u0627\u0646\u062F.",
+        settingsResetLocalSettingsBtn: "\u0628\u0627\u0632\u0646\u0634\u0627\u0646\u06CC \u0645\u062D\u0644\u06CC",
+        settingsAdvancedStorageSubsection: "\u0631\u0641\u062A\u0627\u0631 \u0630\u062E\u06CC\u0631\u0647\u200C\u0633\u0627\u0632\u06CC",
+        settingsAdvancedTransferSubsection: "\u0627\u0646\u062A\u0642\u0627\u0644 \u062F\u0627\u062F\u0647",
+        settingsDeveloperSection: "\u0627\u0628\u0632\u0627\u0631\u0647\u0627\u06CC \u062A\u0648\u0633\u0639\u0647\u200C\u062F\u0647\u0646\u062F\u0647",
+        settingsStorageDiagnostics: "\u0639\u06CC\u0628\u200C\u06CC\u0627\u0628\u06CC \u0630\u062E\u06CC\u0631\u0647\u200C\u0633\u0627\u0632\u06CC",
+        settingsStorageDiagnosticsDesc: "\u062C\u0632\u0626\u06CC\u0627\u062A \u0630\u062E\u06CC\u0631\u0647\u200C\u0633\u0627\u0632\u06CC \u06A9\u0647 Workspace++ \u0627\u06A9\u0646\u0648\u0646 \u0627\u0633\u062A\u0641\u0627\u062F\u0647 \u0645\u06CC\u200C\u06A9\u0646\u062F.",
+        settingsStorageFieldSessions: "\u0641\u0627\u06CC\u0644 \u0646\u0634\u0633\u062A\u200C\u0647\u0627",
+        settingsStorageFieldSessionsBackup: "\u067E\u0634\u062A\u06CC\u0628\u0627\u0646 \u0646\u0634\u0633\u062A\u200C\u0647\u0627",
+        settingsStorageFieldLocalSettings: "\u0641\u0627\u06CC\u0644 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u062D\u0644\u06CC",
+        settingsStorageFieldGlobalSettings: "\u0641\u0627\u06CC\u0644 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0633\u0631\u0627\u0633\u0631\u06CC",
+        settingsStorageFieldSessionCount: "\u062A\u0639\u062F\u0627\u062F \u0646\u0634\u0633\u062A\u200C\u0647\u0627",
+        settingsStorageFieldUpdatedAt: "\u0628\u0647\u200C\u0631\u0648\u0632\u0631\u0633\u0627\u0646\u06CC \u062F\u0631",
+        settingsExportSessions: "\u062E\u0631\u0648\u062C\u06CC \u06AF\u0631\u0641\u062A\u0646 \u0627\u0632 \u0646\u0634\u0633\u062A\u200C\u0647\u0627",
+        settingsExportSessionsDesc: "\u06CC\u06A9 \u0627\u0633\u0646\u067E\u200C\u0634\u0627\u062A \u062F\u0631 .workspace-plus-plus/exports \u0630\u062E\u06CC\u0631\u0647 \u0645\u06CC\u200C\u06A9\u0646\u062F.",
+        settingsExportSessionsBtn: "\u062E\u0631\u0648\u062C\u06CC",
+        settingsImportSessions: "\u0648\u0627\u0631\u062F \u06A9\u0631\u062F\u0646 \u0646\u0634\u0633\u062A\u200C\u0647\u0627",
+        settingsImportSessionsDesc: "\u0622\u062E\u0631\u06CC\u0646 \u0627\u0633\u0646\u067E\u200C\u0634\u0627\u062A \u0631\u0627 \u0627\u0632 .workspace-plus-plus/exports \u0648\u0627\u0631\u062F \u0645\u06CC\u200C\u06A9\u0646\u062F.",
+        settingsImportSessionsBtn: "\u0648\u0627\u0631\u062F \u06A9\u0631\u062F\u0646 \u0622\u062E\u0631\u06CC\u0646",
+        confirmImportSessions: "\u0622\u062E\u0631\u06CC\u0646 \u0646\u0634\u0633\u062A\u200C\u0647\u0627\u06CC \u062E\u0631\u0648\u062C\u06CC\u200C\u06AF\u0631\u0641\u062A\u0647\u200C\u0634\u062F\u0647 \u0648\u0627\u0631\u062F \u0634\u0648\u0646\u062F\u061F \u0646\u0634\u0633\u062A\u200C\u0647\u0627\u06CC \u0641\u0639\u0644\u06CC \u062C\u0627\u06CC\u06AF\u0632\u06CC\u0646 \u0645\u06CC\u200C\u0634\u0648\u0646\u062F.",
+        settingsResetSettings: "\u0628\u0627\u0632\u0646\u0634\u0627\u0646\u06CC \u062A\u0646\u0638\u06CC\u0645\u0627\u062A",
+        settingsResetSettingsDesc: "\u062A\u0646\u0638\u06CC\u0645\u0627\u062A Workspace++ \u0631\u0627 \u0628\u0631\u0627\u06CC \u0645\u062D\u062F\u0648\u062F\u0647 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0641\u0639\u0644\u06CC \u0628\u0627\u0632\u0646\u0634\u0627\u0646\u06CC \u0645\u06CC\u200C\u06A9\u0646\u062F.",
+        settingsResetSettingsBtn: "\u0628\u0627\u0632\u0646\u0634\u0627\u0646\u06CC \u062A\u0646\u0638\u06CC\u0645\u0627\u062A",
+        confirmResetSettings: "\u062A\u0646\u0638\u06CC\u0645\u0627\u062A Workspace++ \u0628\u0647 \u067E\u06CC\u0634\u200C\u0641\u0631\u0636 \u0628\u0627\u0632\u0646\u0634\u0627\u0646\u06CC \u0634\u0648\u062F\u061F",
+        resetSettingsDone: "\u062A\u0646\u0638\u06CC\u0645\u0627\u062A Workspace++ \u0628\u0627\u0632\u0646\u0634\u0627\u0646\u06CC \u0634\u062F.",
+        resetSettingsFailed: "\u0628\u0627\u0632\u0646\u0634\u0627\u0646\u06CC \u062A\u0646\u0638\u06CC\u0645\u0627\u062A Workspace++ \u0646\u0627\u0645\u0648\u0641\u0642 \u0628\u0648\u062F.",
+        settingsResetSessions: "\u0628\u0627\u0632\u0646\u0634\u0627\u0646\u06CC \u0646\u0634\u0633\u062A\u200C\u0647\u0627",
+        settingsResetSessionsDesc: "\u0647\u0645\u0647 \u0646\u0634\u0633\u062A\u200C\u0647\u0627\u06CC \u0630\u062E\u06CC\u0631\u0647\u200C\u0634\u062F\u0647 \u0631\u0627 \u062D\u0630\u0641 \u0645\u06CC\u200C\u06A9\u0646\u062F \u0648 \u0641\u0642\u0637 \u06CC\u06A9 \u0646\u0634\u0633\u062A \u067E\u06CC\u0634\u200C\u0641\u0631\u0636 \u062A\u0627\u0632\u0647 \u0627\u0632 \u0686\u06CC\u062F\u0645\u0627\u0646 \u0641\u0639\u0644\u06CC \u0646\u06AF\u0647 \u0645\u06CC\u200C\u062F\u0627\u0631\u062F.",
+        settingsResetSessionsBtn: "\u0628\u0627\u0632\u0646\u0634\u0627\u0646\u06CC",
+        confirmResetSessions: "\u0647\u0645\u0647 \u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u0628\u0647 \u067E\u06CC\u0634\u200C\u0641\u0631\u0636 \u0628\u0627\u0632\u0646\u0634\u0627\u0646\u06CC \u0634\u0648\u0646\u062F\u061F \u0627\u06CC\u0646 \u06A9\u0627\u0631 \u0642\u0627\u0628\u0644 \u0628\u0627\u0632\u06AF\u0634\u062A \u0646\u06CC\u0633\u062A.",
+        resetSessionsHint: "\u0627\u06CC\u0646 \u06A9\u0627\u0631 \u0647\u0645\u0647 \u0646\u0634\u0633\u062A\u200C\u0647\u0627\u06CC \u0630\u062E\u06CC\u0631\u0647\u200C\u0634\u062F\u0647 \u0631\u0627 \u062D\u0630\u0641 \u0645\u06CC\u200C\u06A9\u0646\u062F \u0648 \u0641\u0642\u0637 \u06CC\u06A9 \u0646\u0634\u0633\u062A \u067E\u06CC\u0634\u200C\u0641\u0631\u0636 \u0646\u06AF\u0647 \u0645\u06CC\u200C\u062F\u0627\u0631\u062F.",
+        resetSessionsDone: "\u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u0628\u0647 \u067E\u06CC\u0634\u200C\u0641\u0631\u0636 \u0628\u0627\u0632\u0646\u0634\u0627\u0646\u06CC \u0634\u062F\u0646\u062F.",
+        resetSessionsFailed: "\u0628\u0627\u0632\u0646\u0634\u0627\u0646\u06CC \u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u0646\u0627\u0645\u0648\u0641\u0642 \u0628\u0648\u062F.",
+        settingsResetSessionsAndSettings: "\u0628\u0627\u0632\u0646\u0634\u0627\u0646\u06CC \u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u0648 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A",
+        settingsResetSessionsAndSettingsDesc: "\u0646\u0634\u0633\u062A\u200C\u0647\u0627\u06CC \u0630\u062E\u06CC\u0631\u0647\u200C\u0634\u062F\u0647 \u0648 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A Workspace++ \u0631\u0627 \u0647\u0645\u200C\u0632\u0645\u0627\u0646 \u0628\u0627\u0632\u0646\u0634\u0627\u0646\u06CC \u0645\u06CC\u200C\u06A9\u0646\u062F.",
+        settingsResetSessionsAndSettingsBtn: "\u0628\u0627\u0632\u0646\u0634\u0627\u0646\u06CC \u0647\u0631 \u062F\u0648",
+        confirmResetSessionsAndSettings: "\u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u0648 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0647\u0631 \u062F\u0648 \u0628\u0627\u0632\u0646\u0634\u0627\u0646\u06CC \u0634\u0648\u0646\u062F\u061F \u0627\u06CC\u0646 \u06A9\u0627\u0631 \u0642\u0627\u0628\u0644 \u0628\u0627\u0632\u06AF\u0634\u062A \u0646\u06CC\u0633\u062A.",
+        resetSessionsAndSettingsDone: "\u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u0648 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0628\u0627\u0632\u0646\u0634\u0627\u0646\u06CC \u0634\u062F\u0646\u062F.",
+        resetSessionsAndSettingsFailed: "\u0628\u0627\u0632\u0646\u0634\u0627\u0646\u06CC \u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u0648 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0646\u0627\u0645\u0648\u0641\u0642 \u0628\u0648\u062F.",
+        confirmDeleteSettingsHint: "\u0628\u0631\u0627\u06CC \u063A\u06CC\u0631\u0641\u0639\u0627\u0644 \u06A9\u0631\u062F\u0646 \u0627\u06CC\u0646 \u062A\u0627\u06CC\u06CC\u062F\u060C \u0628\u0647 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0628\u0631\u0648\u06CC\u062F.",
+        groupCreated: function(n) {
+          return '\u06AF\u0631\u0648\u0647 "' + n + '" \u0627\u06CC\u062C\u0627\u062F \u0634\u062F';
+        },
+        groupDeleted: function(n) {
+          return '\u06AF\u0631\u0648\u0647 "' + n + '" \u062D\u0630\u0641 \u0634\u062F';
+        },
+        groupRenamed: function(o, n) {
+          return '\u0646\u0627\u0645 \u06AF\u0631\u0648\u0647 \u062A\u063A\u06CC\u06CC\u0631 \u06A9\u0631\u062F: "' + o + '" \u2192 "' + n + '"';
+        },
+        groupAll: "\u0647\u0645\u0647",
+        groupDuplicateName: "\u06AF\u0631\u0648\u0647\u06CC \u0628\u0627 \u0627\u06CC\u0646 \u0646\u0627\u0645 \u0627\u0632 \u0642\u0628\u0644 \u0648\u062C\u0648\u062F \u062F\u0627\u0631\u062F.",
+        groupEmptyName: "\u0646\u0627\u0645 \u06AF\u0631\u0648\u0647 \u0646\u0645\u06CC\u200C\u062A\u0648\u0627\u0646\u062F \u062E\u0627\u0644\u06CC \u0628\u0627\u0634\u062F.",
+        cmdSwitchGroup: "\u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u06AF\u0631\u0648\u0647",
+        cmdExitGroup: "\u0646\u0645\u0627\u06CC\u0634 \u0647\u0645\u0647 \u0646\u0634\u0633\u062A\u200C\u0647\u0627 (\u062E\u0631\u0648\u062C \u0627\u0632 \u06AF\u0631\u0648\u0647)",
+        cmdNextGroup: "\u06AF\u0631\u0648\u0647 \u0628\u0639\u062F\u06CC",
+        cmdPreviousGroup: "\u06AF\u0631\u0648\u0647 \u0642\u0628\u0644\u06CC",
+        searchOverlayHelpWithGroups: "\u2191\u2193 \u062D\u0631\u06A9\u062A  /  Tab \u06AF\u0631\u0648\u0647  /  Enter \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC  /  \u21E7Enter \u0630\u062E\u06CC\u0631\u0647  /  \u232B \u062D\u0630\u0641  /  Esc \u0628\u0633\u062A\u0646",
+        settingsSectionGroups: "\u06AF\u0631\u0648\u0647\u200C\u0647\u0627\u06CC \u0646\u0634\u0633\u062A",
+        contextToggleGroups: "\u0641\u0639\u0627\u0644 \u06A9\u0631\u062F\u0646 \u06AF\u0631\u0648\u0647\u200C\u0647\u0627\u06CC \u0646\u0634\u0633\u062A",
+        settingsSectionGroupsDesc: "\u0627\u0632 \u06AF\u0631\u0648\u0647\u200C\u0647\u0627 \u0628\u0631\u0627\u06CC \u0633\u0627\u0632\u0645\u0627\u0646\u200C\u062F\u0647\u06CC \u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u0627\u0633\u062A\u0641\u0627\u062F\u0647 \u06A9\u0646\u06CC\u062F. \u062E\u0627\u0645\u0648\u0634 \u06A9\u0631\u062F\u0646 \u0627\u06CC\u0646 \u06AF\u0632\u06CC\u0646\u0647 \u0632\u0628\u0627\u0646\u0647\u200C\u0647\u0627\u06CC \u06AF\u0631\u0648\u0647 \u0648 \u06A9\u0646\u0634\u200C\u0647\u0627\u06CC \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u06AF\u0631\u0648\u0647 \u0631\u0627 \u067E\u0646\u0647\u0627\u0646 \u0645\u06CC\u200C\u06A9\u0646\u062F.",
+        settingsGroupCreate: "\u0627\u06CC\u062C\u0627\u062F \u06AF\u0631\u0648\u0647",
+        settingsGroupCreateDesc: "\u06CC\u06A9 \u06AF\u0631\u0648\u0647 \u0646\u0634\u0633\u062A \u062C\u062F\u06CC\u062F \u0627\u06CC\u062C\u0627\u062F \u06A9\u0646\u06CC\u062F.",
+        settingsGroupCreatePlaceholder: "\u0646\u0627\u0645 \u06AF\u0631\u0648\u0647...",
+        settingsGroupCreateBtn: "\u0627\u06CC\u062C\u0627\u062F",
+        settingsGroupManageSessions: "\u0645\u062F\u06CC\u0631\u06CC\u062A \u0646\u0634\u0633\u062A\u200C\u0647\u0627",
+        settingsGroupManageSessionsDesc: "\u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u0631\u0627 \u0628\u0647 \u0627\u06CC\u0646 \u06AF\u0631\u0648\u0647 \u0627\u0636\u0627\u0641\u0647 \u06A9\u0646\u06CC\u062F \u06CC\u0627 \u0627\u0632 \u0622\u0646 \u0628\u0631\u062F\u0627\u0631\u06CC\u062F.",
+        settingsGroupSessionCount: function(n) {
+          return n + " \u0646\u0634\u0633\u062A";
+        },
+        settingsGroupDelete: "\u062D\u0630\u0641 \u06AF\u0631\u0648\u0647",
+        settingsGroupDeleteConfirm: function(n) {
+          return '\u06AF\u0631\u0648\u0647 "' + n + '" \u062D\u0630\u0641 \u0634\u0648\u062F\u061F \u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u062D\u0630\u0641 \u0646\u0645\u06CC\u200C\u0634\u0648\u0646\u062F.';
+        },
+        confirmDeleteGroup: function(n) {
+          return '\u06AF\u0631\u0648\u0647 "' + n + '" \u062D\u0630\u0641 \u0634\u0648\u062F\u061F \u0646\u0634\u0633\u062A\u200C\u0647\u0627\u06CC \u062F\u0627\u062E\u0644 \u0627\u06CC\u0646 \u06AF\u0631\u0648\u0647 \u062D\u0630\u0641 \u0646\u0645\u06CC\u200C\u0634\u0648\u0646\u062F.';
+        },
+        groupAddedSession: function(s, g) {
+          return '"' + s + '" \u0628\u0647 "' + g + '" \u0627\u0636\u0627\u0641\u0647 \u0634\u062F';
+        },
+        groupRemovedSession: function(s, g) {
+          return '"' + s + '" \u0627\u0632 "' + g + '" \u0628\u0631\u062F\u0627\u0634\u062A\u0647 \u0634\u062F';
+        },
+        groupRemoveFromGroup: "\u0628\u0631\u062F\u0627\u0634\u062A\u0646 \u0627\u0632 \u06AF\u0631\u0648\u0647",
+        groupMoveToGroup: "\u0627\u0646\u062A\u0642\u0627\u0644 \u0628\u0647 \u06AF\u0631\u0648\u0647",
+        groupCreateNew: "\u06AF\u0631\u0648\u0647 \u062C\u062F\u06CC\u062F",
+        groupCreatePlaceholder: "\u0646\u0627\u0645 \u06AF\u0631\u0648\u0647...",
+        groupContextRename: "\u062A\u063A\u06CC\u06CC\u0631 \u0646\u0627\u0645 \u06AF\u0631\u0648\u0647",
+        groupContextDelete: "\u062D\u0630\u0641 \u06AF\u0631\u0648\u0647",
+        contextSwitchSession: "\u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u0628\u0647 \u0627\u06CC\u0646 \u0646\u0634\u0633\u062A",
+        contextRenameSession: "\u062A\u063A\u06CC\u06CC\u0631 \u0646\u0627\u0645 \u0627\u06CC\u0646 \u0646\u0634\u0633\u062A",
+        contextDeleteSession: "\u062D\u0630\u0641 \u0627\u06CC\u0646 \u0646\u0634\u0633\u062A",
+        contextDuplicateSession: "\u062A\u06A9\u062B\u06CC\u0631 \u0627\u06CC\u0646 \u0646\u0634\u0633\u062A",
+        contextReloadSession: "\u0628\u0627\u0631\u06AF\u0630\u0627\u0631\u06CC \u062F\u0648\u0628\u0627\u0631\u0647 \u0627\u06CC\u0646 \u0646\u0634\u0633\u062A",
+        contextSaveSession: "\u0630\u062E\u06CC\u0631\u0647 \u0627\u06CC\u0646 \u0646\u0634\u0633\u062A",
+        contextSaveCurrentLayoutToThisSession: "\u0630\u062E\u06CC\u0631\u0647 \u0686\u06CC\u062F\u0645\u0627\u0646 \u0641\u0639\u0644\u06CC \u062F\u0631 \u0627\u06CC\u0646 \u0646\u0634\u0633\u062A",
+        groupRemoveAllSessions: "\u0628\u0631\u062F\u0627\u0634\u062A\u0646 \u0647\u0645\u0647 \u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u0627\u0632 \u0627\u06CC\u0646 \u06AF\u0631\u0648\u0647",
+        confirmRemoveAllFromGroup: function(g, n) {
+          return "\u0647\u0631 " + n + ' \u0646\u0634\u0633\u062A \u0627\u0632 "' + g + '" \u0628\u0631\u062F\u0627\u0634\u062A\u0647 \u0634\u0648\u0646\u062F\u061F';
+        },
+        groupRemovedAllSessions: function(g) {
+          return '\u0647\u0645\u0647 \u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u0627\u0632 "' + g + '" \u0628\u0631\u062F\u0627\u0634\u062A\u0647 \u0634\u062F\u0646\u062F';
+        },
+        contextDeleteAllGroups: "\u062D\u0630\u0641 \u0647\u0645\u0647 \u06AF\u0631\u0648\u0647\u200C\u0647\u0627",
+        confirmDeleteAllGroups: function(n) {
+          return "\u0647\u0645\u0647 " + n + " \u06AF\u0631\u0648\u0647 \u062D\u0630\u0641 \u0634\u0648\u0646\u062F\u061F \u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u062D\u0630\u0641 \u0646\u0645\u06CC\u200C\u0634\u0648\u0646\u062F.";
+        },
+        deletedAllGroups: function(n) {
+          return n + " \u06AF\u0631\u0648\u0647 \u062D\u0630\u0641 \u0634\u062F";
+        },
+        contextDeleteAllSessions: "\u062D\u0630\u0641 \u0647\u0645\u0647 \u0646\u0634\u0633\u062A\u200C\u0647\u0627",
+        confirmDeleteAllSessions: function(n) {
+          return n + " \u0646\u0634\u0633\u062A \u062D\u0630\u0641 \u0634\u0648\u062F\u061F \u0646\u0634\u0633\u062A \u0641\u0639\u0627\u0644 \u0646\u06AF\u0647 \u062F\u0627\u0634\u062A\u0647 \u0645\u06CC\u200C\u0634\u0648\u062F.";
+        },
+        deletedAllSessions: function(n) {
+          return n + " \u0646\u0634\u0633\u062A \u062D\u0630\u0641 \u0634\u062F";
+        },
+        contextVersionHistory: "\u062A\u0627\u0631\u06CC\u062E\u0686\u0647 \u0646\u0633\u062E\u0647",
+        cmdVersionHistory: "\u0645\u0634\u0627\u0647\u062F\u0647 \u062A\u0627\u0631\u06CC\u062E\u0686\u0647 \u0646\u0633\u062E\u0647 \u0646\u0634\u0633\u062A",
+        historyTitle: "\u062A\u0627\u0631\u06CC\u062E\u0686\u0647 \u0646\u0633\u062E\u0647",
+        historyEmpty: "\u0628\u0631\u0627\u06CC \u0627\u06CC\u0646 \u0646\u0634\u0633\u062A \u062A\u0627\u0631\u06CC\u062E\u0686\u0647 \u0646\u0633\u062E\u0647\u200C\u0627\u06CC \u0648\u062C\u0648\u062F \u0646\u062F\u0627\u0631\u062F.",
+        historyRestore: "\u0628\u0627\u0632\u06CC\u0627\u0628\u06CC",
+        historyRestoreConfirm: function(name, time) {
+          return '\u0686\u06CC\u062F\u0645\u0627\u0646 "' + name + '" \u0627\u0632 \u0627\u0633\u0646\u067E\u200C\u0634\u0627\u062A "' + time + '" \u0628\u0627\u0632\u06CC\u0627\u0628\u06CC \u0634\u0648\u062F\u061F';
+        },
+        historyRestored: function(name) {
+          return '\u0686\u06CC\u062F\u0645\u0627\u0646 "' + name + '" \u0628\u0627\u0632\u06CC\u0627\u0628\u06CC \u0634\u062F';
+        },
+        historyQuickRestored: function(name) {
+          return '\u0686\u06CC\u062F\u0645\u0627\u0646 \u0642\u0628\u0644\u06CC "' + name + '" \u0633\u0631\u06CC\u0639 \u0628\u0627\u0632\u06CC\u0627\u0628\u06CC \u0634\u062F';
+        },
+        historyNoEntries: "\u0686\u06CC\u062F\u0645\u0627\u0646 \u0642\u0628\u0644\u06CC \u0628\u0631\u0627\u06CC \u0628\u0627\u0632\u06CC\u0627\u0628\u06CC \u0648\u062C\u0648\u062F \u0646\u062F\u0627\u0631\u062F.",
+        historyToday: "\u0627\u0645\u0631\u0648\u0632",
+        historyYesterday: "\u062F\u06CC\u0631\u0648\u0632",
+        historyThisWeek: "\u0627\u06CC\u0646 \u0647\u0641\u062A\u0647",
+        historyFiles: function(n) {
+          return n + " \u0641\u0627\u06CC\u0644";
+        },
+        historyPanes: function(n) {
+          return n + " \u067E\u0646\u0644";
+        },
+        settingsVersionHistoryEnabled: "\u0641\u0639\u0627\u0644 \u06A9\u0631\u062F\u0646 \u062A\u0627\u0631\u06CC\u062E\u0686\u0647 \u0646\u0633\u062E\u0647",
+        settingsVersionHistoryEnabledDesc: "\u062A\u0627\u0631\u06CC\u062E\u0686\u0647 \u062A\u063A\u06CC\u06CC\u0631\u0627\u062A \u0686\u06CC\u062F\u0645\u0627\u0646 \u0631\u0627 \u0628\u0631\u0627\u06CC \u0647\u0631 \u0646\u0634\u0633\u062A \u0646\u06AF\u0647 \u0645\u06CC\u200C\u062F\u0627\u0631\u062F.",
+        settingsVersionHistoryInterval: "\u0641\u0627\u0635\u0644\u0647 \u0627\u0633\u0646\u067E\u200C\u0634\u0627\u062A (\u062F\u0642\u06CC\u0642\u0647)",
+        settingsVersionHistoryIntervalDesc: "\u0647\u0631 \u0686\u0646\u062F \u0648\u0642\u062A \u062A\u063A\u06CC\u06CC\u0631\u0627\u062A \u0686\u06CC\u062F\u0645\u0627\u0646 \u0628\u0631\u0631\u0633\u06CC \u0648 \u0627\u0633\u0646\u067E\u200C\u0634\u0627\u062A \u0630\u062E\u06CC\u0631\u0647 \u0634\u0648\u062F.",
+        settingsVersionHistoryCtrlRmb: platformLabel("\u0628\u0627\u0632\u06CC\u0627\u0628\u06CC \u0633\u0631\u06CC\u0639 (Cmd + \u0631\u0627\u0633\u062A\u200C\u06A9\u0644\u06CC\u06A9)", "\u0628\u0627\u0632\u06CC\u0627\u0628\u06CC \u0633\u0631\u06CC\u0639 (Ctrl + \u0631\u0627\u0633\u062A\u200C\u06A9\u0644\u06CC\u06A9)"),
+        settingsVersionHistoryCtrlRmbDesc: platformLabel("\u0628\u0631\u0627\u06CC \u0628\u0627\u0632\u06CC\u0627\u0628\u06CC \u0686\u06CC\u062F\u0645\u0627\u0646 \u0642\u0628\u0644\u06CC\u060C \u0647\u0646\u06AF\u0627\u0645 \u0646\u06AF\u0647 \u062F\u0627\u0634\u062A\u0646 Cmd \u0631\u0648\u06CC \u0646\u0648\u0627\u0631 \u0648\u0636\u0639\u06CC\u062A \u0631\u0627\u0633\u062A\u200C\u06A9\u0644\u06CC\u06A9 \u06A9\u0646\u06CC\u062F.", "\u0628\u0631\u0627\u06CC \u0628\u0627\u0632\u06CC\u0627\u0628\u06CC \u0686\u06CC\u062F\u0645\u0627\u0646 \u0642\u0628\u0644\u06CC\u060C \u0647\u0646\u06AF\u0627\u0645 \u0646\u06AF\u0647 \u062F\u0627\u0634\u062A\u0646 Ctrl \u0631\u0648\u06CC \u0646\u0648\u0627\u0631 \u0648\u0636\u0639\u06CC\u062A \u0631\u0627\u0633\u062A\u200C\u06A9\u0644\u06CC\u06A9 \u06A9\u0646\u06CC\u062F."),
+        settingsVersionHistoryConfirmRestore: "\u062A\u0627\u06CC\u06CC\u062F \u067E\u06CC\u0634 \u0627\u0632 \u0628\u0627\u0632\u06CC\u0627\u0628\u06CC",
+        settingsVersionHistoryConfirmRestoreDesc: "\u067E\u06CC\u0634 \u0627\u0632 \u0628\u0627\u0632\u06CC\u0627\u0628\u06CC \u0686\u06CC\u062F\u0645\u0627\u0646 \u0642\u0628\u0644\u06CC\u060C \u06AF\u0641\u062A\u200C\u0648\u06AF\u0648\u06CC \u062A\u0627\u06CC\u06CC\u062F \u0646\u0634\u0627\u0646 \u062F\u0647\u06CC\u062F.",
+        rotationBackupSectionTitle: "\u067E\u0634\u062A\u06CC\u0628\u0627\u0646",
+        rotationBackupCreate: "\u0627\u06CC\u062C\u0627\u062F \u067E\u0634\u062A\u06CC\u0628\u0627\u0646",
+        rotationBackupCreateBtn: "\u0627\u06A9\u0646\u0648\u0646 \u067E\u0634\u062A\u06CC\u0628\u0627\u0646 \u0628\u06AF\u06CC\u0631",
+        rotationBackupCreated: "\u067E\u0634\u062A\u06CC\u0628\u0627\u0646 \u0627\u06CC\u062C\u0627\u062F \u0634\u062F.",
+        rotationBackupFailed: "\u0627\u06CC\u062C\u0627\u062F \u067E\u0634\u062A\u06CC\u0628\u0627\u0646 \u0646\u0627\u0645\u0648\u0641\u0642 \u0628\u0648\u062F.",
+        rotationBackupDesc: "\u0647\u0646\u06AF\u0627\u0645 \u0630\u062E\u06CC\u0631\u0647\u060C \u067E\u0634\u062A\u06CC\u0628\u0627\u0646\u200C\u0647\u0627\u06CC \u062E\u0648\u062F\u06A9\u0627\u0631 \u0633\u0627\u062E\u062A\u0647 \u0645\u06CC\u200C\u0634\u0648\u0646\u062F (\u0647\u0631 \u0633\u0627\u0639\u062A\u060C \u062D\u062F\u0627\u06A9\u062B\u0631 3 \u0646\u0633\u0644).",
+        rotationBackupRestore: "\u0628\u0627\u0632\u06CC\u0627\u0628\u06CC",
+        rotationBackupRestoreConfirm: function(time, count) {
+          return '\u0627\u0632 \u067E\u0634\u062A\u06CC\u0628\u0627\u0646 "' + time + '" \u0628\u0627\u0632\u06CC\u0627\u0628\u06CC \u0634\u0648\u062F (' + count + " \u0646\u0634\u0633\u062A)\u061F \u062F\u0627\u062F\u0647 \u0641\u0639\u0644\u06CC \u0628\u0627\u0632\u0646\u0648\u06CC\u0633\u06CC \u0645\u06CC\u200C\u0634\u0648\u062F.";
+        },
+        rotationBackupRestored: "\u0627\u0632 \u067E\u0634\u062A\u06CC\u0628\u0627\u0646 \u0628\u0627\u0632\u06CC\u0627\u0628\u06CC \u0634\u062F.",
+        rotationBackupRestoreFailed: "\u0628\u0627\u0632\u06CC\u0627\u0628\u06CC \u0627\u0632 \u067E\u0634\u062A\u06CC\u0628\u0627\u0646 \u0646\u0627\u0645\u0648\u0641\u0642 \u0628\u0648\u062F.",
+        rotationBackupNone: "\u067E\u0634\u062A\u06CC\u0628\u0627\u0646\u06CC \u0645\u0648\u062C\u0648\u062F \u0646\u06CC\u0633\u062A.",
+        rotationBackupGeneration: function(count) {
+          return count + " \u0646\u0634\u0633\u062A";
+        },
+        frontmatterSessionNotFound: function(n) {
+          return '\u0646\u0634\u0633\u062A "' + n + '" \u067E\u06CC\u062F\u0627 \u0646\u0634\u062F (workspace-session)';
+        },
+        frontmatterAlreadyActive: function(n) {
+          return '\u0646\u0634\u0633\u062A "' + n + '" \u0627\u0632 \u0642\u0628\u0644 \u0641\u0639\u0627\u0644 \u0627\u0633\u062A';
+        }
+      },
+      ms: {
+        modalTitle: "Urus sesi",
+        savePlaceholder: "Nama sesi baharu...",
+        filterPlaceholder: "Tapis sesi...",
+        settingsShowFilterInput: "Tunjukkan penapis sesi",
+        settingsShowFilterInputDesc: "Paparkan penapis teks dalam Pengurus Sesi untuk mencari sesi dengan cepat.",
+        settingsOverlayDefaultFocus: "Fokus overlay lalai",
+        settingsOverlayDefaultFocusDesc: "Pilih elemen yang menerima fokus apabila Pengurus Sesi dibuka.",
+        settingsOverlayFocusCurrentSession: "Sesi semasa",
+        settingsOverlayFocusSessionFilter: "Penapis sesi",
+        settingsOverlayFocusSessionCreate: "Penciptaan sesi",
+        settingsSectionSessionManager: "Senarai dan carian sesi",
+        settingsSectionSessionListSearch: "Senarai dan carian sesi",
+        settingsShowActiveSwitchCommand: "Tunjukkan sesi aktif dalam palet arahan",
+        settingsShowActiveSwitchCommandDesc: "Tunjukkan arahan untuk bertukar ke sesi aktif semasa dalam palet arahan. Kekunci pintas sentiasa berfungsi tanpa mengira tetapan ini.",
+        settingsNumberedSwitchCommands: "Arahan tukar sesi bernombor",
+        settingsNumberedSwitchCommandsDesc: "Daftarkan arahan tukar dengan slot bernombor (1\u20139) yang boleh dipautkan kepada kekunci pintas. Apabila dimatikan, semua sesi menggunakan arahan berasaskan nama.",
+        save: "Cipta",
+        load: "Tukar",
+        saveInline: "Simpan",
+        active: "AKTIF",
+        modifiedJustNow: "Baru sahaja diubah",
+        modifiedMinutes: function(n) {
+          return "Diubah " + n + " minit lalu";
+        },
+        modifiedHours: function(n) {
+          return "Diubah " + n + " jam lalu";
+        },
+        modifiedDays: function(n) {
+          return "Diubah " + n + " hari lalu";
+        },
+        duplicateName: "Sesi dengan nama ini sudah wujud.",
+        emptyName: "Nama sesi tidak boleh kosong.",
+        created: function(n) {
+          return 'Sesi "' + n + '" dicipta';
+        },
+        deleted: function(n) {
+          return 'Sesi "' + n + '" dipadam';
+        },
+        loaded: function(n) {
+          return 'Bertukar ke "' + n + '"';
+        },
+        renamed: function(o, n) {
+          return '"' + o + '" dinamakan semula kepada "' + n + '"';
+        },
+        confirmDelete: function(n) {
+          return 'Padam sesi "' + n + '"?';
+        },
+        confirmDeleteActive: function(n) {
+          return '"' + n + '" ialah sesi aktif. Tetap padam?';
+        },
+        confirmSaveSession: function(n) {
+          return 'Simpan sesi "' + n + '"?';
+        },
+        confirmOverwriteSessionWithCurrentLayout: function(n) {
+          return 'Tulis ganti "' + n + '" dengan tataletak semasa?';
+        },
+        confirmReloadSession: function(n) {
+          return 'Muat semula sesi "' + n + '"? Perubahan yang belum disimpan akan hilang.';
+        },
+        renameTitle: "Namakan semula sesi",
+        renamePlaceholder: "Nama baharu...",
+        noSession: "Tiada sesi",
+        cannotDeleteLast: "Sesi terakhir tidak boleh dipadam.",
+        confirmBulkDelete: function(n) {
+          return "Padam " + n + " sesi?";
+        },
+        bulkDeleted: function(n) {
+          return n + " sesi dipadam";
+        },
+        bulkDelete: function(n) {
+          return "Padam " + n + " sesi";
+        },
+        cmdManage: "Urus sesi",
+        cmdCreate: "Cipta sesi baharu",
+        cmdRename: "Namakan semula sesi semasa",
+        cmdDelete: "Padam sesi semasa",
+        cmdNewEmpty: "Cipta sesi kosong",
+        cmdDuplicate: "Gandakan sesi semasa",
+        duplicated: function(n) {
+          return 'Digandakan sebagai "' + n + '"';
+        },
+        deselect: "Nyahpilih",
+        footerDragReorder: "Seret untuk menyusun semula",
+        footerDragToGroup: "Seret ke tab kumpulan untuk memindahkan",
+        defaultLabel: "(lalai)",
+        rename: "Namakan semula",
+        delete: "Padam",
+        remove: "Keluarkan",
+        cancel: "Batal",
+        ribbonTooltip: "Workspace++",
+        cmdSwitchTo: function(n, name) {
+          return name ? "Tukar ke sesi " + n + ": " + name : "Tukar ke sesi " + n;
+        },
+        cmdSwitchToNamed: function(name) {
+          return 'Tukar ke "' + name + '"';
+        },
+        cmdPrevious: "Sesi sebelumnya",
+        cmdNext: "Sesi seterusnya",
+        cmdSaveCurrent: "Simpan sesi semasa",
+        cmdSaveAs: "Simpan sesi semasa sebagai...",
+        cmdSaveCurrentLayoutToSession: "Simpan tataletak semasa ke sesi...",
+        cmdReloadCurrentWithoutSaving: "Muat semula sesi semasa (tanpa menyimpan)",
+        cmdToggleAutoSave: "Togol auto-simpan semasa bertukar sesi",
+        cmdEnableAutoSave: "Hidupkan auto-simpan semasa bertukar sesi",
+        cmdDisableAutoSave: "Matikan auto-simpan semasa bertukar sesi",
+        cmdSearchOverlay: "Cari sesi",
+        cmdExportSessions: "Eksport petikan sesi",
+        cmdImportSessions: "Import petikan sesi terkini",
+        switchLeft: "Kiri",
+        switchRight: "Kanan",
+        switchGroup: "Kumpulan",
+        keyTab: "Tab",
+        savedSession: function(n) {
+          return '"' + n + '" disimpan';
+        },
+        savedAs: function(n) {
+          return 'Disimpan sebagai "' + n + '"';
+        },
+        savedCurrentLayoutToSession: function(n) {
+          return 'Tataletak semasa disimpan ke "' + n + '"';
+        },
+        noChanges: "Tiada perubahan untuk disimpan",
+        reloadedSession: function(n) {
+          return '"' + n + '" dimuat semula';
+        },
+        autoSaveEnabled: "Auto-simpan semasa bertukar sesi dihidupkan.",
+        autoSaveDisabled: "Auto-simpan semasa bertukar sesi dimatikan.",
+        confirmUnsavedSwitch: function(n) {
+          return 'Sesi semasa mempunyai perubahan yang belum disimpan. Tukar ke "' + n + '"?';
+        },
+        saveAndSwitch: "Simpan dan tukar",
+        switchWithoutSaving: "Tukar tanpa menyimpan",
+        defaultSessionName: "lalai",
+        nameSessionTitle: "Simpan dengan nama sesi",
+        nameSessionPlaceholder: "Nama sesi...",
+        saveWithoutNaming: "Simpan tanpa menamakan",
+        sessionAutoName: function(n) {
+          return "Sesi baharu " + n;
+        },
+        noFilteredSessions: "Tiada sesi yang sepadan",
+        noGroupSessions: "Tiada sesi dalam kumpulan ini",
+        searchOverlayPlaceholder: "Taip untuk menapis sesi...",
+        saveCurrentLayoutToSessionPlaceholder: "Pilih sesi untuk ditulis ganti...",
+        searchOverlayHelp: "\u2191\u2193 gerak  /  Enter tukar  /  \u21E7Enter simpan  /  \u232B padam  /  Esc tutup",
+        backupRestored: "Workspace++: Sesi dipulihkan daripada sandaran.",
+        sessionDataMigrated: "Workspace++: Data sesi dipindahkan ke .workspace-plus-plus/sessions.json.",
+        sessionDataMigrationFailed: "Workspace++: Gagal memindahkan data sesi. Data lama masih disimpan.",
+        localSettingsEnabled: "Workspace++: Tetapan setempat vault dihidupkan.",
+        localSettingsDisabled: "Workspace++: Tetapan setempat vault dimatikan.",
+        localSettingsCopied: "Workspace++: Tetapan global disalin ke tetapan setempat vault.",
+        localSettingsLoadFailed: "Workspace++: Gagal memuat tetapan setempat vault. Tetapan global akan digunakan.",
+        localSettingsOperationFailed: "Workspace++: Gagal mengemas kini tetapan setempat vault.",
+        exportSessionsDone: function(path) {
+          return "Workspace++: Sesi dieksport ke " + path;
+        },
+        exportSessionsFailed: "Workspace++: Gagal mengeksport sesi.",
+        importSessionsDone: function(path) {
+          return "Workspace++: Sesi diimport daripada " + path;
+        },
+        importSessionsNoFile: "Workspace++: Tiada fail eksport ditemui dalam .workspace-plus-plus/exports.",
+        importSessionsFailed: "Workspace++: Gagal mengimport sesi.",
+        settingsLanguage: "Bahasa",
+        settingsLanguageDesc: "Bahasa UI pemalam. Mulakan semula Obsidian untuk menerapkannya pada nama arahan.",
+        settingsSectionGeneral: "Umum",
+        settingsTabSessions: "Sesi",
+        settingsSectionSwitching: "Pertukaran sesi",
+        settingsSectionSwitchCommands: "Arahan tukar",
+        settingsSectionScrollSwitch: "Pertukaran melalui skrol",
+        settingsSectionSwitchPreview: "Pratonton sebelum bertukar",
+        settingsSubsectionSwitchSaving: "Menyimpan semasa bertukar sesi",
+        settingsSubsectionAutoSaveMode: "Mod auto-simpan sesi",
+        settingsSubsectionSwitchCommands: "Arahan pertukaran sesi",
+        settingsSubsectionScrollSwitch: "Pertukaran sesi dengan skrol",
+        settingsSubsectionSwitchPreview: "Pratonton sebelum bertukar sesi",
+        settingsSectionDeletion: "Memadam sesi",
+        settingsSectionAdvanced: "Lanjutan",
+        settingsSectionReset: "Tetap semula",
+        settingsStatusBarModScrollSwitch: "Hidupkan pertukaran sesi daripada bar status",
+        settingsStatusBarModScrollSwitchDesc: "Pada item bar status, skrol secara menegak sambil menahan kekunci pengubah yang dipilih untuk bertukar sesi. Ambang dan jeda membantu mengurangkan pencetus trackpad yang tidak disengajakan.",
+        settingsStatusBarScrollPreset: "Praset input skrol",
+        settingsStatusBarScrollPresetDesc: "Pilih praset yang ditala untuk peranti anda, atau tukar kepada Tersuai untuk melaras nombor sendiri.",
+        settingsStatusBarScrollPresetTrackpad: "Trackpad",
+        settingsStatusBarScrollPresetNotchedWheel: "Roda tetikus bertakuk",
+        settingsStatusBarScrollPresetFreeSpinWheel: "Roda tetikus putaran bebas",
+        settingsStatusBarScrollPresetCustom: "Tersuai",
+        settingsStatusBarScrollModifier: "Pengubah yang diperlukan",
+        settingsStatusBarScrollModifierDesc: "Pilih kekunci pengubah yang mesti ditahan semasa menatal pada item bar status.",
+        settingsStatusBarScrollModifierRecommended: "Cmd atau Option",
+        settingsStatusBarScrollModifierNone: "Tiada",
+        settingsStatusBarScrollModifierModOnly: "Cmd sahaja",
+        settingsStatusBarScrollModifierAltOnly: "Option sahaja",
+        settingsStatusBarScrollModifierModOrAlt: "Cmd atau Option",
+        settingsStatusBarScrollThreshold: "Ambang kepekaan",
+        settingsStatusBarScrollThresholdDesc: "Nilai lebih rendah membuatkan pertukaran lebih mudah. Hanya digunakan apabila praset ialah Tersuai.",
+        settingsStatusBarScrollCooldown: "Jeda",
+        settingsStatusBarScrollCooldownDesc: "Masa minimum antara pertukaran sesi yang dicetuskan oleh skrol. Hanya digunakan apabila praset ialah Tersuai.",
+        settingsStatusBarScrollResetWindow: "Tetingkap tetap semula pengumpulan",
+        settingsStatusBarScrollResetWindowDesc: "Tempoh untuk terus menggabungkan delta skrol kecil sebelum ditetapkan semula. Hanya digunakan apabila praset ialah Tersuai.",
+        settingsStatusBarScrollInvert: "Songsangkan arah skrol",
+        settingsStatusBarScrollInvertDesc: "Songsangkan arah sebelumnya/seterusnya untuk pertukaran sesi melalui skrol pada bar status.",
+        settingsLangAuto: "Auto (bahasa sistem)",
+        settingsGitHubLink: "GitHub",
+        settingsTranslationHelp: "Menemui ralat terjemahan? Sila buka issue atau pull request di GitHub.",
+        settingsPreviewHeading: "Hidupkan pratonton sebelum bertukar sesi",
+        settingsPreviewDesc: "Apabila bertukar sesi dengan kekunci pintas, tekanan pertama menunjukkan kedudukan semasa anda tanpa bertukar.",
+        settingsPreviewNext: "Sesi seterusnya",
+        settingsPreviewPrevious: "Sesi sebelumnya",
+        settingsHotkeys: "Kekunci pintas",
+        settingsHotkeysBtn: "Buka tetapan kekunci pintas",
+        contextOpenSettings: "Buka tetapan",
+        contextCustomizeClicks: "Sesuaikan tindakan klik",
+        settingsSectionStatusBar: "Tindakan klik bar status",
+        statusBarSlotClick: "Klik",
+        statusBarSlotAltClick: function() {
+          return (typeof navigator !== "undefined" && navigator.platform.indexOf("Mac") !== -1 ? "\u2325" : "Alt") + " + Klik";
+        },
+        statusBarSlotModClick: function() {
+          return (typeof navigator !== "undefined" && navigator.platform.indexOf("Mac") !== -1 ? "\u2318" : "Ctrl") + " + Klik";
+        },
+        statusBarSlotShiftClick: function() {
+          return (typeof navigator !== "undefined" && navigator.platform.indexOf("Mac") !== -1 ? "\u21E7" : "Shift") + " + Klik";
+        },
+        statusBarSlotMiddleClick: "Klik tengah",
+        statusBarSlotAltMiddleClick: modifiedClickLabel("Klik tengah", "\u2325", "Alt"),
+        statusBarSlotModMiddleClick: modifiedClickLabel("Klik tengah", "\u2318", "Ctrl"),
+        statusBarSlotShiftMiddleClick: modifiedClickLabel("Klik tengah", "\u21E7", "Shift"),
+        statusBarSlotRightClick: "Klik kanan",
+        statusBarSlotAltRightClick: function() {
+          return (typeof navigator !== "undefined" && navigator.platform.indexOf("Mac") !== -1 ? "\u2325" : "Alt") + " + Klik kanan";
+        },
+        statusBarSlotModRightClick: function() {
+          return (typeof navigator !== "undefined" && navigator.platform.indexOf("Mac") !== -1 ? "\u2318" : "Ctrl") + " + Klik kanan";
+        },
+        statusBarSlotShiftRightClick: function() {
+          return (typeof navigator !== "undefined" && navigator.platform.indexOf("Mac") !== -1 ? "\u21E7" : "Shift") + " + Klik kanan";
+        },
+        statusBarActionNone: "Jangan buat apa-apa",
+        statusBarActionQuickSwitcher: "Buka penukar pantas",
+        statusBarActionSessionManager: "Buka pengurus sesi",
+        statusBarActionSaveSession: "Simpan sesi",
+        statusBarActionReloadWithoutSaving: "Muat semula tanpa menyimpan",
+        statusBarActionVersionHistory: "Tunjukkan sejarah versi",
+        statusBarActionRestoreLatestHistory: "Pulihkan sejarah terkini",
+        statusBarActionSessionMenu: "Menu konteks sesi",
+        statusBarActionSettingsMenu: "Menu konteks tetapan",
+        contextResetOverlayPosition: "Tetap semula kedudukan dan saiz",
+        settingsConfirmDelete: "Sahkan sebelum memadam sesi",
+        settingsConfirmDeleteDesc: "Tunjukkan dialog pengesahan sebelum memadam sesi.",
+        settingsConfirmQuickActions: "Sahkan simpan/muat semula dalam penukar pantas",
+        settingsConfirmQuickActionsDesc: "Tunjukkan dialog pengesahan sebelum menyimpan atau memuat semula sesi daripada overlay penukar pantas.",
+        settingsAutoSaveOnSwitch: "Mod auto-simpan",
+        settingsAutoSaveOnSwitchDesc: "Menyimpan sesi semasa secara automatik apabila bertukar sesi (lalai: HIDUP). Apabila DIMATIKAN, anda boleh menyimpan dan memuat semula sesi secara manual.",
+        settingsWarnUnsavedSwitch: "Beri amaran sebelum bertukar tanpa menyimpan",
+        settingsWarnUnsavedSwitchDesc: "Apabila auto-simpan dimatikan dan sesi semasa mempunyai perubahan yang belum disimpan, tunjukkan amaran sebelum bertukar.",
+        settingsStatusBarQuickSwitcher: "Penukar pantas pada klik bar status",
+        settingsStatusBarQuickSwitcherDesc: "Apabila dihidupkan, mengklik bar status membuka overlay penukar pantas dan bukannya pengurus sesi penuh.",
+        settingsUseLocalSettings: "Guna tetapan setempat vault",
+        settingsUseLocalSettingsDesc: "Hidupkan ini jika anda menyegerakkan .obsidian antara beberapa vault (contohnya dengan Settings Profiles) dan mahu tetapan Workspace++ kekal berbeza bagi setiap vault.",
+        settingsCopyGlobalToLocal: "Salin tetapan global ke vault ini",
+        settingsCopyGlobalToLocalDesc: "Tulis ganti tetapan setempat vault dengan tetapan global semasa anda.",
+        settingsCopyGlobalToLocalBtn: "Salin",
+        settingsResetLocalSettings: "Tetap semula tetapan setempat vault",
+        settingsResetLocalSettingsDesc: "Tetap semula tetapan setempat vault kepada tetapan global anda.",
+        settingsResetLocalSettingsBtn: "Tetap semula setempat",
+        settingsAdvancedStorageSubsection: "Tingkah laku storan",
+        settingsAdvancedTransferSubsection: "Pemindahan data",
+        settingsDeveloperSection: "Alat pembangun",
+        settingsStorageDiagnostics: "Diagnostik storan",
+        settingsStorageDiagnosticsDesc: "Butiran storan yang sedang digunakan oleh Workspace++.",
+        settingsStorageFieldSessions: "Fail sesi",
+        settingsStorageFieldSessionsBackup: "Sandaran sesi",
+        settingsStorageFieldLocalSettings: "Fail tetapan setempat",
+        settingsStorageFieldGlobalSettings: "Fail tetapan global",
+        settingsStorageFieldSessionCount: "Bilangan sesi",
+        settingsStorageFieldUpdatedAt: "Dikemas kini pada",
+        settingsExportSessions: "Eksport sesi",
+        settingsExportSessionsDesc: "Simpan petikan ke .workspace-plus-plus/exports.",
+        settingsExportSessionsBtn: "Eksport",
+        settingsImportSessions: "Import sesi",
+        settingsImportSessionsDesc: "Import petikan terkini daripada .workspace-plus-plus/exports.",
+        settingsImportSessionsBtn: "Import terkini",
+        confirmImportSessions: "Import sesi eksport terkini? Sesi semasa akan digantikan.",
+        settingsResetSettings: "Tetap semula tetapan",
+        settingsResetSettingsDesc: "Tetap semula tetapan Workspace++ untuk skop tetapan semasa.",
+        settingsResetSettingsBtn: "Tetap semula tetapan",
+        confirmResetSettings: "Tetapkan semula tetapan Workspace++ kepada lalai?",
+        resetSettingsDone: "Tetapan Workspace++ telah ditetapkan semula.",
+        resetSettingsFailed: "Gagal menetapkan semula tetapan Workspace++.",
+        settingsResetSessions: "Tetap semula sesi",
+        settingsResetSessionsDesc: "Padam semua sesi yang disimpan dan kekalkan hanya satu sesi lalai baharu daripada tataletak semasa.",
+        settingsResetSessionsBtn: "Tetap semula",
+        confirmResetSessions: "Tetapkan semula semua sesi kepada lalai? Tindakan ini tidak boleh dibuat asal.",
+        resetSessionsHint: "Ini akan memadam setiap sesi yang disimpan dan hanya mengekalkan satu sesi lalai.",
+        resetSessionsDone: "Sesi telah ditetapkan semula kepada lalai.",
+        resetSessionsFailed: "Gagal menetapkan semula sesi.",
+        settingsResetSessionsAndSettings: "Tetap semula sesi dan tetapan",
+        settingsResetSessionsAndSettingsDesc: "Tetapkan semula kedua-dua sesi yang disimpan dan tetapan Workspace++ sekaligus.",
+        settingsResetSessionsAndSettingsBtn: "Tetap semula kedua-duanya",
+        confirmResetSessionsAndSettings: "Tetapkan semula kedua-dua sesi dan tetapan? Tindakan ini tidak boleh dibuat asal.",
+        resetSessionsAndSettingsDone: "Sesi dan tetapan telah ditetapkan semula.",
+        resetSessionsAndSettingsFailed: "Gagal menetapkan semula sesi dan tetapan.",
+        confirmDeleteSettingsHint: "Untuk mematikan pengesahan ini, pergi ke Tetapan.",
+        groupCreated: function(n) {
+          return 'Kumpulan "' + n + '" dicipta';
+        },
+        groupDeleted: function(n) {
+          return 'Kumpulan "' + n + '" dipadam';
+        },
+        groupRenamed: function(o, n) {
+          return 'Kumpulan dinamakan semula: "' + o + '" \u2192 "' + n + '"';
+        },
+        groupAll: "Semua",
+        groupDuplicateName: "Kumpulan dengan nama ini sudah wujud.",
+        groupEmptyName: "Nama kumpulan tidak boleh kosong.",
+        cmdSwitchGroup: "Tukar kumpulan",
+        cmdExitGroup: "Tunjukkan semua sesi (keluar kumpulan)",
+        cmdNextGroup: "Kumpulan seterusnya",
+        cmdPreviousGroup: "Kumpulan sebelumnya",
+        searchOverlayHelpWithGroups: "\u2191\u2193 gerak  /  Tab kumpulan  /  Enter tukar  /  \u21E7Enter simpan  /  \u232B padam  /  Esc tutup",
+        settingsSectionGroups: "Kumpulan sesi",
+        contextToggleGroups: "Hidupkan kumpulan sesi",
+        settingsSectionGroupsDesc: "Gunakan kumpulan untuk menyusun sesi. Matikan ini untuk menyembunyikan tab kumpulan dan tindakan tukar kumpulan.",
+        settingsGroupCreate: "Cipta kumpulan",
+        settingsGroupCreateDesc: "Cipta kumpulan sesi baharu.",
+        settingsGroupCreatePlaceholder: "Nama kumpulan...",
+        settingsGroupCreateBtn: "Cipta",
+        settingsGroupManageSessions: "Urus sesi",
+        settingsGroupManageSessionsDesc: "Tambah atau keluarkan sesi daripada kumpulan ini.",
+        settingsGroupSessionCount: function(n) {
+          return n + " sesi";
+        },
+        settingsGroupDelete: "Padam kumpulan",
+        settingsGroupDeleteConfirm: function(n) {
+          return 'Padam kumpulan "' + n + '"? Sesi tidak akan dipadam.';
+        },
+        confirmDeleteGroup: function(n) {
+          return 'Padam kumpulan "' + n + '"? Sesi dalam kumpulan ini TIDAK akan dipadam.';
+        },
+        groupAddedSession: function(s, g) {
+          return '"' + s + '" ditambah ke "' + g + '"';
+        },
+        groupRemovedSession: function(s, g) {
+          return '"' + s + '" dikeluarkan daripada "' + g + '"';
+        },
+        groupRemoveFromGroup: "Keluarkan daripada kumpulan",
+        groupMoveToGroup: "Alih ke kumpulan",
+        groupCreateNew: "Kumpulan baharu",
+        groupCreatePlaceholder: "Nama kumpulan...",
+        groupContextRename: "Namakan semula kumpulan",
+        groupContextDelete: "Padam kumpulan",
+        contextSwitchSession: "Tukar ke sesi ini",
+        contextRenameSession: "Namakan semula sesi ini",
+        contextDeleteSession: "Padam sesi ini",
+        contextDuplicateSession: "Gandakan sesi ini",
+        contextReloadSession: "Muat semula sesi ini",
+        contextSaveSession: "Simpan sesi ini",
+        contextSaveCurrentLayoutToThisSession: "Simpan tataletak semasa ke sesi ini",
+        groupRemoveAllSessions: "Keluarkan semua sesi daripada kumpulan ini",
+        confirmRemoveAllFromGroup: function(g, n) {
+          return "Keluarkan kesemua " + n + ' sesi daripada "' + g + '"?';
+        },
+        groupRemovedAllSessions: function(g) {
+          return 'Semua sesi dikeluarkan daripada "' + g + '"';
+        },
+        contextDeleteAllGroups: "Padam semua kumpulan",
+        confirmDeleteAllGroups: function(n) {
+          return "Padam semua " + n + " kumpulan? Sesi tidak akan dipadam.";
+        },
+        deletedAllGroups: function(n) {
+          return n + " kumpulan dipadam";
+        },
+        contextDeleteAllSessions: "Padam semua sesi",
+        confirmDeleteAllSessions: function(n) {
+          return "Padam " + n + " sesi? Sesi aktif akan dikekalkan.";
+        },
+        deletedAllSessions: function(n) {
+          return n + " sesi dipadam";
+        },
+        contextVersionHistory: "Sejarah versi",
+        cmdVersionHistory: "Lihat sejarah versi sesi",
+        historyTitle: "Sejarah versi",
+        historyEmpty: "Tiada sejarah versi untuk sesi ini.",
+        historyRestore: "Pulihkan",
+        historyRestoreConfirm: function(name, time) {
+          return 'Pulihkan tataletak "' + name + '" daripada petikan "' + time + '"?';
+        },
+        historyRestored: function(name) {
+          return 'Tataletak "' + name + '" dipulihkan';
+        },
+        historyQuickRestored: function(name) {
+          return 'Tataletak sebelumnya untuk "' + name + '" dipulihkan dengan pantas';
+        },
+        historyNoEntries: "Tiada tataletak sebelumnya untuk dipulihkan.",
+        historyToday: "Hari ini",
+        historyYesterday: "Semalam",
+        historyThisWeek: "Minggu ini",
+        historyFiles: function(n) {
+          return n + " fail";
+        },
+        historyPanes: function(n) {
+          return n + " anak tetingkap";
+        },
+        settingsVersionHistoryEnabled: "Hidupkan sejarah versi",
+        settingsVersionHistoryEnabledDesc: "Simpan sejarah perubahan tataletak untuk setiap sesi.",
+        settingsVersionHistoryInterval: "Selang petikan (minit)",
+        settingsVersionHistoryIntervalDesc: "Kekerapan untuk menyemak perubahan tataletak dan menyimpan petikan.",
+        settingsVersionHistoryCtrlRmb: platformLabel("Pulih pantas (Cmd + klik kanan)", "Pulih pantas (Ctrl + klik kanan)"),
+        settingsVersionHistoryCtrlRmbDesc: platformLabel("Klik kanan bar status sambil menahan Cmd untuk memulihkan tataletak sebelumnya.", "Klik kanan bar status sambil menahan Ctrl untuk memulihkan tataletak sebelumnya."),
+        settingsVersionHistoryConfirmRestore: "Sahkan sebelum memulihkan",
+        settingsVersionHistoryConfirmRestoreDesc: "Tunjukkan dialog pengesahan sebelum memulihkan tataletak sebelumnya.",
+        rotationBackupSectionTitle: "Sandaran",
+        rotationBackupCreate: "Cipta sandaran",
+        rotationBackupCreateBtn: "Sandarkan sekarang",
+        rotationBackupCreated: "Sandaran dicipta.",
+        rotationBackupFailed: "Gagal mencipta sandaran.",
+        rotationBackupDesc: "Sandaran automatik dicipta semasa menyimpan (setiap jam, sehingga 3 generasi).",
+        rotationBackupRestore: "Pulihkan",
+        rotationBackupRestoreConfirm: function(time, count) {
+          return 'Pulihkan daripada sandaran "' + time + '" (' + count + " sesi)? Data semasa akan ditulis ganti.";
+        },
+        rotationBackupRestored: "Dipulihkan daripada sandaran.",
+        rotationBackupRestoreFailed: "Gagal memulihkan daripada sandaran.",
+        rotationBackupNone: "Tiada sandaran tersedia.",
+        rotationBackupGeneration: function(count) {
+          return count + " sesi";
+        },
+        frontmatterSessionNotFound: function(n) {
+          return 'Sesi "' + n + '" tidak ditemui (workspace-session)';
+        },
+        frontmatterAlreadyActive: function(n) {
+          return 'Sesi "' + n + '" sudah aktif';
+        }
+      },
+      pl: {
+        modalTitle: "Zarz\u0105dzaj sesjami",
+        savePlaceholder: "Nazwa nowej sesji...",
+        filterPlaceholder: "Filtruj sesje...",
+        settingsShowFilterInput: "Poka\u017C filtr sesji",
+        settingsShowFilterInputDesc: "Wy\u015Bwietla filtr tekstowy w mened\u017Cerze sesji, aby szybko znajdowa\u0107 sesje.",
+        settingsOverlayDefaultFocus: "Domy\u015Blny fokus nak\u0142adki",
+        settingsOverlayDefaultFocusDesc: "Wybierz element, kt\xF3ry otrzyma fokus po otwarciu mened\u017Cera sesji.",
+        settingsOverlayFocusCurrentSession: "Bie\u017C\u0105ca sesja",
+        settingsOverlayFocusSessionFilter: "Filtr sesji",
+        settingsOverlayFocusSessionCreate: "Tworzenie sesji",
+        settingsSectionSessionManager: "Lista i wyszukiwanie sesji",
+        settingsSectionSessionListSearch: "Lista i wyszukiwanie sesji",
+        settingsShowActiveSwitchCommand: "Poka\u017C aktywn\u0105 sesj\u0119 w palecie polece\u0144",
+        settingsShowActiveSwitchCommandDesc: "Pokazuje w palecie polece\u0144 polecenie prze\u0142\u0105czenia do aktualnie aktywnej sesji. Skr\xF3ty klawiszowe dzia\u0142aj\u0105 zawsze, niezale\u017Cnie od tego ustawienia.",
+        settingsNumberedSwitchCommands: "Numerowane polecenia prze\u0142\u0105czania sesji",
+        settingsNumberedSwitchCommandsDesc: "Rejestruje polecenia prze\u0142\u0105czania z numerowanymi miejscami (1\u20139), kt\xF3re mo\u017Cna przypisa\u0107 do skr\xF3t\xF3w. Po wy\u0142\u0105czeniu wszystkie sesje u\u017Cywaj\u0105 polece\u0144 opartych na nazwie.",
+        save: "Utw\xF3rz",
+        load: "Prze\u0142\u0105cz",
+        saveInline: "Zapisz",
+        active: "AKTYWNA",
+        modifiedJustNow: "Zmodyfikowano przed chwil\u0105",
+        modifiedMinutes: function(n) {
+          return "Zmodyfikowano " + n + " min temu";
+        },
+        modifiedHours: function(n) {
+          return "Zmodyfikowano " + n + " godz. temu";
+        },
+        modifiedDays: function(n) {
+          return "Zmodyfikowano " + n + " dni temu";
+        },
+        duplicateName: "Sesja o tej nazwie ju\u017C istnieje.",
+        emptyName: "Nazwa sesji nie mo\u017Ce by\u0107 pusta.",
+        created: function(n) {
+          return 'Utworzono sesj\u0119 "' + n + '"';
+        },
+        deleted: function(n) {
+          return 'Usuni\u0119to sesj\u0119 "' + n + '"';
+        },
+        loaded: function(n) {
+          return 'Prze\u0142\u0105czono na "' + n + '"';
+        },
+        renamed: function(o, n) {
+          return 'Zmieniono nazw\u0119 "' + o + '" na "' + n + '"';
+        },
+        confirmDelete: function(n) {
+          return 'Usun\u0105\u0107 sesj\u0119 "' + n + '"?';
+        },
+        confirmDeleteActive: function(n) {
+          return '"' + n + '" jest aktywn\u0105 sesj\u0105. Usun\u0105\u0107 mimo to?';
+        },
+        confirmSaveSession: function(n) {
+          return 'Zapisa\u0107 sesj\u0119 "' + n + '"?';
+        },
+        confirmOverwriteSessionWithCurrentLayout: function(n) {
+          return 'Nadpisa\u0107 "' + n + '" bie\u017C\u0105cym uk\u0142adem?';
+        },
+        confirmReloadSession: function(n) {
+          return 'Wczyta\u0107 ponownie sesj\u0119 "' + n + '"? Niezapisane zmiany zostan\u0105 utracone.';
+        },
+        renameTitle: "Zmie\u0144 nazw\u0119 sesji",
+        renamePlaceholder: "Nowa nazwa...",
+        noSession: "Brak sesji",
+        cannotDeleteLast: "Nie mo\u017Cna usun\u0105\u0107 ostatniej sesji.",
+        confirmBulkDelete: function(n) {
+          return "Usun\u0105\u0107 " + n + " sesji?";
+        },
+        bulkDeleted: function(n) {
+          return "Usuni\u0119to " + n + " sesji";
+        },
+        bulkDelete: function(n) {
+          return "Usu\u0144 " + n + " sesji";
+        },
+        cmdManage: "Zarz\u0105dzaj sesjami",
+        cmdCreate: "Utw\xF3rz now\u0105 sesj\u0119",
+        cmdRename: "Zmie\u0144 nazw\u0119 bie\u017C\u0105cej sesji",
+        cmdDelete: "Usu\u0144 bie\u017C\u0105c\u0105 sesj\u0119",
+        cmdNewEmpty: "Utw\xF3rz pust\u0105 sesj\u0119",
+        cmdDuplicate: "Duplikuj bie\u017C\u0105c\u0105 sesj\u0119",
+        duplicated: function(n) {
+          return 'Zduplikowano jako "' + n + '"';
+        },
+        deselect: "Odznacz",
+        footerDragReorder: "Przeci\u0105gnij, aby zmieni\u0107 kolejno\u015B\u0107",
+        footerDragToGroup: "Przeci\u0105gnij na kart\u0119 grupy, aby przenie\u015B\u0107",
+        defaultLabel: "(domy\u015Blna)",
+        rename: "Zmie\u0144 nazw\u0119",
+        delete: "Usu\u0144",
+        remove: "Wypnij",
+        cancel: "Anuluj",
+        ribbonTooltip: "Workspace++",
+        cmdSwitchTo: function(n, name) {
+          return name ? "Prze\u0142\u0105cz na sesj\u0119 " + n + ": " + name : "Prze\u0142\u0105cz na sesj\u0119 " + n;
+        },
+        cmdSwitchToNamed: function(name) {
+          return 'Prze\u0142\u0105cz na "' + name + '"';
+        },
+        cmdPrevious: "Poprzednia sesja",
+        cmdNext: "Nast\u0119pna sesja",
+        cmdSaveCurrent: "Zapisz bie\u017C\u0105c\u0105 sesj\u0119",
+        cmdSaveAs: "Zapisz bie\u017C\u0105c\u0105 sesj\u0119 jako...",
+        cmdSaveCurrentLayoutToSession: "Zapisz bie\u017C\u0105cy uk\u0142ad do sesji...",
+        cmdReloadCurrentWithoutSaving: "Wczytaj ponownie bie\u017C\u0105c\u0105 sesj\u0119 (bez zapisywania)",
+        cmdToggleAutoSave: "Prze\u0142\u0105cz automatyczny zapis przy zmianie sesji",
+        cmdEnableAutoSave: "W\u0142\u0105cz automatyczny zapis przy zmianie sesji",
+        cmdDisableAutoSave: "Wy\u0142\u0105cz automatyczny zapis przy zmianie sesji",
+        cmdSearchOverlay: "Szukaj sesji",
+        cmdExportSessions: "Eksportuj migawk\u0119 sesji",
+        cmdImportSessions: "Importuj najnowsz\u0105 migawk\u0119 sesji",
+        switchLeft: "Lewo",
+        switchRight: "Prawo",
+        switchGroup: "Grupa",
+        keyTab: "Tab",
+        savedSession: function(n) {
+          return 'Zapisano "' + n + '"';
+        },
+        savedAs: function(n) {
+          return 'Zapisano jako "' + n + '"';
+        },
+        savedCurrentLayoutToSession: function(n) {
+          return 'Zapisano bie\u017C\u0105cy uk\u0142ad do "' + n + '"';
+        },
+        noChanges: "Brak zmian do zapisania",
+        reloadedSession: function(n) {
+          return 'Wczytano ponownie "' + n + '"';
+        },
+        autoSaveEnabled: "Automatyczny zapis przy zmianie sesji w\u0142\u0105czony.",
+        autoSaveDisabled: "Automatyczny zapis przy zmianie sesji wy\u0142\u0105czony.",
+        confirmUnsavedSwitch: function(n) {
+          return 'Bie\u017C\u0105ca sesja ma niezapisane zmiany. Prze\u0142\u0105czy\u0107 na "' + n + '"?';
+        },
+        saveAndSwitch: "Zapisz i prze\u0142\u0105cz",
+        switchWithoutSaving: "Prze\u0142\u0105cz bez zapisywania",
+        defaultSessionName: "domy\u015Blna",
+        nameSessionTitle: "Zapisz z nazw\u0105 sesji",
+        nameSessionPlaceholder: "Nazwa sesji...",
+        saveWithoutNaming: "Zapisz bez nazwy",
+        sessionAutoName: function(n) {
+          return "Nowa sesja " + n;
+        },
+        noFilteredSessions: "Brak pasuj\u0105cych sesji",
+        noGroupSessions: "Brak sesji w tej grupie",
+        searchOverlayPlaceholder: "Pisz, aby filtrowa\u0107 sesje...",
+        saveCurrentLayoutToSessionPlaceholder: "Wybierz sesj\u0119 do nadpisania...",
+        searchOverlayHelp: "\u2191\u2193 ruch  /  Enter prze\u0142\u0105cz  /  \u21E7Enter zapisz  /  \u232B usu\u0144  /  Esc zamknij",
+        backupRestored: "Workspace++: Przywr\xF3cono sesje z kopii zapasowej.",
+        sessionDataMigrated: "Workspace++: Dane sesji przeniesiono do .workspace-plus-plus/sessions.json.",
+        sessionDataMigrationFailed: "Workspace++: Nie uda\u0142o si\u0119 przenie\u015B\u0107 danych sesji. Stare dane zosta\u0142y zachowane.",
+        localSettingsEnabled: "Workspace++: W\u0142\u0105czono ustawienia lokalne vaultu.",
+        localSettingsDisabled: "Workspace++: Wy\u0142\u0105czono ustawienia lokalne vaultu.",
+        localSettingsCopied: "Workspace++: Skopiowano ustawienia globalne do ustawie\u0144 lokalnych vaultu.",
+        localSettingsLoadFailed: "Workspace++: Nie uda\u0142o si\u0119 wczyta\u0107 ustawie\u0144 lokalnych vaultu. U\u017Cyte zostan\u0105 ustawienia globalne.",
+        localSettingsOperationFailed: "Workspace++: Nie uda\u0142o si\u0119 zaktualizowa\u0107 ustawie\u0144 lokalnych vaultu.",
+        exportSessionsDone: function(path) {
+          return "Workspace++: Wyeksportowano sesje do " + path;
+        },
+        exportSessionsFailed: "Workspace++: Nie uda\u0142o si\u0119 wyeksportowa\u0107 sesji.",
+        importSessionsDone: function(path) {
+          return "Workspace++: Zaimportowano sesje z " + path;
+        },
+        importSessionsNoFile: "Workspace++: Nie znaleziono pliku eksportu w .workspace-plus-plus/exports.",
+        importSessionsFailed: "Workspace++: Nie uda\u0142o si\u0119 zaimportowa\u0107 sesji.",
+        settingsLanguage: "J\u0119zyk",
+        settingsLanguageDesc: "J\u0119zyk interfejsu wtyczki. Uruchom ponownie Obsidian, aby zastosowa\u0107 do nazw polece\u0144.",
+        settingsSectionGeneral: "Og\xF3lne",
+        settingsTabSessions: "Sesje",
+        settingsSectionSwitching: "Prze\u0142\u0105czanie sesji",
+        settingsSectionSwitchCommands: "Polecenia prze\u0142\u0105czania",
+        settingsSectionScrollSwitch: "Prze\u0142\u0105czanie przewijaniem",
+        settingsSectionSwitchPreview: "Podgl\u0105d przed prze\u0142\u0105czeniem",
+        settingsSubsectionSwitchSaving: "Zapisywanie przy zmianie sesji",
+        settingsSubsectionAutoSaveMode: "Tryb automatycznego zapisu sesji",
+        settingsSubsectionSwitchCommands: "Polecenia prze\u0142\u0105czania sesji",
+        settingsSubsectionScrollSwitch: "Prze\u0142\u0105czanie sesji przewijaniem",
+        settingsSubsectionSwitchPreview: "Podgl\u0105d przed prze\u0142\u0105czeniem sesji",
+        settingsSectionDeletion: "Usuwanie sesji",
+        settingsSectionAdvanced: "Zaawansowane",
+        settingsSectionReset: "Resetowanie",
+        settingsStatusBarModScrollSwitch: "W\u0142\u0105cz prze\u0142\u0105czanie sesji z paska stanu",
+        settingsStatusBarModScrollSwitchDesc: "Na elemencie paska stanu przewijaj pionowo, trzymaj\u0105c wybrany klawisz modyfikuj\u0105cy, aby prze\u0142\u0105cza\u0107 sesje. Pr\xF3g i czas odnowienia ograniczaj\u0105 przypadkowe wyzwolenia z g\u0142adzika.",
+        settingsStatusBarScrollPreset: "Preset wej\u015Bcia przewijania",
+        settingsStatusBarScrollPresetDesc: "Wybierz preset dostrojony do urz\u0105dzenia albo prze\u0142\u0105cz na W\u0142asne, aby samodzielnie ustawi\u0107 warto\u015Bci.",
+        settingsStatusBarScrollPresetTrackpad: "G\u0142adzik",
+        settingsStatusBarScrollPresetNotchedWheel: "K\xF3\u0142ko myszy ze skokami",
+        settingsStatusBarScrollPresetFreeSpinWheel: "K\xF3\u0142ko myszy z wolnym obrotem",
+        settingsStatusBarScrollPresetCustom: "W\u0142asne",
+        settingsStatusBarScrollModifier: "Wymagany modyfikator",
+        settingsStatusBarScrollModifierDesc: "Wybierz modyfikator, kt\xF3ry trzeba trzyma\u0107 podczas przewijania na elemencie paska stanu.",
+        settingsStatusBarScrollModifierRecommended: "Cmd albo Option",
+        settingsStatusBarScrollModifierNone: "Brak",
+        settingsStatusBarScrollModifierModOnly: "Tylko Cmd",
+        settingsStatusBarScrollModifierAltOnly: "Tylko Option",
+        settingsStatusBarScrollModifierModOrAlt: "Cmd albo Option",
+        settingsStatusBarScrollThreshold: "Pr\xF3g czu\u0142o\u015Bci",
+        settingsStatusBarScrollThresholdDesc: "Ni\u017Csze warto\u015Bci u\u0142atwiaj\u0105 prze\u0142\u0105czenie. U\u017Cywane tylko, gdy preset to W\u0142asne.",
+        settingsStatusBarScrollCooldown: "Czas odnowienia",
+        settingsStatusBarScrollCooldownDesc: "Minimalny czas mi\u0119dzy prze\u0142\u0105czeniami sesji wywo\u0142anymi przewijaniem. U\u017Cywane tylko, gdy preset to W\u0142asne.",
+        settingsStatusBarScrollResetWindow: "Okno resetu akumulacji",
+        settingsStatusBarScrollResetWindowDesc: "Jak d\u0142ugo \u0142\u0105czy\u0107 ma\u0142e zmiany przewijania przed resetem. U\u017Cywane tylko, gdy preset to W\u0142asne.",
+        settingsStatusBarScrollInvert: "Odwr\xF3\u0107 kierunek przewijania",
+        settingsStatusBarScrollInvertDesc: "Odwraca kierunek poprzednia/nast\u0119pna dla prze\u0142\u0105czania sesji przewijaniem na pasku stanu.",
+        settingsLangAuto: "Automatycznie (j\u0119zyk systemu)",
+        settingsGitHubLink: "GitHub",
+        settingsTranslationHelp: "Widzisz b\u0142\u0105d t\u0142umaczenia? Otw\xF3rz issue albo pull request na GitHubie.",
+        settingsPreviewHeading: "W\u0142\u0105cz podgl\u0105d przed prze\u0142\u0105czeniem sesji",
+        settingsPreviewDesc: "Podczas prze\u0142\u0105czania sesji skr\xF3tem pierwsze naci\u015Bni\u0119cie pokazuje bie\u017C\u0105c\u0105 pozycj\u0119 bez prze\u0142\u0105czania.",
+        settingsPreviewNext: "Nast\u0119pna sesja",
+        settingsPreviewPrevious: "Poprzednia sesja",
+        settingsHotkeys: "Skr\xF3ty klawiszowe",
+        settingsHotkeysBtn: "Otw\xF3rz ustawienia skr\xF3t\xF3w",
+        contextOpenSettings: "Otw\xF3rz ustawienia",
+        contextCustomizeClicks: "Dostosuj akcje klikni\u0119\u0107",
+        settingsSectionStatusBar: "Akcje klikni\u0119\u0107 paska stanu",
+        statusBarSlotClick: "Klikni\u0119cie",
+        statusBarSlotAltClick: function() {
+          return (typeof navigator !== "undefined" && navigator.platform.indexOf("Mac") !== -1 ? "\u2325" : "Alt") + " + klikni\u0119cie";
+        },
+        statusBarSlotModClick: function() {
+          return (typeof navigator !== "undefined" && navigator.platform.indexOf("Mac") !== -1 ? "\u2318" : "Ctrl") + " + klikni\u0119cie";
+        },
+        statusBarSlotShiftClick: function() {
+          return (typeof navigator !== "undefined" && navigator.platform.indexOf("Mac") !== -1 ? "\u21E7" : "Shift") + " + klikni\u0119cie";
+        },
+        statusBarSlotMiddleClick: "Klikni\u0119cie \u015Brodkowe",
+        statusBarSlotAltMiddleClick: modifiedClickLabel("klikni\u0119cie \u015Brodkowe", "\u2325", "Alt"),
+        statusBarSlotModMiddleClick: modifiedClickLabel("klikni\u0119cie \u015Brodkowe", "\u2318", "Ctrl"),
+        statusBarSlotShiftMiddleClick: modifiedClickLabel("klikni\u0119cie \u015Brodkowe", "\u21E7", "Shift"),
+        statusBarSlotRightClick: "Klikni\u0119cie prawym",
+        statusBarSlotAltRightClick: function() {
+          return (typeof navigator !== "undefined" && navigator.platform.indexOf("Mac") !== -1 ? "\u2325" : "Alt") + " + klikni\u0119cie prawym";
+        },
+        statusBarSlotModRightClick: function() {
+          return (typeof navigator !== "undefined" && navigator.platform.indexOf("Mac") !== -1 ? "\u2318" : "Ctrl") + " + klikni\u0119cie prawym";
+        },
+        statusBarSlotShiftRightClick: function() {
+          return (typeof navigator !== "undefined" && navigator.platform.indexOf("Mac") !== -1 ? "\u21E7" : "Shift") + " + klikni\u0119cie prawym";
+        },
+        statusBarActionNone: "Nic nie r\xF3b",
+        statusBarActionQuickSwitcher: "Otw\xF3rz szybki prze\u0142\u0105cznik",
+        statusBarActionSessionManager: "Otw\xF3rz mened\u017Cer sesji",
+        statusBarActionSaveSession: "Zapisz sesj\u0119",
+        statusBarActionReloadWithoutSaving: "Wczytaj ponownie bez zapisywania",
+        statusBarActionVersionHistory: "Poka\u017C histori\u0119 wersji",
+        statusBarActionRestoreLatestHistory: "Przywr\xF3\u0107 najnowsz\u0105 histori\u0119",
+        statusBarActionSessionMenu: "Menu kontekstowe sesji",
+        statusBarActionSettingsMenu: "Menu kontekstowe ustawie\u0144",
+        contextResetOverlayPosition: "Resetuj pozycj\u0119 i rozmiar",
+        settingsConfirmDelete: "Potwierdzaj przed usuni\u0119ciem sesji",
+        settingsConfirmDeleteDesc: "Pokazuje okno potwierdzenia przed usuni\u0119ciem sesji.",
+        settingsConfirmQuickActions: "Potwierdzaj zapis/ponowne wczytanie w szybkim prze\u0142\u0105czniku",
+        settingsConfirmQuickActionsDesc: "Pokazuje okno potwierdzenia przed zapisaniem albo ponownym wczytaniem sesji z nak\u0142adki szybkiego prze\u0142\u0105cznika.",
+        settingsAutoSaveOnSwitch: "Tryb automatycznego zapisu",
+        settingsAutoSaveOnSwitchDesc: "Automatycznie zapisuje bie\u017C\u0105c\u0105 sesj\u0119 przy prze\u0142\u0105czaniu (domy\u015Blnie: W\u0141.). Po wy\u0142\u0105czeniu mo\u017Cesz zapisywa\u0107 i ponownie wczytywa\u0107 sesje r\u0119cznie.",
+        settingsWarnUnsavedSwitch: "Ostrzegaj przed prze\u0142\u0105czeniem bez zapisu",
+        settingsWarnUnsavedSwitchDesc: "Gdy automatyczny zapis jest wy\u0142\u0105czony, a bie\u017C\u0105ca sesja ma niezapisane zmiany, poka\u017C ostrze\u017Cenie przed prze\u0142\u0105czeniem.",
+        settingsStatusBarQuickSwitcher: "Szybki prze\u0142\u0105cznik po klikni\u0119ciu paska stanu",
+        settingsStatusBarQuickSwitcherDesc: "Po w\u0142\u0105czeniu klikni\u0119cie paska stanu otwiera nak\u0142adk\u0119 szybkiego prze\u0142\u0105cznika zamiast pe\u0142nego mened\u017Cera sesji.",
+        settingsUseLocalSettings: "U\u017Cywaj ustawie\u0144 lokalnych vaultu",
+        settingsUseLocalSettingsDesc: "W\u0142\u0105cz to, je\u015Bli synchronizujesz .obsidian mi\u0119dzy vaultami (np. przez Settings Profiles) i chcesz, aby ustawienia Workspace++ by\u0142y osobne dla ka\u017Cdego vaultu.",
+        settingsCopyGlobalToLocal: "Kopiuj ustawienia globalne do tego vaultu",
+        settingsCopyGlobalToLocalDesc: "Nadpisuje ustawienia lokalne vaultu bie\u017C\u0105cymi ustawieniami globalnymi.",
+        settingsCopyGlobalToLocalBtn: "Kopiuj",
+        settingsResetLocalSettings: "Resetuj ustawienia lokalne vaultu",
+        settingsResetLocalSettingsDesc: "Przywraca ustawienia lokalne vaultu do ustawie\u0144 globalnych.",
+        settingsResetLocalSettingsBtn: "Resetuj lokalne",
+        settingsAdvancedStorageSubsection: "Zachowanie przechowywania",
+        settingsAdvancedTransferSubsection: "Przenoszenie danych",
+        settingsDeveloperSection: "Narz\u0119dzia deweloperskie",
+        settingsStorageDiagnostics: "Diagnostyka przechowywania",
+        settingsStorageDiagnosticsDesc: "Szczeg\xF3\u0142y przechowywania obecnie u\u017Cywane przez Workspace++.",
+        settingsStorageFieldSessions: "Plik sesji",
+        settingsStorageFieldSessionsBackup: "Kopia zapasowa sesji",
+        settingsStorageFieldLocalSettings: "Plik ustawie\u0144 lokalnych",
+        settingsStorageFieldGlobalSettings: "Plik ustawie\u0144 globalnych",
+        settingsStorageFieldSessionCount: "Liczba sesji",
+        settingsStorageFieldUpdatedAt: "Zaktualizowano",
+        settingsExportSessions: "Eksportuj sesje",
+        settingsExportSessionsDesc: "Zapisuje migawk\u0119 w .workspace-plus-plus/exports.",
+        settingsExportSessionsBtn: "Eksportuj",
+        settingsImportSessions: "Importuj sesje",
+        settingsImportSessionsDesc: "Importuje najnowsz\u0105 migawk\u0119 z .workspace-plus-plus/exports.",
+        settingsImportSessionsBtn: "Importuj najnowsz\u0105",
+        confirmImportSessions: "Zaimportowa\u0107 najnowsze wyeksportowane sesje? Bie\u017C\u0105ce sesje zostan\u0105 zast\u0105pione.",
+        settingsResetSettings: "Resetuj ustawienia",
+        settingsResetSettingsDesc: "Resetuje ustawienia Workspace++ dla bie\u017C\u0105cego zakresu ustawie\u0144.",
+        settingsResetSettingsBtn: "Resetuj ustawienia",
+        confirmResetSettings: "Zresetowa\u0107 ustawienia Workspace++ do domy\u015Blnych?",
+        resetSettingsDone: "Ustawienia Workspace++ zosta\u0142y zresetowane.",
+        resetSettingsFailed: "Nie uda\u0142o si\u0119 zresetowa\u0107 ustawie\u0144 Workspace++.",
+        settingsResetSessions: "Resetuj sesje",
+        settingsResetSessionsDesc: "Usuwa wszystkie zapisane sesje i zostawia tylko now\u0105 domy\u015Bln\u0105 sesj\u0119 z bie\u017C\u0105cego uk\u0142adu.",
+        settingsResetSessionsBtn: "Resetuj",
+        confirmResetSessions: "Zresetowa\u0107 wszystkie sesje do domy\u015Blnych? Tego nie mo\u017Cna cofn\u0105\u0107.",
+        resetSessionsHint: "To usunie wszystkie zapisane sesje i zostawi tylko jedn\u0105 domy\u015Bln\u0105 sesj\u0119.",
+        resetSessionsDone: "Sesje zosta\u0142y zresetowane do domy\u015Blnych.",
+        resetSessionsFailed: "Nie uda\u0142o si\u0119 zresetowa\u0107 sesji.",
+        settingsResetSessionsAndSettings: "Resetuj sesje i ustawienia",
+        settingsResetSessionsAndSettingsDesc: "Resetuje zapisane sesje i ustawienia Workspace++ jednocze\u015Bnie.",
+        settingsResetSessionsAndSettingsBtn: "Resetuj oba",
+        confirmResetSessionsAndSettings: "Zresetowa\u0107 sesje i ustawienia? Tego nie mo\u017Cna cofn\u0105\u0107.",
+        resetSessionsAndSettingsDone: "Sesje i ustawienia zosta\u0142y zresetowane.",
+        resetSessionsAndSettingsFailed: "Nie uda\u0142o si\u0119 zresetowa\u0107 sesji i ustawie\u0144.",
+        confirmDeleteSettingsHint: "Aby wy\u0142\u0105czy\u0107 to potwierdzenie, przejd\u017A do ustawie\u0144.",
+        groupCreated: function(n) {
+          return 'Utworzono grup\u0119 "' + n + '"';
+        },
+        groupDeleted: function(n) {
+          return 'Usuni\u0119to grup\u0119 "' + n + '"';
+        },
+        groupRenamed: function(o, n) {
+          return 'Zmieniono nazw\u0119 grupy: "' + o + '" \u2192 "' + n + '"';
+        },
+        groupAll: "Wszystkie",
+        groupDuplicateName: "Grupa o tej nazwie ju\u017C istnieje.",
+        groupEmptyName: "Nazwa grupy nie mo\u017Ce by\u0107 pusta.",
+        cmdSwitchGroup: "Prze\u0142\u0105cz grup\u0119",
+        cmdExitGroup: "Poka\u017C wszystkie sesje (wyjd\u017A z grupy)",
+        cmdNextGroup: "Nast\u0119pna grupa",
+        cmdPreviousGroup: "Poprzednia grupa",
+        searchOverlayHelpWithGroups: "\u2191\u2193 ruch  /  Tab grupa  /  Enter prze\u0142\u0105cz  /  \u21E7Enter zapisz  /  \u232B usu\u0144  /  Esc zamknij",
+        settingsSectionGroups: "Grupy sesji",
+        contextToggleGroups: "W\u0142\u0105cz grupy sesji",
+        settingsSectionGroupsDesc: "U\u017Cywaj grup do organizowania sesji. Wy\u0142\u0105czenie ukryje karty grup i akcje prze\u0142\u0105czania grup.",
+        settingsGroupCreate: "Utw\xF3rz grup\u0119",
+        settingsGroupCreateDesc: "Utw\xF3rz now\u0105 grup\u0119 sesji.",
+        settingsGroupCreatePlaceholder: "Nazwa grupy...",
+        settingsGroupCreateBtn: "Utw\xF3rz",
+        settingsGroupManageSessions: "Zarz\u0105dzaj sesjami",
+        settingsGroupManageSessionsDesc: "Dodaj sesje do tej grupy albo wypnij je z niej.",
+        settingsGroupSessionCount: function(n) {
+          return n + " sesji";
+        },
+        settingsGroupDelete: "Usu\u0144 grup\u0119",
+        settingsGroupDeleteConfirm: function(n) {
+          return 'Usun\u0105\u0107 grup\u0119 "' + n + '"? Sesje nie zostan\u0105 usuni\u0119te.';
+        },
+        confirmDeleteGroup: function(n) {
+          return 'Usun\u0105\u0107 grup\u0119 "' + n + '"? Sesje w tej grupie NIE zostan\u0105 usuni\u0119te.';
+        },
+        groupAddedSession: function(s, g) {
+          return 'Dodano "' + s + '" do "' + g + '"';
+        },
+        groupRemovedSession: function(s, g) {
+          return 'Wypi\u0119to "' + s + '" z "' + g + '"';
+        },
+        groupRemoveFromGroup: "Wypnij z grupy",
+        groupMoveToGroup: "Przenie\u015B do grupy",
+        groupCreateNew: "Nowa grupa",
+        groupCreatePlaceholder: "Nazwa grupy...",
+        groupContextRename: "Zmie\u0144 nazw\u0119 grupy",
+        groupContextDelete: "Usu\u0144 grup\u0119",
+        contextSwitchSession: "Prze\u0142\u0105cz na t\u0119 sesj\u0119",
+        contextRenameSession: "Zmie\u0144 nazw\u0119 tej sesji",
+        contextDeleteSession: "Usu\u0144 t\u0119 sesj\u0119",
+        contextDuplicateSession: "Duplikuj t\u0119 sesj\u0119",
+        contextReloadSession: "Wczytaj ponownie t\u0119 sesj\u0119",
+        contextSaveSession: "Zapisz t\u0119 sesj\u0119",
+        contextSaveCurrentLayoutToThisSession: "Zapisz bie\u017C\u0105cy uk\u0142ad do tej sesji",
+        groupRemoveAllSessions: "Wypnij wszystkie sesje z tej grupy",
+        confirmRemoveAllFromGroup: function(g, n) {
+          return "Wypi\u0105\u0107 wszystkie sesje (" + n + ') z "' + g + '"?';
+        },
+        groupRemovedAllSessions: function(g) {
+          return 'Wypi\u0119to wszystkie sesje z "' + g + '"';
+        },
+        contextDeleteAllGroups: "Usu\u0144 wszystkie grupy",
+        confirmDeleteAllGroups: function(n) {
+          return "Usun\u0105\u0107 wszystkie " + n + " grup? Sesje nie zostan\u0105 usuni\u0119te.";
+        },
+        deletedAllGroups: function(n) {
+          return "Usuni\u0119to " + n + " grup";
+        },
+        contextDeleteAllSessions: "Usu\u0144 wszystkie sesje",
+        confirmDeleteAllSessions: function(n) {
+          return "Usun\u0105\u0107 " + n + " sesji? Aktywna sesja zostanie zachowana.";
+        },
+        deletedAllSessions: function(n) {
+          return "Usuni\u0119to " + n + " sesji";
+        },
+        contextVersionHistory: "Historia wersji",
+        cmdVersionHistory: "Poka\u017C histori\u0119 wersji sesji",
+        historyTitle: "Historia wersji",
+        historyEmpty: "Brak historii wersji dla tej sesji.",
+        historyRestore: "Przywr\xF3\u0107",
+        historyRestoreConfirm: function(name, time) {
+          return 'Przywr\xF3ci\u0107 uk\u0142ad "' + name + '" z migawki "' + time + '"?';
+        },
+        historyRestored: function(name) {
+          return 'Przywr\xF3cono uk\u0142ad "' + name + '"';
+        },
+        historyQuickRestored: function(name) {
+          return 'Szybko przywr\xF3cono poprzedni uk\u0142ad "' + name + '"';
+        },
+        historyNoEntries: "Brak poprzednich uk\u0142ad\xF3w do przywr\xF3cenia.",
+        historyToday: "Dzisiaj",
+        historyYesterday: "Wczoraj",
+        historyThisWeek: "W tym tygodniu",
+        historyFiles: function(n) {
+          return n + " plik\xF3w";
+        },
+        historyPanes: function(n) {
+          return n + " paneli";
+        },
+        settingsVersionHistoryEnabled: "W\u0142\u0105cz histori\u0119 wersji",
+        settingsVersionHistoryEnabledDesc: "Zachowuje histori\u0119 zmian uk\u0142adu dla ka\u017Cdej sesji.",
+        settingsVersionHistoryInterval: "Interwa\u0142 migawki (minuty)",
+        settingsVersionHistoryIntervalDesc: "Jak cz\u0119sto sprawdza\u0107 zmiany uk\u0142adu i zapisywa\u0107 migawk\u0119.",
+        settingsVersionHistoryCtrlRmb: platformLabel("Szybkie przywracanie (Cmd + prawy klik)", "Szybkie przywracanie (Ctrl + prawy klik)"),
+        settingsVersionHistoryCtrlRmbDesc: platformLabel("Kliknij prawym przyciskiem pasek stanu, trzymaj\u0105c Cmd, aby przywr\xF3ci\u0107 poprzedni uk\u0142ad.", "Kliknij prawym przyciskiem pasek stanu, trzymaj\u0105c Ctrl, aby przywr\xF3ci\u0107 poprzedni uk\u0142ad."),
+        settingsVersionHistoryConfirmRestore: "Potwierdzaj przed przywracaniem",
+        settingsVersionHistoryConfirmRestoreDesc: "Pokazuje okno potwierdzenia przed przywr\xF3ceniem poprzedniego uk\u0142adu.",
+        rotationBackupSectionTitle: "Kopia zapasowa",
+        rotationBackupCreate: "Utw\xF3rz kopi\u0119 zapasow\u0105",
+        rotationBackupCreateBtn: "Utw\xF3rz teraz",
+        rotationBackupCreated: "Utworzono kopi\u0119 zapasow\u0105.",
+        rotationBackupFailed: "Nie uda\u0142o si\u0119 utworzy\u0107 kopii zapasowej.",
+        rotationBackupDesc: "Automatyczne kopie zapasowe s\u0105 tworzone przy zapisie (co godzin\u0119, do 3 generacji).",
+        rotationBackupRestore: "Przywr\xF3\u0107",
+        rotationBackupRestoreConfirm: function(time, count) {
+          return 'Przywr\xF3ci\u0107 z kopii zapasowej "' + time + '" (liczba sesji: ' + count + ")? Bie\u017C\u0105ce dane zostan\u0105 nadpisane.";
+        },
+        rotationBackupRestored: "Przywr\xF3cono z kopii zapasowej.",
+        rotationBackupRestoreFailed: "Nie uda\u0142o si\u0119 przywr\xF3ci\u0107 z kopii zapasowej.",
+        rotationBackupNone: "Brak dost\u0119pnych kopii zapasowych.",
+        rotationBackupGeneration: function(count) {
+          return count + " sesji";
+        },
+        frontmatterSessionNotFound: function(n) {
+          return 'Nie znaleziono sesji "' + n + '" (workspace-session)';
+        },
+        frontmatterAlreadyActive: function(n) {
+          return 'Sesja "' + n + '" jest ju\u017C aktywna';
+        }
       }
     };
     var EXTENDED_STRINGS = {
@@ -7090,7 +9260,12 @@ var require_i18n = __commonJS({
       tr: "T\xFCrk\xE7e",
       id: "Bahasa Indonesia",
       vi: "Ti\u1EBFng Vi\u1EC7t",
-      th: "\u0E44\u0E17\u0E22"
+      th: "\u0E44\u0E17\u0E22",
+      hi: "\u0939\u093F\u0928\u094D\u0926\u0940",
+      bn: "\u09AC\u09BE\u0982\u09B2\u09BE",
+      fa: "\u0641\u0627\u0631\u0633\u06CC",
+      ms: "Bahasa Melayu",
+      pl: "Polski"
     };
     var LANG_ORDER = [
       "en",
@@ -7108,7 +9283,12 @@ var require_i18n = __commonJS({
       "tr",
       "id",
       "vi",
-      "th"
+      "th",
+      "hi",
+      "bn",
+      "fa",
+      "ms",
+      "pl"
     ];
     exports2.LANG_OPTIONS = LANG_OPTIONS;
     exports2.LANG_ORDER = LANG_ORDER;
