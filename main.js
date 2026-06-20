@@ -305,6 +305,8 @@ var require_i18n = __commonJS({
         settingsAutoSaveOnSwitchDesc: "Automatically saves the current session when switching (default: ON). When OFF, you can save and reload sessions manually.",
         settingsWarnUnsavedSwitch: "Warn before switching without saving",
         settingsWarnUnsavedSwitchDesc: "When auto-save is off and current session has unsaved changes, show a warning before switching.",
+        settingsHighlightUnsavedSessionChanges: "Highlight unsaved session changes",
+        settingsHighlightUnsavedSessionChangesDesc: "When auto-save on switch is off, highlight the status bar when the current workspace layout differs from the saved session.",
         settingsStatusBarQuickSwitcher: "Quick switcher on status bar click",
         settingsStatusBarQuickSwitcherDesc: "When enabled, clicking the status bar opens the quick switcher overlay instead of the full session manager.",
         settingsUseLocalSettings: "Use vault-local settings",
@@ -678,6 +680,8 @@ var require_i18n = __commonJS({
         settingsAutoSaveOnSwitchDesc: "\u5207\u6362\u4F1A\u8BDD\u65F6\u81EA\u52A8\u4FDD\u5B58\u5F53\u524D\u4F1A\u8BDD\uFF08\u9ED8\u8BA4\uFF1A\u5F00\u542F\uFF09\u3002\u5173\u95ED\u540E\u53EF\u624B\u52A8\u63A7\u5236\u4FDD\u5B58\u548C\u91CD\u65B0\u52A0\u8F7D\u3002",
         settingsWarnUnsavedSwitch: "\u672A\u4FDD\u5B58\u65F6\u5207\u6362\u524D\u8B66\u544A",
         settingsWarnUnsavedSwitchDesc: "\u5F53\u81EA\u52A8\u4FDD\u5B58\u5173\u95ED\u4E14\u5F53\u524D\u4F1A\u8BDD\u6709\u672A\u4FDD\u5B58\u66F4\u6539\u65F6\uFF0C\u5207\u6362\u524D\u663E\u793A\u8B66\u544A\u3002",
+        settingsHighlightUnsavedSessionChanges: "\u9AD8\u4EAE\u672A\u4FDD\u5B58\u7684\u4F1A\u8BDD\u66F4\u6539",
+        settingsHighlightUnsavedSessionChangesDesc: "\u5F53\u81EA\u52A8\u4FDD\u5B58\u5173\u95ED\u4E14\u5F53\u524D\u5DE5\u4F5C\u533A\u5E03\u5C40\u4E0E\u4FDD\u5B58\u7684\u4F1A\u8BDD\u4E0D\u540C\u65F6\uFF0C\u9AD8\u4EAE\u72B6\u6001\u680F\u3002",
         settingsStatusBarQuickSwitcher: "\u72B6\u6001\u680F\u70B9\u51FB\u65F6\u4F7F\u7528\u5FEB\u901F\u5207\u6362\u5668",
         settingsStatusBarQuickSwitcherDesc: "\u542F\u7528\u540E\uFF0C\u70B9\u51FB\u72B6\u6001\u680F\u5C06\u6253\u5F00\u5FEB\u901F\u5207\u6362\u8986\u76D6\u5C42\uFF0C\u800C\u975E\u5B8C\u6574\u7684\u4F1A\u8BDD\u7BA1\u7406\u5668\u3002",
         settingsResetSessions: "\u91CD\u7F6E\u4F1A\u8BDD",
@@ -1008,6 +1012,8 @@ var require_i18n = __commonJS({
         settingsAutoSaveOnSwitchDesc: "\u5207\u63DB\u5DE5\u4F5C\u968E\u6BB5\u6642\u81EA\u52D5\u5132\u5B58\u76EE\u524D\u5DE5\u4F5C\u968E\u6BB5\uFF08\u9810\u8A2D\uFF1A\u958B\u555F\uFF09\u3002\u95DC\u9589\u5F8C\u53EF\u624B\u52D5\u63A7\u5236\u5132\u5B58\u548C\u91CD\u65B0\u8F09\u5165\u3002",
         settingsWarnUnsavedSwitch: "\u672A\u5132\u5B58\u6642\u5207\u63DB\u524D\u8B66\u544A",
         settingsWarnUnsavedSwitchDesc: "\u7576\u81EA\u52D5\u5132\u5B58\u95DC\u9589\u4E14\u76EE\u524D\u5DE5\u4F5C\u968E\u6BB5\u6709\u672A\u5132\u5B58\u8B8A\u66F4\u6642\uFF0C\u5207\u63DB\u524D\u986F\u793A\u8B66\u544A\u3002",
+        settingsHighlightUnsavedSessionChanges: "\u9192\u76EE\u63D0\u793A\u672A\u5132\u5B58\u7684\u5DE5\u4F5C\u968E\u6BB5\u8B8A\u66F4",
+        settingsHighlightUnsavedSessionChangesDesc: "\u7576\u81EA\u52D5\u5132\u5B58\u95DC\u9589\u4E14\u76EE\u524D\u5DE5\u4F5C\u5340\u914D\u7F6E\u8207\u5DF2\u5132\u5B58\u7684\u5DE5\u4F5C\u968E\u6BB5\u4E0D\u540C\u6642\uFF0C\u9192\u76EE\u63D0\u793A\u72C0\u614B\u5217\u3002",
         settingsStatusBarQuickSwitcher: "\u72C0\u614B\u5217\u9EDE\u64CA\u6642\u4F7F\u7528\u5FEB\u901F\u5207\u63DB\u5668",
         settingsStatusBarQuickSwitcherDesc: "\u555F\u7528\u5F8C\uFF0C\u9EDE\u64CA\u72C0\u614B\u5217\u5C07\u958B\u555F\u5FEB\u901F\u5207\u63DB\u8986\u84CB\u5C64\uFF0C\u800C\u975E\u5B8C\u6574\u7684\u5DE5\u4F5C\u968E\u6BB5\u7BA1\u7406\u5668\u3002",
         settingsResetSessions: "\u91CD\u8A2D\u5DE5\u4F5C\u968E\u6BB5",
@@ -1338,6 +1344,8 @@ var require_i18n = __commonJS({
         settingsAutoSaveOnSwitchDesc: "Guarda autom\xE1ticamente la sesi\xF3n actual al cambiar (por defecto: activado). Si est\xE1 desactivado, puedes guardar y recargar sesiones manualmente.",
         settingsWarnUnsavedSwitch: "Advertir antes de cambiar sin guardar",
         settingsWarnUnsavedSwitchDesc: "Si el guardado autom\xE1tico est\xE1 desactivado y la sesi\xF3n actual tiene cambios sin guardar, muestra una advertencia antes de cambiar.",
+        settingsHighlightUnsavedSessionChanges: "Resaltar cambios de sesi\xF3n sin guardar",
+        settingsHighlightUnsavedSessionChangesDesc: "Cuando el guardado autom\xE1tico est\xE9 desactivado, resalta la barra de estado si el dise\xF1o actual del espacio de trabajo difiere de la sesi\xF3n guardada.",
         settingsStatusBarQuickSwitcher: "Cambio r\xE1pido al hacer clic en la barra de estado",
         settingsStatusBarQuickSwitcherDesc: "Si est\xE1 activado, al hacer clic en la barra de estado se abre el selector r\xE1pido en lugar del gestor de sesiones completo.",
         settingsResetSessions: "Restablecer sesiones",
@@ -1668,6 +1676,8 @@ var require_i18n = __commonJS({
         settingsAutoSaveOnSwitchDesc: "Enregistre automatiquement la session en cours lors du changement (par d\xE9faut : activ\xE9). D\xE9sactiv\xE9, vous pouvez enregistrer et recharger les sessions manuellement.",
         settingsWarnUnsavedSwitch: "Avertir avant de basculer sans enregistrer",
         settingsWarnUnsavedSwitchDesc: "Si l\u2019enregistrement auto est d\xE9sactiv\xE9 et que la session actuelle a des modifications non enregistr\xE9es, affiche un avertissement avant le basculement.",
+        settingsHighlightUnsavedSessionChanges: "Mettre en \xE9vidence les modifications de session non enregistr\xE9es",
+        settingsHighlightUnsavedSessionChangesDesc: "Lorsque l\u2019enregistrement automatique est d\xE9sactiv\xE9, met en \xE9vidence la barre d\u2019\xE9tat si l\u2019agencement actuel de l\u2019espace de travail diff\xE8re de la session enregistr\xE9e.",
         settingsStatusBarQuickSwitcher: "Changement rapide via la barre d\u2019\xE9tat",
         settingsStatusBarQuickSwitcherDesc: "Si activ\xE9, un clic sur la barre d\u2019\xE9tat ouvre le s\xE9lecteur rapide au lieu du gestionnaire de sessions complet.",
         settingsResetSessions: "R\xE9initialiser les sessions",
@@ -1998,6 +2008,8 @@ var require_i18n = __commonJS({
         settingsAutoSaveOnSwitchDesc: "\u064A\u062D\u0641\u0638 \u0627\u0644\u062C\u0644\u0633\u0629 \u0627\u0644\u062D\u0627\u0644\u064A\u0629 \u062A\u0644\u0642\u0627\u0626\u064A\u064B\u0627 \u0639\u0646\u062F \u0627\u0644\u062A\u0628\u062F\u064A\u0644 (\u0627\u0641\u062A\u0631\u0627\u0636\u064A: \u0645\u0641\u0639\u0651\u0644). \u0639\u0646\u062F \u0627\u0644\u0625\u064A\u0642\u0627\u0641\u060C \u064A\u0645\u0643\u0646\u0643 \u0627\u0644\u062D\u0641\u0638 \u0648\u0625\u0639\u0627\u062F\u0629 \u0627\u0644\u062A\u062D\u0645\u064A\u0644 \u064A\u062F\u0648\u064A\u064B\u0627.",
         settingsWarnUnsavedSwitch: "\u0627\u0644\u062A\u062D\u0630\u064A\u0631 \u0642\u0628\u0644 \u0627\u0644\u062A\u0628\u062F\u064A\u0644 \u0628\u062F\u0648\u0646 \u062D\u0641\u0638",
         settingsWarnUnsavedSwitchDesc: "\u0625\u0630\u0627 \u0643\u0627\u0646 \u0627\u0644\u062D\u0641\u0638 \u0627\u0644\u062A\u0644\u0642\u0627\u0626\u064A \u0645\u0639\u0637\u0644\u0627\u064B \u0648\u0627\u0644\u062C\u0644\u0633\u0629 \u0627\u0644\u062D\u0627\u0644\u064A\u0629 \u062A\u062D\u062A\u0648\u064A \u0639\u0644\u0649 \u062A\u063A\u064A\u064A\u0631\u0627\u062A \u063A\u064A\u0631 \u0645\u062D\u0641\u0648\u0638\u0629\u060C \u0641\u0627\u0639\u0631\u0636 \u062A\u062D\u0630\u064A\u0631\u064B\u0627 \u0642\u0628\u0644 \u0627\u0644\u062A\u0628\u062F\u064A\u0644.",
+        settingsHighlightUnsavedSessionChanges: "\u062A\u0645\u064A\u064A\u0632 \u062A\u063A\u064A\u064A\u0631\u0627\u062A \u0627\u0644\u062C\u0644\u0633\u0629 \u063A\u064A\u0631 \u0627\u0644\u0645\u062D\u0641\u0648\u0638\u0629",
+        settingsHighlightUnsavedSessionChangesDesc: "\u0639\u0646\u062F \u0625\u064A\u0642\u0627\u0641 \u0627\u0644\u062D\u0641\u0638 \u0627\u0644\u062A\u0644\u0642\u0627\u0626\u064A \u0639\u0646\u062F \u0627\u0644\u062A\u0628\u062F\u064A\u0644\u060C \u0645\u064A\u0651\u0632 \u0634\u0631\u064A\u0637 \u0627\u0644\u062D\u0627\u0644\u0629 \u0625\u0630\u0627 \u0643\u0627\u0646 \u062A\u062E\u0637\u064A\u0637 \u0645\u0633\u0627\u062D\u0629 \u0627\u0644\u0639\u0645\u0644 \u0627\u0644\u062D\u0627\u0644\u064A \u064A\u062E\u062A\u0644\u0641 \u0639\u0646 \u0627\u0644\u062C\u0644\u0633\u0629 \u0627\u0644\u0645\u062D\u0641\u0648\u0638\u0629.",
         settingsStatusBarQuickSwitcher: "\u0627\u0644\u062A\u0628\u062F\u064A\u0644 \u0627\u0644\u0633\u0631\u064A\u0639 \u0639\u0646\u062F \u0627\u0644\u0646\u0642\u0631 \u0639\u0644\u0649 \u0634\u0631\u064A\u0637 \u0627\u0644\u062D\u0627\u0644\u0629",
         settingsStatusBarQuickSwitcherDesc: "\u0639\u0646\u062F \u0627\u0644\u062A\u0641\u0639\u064A\u0644\u060C \u064A\u0624\u062F\u064A \u0627\u0644\u0646\u0642\u0631 \u0639\u0644\u0649 \u0634\u0631\u064A\u0637 \u0627\u0644\u062D\u0627\u0644\u0629 \u0625\u0644\u0649 \u0641\u062A\u062D \u0627\u0644\u0645\u0628\u062F\u0651\u0644 \u0627\u0644\u0633\u0631\u064A\u0639 \u0628\u062F\u0644\u0627\u064B \u0645\u0646 \u0645\u062F\u064A\u0631 \u0627\u0644\u062C\u0644\u0633\u0627\u062A \u0627\u0644\u0643\u0627\u0645\u0644.",
         settingsResetSessions: "\u0625\u0639\u0627\u062F\u0629 \u062A\u0639\u064A\u064A\u0646 \u0627\u0644\u062C\u0644\u0633\u0627\u062A",
@@ -2328,6 +2340,8 @@ var require_i18n = __commonJS({
         settingsAutoSaveOnSwitchDesc: "Salva automaticamente a sess\xE3o atual ao trocar (padr\xE3o: ativado). Quando desativado, voc\xEA pode salvar e recarregar sess\xF5es manualmente.",
         settingsWarnUnsavedSwitch: "Avisar antes de trocar sem salvar",
         settingsWarnUnsavedSwitchDesc: "Quando o salvamento autom\xE1tico estiver desativado e a sess\xE3o atual tiver altera\xE7\xF5es n\xE3o salvas, exibe um aviso antes da troca.",
+        settingsHighlightUnsavedSessionChanges: "Destacar altera\xE7\xF5es de sess\xE3o n\xE3o salvas",
+        settingsHighlightUnsavedSessionChangesDesc: "Quando o salvamento autom\xE1tico ao trocar estiver desativado, destaca a barra de status se o layout atual do espa\xE7o de trabalho diferir da sess\xE3o salva.",
         settingsStatusBarQuickSwitcher: "Troca r\xE1pida ao clicar na barra de status",
         settingsStatusBarQuickSwitcherDesc: "Quando ativado, clicar na barra de status abre o seletor r\xE1pido em vez do gerenciador de sess\xF5es completo.",
         settingsResetSessions: "Redefinir sess\xF5es",
@@ -2658,6 +2672,8 @@ var require_i18n = __commonJS({
         settingsAutoSaveOnSwitchDesc: "\u0410\u0432\u0442\u043E\u043C\u0430\u0442\u0438\u0447\u0435\u0441\u043A\u0438 \u0441\u043E\u0445\u0440\u0430\u043D\u044F\u0435\u0442 \u0442\u0435\u043A\u0443\u0449\u0443\u044E \u0441\u0435\u0441\u0441\u0438\u044E \u043F\u0440\u0438 \u043F\u0435\u0440\u0435\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u0438 (\u043F\u043E \u0443\u043C\u043E\u043B\u0447\u0430\u043D\u0438\u044E: \u0432\u043A\u043B.). \u041F\u0440\u0438 \u043E\u0442\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u0438 \u043C\u043E\u0436\u043D\u043E \u0441\u043E\u0445\u0440\u0430\u043D\u044F\u0442\u044C \u0438 \u043F\u0435\u0440\u0435\u0437\u0430\u0433\u0440\u0443\u0436\u0430\u0442\u044C \u0441\u0435\u0441\u0441\u0438\u0438 \u0432\u0440\u0443\u0447\u043D\u0443\u044E.",
         settingsWarnUnsavedSwitch: "\u041F\u0440\u0435\u0434\u0443\u043F\u0440\u0435\u0436\u0434\u0430\u0442\u044C \u043F\u0435\u0440\u0435\u0434 \u043F\u0435\u0440\u0435\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u0435\u043C \u0431\u0435\u0437 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u044F",
         settingsWarnUnsavedSwitchDesc: "\u0415\u0441\u043B\u0438 \u0430\u0432\u0442\u043E\u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0435 \u043E\u0442\u043A\u043B\u044E\u0447\u0435\u043D\u043E \u0438 \u0432 \u0442\u0435\u043A\u0443\u0449\u0435\u0439 \u0441\u0435\u0441\u0441\u0438\u0438 \u0435\u0441\u0442\u044C \u043D\u0435\u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u044B\u0435 \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u044F, \u043F\u043E\u043A\u0430\u0437\u044B\u0432\u0430\u0442\u044C \u043F\u0440\u0435\u0434\u0443\u043F\u0440\u0435\u0436\u0434\u0435\u043D\u0438\u0435 \u043F\u0435\u0440\u0435\u0434 \u043F\u0435\u0440\u0435\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u0435\u043C.",
+        settingsHighlightUnsavedSessionChanges: "\u041F\u043E\u0434\u0441\u0432\u0435\u0447\u0438\u0432\u0430\u0442\u044C \u043D\u0435\u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u044B\u0435 \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u044F \u0441\u0435\u0441\u0441\u0438\u0438",
+        settingsHighlightUnsavedSessionChangesDesc: "\u041A\u043E\u0433\u0434\u0430 \u0430\u0432\u0442\u043E\u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0435 \u043F\u0440\u0438 \u043F\u0435\u0440\u0435\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u0438 \u043E\u0442\u043A\u043B\u044E\u0447\u0435\u043D\u043E, \u043F\u043E\u0434\u0441\u0432\u0435\u0447\u0438\u0432\u0430\u0435\u0442 \u0441\u0442\u0440\u043E\u043A\u0443 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u044F, \u0435\u0441\u043B\u0438 \u0442\u0435\u043A\u0443\u0449\u0430\u044F \u0440\u0430\u0441\u043A\u043B\u0430\u0434\u043A\u0430 \u0440\u0430\u0431\u043E\u0447\u0435\u0439 \u043E\u0431\u043B\u0430\u0441\u0442\u0438 \u043E\u0442\u043B\u0438\u0447\u0430\u0435\u0442\u0441\u044F \u043E\u0442 \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u043E\u0439 \u0441\u0435\u0441\u0441\u0438\u0438.",
         settingsStatusBarQuickSwitcher: "\u0411\u044B\u0441\u0442\u0440\u043E\u0435 \u043F\u0435\u0440\u0435\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u0435 \u043F\u043E \u043A\u043B\u0438\u043A\u0443 \u043D\u0430 \u0441\u0442\u0440\u043E\u043A\u0435 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u044F",
         settingsStatusBarQuickSwitcherDesc: "\u041F\u0440\u0438 \u0432\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u0438 \u043A\u043B\u0438\u043A \u043F\u043E \u0441\u0442\u0440\u043E\u043A\u0435 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u044F \u043E\u0442\u043A\u0440\u044B\u0432\u0430\u0435\u0442 \u0431\u044B\u0441\u0442\u0440\u044B\u0439 \u043F\u0435\u0440\u0435\u043A\u043B\u044E\u0447\u0430\u0442\u0435\u043B\u044C \u0432\u043C\u0435\u0441\u0442\u043E \u043F\u043E\u043B\u043D\u043E\u0433\u043E \u043C\u0435\u043D\u0435\u0434\u0436\u0435\u0440\u0430 \u0441\u0435\u0441\u0441\u0438\u0439.",
         settingsResetSessions: "\u0421\u0431\u0440\u043E\u0441\u0438\u0442\u044C \u0441\u0435\u0441\u0441\u0438\u0438",
@@ -2988,6 +3004,8 @@ var require_i18n = __commonJS({
         settingsAutoSaveOnSwitchDesc: "Speichert die aktuelle Sitzung automatisch beim Wechsel (Standard: ein). Bei Deaktivierung k\xF6nnen Sie Sitzungen manuell speichern und neu laden.",
         settingsWarnUnsavedSwitch: "Vor Wechsel ohne Speichern warnen",
         settingsWarnUnsavedSwitchDesc: "Wenn automatisches Speichern deaktiviert ist und die aktuelle Sitzung ungespeicherte \xC4nderungen hat, vor dem Wechsel warnen.",
+        settingsHighlightUnsavedSessionChanges: "Ungespeicherte Sitzungs\xE4nderungen hervorheben",
+        settingsHighlightUnsavedSessionChangesDesc: "Wenn automatisches Speichern beim Wechsel deaktiviert ist, wird die Statusleiste hervorgehoben, wenn das aktuelle Workspace-Layout von der gespeicherten Sitzung abweicht.",
         settingsStatusBarQuickSwitcher: "Schnellwechsel bei Klick auf die Statusleiste",
         settingsStatusBarQuickSwitcherDesc: "Wenn aktiviert, \xF6ffnet ein Klick auf die Statusleiste den Schnellwechsler statt des vollst\xE4ndigen Sitzungsmanagers.",
         settingsResetSessions: "Sitzungen zur\xFCcksetzen",
@@ -3398,6 +3416,8 @@ var require_i18n = __commonJS({
         settingsAutoSaveOnSwitchDesc: "\u30BB\u30C3\u30B7\u30E7\u30F3\u5207\u66FF\u6642\u306B\u81EA\u52D5\u3067\u4FDD\u5B58\u3057\u307E\u3059\uFF08\u30C7\u30D5\u30A9\u30EB\u30C8: ON\uFF09\u3002OFF\u306B\u3059\u308B\u3068\u3001\u4FDD\u5B58\u30FB\u518D\u8AAD\u307F\u8FBC\u307F\u3092\u624B\u52D5\u3067\u884C\u3048\u308B\u3088\u3046\u306B\u306A\u308A\u307E\u3059\u3002",
         settingsWarnUnsavedSwitch: "\u672A\u4FDD\u5B58\u306E\u307E\u307E\u5207\u308A\u66FF\u3048\u308B\u524D\u306B\u8B66\u544A\u3059\u308B",
         settingsWarnUnsavedSwitchDesc: "\u81EA\u52D5\u4FDD\u5B58\u304C\u7121\u52B9\u3067\u73FE\u5728\u306E\u30BB\u30C3\u30B7\u30E7\u30F3\u306B\u672A\u4FDD\u5B58\u306E\u5909\u66F4\u304C\u3042\u308B\u5834\u5408\u3001\u5207\u308A\u66FF\u3048\u524D\u306B\u8B66\u544A\u3092\u8868\u793A\u3057\u307E\u3059\u3002",
+        settingsHighlightUnsavedSessionChanges: "\u672A\u4FDD\u5B58\u306E\u30BB\u30C3\u30B7\u30E7\u30F3\u5909\u66F4\u3092\u5F37\u8ABF\u8868\u793A",
+        settingsHighlightUnsavedSessionChangesDesc: "\u30BB\u30C3\u30B7\u30E7\u30F3\u5207\u308A\u66FF\u3048\u6642\u306E\u81EA\u52D5\u4FDD\u5B58\u304C\u30AA\u30D5\u306E\u3068\u304D\u3001\u73FE\u5728\u306E\u30EF\u30FC\u30AF\u30B9\u30DA\u30FC\u30B9\u914D\u7F6E\u304C\u4FDD\u5B58\u6E08\u307F\u30BB\u30C3\u30B7\u30E7\u30F3\u3068\u7570\u306A\u308B\u5834\u5408\u306B\u30B9\u30C6\u30FC\u30BF\u30B9\u30D0\u30FC\u3092\u5F37\u8ABF\u8868\u793A\u3057\u307E\u3059\u3002",
         settingsStatusBarQuickSwitcher: "\u30B9\u30C6\u30FC\u30BF\u30B9\u30D0\u30FC\u30AF\u30EA\u30C3\u30AF\u3067\u30AF\u30A4\u30C3\u30AF\u30B9\u30A4\u30C3\u30C1\u30E3\u30FC\u3092\u958B\u304F",
         settingsStatusBarQuickSwitcherDesc: "\u6709\u52B9\u306B\u3059\u308B\u3068\u3001\u30B9\u30C6\u30FC\u30BF\u30B9\u30D0\u30FC\u306E\u30AF\u30EA\u30C3\u30AF\u3067\u30BB\u30C3\u30B7\u30E7\u30F3\u30DE\u30CD\u30FC\u30B8\u30E3\u30FC\u306E\u4EE3\u308F\u308A\u306B\u30AF\u30A4\u30C3\u30AF\u30B9\u30A4\u30C3\u30C1\u30E3\u30FC\u3092\u958B\u304D\u307E\u3059\u3002",
         settingsUseLocalSettings: "Vault\u3054\u3068\u306E\u8A2D\u5B9A\u3092\u4F7F\u3046",
@@ -3771,6 +3791,8 @@ var require_i18n = __commonJS({
         settingsAutoSaveOnSwitchDesc: "\uC138\uC158 \uC804\uD658 \uC2DC \uD604\uC7AC \uC138\uC158\uC744 \uC790\uB3D9\uC73C\uB85C \uC800\uC7A5\uD569\uB2C8\uB2E4 (\uAE30\uBCF8\uAC12: \uCF1C\uC9D0). \uB044\uBA74 \uC800\uC7A5\uACFC \uB2E4\uC2DC \uBD88\uB7EC\uC624\uAE30\uB97C \uC218\uB3D9\uC73C\uB85C \uC81C\uC5B4\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.",
         settingsWarnUnsavedSwitch: "\uC800\uC7A5 \uC5C6\uC774 \uC804\uD658 \uC804 \uACBD\uACE0",
         settingsWarnUnsavedSwitchDesc: "\uC790\uB3D9 \uC800\uC7A5\uC774 \uAEBC\uC838 \uC788\uACE0 \uD604\uC7AC \uC138\uC158\uC5D0 \uC800\uC7A5\uB418\uC9C0 \uC54A\uC740 \uBCC0\uACBD \uC0AC\uD56D\uC774 \uC788\uC73C\uBA74 \uC804\uD658 \uC804\uC5D0 \uACBD\uACE0\uB97C \uD45C\uC2DC\uD569\uB2C8\uB2E4.",
+        settingsHighlightUnsavedSessionChanges: "\uC800\uC7A5\uB418\uC9C0 \uC54A\uC740 \uC138\uC158 \uBCC0\uACBD \uAC15\uC870",
+        settingsHighlightUnsavedSessionChangesDesc: "\uC804\uD658 \uC2DC \uC790\uB3D9 \uC800\uC7A5\uC774 \uAEBC\uC838 \uC788\uC744 \uB54C \uD604\uC7AC \uC791\uC5C5 \uACF5\uAC04 \uB808\uC774\uC544\uC6C3\uC774 \uC800\uC7A5\uB41C \uC138\uC158\uACFC \uB2E4\uB974\uBA74 \uC0C1\uD0DC \uD45C\uC2DC\uC904\uC744 \uAC15\uC870\uD569\uB2C8\uB2E4.",
         settingsStatusBarQuickSwitcher: "\uC0C1\uD0DC \uD45C\uC2DC\uC904 \uD074\uB9AD \uC2DC \uBE60\uB978 \uC804\uD658\uAE30 \uC5F4\uAE30",
         settingsStatusBarQuickSwitcherDesc: "\uD65C\uC131\uD654\uD558\uBA74 \uC0C1\uD0DC \uD45C\uC2DC\uC904\uC744 \uD074\uB9AD\uD560 \uB54C \uC804\uCCB4 \uC138\uC158 \uAD00\uB9AC\uC790 \uB300\uC2E0 \uBE60\uB978 \uC804\uD658\uAE30\uAC00 \uC5F4\uB9BD\uB2C8\uB2E4.",
         settingsResetSessions: "\uC138\uC158 \uCD08\uAE30\uD654",
@@ -4101,6 +4123,8 @@ var require_i18n = __commonJS({
         settingsAutoSaveOnSwitchDesc: "Salva automaticamente la sessione corrente al cambio (predefinito: attivato). Se disattivato, puoi salvare e ricaricare le sessioni manualmente.",
         settingsWarnUnsavedSwitch: "Avvisa prima di cambiare senza salvare",
         settingsWarnUnsavedSwitchDesc: "Se il salvataggio automatico \xE8 disattivato e la sessione corrente ha modifiche non salvate, mostra un avviso prima del cambio.",
+        settingsHighlightUnsavedSessionChanges: "Evidenzia modifiche di sessione non salvate",
+        settingsHighlightUnsavedSessionChangesDesc: "Quando il salvataggio automatico al cambio \xE8 disattivato, evidenzia la barra di stato se il layout attuale dello spazio di lavoro differisce dalla sessione salvata.",
         settingsStatusBarQuickSwitcher: "Cambio rapido cliccando sulla barra di stato",
         settingsStatusBarQuickSwitcherDesc: "Se attivato, cliccando sulla barra di stato si apre il selettore rapido invece del gestore sessioni completo.",
         settingsResetSessions: "Reimposta sessioni",
@@ -4431,6 +4455,8 @@ var require_i18n = __commonJS({
         settingsAutoSaveOnSwitchDesc: "Ge\xE7i\u015F s\u0131ras\u0131nda mevcut oturumu otomatik olarak kaydeder (varsay\u0131lan: a\xE7\u0131k). Kapat\u0131ld\u0131\u011F\u0131nda oturumlar\u0131 elle kaydedip yeniden y\xFCkleyebilirsiniz.",
         settingsWarnUnsavedSwitch: "Kaydetmeden ge\xE7meden \xF6nce uyar",
         settingsWarnUnsavedSwitchDesc: "Otomatik kaydetme kapal\u0131ysa ve mevcut oturumda kaydedilmemi\u015F de\u011Fi\u015Fiklikler varsa ge\xE7i\u015Ften \xF6nce uyar\u0131 g\xF6ster.",
+        settingsHighlightUnsavedSessionChanges: "Kaydedilmemi\u015F oturum de\u011Fi\u015Fikliklerini vurgula",
+        settingsHighlightUnsavedSessionChangesDesc: "Ge\xE7i\u015Fte otomatik kaydetme kapal\u0131yken mevcut \xE7al\u0131\u015Fma alan\u0131 d\xFCzeni kay\u0131tl\u0131 oturumdan farkl\u0131ysa durum \xE7ubu\u011Funu vurgula.",
         settingsStatusBarQuickSwitcher: "Durum \xE7ubu\u011Funa t\u0131kland\u0131\u011F\u0131nda h\u0131zl\u0131 ge\xE7i\u015F",
         settingsStatusBarQuickSwitcherDesc: "Etkinle\u015Ftirildi\u011Finde, durum \xE7ubu\u011Funa t\u0131klamak tam oturum y\xF6neticisi yerine h\u0131zl\u0131 ge\xE7i\u015F panelini a\xE7ar.",
         settingsResetSessions: "Oturumlar\u0131 s\u0131f\u0131rla",
@@ -4761,6 +4787,8 @@ var require_i18n = __commonJS({
         settingsAutoSaveOnSwitchDesc: "Menyimpan sesi saat ini secara otomatis saat berpindah (default: aktif). Jika dimatikan, Anda dapat menyimpan dan memuat ulang sesi secara manual.",
         settingsWarnUnsavedSwitch: "Peringatkan sebelum berpindah tanpa menyimpan",
         settingsWarnUnsavedSwitchDesc: "Jika simpan otomatis dimatikan dan sesi saat ini punya perubahan yang belum disimpan, tampilkan peringatan sebelum berpindah.",
+        settingsHighlightUnsavedSessionChanges: "Sorot perubahan sesi yang belum disimpan",
+        settingsHighlightUnsavedSessionChangesDesc: "Saat simpan otomatis saat berpindah dimatikan, sorot bilah status jika tata letak ruang kerja saat ini berbeda dari sesi yang disimpan.",
         settingsStatusBarQuickSwitcher: "Pengalih cepat saat klik bilah status",
         settingsStatusBarQuickSwitcherDesc: "Jika diaktifkan, mengklik bilah status akan membuka pengalih cepat alih-alih pengelola sesi lengkap.",
         settingsResetSessions: "Setel ulang sesi",
@@ -5157,6 +5185,8 @@ var require_i18n = __commonJS({
         settingsAutoSaveOnSwitchDesc: "T\u1EF1 \u0111\u1ED9ng l\u01B0u phi\xEAn hi\u1EC7n t\u1EA1i khi chuy\u1EC3n phi\xEAn (m\u1EB7c \u0111\u1ECBnh: B\u1EACT). Khi T\u1EAET, b\u1EA1n c\xF3 th\u1EC3 l\u01B0u v\xE0 t\u1EA3i l\u1EA1i phi\xEAn th\u1EE7 c\xF4ng.",
         settingsWarnUnsavedSwitch: "C\u1EA3nh b\xE1o tr\u01B0\u1EDBc khi chuy\u1EC3n m\xE0 kh\xF4ng l\u01B0u",
         settingsWarnUnsavedSwitchDesc: "Khi t\u1EF1 \u0111\u1ED9ng l\u01B0u b\u1ECB t\u1EAFt v\xE0 phi\xEAn hi\u1EC7n t\u1EA1i c\xF3 thay \u0111\u1ED5i ch\u01B0a l\u01B0u, hi\u1EC3n th\u1ECB c\u1EA3nh b\xE1o tr\u01B0\u1EDBc khi chuy\u1EC3n.",
+        settingsHighlightUnsavedSessionChanges: "T\xF4 s\xE1ng thay \u0111\u1ED5i phi\xEAn ch\u01B0a l\u01B0u",
+        settingsHighlightUnsavedSessionChangesDesc: "Khi t\u1EF1 \u0111\u1ED9ng l\u01B0u l\xFAc chuy\u1EC3n phi\xEAn b\u1ECB t\u1EAFt, t\xF4 s\xE1ng thanh tr\u1EA1ng th\xE1i n\u1EBFu b\u1ED1 c\u1EE5c kh\xF4ng gian l\xE0m vi\u1EC7c hi\u1EC7n t\u1EA1i kh\xE1c v\u1EDBi phi\xEAn \u0111\xE3 l\u01B0u.",
         settingsStatusBarQuickSwitcher: "M\u1EDF tr\xECnh chuy\u1EC3n nhanh khi nh\u1EA5p thanh tr\u1EA1ng th\xE1i",
         settingsStatusBarQuickSwitcherDesc: "Khi b\u1EADt, nh\u1EA5p v\xE0o thanh tr\u1EA1ng th\xE1i s\u1EBD m\u1EDF l\u1EDBp ph\u1EE7 tr\xECnh chuy\u1EC3n nhanh thay v\xEC tr\xECnh qu\u1EA3n l\xFD phi\xEAn \u0111\u1EA7y \u0111\u1EE7.",
         settingsUseLocalSettings: "D\xF9ng c\xE0i \u0111\u1EB7t ri\xEAng cho vault",
@@ -5591,6 +5621,8 @@ var require_i18n = __commonJS({
         settingsAutoSaveOnSwitchDesc: "\u0E1A\u0E31\u0E19\u0E17\u0E36\u0E01\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E1B\u0E31\u0E08\u0E08\u0E38\u0E1A\u0E31\u0E19\u0E42\u0E14\u0E22\u0E2D\u0E31\u0E15\u0E42\u0E19\u0E21\u0E31\u0E15\u0E34\u0E40\u0E21\u0E37\u0E48\u0E2D\u0E2A\u0E25\u0E31\u0E1A\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19 (\u0E04\u0E48\u0E32\u0E40\u0E23\u0E34\u0E48\u0E21\u0E15\u0E49\u0E19: \u0E40\u0E1B\u0E34\u0E14) \u0E40\u0E21\u0E37\u0E48\u0E2D\u0E1B\u0E34\u0E14 \u0E04\u0E38\u0E13\u0E2A\u0E32\u0E21\u0E32\u0E23\u0E16\u0E1A\u0E31\u0E19\u0E17\u0E36\u0E01\u0E41\u0E25\u0E30\u0E42\u0E2B\u0E25\u0E14\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E0B\u0E49\u0E33\u0E14\u0E49\u0E27\u0E22\u0E15\u0E19\u0E40\u0E2D\u0E07",
         settingsWarnUnsavedSwitch: "\u0E40\u0E15\u0E37\u0E2D\u0E19\u0E01\u0E48\u0E2D\u0E19\u0E2A\u0E25\u0E31\u0E1A\u0E42\u0E14\u0E22\u0E44\u0E21\u0E48\u0E1A\u0E31\u0E19\u0E17\u0E36\u0E01",
         settingsWarnUnsavedSwitchDesc: "\u0E40\u0E21\u0E37\u0E48\u0E2D\u0E1B\u0E34\u0E14\u0E01\u0E32\u0E23\u0E1A\u0E31\u0E19\u0E17\u0E36\u0E01\u0E2D\u0E31\u0E15\u0E42\u0E19\u0E21\u0E31\u0E15\u0E34\u0E41\u0E25\u0E30\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E1B\u0E31\u0E08\u0E08\u0E38\u0E1A\u0E31\u0E19\u0E21\u0E35\u0E01\u0E32\u0E23\u0E40\u0E1B\u0E25\u0E35\u0E48\u0E22\u0E19\u0E41\u0E1B\u0E25\u0E07\u0E17\u0E35\u0E48\u0E22\u0E31\u0E07\u0E44\u0E21\u0E48\u0E44\u0E14\u0E49\u0E1A\u0E31\u0E19\u0E17\u0E36\u0E01 \u0E43\u0E2B\u0E49\u0E41\u0E2A\u0E14\u0E07\u0E04\u0E33\u0E40\u0E15\u0E37\u0E2D\u0E19\u0E01\u0E48\u0E2D\u0E19\u0E2A\u0E25\u0E31\u0E1A",
+        settingsHighlightUnsavedSessionChanges: "\u0E40\u0E19\u0E49\u0E19\u0E01\u0E32\u0E23\u0E40\u0E1B\u0E25\u0E35\u0E48\u0E22\u0E19\u0E41\u0E1B\u0E25\u0E07\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E17\u0E35\u0E48\u0E22\u0E31\u0E07\u0E44\u0E21\u0E48\u0E44\u0E14\u0E49\u0E1A\u0E31\u0E19\u0E17\u0E36\u0E01",
+        settingsHighlightUnsavedSessionChangesDesc: "\u0E40\u0E21\u0E37\u0E48\u0E2D\u0E1B\u0E34\u0E14\u0E01\u0E32\u0E23\u0E1A\u0E31\u0E19\u0E17\u0E36\u0E01\u0E2D\u0E31\u0E15\u0E42\u0E19\u0E21\u0E31\u0E15\u0E34\u0E02\u0E13\u0E30\u0E2A\u0E25\u0E31\u0E1A\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19 \u0E43\u0E2B\u0E49\u0E40\u0E19\u0E49\u0E19\u0E41\u0E16\u0E1A\u0E2A\u0E16\u0E32\u0E19\u0E30\u0E2B\u0E32\u0E01\u0E40\u0E04\u0E49\u0E32\u0E42\u0E04\u0E23\u0E07\u0E1E\u0E37\u0E49\u0E19\u0E17\u0E35\u0E48\u0E17\u0E33\u0E07\u0E32\u0E19\u0E1B\u0E31\u0E08\u0E08\u0E38\u0E1A\u0E31\u0E19\u0E15\u0E48\u0E32\u0E07\u0E08\u0E32\u0E01\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E17\u0E35\u0E48\u0E1A\u0E31\u0E19\u0E17\u0E36\u0E01\u0E44\u0E27\u0E49",
         settingsStatusBarQuickSwitcher: "\u0E40\u0E1B\u0E34\u0E14\u0E15\u0E31\u0E27\u0E2A\u0E25\u0E31\u0E1A\u0E14\u0E48\u0E27\u0E19\u0E40\u0E21\u0E37\u0E48\u0E2D\u0E04\u0E25\u0E34\u0E01\u0E41\u0E16\u0E1A\u0E2A\u0E16\u0E32\u0E19\u0E30",
         settingsStatusBarQuickSwitcherDesc: "\u0E40\u0E21\u0E37\u0E48\u0E2D\u0E40\u0E1B\u0E34\u0E14\u0E43\u0E0A\u0E49\u0E07\u0E32\u0E19 \u0E01\u0E32\u0E23\u0E04\u0E25\u0E34\u0E01\u0E41\u0E16\u0E1A\u0E2A\u0E16\u0E32\u0E19\u0E30\u0E08\u0E30\u0E40\u0E1B\u0E34\u0E14\u0E42\u0E2D\u0E40\u0E27\u0E2D\u0E23\u0E4C\u0E40\u0E25\u0E22\u0E4C\u0E15\u0E31\u0E27\u0E2A\u0E25\u0E31\u0E1A\u0E14\u0E48\u0E27\u0E19\u0E41\u0E17\u0E19\u0E15\u0E31\u0E27\u0E08\u0E31\u0E14\u0E01\u0E32\u0E23\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E40\u0E15\u0E47\u0E21",
         settingsUseLocalSettings: "\u0E43\u0E0A\u0E49\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E40\u0E09\u0E1E\u0E32\u0E30 vault",
@@ -6025,6 +6057,8 @@ var require_i18n = __commonJS({
         settingsAutoSaveOnSwitchDesc: "\u0938\u0924\u094D\u0930 \u0938\u094D\u0935\u093F\u091A \u0915\u0930\u0924\u0947 \u0938\u092E\u092F \u0935\u0930\u094D\u0924\u092E\u093E\u0928 \u0938\u0924\u094D\u0930 \u0905\u092A\u0928\u0947 \u0906\u092A \u0938\u0939\u0947\u091C\u0924\u093E \u0939\u0948 (\u0921\u093F\u092B\u093C\u0949\u0932\u094D\u091F: \u091A\u093E\u0932\u0942)\u0964 \u092C\u0902\u0926 \u0939\u094B\u0928\u0947 \u092A\u0930 \u0906\u092A \u0938\u0924\u094D\u0930\u094B\u0902 \u0915\u094B \u092E\u0948\u0928\u094D\u092F\u0941\u0905\u0932 \u0930\u0942\u092A \u0938\u0947 \u0938\u0939\u0947\u091C \u0914\u0930 \u092B\u093F\u0930 \u0938\u0947 \u0932\u094B\u0921 \u0915\u0930 \u0938\u0915\u0924\u0947 \u0939\u0948\u0902\u0964",
         settingsWarnUnsavedSwitch: "\u092C\u093F\u0928\u093E \u0938\u0939\u0947\u091C\u0947 \u0938\u094D\u0935\u093F\u091A \u0915\u0930\u0928\u0947 \u0938\u0947 \u092A\u0939\u0932\u0947 \u091A\u0947\u0924\u093E\u0935\u0928\u0940 \u0926\u0947\u0902",
         settingsWarnUnsavedSwitchDesc: "\u091C\u092C \u0911\u091F\u094B-\u0938\u0947\u0935 \u092C\u0902\u0926 \u0939\u094B \u0914\u0930 \u0935\u0930\u094D\u0924\u092E\u093E\u0928 \u0938\u0924\u094D\u0930 \u092E\u0947\u0902 \u0905\u0938\u0939\u0947\u091C\u0947 \u092C\u0926\u0932\u093E\u0935 \u0939\u094B\u0902, \u0924\u094B \u0938\u094D\u0935\u093F\u091A \u0915\u0930\u0928\u0947 \u0938\u0947 \u092A\u0939\u0932\u0947 \u091A\u0947\u0924\u093E\u0935\u0928\u0940 \u0926\u093F\u0916\u093E\u090F\u0901\u0964",
+        settingsHighlightUnsavedSessionChanges: "\u0905\u0938\u0939\u0947\u091C\u0947 \u0938\u0924\u094D\u0930 \u092C\u0926\u0932\u093E\u0935\u094B\u0902 \u0915\u094B \u0939\u093E\u0907\u0932\u093E\u0907\u091F \u0915\u0930\u0947\u0902",
+        settingsHighlightUnsavedSessionChangesDesc: "\u091C\u092C \u0938\u094D\u0935\u093F\u091A \u092A\u0930 \u0911\u091F\u094B-\u0938\u0947\u0935 \u092C\u0902\u0926 \u0939\u094B, \u0924\u094B \u0935\u0930\u094D\u0924\u092E\u093E\u0928 \u0915\u093E\u0930\u094D\u092F\u0915\u094D\u0937\u0947\u0924\u094D\u0930 \u0932\u0947\u0906\u0909\u091F \u0938\u0939\u0947\u091C\u0947 \u0917\u090F \u0938\u0924\u094D\u0930 \u0938\u0947 \u0905\u0932\u0917 \u0939\u094B\u0928\u0947 \u092A\u0930 \u0938\u094D\u091F\u0947\u091F\u0938 \u092C\u093E\u0930 \u0939\u093E\u0907\u0932\u093E\u0907\u091F \u0915\u0930\u0947\u0902\u0964",
         settingsStatusBarQuickSwitcher: "\u0938\u094D\u091F\u0947\u091F\u0938 \u092C\u093E\u0930 \u0915\u094D\u0932\u093F\u0915 \u092A\u0930 \u0915\u094D\u0935\u093F\u0915 \u0938\u094D\u0935\u093F\u091A\u0930",
         settingsStatusBarQuickSwitcherDesc: "\u091A\u093E\u0932\u0942 \u0939\u094B\u0928\u0947 \u092A\u0930, \u0938\u094D\u091F\u0947\u091F\u0938 \u092C\u093E\u0930 \u0915\u094D\u0932\u093F\u0915 \u0915\u0930\u0928\u0947 \u0938\u0947 \u092A\u0942\u0930\u094D\u0923 \u0938\u0924\u094D\u0930 \u092A\u094D\u0930\u092C\u0902\u0927\u0915 \u0915\u0947 \u092C\u091C\u093E\u092F \u0915\u094D\u0935\u093F\u0915 \u0938\u094D\u0935\u093F\u091A\u0930 \u0913\u0935\u0930\u0932\u0947 \u0916\u0941\u0932\u0924\u093E \u0939\u0948\u0964",
         settingsUseLocalSettings: "vault-\u0935\u093F\u0936\u093F\u0937\u094D\u091F \u0938\u0947\u091F\u093F\u0902\u0917 \u0907\u0938\u094D\u0924\u0947\u092E\u093E\u0932 \u0915\u0930\u0947\u0902",
@@ -6459,6 +6493,8 @@ var require_i18n = __commonJS({
         settingsAutoSaveOnSwitchDesc: "\u09B8\u09C7\u09B6\u09A8 \u09B8\u09C1\u0987\u099A \u0995\u09B0\u09BE\u09B0 \u09B8\u09AE\u09AF\u09BC \u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u09B8\u09C7\u09B6\u09A8 \u09B8\u09CD\u09AC\u09AF\u09BC\u0982\u0995\u09CD\u09B0\u09BF\u09AF\u09BC\u09AD\u09BE\u09AC\u09C7 \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3 \u0995\u09B0\u09C7 (\u09A1\u09BF\u09AB\u09B2\u09CD\u099F: \u099A\u09BE\u09B2\u09C1)\u0964 \u09AC\u09A8\u09CD\u09A7 \u09A5\u09BE\u0995\u09B2\u09C7 \u0986\u09AA\u09A8\u09BF \u09B8\u09C7\u09B6\u09A8 \u09AE\u09CD\u09AF\u09BE\u09A8\u09C1\u09AF\u09BC\u09BE\u09B2\u09BF \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3 \u0993 \u09AA\u09C1\u09A8\u09B0\u09BE\u09AF\u09BC \u09B2\u09CB\u09A1 \u0995\u09B0\u09A4\u09C7 \u09AA\u09BE\u09B0\u09AC\u09C7\u09A8\u0964",
         settingsWarnUnsavedSwitch: "\u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3 \u099B\u09BE\u09A1\u09BC\u09BE \u09B8\u09C1\u0987\u099A \u0995\u09B0\u09BE\u09B0 \u0986\u0997\u09C7 \u09B8\u09A4\u09B0\u09CD\u0995 \u0995\u09B0\u09C1\u09A8",
         settingsWarnUnsavedSwitchDesc: "\u0985\u099F\u09CB-\u09B8\u09C7\u09AD \u09AC\u09A8\u09CD\u09A7 \u09A5\u09BE\u0995\u09B2\u09C7 \u098F\u09AC\u0982 \u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u09B8\u09C7\u09B6\u09A8\u09C7 \u0985\u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09BF\u09A4 \u09AA\u09B0\u09BF\u09AC\u09B0\u09CD\u09A4\u09A8 \u09A5\u09BE\u0995\u09B2\u09C7 \u09B8\u09C1\u0987\u099A \u0995\u09B0\u09BE\u09B0 \u0986\u0997\u09C7 \u09B8\u09A4\u09B0\u09CD\u0995\u09A4\u09BE \u09A6\u09C7\u0996\u09BE\u09A8\u0964",
+        settingsHighlightUnsavedSessionChanges: "\u0985\u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09BF\u09A4 \u09B8\u09C7\u09B6\u09A8 \u09AA\u09B0\u09BF\u09AC\u09B0\u09CD\u09A4\u09A8 \u09B9\u09BE\u0987\u09B2\u09BE\u0987\u099F \u0995\u09B0\u09C1\u09A8",
+        settingsHighlightUnsavedSessionChangesDesc: "\u09B8\u09C1\u0987\u099A\u09C7\u09B0 \u09B8\u09AE\u09AF\u09BC \u0985\u099F\u09CB-\u09B8\u09C7\u09AD \u09AC\u09A8\u09CD\u09A7 \u09A5\u09BE\u0995\u09B2\u09C7, \u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u0993\u09AF\u09BC\u09BE\u09B0\u09CD\u0995\u09B8\u09CD\u09AA\u09C7\u09B8 \u09B2\u09C7\u0986\u0989\u099F \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09BF\u09A4 \u09B8\u09C7\u09B6\u09A8 \u09A5\u09C7\u0995\u09C7 \u0986\u09B2\u09BE\u09A6\u09BE \u09B9\u09B2\u09C7 \u09B8\u09CD\u099F\u09C7\u099F\u09BE\u09B8 \u09AC\u09BE\u09B0 \u09B9\u09BE\u0987\u09B2\u09BE\u0987\u099F \u0995\u09B0\u09C1\u09A8\u0964",
         settingsStatusBarQuickSwitcher: "\u09B8\u09CD\u099F\u09C7\u099F\u09BE\u09B8 \u09AC\u09BE\u09B0 \u0995\u09CD\u09B2\u09BF\u0995\u09C7 \u0995\u09C1\u0987\u0995 \u09B8\u09C1\u0987\u099A\u09BE\u09B0",
         settingsStatusBarQuickSwitcherDesc: "\u099A\u09BE\u09B2\u09C1 \u09A5\u09BE\u0995\u09B2\u09C7, \u09B8\u09CD\u099F\u09C7\u099F\u09BE\u09B8 \u09AC\u09BE\u09B0\u09C7 \u0995\u09CD\u09B2\u09BF\u0995 \u0995\u09B0\u09B2\u09C7 \u09AA\u09C2\u09B0\u09CD\u09A3 \u09B8\u09C7\u09B6\u09A8 \u09AE\u09CD\u09AF\u09BE\u09A8\u09C7\u099C\u09BE\u09B0\u09C7\u09B0 \u09AC\u09A6\u09B2\u09C7 \u0995\u09C1\u0987\u0995 \u09B8\u09C1\u0987\u099A\u09BE\u09B0 \u0993\u09AD\u09BE\u09B0\u09B2\u09C7 \u0996\u09C1\u09B2\u09AC\u09C7\u0964",
         settingsUseLocalSettings: "vault-\u09A8\u09BF\u09B0\u09CD\u09A6\u09BF\u09B7\u09CD\u099F \u09B8\u09C7\u099F\u09BF\u0982 \u09AC\u09CD\u09AF\u09AC\u09B9\u09BE\u09B0 \u0995\u09B0\u09C1\u09A8",
@@ -6893,6 +6929,8 @@ var require_i18n = __commonJS({
         settingsAutoSaveOnSwitchDesc: "\u0647\u0646\u06AF\u0627\u0645 \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u0646\u0634\u0633\u062A\u060C \u0646\u0634\u0633\u062A \u0641\u0639\u0644\u06CC \u0631\u0627 \u062E\u0648\u062F\u06A9\u0627\u0631 \u0630\u062E\u06CC\u0631\u0647 \u0645\u06CC\u200C\u06A9\u0646\u062F (\u067E\u06CC\u0634\u200C\u0641\u0631\u0636: \u0631\u0648\u0634\u0646). \u0648\u0642\u062A\u06CC \u062E\u0627\u0645\u0648\u0634 \u0628\u0627\u0634\u062F\u060C \u0645\u06CC\u200C\u062A\u0648\u0627\u0646\u06CC\u062F \u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u0631\u0627 \u062F\u0633\u062A\u06CC \u0630\u062E\u06CC\u0631\u0647 \u0648 \u062F\u0648\u0628\u0627\u0631\u0647 \u0628\u0627\u0631\u06AF\u0630\u0627\u0631\u06CC \u06A9\u0646\u06CC\u062F.",
         settingsWarnUnsavedSwitch: "\u0647\u0634\u062F\u0627\u0631 \u067E\u06CC\u0634 \u0627\u0632 \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u0628\u062F\u0648\u0646 \u0630\u062E\u06CC\u0631\u0647",
         settingsWarnUnsavedSwitchDesc: "\u0648\u0642\u062A\u06CC \u0630\u062E\u06CC\u0631\u0647 \u062E\u0648\u062F\u06A9\u0627\u0631 \u062E\u0627\u0645\u0648\u0634 \u0627\u0633\u062A \u0648 \u0646\u0634\u0633\u062A \u0641\u0639\u0644\u06CC \u062A\u063A\u06CC\u06CC\u0631\u0627\u062A \u0630\u062E\u06CC\u0631\u0647\u200C\u0646\u0634\u062F\u0647 \u062F\u0627\u0631\u062F\u060C \u067E\u06CC\u0634 \u0627\u0632 \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u0647\u0634\u062F\u0627\u0631 \u0646\u0634\u0627\u0646 \u062F\u0647\u06CC\u062F.",
+        settingsHighlightUnsavedSessionChanges: "\u0628\u0631\u062C\u0633\u062A\u0647\u200C\u0633\u0627\u0632\u06CC \u062A\u063A\u06CC\u06CC\u0631\u0627\u062A \u0630\u062E\u06CC\u0631\u0647\u200C\u0646\u0634\u062F\u0647 \u0646\u0634\u0633\u062A",
+        settingsHighlightUnsavedSessionChangesDesc: "\u0648\u0642\u062A\u06CC \u0630\u062E\u06CC\u0631\u0647 \u062E\u0648\u062F\u06A9\u0627\u0631 \u0647\u0646\u06AF\u0627\u0645 \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u062E\u0627\u0645\u0648\u0634 \u0627\u0633\u062A\u060C \u0627\u06AF\u0631 \u0686\u06CC\u062F\u0645\u0627\u0646 \u0641\u0639\u0644\u06CC \u0641\u0636\u0627\u06CC \u06A9\u0627\u0631\u06CC \u0628\u0627 \u0646\u0634\u0633\u062A \u0630\u062E\u06CC\u0631\u0647\u200C\u0634\u062F\u0647 \u0641\u0631\u0642 \u062F\u0627\u0634\u062A\u0647 \u0628\u0627\u0634\u062F\u060C \u0646\u0648\u0627\u0631 \u0648\u0636\u0639\u06CC\u062A \u0631\u0627 \u0628\u0631\u062C\u0633\u062A\u0647 \u06A9\u0646\u06CC\u062F.",
         settingsStatusBarQuickSwitcher: "\u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06A9\u0646\u0646\u062F\u0647 \u0633\u0631\u06CC\u0639 \u0628\u0627 \u06A9\u0644\u06CC\u06A9 \u0646\u0648\u0627\u0631 \u0648\u0636\u0639\u06CC\u062A",
         settingsStatusBarQuickSwitcherDesc: "\u0627\u06AF\u0631 \u0641\u0639\u0627\u0644 \u0628\u0627\u0634\u062F\u060C \u06A9\u0644\u06CC\u06A9 \u0631\u0648\u06CC \u0646\u0648\u0627\u0631 \u0648\u0636\u0639\u06CC\u062A \u0628\u0647\u200C\u062C\u0627\u06CC \u0645\u062F\u06CC\u0631 \u0646\u0634\u0633\u062A \u06A9\u0627\u0645\u0644\u060C \u067E\u0648\u0634\u0634 \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06A9\u0646\u0646\u062F\u0647 \u0633\u0631\u06CC\u0639 \u0631\u0627 \u0628\u0627\u0632 \u0645\u06CC\u200C\u06A9\u0646\u062F.",
         settingsUseLocalSettings: "\u0627\u0633\u062A\u0641\u0627\u062F\u0647 \u0627\u0632 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u062E\u0635\u0648\u0635 vault",
@@ -7327,6 +7365,8 @@ var require_i18n = __commonJS({
         settingsAutoSaveOnSwitchDesc: "Menyimpan sesi semasa secara automatik apabila bertukar sesi (lalai: HIDUP). Apabila DIMATIKAN, anda boleh menyimpan dan memuat semula sesi secara manual.",
         settingsWarnUnsavedSwitch: "Beri amaran sebelum bertukar tanpa menyimpan",
         settingsWarnUnsavedSwitchDesc: "Apabila auto-simpan dimatikan dan sesi semasa mempunyai perubahan yang belum disimpan, tunjukkan amaran sebelum bertukar.",
+        settingsHighlightUnsavedSessionChanges: "Serlahkan perubahan sesi yang belum disimpan",
+        settingsHighlightUnsavedSessionChangesDesc: "Apabila auto-simpan semasa bertukar dimatikan, serlahkan bar status jika susun atur ruang kerja semasa berbeza daripada sesi yang disimpan.",
         settingsStatusBarQuickSwitcher: "Penukar pantas pada klik bar status",
         settingsStatusBarQuickSwitcherDesc: "Apabila dihidupkan, mengklik bar status membuka overlay penukar pantas dan bukannya pengurus sesi penuh.",
         settingsUseLocalSettings: "Guna tetapan setempat vault",
@@ -7761,6 +7801,8 @@ var require_i18n = __commonJS({
         settingsAutoSaveOnSwitchDesc: "Automatycznie zapisuje bie\u017C\u0105c\u0105 sesj\u0119 przy prze\u0142\u0105czaniu (domy\u015Blnie: W\u0141.). Po wy\u0142\u0105czeniu mo\u017Cesz zapisywa\u0107 i ponownie wczytywa\u0107 sesje r\u0119cznie.",
         settingsWarnUnsavedSwitch: "Ostrzegaj przed prze\u0142\u0105czeniem bez zapisu",
         settingsWarnUnsavedSwitchDesc: "Gdy automatyczny zapis jest wy\u0142\u0105czony, a bie\u017C\u0105ca sesja ma niezapisane zmiany, poka\u017C ostrze\u017Cenie przed prze\u0142\u0105czeniem.",
+        settingsHighlightUnsavedSessionChanges: "Wyr\xF3\u017Cniaj niezapisane zmiany sesji",
+        settingsHighlightUnsavedSessionChangesDesc: "Gdy automatyczny zapis przy prze\u0142\u0105czaniu jest wy\u0142\u0105czony, wyr\xF3\u017Cnia pasek stanu, je\u015Bli bie\u017C\u0105cy uk\u0142ad obszaru roboczego r\xF3\u017Cni si\u0119 od zapisanej sesji.",
         settingsStatusBarQuickSwitcher: "Szybki prze\u0142\u0105cznik po klikni\u0119ciu paska stanu",
         settingsStatusBarQuickSwitcherDesc: "Po w\u0142\u0105czeniu klikni\u0119cie paska stanu otwiera nak\u0142adk\u0119 szybkiego prze\u0142\u0105cznika zamiast pe\u0142nego mened\u017Cera sesji.",
         settingsUseLocalSettings: "U\u017Cywaj ustawie\u0144 lokalnych vaultu",
@@ -11906,6 +11948,7 @@ var require_default_data = __commonJS({
       confirmQuickActions: false,
       autoSaveOnSwitch: true,
       warnOnUnsavedSwitch: true,
+      highlightUnsavedSessionChanges: true,
       statusBarQuickSwitcher: true,
       groupFeatureEnabled: true,
       showFilterInput: false,
@@ -11922,7 +11965,7 @@ var require_default_data = __commonJS({
       versionHistorySnapshotInterval: 5,
       versionHistoryCtrlRmbRestore: true,
       versionHistoryConfirmRestore: true,
-      statusBarModScrollSwitch: true,
+      statusBarModScrollSwitch: false,
       statusBarScrollPreset: "trackpad",
       statusBarScrollModifierMode: "none",
       statusBarScrollThreshold: 30,
@@ -12134,7 +12177,7 @@ var require_settings = __commonJS({
           }
           var contentEl = containerEl.createDiv({ cls: "wpp-settings-tab-content" });
           function addSection(title) {
-            contentEl.createEl("h3", { text: title, cls: "wpp-settings-section-title" });
+            contentEl.createEl("h3", { text: resolveSettingText(title), cls: "wpp-settings-section-title" });
           }
           if (self.activeTab === "general") {
             new obsidian2.Setting(contentEl).setName(L.settingsLanguage).setDesc(L.settingsLanguageDesc).addDropdown(function(dropdown) {
@@ -12217,6 +12260,16 @@ var require_settings = __commonJS({
                 value: self.plugin.isWarnOnUnsavedSwitchEnabled(),
                 onChange: function(value) {
                   self.plugin.data.warnOnUnsavedSwitch = value;
+                  self.plugin.persistData();
+                }
+              });
+              addToggleSetting(contentEl, {
+                name: L.settingsHighlightUnsavedSessionChanges,
+                desc: L.settingsHighlightUnsavedSessionChangesDesc,
+                value: self.plugin.isUnsavedStatusBarHighlightEnabled(),
+                onChange: function(value) {
+                  self.plugin.data.highlightUnsavedSessionChanges = value;
+                  self.plugin.updateStatusBar();
                   self.plugin.persistData();
                 }
               });
@@ -14453,6 +14506,7 @@ var require_persistence = __commonJS({
       "confirmDeleteByHotkey",
       "autoSaveOnSwitch",
       "warnOnUnsavedSwitch",
+      "highlightUnsavedSessionChanges",
       "statusBarQuickSwitcher",
       "statusBarModScrollSwitch",
       "groupFeatureEnabled",
@@ -15633,10 +15687,38 @@ var require_sessions = __commonJS({
       };
       WorkspacePlusPlus2.prototype.layoutsEqualStructural = function(a, b) {
         try {
-          var normalize = function(layout) {
-            return JSON.stringify(layout || null).replace(/"(?:left|top|scroll)":-?\d+(?:\.\d+)?/g, '"_":0');
+          var volatileKeys = {
+            eState: true,
+            lastOpenFiles: true,
+            left: true,
+            scroll: true,
+            top: true
           };
-          return normalize(a) === normalize(b);
+          var looksLikeWorkspaceItem = function(value) {
+            return value && typeof value === "object" && typeof value.id === "string" && typeof value.type === "string" && (Array.isArray(value.children) || value.state !== void 0 || value.currentTab !== void 0 || value.direction !== void 0 || value.collapsed !== void 0);
+          };
+          var normalizeNode = function(value, depth) {
+            if (Array.isArray(value)) {
+              return value.map(function(item) {
+                return normalizeNode(item, depth + 1);
+              });
+            }
+            if (value && typeof value === "object") {
+              var normalized = {};
+              var isWorkspaceItem = looksLikeWorkspaceItem(value);
+              var keys = Object.keys(value).sort();
+              for (var i = 0; i < keys.length; i++) {
+                var key = keys[i];
+                if (volatileKeys[key]) continue;
+                if (key === "id" && isWorkspaceItem) continue;
+                if (key === "active" && depth === 0 && typeof value[key] === "string") continue;
+                normalized[key] = normalizeNode(value[key], depth + 1);
+              }
+              return normalized;
+            }
+            return value;
+          };
+          return JSON.stringify(normalizeNode(a || null, 0)) === JSON.stringify(normalizeNode(b || null, 0));
         } catch (e) {
           return this.layoutsEqual(a, b);
         }
@@ -15646,6 +15728,9 @@ var require_sessions = __commonJS({
       };
       WorkspacePlusPlus2.prototype.isWarnOnUnsavedSwitchEnabled = function() {
         return this.data.warnOnUnsavedSwitch !== false;
+      };
+      WorkspacePlusPlus2.prototype.isUnsavedStatusBarHighlightEnabled = function() {
+        return this.data.highlightUnsavedSessionChanges !== false;
       };
       WorkspacePlusPlus2.prototype.isGroupFeatureEnabled = function() {
         return this.data.groupFeatureEnabled !== false;
@@ -15682,7 +15767,10 @@ var require_sessions = __commonJS({
       WorkspacePlusPlus2.prototype.isActiveSessionDirty = function() {
         var session = this.getActiveSession();
         if (!session) return false;
-        return !this.layoutsEqual(session.layout, this.getCurrentWorkspaceLayout());
+        return !this.layoutsEqualStructural(session.layout, this.getCurrentWorkspaceLayout());
+      };
+      WorkspacePlusPlus2.prototype.shouldShowUnsavedStatusBarHighlight = function() {
+        return this.isUnsavedStatusBarHighlightEnabled() && !this.isAutoSaveOnSwitchEnabled() && this.isActiveSessionDirty();
       };
       WorkspacePlusPlus2.prototype.setAutoSaveOnSwitch = function(enabled, options) {
         var L = i18n2.L;
@@ -15694,6 +15782,7 @@ var require_sessions = __commonJS({
         } else {
           this.stopHistorySnapshotTimer();
         }
+        this.updateStatusBar();
         return this.persistData().then(function() {
           if (options.notify) {
             new obsidian2.Notice(isOn ? L.autoSaveEnabled : L.autoSaveDisabled);
@@ -15830,6 +15919,12 @@ var require_sessions = __commonJS({
       WorkspacePlusPlus2.prototype.updateStatusBar = function() {
         var L = i18n2.L;
         var session = this.getActiveSession();
+        if (!this.statusBarEl) return;
+        var showUnsavedHighlight = this.shouldShowUnsavedStatusBarHighlight();
+        this.statusBarEl.removeClass("wpp-status-bar-unsaved");
+        if (showUnsavedHighlight) {
+          this.statusBarEl.addClass("wpp-status-bar-unsaved");
+        }
         this.statusBarEl.empty();
         var icon = this.statusBarEl.createSpan({ cls: "wpp-status-icon" });
         obsidian2.setIcon(icon, "panels-top-left");
@@ -17072,6 +17167,13 @@ var WorkspacePlusPlus = (
         self.addSettingTab(self.settingTab);
         self.registerEvent(self.app.workspace.on("layout-change", function() {
           self.noteStartupLayoutChange();
+          self.updateStatusBar();
+        }));
+        self.registerEvent(self.app.workspace.on("active-leaf-change", function() {
+          if (self.isSwitchingSession) return;
+          setTimeout(function() {
+            self.updateStatusBar();
+          }, 0);
         }));
         self.app.workspace.onLayoutReady(function() {
           self.startStartupSettleWindow();

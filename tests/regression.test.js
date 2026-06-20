@@ -140,6 +140,128 @@ test('overwriteSessionWithCurrentLayout saves current layout to selected session
     assert.equal(plugin._changeLayoutCalls.length, 0);
 });
 
+test('unsaved status bar highlight is shown only in manual save mode with layout changes', function () {
+    const plugin = createPlugin({
+        activeSessionId: 'a',
+        sessionOrder: ['a'],
+        sessions: {
+            a: { id: 'a', name: 'A', layout: { layout: 'saved' }, modified: 1 },
+        },
+        autoSaveOnSwitch: false,
+    });
+
+    plugin.getCurrentWorkspaceLayout = function () {
+        return { layout: 'changed' };
+    };
+
+    assert.equal(plugin.shouldShowUnsavedStatusBarHighlight(), true);
+
+    plugin.data.highlightUnsavedSessionChanges = false;
+    assert.equal(plugin.shouldShowUnsavedStatusBarHighlight(), false);
+
+    plugin.data.highlightUnsavedSessionChanges = true;
+    plugin.data.autoSaveOnSwitch = true;
+    assert.equal(plugin.shouldShowUnsavedStatusBarHighlight(), false);
+
+    plugin.data.autoSaveOnSwitch = false;
+    plugin.getCurrentWorkspaceLayout = function () {
+        return { layout: 'saved' };
+    };
+    assert.equal(plugin.shouldShowUnsavedStatusBarHighlight(), false);
+
+    plugin.getCurrentWorkspaceLayout = function () {
+        return { layout: 'saved', scroll: 25, left: 10, top: 20 };
+    };
+    assert.equal(plugin.shouldShowUnsavedStatusBarHighlight(), false);
+});
+
+test('structural layout comparison ignores Obsidian volatile workspace ids and focus state', function () {
+    const savedLayout = {
+        main: {
+            id: 'saved-main',
+            type: 'split',
+            direction: 'vertical',
+            children: [{
+                id: 'saved-tabs',
+                type: 'tabs',
+                currentTab: 0,
+                children: [
+                    {
+                        id: 'saved-leaf-a',
+                        type: 'leaf',
+                        state: {
+                            type: 'markdown',
+                            state: { file: 'a.md', mode: 'source', source: false },
+                            eState: { cursor: { from: 3 }, scroll: 12 },
+                        },
+                    },
+                    {
+                        id: 'saved-leaf-b',
+                        type: 'leaf',
+                        state: {
+                            type: 'markdown',
+                            state: { file: 'b.md', mode: 'source', source: false },
+                            eState: { cursor: { from: 8 }, scroll: 40 },
+                        },
+                    },
+                ],
+            }],
+        },
+        active: 'saved-leaf-a',
+        lastOpenFiles: ['a.md', 'b.md'],
+    };
+    const currentLayout = {
+        main: {
+            id: 'current-main',
+            type: 'split',
+            direction: 'vertical',
+            children: [{
+                id: 'current-tabs',
+                type: 'tabs',
+                currentTab: 0,
+                children: [
+                    {
+                        id: 'current-leaf-a',
+                        type: 'leaf',
+                        state: {
+                            type: 'markdown',
+                            state: { file: 'a.md', mode: 'source', source: false },
+                            eState: { cursor: { from: 30 }, scroll: 120 },
+                        },
+                    },
+                    {
+                        id: 'current-leaf-b',
+                        type: 'leaf',
+                        state: {
+                            type: 'markdown',
+                            state: { file: 'b.md', mode: 'source', source: false },
+                            eState: { cursor: { from: 80 }, scroll: 400 },
+                        },
+                    },
+                ],
+            }],
+        },
+        active: 'current-leaf-a',
+        lastOpenFiles: ['b.md', 'a.md'],
+    };
+    const plugin = createPlugin({
+        activeSessionId: 'a',
+        sessionOrder: ['a'],
+        sessions: {
+            a: { id: 'a', name: 'A', layout: savedLayout, modified: 1 },
+        },
+        autoSaveOnSwitch: false,
+    });
+
+    plugin.getCurrentWorkspaceLayout = function () {
+        return currentLayout;
+    };
+    assert.equal(plugin.shouldShowUnsavedStatusBarHighlight(), false);
+
+    currentLayout.main.children[0].currentTab = 1;
+    assert.equal(plugin.shouldShowUnsavedStatusBarHighlight(), true);
+});
+
 test('deleting active session applies fallback active layout', async function () {
     const plugin = createPlugin({
         activeSessionId: 'a',

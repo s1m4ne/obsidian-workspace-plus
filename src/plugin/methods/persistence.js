@@ -29,6 +29,7 @@ var SETTINGS_KEYS = [
     'confirmDeleteByHotkey',
     'autoSaveOnSwitch',
     'warnOnUnsavedSwitch',
+    'highlightUnsavedSessionChanges',
     'statusBarQuickSwitcher',
     'statusBarModScrollSwitch',
     'groupFeatureEnabled',

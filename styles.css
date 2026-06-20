@@ -271,9 +271,19 @@ body.wpp-session-list-dragging * {
 }
 
 .wpp-status-bar:hover {
-    color: var(--text-accent);
     background: var(--background-modifier-hover);
     border-radius: 4px;
+}
+
+.wpp-status-bar.wpp-status-bar-unsaved {
+    color: var(--text-warning);
+    background: rgba(var(--color-orange-rgb), 0.14);
+    border-radius: 4px;
+}
+
+.wpp-status-bar.wpp-status-bar-unsaved:hover {
+    color: var(--text-warning);
+    background: rgba(var(--color-orange-rgb), 0.2);
 }
 
 .wpp-status-icon {
@@ -705,12 +715,12 @@ body.wpp-session-list-dragging * {
 
 /* Status bar group indicator */
 .wpp-status-group {
-    color: var(--text-muted);
+    color: inherit;
     font-size: var(--font-ui-smaller);
 }
 
 .wpp-status-separator {
-    color: var(--text-faint);
+    color: inherit;
     font-size: var(--font-ui-smaller);
 }
 
