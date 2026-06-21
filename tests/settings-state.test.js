@@ -77,6 +77,15 @@ test('settings state syncs commands when numbered command setting changes', asyn
     assert.equal(plugin.persistCalls, 1);
 });
 
+test('settings state stores sidebar restore preference', async function () {
+    const plugin = createPlugin({ restoreSidebars: true });
+
+    await plugin.setRestoreSidebars(false);
+
+    assert.equal(plugin.data.restoreSidebars, false);
+    assert.equal(plugin.persistCalls, 1);
+});
+
 test('settings state starts and stops version history timer with the setting', async function () {
     const plugin = createPlugin();
 

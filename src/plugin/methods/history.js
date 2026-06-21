@@ -164,7 +164,7 @@ function attachHistoryMethods(WorkspacePlusPlus) {
 
         // Only change the visible workspace if this is the active session
         var applyLayout = isActive && session.layout
-            ? this.app.workspace.changeLayout(session.layout).catch(function () {})
+            ? this.applyWorkspaceLayout(session.layout)
             : Promise.resolve();
 
         return applyLayout.then(function () {

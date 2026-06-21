@@ -183,6 +183,17 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                 });
             }
 
+            addSubsection(contentEl, L.settingsSubsectionSessionRestore);
+
+            addToggleSetting(contentEl, {
+                name: L.settingsRestoreSidebars,
+                desc: L.settingsRestoreSidebarsDesc,
+                value: self.plugin.isSidebarRestoreEnabled(),
+                onChange: function (value) {
+                    self.plugin.setRestoreSidebars(value);
+                },
+            });
+
             addSubsection(contentEl, L.settingsSubsectionScrollSwitch);
 
             addToggleSetting(contentEl, {

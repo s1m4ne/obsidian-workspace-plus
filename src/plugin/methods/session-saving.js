@@ -298,7 +298,7 @@ function attachSessionSavingMethods(WorkspacePlusPlus) {
         }
 
         var applyLayout = session.layout
-            ? this.app.workspace.changeLayout(session.layout).catch(function () {})
+            ? this.applyWorkspaceLayout(session.layout)
             : Promise.resolve();
         var name = session.name;
 
