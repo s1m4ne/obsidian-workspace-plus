@@ -149,6 +149,16 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
         return BACKUPS_DIR + '/sessions.' + generation + '.json';
     };
 
+    WorkspacePlusPlus.prototype.getBackupFilePaths = function () {
+        return [
+            this.getSessionsBackupPath(),
+            this.getBackupPath(),
+            this.getRotationBackupPath(1),
+            this.getRotationBackupPath(2),
+            this.getRotationBackupPath(3),
+        ];
+    };
+
     WorkspacePlusPlus.prototype.getBackupPlatformLabel = function () {
         return getBackupPlatformLabel();
     };
@@ -424,8 +434,35 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
     };
 
     WorkspacePlusPlus.prototype.resetSessionsAndSettingsToDefault = function () {
+        var self = this;
         this.applyDefaultSettingsToCurrentScope();
-        return this.resetSessionsToDefault();
+        return this.resetSessionsToDefault().then(function () {
+            return self.clearBackupFiles();
+        });
+    };
+
+    WorkspacePlusPlus.prototype.clearBackupFiles = function () {
+        var self = this;
+        var paths = this.getBackupFilePaths();
+        var tasks = paths.map(function (path) {
+            return self.removeIfExists(path);
+        });
+        return Promise.all(tasks).then(function () {
+            self._lastRotationBackupAt = 0;
+            return true;
+        });
+    };
+
+    WorkspacePlusPlus.prototype.clearBackupsAndVersionHistory = function () {
+        var self = this;
+        var changed = false;
+        if (typeof this.clearVersionHistoryEntries === 'function') {
+            changed = this.clearVersionHistoryEntries();
+        }
+        var save = changed ? this.persistData() : Promise.resolve();
+        return save.then(function () {
+            return self.clearBackupFiles();
+        });
     };
 
     WorkspacePlusPlus.prototype.getStorageDiagnosticsInfo = function () {

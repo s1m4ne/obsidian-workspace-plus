@@ -731,6 +731,21 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
             addDangerResetSetting(contentEl, self.app, function () {
                 self.display();
             }, {
+                name: L.settingsResetBackupsAndHistory,
+                desc: L.settingsResetBackupsAndHistoryDesc,
+                buttonText: L.settingsResetBackupsAndHistoryBtn,
+                confirmMessage: L.confirmResetBackupsAndHistory,
+                confirmHint: L.resetBackupsAndHistoryHint,
+                run: function () {
+                    return self.plugin.clearBackupsAndVersionHistory();
+                },
+                successNotice: L.resetBackupsAndHistoryDone,
+                failureNotice: L.resetBackupsAndHistoryFailed,
+            });
+
+            addDangerResetSetting(contentEl, self.app, function () {
+                self.display();
+            }, {
                 name: L.settingsResetSessionsAndSettings,
                 desc: L.settingsResetSessionsAndSettingsDesc,
                 buttonText: L.settingsResetSessionsAndSettingsBtn,
