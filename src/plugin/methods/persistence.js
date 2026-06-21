@@ -87,6 +87,18 @@ function getPersistStamp(data) {
     return stamp;
 }
 
+function getBackupPlatformLabel() {
+    var platform = obsidian.Platform || {};
+    if (platform.isAndroidApp) return 'Android';
+    if (platform.isIosApp) return 'iOS';
+    if (platform.isMacOS) return 'macOS';
+    if (platform.isWin) return 'Windows';
+    if (platform.isLinux) return 'Linux';
+    if (platform.isMobileApp || platform.isMobile) return 'Mobile';
+    if (platform.isDesktopApp || platform.isDesktop) return 'Desktop';
+    return '';
+}
+
 function pad2(n) {
     return n < 10 ? '0' + n : String(n);
 }
@@ -135,6 +147,17 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
 
     WorkspacePlusPlus.prototype.getRotationBackupPath = function (generation) {
         return BACKUPS_DIR + '/sessions.' + generation + '.json';
+    };
+
+    WorkspacePlusPlus.prototype.getBackupPlatformLabel = function () {
+        return getBackupPlatformLabel();
+    };
+
+    WorkspacePlusPlus.prototype.prepareRotationBackupData = function (sessionData) {
+        var backupData = Object.assign({}, sessionData);
+        var platform = this.getBackupPlatformLabel();
+        if (platform) backupData._wppBackupPlatform = platform;
+        return backupData;
     };
 
     WorkspacePlusPlus.prototype.getDefaultSettingsData = function () {
@@ -615,7 +638,10 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
             })
             .then(function () {
                 // Write current data as generation 1
-                return self.writeJson(self.getRotationBackupPath(1), sessionData);
+                return self.writeJson(
+                    self.getRotationBackupPath(1),
+                    self.prepareRotationBackupData(sessionData)
+                );
             })
             .catch(function () {
                 // Backup failure should not block normal persistence
@@ -645,7 +671,15 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
                     var sessions = res.data.sessions;
                     var count = (sessions && typeof sessions === 'object')
                         ? Object.keys(sessions).length : 0;
-                    return { generation: n, savedAt: stamp, sessionCount: count };
+                    var platform = typeof res.data._wppBackupPlatform === 'string'
+                        ? res.data._wppBackupPlatform
+                        : '';
+                    return {
+                        generation: n,
+                        savedAt: stamp,
+                        sessionCount: count,
+                        backupPlatform: platform,
+                    };
                 })
                 .catch(function () {
                     return null;

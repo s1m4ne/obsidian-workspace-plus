@@ -10822,6 +10822,7 @@ var require_settings_context_menu = __commonJS({
         mi.onClick(function() {
           var sessionData = plugin.extractSessionData(plugin.data);
           sessionData._wppSavedAt = Date.now();
+          var backupData = plugin.prepareRotationBackupData(sessionData);
           plugin.ensureDir(plugin.getBackupsDirPath()).then(function() {
             return plugin.copyFileIfExists(
               plugin.getRotationBackupPath(2),
@@ -10835,7 +10836,7 @@ var require_settings_context_menu = __commonJS({
           }).then(function() {
             return plugin.writeJson(
               plugin.getRotationBackupPath(1),
-              sessionData
+              backupData
             );
           }).then(function() {
             plugin._lastRotationBackupAt = Date.now();
@@ -12737,6 +12738,7 @@ var require_settings = __commonJS({
                 btn.setDisabled(true);
                 var sessionData = self.plugin.extractSessionData(self.plugin.data);
                 sessionData._wppSavedAt = Date.now();
+                var backupData = self.plugin.prepareRotationBackupData(sessionData);
                 self.plugin.ensureDir(self.plugin.getBackupsDirPath()).then(function() {
                   return self.plugin.copyFileIfExists(
                     self.plugin.getRotationBackupPath(2),
@@ -12750,7 +12752,7 @@ var require_settings = __commonJS({
                 }).then(function() {
                   return self.plugin.writeJson(
                     self.plugin.getRotationBackupPath(1),
-                    sessionData
+                    backupData
                   );
                 }).then(function() {
                   self.plugin._lastRotationBackupAt = Date.now();
@@ -12777,6 +12779,9 @@ var require_settings = __commonJS({
                     absoluteTime = String(backup.savedAt);
                   }
                   var relativeTime = formatRelativeTime(backup.savedAt);
+                  var backupSummary = relativeTime + "  \xB7  " + L.rotationBackupGeneration(backup.sessionCount);
+                  var backupDesc = absoluteTime;
+                  if (backup.backupPlatform) backupDesc += "  \xB7  " + backup.backupPlatform;
                   var setting = new obsidian2.Setting(backupListEl);
                   var nameEl = setting.nameEl;
                   var numSpan = document.createElement("span");
@@ -12784,8 +12789,8 @@ var require_settings = __commonJS({
                   numSpan.style.color = "var(--text-accent)";
                   numSpan.style.marginRight = "6px";
                   nameEl.appendChild(numSpan);
-                  nameEl.appendText(relativeTime + "  \xB7  " + L.rotationBackupGeneration(backup.sessionCount));
-                  setting.setDesc(absoluteTime).addButton(function(btn) {
+                  nameEl.appendText(backupSummary);
+                  setting.setDesc(backupDesc).addButton(function(btn) {
                     btn.setButtonText(L.rotationBackupRestore);
                     btn.onClick(function() {
                       new modals2.ConfirmModal(
@@ -14785,6 +14790,17 @@ var require_persistence = __commonJS({
       if (typeof stamp !== "number" || !isFinite(stamp)) return 0;
       return stamp;
     }
+    function getBackupPlatformLabel() {
+      var platform = obsidian2.Platform || {};
+      if (platform.isAndroidApp) return "Android";
+      if (platform.isIosApp) return "iOS";
+      if (platform.isMacOS) return "macOS";
+      if (platform.isWin) return "Windows";
+      if (platform.isLinux) return "Linux";
+      if (platform.isMobileApp || platform.isMobile) return "Mobile";
+      if (platform.isDesktopApp || platform.isDesktop) return "Desktop";
+      return "";
+    }
     function pad2(n) {
       return n < 10 ? "0" + n : String(n);
     }
@@ -14816,6 +14832,15 @@ var require_persistence = __commonJS({
       };
       WorkspacePlusPlus2.prototype.getRotationBackupPath = function(generation) {
         return BACKUPS_DIR + "/sessions." + generation + ".json";
+      };
+      WorkspacePlusPlus2.prototype.getBackupPlatformLabel = function() {
+        return getBackupPlatformLabel();
+      };
+      WorkspacePlusPlus2.prototype.prepareRotationBackupData = function(sessionData) {
+        var backupData = Object.assign({}, sessionData);
+        var platform = this.getBackupPlatformLabel();
+        if (platform) backupData._wppBackupPlatform = platform;
+        return backupData;
       };
       WorkspacePlusPlus2.prototype.getDefaultSettingsData = function() {
         return pickKeys(DEFAULT_DATA2, SETTINGS_KEYS);
@@ -15200,7 +15225,10 @@ var require_persistence = __commonJS({
             self.getRotationBackupPath(2)
           );
         }).then(function() {
-          return self.writeJson(self.getRotationBackupPath(1), sessionData);
+          return self.writeJson(
+            self.getRotationBackupPath(1),
+            self.prepareRotationBackupData(sessionData)
+          );
         }).catch(function() {
           return;
         });
@@ -15223,7 +15251,13 @@ var require_persistence = __commonJS({
             var stamp = getPersistStamp(res.data);
             var sessions = res.data.sessions;
             var count = sessions && typeof sessions === "object" ? Object.keys(sessions).length : 0;
-            return { generation: n, savedAt: stamp, sessionCount: count };
+            var platform = typeof res.data._wppBackupPlatform === "string" ? res.data._wppBackupPlatform : "";
+            return {
+              generation: n,
+              savedAt: stamp,
+              sessionCount: count,
+              backupPlatform: platform
+            };
           }).catch(function() {
             return null;
           });

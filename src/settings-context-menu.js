@@ -118,6 +118,7 @@ function openSettingsContextMenu(options) {
         mi.onClick(function () {
             var sessionData = plugin.extractSessionData(plugin.data);
             sessionData._wppSavedAt = Date.now();
+            var backupData = plugin.prepareRotationBackupData(sessionData);
             plugin.ensureDir(plugin.getBackupsDirPath())
                 .then(function () {
                     return plugin.copyFileIfExists(
@@ -134,7 +135,7 @@ function openSettingsContextMenu(options) {
                 .then(function () {
                     return plugin.writeJson(
                         plugin.getRotationBackupPath(1),
-                        sessionData
+                        backupData
                     );
                 })
                 .then(function () {

@@ -9,6 +9,11 @@ function loadMethods() {
         Notice: class {
             constructor(_message) {}
         },
+        Platform: {
+            isDesktop: true,
+            isDesktopApp: true,
+            isMacOS: true,
+        },
     };
     const originalLoad = Module._load;
     Module._load = function (request, parent, isMain) {
@@ -242,4 +247,49 @@ test('session sync save reload merge uses the previous baseline while reading ex
     assert.equal(plugin.data.sessions.remoteNew.name, 'Remote new');
     assert.equal(plugin.data.sessions.localNew.name, 'Local new');
     assert.deepEqual(plugin.data.sessionOrder, ['base', 'remoteNew', 'localNew']);
+});
+
+test('rotation backup data records the current platform label', function () {
+    const plugin = createPlugin();
+    const sessionData = plugin.extractSessionData(plugin.data);
+    sessionData._wppSavedAt = 123;
+
+    const backupData = plugin.prepareRotationBackupData(sessionData);
+
+    assert.equal(plugin.getBackupPlatformLabel(), 'macOS');
+    assert.equal(backupData._wppBackupPlatform, 'macOS');
+    assert.equal(sessionData._wppBackupPlatform, undefined);
+});
+
+test('rotation backup info includes saved platform labels', async function () {
+    const plugin = createPlugin();
+    plugin.getRotationBackupPath = function (generation) {
+        return 'sessions.' + generation + '.json';
+    };
+    plugin.readJsonIfExists = function (path) {
+        if (path === 'sessions.1.json') {
+            return Promise.resolve({
+                exists: true,
+                data: {
+                    _wppSavedAt: 123,
+                    _wppBackupPlatform: 'Windows',
+                    sessions: {
+                        a: { id: 'a', name: 'A' },
+                        b: { id: 'b', name: 'B' },
+                    },
+                },
+                error: null,
+            });
+        }
+        return Promise.resolve({ exists: false, data: null, error: null });
+    };
+
+    const backups = await plugin.getRotationBackupInfo();
+
+    assert.deepEqual(backups, [{
+        generation: 1,
+        savedAt: 123,
+        sessionCount: 2,
+        backupPlatform: 'Windows',
+    }]);
 });
