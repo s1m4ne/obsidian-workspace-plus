@@ -451,6 +451,7 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                         btn.setDisabled(true);
                         var sessionData = self.plugin.extractSessionData(self.plugin.data);
                         sessionData._wppSavedAt = Date.now();
+                        var backupData = self.plugin.prepareRotationBackupData(sessionData);
                         self.plugin.ensureDir(self.plugin.getBackupsDirPath())
                             .then(function () {
                                 return self.plugin.copyFileIfExists(
@@ -467,7 +468,7 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                             .then(function () {
                                 return self.plugin.writeJson(
                                     self.plugin.getRotationBackupPath(1),
-                                    sessionData
+                                    backupData
                                 );
                             })
                             .then(function () {
@@ -498,6 +499,9 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                             absoluteTime = String(backup.savedAt);
                         }
                         var relativeTime = formatRelativeTime(backup.savedAt);
+                        var backupSummary = relativeTime + '  ·  ' + L.rotationBackupGeneration(backup.sessionCount);
+                        var backupDesc = absoluteTime;
+                        if (backup.backupPlatform) backupDesc += '  ·  ' + backup.backupPlatform;
                         var setting = new obsidian.Setting(backupListEl);
                         var nameEl = setting.nameEl;
                         var numSpan = document.createElement('span');
@@ -505,8 +509,8 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                         numSpan.style.color = 'var(--text-accent)';
                         numSpan.style.marginRight = '6px';
                         nameEl.appendChild(numSpan);
-                        nameEl.appendText(relativeTime + '  ·  ' + L.rotationBackupGeneration(backup.sessionCount));
-                        setting.setDesc(absoluteTime)
+                        nameEl.appendText(backupSummary);
+                        setting.setDesc(backupDesc)
                             .addButton(function (btn) {
                                 btn.setButtonText(L.rotationBackupRestore);
                                 btn.onClick(function () {
@@ -722,6 +726,21 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                 },
                 successNotice: L.resetSessionsDone,
                 failureNotice: L.resetSessionsFailed,
+            });
+
+            addDangerResetSetting(contentEl, self.app, function () {
+                self.display();
+            }, {
+                name: L.settingsResetBackupsAndHistory,
+                desc: L.settingsResetBackupsAndHistoryDesc,
+                buttonText: L.settingsResetBackupsAndHistoryBtn,
+                confirmMessage: L.confirmResetBackupsAndHistory,
+                confirmHint: L.resetBackupsAndHistoryHint,
+                run: function () {
+                    return self.plugin.clearBackupsAndVersionHistory();
+                },
+                successNotice: L.resetBackupsAndHistoryDone,
+                failureNotice: L.resetBackupsAndHistoryFailed,
             });
 
             addDangerResetSetting(contentEl, self.app, function () {

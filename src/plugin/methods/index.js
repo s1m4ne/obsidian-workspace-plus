@@ -3,6 +3,7 @@
 var attachHotkeyMethods = require('./hotkeys');
 var attachOverlayMethods = require('./overlays');
 var attachPersistenceMethods = require('./persistence');
+var attachSessionSyncMethods = require('./session-sync');
 var attachSessionMethods = require('./sessions');
 var attachSessionValidationMethods = require('./sessions-validation');
 var attachGroupMethods = require('./groups');
@@ -20,6 +21,7 @@ function attachPluginMethods(WorkspacePlusPlus) {
     attachHotkeyMethods(WorkspacePlusPlus);
     attachOverlayMethods(WorkspacePlusPlus);
     attachPersistenceMethods(WorkspacePlusPlus);
+    attachSessionSyncMethods(WorkspacePlusPlus);
     attachSessionMethods(WorkspacePlusPlus);
     attachSessionValidationMethods(WorkspacePlusPlus);
     attachGroupMethods(WorkspacePlusPlus);

@@ -9471,6 +9471,338 @@ var require_i18n = __commonJS({
     var extendedKey;
     var extendedKeyIndex;
     var extendedLangIndex;
+    var RESET_STRINGS = {
+      en: {
+        settingsResetBackupsAndHistory: "Delete backups and version history",
+        settingsResetBackupsAndHistoryDesc: "Delete automatic backup files and saved session version history. Current sessions and settings are kept.",
+        settingsResetBackupsAndHistoryBtn: "Delete",
+        confirmResetBackupsAndHistory: "Delete all backups and version history? This cannot be undone.",
+        resetBackupsAndHistoryHint: "This removes backup files and per-session version history, but keeps current sessions and settings.",
+        resetBackupsAndHistoryDone: "Backups and version history have been deleted.",
+        resetBackupsAndHistoryFailed: "Failed to delete backups and version history.",
+        settingsResetSessionsAndSettings: "Reset all",
+        settingsResetSessionsAndSettingsDesc: "Reset settings and sessions, and delete backup files and version history.",
+        settingsResetSessionsAndSettingsBtn: "Reset all",
+        confirmResetSessionsAndSettings: "Reset all Workspace++ data? Settings and sessions will be reset, and backups and version history will be deleted. This cannot be undone.",
+        resetSessionsAndSettingsDone: "Workspace++ data has been reset.",
+        resetSessionsAndSettingsFailed: "Failed to reset Workspace++ data."
+      },
+      zh: {
+        settingsResetBackupsAndHistory: "\u5220\u9664\u5907\u4EFD\u548C\u7248\u672C\u5386\u53F2",
+        settingsResetBackupsAndHistoryDesc: "\u5220\u9664\u81EA\u52A8\u5907\u4EFD\u6587\u4EF6\u548C\u5DF2\u4FDD\u5B58\u7684\u4F1A\u8BDD\u7248\u672C\u5386\u53F2\u3002\u5F53\u524D\u4F1A\u8BDD\u548C\u8BBE\u7F6E\u4F1A\u4FDD\u7559\u3002",
+        settingsResetBackupsAndHistoryBtn: "\u5220\u9664",
+        confirmResetBackupsAndHistory: "\u5220\u9664\u6240\u6709\u5907\u4EFD\u548C\u7248\u672C\u5386\u53F2\uFF1F\u6B64\u64CD\u4F5C\u65E0\u6CD5\u64A4\u9500\u3002",
+        resetBackupsAndHistoryHint: "\u8FD9\u4F1A\u79FB\u9664\u5907\u4EFD\u6587\u4EF6\u548C\u6BCF\u4E2A\u4F1A\u8BDD\u7684\u7248\u672C\u5386\u53F2\uFF0C\u4F46\u4FDD\u7559\u5F53\u524D\u4F1A\u8BDD\u548C\u8BBE\u7F6E\u3002",
+        resetBackupsAndHistoryDone: "\u5907\u4EFD\u548C\u7248\u672C\u5386\u53F2\u5DF2\u5220\u9664\u3002",
+        resetBackupsAndHistoryFailed: "\u5220\u9664\u5907\u4EFD\u548C\u7248\u672C\u5386\u53F2\u5931\u8D25\u3002",
+        settingsResetSessionsAndSettings: "\u5168\u90E8\u91CD\u7F6E",
+        settingsResetSessionsAndSettingsDesc: "\u91CD\u7F6E\u8BBE\u7F6E\u548C\u4F1A\u8BDD\uFF0C\u5E76\u5220\u9664\u5907\u4EFD\u6587\u4EF6\u548C\u7248\u672C\u5386\u53F2\u3002",
+        settingsResetSessionsAndSettingsBtn: "\u5168\u90E8\u91CD\u7F6E",
+        confirmResetSessionsAndSettings: "\u91CD\u7F6E\u6240\u6709 Workspace++ \u6570\u636E\uFF1F\u8BBE\u7F6E\u548C\u4F1A\u8BDD\u5C06\u88AB\u91CD\u7F6E\uFF0C\u5907\u4EFD\u548C\u7248\u672C\u5386\u53F2\u5C06\u88AB\u5220\u9664\u3002\u6B64\u64CD\u4F5C\u65E0\u6CD5\u64A4\u9500\u3002",
+        resetSessionsAndSettingsDone: "Workspace++ \u6570\u636E\u5DF2\u91CD\u7F6E\u3002",
+        resetSessionsAndSettingsFailed: "\u91CD\u7F6E Workspace++ \u6570\u636E\u5931\u8D25\u3002"
+      },
+      "zh-TW": {
+        settingsResetBackupsAndHistory: "\u522A\u9664\u5099\u4EFD\u548C\u7248\u672C\u6B77\u53F2",
+        settingsResetBackupsAndHistoryDesc: "\u522A\u9664\u81EA\u52D5\u5099\u4EFD\u6A94\u6848\u548C\u5DF2\u5132\u5B58\u7684\u5DE5\u4F5C\u968E\u6BB5\u7248\u672C\u6B77\u53F2\u3002\u76EE\u524D\u7684\u5DE5\u4F5C\u968E\u6BB5\u548C\u8A2D\u5B9A\u6703\u4FDD\u7559\u3002",
+        settingsResetBackupsAndHistoryBtn: "\u522A\u9664",
+        confirmResetBackupsAndHistory: "\u522A\u9664\u6240\u6709\u5099\u4EFD\u548C\u7248\u672C\u6B77\u53F2\uFF1F\u6B64\u64CD\u4F5C\u7121\u6CD5\u5FA9\u539F\u3002",
+        resetBackupsAndHistoryHint: "\u9019\u6703\u79FB\u9664\u5099\u4EFD\u6A94\u6848\u548C\u5404\u5DE5\u4F5C\u968E\u6BB5\u7684\u7248\u672C\u6B77\u53F2\uFF0C\u4F46\u4FDD\u7559\u76EE\u524D\u7684\u5DE5\u4F5C\u968E\u6BB5\u548C\u8A2D\u5B9A\u3002",
+        resetBackupsAndHistoryDone: "\u5099\u4EFD\u548C\u7248\u672C\u6B77\u53F2\u5DF2\u522A\u9664\u3002",
+        resetBackupsAndHistoryFailed: "\u522A\u9664\u5099\u4EFD\u548C\u7248\u672C\u6B77\u53F2\u5931\u6557\u3002",
+        settingsResetSessionsAndSettings: "\u5168\u90E8\u91CD\u8A2D",
+        settingsResetSessionsAndSettingsDesc: "\u91CD\u8A2D\u8A2D\u5B9A\u548C\u5DE5\u4F5C\u968E\u6BB5\uFF0C\u4E26\u522A\u9664\u5099\u4EFD\u6A94\u6848\u548C\u7248\u672C\u6B77\u53F2\u3002",
+        settingsResetSessionsAndSettingsBtn: "\u5168\u90E8\u91CD\u8A2D",
+        confirmResetSessionsAndSettings: "\u91CD\u8A2D\u6240\u6709 Workspace++ \u8CC7\u6599\uFF1F\u8A2D\u5B9A\u548C\u5DE5\u4F5C\u968E\u6BB5\u5C07\u88AB\u91CD\u8A2D\uFF0C\u5099\u4EFD\u548C\u7248\u672C\u6B77\u53F2\u5C07\u88AB\u522A\u9664\u3002\u6B64\u64CD\u4F5C\u7121\u6CD5\u5FA9\u539F\u3002",
+        resetSessionsAndSettingsDone: "Workspace++ \u8CC7\u6599\u5DF2\u91CD\u8A2D\u3002",
+        resetSessionsAndSettingsFailed: "\u91CD\u8A2D Workspace++ \u8CC7\u6599\u5931\u6557\u3002"
+      },
+      es: {
+        settingsResetBackupsAndHistory: "Eliminar copias e historial de versiones",
+        settingsResetBackupsAndHistoryDesc: "Elimina los archivos de copia autom\xE1tica y el historial de versiones guardado de las sesiones. Las sesiones y los ajustes actuales se conservan.",
+        settingsResetBackupsAndHistoryBtn: "Eliminar",
+        confirmResetBackupsAndHistory: "\xBFEliminar todas las copias de seguridad y el historial de versiones? Esta acci\xF3n no se puede deshacer.",
+        resetBackupsAndHistoryHint: "Esto elimina los archivos de copia y el historial de versiones de cada sesi\xF3n, pero conserva las sesiones y los ajustes actuales.",
+        resetBackupsAndHistoryDone: "Se eliminaron las copias de seguridad y el historial de versiones.",
+        resetBackupsAndHistoryFailed: "No se pudieron eliminar las copias de seguridad y el historial de versiones.",
+        settingsResetSessionsAndSettings: "Restablecer todo",
+        settingsResetSessionsAndSettingsDesc: "Restablece ajustes y sesiones, y elimina copias de seguridad e historial de versiones.",
+        settingsResetSessionsAndSettingsBtn: "Restablecer todo",
+        confirmResetSessionsAndSettings: "\xBFRestablecer todos los datos de Workspace++? Se restablecer\xE1n ajustes y sesiones, y se eliminar\xE1n copias e historial de versiones. Esta acci\xF3n no se puede deshacer.",
+        resetSessionsAndSettingsDone: "Los datos de Workspace++ se restablecieron.",
+        resetSessionsAndSettingsFailed: "No se pudieron restablecer los datos de Workspace++."
+      },
+      fr: {
+        settingsResetBackupsAndHistory: "Supprimer sauvegardes et historique",
+        settingsResetBackupsAndHistoryDesc: "Supprime les fichiers de sauvegarde automatique et l\u2019historique de version enregistr\xE9 des sessions. Les sessions et param\xE8tres actuels sont conserv\xE9s.",
+        settingsResetBackupsAndHistoryBtn: "Supprimer",
+        confirmResetBackupsAndHistory: "Supprimer toutes les sauvegardes et l\u2019historique de version ? Cette action est irr\xE9versible.",
+        resetBackupsAndHistoryHint: "Cela supprime les fichiers de sauvegarde et l\u2019historique de version par session, mais conserve les sessions et param\xE8tres actuels.",
+        resetBackupsAndHistoryDone: "Les sauvegardes et l\u2019historique de version ont \xE9t\xE9 supprim\xE9s.",
+        resetBackupsAndHistoryFailed: "\xC9chec de la suppression des sauvegardes et de l\u2019historique de version.",
+        settingsResetSessionsAndSettings: "Tout r\xE9initialiser",
+        settingsResetSessionsAndSettingsDesc: "R\xE9initialise les param\xE8tres et les sessions, puis supprime les sauvegardes et l\u2019historique de version.",
+        settingsResetSessionsAndSettingsBtn: "Tout r\xE9initialiser",
+        confirmResetSessionsAndSettings: "R\xE9initialiser toutes les donn\xE9es Workspace++ ? Les param\xE8tres et les sessions seront r\xE9initialis\xE9s, et les sauvegardes ainsi que l\u2019historique de version seront supprim\xE9s. Cette action est irr\xE9versible.",
+        resetSessionsAndSettingsDone: "Les donn\xE9es Workspace++ ont \xE9t\xE9 r\xE9initialis\xE9es.",
+        resetSessionsAndSettingsFailed: "\xC9chec de la r\xE9initialisation des donn\xE9es Workspace++."
+      },
+      ar: {
+        settingsResetBackupsAndHistory: "\u062D\u0630\u0641 \u0627\u0644\u0646\u0633\u062E \u0627\u0644\u0627\u062D\u062A\u064A\u0627\u0637\u064A\u0629 \u0648\u0633\u062C\u0644 \u0627\u0644\u0625\u0635\u062F\u0627\u0631\u0627\u062A",
+        settingsResetBackupsAndHistoryDesc: "\u064A\u062D\u0630\u0641 \u0645\u0644\u0641\u0627\u062A \u0627\u0644\u0646\u0633\u062E \u0627\u0644\u0627\u062D\u062A\u064A\u0627\u0637\u064A \u0627\u0644\u062A\u0644\u0642\u0627\u0626\u064A\u0629 \u0648\u0633\u062C\u0644 \u0625\u0635\u062F\u0627\u0631\u0627\u062A \u0627\u0644\u062C\u0644\u0633\u0627\u062A \u0627\u0644\u0645\u062D\u0641\u0648\u0638. \u0633\u064A\u062A\u0645 \u0627\u0644\u0627\u062D\u062A\u0641\u0627\u0638 \u0628\u0627\u0644\u062C\u0644\u0633\u0627\u062A \u0648\u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A \u0627\u0644\u062D\u0627\u0644\u064A\u0629.",
+        settingsResetBackupsAndHistoryBtn: "\u062D\u0630\u0641",
+        confirmResetBackupsAndHistory: "\u062D\u0630\u0641 \u062C\u0645\u064A\u0639 \u0627\u0644\u0646\u0633\u062E \u0627\u0644\u0627\u062D\u062A\u064A\u0627\u0637\u064A\u0629 \u0648\u0633\u062C\u0644 \u0627\u0644\u0625\u0635\u062F\u0627\u0631\u0627\u062A\u061F \u0644\u0627 \u064A\u0645\u0643\u0646 \u0627\u0644\u062A\u0631\u0627\u062C\u0639 \u0639\u0646 \u0647\u0630\u0627 \u0627\u0644\u0625\u062C\u0631\u0627\u0621.",
+        resetBackupsAndHistoryHint: "\u064A\u0632\u064A\u0644 \u0647\u0630\u0627 \u0645\u0644\u0641\u0627\u062A \u0627\u0644\u0646\u0633\u062E \u0627\u0644\u0627\u062D\u062A\u064A\u0627\u0637\u064A \u0648\u0633\u062C\u0644 \u0627\u0644\u0625\u0635\u062F\u0627\u0631\u0627\u062A \u0644\u0643\u0644 \u062C\u0644\u0633\u0629\u060C \u0645\u0639 \u0627\u0644\u0627\u062D\u062A\u0641\u0627\u0638 \u0628\u0627\u0644\u062C\u0644\u0633\u0627\u062A \u0648\u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A \u0627\u0644\u062D\u0627\u0644\u064A\u0629.",
+        resetBackupsAndHistoryDone: "\u062A\u0645 \u062D\u0630\u0641 \u0627\u0644\u0646\u0633\u062E \u0627\u0644\u0627\u062D\u062A\u064A\u0627\u0637\u064A\u0629 \u0648\u0633\u062C\u0644 \u0627\u0644\u0625\u0635\u062F\u0627\u0631\u0627\u062A.",
+        resetBackupsAndHistoryFailed: "\u0641\u0634\u0644 \u062D\u0630\u0641 \u0627\u0644\u0646\u0633\u062E \u0627\u0644\u0627\u062D\u062A\u064A\u0627\u0637\u064A\u0629 \u0648\u0633\u062C\u0644 \u0627\u0644\u0625\u0635\u062F\u0627\u0631\u0627\u062A.",
+        settingsResetSessionsAndSettings: "\u0625\u0639\u0627\u062F\u0629 \u062A\u0639\u064A\u064A\u0646 \u0627\u0644\u0643\u0644",
+        settingsResetSessionsAndSettingsDesc: "\u064A\u0639\u064A\u062F \u062A\u0639\u064A\u064A\u0646 \u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A \u0648\u0627\u0644\u062C\u0644\u0633\u0627\u062A \u0648\u064A\u062D\u0630\u0641 \u0645\u0644\u0641\u0627\u062A \u0627\u0644\u0646\u0633\u062E \u0627\u0644\u0627\u062D\u062A\u064A\u0627\u0637\u064A \u0648\u0633\u062C\u0644 \u0627\u0644\u0625\u0635\u062F\u0627\u0631\u0627\u062A.",
+        settingsResetSessionsAndSettingsBtn: "\u0625\u0639\u0627\u062F\u0629 \u062A\u0639\u064A\u064A\u0646 \u0627\u0644\u0643\u0644",
+        confirmResetSessionsAndSettings: "\u0625\u0639\u0627\u062F\u0629 \u062A\u0639\u064A\u064A\u0646 \u062C\u0645\u064A\u0639 \u0628\u064A\u0627\u0646\u0627\u062A Workspace++\u061F \u0633\u062A\u062A\u0645 \u0625\u0639\u0627\u062F\u0629 \u062A\u0639\u064A\u064A\u0646 \u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A \u0648\u0627\u0644\u062C\u0644\u0633\u0627\u062A\u060C \u0648\u0633\u062A\u064F\u062D\u0630\u0641 \u0627\u0644\u0646\u0633\u062E \u0627\u0644\u0627\u062D\u062A\u064A\u0627\u0637\u064A\u0629 \u0648\u0633\u062C\u0644 \u0627\u0644\u0625\u0635\u062F\u0627\u0631\u0627\u062A. \u0644\u0627 \u064A\u0645\u0643\u0646 \u0627\u0644\u062A\u0631\u0627\u062C\u0639 \u0639\u0646 \u0647\u0630\u0627 \u0627\u0644\u0625\u062C\u0631\u0627\u0621.",
+        resetSessionsAndSettingsDone: "\u062A\u0645\u062A \u0625\u0639\u0627\u062F\u0629 \u062A\u0639\u064A\u064A\u0646 \u0628\u064A\u0627\u0646\u0627\u062A Workspace++.",
+        resetSessionsAndSettingsFailed: "\u0641\u0634\u0644\u062A \u0625\u0639\u0627\u062F\u0629 \u062A\u0639\u064A\u064A\u0646 \u0628\u064A\u0627\u0646\u0627\u062A Workspace++."
+      },
+      pt: {
+        settingsResetBackupsAndHistory: "Excluir backups e hist\xF3rico de vers\xF5es",
+        settingsResetBackupsAndHistoryDesc: "Exclui arquivos de backup autom\xE1tico e o hist\xF3rico de vers\xF5es salvo das sess\xF5es. As sess\xF5es e configura\xE7\xF5es atuais s\xE3o mantidas.",
+        settingsResetBackupsAndHistoryBtn: "Excluir",
+        confirmResetBackupsAndHistory: "Excluir todos os backups e o hist\xF3rico de vers\xF5es? Esta a\xE7\xE3o n\xE3o pode ser desfeita.",
+        resetBackupsAndHistoryHint: "Isso remove arquivos de backup e o hist\xF3rico de vers\xF5es por sess\xE3o, mas mant\xE9m as sess\xF5es e configura\xE7\xF5es atuais.",
+        resetBackupsAndHistoryDone: "Backups e hist\xF3rico de vers\xF5es foram exclu\xEDdos.",
+        resetBackupsAndHistoryFailed: "Falha ao excluir backups e hist\xF3rico de vers\xF5es.",
+        settingsResetSessionsAndSettings: "Redefinir tudo",
+        settingsResetSessionsAndSettingsDesc: "Redefine configura\xE7\xF5es e sess\xF5es, e exclui backups e hist\xF3rico de vers\xF5es.",
+        settingsResetSessionsAndSettingsBtn: "Redefinir tudo",
+        confirmResetSessionsAndSettings: "Redefinir todos os dados do Workspace++? Configura\xE7\xF5es e sess\xF5es ser\xE3o redefinidas, e backups e hist\xF3rico de vers\xF5es ser\xE3o exclu\xEDdos. Esta a\xE7\xE3o n\xE3o pode ser desfeita.",
+        resetSessionsAndSettingsDone: "Os dados do Workspace++ foram redefinidos.",
+        resetSessionsAndSettingsFailed: "Falha ao redefinir os dados do Workspace++."
+      },
+      ru: {
+        settingsResetBackupsAndHistory: "\u0423\u0434\u0430\u043B\u0438\u0442\u044C \u0440\u0435\u0437\u0435\u0440\u0432\u043D\u044B\u0435 \u043A\u043E\u043F\u0438\u0438 \u0438 \u0438\u0441\u0442\u043E\u0440\u0438\u044E \u0432\u0435\u0440\u0441\u0438\u0439",
+        settingsResetBackupsAndHistoryDesc: "\u0423\u0434\u0430\u043B\u044F\u0435\u0442 \u0444\u0430\u0439\u043B\u044B \u0430\u0432\u0442\u043E\u043C\u0430\u0442\u0438\u0447\u0435\u0441\u043A\u0438\u0445 \u0440\u0435\u0437\u0435\u0440\u0432\u043D\u044B\u0445 \u043A\u043E\u043F\u0438\u0439 \u0438 \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u0443\u044E \u0438\u0441\u0442\u043E\u0440\u0438\u044E \u0432\u0435\u0440\u0441\u0438\u0439 \u0441\u0435\u0441\u0441\u0438\u0439. \u0422\u0435\u043A\u0443\u0449\u0438\u0435 \u0441\u0435\u0441\u0441\u0438\u0438 \u0438 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u0441\u043E\u0445\u0440\u0430\u043D\u044F\u044E\u0442\u0441\u044F.",
+        settingsResetBackupsAndHistoryBtn: "\u0423\u0434\u0430\u043B\u0438\u0442\u044C",
+        confirmResetBackupsAndHistory: "\u0423\u0434\u0430\u043B\u0438\u0442\u044C \u0432\u0441\u0435 \u0440\u0435\u0437\u0435\u0440\u0432\u043D\u044B\u0435 \u043A\u043E\u043F\u0438\u0438 \u0438 \u0438\u0441\u0442\u043E\u0440\u0438\u044E \u0432\u0435\u0440\u0441\u0438\u0439? \u042D\u0442\u043E \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0435 \u043D\u0435\u043B\u044C\u0437\u044F \u043E\u0442\u043C\u0435\u043D\u0438\u0442\u044C.",
+        resetBackupsAndHistoryHint: "\u0411\u0443\u0434\u0443\u0442 \u0443\u0434\u0430\u043B\u0435\u043D\u044B \u0444\u0430\u0439\u043B\u044B \u0440\u0435\u0437\u0435\u0440\u0432\u043D\u044B\u0445 \u043A\u043E\u043F\u0438\u0439 \u0438 \u0438\u0441\u0442\u043E\u0440\u0438\u044F \u0432\u0435\u0440\u0441\u0438\u0439 \u043A\u0430\u0436\u0434\u043E\u0439 \u0441\u0435\u0441\u0441\u0438\u0438, \u043D\u043E \u0442\u0435\u043A\u0443\u0449\u0438\u0435 \u0441\u0435\u0441\u0441\u0438\u0438 \u0438 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u0441\u043E\u0445\u0440\u0430\u043D\u044F\u0442\u0441\u044F.",
+        resetBackupsAndHistoryDone: "\u0420\u0435\u0437\u0435\u0440\u0432\u043D\u044B\u0435 \u043A\u043E\u043F\u0438\u0438 \u0438 \u0438\u0441\u0442\u043E\u0440\u0438\u044F \u0432\u0435\u0440\u0441\u0438\u0439 \u0443\u0434\u0430\u043B\u0435\u043D\u044B.",
+        resetBackupsAndHistoryFailed: "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0443\u0434\u0430\u043B\u0438\u0442\u044C \u0440\u0435\u0437\u0435\u0440\u0432\u043D\u044B\u0435 \u043A\u043E\u043F\u0438\u0438 \u0438 \u0438\u0441\u0442\u043E\u0440\u0438\u044E \u0432\u0435\u0440\u0441\u0438\u0439.",
+        settingsResetSessionsAndSettings: "\u0421\u0431\u0440\u043E\u0441\u0438\u0442\u044C \u0432\u0441\u0451",
+        settingsResetSessionsAndSettingsDesc: "\u0421\u0431\u0440\u0430\u0441\u044B\u0432\u0430\u0435\u0442 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u0438 \u0441\u0435\u0441\u0441\u0438\u0438, \u0430 \u0442\u0430\u043A\u0436\u0435 \u0443\u0434\u0430\u043B\u044F\u0435\u0442 \u0440\u0435\u0437\u0435\u0440\u0432\u043D\u044B\u0435 \u043A\u043E\u043F\u0438\u0438 \u0438 \u0438\u0441\u0442\u043E\u0440\u0438\u044E \u0432\u0435\u0440\u0441\u0438\u0439.",
+        settingsResetSessionsAndSettingsBtn: "\u0421\u0431\u0440\u043E\u0441\u0438\u0442\u044C \u0432\u0441\u0451",
+        confirmResetSessionsAndSettings: "\u0421\u0431\u0440\u043E\u0441\u0438\u0442\u044C \u0432\u0441\u0435 \u0434\u0430\u043D\u043D\u044B\u0435 Workspace++? \u041D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u0438 \u0441\u0435\u0441\u0441\u0438\u0438 \u0431\u0443\u0434\u0443\u0442 \u0441\u0431\u0440\u043E\u0448\u0435\u043D\u044B, \u0430 \u0440\u0435\u0437\u0435\u0440\u0432\u043D\u044B\u0435 \u043A\u043E\u043F\u0438\u0438 \u0438 \u0438\u0441\u0442\u043E\u0440\u0438\u044F \u0432\u0435\u0440\u0441\u0438\u0439 \u0443\u0434\u0430\u043B\u0435\u043D\u044B. \u042D\u0442\u043E \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0435 \u043D\u0435\u043B\u044C\u0437\u044F \u043E\u0442\u043C\u0435\u043D\u0438\u0442\u044C.",
+        resetSessionsAndSettingsDone: "\u0414\u0430\u043D\u043D\u044B\u0435 Workspace++ \u0441\u0431\u0440\u043E\u0448\u0435\u043D\u044B.",
+        resetSessionsAndSettingsFailed: "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0441\u0431\u0440\u043E\u0441\u0438\u0442\u044C \u0434\u0430\u043D\u043D\u044B\u0435 Workspace++."
+      },
+      de: {
+        settingsResetBackupsAndHistory: "Sicherungen und Versionsverlauf l\xF6schen",
+        settingsResetBackupsAndHistoryDesc: "L\xF6scht automatische Sicherungsdateien und den gespeicherten Versionsverlauf der Sitzungen. Aktuelle Sitzungen und Einstellungen bleiben erhalten.",
+        settingsResetBackupsAndHistoryBtn: "L\xF6schen",
+        confirmResetBackupsAndHistory: "Alle Sicherungen und den Versionsverlauf l\xF6schen? Diese Aktion kann nicht r\xFCckg\xE4ngig gemacht werden.",
+        resetBackupsAndHistoryHint: "Dadurch werden Sicherungsdateien und der Versionsverlauf pro Sitzung entfernt, aktuelle Sitzungen und Einstellungen bleiben jedoch erhalten.",
+        resetBackupsAndHistoryDone: "Sicherungen und Versionsverlauf wurden gel\xF6scht.",
+        resetBackupsAndHistoryFailed: "Sicherungen und Versionsverlauf konnten nicht gel\xF6scht werden.",
+        settingsResetSessionsAndSettings: "Alles zur\xFCcksetzen",
+        settingsResetSessionsAndSettingsDesc: "Setzt Einstellungen und Sitzungen zur\xFCck und l\xF6scht Sicherungen sowie Versionsverlauf.",
+        settingsResetSessionsAndSettingsBtn: "Alles zur\xFCcksetzen",
+        confirmResetSessionsAndSettings: "Alle Workspace++-Daten zur\xFCcksetzen? Einstellungen und Sitzungen werden zur\xFCckgesetzt, Sicherungen und Versionsverlauf werden gel\xF6scht. Diese Aktion kann nicht r\xFCckg\xE4ngig gemacht werden.",
+        resetSessionsAndSettingsDone: "Workspace++-Daten wurden zur\xFCckgesetzt.",
+        resetSessionsAndSettingsFailed: "Workspace++-Daten konnten nicht zur\xFCckgesetzt werden."
+      },
+      ja: {
+        settingsResetBackupsAndHistory: "\u30D0\u30C3\u30AF\u30A2\u30C3\u30D7\u3068\u30D0\u30FC\u30B8\u30E7\u30F3\u5C65\u6B74\u3092\u524A\u9664",
+        settingsResetBackupsAndHistoryDesc: "\u81EA\u52D5\u30D0\u30C3\u30AF\u30A2\u30C3\u30D7\u30D5\u30A1\u30A4\u30EB\u3068\u4FDD\u5B58\u6E08\u307F\u30BB\u30C3\u30B7\u30E7\u30F3\u306E\u30D0\u30FC\u30B8\u30E7\u30F3\u5C65\u6B74\u3092\u524A\u9664\u3057\u307E\u3059\u3002\u73FE\u5728\u306E\u30BB\u30C3\u30B7\u30E7\u30F3\u3068\u8A2D\u5B9A\u306F\u6B8B\u308A\u307E\u3059\u3002",
+        settingsResetBackupsAndHistoryBtn: "\u524A\u9664",
+        confirmResetBackupsAndHistory: "\u3059\u3079\u3066\u306E\u30D0\u30C3\u30AF\u30A2\u30C3\u30D7\u3068\u30D0\u30FC\u30B8\u30E7\u30F3\u5C65\u6B74\u3092\u524A\u9664\u3057\u307E\u3059\u304B\uFF1F\u3053\u306E\u64CD\u4F5C\u306F\u5143\u306B\u623B\u305B\u307E\u305B\u3093\u3002",
+        resetBackupsAndHistoryHint: "\u30D0\u30C3\u30AF\u30A2\u30C3\u30D7\u30D5\u30A1\u30A4\u30EB\u3068\u5404\u30BB\u30C3\u30B7\u30E7\u30F3\u306E\u30D0\u30FC\u30B8\u30E7\u30F3\u5C65\u6B74\u3092\u524A\u9664\u3057\u307E\u3059\u304C\u3001\u73FE\u5728\u306E\u30BB\u30C3\u30B7\u30E7\u30F3\u3068\u8A2D\u5B9A\u306F\u6B8B\u308A\u307E\u3059\u3002",
+        resetBackupsAndHistoryDone: "\u30D0\u30C3\u30AF\u30A2\u30C3\u30D7\u3068\u30D0\u30FC\u30B8\u30E7\u30F3\u5C65\u6B74\u3092\u524A\u9664\u3057\u307E\u3057\u305F\u3002",
+        resetBackupsAndHistoryFailed: "\u30D0\u30C3\u30AF\u30A2\u30C3\u30D7\u3068\u30D0\u30FC\u30B8\u30E7\u30F3\u5C65\u6B74\u306E\u524A\u9664\u306B\u5931\u6557\u3057\u307E\u3057\u305F\u3002",
+        settingsResetSessionsAndSettings: "\u3059\u3079\u3066\u30EA\u30BB\u30C3\u30C8",
+        settingsResetSessionsAndSettingsDesc: "\u8A2D\u5B9A\u3068\u30BB\u30C3\u30B7\u30E7\u30F3\u3092\u30EA\u30BB\u30C3\u30C8\u3057\u3001\u30D0\u30C3\u30AF\u30A2\u30C3\u30D7\u30D5\u30A1\u30A4\u30EB\u3068\u30D0\u30FC\u30B8\u30E7\u30F3\u5C65\u6B74\u3082\u524A\u9664\u3057\u307E\u3059\u3002",
+        settingsResetSessionsAndSettingsBtn: "\u3059\u3079\u3066\u30EA\u30BB\u30C3\u30C8",
+        confirmResetSessionsAndSettings: "Workspace++ \u306E\u3059\u3079\u3066\u306E\u30C7\u30FC\u30BF\u3092\u30EA\u30BB\u30C3\u30C8\u3057\u307E\u3059\u304B\uFF1F\u8A2D\u5B9A\u3068\u30BB\u30C3\u30B7\u30E7\u30F3\u306F\u521D\u671F\u5316\u3055\u308C\u3001\u30D0\u30C3\u30AF\u30A2\u30C3\u30D7\u3068\u30D0\u30FC\u30B8\u30E7\u30F3\u5C65\u6B74\u306F\u524A\u9664\u3055\u308C\u307E\u3059\u3002\u3053\u306E\u64CD\u4F5C\u306F\u5143\u306B\u623B\u305B\u307E\u305B\u3093\u3002",
+        resetSessionsAndSettingsDone: "Workspace++ \u306E\u30C7\u30FC\u30BF\u3092\u30EA\u30BB\u30C3\u30C8\u3057\u307E\u3057\u305F\u3002",
+        resetSessionsAndSettingsFailed: "Workspace++ \u306E\u30C7\u30FC\u30BF\u306E\u30EA\u30BB\u30C3\u30C8\u306B\u5931\u6557\u3057\u307E\u3057\u305F\u3002"
+      },
+      ko: {
+        settingsResetBackupsAndHistory: "\uBC31\uC5C5\uACFC \uBC84\uC804 \uAE30\uB85D \uC0AD\uC81C",
+        settingsResetBackupsAndHistoryDesc: "\uC790\uB3D9 \uBC31\uC5C5 \uD30C\uC77C\uACFC \uC800\uC7A5\uB41C \uC138\uC158\uC758 \uBC84\uC804 \uAE30\uB85D\uC744 \uC0AD\uC81C\uD569\uB2C8\uB2E4. \uD604\uC7AC \uC138\uC158\uACFC \uC124\uC815\uC740 \uC720\uC9C0\uB429\uB2C8\uB2E4.",
+        settingsResetBackupsAndHistoryBtn: "\uC0AD\uC81C",
+        confirmResetBackupsAndHistory: "\uBAA8\uB4E0 \uBC31\uC5C5\uACFC \uBC84\uC804 \uAE30\uB85D\uC744 \uC0AD\uC81C\uD558\uC2DC\uACA0\uC2B5\uB2C8\uAE4C? \uC774 \uC791\uC5C5\uC740 \uB418\uB3CC\uB9B4 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4.",
+        resetBackupsAndHistoryHint: "\uBC31\uC5C5 \uD30C\uC77C\uACFC \uC138\uC158\uBCC4 \uBC84\uC804 \uAE30\uB85D\uC744 \uC81C\uAC70\uD558\uC9C0\uB9CC \uD604\uC7AC \uC138\uC158\uACFC \uC124\uC815\uC740 \uC720\uC9C0\uD569\uB2C8\uB2E4.",
+        resetBackupsAndHistoryDone: "\uBC31\uC5C5\uACFC \uBC84\uC804 \uAE30\uB85D\uC774 \uC0AD\uC81C\uB418\uC5C8\uC2B5\uB2C8\uB2E4.",
+        resetBackupsAndHistoryFailed: "\uBC31\uC5C5\uACFC \uBC84\uC804 \uAE30\uB85D \uC0AD\uC81C\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4.",
+        settingsResetSessionsAndSettings: "\uBAA8\uB450 \uCD08\uAE30\uD654",
+        settingsResetSessionsAndSettingsDesc: "\uC124\uC815\uACFC \uC138\uC158\uC744 \uCD08\uAE30\uD654\uD558\uACE0 \uBC31\uC5C5 \uD30C\uC77C\uACFC \uBC84\uC804 \uAE30\uB85D\uC744 \uC0AD\uC81C\uD569\uB2C8\uB2E4.",
+        settingsResetSessionsAndSettingsBtn: "\uBAA8\uB450 \uCD08\uAE30\uD654",
+        confirmResetSessionsAndSettings: "Workspace++ \uB370\uC774\uD130\uB97C \uBAA8\uB450 \uCD08\uAE30\uD654\uD558\uC2DC\uACA0\uC2B5\uB2C8\uAE4C? \uC124\uC815\uACFC \uC138\uC158\uC774 \uCD08\uAE30\uD654\uB418\uACE0 \uBC31\uC5C5\uACFC \uBC84\uC804 \uAE30\uB85D\uC774 \uC0AD\uC81C\uB429\uB2C8\uB2E4. \uC774 \uC791\uC5C5\uC740 \uB418\uB3CC\uB9B4 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4.",
+        resetSessionsAndSettingsDone: "Workspace++ \uB370\uC774\uD130\uAC00 \uCD08\uAE30\uD654\uB418\uC5C8\uC2B5\uB2C8\uB2E4.",
+        resetSessionsAndSettingsFailed: "Workspace++ \uB370\uC774\uD130 \uCD08\uAE30\uD654\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4."
+      },
+      it: {
+        settingsResetBackupsAndHistory: "Elimina backup e cronologia versioni",
+        settingsResetBackupsAndHistoryDesc: "Elimina i file di backup automatici e la cronologia delle versioni salvata delle sessioni. Le sessioni e le impostazioni attuali vengono mantenute.",
+        settingsResetBackupsAndHistoryBtn: "Elimina",
+        confirmResetBackupsAndHistory: "Eliminare tutti i backup e la cronologia delle versioni? Questa azione non pu\xF2 essere annullata.",
+        resetBackupsAndHistoryHint: "Rimuove i file di backup e la cronologia delle versioni per sessione, ma mantiene sessioni e impostazioni attuali.",
+        resetBackupsAndHistoryDone: "Backup e cronologia delle versioni eliminati.",
+        resetBackupsAndHistoryFailed: "Impossibile eliminare backup e cronologia delle versioni.",
+        settingsResetSessionsAndSettings: "Reimposta tutto",
+        settingsResetSessionsAndSettingsDesc: "Reimposta impostazioni e sessioni ed elimina backup e cronologia delle versioni.",
+        settingsResetSessionsAndSettingsBtn: "Reimposta tutto",
+        confirmResetSessionsAndSettings: "Reimpostare tutti i dati di Workspace++? Impostazioni e sessioni verranno reimpostate, e backup e cronologia delle versioni verranno eliminati. Questa azione non pu\xF2 essere annullata.",
+        resetSessionsAndSettingsDone: "I dati di Workspace++ sono stati reimpostati.",
+        resetSessionsAndSettingsFailed: "Impossibile reimpostare i dati di Workspace++."
+      },
+      tr: {
+        settingsResetBackupsAndHistory: "Yedekleri ve s\xFCr\xFCm ge\xE7mi\u015Fini sil",
+        settingsResetBackupsAndHistoryDesc: "Otomatik yedek dosyalar\u0131n\u0131 ve kaydedilmi\u015F oturum s\xFCr\xFCm ge\xE7mi\u015Fini siler. Mevcut oturumlar ve ayarlar korunur.",
+        settingsResetBackupsAndHistoryBtn: "Sil",
+        confirmResetBackupsAndHistory: "T\xFCm yedekler ve s\xFCr\xFCm ge\xE7mi\u015Fi silinsin mi? Bu i\u015Flem geri al\u0131namaz.",
+        resetBackupsAndHistoryHint: "Bu i\u015Flem yedek dosyalar\u0131n\u0131 ve oturum ba\u015F\u0131na s\xFCr\xFCm ge\xE7mi\u015Fini kald\u0131r\u0131r, ancak mevcut oturumlar\u0131 ve ayarlar\u0131 korur.",
+        resetBackupsAndHistoryDone: "Yedekler ve s\xFCr\xFCm ge\xE7mi\u015Fi silindi.",
+        resetBackupsAndHistoryFailed: "Yedekler ve s\xFCr\xFCm ge\xE7mi\u015Fi silinemedi.",
+        settingsResetSessionsAndSettings: "T\xFCm\xFCn\xFC s\u0131f\u0131rla",
+        settingsResetSessionsAndSettingsDesc: "Ayarlar\u0131 ve oturumlar\u0131 s\u0131f\u0131rlar, yedekleri ve s\xFCr\xFCm ge\xE7mi\u015Fini siler.",
+        settingsResetSessionsAndSettingsBtn: "T\xFCm\xFCn\xFC s\u0131f\u0131rla",
+        confirmResetSessionsAndSettings: "T\xFCm Workspace++ verileri s\u0131f\u0131rlans\u0131n m\u0131? Ayarlar ve oturumlar s\u0131f\u0131rlanacak, yedekler ve s\xFCr\xFCm ge\xE7mi\u015Fi silinecek. Bu i\u015Flem geri al\u0131namaz.",
+        resetSessionsAndSettingsDone: "Workspace++ verileri s\u0131f\u0131rland\u0131.",
+        resetSessionsAndSettingsFailed: "Workspace++ verileri s\u0131f\u0131rlanamad\u0131."
+      },
+      id: {
+        settingsResetBackupsAndHistory: "Hapus cadangan dan riwayat versi",
+        settingsResetBackupsAndHistoryDesc: "Menghapus file cadangan otomatis dan riwayat versi sesi yang tersimpan. Sesi dan pengaturan saat ini tetap dipertahankan.",
+        settingsResetBackupsAndHistoryBtn: "Hapus",
+        confirmResetBackupsAndHistory: "Hapus semua cadangan dan riwayat versi? Tindakan ini tidak dapat dibatalkan.",
+        resetBackupsAndHistoryHint: "Ini menghapus file cadangan dan riwayat versi per sesi, tetapi mempertahankan sesi dan pengaturan saat ini.",
+        resetBackupsAndHistoryDone: "Cadangan dan riwayat versi telah dihapus.",
+        resetBackupsAndHistoryFailed: "Gagal menghapus cadangan dan riwayat versi.",
+        settingsResetSessionsAndSettings: "Setel ulang semua",
+        settingsResetSessionsAndSettingsDesc: "Menyetel ulang pengaturan dan sesi, serta menghapus cadangan dan riwayat versi.",
+        settingsResetSessionsAndSettingsBtn: "Setel ulang semua",
+        confirmResetSessionsAndSettings: "Setel ulang semua data Workspace++? Pengaturan dan sesi akan disetel ulang, serta cadangan dan riwayat versi akan dihapus. Tindakan ini tidak dapat dibatalkan.",
+        resetSessionsAndSettingsDone: "Data Workspace++ telah disetel ulang.",
+        resetSessionsAndSettingsFailed: "Gagal menyetel ulang data Workspace++."
+      },
+      vi: {
+        settingsResetBackupsAndHistory: "X\xF3a b\u1EA3n sao l\u01B0u v\xE0 l\u1ECBch s\u1EED phi\xEAn b\u1EA3n",
+        settingsResetBackupsAndHistoryDesc: "X\xF3a c\xE1c t\u1EC7p sao l\u01B0u t\u1EF1 \u0111\u1ED9ng v\xE0 l\u1ECBch s\u1EED phi\xEAn b\u1EA3n \u0111\xE3 l\u01B0u c\u1EE7a phi\xEAn. C\xE1c phi\xEAn v\xE0 c\xE0i \u0111\u1EB7t hi\u1EC7n t\u1EA1i v\u1EABn \u0111\u01B0\u1EE3c gi\u1EEF l\u1EA1i.",
+        settingsResetBackupsAndHistoryBtn: "X\xF3a",
+        confirmResetBackupsAndHistory: "X\xF3a t\u1EA5t c\u1EA3 b\u1EA3n sao l\u01B0u v\xE0 l\u1ECBch s\u1EED phi\xEAn b\u1EA3n? Kh\xF4ng th\u1EC3 ho\xE0n t\xE1c thao t\xE1c n\xE0y.",
+        resetBackupsAndHistoryHint: "Thao t\xE1c n\xE0y x\xF3a c\xE1c t\u1EC7p sao l\u01B0u v\xE0 l\u1ECBch s\u1EED phi\xEAn b\u1EA3n theo t\u1EEBng phi\xEAn, nh\u01B0ng gi\u1EEF l\u1EA1i c\xE1c phi\xEAn v\xE0 c\xE0i \u0111\u1EB7t hi\u1EC7n t\u1EA1i.",
+        resetBackupsAndHistoryDone: "\u0110\xE3 x\xF3a b\u1EA3n sao l\u01B0u v\xE0 l\u1ECBch s\u1EED phi\xEAn b\u1EA3n.",
+        resetBackupsAndHistoryFailed: "Kh\xF4ng th\u1EC3 x\xF3a b\u1EA3n sao l\u01B0u v\xE0 l\u1ECBch s\u1EED phi\xEAn b\u1EA3n.",
+        settingsResetSessionsAndSettings: "\u0110\u1EB7t l\u1EA1i t\u1EA5t c\u1EA3",
+        settingsResetSessionsAndSettingsDesc: "\u0110\u1EB7t l\u1EA1i c\xE0i \u0111\u1EB7t v\xE0 phi\xEAn, \u0111\u1ED3ng th\u1EDDi x\xF3a b\u1EA3n sao l\u01B0u v\xE0 l\u1ECBch s\u1EED phi\xEAn b\u1EA3n.",
+        settingsResetSessionsAndSettingsBtn: "\u0110\u1EB7t l\u1EA1i t\u1EA5t c\u1EA3",
+        confirmResetSessionsAndSettings: "\u0110\u1EB7t l\u1EA1i to\xE0n b\u1ED9 d\u1EEF li\u1EC7u Workspace++? C\xE0i \u0111\u1EB7t v\xE0 phi\xEAn s\u1EBD \u0111\u01B0\u1EE3c \u0111\u1EB7t l\u1EA1i, c\xF2n b\u1EA3n sao l\u01B0u v\xE0 l\u1ECBch s\u1EED phi\xEAn b\u1EA3n s\u1EBD b\u1ECB x\xF3a. Kh\xF4ng th\u1EC3 ho\xE0n t\xE1c thao t\xE1c n\xE0y.",
+        resetSessionsAndSettingsDone: "D\u1EEF li\u1EC7u Workspace++ \u0111\xE3 \u0111\u01B0\u1EE3c \u0111\u1EB7t l\u1EA1i.",
+        resetSessionsAndSettingsFailed: "Kh\xF4ng th\u1EC3 \u0111\u1EB7t l\u1EA1i d\u1EEF li\u1EC7u Workspace++."
+      },
+      th: {
+        settingsResetBackupsAndHistory: "\u0E25\u0E1A\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E2A\u0E33\u0E23\u0E2D\u0E07\u0E41\u0E25\u0E30\u0E1B\u0E23\u0E30\u0E27\u0E31\u0E15\u0E34\u0E40\u0E27\u0E2D\u0E23\u0E4C\u0E0A\u0E31\u0E19",
+        settingsResetBackupsAndHistoryDesc: "\u0E25\u0E1A\u0E44\u0E1F\u0E25\u0E4C\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E2A\u0E33\u0E23\u0E2D\u0E07\u0E2D\u0E31\u0E15\u0E42\u0E19\u0E21\u0E31\u0E15\u0E34\u0E41\u0E25\u0E30\u0E1B\u0E23\u0E30\u0E27\u0E31\u0E15\u0E34\u0E40\u0E27\u0E2D\u0E23\u0E4C\u0E0A\u0E31\u0E19\u0E02\u0E2D\u0E07\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E17\u0E35\u0E48\u0E1A\u0E31\u0E19\u0E17\u0E36\u0E01\u0E44\u0E27\u0E49 \u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E41\u0E25\u0E30\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E1B\u0E31\u0E08\u0E08\u0E38\u0E1A\u0E31\u0E19\u0E08\u0E30\u0E22\u0E31\u0E07\u0E04\u0E07\u0E2D\u0E22\u0E39\u0E48",
+        settingsResetBackupsAndHistoryBtn: "\u0E25\u0E1A",
+        confirmResetBackupsAndHistory: "\u0E25\u0E1A\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E2A\u0E33\u0E23\u0E2D\u0E07\u0E41\u0E25\u0E30\u0E1B\u0E23\u0E30\u0E27\u0E31\u0E15\u0E34\u0E40\u0E27\u0E2D\u0E23\u0E4C\u0E0A\u0E31\u0E19\u0E17\u0E31\u0E49\u0E07\u0E2B\u0E21\u0E14\u0E2B\u0E23\u0E37\u0E2D\u0E44\u0E21\u0E48 \u0E01\u0E32\u0E23\u0E14\u0E33\u0E40\u0E19\u0E34\u0E19\u0E01\u0E32\u0E23\u0E19\u0E35\u0E49\u0E44\u0E21\u0E48\u0E2A\u0E32\u0E21\u0E32\u0E23\u0E16\u0E22\u0E49\u0E2D\u0E19\u0E01\u0E25\u0E31\u0E1A\u0E44\u0E14\u0E49",
+        resetBackupsAndHistoryHint: "\u0E01\u0E32\u0E23\u0E14\u0E33\u0E40\u0E19\u0E34\u0E19\u0E01\u0E32\u0E23\u0E19\u0E35\u0E49\u0E08\u0E30\u0E25\u0E1A\u0E44\u0E1F\u0E25\u0E4C\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E2A\u0E33\u0E23\u0E2D\u0E07\u0E41\u0E25\u0E30\u0E1B\u0E23\u0E30\u0E27\u0E31\u0E15\u0E34\u0E40\u0E27\u0E2D\u0E23\u0E4C\u0E0A\u0E31\u0E19\u0E02\u0E2D\u0E07\u0E41\u0E15\u0E48\u0E25\u0E30\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19 \u0E41\u0E15\u0E48\u0E22\u0E31\u0E07\u0E04\u0E07\u0E40\u0E01\u0E47\u0E1A\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E41\u0E25\u0E30\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E1B\u0E31\u0E08\u0E08\u0E38\u0E1A\u0E31\u0E19\u0E44\u0E27\u0E49",
+        resetBackupsAndHistoryDone: "\u0E25\u0E1A\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E2A\u0E33\u0E23\u0E2D\u0E07\u0E41\u0E25\u0E30\u0E1B\u0E23\u0E30\u0E27\u0E31\u0E15\u0E34\u0E40\u0E27\u0E2D\u0E23\u0E4C\u0E0A\u0E31\u0E19\u0E41\u0E25\u0E49\u0E27",
+        resetBackupsAndHistoryFailed: "\u0E44\u0E21\u0E48\u0E2A\u0E32\u0E21\u0E32\u0E23\u0E16\u0E25\u0E1A\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E2A\u0E33\u0E23\u0E2D\u0E07\u0E41\u0E25\u0E30\u0E1B\u0E23\u0E30\u0E27\u0E31\u0E15\u0E34\u0E40\u0E27\u0E2D\u0E23\u0E4C\u0E0A\u0E31\u0E19\u0E44\u0E14\u0E49",
+        settingsResetSessionsAndSettings: "\u0E23\u0E35\u0E40\u0E0B\u0E47\u0E15\u0E17\u0E31\u0E49\u0E07\u0E2B\u0E21\u0E14",
+        settingsResetSessionsAndSettingsDesc: "\u0E23\u0E35\u0E40\u0E0B\u0E47\u0E15\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E41\u0E25\u0E30\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19 \u0E41\u0E25\u0E30\u0E25\u0E1A\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E2A\u0E33\u0E23\u0E2D\u0E07\u0E01\u0E31\u0E1A\u0E1B\u0E23\u0E30\u0E27\u0E31\u0E15\u0E34\u0E40\u0E27\u0E2D\u0E23\u0E4C\u0E0A\u0E31\u0E19",
+        settingsResetSessionsAndSettingsBtn: "\u0E23\u0E35\u0E40\u0E0B\u0E47\u0E15\u0E17\u0E31\u0E49\u0E07\u0E2B\u0E21\u0E14",
+        confirmResetSessionsAndSettings: "\u0E23\u0E35\u0E40\u0E0B\u0E47\u0E15\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25 Workspace++ \u0E17\u0E31\u0E49\u0E07\u0E2B\u0E21\u0E14\u0E2B\u0E23\u0E37\u0E2D\u0E44\u0E21\u0E48 \u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E41\u0E25\u0E30\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E08\u0E30\u0E16\u0E39\u0E01\u0E23\u0E35\u0E40\u0E0B\u0E47\u0E15 \u0E41\u0E25\u0E30\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E2A\u0E33\u0E23\u0E2D\u0E07\u0E01\u0E31\u0E1A\u0E1B\u0E23\u0E30\u0E27\u0E31\u0E15\u0E34\u0E40\u0E27\u0E2D\u0E23\u0E4C\u0E0A\u0E31\u0E19\u0E08\u0E30\u0E16\u0E39\u0E01\u0E25\u0E1A \u0E01\u0E32\u0E23\u0E14\u0E33\u0E40\u0E19\u0E34\u0E19\u0E01\u0E32\u0E23\u0E19\u0E35\u0E49\u0E44\u0E21\u0E48\u0E2A\u0E32\u0E21\u0E32\u0E23\u0E16\u0E22\u0E49\u0E2D\u0E19\u0E01\u0E25\u0E31\u0E1A\u0E44\u0E14\u0E49",
+        resetSessionsAndSettingsDone: "\u0E23\u0E35\u0E40\u0E0B\u0E47\u0E15\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25 Workspace++ \u0E41\u0E25\u0E49\u0E27",
+        resetSessionsAndSettingsFailed: "\u0E44\u0E21\u0E48\u0E2A\u0E32\u0E21\u0E32\u0E23\u0E16\u0E23\u0E35\u0E40\u0E0B\u0E47\u0E15\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25 Workspace++ \u0E44\u0E14\u0E49"
+      },
+      hi: {
+        settingsResetBackupsAndHistory: "\u092C\u0948\u0915\u0905\u092A \u0914\u0930 \u0938\u0902\u0938\u094D\u0915\u0930\u0923 \u0907\u0924\u093F\u0939\u093E\u0938 \u092E\u093F\u091F\u093E\u090F\u0901",
+        settingsResetBackupsAndHistoryDesc: "\u0911\u091F\u094B\u092E\u0948\u091F\u093F\u0915 \u092C\u0948\u0915\u0905\u092A \u092B\u093C\u093E\u0907\u0932\u0947\u0902 \u0914\u0930 \u0938\u0939\u0947\u091C\u0947 \u0917\u090F \u0938\u0924\u094D\u0930\u094B\u0902 \u0915\u093E \u0938\u0902\u0938\u094D\u0915\u0930\u0923 \u0907\u0924\u093F\u0939\u093E\u0938 \u092E\u093F\u091F\u093E\u090F\u0901\u0964 \u092E\u094C\u091C\u0942\u0926\u093E \u0938\u0924\u094D\u0930 \u0914\u0930 \u0938\u0947\u091F\u093F\u0902\u0917 \u092C\u0928\u0940 \u0930\u0939\u0947\u0902\u0917\u0940\u0964",
+        settingsResetBackupsAndHistoryBtn: "\u092E\u093F\u091F\u093E\u090F\u0901",
+        confirmResetBackupsAndHistory: "\u0938\u092D\u0940 \u092C\u0948\u0915\u0905\u092A \u0914\u0930 \u0938\u0902\u0938\u094D\u0915\u0930\u0923 \u0907\u0924\u093F\u0939\u093E\u0938 \u092E\u093F\u091F\u093E\u090F\u0901? \u092F\u0939 \u0915\u093E\u0930\u094D\u0930\u0935\u093E\u0908 \u0935\u093E\u092A\u0938 \u0928\u0939\u0940\u0902 \u0915\u0940 \u091C\u093E \u0938\u0915\u0924\u0940\u0964",
+        resetBackupsAndHistoryHint: "\u092F\u0939 \u092C\u0948\u0915\u0905\u092A \u092B\u093C\u093E\u0907\u0932\u0947\u0902 \u0914\u0930 \u0939\u0930 \u0938\u0924\u094D\u0930 \u0915\u093E \u0938\u0902\u0938\u094D\u0915\u0930\u0923 \u0907\u0924\u093F\u0939\u093E\u0938 \u0939\u091F\u093E\u0924\u093E \u0939\u0948, \u0932\u0947\u0915\u093F\u0928 \u092E\u094C\u091C\u0942\u0926\u093E \u0938\u0924\u094D\u0930 \u0914\u0930 \u0938\u0947\u091F\u093F\u0902\u0917 \u0930\u0916\u0924\u093E \u0939\u0948\u0964",
+        resetBackupsAndHistoryDone: "\u092C\u0948\u0915\u0905\u092A \u0914\u0930 \u0938\u0902\u0938\u094D\u0915\u0930\u0923 \u0907\u0924\u093F\u0939\u093E\u0938 \u092E\u093F\u091F\u093E \u0926\u093F\u090F \u0917\u090F\u0964",
+        resetBackupsAndHistoryFailed: "\u092C\u0948\u0915\u0905\u092A \u0914\u0930 \u0938\u0902\u0938\u094D\u0915\u0930\u0923 \u0907\u0924\u093F\u0939\u093E\u0938 \u092E\u093F\u091F\u093E\u090F \u0928\u0939\u0940\u0902 \u091C\u093E \u0938\u0915\u0947\u0964",
+        settingsResetSessionsAndSettings: "\u0938\u092C \u0915\u0941\u091B \u0930\u0940\u0938\u0947\u091F \u0915\u0930\u0947\u0902",
+        settingsResetSessionsAndSettingsDesc: "\u0938\u0947\u091F\u093F\u0902\u0917 \u0914\u0930 \u0938\u0924\u094D\u0930 \u0930\u0940\u0938\u0947\u091F \u0915\u0930\u0947\u0902, \u0914\u0930 \u092C\u0948\u0915\u0905\u092A \u0935 \u0938\u0902\u0938\u094D\u0915\u0930\u0923 \u0907\u0924\u093F\u0939\u093E\u0938 \u092E\u093F\u091F\u093E\u090F\u0901\u0964",
+        settingsResetSessionsAndSettingsBtn: "\u0938\u092C \u0930\u0940\u0938\u0947\u091F \u0915\u0930\u0947\u0902",
+        confirmResetSessionsAndSettings: "Workspace++ \u0915\u093E \u0938\u093E\u0930\u093E \u0921\u0947\u091F\u093E \u0930\u0940\u0938\u0947\u091F \u0915\u0930\u0947\u0902? \u0938\u0947\u091F\u093F\u0902\u0917 \u0914\u0930 \u0938\u0924\u094D\u0930 \u0930\u0940\u0938\u0947\u091F \u0939\u094B\u0902\u0917\u0947, \u0914\u0930 \u092C\u0948\u0915\u0905\u092A \u0935 \u0938\u0902\u0938\u094D\u0915\u0930\u0923 \u0907\u0924\u093F\u0939\u093E\u0938 \u092E\u093F\u091F\u0947\u0902\u0917\u0947\u0964 \u092F\u0939 \u0915\u093E\u0930\u094D\u0930\u0935\u093E\u0908 \u0935\u093E\u092A\u0938 \u0928\u0939\u0940\u0902 \u0915\u0940 \u091C\u093E \u0938\u0915\u0924\u0940\u0964",
+        resetSessionsAndSettingsDone: "Workspace++ \u0921\u0947\u091F\u093E \u0930\u0940\u0938\u0947\u091F \u0915\u0930 \u0926\u093F\u092F\u093E \u0917\u092F\u093E\u0964",
+        resetSessionsAndSettingsFailed: "Workspace++ \u0921\u0947\u091F\u093E \u0930\u0940\u0938\u0947\u091F \u0928\u0939\u0940\u0902 \u0939\u094B \u0938\u0915\u093E\u0964"
+      },
+      bn: {
+        settingsResetBackupsAndHistory: "\u09AC\u09CD\u09AF\u09BE\u0995\u0986\u09AA \u0993 \u09B8\u0982\u09B8\u09CD\u0995\u09B0\u09A3 \u0987\u09A4\u09BF\u09B9\u09BE\u09B8 \u09AE\u09C1\u099B\u09C1\u09A8",
+        settingsResetBackupsAndHistoryDesc: "\u09B8\u09CD\u09AC\u09AF\u09BC\u0982\u0995\u09CD\u09B0\u09BF\u09AF\u09BC \u09AC\u09CD\u09AF\u09BE\u0995\u0986\u09AA \u09AB\u09BE\u0987\u09B2 \u098F\u09AC\u0982 \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09BF\u09A4 \u09B8\u09C7\u09B6\u09A8\u09C7\u09B0 \u09B8\u0982\u09B8\u09CD\u0995\u09B0\u09A3 \u0987\u09A4\u09BF\u09B9\u09BE\u09B8 \u09AE\u09C1\u099B\u09C7 \u09A6\u09C7\u09AF\u09BC\u0964 \u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u09B8\u09C7\u09B6\u09A8 \u0993 \u09B8\u09C7\u099F\u09BF\u0982\u09B8 \u09B0\u09BE\u0996\u09BE \u09B9\u09AC\u09C7\u0964",
+        settingsResetBackupsAndHistoryBtn: "\u09AE\u09C1\u099B\u09C1\u09A8",
+        confirmResetBackupsAndHistory: "\u09B8\u09AC \u09AC\u09CD\u09AF\u09BE\u0995\u0986\u09AA \u0993 \u09B8\u0982\u09B8\u09CD\u0995\u09B0\u09A3 \u0987\u09A4\u09BF\u09B9\u09BE\u09B8 \u09AE\u09C1\u099B\u09AC\u09C7\u09A8? \u098F\u0987 \u0995\u09BE\u099C\u099F\u09BF \u0986\u09B0 \u09AB\u09BF\u09B0\u09BF\u09AF\u09BC\u09C7 \u0986\u09A8\u09BE \u09AF\u09BE\u09AC\u09C7 \u09A8\u09BE\u0964",
+        resetBackupsAndHistoryHint: "\u098F\u099F\u09BF \u09AC\u09CD\u09AF\u09BE\u0995\u0986\u09AA \u09AB\u09BE\u0987\u09B2 \u098F\u09AC\u0982 \u09AA\u09CD\u09B0\u09A4\u09BF\u099F\u09BF \u09B8\u09C7\u09B6\u09A8\u09C7\u09B0 \u09B8\u0982\u09B8\u09CD\u0995\u09B0\u09A3 \u0987\u09A4\u09BF\u09B9\u09BE\u09B8 \u09AE\u09C1\u099B\u09C7 \u09A6\u09C7\u09AF\u09BC, \u09A4\u09AC\u09C7 \u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u09B8\u09C7\u09B6\u09A8 \u0993 \u09B8\u09C7\u099F\u09BF\u0982\u09B8 \u09B0\u09BE\u0996\u09C7\u0964",
+        resetBackupsAndHistoryDone: "\u09AC\u09CD\u09AF\u09BE\u0995\u0986\u09AA \u0993 \u09B8\u0982\u09B8\u09CD\u0995\u09B0\u09A3 \u0987\u09A4\u09BF\u09B9\u09BE\u09B8 \u09AE\u09C1\u099B\u09C7 \u09AB\u09C7\u09B2\u09BE \u09B9\u09AF\u09BC\u09C7\u099B\u09C7\u0964",
+        resetBackupsAndHistoryFailed: "\u09AC\u09CD\u09AF\u09BE\u0995\u0986\u09AA \u0993 \u09B8\u0982\u09B8\u09CD\u0995\u09B0\u09A3 \u0987\u09A4\u09BF\u09B9\u09BE\u09B8 \u09AE\u09C1\u099B\u09A4\u09C7 \u09AC\u09CD\u09AF\u09B0\u09CD\u09A5 \u09B9\u09AF\u09BC\u09C7\u099B\u09C7\u0964",
+        settingsResetSessionsAndSettings: "\u09B8\u09AC \u09B0\u09BF\u09B8\u09C7\u099F \u0995\u09B0\u09C1\u09A8",
+        settingsResetSessionsAndSettingsDesc: "\u09B8\u09C7\u099F\u09BF\u0982\u09B8 \u0993 \u09B8\u09C7\u09B6\u09A8 \u09B0\u09BF\u09B8\u09C7\u099F \u0995\u09B0\u09C7, \u098F\u09AC\u0982 \u09AC\u09CD\u09AF\u09BE\u0995\u0986\u09AA \u0993 \u09B8\u0982\u09B8\u09CD\u0995\u09B0\u09A3 \u0987\u09A4\u09BF\u09B9\u09BE\u09B8 \u09AE\u09C1\u099B\u09C7 \u09A6\u09C7\u09AF\u09BC\u0964",
+        settingsResetSessionsAndSettingsBtn: "\u09B8\u09AC \u09B0\u09BF\u09B8\u09C7\u099F",
+        confirmResetSessionsAndSettings: "Workspace++-\u098F\u09B0 \u09B8\u09AC \u09A1\u09C7\u099F\u09BE \u09B0\u09BF\u09B8\u09C7\u099F \u0995\u09B0\u09AC\u09C7\u09A8? \u09B8\u09C7\u099F\u09BF\u0982\u09B8 \u0993 \u09B8\u09C7\u09B6\u09A8 \u09B0\u09BF\u09B8\u09C7\u099F \u09B9\u09AC\u09C7, \u098F\u09AC\u0982 \u09AC\u09CD\u09AF\u09BE\u0995\u0986\u09AA \u0993 \u09B8\u0982\u09B8\u09CD\u0995\u09B0\u09A3 \u0987\u09A4\u09BF\u09B9\u09BE\u09B8 \u09AE\u09C1\u099B\u09C7 \u09AF\u09BE\u09AC\u09C7\u0964 \u098F\u0987 \u0995\u09BE\u099C\u099F\u09BF \u0986\u09B0 \u09AB\u09BF\u09B0\u09BF\u09AF\u09BC\u09C7 \u0986\u09A8\u09BE \u09AF\u09BE\u09AC\u09C7 \u09A8\u09BE\u0964",
+        resetSessionsAndSettingsDone: "Workspace++ \u09A1\u09C7\u099F\u09BE \u09B0\u09BF\u09B8\u09C7\u099F \u0995\u09B0\u09BE \u09B9\u09AF\u09BC\u09C7\u099B\u09C7\u0964",
+        resetSessionsAndSettingsFailed: "Workspace++ \u09A1\u09C7\u099F\u09BE \u09B0\u09BF\u09B8\u09C7\u099F \u0995\u09B0\u09A4\u09C7 \u09AC\u09CD\u09AF\u09B0\u09CD\u09A5 \u09B9\u09AF\u09BC\u09C7\u099B\u09C7\u0964"
+      },
+      fa: {
+        settingsResetBackupsAndHistory: "\u062D\u0630\u0641 \u067E\u0634\u062A\u06CC\u0628\u0627\u0646\u200C\u0647\u0627 \u0648 \u062A\u0627\u0631\u06CC\u062E\u0686\u0647 \u0646\u0633\u062E\u0647\u200C\u0647\u0627",
+        settingsResetBackupsAndHistoryDesc: "\u0641\u0627\u06CC\u0644\u200C\u0647\u0627\u06CC \u067E\u0634\u062A\u06CC\u0628\u0627\u0646 \u062E\u0648\u062F\u06A9\u0627\u0631 \u0648 \u062A\u0627\u0631\u06CC\u062E\u0686\u0647 \u0646\u0633\u062E\u0647 \u0646\u0634\u0633\u062A\u200C\u0647\u0627\u06CC \u0630\u062E\u06CC\u0631\u0647\u200C\u0634\u062F\u0647 \u0631\u0627 \u062D\u0630\u0641 \u0645\u06CC\u200C\u06A9\u0646\u062F. \u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u0648 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0641\u0639\u0644\u06CC \u062D\u0641\u0638 \u0645\u06CC\u200C\u0634\u0648\u0646\u062F.",
+        settingsResetBackupsAndHistoryBtn: "\u062D\u0630\u0641",
+        confirmResetBackupsAndHistory: "\u0647\u0645\u0647 \u067E\u0634\u062A\u06CC\u0628\u0627\u0646\u200C\u0647\u0627 \u0648 \u062A\u0627\u0631\u06CC\u062E\u0686\u0647 \u0646\u0633\u062E\u0647\u200C\u0647\u0627 \u062D\u0630\u0641 \u0634\u0648\u0646\u062F\u061F \u0627\u06CC\u0646 \u06A9\u0627\u0631 \u0642\u0627\u0628\u0644 \u0628\u0627\u0632\u06AF\u0634\u062A \u0646\u06CC\u0633\u062A.",
+        resetBackupsAndHistoryHint: "\u0627\u06CC\u0646 \u06A9\u0627\u0631 \u0641\u0627\u06CC\u0644\u200C\u0647\u0627\u06CC \u067E\u0634\u062A\u06CC\u0628\u0627\u0646 \u0648 \u062A\u0627\u0631\u06CC\u062E\u0686\u0647 \u0646\u0633\u062E\u0647 \u0647\u0631 \u0646\u0634\u0633\u062A \u0631\u0627 \u062D\u0630\u0641 \u0645\u06CC\u200C\u06A9\u0646\u062F\u060C \u0627\u0645\u0627 \u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u0648 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0641\u0639\u0644\u06CC \u0631\u0627 \u0646\u06AF\u0647 \u0645\u06CC\u200C\u062F\u0627\u0631\u062F.",
+        resetBackupsAndHistoryDone: "\u067E\u0634\u062A\u06CC\u0628\u0627\u0646\u200C\u0647\u0627 \u0648 \u062A\u0627\u0631\u06CC\u062E\u0686\u0647 \u0646\u0633\u062E\u0647\u200C\u0647\u0627 \u062D\u0630\u0641 \u0634\u062F\u0646\u062F.",
+        resetBackupsAndHistoryFailed: "\u062D\u0630\u0641 \u067E\u0634\u062A\u06CC\u0628\u0627\u0646\u200C\u0647\u0627 \u0648 \u062A\u0627\u0631\u06CC\u062E\u0686\u0647 \u0646\u0633\u062E\u0647\u200C\u0647\u0627 \u0646\u0627\u0645\u0648\u0641\u0642 \u0628\u0648\u062F.",
+        settingsResetSessionsAndSettings: "\u0628\u0627\u0632\u0646\u0634\u0627\u0646\u06CC \u0647\u0645\u0647",
+        settingsResetSessionsAndSettingsDesc: "\u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0648 \u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u0631\u0627 \u0628\u0627\u0632\u0646\u0634\u0627\u0646\u06CC \u0645\u06CC\u200C\u06A9\u0646\u062F \u0648 \u067E\u0634\u062A\u06CC\u0628\u0627\u0646\u200C\u0647\u0627 \u0648 \u062A\u0627\u0631\u06CC\u062E\u0686\u0647 \u0646\u0633\u062E\u0647\u200C\u0647\u0627 \u0631\u0627 \u062D\u0630\u0641 \u0645\u06CC\u200C\u06A9\u0646\u062F.",
+        settingsResetSessionsAndSettingsBtn: "\u0628\u0627\u0632\u0646\u0634\u0627\u0646\u06CC \u0647\u0645\u0647",
+        confirmResetSessionsAndSettings: "\u0647\u0645\u0647 \u062F\u0627\u062F\u0647\u200C\u0647\u0627\u06CC Workspace++ \u0628\u0627\u0632\u0646\u0634\u0627\u0646\u06CC \u0634\u0648\u0646\u062F\u061F \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0648 \u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u0628\u0627\u0632\u0646\u0634\u0627\u0646\u06CC \u0645\u06CC\u200C\u0634\u0648\u0646\u062F \u0648 \u067E\u0634\u062A\u06CC\u0628\u0627\u0646\u200C\u0647\u0627 \u0648 \u062A\u0627\u0631\u06CC\u062E\u0686\u0647 \u0646\u0633\u062E\u0647\u200C\u0647\u0627 \u062D\u0630\u0641 \u062E\u0648\u0627\u0647\u0646\u062F \u0634\u062F. \u0627\u06CC\u0646 \u06A9\u0627\u0631 \u0642\u0627\u0628\u0644 \u0628\u0627\u0632\u06AF\u0634\u062A \u0646\u06CC\u0633\u062A.",
+        resetSessionsAndSettingsDone: "\u062F\u0627\u062F\u0647\u200C\u0647\u0627\u06CC Workspace++ \u0628\u0627\u0632\u0646\u0634\u0627\u0646\u06CC \u0634\u062F\u0646\u062F.",
+        resetSessionsAndSettingsFailed: "\u0628\u0627\u0632\u0646\u0634\u0627\u0646\u06CC \u062F\u0627\u062F\u0647\u200C\u0647\u0627\u06CC Workspace++ \u0646\u0627\u0645\u0648\u0641\u0642 \u0628\u0648\u062F."
+      },
+      ms: {
+        settingsResetBackupsAndHistory: "Padam sandaran dan sejarah versi",
+        settingsResetBackupsAndHistoryDesc: "Memadam fail sandaran automatik dan sejarah versi sesi yang disimpan. Sesi dan tetapan semasa dikekalkan.",
+        settingsResetBackupsAndHistoryBtn: "Padam",
+        confirmResetBackupsAndHistory: "Padam semua sandaran dan sejarah versi? Tindakan ini tidak boleh dibuat asal.",
+        resetBackupsAndHistoryHint: "Ini membuang fail sandaran dan sejarah versi setiap sesi, tetapi mengekalkan sesi dan tetapan semasa.",
+        resetBackupsAndHistoryDone: "Sandaran dan sejarah versi telah dipadam.",
+        resetBackupsAndHistoryFailed: "Gagal memadam sandaran dan sejarah versi.",
+        settingsResetSessionsAndSettings: "Tetapkan semula semua",
+        settingsResetSessionsAndSettingsDesc: "Menetapkan semula tetapan dan sesi, serta memadam sandaran dan sejarah versi.",
+        settingsResetSessionsAndSettingsBtn: "Tetapkan semula semua",
+        confirmResetSessionsAndSettings: "Tetapkan semula semua data Workspace++? Tetapan dan sesi akan ditetapkan semula, dan sandaran serta sejarah versi akan dipadam. Tindakan ini tidak boleh dibuat asal.",
+        resetSessionsAndSettingsDone: "Data Workspace++ telah ditetapkan semula.",
+        resetSessionsAndSettingsFailed: "Gagal menetapkan semula data Workspace++."
+      },
+      pl: {
+        settingsResetBackupsAndHistory: "Usu\u0144 kopie zapasowe i histori\u0119 wersji",
+        settingsResetBackupsAndHistoryDesc: "Usuwa automatyczne pliki kopii zapasowych i zapisan\u0105 histori\u0119 wersji sesji. Bie\u017C\u0105ce sesje i ustawienia pozostan\u0105.",
+        settingsResetBackupsAndHistoryBtn: "Usu\u0144",
+        confirmResetBackupsAndHistory: "Usun\u0105\u0107 wszystkie kopie zapasowe i histori\u0119 wersji? Tej operacji nie mo\u017Cna cofn\u0105\u0107.",
+        resetBackupsAndHistoryHint: "Usuwa pliki kopii zapasowych i histori\u0119 wersji poszczeg\xF3lnych sesji, ale zachowuje bie\u017C\u0105ce sesje i ustawienia.",
+        resetBackupsAndHistoryDone: "Kopie zapasowe i historia wersji zosta\u0142y usuni\u0119te.",
+        resetBackupsAndHistoryFailed: "Nie uda\u0142o si\u0119 usun\u0105\u0107 kopii zapasowych i historii wersji.",
+        settingsResetSessionsAndSettings: "Zresetuj wszystko",
+        settingsResetSessionsAndSettingsDesc: "Resetuje ustawienia i sesje oraz usuwa kopie zapasowe i histori\u0119 wersji.",
+        settingsResetSessionsAndSettingsBtn: "Zresetuj wszystko",
+        confirmResetSessionsAndSettings: "Zresetowa\u0107 wszystkie dane Workspace++? Ustawienia i sesje zostan\u0105 zresetowane, a kopie zapasowe i historia wersji usuni\u0119te. Tej operacji nie mo\u017Cna cofn\u0105\u0107.",
+        resetSessionsAndSettingsDone: "Dane Workspace++ zosta\u0142y zresetowane.",
+        resetSessionsAndSettingsFailed: "Nie uda\u0142o si\u0119 zresetowa\u0107 danych Workspace++."
+      }
+    };
+    var resetLangs = Object.keys(RESET_STRINGS);
+    for (resetLangIndex = 0; resetLangIndex < resetLangs.length; resetLangIndex++) {
+      resetLang = resetLangs[resetLangIndex];
+      if (!STRINGS[resetLang]) continue;
+      resetKeys = Object.keys(RESET_STRINGS[resetLang]);
+      for (resetKeyIndex = 0; resetKeyIndex < resetKeys.length; resetKeyIndex++) {
+        resetKey = resetKeys[resetKeyIndex];
+        STRINGS[resetLang][resetKey] = RESET_STRINGS[resetLang][resetKey];
+      }
+    }
+    var resetLang;
+    var resetKeys;
+    var resetKey;
+    var resetKeyIndex;
+    var resetLangIndex;
     var LANG_OPTIONS = {
       en: "English",
       zh: "\u7B80\u4F53\u4E2D\u6587",
@@ -10822,6 +11154,7 @@ var require_settings_context_menu = __commonJS({
         mi.onClick(function() {
           var sessionData = plugin.extractSessionData(plugin.data);
           sessionData._wppSavedAt = Date.now();
+          var backupData = plugin.prepareRotationBackupData(sessionData);
           plugin.ensureDir(plugin.getBackupsDirPath()).then(function() {
             return plugin.copyFileIfExists(
               plugin.getRotationBackupPath(2),
@@ -10835,7 +11168,7 @@ var require_settings_context_menu = __commonJS({
           }).then(function() {
             return plugin.writeJson(
               plugin.getRotationBackupPath(1),
-              sessionData
+              backupData
             );
           }).then(function() {
             plugin._lastRotationBackupAt = Date.now();
@@ -12737,6 +13070,7 @@ var require_settings = __commonJS({
                 btn.setDisabled(true);
                 var sessionData = self.plugin.extractSessionData(self.plugin.data);
                 sessionData._wppSavedAt = Date.now();
+                var backupData = self.plugin.prepareRotationBackupData(sessionData);
                 self.plugin.ensureDir(self.plugin.getBackupsDirPath()).then(function() {
                   return self.plugin.copyFileIfExists(
                     self.plugin.getRotationBackupPath(2),
@@ -12750,7 +13084,7 @@ var require_settings = __commonJS({
                 }).then(function() {
                   return self.plugin.writeJson(
                     self.plugin.getRotationBackupPath(1),
-                    sessionData
+                    backupData
                   );
                 }).then(function() {
                   self.plugin._lastRotationBackupAt = Date.now();
@@ -12777,6 +13111,9 @@ var require_settings = __commonJS({
                     absoluteTime = String(backup.savedAt);
                   }
                   var relativeTime = formatRelativeTime(backup.savedAt);
+                  var backupSummary = relativeTime + "  \xB7  " + L.rotationBackupGeneration(backup.sessionCount);
+                  var backupDesc = absoluteTime;
+                  if (backup.backupPlatform) backupDesc += "  \xB7  " + backup.backupPlatform;
                   var setting = new obsidian2.Setting(backupListEl);
                   var nameEl = setting.nameEl;
                   var numSpan = document.createElement("span");
@@ -12784,8 +13121,8 @@ var require_settings = __commonJS({
                   numSpan.style.color = "var(--text-accent)";
                   numSpan.style.marginRight = "6px";
                   nameEl.appendChild(numSpan);
-                  nameEl.appendText(relativeTime + "  \xB7  " + L.rotationBackupGeneration(backup.sessionCount));
-                  setting.setDesc(absoluteTime).addButton(function(btn) {
+                  nameEl.appendText(backupSummary);
+                  setting.setDesc(backupDesc).addButton(function(btn) {
                     btn.setButtonText(L.rotationBackupRestore);
                     btn.onClick(function() {
                       new modals2.ConfirmModal(
@@ -12971,6 +13308,20 @@ var require_settings = __commonJS({
               },
               successNotice: L.resetSessionsDone,
               failureNotice: L.resetSessionsFailed
+            });
+            addDangerResetSetting(contentEl, self.app, function() {
+              self.display();
+            }, {
+              name: L.settingsResetBackupsAndHistory,
+              desc: L.settingsResetBackupsAndHistoryDesc,
+              buttonText: L.settingsResetBackupsAndHistoryBtn,
+              confirmMessage: L.confirmResetBackupsAndHistory,
+              confirmHint: L.resetBackupsAndHistoryHint,
+              run: function() {
+                return self.plugin.clearBackupsAndVersionHistory();
+              },
+              successNotice: L.resetBackupsAndHistoryDone,
+              failureNotice: L.resetBackupsAndHistoryFailed
             });
             addDangerResetSetting(contentEl, self.app, function() {
               self.display();
@@ -14785,6 +15136,17 @@ var require_persistence = __commonJS({
       if (typeof stamp !== "number" || !isFinite(stamp)) return 0;
       return stamp;
     }
+    function getBackupPlatformLabel() {
+      var platform = obsidian2.Platform || {};
+      if (platform.isAndroidApp) return "Android";
+      if (platform.isIosApp) return "iOS";
+      if (platform.isMacOS) return "macOS";
+      if (platform.isWin) return "Windows";
+      if (platform.isLinux) return "Linux";
+      if (platform.isMobileApp || platform.isMobile) return "Mobile";
+      if (platform.isDesktopApp || platform.isDesktop) return "Desktop";
+      return "";
+    }
     function pad2(n) {
       return n < 10 ? "0" + n : String(n);
     }
@@ -14816,6 +15178,24 @@ var require_persistence = __commonJS({
       };
       WorkspacePlusPlus2.prototype.getRotationBackupPath = function(generation) {
         return BACKUPS_DIR + "/sessions." + generation + ".json";
+      };
+      WorkspacePlusPlus2.prototype.getBackupFilePaths = function() {
+        return [
+          this.getSessionsBackupPath(),
+          this.getBackupPath(),
+          this.getRotationBackupPath(1),
+          this.getRotationBackupPath(2),
+          this.getRotationBackupPath(3)
+        ];
+      };
+      WorkspacePlusPlus2.prototype.getBackupPlatformLabel = function() {
+        return getBackupPlatformLabel();
+      };
+      WorkspacePlusPlus2.prototype.prepareRotationBackupData = function(sessionData) {
+        var backupData = Object.assign({}, sessionData);
+        var platform = this.getBackupPlatformLabel();
+        if (platform) backupData._wppBackupPlatform = platform;
+        return backupData;
       };
       WorkspacePlusPlus2.prototype.getDefaultSettingsData = function() {
         return pickKeys(DEFAULT_DATA2, SETTINGS_KEYS);
@@ -15031,8 +15411,33 @@ var require_persistence = __commonJS({
         return this.persistData();
       };
       WorkspacePlusPlus2.prototype.resetSessionsAndSettingsToDefault = function() {
+        var self = this;
         this.applyDefaultSettingsToCurrentScope();
-        return this.resetSessionsToDefault();
+        return this.resetSessionsToDefault().then(function() {
+          return self.clearBackupFiles();
+        });
+      };
+      WorkspacePlusPlus2.prototype.clearBackupFiles = function() {
+        var self = this;
+        var paths = this.getBackupFilePaths();
+        var tasks = paths.map(function(path) {
+          return self.removeIfExists(path);
+        });
+        return Promise.all(tasks).then(function() {
+          self._lastRotationBackupAt = 0;
+          return true;
+        });
+      };
+      WorkspacePlusPlus2.prototype.clearBackupsAndVersionHistory = function() {
+        var self = this;
+        var changed = false;
+        if (typeof this.clearVersionHistoryEntries === "function") {
+          changed = this.clearVersionHistoryEntries();
+        }
+        var save = changed ? this.persistData() : Promise.resolve();
+        return save.then(function() {
+          return self.clearBackupFiles();
+        });
       };
       WorkspacePlusPlus2.prototype.getStorageDiagnosticsInfo = function() {
         return {
@@ -15116,34 +15521,40 @@ var require_persistence = __commonJS({
       };
       WorkspacePlusPlus2.prototype.persistDataImmediate = function() {
         var self = this;
-        var sessionData = this.extractSessionData(this.data);
-        var settingsData = Object.assign({}, this.getDefaultSettingsData(), this.extractSettingsData(this.data));
-        var now = Date.now();
-        if (typeof this._lastPersistStamp === "number" && now <= this._lastPersistStamp) {
-          now = this._lastPersistStamp + 1;
-        }
-        this._lastPersistStamp = now;
-        sessionData._wppSavedAt = now;
-        if (this.isUsingLocalSettings()) {
-          if (!this.globalSettings) {
-            this.globalSettings = Object.assign({}, settingsData);
+        var syncBeforeWrite = typeof this.reloadExternalSessionStorageIfChanged === "function" ? this.reloadExternalSessionStorageIfChanged({ mergeLocal: true }) : Promise.resolve(false);
+        return syncBeforeWrite.then(function() {
+          var sessionData = self.extractSessionData(self.data);
+          var settingsData = Object.assign({}, self.getDefaultSettingsData(), self.extractSettingsData(self.data));
+          var now = Date.now();
+          if (typeof self._lastPersistStamp === "number" && now <= self._lastPersistStamp) {
+            now = self._lastPersistStamp + 1;
           }
-        } else {
-          this.globalSettings = Object.assign({}, settingsData);
-        }
-        return this.ensureStorageDir().then(function() {
-          return self.writeJsonWithBackup(
-            self.getSessionsPath(),
-            self.getSessionsBackupPath(),
-            sessionData
-          );
-        }).then(function() {
-          return self.rotateBackupIfNeeded(sessionData);
-        }).then(function() {
-          if (!self.isUsingLocalSettings()) return;
-          return self.writeJson(self.getLocalSettingsPath(), settingsData, true);
-        }).then(function() {
-          return self.persistGlobalSettings();
+          self._lastPersistStamp = now;
+          sessionData._wppSavedAt = now;
+          if (self.isUsingLocalSettings()) {
+            if (!self.globalSettings) {
+              self.globalSettings = Object.assign({}, settingsData);
+            }
+          } else {
+            self.globalSettings = Object.assign({}, settingsData);
+          }
+          return self.ensureStorageDir().then(function() {
+            return self.writeJsonWithBackup(
+              self.getSessionsPath(),
+              self.getSessionsBackupPath(),
+              sessionData
+            );
+          }).then(function() {
+            if (typeof self.recordSessionDataStored !== "function") return true;
+            return self.recordSessionDataStored(sessionData);
+          }).then(function() {
+            return self.rotateBackupIfNeeded(sessionData);
+          }).then(function() {
+            if (!self.isUsingLocalSettings()) return;
+            return self.writeJson(self.getLocalSettingsPath(), settingsData, true);
+          }).then(function() {
+            return self.persistGlobalSettings();
+          });
         });
       };
       WorkspacePlusPlus2.prototype.persistData = function() {
@@ -15194,7 +15605,10 @@ var require_persistence = __commonJS({
             self.getRotationBackupPath(2)
           );
         }).then(function() {
-          return self.writeJson(self.getRotationBackupPath(1), sessionData);
+          return self.writeJson(
+            self.getRotationBackupPath(1),
+            self.prepareRotationBackupData(sessionData)
+          );
         }).catch(function() {
           return;
         });
@@ -15217,7 +15631,13 @@ var require_persistence = __commonJS({
             var stamp = getPersistStamp(res.data);
             var sessions = res.data.sessions;
             var count = sessions && typeof sessions === "object" ? Object.keys(sessions).length : 0;
-            return { generation: n, savedAt: stamp, sessionCount: count };
+            var platform = typeof res.data._wppBackupPlatform === "string" ? res.data._wppBackupPlatform : "";
+            return {
+              generation: n,
+              savedAt: stamp,
+              sessionCount: count,
+              backupPlatform: platform
+            };
           }).catch(function() {
             return null;
           });
@@ -15318,13 +15738,22 @@ var require_persistence = __commonJS({
             }
           }
           if (!useBackup) {
-            return self.normalizeSessionData(mainRes.data);
+            var mainData = self.normalizeSessionData(mainRes.data);
+            if (typeof self.recordSessionStorageState === "function") {
+              self.recordSessionStorageState(mainStamp, mainMtime, mainData);
+            }
+            return mainData;
           }
           var restoredRaw = backupRes.data;
           var restored = self.normalizeSessionData(restoredRaw);
           return self.writeJson(mainPath, restoredRaw).catch(function() {
             return;
           }).then(function() {
+            return self.getFileMtime(mainPath);
+          }).then(function(restoredMtime) {
+            if (typeof self.recordSessionStorageState === "function") {
+              self.recordSessionStorageState(backupStamp, restoredMtime || backupMtime, restored);
+            }
             if (!mainValid) new obsidian2.Notice(L.backupRestored);
             return restored;
           });
@@ -15409,6 +15838,318 @@ var require_persistence = __commonJS({
       };
     }
     module2.exports = attachPersistenceMethods;
+  }
+});
+
+// src/plugin/methods/session-sync.js
+var require_session_sync = __commonJS({
+  "src/plugin/methods/session-sync.js"(exports2, module2) {
+    "use strict";
+    var EXTERNAL_SESSION_RELOAD_DEBOUNCE_MS = 500;
+    var SESSION_FILE_MTIME_EPSILON_MS = 25;
+    var STARTUP_SESSION_RECHECK_DELAYS = [3e3, 1e4];
+    function getPersistStamp(data) {
+      if (!data || typeof data !== "object") return 0;
+      var stamp = data._wppSavedAt;
+      if (typeof stamp !== "number" || !isFinite(stamp)) return 0;
+      return stamp;
+    }
+    function cloneJson(value) {
+      if (value === void 0) return void 0;
+      return JSON.parse(JSON.stringify(value));
+    }
+    function isSessionDataShape(data) {
+      return !!(data && typeof data === "object" && (data.sessions !== void 0 || data.sessionOrder !== void 0 || data.activeSessionId !== void 0));
+    }
+    function getSessionModified(session) {
+      if (!session || typeof session.modified !== "number" || !isFinite(session.modified)) return 0;
+      return session.modified;
+    }
+    function mergeOrder(primary, secondary, validMap) {
+      var out = [];
+      var seen = {};
+      function add(id) {
+        if (!id || seen[id]) return;
+        if (validMap && !validMap[id]) return;
+        seen[id] = true;
+        out.push(id);
+      }
+      var i;
+      primary = Array.isArray(primary) ? primary : [];
+      secondary = Array.isArray(secondary) ? secondary : [];
+      for (i = 0; i < primary.length; i++) add(primary[i]);
+      for (i = 0; i < secondary.length; i++) add(secondary[i]);
+      if (validMap) {
+        var keys = Object.keys(validMap);
+        for (i = 0; i < keys.length; i++) add(keys[i]);
+      }
+      return out;
+    }
+    function mergeObjectWithLocalDeletes(externalObj, localObj, baselineObj) {
+      externalObj = externalObj || {};
+      localObj = localObj || {};
+      baselineObj = baselineObj || {};
+      var out = {};
+      var id;
+      var externalKeys = Object.keys(externalObj);
+      for (var i = 0; i < externalKeys.length; i++) {
+        id = externalKeys[i];
+        if (baselineObj[id] && !localObj[id]) continue;
+        out[id] = cloneJson(externalObj[id]);
+      }
+      var localKeys = Object.keys(localObj);
+      for (i = 0; i < localKeys.length; i++) {
+        id = localKeys[i];
+        out[id] = cloneJson(localObj[id]);
+      }
+      return out;
+    }
+    function attachSessionSyncMethods(WorkspacePlusPlus2) {
+      WorkspacePlusPlus2.prototype.getComparableSessionData = function(data) {
+        var normalized = this.normalizeSessionData(data || {});
+        return {
+          sessions: normalized.sessions || {},
+          sessionOrder: normalized.sessionOrder || [],
+          groups: normalized.groups || {},
+          groupOrder: normalized.groupOrder || [],
+          sessionGroups: normalized.sessionGroups || {}
+        };
+      };
+      WorkspacePlusPlus2.prototype.getComparableSessionDataJson = function(data) {
+        return JSON.stringify(this.getComparableSessionData(data));
+      };
+      WorkspacePlusPlus2.prototype.recordSessionStorageState = function(stamp, mtime, data) {
+        this._sessionStorageStamp = typeof stamp === "number" && isFinite(stamp) ? stamp : 0;
+        this._sessionStorageMtime = typeof mtime === "number" && isFinite(mtime) ? mtime : 0;
+        if (data) {
+          var comparable = this.getComparableSessionData(data);
+          this._sessionStorageComparableData = cloneJson(comparable);
+          this._sessionStorageDataJson = JSON.stringify(comparable);
+        }
+      };
+      WorkspacePlusPlus2.prototype.recordSessionDataStored = function(sessionData) {
+        var self = this;
+        var stamp = getPersistStamp(sessionData);
+        this.recordSessionStorageState(stamp, Date.now(), sessionData);
+        return this.getFileMtime(this.getSessionsPath()).then(function(mtime) {
+          self.recordSessionStorageState(stamp, mtime || self._sessionStorageMtime || 0, sessionData);
+          return true;
+        }).catch(function() {
+          return true;
+        });
+      };
+      WorkspacePlusPlus2.prototype.getSessionStorageInfo = function() {
+        var self = this;
+        var path = this.getSessionsPath();
+        return Promise.all([
+          this.readJsonIfExists(path),
+          this.getFileMtime(path)
+        ]).then(function(parts) {
+          var res = parts[0];
+          var mtime = parts[1] || 0;
+          var valid = !!(res.exists && !res.error && isSessionDataShape(res.data));
+          return {
+            exists: !!res.exists,
+            valid,
+            data: valid ? res.data : null,
+            stamp: valid ? getPersistStamp(res.data) : 0,
+            mtime,
+            path,
+            plugin: self
+          };
+        });
+      };
+      WorkspacePlusPlus2.prototype.isSessionStorageInfoNewer = function(info) {
+        if (!info || !info.valid) return false;
+        var currentStamp = this._sessionStorageStamp || 0;
+        var currentMtime = this._sessionStorageMtime || 0;
+        var nextStamp = info.stamp || 0;
+        var nextMtime = info.mtime || 0;
+        if (nextStamp && currentStamp) {
+          if (nextStamp > currentStamp) return true;
+          if (nextStamp < currentStamp) return false;
+        } else if (nextStamp && !currentStamp) {
+          return true;
+        }
+        return nextMtime > currentMtime + SESSION_FILE_MTIME_EPSILON_MS;
+      };
+      WorkspacePlusPlus2.prototype.hasLocalSessionChangesSinceStorage = function() {
+        if (!this._sessionStorageDataJson) return false;
+        return this.getComparableSessionDataJson(this.data || {}) !== this._sessionStorageDataJson;
+      };
+      WorkspacePlusPlus2.prototype.mergeExternalSessionDataForWrite = function(externalData) {
+        var local = this.extractSessionData(this.data || {});
+        var external = this.normalizeSessionData(externalData || {});
+        var baseline = this._sessionStorageComparableData || {};
+        var baselineSessions = baseline.sessions || {};
+        var localSessions = local.sessions || {};
+        var externalSessions = external.sessions || {};
+        var mergedSessions = {};
+        var id;
+        var externalIds = Object.keys(externalSessions);
+        for (var i = 0; i < externalIds.length; i++) {
+          id = externalIds[i];
+          if (baselineSessions[id] && !localSessions[id] && getSessionModified(externalSessions[id]) <= getSessionModified(baselineSessions[id])) {
+            continue;
+          }
+          mergedSessions[id] = cloneJson(externalSessions[id]);
+        }
+        var localIds = Object.keys(localSessions);
+        for (i = 0; i < localIds.length; i++) {
+          id = localIds[i];
+          if (!mergedSessions[id]) {
+            mergedSessions[id] = cloneJson(localSessions[id]);
+            continue;
+          }
+          if (getSessionModified(localSessions[id]) >= getSessionModified(mergedSessions[id])) {
+            mergedSessions[id] = cloneJson(localSessions[id]);
+          }
+        }
+        var groups = mergeObjectWithLocalDeletes(
+          external.groups || {},
+          local.groups || {},
+          baseline.groups || {}
+        );
+        var sessionGroups = mergeObjectWithLocalDeletes(
+          external.sessionGroups || {},
+          local.sessionGroups || {},
+          baseline.sessionGroups || {}
+        );
+        return this.normalizeSessionData({
+          activeSessionId: local.activeSessionId || external.activeSessionId,
+          sessions: mergedSessions,
+          sessionOrder: mergeOrder(external.sessionOrder, local.sessionOrder, mergedSessions),
+          groups,
+          groupOrder: mergeOrder(external.groupOrder, local.groupOrder, groups),
+          sessionGroups,
+          activeGroupId: local.activeGroupId || external.activeGroupId
+        });
+      };
+      WorkspacePlusPlus2.prototype.applySessionDataFromStorage = function(sessionData, options) {
+        options = options || {};
+        if (!sessionData) return false;
+        var localActiveSessionId = this.data && this.data.activeSessionId;
+        var localActiveGroupId = this.data && this.data.activeGroupId;
+        var next = options.mergeLocal ? this.mergeExternalSessionDataForWrite(sessionData) : this.normalizeSessionData(sessionData);
+        this.data.sessions = next.sessions || {};
+        this.data.sessionOrder = next.sessionOrder || [];
+        this.data.groups = next.groups || {};
+        this.data.groupOrder = next.groupOrder || [];
+        this.data.sessionGroups = next.sessionGroups || {};
+        if (localActiveSessionId && this.data.sessions[localActiveSessionId]) {
+          this.data.activeSessionId = localActiveSessionId;
+        } else if (next.activeSessionId && this.data.sessions[next.activeSessionId]) {
+          this.data.activeSessionId = next.activeSessionId;
+        } else {
+          this.data.activeSessionId = this.data.sessionOrder[0] || Object.keys(this.data.sessions)[0] || null;
+        }
+        if (localActiveGroupId && this.data.groups[localActiveGroupId]) {
+          this.data.activeGroupId = localActiveGroupId;
+        } else if (next.activeGroupId && this.data.groups[next.activeGroupId]) {
+          this.data.activeGroupId = next.activeGroupId;
+        } else {
+          this.data.activeGroupId = null;
+        }
+        this.syncSessionOrder();
+        this.normalizeGroupFeatureState();
+        this.updateStatusBar();
+        this.syncSessionCommands();
+        if (typeof this._refreshOverlaySessions === "function") {
+          this._refreshOverlaySessions();
+        }
+        return true;
+      };
+      WorkspacePlusPlus2.prototype.reloadExternalSessionStorageIfChanged = function(options) {
+        var self = this;
+        options = options || {};
+        return this.getSessionStorageInfo().then(function(info) {
+          if (!options.force && !self.isSessionStorageInfoNewer(info)) {
+            return false;
+          }
+          var mergeLocal = !!options.mergeLocal && self.hasLocalSessionChangesSinceStorage();
+          var previousComparable = self._sessionStorageComparableData ? cloneJson(self._sessionStorageComparableData) : null;
+          var previousComparableJson = self._sessionStorageDataJson || "";
+          return self.loadSessionDataFromStorage().then(function(sessionData) {
+            if (!sessionData) return false;
+            var externalComparable = self._sessionStorageComparableData ? cloneJson(self._sessionStorageComparableData) : null;
+            var externalComparableJson = self._sessionStorageDataJson || "";
+            if (mergeLocal && previousComparable) {
+              self._sessionStorageComparableData = previousComparable;
+              self._sessionStorageDataJson = previousComparableJson;
+            }
+            var applied = self.applySessionDataFromStorage(sessionData, {
+              mergeLocal
+            });
+            if (mergeLocal && externalComparable) {
+              self._sessionStorageComparableData = externalComparable;
+              self._sessionStorageDataJson = externalComparableJson;
+            }
+            return applied;
+          });
+        }).catch(function() {
+          return false;
+        });
+      };
+      WorkspacePlusPlus2.prototype.scheduleExternalSessionStorageReload = function() {
+        var self = this;
+        if (this._externalSessionReloadTimer) {
+          clearTimeout(this._externalSessionReloadTimer);
+        }
+        this._externalSessionReloadTimer = setTimeout(function() {
+          self._externalSessionReloadTimer = null;
+          self.reloadExternalSessionStorageIfChanged({ mergeLocal: false });
+        }, EXTERNAL_SESSION_RELOAD_DEBOUNCE_MS);
+      };
+      WorkspacePlusPlus2.prototype.registerSessionStorageListeners = function() {
+        var self = this;
+        var sessionsPath = this.getSessionsPath();
+        if (this._sessionStorageListenersRegistered) return;
+        this._sessionStorageListenersRegistered = true;
+        this._startupSessionStorageTimers = [];
+        function isSessionsFile(file) {
+          return !!(file && file.path === sessionsPath);
+        }
+        this.registerEvent(this.app.vault.on("modify", function(file) {
+          if (!isSessionsFile(file)) return;
+          self.scheduleExternalSessionStorageReload();
+        }));
+        this.registerEvent(this.app.vault.on("create", function(file) {
+          if (!isSessionsFile(file)) return;
+          self.scheduleExternalSessionStorageReload();
+        }));
+        if (typeof this.registerDomEvent === "function" && typeof window !== "undefined") {
+          this.registerDomEvent(window, "focus", function() {
+            self.scheduleExternalSessionStorageReload();
+          });
+        }
+      };
+      WorkspacePlusPlus2.prototype.scheduleStartupSessionStorageChecks = function() {
+        var self = this;
+        if (!this._startupSessionStorageTimers) this._startupSessionStorageTimers = [];
+        for (var i = 0; i < STARTUP_SESSION_RECHECK_DELAYS.length; i++) {
+          (function(delayMs) {
+            var timer = setTimeout(function() {
+              var idx = self._startupSessionStorageTimers.indexOf(timer);
+              if (idx !== -1) self._startupSessionStorageTimers.splice(idx, 1);
+              self.reloadExternalSessionStorageIfChanged({ mergeLocal: false });
+            }, delayMs);
+            self._startupSessionStorageTimers.push(timer);
+          })(STARTUP_SESSION_RECHECK_DELAYS[i]);
+        }
+      };
+      WorkspacePlusPlus2.prototype.clearSessionStorageSyncTimers = function() {
+        if (this._externalSessionReloadTimer) {
+          clearTimeout(this._externalSessionReloadTimer);
+          this._externalSessionReloadTimer = null;
+        }
+        var timers = this._startupSessionStorageTimers || [];
+        for (var i = 0; i < timers.length; i++) {
+          clearTimeout(timers[i]);
+        }
+        this._startupSessionStorageTimers = [];
+      };
+    }
+    module2.exports = attachSessionSyncMethods;
   }
 });
 
@@ -17323,6 +18064,18 @@ var require_history = __commonJS({
           return ok;
         });
       };
+      WorkspacePlusPlus2.prototype.clearVersionHistoryEntries = function() {
+        var sessions = this.data && this.data.sessions || {};
+        var ids = Object.keys(sessions);
+        var changed = false;
+        for (var i = 0; i < ids.length; i++) {
+          var session = sessions[ids[i]];
+          if (!session || !Object.prototype.hasOwnProperty.call(session, "history")) continue;
+          delete session.history;
+          changed = true;
+        }
+        return changed;
+      };
       WorkspacePlusPlus2.prototype.startHistorySnapshotTimer = function() {
         this.stopHistorySnapshotTimer();
         if (!this.isVersionHistoryEnabled()) return;
@@ -17664,6 +18417,7 @@ var require_methods = __commonJS({
     var attachHotkeyMethods = require_hotkeys();
     var attachOverlayMethods = require_overlays();
     var attachPersistenceMethods = require_persistence();
+    var attachSessionSyncMethods = require_session_sync();
     var attachSessionMethods = require_sessions();
     var attachSessionValidationMethods = require_sessions_validation();
     var attachGroupMethods = require_groups();
@@ -17680,6 +18434,7 @@ var require_methods = __commonJS({
       attachHotkeyMethods(WorkspacePlusPlus2);
       attachOverlayMethods(WorkspacePlusPlus2);
       attachPersistenceMethods(WorkspacePlusPlus2);
+      attachSessionSyncMethods(WorkspacePlusPlus2);
       attachSessionMethods(WorkspacePlusPlus2);
       attachSessionValidationMethods(WorkspacePlusPlus2);
       attachGroupMethods(WorkspacePlusPlus2);
@@ -17880,6 +18635,7 @@ var WorkspacePlusPlus = (
         self.statusBarScrollSwitchAt = 0;
         self.sessionSwitchNotice = null;
         self.syncSessionOrder();
+        self.registerSessionStorageListeners();
         i18n.resolveLocale(self.data.language);
         var L = i18n.L;
         self.addRibbonIcon("panels-top-left", L.ribbonTooltip, function() {
@@ -17907,6 +18663,7 @@ var WorkspacePlusPlus = (
           self.startHistorySnapshotTimer();
           self.initRotationBackupTimestamp();
           self.registerFrontmatterListeners();
+          self.scheduleStartupSessionStorageChecks();
         });
       });
     };
@@ -17929,6 +18686,7 @@ var WorkspacePlusPlus = (
         clearTimeout(this.startupFlushTimer);
         this.startupFlushTimer = null;
       }
+      this.clearSessionStorageSyncTimers();
       this.startupSettleUntil = 0;
       return this.flushPendingPersistence();
     };

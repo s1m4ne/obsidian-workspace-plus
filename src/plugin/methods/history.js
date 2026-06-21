@@ -194,6 +194,21 @@ function attachHistoryMethods(WorkspacePlusPlus) {
         });
     };
 
+    WorkspacePlusPlus.prototype.clearVersionHistoryEntries = function () {
+        var sessions = (this.data && this.data.sessions) || {};
+        var ids = Object.keys(sessions);
+        var changed = false;
+
+        for (var i = 0; i < ids.length; i++) {
+            var session = sessions[ids[i]];
+            if (!session || !Object.prototype.hasOwnProperty.call(session, 'history')) continue;
+            delete session.history;
+            changed = true;
+        }
+
+        return changed;
+    };
+
     // --- Periodic snapshot timer ---
 
     WorkspacePlusPlus.prototype.startHistorySnapshotTimer = function () {
