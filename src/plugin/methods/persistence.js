@@ -501,40 +501,51 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
 
     WorkspacePlusPlus.prototype.persistDataImmediate = function () {
         var self = this;
-        var sessionData = this.extractSessionData(this.data);
-        var settingsData = Object.assign({}, this.getDefaultSettingsData(), this.extractSettingsData(this.data));
-        var now = Date.now();
-        if (typeof this._lastPersistStamp === 'number' && now <= this._lastPersistStamp) {
-            now = this._lastPersistStamp + 1;
-        }
-        this._lastPersistStamp = now;
-        sessionData._wppSavedAt = now;
+        var syncBeforeWrite = typeof this.reloadExternalSessionStorageIfChanged === 'function'
+            ? this.reloadExternalSessionStorageIfChanged({ mergeLocal: true })
+            : Promise.resolve(false);
 
-        if (this.isUsingLocalSettings()) {
-            if (!this.globalSettings) {
-                this.globalSettings = Object.assign({}, settingsData);
-            }
-        } else {
-            this.globalSettings = Object.assign({}, settingsData);
-        }
+        return syncBeforeWrite
+            .then(function () {
+                var sessionData = self.extractSessionData(self.data);
+                var settingsData = Object.assign({}, self.getDefaultSettingsData(), self.extractSettingsData(self.data));
+                var now = Date.now();
+                if (typeof self._lastPersistStamp === 'number' && now <= self._lastPersistStamp) {
+                    now = self._lastPersistStamp + 1;
+                }
+                self._lastPersistStamp = now;
+                sessionData._wppSavedAt = now;
 
-        return this.ensureStorageDir()
-            .then(function () {
-                return self.writeJsonWithBackup(
-                    self.getSessionsPath(),
-                    self.getSessionsBackupPath(),
-                    sessionData
-                );
-            })
-            .then(function () {
-                return self.rotateBackupIfNeeded(sessionData);
-            })
-            .then(function () {
-                if (!self.isUsingLocalSettings()) return;
-                return self.writeJson(self.getLocalSettingsPath(), settingsData, true);
-            })
-            .then(function () {
-                return self.persistGlobalSettings();
+                if (self.isUsingLocalSettings()) {
+                    if (!self.globalSettings) {
+                        self.globalSettings = Object.assign({}, settingsData);
+                    }
+                } else {
+                    self.globalSettings = Object.assign({}, settingsData);
+                }
+
+                return self.ensureStorageDir()
+                    .then(function () {
+                        return self.writeJsonWithBackup(
+                            self.getSessionsPath(),
+                            self.getSessionsBackupPath(),
+                            sessionData
+                        );
+                    })
+                    .then(function () {
+                        if (typeof self.recordSessionDataStored !== 'function') return true;
+                        return self.recordSessionDataStored(sessionData);
+                    })
+                    .then(function () {
+                        return self.rotateBackupIfNeeded(sessionData);
+                    })
+                    .then(function () {
+                        if (!self.isUsingLocalSettings()) return;
+                        return self.writeJson(self.getLocalSettingsPath(), settingsData, true);
+                    })
+                    .then(function () {
+                        return self.persistGlobalSettings();
+                    });
             });
     };
 
@@ -753,7 +764,11 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
             }
 
             if (!useBackup) {
-                return self.normalizeSessionData(mainRes.data);
+                var mainData = self.normalizeSessionData(mainRes.data);
+                if (typeof self.recordSessionStorageState === 'function') {
+                    self.recordSessionStorageState(mainStamp, mainMtime, mainData);
+                }
+                return mainData;
             }
 
             var restoredRaw = backupRes.data;
@@ -761,6 +776,11 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
             return self.writeJson(mainPath, restoredRaw).catch(function () {
                 return;
             }).then(function () {
+                return self.getFileMtime(mainPath);
+            }).then(function (restoredMtime) {
+                if (typeof self.recordSessionStorageState === 'function') {
+                    self.recordSessionStorageState(backupStamp, restoredMtime || backupMtime, restored);
+                }
                 if (!mainValid) new obsidian.Notice(L.backupRestored);
                 return restored;
             });

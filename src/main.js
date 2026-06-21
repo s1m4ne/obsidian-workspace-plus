@@ -55,6 +55,7 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
             self.statusBarScrollSwitchAt = 0;
             self.sessionSwitchNotice = null;
             self.syncSessionOrder();
+            self.registerSessionStorageListeners();
             i18n.resolveLocale(self.data.language);
             var L = i18n.L;
 
@@ -92,6 +93,7 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
                 self.startHistorySnapshotTimer();
                 self.initRotationBackupTimestamp();
                 self.registerFrontmatterListeners();
+                self.scheduleStartupSessionStorageChecks();
             });
         });
     };
@@ -115,6 +117,7 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
             clearTimeout(this.startupFlushTimer);
             this.startupFlushTimer = null;
         }
+        this.clearSessionStorageSyncTimers();
         this.startupSettleUntil = 0;
         return this.flushPendingPersistence();
     };
