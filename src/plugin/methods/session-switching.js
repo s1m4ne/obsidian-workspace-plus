@@ -270,7 +270,7 @@ function attachSessionSwitchingMethods(WorkspacePlusPlus) {
 
             // 3. Apply target layout
             var applyLayout = target.layout
-                ? self.app.workspace.changeLayout(target.layout).catch(function () {})
+                ? self.applyWorkspaceLayout(target.layout)
                 : Promise.resolve();
 
             return applyLayout.then(function () {

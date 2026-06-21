@@ -31,9 +31,11 @@ function loadSessionCrudMethods() {
 }
 
 const attachSessionCrudMethods = loadSessionCrudMethods();
+const attachLayoutRestoreMethods = require('../src/plugin/methods/layout-restore');
 
 function createPlugin(initialData) {
     function PluginMock() {}
+    attachLayoutRestoreMethods(PluginMock);
     attachSessionCrudMethods(PluginMock);
     const plugin = new PluginMock();
     plugin.data = Object.assign({

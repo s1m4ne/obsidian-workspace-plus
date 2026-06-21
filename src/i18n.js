@@ -7487,6 +7487,125 @@ var RESET_STRINGS = {
     },
 };
 
+var RESTORE_STRINGS = {
+    en: {
+        settingsSubsectionSessionRestore: 'Session restore',
+        settingsRestoreSidebars: 'Restore sidebars',
+        settingsRestoreSidebarsDesc: 'When off, switching or restoring a session restores only the main editor area and keeps the current left and right sidebars.',
+    },
+    zh: {
+        settingsSubsectionSessionRestore: '会话恢复',
+        settingsRestoreSidebars: '恢复侧边栏',
+        settingsRestoreSidebarsDesc: '关闭后，切换或恢复会话时只恢复主编辑区，并保留当前左右侧边栏。',
+    },
+    'zh-TW': {
+        settingsSubsectionSessionRestore: '工作階段還原',
+        settingsRestoreSidebars: '還原側邊欄',
+        settingsRestoreSidebarsDesc: '關閉後，切換或還原工作階段時只還原主要編輯區，並保留目前左右側邊欄。',
+    },
+    es: {
+        settingsSubsectionSessionRestore: 'Restauración de sesiones',
+        settingsRestoreSidebars: 'Restaurar barras laterales',
+        settingsRestoreSidebarsDesc: 'Si está desactivado, al cambiar o restaurar una sesión solo se restaura el área principal del editor y se conservan las barras laterales izquierda y derecha actuales.',
+    },
+    fr: {
+        settingsSubsectionSessionRestore: 'Restauration des sessions',
+        settingsRestoreSidebars: 'Restaurer les barres latérales',
+        settingsRestoreSidebarsDesc: 'Si désactivé, le changement ou la restauration d’une session ne restaure que la zone principale de l’éditeur et conserve les barres latérales gauche et droite actuelles.',
+    },
+    ar: {
+        settingsSubsectionSessionRestore: 'استعادة الجلسة',
+        settingsRestoreSidebars: 'استعادة الشريطين الجانبيين',
+        settingsRestoreSidebarsDesc: 'عند إيقافه، يؤدي تبديل جلسة أو استعادتها إلى استعادة منطقة التحرير الرئيسية فقط مع الاحتفاظ بالشريطين الجانبيين الأيسر والأيمن الحاليين.',
+    },
+    pt: {
+        settingsSubsectionSessionRestore: 'Restauração de sessões',
+        settingsRestoreSidebars: 'Restaurar barras laterais',
+        settingsRestoreSidebarsDesc: 'Quando desativado, trocar ou restaurar uma sessão restaura apenas a área principal do editor e mantém as barras laterais esquerda e direita atuais.',
+    },
+    ru: {
+        settingsSubsectionSessionRestore: 'Восстановление сессий',
+        settingsRestoreSidebars: 'Восстанавливать боковые панели',
+        settingsRestoreSidebarsDesc: 'Если выключено, при переключении или восстановлении сессии восстанавливается только основная область редактора, а текущие левая и правая боковые панели сохраняются.',
+    },
+    de: {
+        settingsSubsectionSessionRestore: 'Sitzungswiederherstellung',
+        settingsRestoreSidebars: 'Seitenleisten wiederherstellen',
+        settingsRestoreSidebarsDesc: 'Wenn deaktiviert, wird beim Wechseln oder Wiederherstellen einer Sitzung nur der Haupteditorbereich wiederhergestellt, während die aktuellen linken und rechten Seitenleisten erhalten bleiben.',
+    },
+    ja: {
+        settingsSubsectionSessionRestore: 'セッション復元',
+        settingsRestoreSidebars: 'サイドバーも復元',
+        settingsRestoreSidebarsDesc: 'オフにすると、セッションの切り替えや復元では中央の編集エリアだけを復元し、左右のサイドバーは現在の状態を維持します。',
+    },
+    ko: {
+        settingsSubsectionSessionRestore: '세션 복원',
+        settingsRestoreSidebars: '사이드바도 복원',
+        settingsRestoreSidebarsDesc: '끄면 세션을 전환하거나 복원할 때 기본 편집 영역만 복원하고 현재 왼쪽/오른쪽 사이드바는 유지합니다.',
+    },
+    it: {
+        settingsSubsectionSessionRestore: 'Ripristino sessione',
+        settingsRestoreSidebars: 'Ripristina barre laterali',
+        settingsRestoreSidebarsDesc: 'Se disattivato, il cambio o il ripristino di una sessione ripristina solo l’area principale dell’editor e mantiene le barre laterali sinistra e destra attuali.',
+    },
+    tr: {
+        settingsSubsectionSessionRestore: 'Oturum geri yükleme',
+        settingsRestoreSidebars: 'Yan çubukları geri yükle',
+        settingsRestoreSidebarsDesc: 'Kapalıyken, oturum değiştirirken veya geri yüklerken yalnızca ana düzenleyici alanı geri yüklenir; mevcut sol ve sağ yan çubuklar korunur.',
+    },
+    id: {
+        settingsSubsectionSessionRestore: 'Pemulihan sesi',
+        settingsRestoreSidebars: 'Pulihkan bilah sisi',
+        settingsRestoreSidebarsDesc: 'Jika nonaktif, berpindah atau memulihkan sesi hanya memulihkan area editor utama dan mempertahankan bilah sisi kiri dan kanan saat ini.',
+    },
+    vi: {
+        settingsSubsectionSessionRestore: 'Khôi phục phiên',
+        settingsRestoreSidebars: 'Khôi phục thanh bên',
+        settingsRestoreSidebarsDesc: 'Khi tắt, việc chuyển hoặc khôi phục phiên chỉ khôi phục vùng soạn thảo chính và giữ nguyên thanh bên trái và phải hiện tại.',
+    },
+    th: {
+        settingsSubsectionSessionRestore: 'การกู้คืนเซสชัน',
+        settingsRestoreSidebars: 'กู้คืนแถบด้านข้าง',
+        settingsRestoreSidebarsDesc: 'เมื่อปิด การสลับหรือกู้คืนเซสชันจะกู้คืนเฉพาะพื้นที่แก้ไขหลัก และคงแถบด้านข้างซ้ายและขวาปัจจุบันไว้',
+    },
+    hi: {
+        settingsSubsectionSessionRestore: 'सत्र पुनर्स्थापना',
+        settingsRestoreSidebars: 'साइडबार भी पुनर्स्थापित करें',
+        settingsRestoreSidebarsDesc: 'बंद होने पर, सत्र बदलने या पुनर्स्थापित करने से केवल मुख्य संपादक क्षेत्र पुनर्स्थापित होता है और मौजूदा बाएँ व दाएँ साइडबार बने रहते हैं।',
+    },
+    bn: {
+        settingsSubsectionSessionRestore: 'সেশন পুনরুদ্ধার',
+        settingsRestoreSidebars: 'সাইডবারও পুনরুদ্ধার করুন',
+        settingsRestoreSidebarsDesc: 'বন্ধ থাকলে, সেশন বদলানো বা পুনরুদ্ধারের সময় শুধু মূল সম্পাদক এলাকা পুনরুদ্ধার হবে এবং বর্তমান বাম ও ডান সাইডবার রাখা হবে।',
+    },
+    fa: {
+        settingsSubsectionSessionRestore: 'بازیابی نشست',
+        settingsRestoreSidebars: 'بازیابی نوارهای کناری',
+        settingsRestoreSidebarsDesc: 'وقتی خاموش باشد، تغییر یا بازیابی نشست فقط ناحیه اصلی ویرایشگر را بازیابی می‌کند و نوارهای کناری چپ و راست فعلی را نگه می‌دارد.',
+    },
+    ms: {
+        settingsSubsectionSessionRestore: 'Pemulihan sesi',
+        settingsRestoreSidebars: 'Pulihkan bar sisi',
+        settingsRestoreSidebarsDesc: 'Apabila dimatikan, menukar atau memulihkan sesi hanya memulihkan kawasan editor utama dan mengekalkan bar sisi kiri dan kanan semasa.',
+    },
+    pl: {
+        settingsSubsectionSessionRestore: 'Przywracanie sesji',
+        settingsRestoreSidebars: 'Przywracaj paski boczne',
+        settingsRestoreSidebarsDesc: 'Gdy wyłączone, przełączanie lub przywracanie sesji odtwarza tylko główny obszar edytora i zachowuje bieżące lewe oraz prawe paski boczne.',
+    },
+};
+
+var restoreLangs = Object.keys(RESTORE_STRINGS);
+for (var restoreLangIndex = 0; restoreLangIndex < restoreLangs.length; restoreLangIndex++) {
+    var restoreLang = restoreLangs[restoreLangIndex];
+    if (!STRINGS[restoreLang]) continue;
+    var restoreKeys = Object.keys(RESTORE_STRINGS[restoreLang]);
+    for (var restoreKeyIndex = 0; restoreKeyIndex < restoreKeys.length; restoreKeyIndex++) {
+        var restoreKey = restoreKeys[restoreKeyIndex];
+        STRINGS[restoreLang][restoreKey] = RESTORE_STRINGS[restoreLang][restoreKey];
+    }
+}
+
 var resetLangs = Object.keys(RESET_STRINGS);
 for (var resetLangIndex = 0; resetLangIndex < resetLangs.length; resetLangIndex++) {
     var resetLang = resetLangs[resetLangIndex];

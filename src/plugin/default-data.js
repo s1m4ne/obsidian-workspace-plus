@@ -12,6 +12,7 @@ module.exports = {
     autoSaveOnSwitch: true,
     warnOnUnsavedSwitch: true,
     highlightUnsavedSessionChanges: true,
+    restoreSidebars: true,
     statusBarQuickSwitcher: true,
     groupFeatureEnabled: true,
     showFilterInput: false,

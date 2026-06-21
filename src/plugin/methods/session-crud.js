@@ -74,7 +74,7 @@ function attachSessionCrudMethods(WorkspacePlusPlus) {
         if (wasActive && nextActiveId) {
             var nextSession = this.data.sessions[nextActiveId];
             applyNextLayout = nextSession && nextSession.layout
-                ? this.app.workspace.changeLayout(nextSession.layout).catch(function () {})
+                ? this.applyWorkspaceLayout(nextSession.layout)
                 : Promise.resolve();
         }
 

@@ -31,9 +31,11 @@ function loadSessionSavingMethods() {
 }
 
 const attachSessionSavingMethods = loadSessionSavingMethods();
+const attachLayoutRestoreMethods = require('../src/plugin/methods/layout-restore');
 
 function createPlugin(initialData) {
     function PluginMock() {}
+    attachLayoutRestoreMethods(PluginMock);
     attachSessionSavingMethods(PluginMock);
     const plugin = new PluginMock();
     plugin.data = Object.assign({

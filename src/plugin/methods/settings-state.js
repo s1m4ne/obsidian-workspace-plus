@@ -45,6 +45,11 @@ function attachSettingsStateMethods(WorkspacePlusPlus) {
         return persistIfNeeded(this, options);
     };
 
+    WorkspacePlusPlus.prototype.setRestoreSidebars = function (enabled, options) {
+        this.data.restoreSidebars = !!enabled;
+        return persistIfNeeded(this, options);
+    };
+
     WorkspacePlusPlus.prototype.setStatusBarModScrollSwitch = function (enabled, options) {
         this.data.statusBarModScrollSwitch = !!enabled;
         return persistIfNeeded(this, options);

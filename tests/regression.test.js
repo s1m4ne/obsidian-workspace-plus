@@ -38,6 +38,7 @@ function loadPluginMethod(modulePath) {
 }
 
 const attachSessionMethods = loadPluginMethod('../src/plugin/methods/sessions');
+const attachLayoutRestoreMethods = loadPluginMethod('../src/plugin/methods/layout-restore');
 const attachSessionValidationMethods = loadPluginMethod('../src/plugin/methods/sessions-validation');
 const attachGroupMethods = loadPluginMethod('../src/plugin/methods/groups');
 const attachSessionCrudMethods = loadPluginMethod('../src/plugin/methods/session-crud');
@@ -50,6 +51,7 @@ const attachSessionCommandMethods = loadPluginMethod('../src/plugin/methods/sess
 function createPlugin(initialData) {
     function PluginMock() {}
     attachSessionMethods(PluginMock);
+    attachLayoutRestoreMethods(PluginMock);
     attachSessionValidationMethods(PluginMock);
     attachGroupMethods(PluginMock);
     attachSessionCrudMethods(PluginMock);
@@ -127,6 +129,43 @@ test('session switch auto-saves current layout and applies target layout', async
     assert.equal(plugin._persistCalls, 1);
     assert.equal(plugin._changeLayoutCalls.length, 1);
     assert.deepEqual(plugin._changeLayoutCalls[0], { layout: 'target-b' });
+});
+
+test('session switch can keep current sidebars while restoring target main area', async function () {
+    const currentLayout = {
+        main: { id: 'current-main', type: 'leaf', state: { type: 'markdown', state: { file: 'current.md' } } },
+        left: { id: 'current-left', type: 'leaf', state: { type: 'file-explorer' } },
+        right: { id: 'current-right', type: 'leaf', state: { type: 'outline' } },
+        active: 'current-main',
+    };
+    const targetLayout = {
+        main: { id: 'target-main', type: 'leaf', state: { type: 'markdown', state: { file: 'target.md' } } },
+        left: { id: 'target-left', type: 'leaf', state: { type: 'search' } },
+        right: { id: 'target-right', type: 'leaf', state: { type: 'backlink' } },
+        active: 'target-main',
+    };
+    const plugin = createPlugin({
+        activeSessionId: 'a',
+        sessionOrder: ['a', 'b'],
+        sessions: {
+            a: { id: 'a', name: 'A', layout: { layout: 'old-a' }, modified: 1 },
+            b: { id: 'b', name: 'B', layout: targetLayout, modified: 1 },
+        },
+        autoSaveOnSwitch: true,
+        restoreSidebars: false,
+    });
+    plugin.getCurrentWorkspaceLayout = function () {
+        return currentLayout;
+    };
+
+    const switched = await plugin.performSessionSwitch('b', { silent: true });
+
+    assert.equal(switched, true);
+    assert.equal(plugin._changeLayoutCalls.length, 1);
+    assert.deepEqual(plugin._changeLayoutCalls[0].main, targetLayout.main);
+    assert.deepEqual(plugin._changeLayoutCalls[0].left, currentLayout.left);
+    assert.deepEqual(plugin._changeLayoutCalls[0].right, currentLayout.right);
+    assert.equal(plugin._changeLayoutCalls[0].active, 'target-main');
 });
 
 test('overwriteSessionWithCurrentLayout saves current layout to selected session without switching', async function () {

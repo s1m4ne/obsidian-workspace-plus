@@ -5,6 +5,7 @@ var attachOverlayMethods = require('./overlays');
 var attachPersistenceMethods = require('./persistence');
 var attachSessionSyncMethods = require('./session-sync');
 var attachSessionMethods = require('./sessions');
+var attachLayoutRestoreMethods = require('./layout-restore');
 var attachSessionValidationMethods = require('./sessions-validation');
 var attachGroupMethods = require('./groups');
 var attachSessionCrudMethods = require('./session-crud');
@@ -23,6 +24,7 @@ function attachPluginMethods(WorkspacePlusPlus) {
     attachPersistenceMethods(WorkspacePlusPlus);
     attachSessionSyncMethods(WorkspacePlusPlus);
     attachSessionMethods(WorkspacePlusPlus);
+    attachLayoutRestoreMethods(WorkspacePlusPlus);
     attachSessionValidationMethods(WorkspacePlusPlus);
     attachGroupMethods(WorkspacePlusPlus);
     attachSessionCrudMethods(WorkspacePlusPlus);

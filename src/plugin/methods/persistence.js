@@ -770,7 +770,7 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
                 return self.persistData().then(function () {
                     var active = self.getActiveSession();
                     if (active && active.layout) {
-                        return self.app.workspace.changeLayout(active.layout).then(function () {
+                        return self.applyWorkspaceLayout(active.layout, { catchErrors: false }).then(function () {
                             new obsidian.Notice(L.rotationBackupRestored);
                             return true;
                         });

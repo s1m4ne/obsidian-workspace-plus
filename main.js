@@ -9788,6 +9788,128 @@ var require_i18n = __commonJS({
         resetSessionsAndSettingsFailed: "Nie uda\u0142o si\u0119 zresetowa\u0107 danych Workspace++."
       }
     };
+    var RESTORE_STRINGS = {
+      en: {
+        settingsSubsectionSessionRestore: "Session restore",
+        settingsRestoreSidebars: "Restore sidebars",
+        settingsRestoreSidebarsDesc: "When off, switching or restoring a session restores only the main editor area and keeps the current left and right sidebars."
+      },
+      zh: {
+        settingsSubsectionSessionRestore: "\u4F1A\u8BDD\u6062\u590D",
+        settingsRestoreSidebars: "\u6062\u590D\u4FA7\u8FB9\u680F",
+        settingsRestoreSidebarsDesc: "\u5173\u95ED\u540E\uFF0C\u5207\u6362\u6216\u6062\u590D\u4F1A\u8BDD\u65F6\u53EA\u6062\u590D\u4E3B\u7F16\u8F91\u533A\uFF0C\u5E76\u4FDD\u7559\u5F53\u524D\u5DE6\u53F3\u4FA7\u8FB9\u680F\u3002"
+      },
+      "zh-TW": {
+        settingsSubsectionSessionRestore: "\u5DE5\u4F5C\u968E\u6BB5\u9084\u539F",
+        settingsRestoreSidebars: "\u9084\u539F\u5074\u908A\u6B04",
+        settingsRestoreSidebarsDesc: "\u95DC\u9589\u5F8C\uFF0C\u5207\u63DB\u6216\u9084\u539F\u5DE5\u4F5C\u968E\u6BB5\u6642\u53EA\u9084\u539F\u4E3B\u8981\u7DE8\u8F2F\u5340\uFF0C\u4E26\u4FDD\u7559\u76EE\u524D\u5DE6\u53F3\u5074\u908A\u6B04\u3002"
+      },
+      es: {
+        settingsSubsectionSessionRestore: "Restauraci\xF3n de sesiones",
+        settingsRestoreSidebars: "Restaurar barras laterales",
+        settingsRestoreSidebarsDesc: "Si est\xE1 desactivado, al cambiar o restaurar una sesi\xF3n solo se restaura el \xE1rea principal del editor y se conservan las barras laterales izquierda y derecha actuales."
+      },
+      fr: {
+        settingsSubsectionSessionRestore: "Restauration des sessions",
+        settingsRestoreSidebars: "Restaurer les barres lat\xE9rales",
+        settingsRestoreSidebarsDesc: "Si d\xE9sactiv\xE9, le changement ou la restauration d\u2019une session ne restaure que la zone principale de l\u2019\xE9diteur et conserve les barres lat\xE9rales gauche et droite actuelles."
+      },
+      ar: {
+        settingsSubsectionSessionRestore: "\u0627\u0633\u062A\u0639\u0627\u062F\u0629 \u0627\u0644\u062C\u0644\u0633\u0629",
+        settingsRestoreSidebars: "\u0627\u0633\u062A\u0639\u0627\u062F\u0629 \u0627\u0644\u0634\u0631\u064A\u0637\u064A\u0646 \u0627\u0644\u062C\u0627\u0646\u0628\u064A\u064A\u0646",
+        settingsRestoreSidebarsDesc: "\u0639\u0646\u062F \u0625\u064A\u0642\u0627\u0641\u0647\u060C \u064A\u0624\u062F\u064A \u062A\u0628\u062F\u064A\u0644 \u062C\u0644\u0633\u0629 \u0623\u0648 \u0627\u0633\u062A\u0639\u0627\u062F\u062A\u0647\u0627 \u0625\u0644\u0649 \u0627\u0633\u062A\u0639\u0627\u062F\u0629 \u0645\u0646\u0637\u0642\u0629 \u0627\u0644\u062A\u062D\u0631\u064A\u0631 \u0627\u0644\u0631\u0626\u064A\u0633\u064A\u0629 \u0641\u0642\u0637 \u0645\u0639 \u0627\u0644\u0627\u062D\u062A\u0641\u0627\u0638 \u0628\u0627\u0644\u0634\u0631\u064A\u0637\u064A\u0646 \u0627\u0644\u062C\u0627\u0646\u0628\u064A\u064A\u0646 \u0627\u0644\u0623\u064A\u0633\u0631 \u0648\u0627\u0644\u0623\u064A\u0645\u0646 \u0627\u0644\u062D\u0627\u0644\u064A\u064A\u0646."
+      },
+      pt: {
+        settingsSubsectionSessionRestore: "Restaura\xE7\xE3o de sess\xF5es",
+        settingsRestoreSidebars: "Restaurar barras laterais",
+        settingsRestoreSidebarsDesc: "Quando desativado, trocar ou restaurar uma sess\xE3o restaura apenas a \xE1rea principal do editor e mant\xE9m as barras laterais esquerda e direita atuais."
+      },
+      ru: {
+        settingsSubsectionSessionRestore: "\u0412\u043E\u0441\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D\u0438\u0435 \u0441\u0435\u0441\u0441\u0438\u0439",
+        settingsRestoreSidebars: "\u0412\u043E\u0441\u0441\u0442\u0430\u043D\u0430\u0432\u043B\u0438\u0432\u0430\u0442\u044C \u0431\u043E\u043A\u043E\u0432\u044B\u0435 \u043F\u0430\u043D\u0435\u043B\u0438",
+        settingsRestoreSidebarsDesc: "\u0415\u0441\u043B\u0438 \u0432\u044B\u043A\u043B\u044E\u0447\u0435\u043D\u043E, \u043F\u0440\u0438 \u043F\u0435\u0440\u0435\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u0438 \u0438\u043B\u0438 \u0432\u043E\u0441\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D\u0438\u0438 \u0441\u0435\u0441\u0441\u0438\u0438 \u0432\u043E\u0441\u0441\u0442\u0430\u043D\u0430\u0432\u043B\u0438\u0432\u0430\u0435\u0442\u0441\u044F \u0442\u043E\u043B\u044C\u043A\u043E \u043E\u0441\u043D\u043E\u0432\u043D\u0430\u044F \u043E\u0431\u043B\u0430\u0441\u0442\u044C \u0440\u0435\u0434\u0430\u043A\u0442\u043E\u0440\u0430, \u0430 \u0442\u0435\u043A\u0443\u0449\u0438\u0435 \u043B\u0435\u0432\u0430\u044F \u0438 \u043F\u0440\u0430\u0432\u0430\u044F \u0431\u043E\u043A\u043E\u0432\u044B\u0435 \u043F\u0430\u043D\u0435\u043B\u0438 \u0441\u043E\u0445\u0440\u0430\u043D\u044F\u044E\u0442\u0441\u044F."
+      },
+      de: {
+        settingsSubsectionSessionRestore: "Sitzungswiederherstellung",
+        settingsRestoreSidebars: "Seitenleisten wiederherstellen",
+        settingsRestoreSidebarsDesc: "Wenn deaktiviert, wird beim Wechseln oder Wiederherstellen einer Sitzung nur der Haupteditorbereich wiederhergestellt, w\xE4hrend die aktuellen linken und rechten Seitenleisten erhalten bleiben."
+      },
+      ja: {
+        settingsSubsectionSessionRestore: "\u30BB\u30C3\u30B7\u30E7\u30F3\u5FA9\u5143",
+        settingsRestoreSidebars: "\u30B5\u30A4\u30C9\u30D0\u30FC\u3082\u5FA9\u5143",
+        settingsRestoreSidebarsDesc: "\u30AA\u30D5\u306B\u3059\u308B\u3068\u3001\u30BB\u30C3\u30B7\u30E7\u30F3\u306E\u5207\u308A\u66FF\u3048\u3084\u5FA9\u5143\u3067\u306F\u4E2D\u592E\u306E\u7DE8\u96C6\u30A8\u30EA\u30A2\u3060\u3051\u3092\u5FA9\u5143\u3057\u3001\u5DE6\u53F3\u306E\u30B5\u30A4\u30C9\u30D0\u30FC\u306F\u73FE\u5728\u306E\u72B6\u614B\u3092\u7DAD\u6301\u3057\u307E\u3059\u3002"
+      },
+      ko: {
+        settingsSubsectionSessionRestore: "\uC138\uC158 \uBCF5\uC6D0",
+        settingsRestoreSidebars: "\uC0AC\uC774\uB4DC\uBC14\uB3C4 \uBCF5\uC6D0",
+        settingsRestoreSidebarsDesc: "\uB044\uBA74 \uC138\uC158\uC744 \uC804\uD658\uD558\uAC70\uB098 \uBCF5\uC6D0\uD560 \uB54C \uAE30\uBCF8 \uD3B8\uC9D1 \uC601\uC5ED\uB9CC \uBCF5\uC6D0\uD558\uACE0 \uD604\uC7AC \uC67C\uCABD/\uC624\uB978\uCABD \uC0AC\uC774\uB4DC\uBC14\uB294 \uC720\uC9C0\uD569\uB2C8\uB2E4."
+      },
+      it: {
+        settingsSubsectionSessionRestore: "Ripristino sessione",
+        settingsRestoreSidebars: "Ripristina barre laterali",
+        settingsRestoreSidebarsDesc: "Se disattivato, il cambio o il ripristino di una sessione ripristina solo l\u2019area principale dell\u2019editor e mantiene le barre laterali sinistra e destra attuali."
+      },
+      tr: {
+        settingsSubsectionSessionRestore: "Oturum geri y\xFCkleme",
+        settingsRestoreSidebars: "Yan \xE7ubuklar\u0131 geri y\xFCkle",
+        settingsRestoreSidebarsDesc: "Kapal\u0131yken, oturum de\u011Fi\u015Ftirirken veya geri y\xFCklerken yaln\u0131zca ana d\xFCzenleyici alan\u0131 geri y\xFCklenir; mevcut sol ve sa\u011F yan \xE7ubuklar korunur."
+      },
+      id: {
+        settingsSubsectionSessionRestore: "Pemulihan sesi",
+        settingsRestoreSidebars: "Pulihkan bilah sisi",
+        settingsRestoreSidebarsDesc: "Jika nonaktif, berpindah atau memulihkan sesi hanya memulihkan area editor utama dan mempertahankan bilah sisi kiri dan kanan saat ini."
+      },
+      vi: {
+        settingsSubsectionSessionRestore: "Kh\xF4i ph\u1EE5c phi\xEAn",
+        settingsRestoreSidebars: "Kh\xF4i ph\u1EE5c thanh b\xEAn",
+        settingsRestoreSidebarsDesc: "Khi t\u1EAFt, vi\u1EC7c chuy\u1EC3n ho\u1EB7c kh\xF4i ph\u1EE5c phi\xEAn ch\u1EC9 kh\xF4i ph\u1EE5c v\xF9ng so\u1EA1n th\u1EA3o ch\xEDnh v\xE0 gi\u1EEF nguy\xEAn thanh b\xEAn tr\xE1i v\xE0 ph\u1EA3i hi\u1EC7n t\u1EA1i."
+      },
+      th: {
+        settingsSubsectionSessionRestore: "\u0E01\u0E32\u0E23\u0E01\u0E39\u0E49\u0E04\u0E37\u0E19\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19",
+        settingsRestoreSidebars: "\u0E01\u0E39\u0E49\u0E04\u0E37\u0E19\u0E41\u0E16\u0E1A\u0E14\u0E49\u0E32\u0E19\u0E02\u0E49\u0E32\u0E07",
+        settingsRestoreSidebarsDesc: "\u0E40\u0E21\u0E37\u0E48\u0E2D\u0E1B\u0E34\u0E14 \u0E01\u0E32\u0E23\u0E2A\u0E25\u0E31\u0E1A\u0E2B\u0E23\u0E37\u0E2D\u0E01\u0E39\u0E49\u0E04\u0E37\u0E19\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E08\u0E30\u0E01\u0E39\u0E49\u0E04\u0E37\u0E19\u0E40\u0E09\u0E1E\u0E32\u0E30\u0E1E\u0E37\u0E49\u0E19\u0E17\u0E35\u0E48\u0E41\u0E01\u0E49\u0E44\u0E02\u0E2B\u0E25\u0E31\u0E01 \u0E41\u0E25\u0E30\u0E04\u0E07\u0E41\u0E16\u0E1A\u0E14\u0E49\u0E32\u0E19\u0E02\u0E49\u0E32\u0E07\u0E0B\u0E49\u0E32\u0E22\u0E41\u0E25\u0E30\u0E02\u0E27\u0E32\u0E1B\u0E31\u0E08\u0E08\u0E38\u0E1A\u0E31\u0E19\u0E44\u0E27\u0E49"
+      },
+      hi: {
+        settingsSubsectionSessionRestore: "\u0938\u0924\u094D\u0930 \u092A\u0941\u0928\u0930\u094D\u0938\u094D\u0925\u093E\u092A\u0928\u093E",
+        settingsRestoreSidebars: "\u0938\u093E\u0907\u0921\u092C\u093E\u0930 \u092D\u0940 \u092A\u0941\u0928\u0930\u094D\u0938\u094D\u0925\u093E\u092A\u093F\u0924 \u0915\u0930\u0947\u0902",
+        settingsRestoreSidebarsDesc: "\u092C\u0902\u0926 \u0939\u094B\u0928\u0947 \u092A\u0930, \u0938\u0924\u094D\u0930 \u092C\u0926\u0932\u0928\u0947 \u092F\u093E \u092A\u0941\u0928\u0930\u094D\u0938\u094D\u0925\u093E\u092A\u093F\u0924 \u0915\u0930\u0928\u0947 \u0938\u0947 \u0915\u0947\u0935\u0932 \u092E\u0941\u0916\u094D\u092F \u0938\u0902\u092A\u093E\u0926\u0915 \u0915\u094D\u0937\u0947\u0924\u094D\u0930 \u092A\u0941\u0928\u0930\u094D\u0938\u094D\u0925\u093E\u092A\u093F\u0924 \u0939\u094B\u0924\u093E \u0939\u0948 \u0914\u0930 \u092E\u094C\u091C\u0942\u0926\u093E \u092C\u093E\u090F\u0901 \u0935 \u0926\u093E\u090F\u0901 \u0938\u093E\u0907\u0921\u092C\u093E\u0930 \u092C\u0928\u0947 \u0930\u0939\u0924\u0947 \u0939\u0948\u0902\u0964"
+      },
+      bn: {
+        settingsSubsectionSessionRestore: "\u09B8\u09C7\u09B6\u09A8 \u09AA\u09C1\u09A8\u09B0\u09C1\u09A6\u09CD\u09A7\u09BE\u09B0",
+        settingsRestoreSidebars: "\u09B8\u09BE\u0987\u09A1\u09AC\u09BE\u09B0\u0993 \u09AA\u09C1\u09A8\u09B0\u09C1\u09A6\u09CD\u09A7\u09BE\u09B0 \u0995\u09B0\u09C1\u09A8",
+        settingsRestoreSidebarsDesc: "\u09AC\u09A8\u09CD\u09A7 \u09A5\u09BE\u0995\u09B2\u09C7, \u09B8\u09C7\u09B6\u09A8 \u09AC\u09A6\u09B2\u09BE\u09A8\u09CB \u09AC\u09BE \u09AA\u09C1\u09A8\u09B0\u09C1\u09A6\u09CD\u09A7\u09BE\u09B0\u09C7\u09B0 \u09B8\u09AE\u09AF\u09BC \u09B6\u09C1\u09A7\u09C1 \u09AE\u09C2\u09B2 \u09B8\u09AE\u09CD\u09AA\u09BE\u09A6\u0995 \u098F\u09B2\u09BE\u0995\u09BE \u09AA\u09C1\u09A8\u09B0\u09C1\u09A6\u09CD\u09A7\u09BE\u09B0 \u09B9\u09AC\u09C7 \u098F\u09AC\u0982 \u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u09AC\u09BE\u09AE \u0993 \u09A1\u09BE\u09A8 \u09B8\u09BE\u0987\u09A1\u09AC\u09BE\u09B0 \u09B0\u09BE\u0996\u09BE \u09B9\u09AC\u09C7\u0964"
+      },
+      fa: {
+        settingsSubsectionSessionRestore: "\u0628\u0627\u0632\u06CC\u0627\u0628\u06CC \u0646\u0634\u0633\u062A",
+        settingsRestoreSidebars: "\u0628\u0627\u0632\u06CC\u0627\u0628\u06CC \u0646\u0648\u0627\u0631\u0647\u0627\u06CC \u06A9\u0646\u0627\u0631\u06CC",
+        settingsRestoreSidebarsDesc: "\u0648\u0642\u062A\u06CC \u062E\u0627\u0645\u0648\u0634 \u0628\u0627\u0634\u062F\u060C \u062A\u063A\u06CC\u06CC\u0631 \u06CC\u0627 \u0628\u0627\u0632\u06CC\u0627\u0628\u06CC \u0646\u0634\u0633\u062A \u0641\u0642\u0637 \u0646\u0627\u062D\u06CC\u0647 \u0627\u0635\u0644\u06CC \u0648\u06CC\u0631\u0627\u06CC\u0634\u06AF\u0631 \u0631\u0627 \u0628\u0627\u0632\u06CC\u0627\u0628\u06CC \u0645\u06CC\u200C\u06A9\u0646\u062F \u0648 \u0646\u0648\u0627\u0631\u0647\u0627\u06CC \u06A9\u0646\u0627\u0631\u06CC \u0686\u067E \u0648 \u0631\u0627\u0633\u062A \u0641\u0639\u0644\u06CC \u0631\u0627 \u0646\u06AF\u0647 \u0645\u06CC\u200C\u062F\u0627\u0631\u062F."
+      },
+      ms: {
+        settingsSubsectionSessionRestore: "Pemulihan sesi",
+        settingsRestoreSidebars: "Pulihkan bar sisi",
+        settingsRestoreSidebarsDesc: "Apabila dimatikan, menukar atau memulihkan sesi hanya memulihkan kawasan editor utama dan mengekalkan bar sisi kiri dan kanan semasa."
+      },
+      pl: {
+        settingsSubsectionSessionRestore: "Przywracanie sesji",
+        settingsRestoreSidebars: "Przywracaj paski boczne",
+        settingsRestoreSidebarsDesc: "Gdy wy\u0142\u0105czone, prze\u0142\u0105czanie lub przywracanie sesji odtwarza tylko g\u0142\xF3wny obszar edytora i zachowuje bie\u017C\u0105ce lewe oraz prawe paski boczne."
+      }
+    };
+    var restoreLangs = Object.keys(RESTORE_STRINGS);
+    for (restoreLangIndex = 0; restoreLangIndex < restoreLangs.length; restoreLangIndex++) {
+      restoreLang = restoreLangs[restoreLangIndex];
+      if (!STRINGS[restoreLang]) continue;
+      restoreKeys = Object.keys(RESTORE_STRINGS[restoreLang]);
+      for (restoreKeyIndex = 0; restoreKeyIndex < restoreKeys.length; restoreKeyIndex++) {
+        restoreKey = restoreKeys[restoreKeyIndex];
+        STRINGS[restoreLang][restoreKey] = RESTORE_STRINGS[restoreLang][restoreKey];
+      }
+    }
+    var restoreLang;
+    var restoreKeys;
+    var restoreKey;
+    var restoreKeyIndex;
+    var restoreLangIndex;
     var resetLangs = Object.keys(RESET_STRINGS);
     for (resetLangIndex = 0; resetLangIndex < resetLangs.length; resetLangIndex++) {
       resetLang = resetLangs[resetLangIndex];
@@ -12854,6 +12976,15 @@ var require_settings = __commonJS({
                 }
               });
             }
+            addSubsection(contentEl, L.settingsSubsectionSessionRestore);
+            addToggleSetting(contentEl, {
+              name: L.settingsRestoreSidebars,
+              desc: L.settingsRestoreSidebarsDesc,
+              value: self.plugin.isSidebarRestoreEnabled(),
+              onChange: function(value) {
+                self.plugin.setRestoreSidebars(value);
+              }
+            });
             addSubsection(contentEl, L.settingsSubsectionScrollSwitch);
             addToggleSetting(contentEl, {
               name: L.settingsStatusBarModScrollSwitch,
@@ -13394,6 +13525,7 @@ var require_default_data = __commonJS({
       autoSaveOnSwitch: true,
       warnOnUnsavedSwitch: true,
       highlightUnsavedSessionChanges: true,
+      restoreSidebars: true,
       statusBarQuickSwitcher: true,
       groupFeatureEnabled: true,
       showFilterInput: false,
@@ -15683,7 +15815,7 @@ var require_persistence = __commonJS({
           return self.persistData().then(function() {
             var active = self.getActiveSession();
             if (active && active.layout) {
-              return self.app.workspace.changeLayout(active.layout).then(function() {
+              return self.applyWorkspaceLayout(active.layout, { catchErrors: false }).then(function() {
                 new obsidian2.Notice(L.rotationBackupRestored);
                 return true;
               });
@@ -16171,14 +16303,44 @@ var require_layout_utils = __commonJS({
       if (layout === void 0) return void 0;
       return JSON.parse(JSON.stringify(layout));
     }
+    function nodeContainsId(node, id) {
+      if (!id || !node) return false;
+      if (Array.isArray(node)) {
+        for (var i = 0; i < node.length; i++) {
+          if (nodeContainsId(node[i], id)) return true;
+        }
+        return false;
+      }
+      if (typeof node === "object") {
+        if (node.id === id) return true;
+        var keys = Object.keys(node);
+        for (var k = 0; k < keys.length; k++) {
+          if (nodeContainsId(node[keys[k]], id)) return true;
+        }
+      }
+      return false;
+    }
+    function mergeMainLayoutIntoCurrent(targetLayout, currentLayout) {
+      var target = cloneLayout(targetLayout);
+      if (!target || typeof target !== "object" || !target.main) return target;
+      var current = currentLayout && typeof currentLayout === "object" ? cloneLayout(currentLayout) : {};
+      current.main = target.main;
+      if (typeof target.active === "string" && nodeContainsId(target.main, target.active)) {
+        current.active = target.active;
+      }
+      return current;
+    }
     function looksLikeWorkspaceItem(value) {
       return value && typeof value === "object" && typeof value.id === "string" && typeof value.type === "string" && (Array.isArray(value.children) || value.state !== void 0 || value.currentTab !== void 0 || value.direction !== void 0 || value.collapsed !== void 0);
     }
     function normalizeLayoutForComparison(layout) {
+      var options = arguments.length > 1 && arguments[1] ? arguments[1] : {};
+      if (options.restoreScope === "main-only" && layout && typeof layout === "object" && layout.main) {
+        layout = layout.main;
+      }
       var volatileKeys = {
         eState: true,
         lastOpenFiles: true,
-        left: true,
         scroll: true,
         top: true
       };
@@ -16195,6 +16357,7 @@ var require_layout_utils = __commonJS({
           for (var i = 0; i < keys.length; i++) {
             var key = keys[i];
             if (volatileKeys[key]) continue;
+            if (key === "left" && (value[key] === null || typeof value[key] !== "object")) continue;
             if (key === "id" && isWorkspaceItem) continue;
             if (key === "active" && depth === 0 && typeof value[key] === "string") continue;
             normalized[key] = normalizeNode(value[key], depth + 1);
@@ -16206,8 +16369,9 @@ var require_layout_utils = __commonJS({
       return normalizeNode(layout || null, 0);
     }
     function layoutsEqualStructural(a, b) {
+      var options = arguments.length > 2 && arguments[2] ? arguments[2] : {};
       try {
-        return JSON.stringify(normalizeLayoutForComparison(a)) === JSON.stringify(normalizeLayoutForComparison(b));
+        return JSON.stringify(normalizeLayoutForComparison(a, options)) === JSON.stringify(normalizeLayoutForComparison(b, options));
       } catch (e) {
         return layoutsEqual(a, b);
       }
@@ -16216,6 +16380,7 @@ var require_layout_utils = __commonJS({
       serializeLayout,
       layoutsEqual,
       cloneLayout,
+      mergeMainLayoutIntoCurrent,
       normalizeLayoutForComparison,
       layoutsEqualStructural
     };
@@ -16355,10 +16520,50 @@ var require_sessions = __commonJS({
         return layoutUtils.layoutsEqual(a, b);
       };
       WorkspacePlusPlus2.prototype.layoutsEqualStructural = function(a, b) {
-        return layoutUtils.layoutsEqualStructural(a, b);
+        var restoreScope = typeof this.getWorkspaceRestoreScope === "function" ? this.getWorkspaceRestoreScope() : "full";
+        return layoutUtils.layoutsEqualStructural(a, b, { restoreScope });
       };
     }
     module2.exports = attachSessionMethods;
+  }
+});
+
+// src/plugin/methods/layout-restore.js
+var require_layout_restore = __commonJS({
+  "src/plugin/methods/layout-restore.js"(exports2, module2) {
+    "use strict";
+    var layoutUtils = require_layout_utils();
+    function attachLayoutRestoreMethods(WorkspacePlusPlus2) {
+      WorkspacePlusPlus2.prototype.isSidebarRestoreEnabled = function() {
+        return this.data.restoreSidebars !== false;
+      };
+      WorkspacePlusPlus2.prototype.getWorkspaceRestoreScope = function() {
+        return this.isSidebarRestoreEnabled() ? "full" : "main-only";
+      };
+      WorkspacePlusPlus2.prototype.buildLayoutForRestore = function(layout) {
+        if (!layout) return layout;
+        if (this.isSidebarRestoreEnabled()) {
+          return layoutUtils.cloneLayout(layout);
+        }
+        var currentLayout = null;
+        try {
+          currentLayout = this.getCurrentWorkspaceLayout();
+        } catch (e) {
+          currentLayout = null;
+        }
+        return layoutUtils.mergeMainLayoutIntoCurrent(layout, currentLayout);
+      };
+      WorkspacePlusPlus2.prototype.applyWorkspaceLayout = function(layout, options) {
+        options = options || {};
+        if (!layout) return Promise.resolve();
+        var nextLayout = this.buildLayoutForRestore(layout);
+        var apply = Promise.resolve(this.app.workspace.changeLayout(nextLayout));
+        if (options.catchErrors === false) return apply;
+        return apply.catch(function() {
+        });
+      };
+    }
+    module2.exports = attachLayoutRestoreMethods;
   }
 });
 
@@ -16942,8 +17147,7 @@ var require_session_crud = __commonJS({
         var applyNextLayout = Promise.resolve();
         if (wasActive && nextActiveId) {
           var nextSession = this.data.sessions[nextActiveId];
-          applyNextLayout = nextSession && nextSession.layout ? this.app.workspace.changeLayout(nextSession.layout).catch(function() {
-          }) : Promise.resolve();
+          applyNextLayout = nextSession && nextSession.layout ? this.applyWorkspaceLayout(nextSession.layout) : Promise.resolve();
         }
         this.updateStatusBar();
         this.syncSessionCommands();
@@ -17383,8 +17587,7 @@ var require_session_saving = __commonJS({
           if (!options.silent) new obsidian2.Notice(L.noSession);
           return Promise.resolve(false);
         }
-        var applyLayout = session.layout ? this.app.workspace.changeLayout(session.layout).catch(function() {
-        }) : Promise.resolve();
+        var applyLayout = session.layout ? this.applyWorkspaceLayout(session.layout) : Promise.resolve();
         var name = session.name;
         return applyLayout.then(function() {
           if (!options.silent) {
@@ -17797,8 +18000,7 @@ var require_session_switching = __commonJS({
             current.modified = Date.now();
           }
           self.data.activeSessionId = targetId;
-          var applyLayout = target.layout ? self.app.workspace.changeLayout(target.layout).catch(function() {
-          }) : Promise.resolve();
+          var applyLayout = target.layout ? self.applyWorkspaceLayout(target.layout) : Promise.resolve();
           return applyLayout.then(function() {
             self.updateStatusBar();
             return self.persistData();
@@ -18040,8 +18242,7 @@ var require_history = __commonJS({
         session.modified = Date.now();
         var self = this;
         var isActive = session.id === this.data.activeSessionId;
-        var applyLayout = isActive && session.layout ? this.app.workspace.changeLayout(session.layout).catch(function() {
-        }) : Promise.resolve();
+        var applyLayout = isActive && session.layout ? this.applyWorkspaceLayout(session.layout) : Promise.resolve();
         return applyLayout.then(function() {
           self.updateStatusBar();
           return self.persistData();
@@ -18325,6 +18526,10 @@ var require_settings_state = __commonJS({
         this.data.confirmQuickActions = !!enabled;
         return persistIfNeeded(this, options);
       };
+      WorkspacePlusPlus2.prototype.setRestoreSidebars = function(enabled, options) {
+        this.data.restoreSidebars = !!enabled;
+        return persistIfNeeded(this, options);
+      };
       WorkspacePlusPlus2.prototype.setStatusBarModScrollSwitch = function(enabled, options) {
         this.data.statusBarModScrollSwitch = !!enabled;
         return persistIfNeeded(this, options);
@@ -18419,6 +18624,7 @@ var require_methods = __commonJS({
     var attachPersistenceMethods = require_persistence();
     var attachSessionSyncMethods = require_session_sync();
     var attachSessionMethods = require_sessions();
+    var attachLayoutRestoreMethods = require_layout_restore();
     var attachSessionValidationMethods = require_sessions_validation();
     var attachGroupMethods = require_groups();
     var attachSessionCrudMethods = require_session_crud();
@@ -18436,6 +18642,7 @@ var require_methods = __commonJS({
       attachPersistenceMethods(WorkspacePlusPlus2);
       attachSessionSyncMethods(WorkspacePlusPlus2);
       attachSessionMethods(WorkspacePlusPlus2);
+      attachLayoutRestoreMethods(WorkspacePlusPlus2);
       attachSessionValidationMethods(WorkspacePlusPlus2);
       attachGroupMethods(WorkspacePlusPlus2);
       attachSessionCrudMethods(WorkspacePlusPlus2);

@@ -143,7 +143,10 @@ function attachSessionMethods(WorkspacePlusPlus) {
     };
 
     WorkspacePlusPlus.prototype.layoutsEqualStructural = function (a, b) {
-        return layoutUtils.layoutsEqualStructural(a, b);
+        var restoreScope = typeof this.getWorkspaceRestoreScope === 'function'
+            ? this.getWorkspaceRestoreScope()
+            : 'full';
+        return layoutUtils.layoutsEqualStructural(a, b, { restoreScope: restoreScope });
     };
 
 }
