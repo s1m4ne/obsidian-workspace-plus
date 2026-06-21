@@ -2,13 +2,7 @@
 
 Workspace++ is an [Obsidian](https://obsidian.md/) community plugin for saving, switching, and organizing workspace sessions. It is built for people who want Obsidian layouts to feel fast, native, and keyboard-friendly.
 
-Install it from the Obsidian Community Plugins directory:
-
-https://community.obsidian.md/plugins/workspace-plus-plus
-
-Bug reports, feature requests, and pull requests are welcome. Feel free to open an [issue](https://github.com/s1m4ne/obsidian-workspace-plus/issues) or PR.
-
-> If you find this plugin useful, please give it a star on GitHub. It helps others discover it.
+![Workspace++ session manager workflow](assets/readme/session-manager-modal.png)
 
 ## Highlights
 
@@ -32,27 +26,21 @@ Bug reports, feature requests, and pull requests are welcome. Feel free to open 
 
 Cycle through sessions with `Cmd/Ctrl+Shift+Enter`, or move backward/forward with `Cmd/Ctrl+Shift+,` and `Cmd/Ctrl+Shift+.`. You can also register numbered or name-based session switch commands for custom hotkeys.
 
-https://github.com/user-attachments/assets/b1dc94f7-b979-4b09-97e6-3ebf4837b5ed
+![Workspace++ quick switching overlay](assets/readme/quick-switcher-overlay.png)
 
 ### Session manager
 
 Open the session manager to switch, create, rename, duplicate, delete, reorder, bulk-delete, and group sessions.
 
-https://github.com/user-attachments/assets/27a02a7b-aaa8-4795-b67d-4348fa4012f7
+![Workspace++ session manager overlay](assets/readme/session-manager-overlay.png)
 
 ### Create, duplicate, delete
 
 Create sessions from the current layout, duplicate the active session with `Cmd/Ctrl+Shift+M`, or delete it with `Cmd/Ctrl+Shift+Backspace`.
 
-https://github.com/user-attachments/assets/c86b8000-c49e-442c-8246-17c181a4d921
-
 ### Rename and reorder
 
 Rename the current session with `Cmd/Ctrl+Shift+R`, right-click sessions for context actions, and drag sessions to reorder them.
-
-https://github.com/user-attachments/assets/6041d80f-9c15-4a59-8d27-8a8f39d9dba6
-
-https://github.com/user-attachments/assets/6c2b5a13-cc9f-43ca-bff1-944c5b318a92
 
 ### Status bar workflow
 
@@ -185,6 +173,37 @@ This makes sessions easy to sync with file-based tools, but concurrent edits are
 Workspace++ includes 21 interface locales:
 
 English, Arabic, Bengali, Chinese Simplified, Chinese Traditional, French, German, Hindi, Indonesian, Italian, Japanese, Korean, Malay, Persian, Polish, Portuguese, Russian, Spanish, Thai, Turkish, and Vietnamese.
+
+## Video Demos
+
+<details>
+<summary>Show video demos</summary>
+
+### Quick switching
+
+https://github.com/user-attachments/assets/b1dc94f7-b979-4b09-97e6-3ebf4837b5ed
+
+### Session manager
+
+https://github.com/user-attachments/assets/27a02a7b-aaa8-4795-b67d-4348fa4012f7
+
+### Create, duplicate, delete
+
+https://github.com/user-attachments/assets/c86b8000-c49e-442c-8246-17c181a4d921
+
+### Rename and reorder
+
+https://github.com/user-attachments/assets/6041d80f-9c15-4a59-8d27-8a8f39d9dba6
+
+https://github.com/user-attachments/assets/6c2b5a13-cc9f-43ca-bff1-944c5b318a92
+
+</details>
+
+## Community
+
+Bug reports, feature requests, and pull requests are welcome. Feel free to open an [issue](https://github.com/s1m4ne/obsidian-workspace-plus/issues) or PR.
+
+If you find this plugin useful, please give it a star on GitHub. It helps others discover it.
 
 ## License
 
