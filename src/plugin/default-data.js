@@ -4,6 +4,7 @@ module.exports = {
     activeSessionId: null,
     sessions: {},
     sessionOrder: [],
+    sessionStorageLocation: 'plugin-folder',
     language: 'auto',
     previewNext: true,
     previewPrevious: true,

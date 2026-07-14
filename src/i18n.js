@@ -7617,6 +7617,48 @@ for (var resetLangIndex = 0; resetLangIndex < resetLangs.length; resetLangIndex+
     }
 }
 
+var SESSION_STORAGE_STRINGS = {
+    en: {
+        settingsSessionStorageLocation: 'Session storage location',
+        settingsSessionStorageLocationDesc: function (path) { return 'Current session file: ' + path; },
+        settingsMoveSessionsToPluginFolder: 'Move sessions to Obsidian plugin folder',
+        settingsMoveSessionsToPluginFolderDesc: 'Use this if you want Obsidian Sync to sync Workspace++ sessions across devices. Avoid it if you share .obsidian across multiple vaults with Settings Profiles.',
+        settingsMoveSessionsToPluginFolderBtn: 'Move to .obsidian',
+        settingsMoveSessionsToVaultFolder: 'Move sessions outside .obsidian',
+        settingsMoveSessionsToVaultFolderDesc: 'Use this if you share .obsidian across multiple vaults and want each vault to keep separate sessions.',
+        settingsMoveSessionsToVaultFolderBtn: 'Move outside .obsidian',
+        sessionStorageMoved: function (path) { return 'Workspace++: Session storage moved to ' + path; },
+        sessionStorageMoveFailed: 'Workspace++: Failed to move session storage.',
+        settingsStorageFieldSessionStorageLocation: 'Session storage mode',
+    },
+    ja: {
+        settingsSessionStorageLocation: 'セッションの保存場所',
+        settingsSessionStorageLocationDesc: function (path) { return '現在のセッションファイル: ' + path; },
+        settingsMoveSessionsToPluginFolder: 'セッションをObsidianプラグインフォルダへ移動',
+        settingsMoveSessionsToPluginFolderDesc: 'Obsidian SyncでWorkspace++のセッションをデバイス間同期したい場合に使用します。Settings Profilesなどで複数Vault間の.obsidianを共有している場合は避けてください。',
+        settingsMoveSessionsToPluginFolderBtn: '.obsidianへ移動',
+        settingsMoveSessionsToVaultFolder: 'セッションを.obsidianの外へ移動',
+        settingsMoveSessionsToVaultFolderDesc: '複数Vault間で.obsidianを共有していて、各Vaultで別々のセッションを保持したい場合に使用します。',
+        settingsMoveSessionsToVaultFolderBtn: '.obsidianの外へ移動',
+        sessionStorageMoved: function (path) { return 'Workspace++: セッションの保存場所を ' + path + ' に移動しました。'; },
+        sessionStorageMoveFailed: 'Workspace++: セッションの保存場所の移動に失敗しました。',
+        settingsStorageFieldSessionStorageLocation: 'セッション保存モード',
+    },
+};
+
+var sessionStorageLangs = Object.keys(STRINGS);
+for (var sessionStorageLangIndex = 0; sessionStorageLangIndex < sessionStorageLangs.length; sessionStorageLangIndex++) {
+    var sessionStorageLang = sessionStorageLangs[sessionStorageLangIndex];
+    var sessionStorageStrings = SESSION_STORAGE_STRINGS[sessionStorageLang] || SESSION_STORAGE_STRINGS.en;
+    var sessionStorageKeys = Object.keys(sessionStorageStrings);
+    for (var sessionStorageKeyIndex = 0; sessionStorageKeyIndex < sessionStorageKeys.length; sessionStorageKeyIndex++) {
+        var sessionStorageKey = sessionStorageKeys[sessionStorageKeyIndex];
+        if (STRINGS[sessionStorageLang][sessionStorageKey] === undefined) {
+            STRINGS[sessionStorageLang][sessionStorageKey] = sessionStorageStrings[sessionStorageKey];
+        }
+    }
+}
+
 var LANG_OPTIONS = {
     en: 'English',
     zh: '简体中文',

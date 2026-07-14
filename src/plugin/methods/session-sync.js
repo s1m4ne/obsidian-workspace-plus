@@ -317,14 +317,22 @@ function attachSessionSyncMethods(WorkspacePlusPlus) {
 
     WorkspacePlusPlus.prototype.registerSessionStorageListeners = function () {
         var self = this;
-        var sessionsPath = this.getSessionsPath();
-
         if (this._sessionStorageListenersRegistered) return;
         this._sessionStorageListenersRegistered = true;
         this._startupSessionStorageTimers = [];
 
         function isSessionsFile(file) {
-            return !!(file && file.path === sessionsPath);
+            return !!(
+                file
+                && (
+                    file.path === self.getSessionsPath()
+                    || (typeof self.getSessionsPathForLocation === 'function'
+                        && (
+                            file.path === self.getSessionsPathForLocation('vault-folder')
+                            || file.path === self.getSessionsPathForLocation('plugin-folder')
+                        ))
+                )
+            );
         }
 
         this.registerEvent(this.app.vault.on('modify', function (file) {
