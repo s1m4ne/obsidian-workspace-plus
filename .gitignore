@@ -5,6 +5,10 @@ node_modules/
 /main.js
 data.json
 data.backup.json
+sessions.json
+sessions.backup.json
+backups/
+exports/
 .claude/
 .workspace-plus-plus/
 .hotreload

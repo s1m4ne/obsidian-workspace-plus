@@ -148,25 +148,28 @@ All commands can be assigned custom hotkeys in **Settings** > **Hotkeys**.
 
 ## Sync and storage
 
-Workspace++ stores session data in your vault:
+Workspace++ stores session data in the Obsidian plugin folder for new installs:
+
+```text
+.obsidian/plugins/workspace-plus-plus/sessions.json
+```
+
+Existing installs that already use the older vault-local folder keep using it automatically:
 
 ```text
 .workspace-plus-plus/sessions.json
 ```
 
-The immediate backup is stored at:
+You can move session storage in **Settings** > **Workspace++** > **Advanced**. Use the Obsidian plugin folder if you want Obsidian Sync to sync Workspace++ sessions across devices. Use the vault-local `.workspace-plus-plus` folder if you share `.obsidian` across multiple vaults with tools such as Settings Profiles and want each vault to keep separate sessions.
+
+Immediate backups and rotation backups are stored next to the active session file:
 
 ```text
-.workspace-plus-plus/sessions.backup.json
+sessions.backup.json
+backups/
 ```
 
-Rotation backups are stored in:
-
-```text
-.workspace-plus-plus/backups/
-```
-
-This makes sessions easy to sync with file-based tools, but concurrent edits are not automatically merged. If you use Syncthing, Dropbox, iCloud, Obsidian Sync, or another file sync tool, let sync finish before editing sessions on another device. Automatic backups help recover from corrupted session data, but they are not a full multi-device conflict resolver.
+Workspace++ watches the active session file for external changes and reloads synced updates when possible, but concurrent edits are not a full conflict-free merge system. If you use Syncthing, Dropbox, iCloud, Obsidian Sync, or another file sync tool, let sync finish before editing sessions on another device. Automatic backups help recover from corrupted session data, but they are not a full multi-device conflict resolver.
 
 ## Languages
 

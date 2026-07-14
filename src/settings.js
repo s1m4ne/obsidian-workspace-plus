@@ -632,6 +632,40 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
         if (self.activeTab === 'advanced') {
             addSection(L.settingsAdvancedStorageSubsection);
 
+            var sessionStorageLocation = self.plugin.getSessionStorageLocation();
+
+            new obsidian.Setting(contentEl)
+                .setName(L.settingsSessionStorageLocation)
+                .setDesc(L.settingsSessionStorageLocationDesc(self.plugin.getSessionsPath()));
+
+            addAsyncActionSetting(contentEl, {
+                name: L.settingsMoveSessionsToPluginFolder,
+                desc: L.settingsMoveSessionsToPluginFolderDesc,
+                buttonText: L.settingsMoveSessionsToPluginFolderBtn,
+                disabled: sessionStorageLocation === 'plugin-folder',
+                run: function () {
+                    return self.plugin.setSessionStorageLocation('plugin-folder');
+                },
+                onSuccess: function () {
+                    self.display();
+                },
+                failureNotice: L.sessionStorageMoveFailed,
+            });
+
+            addAsyncActionSetting(contentEl, {
+                name: L.settingsMoveSessionsToVaultFolder,
+                desc: L.settingsMoveSessionsToVaultFolderDesc,
+                buttonText: L.settingsMoveSessionsToVaultFolderBtn,
+                disabled: sessionStorageLocation === 'vault-folder',
+                run: function () {
+                    return self.plugin.setSessionStorageLocation('vault-folder');
+                },
+                onSuccess: function () {
+                    self.display();
+                },
+                failureNotice: L.sessionStorageMoveFailed,
+            });
+
             var useLocalSettings = self.plugin.isUsingLocalSettings();
 
             addToggleSetting(contentEl, {
@@ -801,6 +835,7 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
 
             addDevCardRow(L.settingsStorageFieldSessions, diagnosticsInfo.sessionsPath, { code: true });
             addDevCardRow(L.settingsStorageFieldSessionsBackup, diagnosticsInfo.sessionsBackupPath, { code: true });
+            addDevCardRow(L.settingsStorageFieldSessionStorageLocation, diagnosticsInfo.sessionStorageLocation, { code: true });
             addDevCardRow(L.settingsStorageFieldLocalSettings, diagnosticsInfo.localSettingsPath, { code: true });
             addDevCardRow(L.settingsStorageFieldGlobalSettings, diagnosticsInfo.globalSettingsPath, { code: true });
             addDevCardRow(L.settingsStorageFieldSessionCount, diagnosticsInfo.sessionCount);

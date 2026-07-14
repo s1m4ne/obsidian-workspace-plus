@@ -5,11 +5,13 @@ var i18n = require('../../i18n');
 var DEFAULT_DATA = require('../default-data');
 
 var STORAGE_DIR = '.workspace-plus-plus';
-var SESSIONS_FILE = STORAGE_DIR + '/sessions.json';
-var SESSIONS_BACKUP_FILE = STORAGE_DIR + '/sessions.backup.json';
+var SESSION_STORAGE_VAULT = 'vault-folder';
+var SESSION_STORAGE_PLUGIN = 'plugin-folder';
+var SESSIONS_FILE_NAME = 'sessions.json';
+var SESSIONS_BACKUP_FILE_NAME = 'sessions.backup.json';
 var LOCAL_SETTINGS_FILE = STORAGE_DIR + '/settings.local.json';
-var EXPORT_DIR = STORAGE_DIR + '/exports';
-var BACKUPS_DIR = STORAGE_DIR + '/backups';
+var EXPORT_DIR_NAME = 'exports';
+var BACKUPS_DIR_NAME = 'backups';
 var BACKUP_ROTATION_INTERVAL = 3600000; // 1 hour
 
 var SESSION_KEYS = [
@@ -52,6 +54,16 @@ var SETTINGS_KEYS = [
     'showActiveSwitchCommand',
     'numberedSwitchCommands',
 ];
+
+function joinPath(base, child) {
+    return String(base || '').replace(/\/+$/, '') + '/' + child;
+}
+
+function normalizeSessionStorageLocation(value) {
+    if (value === SESSION_STORAGE_PLUGIN) return SESSION_STORAGE_PLUGIN;
+    if (value === SESSION_STORAGE_VAULT) return SESSION_STORAGE_VAULT;
+    return null;
+}
 
 function pickKeys(data, keys) {
     var out = {};
@@ -125,12 +137,56 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
         return STORAGE_DIR;
     };
 
+    WorkspacePlusPlus.prototype.getPluginStorageDirPath = function () {
+        return (this.manifest && this.manifest.dir) || '.obsidian/plugins/workspace-plus-plus';
+    };
+
+    WorkspacePlusPlus.prototype.getDefaultSessionStorageLocation = function () {
+        return SESSION_STORAGE_PLUGIN;
+    };
+
+    WorkspacePlusPlus.prototype.normalizeSessionStorageLocation = function (location) {
+        return normalizeSessionStorageLocation(location);
+    };
+
+    WorkspacePlusPlus.prototype.getSessionStorageLocation = function () {
+        return normalizeSessionStorageLocation(this.data && this.data.sessionStorageLocation)
+            || normalizeSessionStorageLocation(this._sessionStorageLocation)
+            || this.getDefaultSessionStorageLocation();
+    };
+
+    WorkspacePlusPlus.prototype.setRuntimeSessionStorageLocation = function (location) {
+        var normalized = normalizeSessionStorageLocation(location) || this.getDefaultSessionStorageLocation();
+        this._sessionStorageLocation = normalized;
+        if (this.data) this.data.sessionStorageLocation = normalized;
+        return normalized;
+    };
+
+    WorkspacePlusPlus.prototype.getSessionStorageDirPathForLocation = function (location) {
+        var normalized = normalizeSessionStorageLocation(location) || this.getDefaultSessionStorageLocation();
+        return normalized === SESSION_STORAGE_PLUGIN
+            ? this.getPluginStorageDirPath()
+            : this.getStorageDirPath();
+    };
+
+    WorkspacePlusPlus.prototype.getSessionStorageDirPath = function () {
+        return this.getSessionStorageDirPathForLocation(this.getSessionStorageLocation());
+    };
+
+    WorkspacePlusPlus.prototype.getSessionsPathForLocation = function (location) {
+        return joinPath(this.getSessionStorageDirPathForLocation(location), SESSIONS_FILE_NAME);
+    };
+
     WorkspacePlusPlus.prototype.getSessionsPath = function () {
-        return SESSIONS_FILE;
+        return this.getSessionsPathForLocation(this.getSessionStorageLocation());
+    };
+
+    WorkspacePlusPlus.prototype.getSessionsBackupPathForLocation = function (location) {
+        return joinPath(this.getSessionStorageDirPathForLocation(location), SESSIONS_BACKUP_FILE_NAME);
     };
 
     WorkspacePlusPlus.prototype.getSessionsBackupPath = function () {
-        return SESSIONS_BACKUP_FILE;
+        return this.getSessionsBackupPathForLocation(this.getSessionStorageLocation());
     };
 
     WorkspacePlusPlus.prototype.getLocalSettingsPath = function () {
@@ -138,25 +194,36 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
     };
 
     WorkspacePlusPlus.prototype.getExportDirPath = function () {
-        return EXPORT_DIR;
+        return joinPath(this.getSessionStorageDirPath(), EXPORT_DIR_NAME);
     };
 
     WorkspacePlusPlus.prototype.getBackupsDirPath = function () {
-        return BACKUPS_DIR;
+        return joinPath(this.getSessionStorageDirPath(), BACKUPS_DIR_NAME);
     };
 
     WorkspacePlusPlus.prototype.getRotationBackupPath = function (generation) {
-        return BACKUPS_DIR + '/sessions.' + generation + '.json';
+        return this.getBackupsDirPath() + '/sessions.' + generation + '.json';
+    };
+
+    WorkspacePlusPlus.prototype.getRotationBackupPathForLocation = function (location, generation) {
+        return joinPath(this.getSessionStorageDirPathForLocation(location), BACKUPS_DIR_NAME) + '/sessions.' + generation + '.json';
+    };
+
+    WorkspacePlusPlus.prototype.getSessionBackupFilePathsForLocation = function (location) {
+        return [
+            this.getSessionsBackupPathForLocation(location),
+            this.getRotationBackupPathForLocation(location, 1),
+            this.getRotationBackupPathForLocation(location, 2),
+            this.getRotationBackupPathForLocation(location, 3),
+        ];
     };
 
     WorkspacePlusPlus.prototype.getBackupFilePaths = function () {
         return [
-            this.getSessionsBackupPath(),
             this.getBackupPath(),
-            this.getRotationBackupPath(1),
-            this.getRotationBackupPath(2),
-            this.getRotationBackupPath(3),
-        ];
+        ]
+            .concat(this.getSessionBackupFilePathsForLocation(SESSION_STORAGE_VAULT))
+            .concat(this.getSessionBackupFilePathsForLocation(SESSION_STORAGE_PLUGIN));
     };
 
     WorkspacePlusPlus.prototype.getBackupPlatformLabel = function () {
@@ -282,6 +349,10 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
         return this.ensureDir(this.getStorageDirPath());
     };
 
+    WorkspacePlusPlus.prototype.ensureSessionStorageDir = function () {
+        return this.ensureDir(this.getSessionStorageDirPath());
+    };
+
     WorkspacePlusPlus.prototype.getFileMtime = function (path) {
         return this.app.vault.adapter.stat(path)
             .then(function (stat) {
@@ -335,14 +406,95 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
         });
     };
 
+    WorkspacePlusPlus.prototype.resolveSessionStorageLocation = function (settingsData) {
+        var explicit = normalizeSessionStorageLocation(settingsData && settingsData.sessionStorageLocation);
+        if (explicit) {
+            this.setRuntimeSessionStorageLocation(explicit);
+            return Promise.resolve(explicit);
+        }
+
+        var self = this;
+        return Promise.all([
+            this.app.vault.adapter.exists(this.getSessionsPathForLocation(SESSION_STORAGE_VAULT)),
+            this.app.vault.adapter.exists(this.getSessionsBackupPathForLocation(SESSION_STORAGE_VAULT)),
+            this.app.vault.adapter.exists(this.getSessionsPathForLocation(SESSION_STORAGE_PLUGIN)),
+            this.app.vault.adapter.exists(this.getSessionsBackupPathForLocation(SESSION_STORAGE_PLUGIN)),
+        ]).then(function (exists) {
+            var location;
+            if (exists[0] || exists[1]) {
+                location = SESSION_STORAGE_VAULT;
+            } else if (exists[2] || exists[3]) {
+                location = SESSION_STORAGE_PLUGIN;
+            } else {
+                location = self.getDefaultSessionStorageLocation();
+            }
+            self.setRuntimeSessionStorageLocation(location);
+            return location;
+        }).catch(function () {
+            var fallback = self.getDefaultSessionStorageLocation();
+            self.setRuntimeSessionStorageLocation(fallback);
+            return fallback;
+        });
+    };
+
+    WorkspacePlusPlus.prototype.setSessionStorageLocation = function (location, options) {
+        var self = this;
+        var L = i18n.L;
+        options = options || {};
+        var next = normalizeSessionStorageLocation(location);
+        if (!next) return Promise.resolve(false);
+        if (next === this.getSessionStorageLocation()) return Promise.resolve(false);
+
+        var previousLocation = this.getSessionStorageLocation();
+        var sessionData = this.extractSessionData(this.data);
+        var now = Date.now();
+        if (typeof this._lastPersistStamp === 'number' && now <= this._lastPersistStamp) {
+            now = this._lastPersistStamp + 1;
+        }
+        sessionData._wppSavedAt = now;
+
+        this.setRuntimeSessionStorageLocation(next);
+        this._lastPersistStamp = now;
+        this._lastRotationBackupAt = 0;
+
+        return this.ensureSessionStorageDir()
+            .then(function () {
+                return self.writeJsonWithBackup(
+                    self.getSessionsPath(),
+                    self.getSessionsBackupPath(),
+                    sessionData,
+                    true
+                );
+            })
+            .then(function () {
+                if (typeof self.recordSessionDataStored !== 'function') return true;
+                return self.recordSessionDataStored(sessionData);
+            })
+            .then(function () {
+                return self.persistData();
+            })
+            .then(function () {
+                if (!options.silent) new obsidian.Notice(L.sessionStorageMoved(self.getSessionsPath()), 7000);
+                return true;
+            })
+            .catch(function (error) {
+                self.setRuntimeSessionStorageLocation(previousLocation);
+                if (!options.silent) new obsidian.Notice(L.sessionStorageMoveFailed);
+                throw error;
+            });
+    };
+
     WorkspacePlusPlus.prototype.persistGlobalSettings = function () {
         var self = this;
         if (!this.globalSettings) {
             this.globalSettings = Object.assign({}, this.getDefaultSettingsData());
         }
-        var json = JSON.stringify(this.globalSettings);
+        var data = Object.assign({}, this.globalSettings, {
+            sessionStorageLocation: this.getSessionStorageLocation(),
+        });
+        var json = JSON.stringify(data);
         return this.app.vault.adapter.write(this.getBackupPath(), json).then(function () {
-            return self.saveData(self.globalSettings);
+            return self.saveData(data);
         });
     };
 
@@ -467,6 +619,7 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
 
     WorkspacePlusPlus.prototype.getStorageDiagnosticsInfo = function () {
         return {
+            sessionStorageLocation: this.getSessionStorageLocation(),
             sessionsPath: this.getSessionsPath(),
             sessionsBackupPath: this.getSessionsBackupPath(),
             localSettingsPath: this.getLocalSettingsPath(),
@@ -487,7 +640,7 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
             data: this.extractSessionData(this.data),
         };
 
-        return this.ensureStorageDir()
+        return this.ensureSessionStorageDir()
             .then(function () {
                 return self.ensureDir(self.getExportDirPath());
             })
@@ -584,7 +737,7 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
                     self.globalSettings = Object.assign({}, settingsData);
                 }
 
-                return self.ensureStorageDir()
+                return self.ensureSessionStorageDir()
                     .then(function () {
                         return self.writeJsonWithBackup(
                             self.getSessionsPath(),
@@ -861,7 +1014,7 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
     WorkspacePlusPlus.prototype.migrateLegacySessions = function (sessionData) {
         var self = this;
         var normalized = this.normalizeSessionData(sessionData);
-        return this.ensureStorageDir()
+        return this.ensureSessionStorageDir()
             .then(function () {
                 return self.writeJsonWithBackup(
                     self.getSessionsPath(),
@@ -887,6 +1040,7 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
         var rawSaved = null;
         var legacyMain = null;
         var hadLegacyInMain = false;
+        var loadedLocalSettings = null;
 
         return this.loadData()
             .catch(function () {
@@ -902,6 +1056,16 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
                 );
                 hadLegacyInMain = hasSessionShape(loadedMain);
                 legacyMain = hadLegacyInMain ? self.normalizeSessionData(loadedMain) : null;
+                return self.loadLocalSettingsData();
+            })
+            .then(function (localSettings) {
+                loadedLocalSettings = localSettings;
+                self.useLocalSettings = !!loadedLocalSettings;
+                return self.resolveSessionStorageLocation({
+                    sessionStorageLocation: loadedMain.sessionStorageLocation,
+                });
+            })
+            .then(function () {
                 return self.loadSessionDataFromStorage();
             })
             .then(function (sessionData) {
@@ -945,22 +1109,20 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
                     });
             })
             .then(function (sessionData) {
-                return self.loadLocalSettingsData().then(function (localSettings) {
-                    self.useLocalSettings = !!localSettings;
-                    var effectiveSettings = self.isUsingLocalSettings()
-                        ? Object.assign({}, self.globalSettings, localSettings)
-                        : Object.assign({}, self.globalSettings);
-                    // Migrate: existing users keep filter visible (new default is OFF).
-                    // rawSaved is null for new installs; for existing users it is the raw
-                    // data.json object. Before showFilterInput was added to SETTINGS_KEYS
-                    // it was never written to disk, so rawSaved.showFilterInput is
-                    // undefined for any user who predates that setting.
-                    if (rawSaved !== null && rawSaved !== undefined && rawSaved.showFilterInput === undefined) {
-                        effectiveSettings.showFilterInput = true;
-                    }
-                    var merged = Object.assign({}, self.getDefaultSessionData(), sessionData || {});
-                    return Object.assign(merged, effectiveSettings);
-                });
+                var effectiveSettings = self.isUsingLocalSettings()
+                    ? Object.assign({}, self.globalSettings, loadedLocalSettings)
+                    : Object.assign({}, self.globalSettings);
+                effectiveSettings.sessionStorageLocation = self.getSessionStorageLocation();
+                // Migrate: existing users keep filter visible (new default is OFF).
+                // rawSaved is null for new installs; for existing users it is the raw
+                // data.json object. Before showFilterInput was added to SETTINGS_KEYS
+                // it was never written to disk, so rawSaved.showFilterInput is
+                // undefined for any user who predates that setting.
+                if (rawSaved !== null && rawSaved !== undefined && rawSaved.showFilterInput === undefined) {
+                    effectiveSettings.showFilterInput = true;
+                }
+                var merged = Object.assign({}, self.getDefaultSessionData(), sessionData || {});
+                return Object.assign(merged, effectiveSettings);
             });
     };
 }

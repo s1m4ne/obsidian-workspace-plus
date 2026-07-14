@@ -293,3 +293,85 @@ test('rotation backup info includes saved platform labels', async function () {
         backupPlatform: 'Windows',
     }]);
 });
+
+test('session storage defaults new installs to the Obsidian plugin folder', async function () {
+    const plugin = createPlugin();
+    plugin.app.vault.adapter.exists = function () {
+        return Promise.resolve(false);
+    };
+
+    const location = await plugin.resolveSessionStorageLocation({});
+
+    assert.equal(location, 'plugin-folder');
+    assert.equal(plugin.getSessionStorageLocation(), 'plugin-folder');
+    assert.equal(plugin.getSessionsPath(), '.obsidian/plugins/workspace-plus-plus/sessions.json');
+});
+
+test('session storage keeps existing vault-local files when no setting is explicit', async function () {
+    const plugin = createPlugin();
+    plugin.app.vault.adapter.exists = function (path) {
+        return Promise.resolve(path === '.workspace-plus-plus/sessions.json');
+    };
+
+    const location = await plugin.resolveSessionStorageLocation({});
+
+    assert.equal(location, 'vault-folder');
+    assert.equal(plugin.getSessionStorageLocation(), 'vault-folder');
+    assert.equal(plugin.getSessionsPath(), '.workspace-plus-plus/sessions.json');
+});
+
+test('session storage explicit setting wins over detected legacy files', async function () {
+    const plugin = createPlugin();
+    plugin.app.vault.adapter.exists = function (path) {
+        return Promise.resolve(path === '.workspace-plus-plus/sessions.json');
+    };
+
+    const location = await plugin.resolveSessionStorageLocation({
+        sessionStorageLocation: 'plugin-folder',
+    });
+
+    assert.equal(location, 'plugin-folder');
+    assert.equal(plugin.getSessionsPath(), '.obsidian/plugins/workspace-plus-plus/sessions.json');
+});
+
+test('session storage move writes sessions to the target without deleting the old file', async function () {
+    const plugin = createPlugin({
+        sessionStorageLocation: 'vault-folder',
+    });
+    const writes = [];
+    const removed = [];
+    plugin.setRuntimeSessionStorageLocation('vault-folder');
+    plugin.persistData = function () {
+        plugin.persistCalls = (plugin.persistCalls || 0) + 1;
+        return Promise.resolve(true);
+    };
+    plugin.app.vault.adapter.exists = function (path) {
+        return Promise.resolve(path === '.obsidian/plugins/workspace-plus-plus');
+    };
+    plugin.app.vault.adapter.mkdir = function () {
+        return Promise.resolve();
+    };
+    plugin.app.vault.adapter.write = function (path, raw) {
+        writes.push({ path: path, data: JSON.parse(raw) });
+        return Promise.resolve();
+    };
+    plugin.app.vault.adapter.remove = function (path) {
+        removed.push(path);
+        return Promise.resolve();
+    };
+    plugin.app.vault.adapter.stat = function () {
+        return Promise.resolve({ mtime: 2000 });
+    };
+
+    const moved = await plugin.setSessionStorageLocation('plugin-folder', { silent: true });
+
+    assert.equal(moved, true);
+    assert.equal(plugin.getSessionStorageLocation(), 'plugin-folder');
+    assert.equal(plugin.persistCalls, 1);
+    assert.deepEqual(writes.map((w) => w.path), [
+        '.obsidian/plugins/workspace-plus-plus/sessions.backup.json',
+        '.obsidian/plugins/workspace-plus-plus/sessions.json',
+    ]);
+    assert.equal(writes[1].data.sessions.local.name, 'Local');
+    assert.deepEqual(removed, []);
+});
