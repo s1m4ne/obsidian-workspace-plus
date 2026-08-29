@@ -15290,6 +15290,8 @@ var require_persistence = __commonJS({
     var SESSION_STORAGE_PLUGIN = "plugin-folder";
     var SESSIONS_FILE_NAME = "sessions.json";
     var SESSIONS_BACKUP_FILE_NAME = "sessions.backup.json";
+    var HISTORY_FILE_NAME = "history.json";
+    var HISTORY_FORMAT_VERSION = 1;
     var LOCAL_SETTINGS_FILE = STORAGE_DIR + "/settings.local.json";
     var EXPORT_DIR_NAME = "exports";
     var BACKUPS_DIR_NAME = "backups";
@@ -15341,6 +15343,66 @@ var require_persistence = __commonJS({
       if (value === SESSION_STORAGE_PLUGIN) return SESSION_STORAGE_PLUGIN;
       if (value === SESSION_STORAGE_VAULT) return SESSION_STORAGE_VAULT;
       return null;
+    }
+    function readHistoryMap(raw) {
+      if (!raw || typeof raw !== "object") return {};
+      var map = raw.history && typeof raw.history === "object" ? raw.history : raw;
+      var out = {};
+      var ids = Object.keys(map);
+      for (var i = 0; i < ids.length; i++) {
+        var entries = map[ids[i]];
+        if (Array.isArray(entries) && entries.length > 0) out[ids[i]] = entries;
+      }
+      return out;
+    }
+    function splitSessionHistory(sessionData) {
+      var sessions = sessionData && sessionData.sessions || {};
+      var strippedSessions = {};
+      var history = {};
+      var ids = Object.keys(sessions);
+      for (var i = 0; i < ids.length; i++) {
+        var id = ids[i];
+        var session = sessions[id];
+        if (!session || typeof session !== "object") continue;
+        var copy = {};
+        var keys = Object.keys(session);
+        for (var k = 0; k < keys.length; k++) {
+          if (keys[k] === "history") continue;
+          copy[keys[k]] = session[keys[k]];
+        }
+        strippedSessions[id] = copy;
+        if (Array.isArray(session.history) && session.history.length > 0) {
+          history[id] = session.history;
+        }
+      }
+      return {
+        data: Object.assign({}, sessionData, { sessions: strippedSessions }),
+        history
+      };
+    }
+    function mergeSessionHistory(sessionData, historyMap) {
+      var sessions = sessionData && sessionData.sessions || {};
+      var ids = Object.keys(sessions);
+      for (var i = 0; i < ids.length; i++) {
+        var session = sessions[ids[i]];
+        if (!session || typeof session !== "object") continue;
+        var entries = historyMap && historyMap[ids[i]];
+        if (Array.isArray(entries) && entries.length > 0) {
+          session.history = entries;
+        } else if (!Array.isArray(session.history) || session.history.length === 0) {
+          delete session.history;
+        }
+      }
+      return sessionData;
+    }
+    function hasInlineSessionHistory(sessionData) {
+      var sessions = sessionData && sessionData.sessions || {};
+      var ids = Object.keys(sessions);
+      for (var i = 0; i < ids.length; i++) {
+        var session = sessions[ids[i]];
+        if (session && Array.isArray(session.history) && session.history.length > 0) return true;
+      }
+      return false;
     }
     function pickKeys(data, keys) {
       var out = {};
@@ -15425,6 +15487,45 @@ var require_persistence = __commonJS({
       WorkspacePlusPlus2.prototype.getSessionsBackupPath = function() {
         return this.getSessionsBackupPathForLocation(this.getSessionStorageLocation());
       };
+      WorkspacePlusPlus2.prototype.getHistoryPathForLocation = function(location) {
+        return joinPath(this.getSessionStorageDirPathForLocation(location), HISTORY_FILE_NAME);
+      };
+      WorkspacePlusPlus2.prototype.getHistoryPath = function() {
+        return this.getHistoryPathForLocation(this.getSessionStorageLocation());
+      };
+      WorkspacePlusPlus2.prototype.writeSessionHistory = function(historyMap) {
+        var payload = {
+          version: HISTORY_FORMAT_VERSION,
+          history: historyMap || {}
+        };
+        return this.writeJson(this.getHistoryPath(), payload);
+      };
+      WorkspacePlusPlus2.prototype.readSessionHistory = function() {
+        return this.readJsonIfExists(this.getHistoryPath()).then(function(res) {
+          if (!res.exists || res.error) return {};
+          return readHistoryMap(res.data);
+        });
+      };
+      WorkspacePlusPlus2.prototype.attachSessionHistory = function(sessionData) {
+        var self = this;
+        if (!sessionData) return Promise.resolve(sessionData);
+        var hadInline = hasInlineSessionHistory(sessionData);
+        return this.readSessionHistory().then(function(historyMap) {
+          mergeSessionHistory(sessionData, historyMap);
+          if (!hadInline || Object.keys(historyMap).length > 0) return sessionData;
+          var split = splitSessionHistory(sessionData);
+          if (Object.keys(split.history).length === 0) return sessionData;
+          return self.ensureSessionStorageDir().then(function() {
+            return self.writeSessionHistory(split.history);
+          }).catch(function() {
+            return;
+          }).then(function() {
+            return sessionData;
+          });
+        }).catch(function() {
+          return sessionData;
+        });
+      };
       WorkspacePlusPlus2.prototype.getLocalSettingsPath = function() {
         return LOCAL_SETTINGS_FILE;
       };
@@ -15445,7 +15546,10 @@ var require_persistence = __commonJS({
           this.getSessionsBackupPathForLocation(location),
           this.getRotationBackupPathForLocation(location, 1),
           this.getRotationBackupPathForLocation(location, 2),
-          this.getRotationBackupPathForLocation(location, 3)
+          this.getRotationBackupPathForLocation(location, 3),
+          // history.json is not a backup, but it is recovery-only data that the
+          // reset flows are expected to clear alongside the backups.
+          this.getHistoryPathForLocation(location)
         ];
       };
       WorkspacePlusPlus2.prototype.getBackupFilePaths = function() {
@@ -15634,7 +15738,8 @@ var require_persistence = __commonJS({
         if (!next) return Promise.resolve(false);
         if (next === this.getSessionStorageLocation()) return Promise.resolve(false);
         var previousLocation = this.getSessionStorageLocation();
-        var sessionData = this.extractSessionData(this.data);
+        var split = splitSessionHistory(this.extractSessionData(this.data));
+        var sessionData = split.data;
         var now = Date.now();
         if (typeof this._lastPersistStamp === "number" && now <= this._lastPersistStamp) {
           now = this._lastPersistStamp + 1;
@@ -15644,6 +15749,8 @@ var require_persistence = __commonJS({
         this._lastPersistStamp = now;
         this._lastRotationBackupAt = 0;
         return this.ensureSessionStorageDir().then(function() {
+          return self.writeSessionHistory(split.history);
+        }).then(function() {
           return self.writeJsonWithBackup(
             self.getSessionsPath(),
             self.getSessionsBackupPath(),
@@ -15796,7 +15903,9 @@ var require_persistence = __commonJS({
         var payload = {
           exportedAt: Date.now(),
           source: this.manifest.id,
-          data: this.extractSessionData(this.data)
+          // History is device-specific layout data; exports are meant to move
+          // sessions to another vault or device, so it is left behind.
+          data: splitSessionHistory(this.extractSessionData(this.data)).data
         };
         return this.ensureSessionStorageDir().then(function() {
           return self.ensureDir(self.getExportDirPath());
@@ -15862,7 +15971,8 @@ var require_persistence = __commonJS({
         var self = this;
         var syncBeforeWrite = typeof this.reloadExternalSessionStorageIfChanged === "function" ? this.reloadExternalSessionStorageIfChanged({ mergeLocal: true }) : Promise.resolve(false);
         return syncBeforeWrite.then(function() {
-          var sessionData = self.extractSessionData(self.data);
+          var split = splitSessionHistory(self.extractSessionData(self.data));
+          var sessionData = split.data;
           var settingsData = Object.assign({}, self.getDefaultSettingsData(), self.extractSettingsData(self.data));
           var now = Date.now();
           if (typeof self._lastPersistStamp === "number" && now <= self._lastPersistStamp) {
@@ -15878,6 +15988,8 @@ var require_persistence = __commonJS({
             self.globalSettings = Object.assign({}, settingsData);
           }
           return self.ensureSessionStorageDir().then(function() {
+            return self.writeSessionHistory(split.history);
+          }).then(function() {
             return self.writeJsonWithBackup(
               self.getSessionsPath(),
               self.getSessionsBackupPath(),
@@ -16165,6 +16277,8 @@ var require_persistence = __commonJS({
             }
             return self.getDefaultSessionData();
           });
+        }).then(function(sessionData) {
+          return self.attachSessionHistory(sessionData);
         }).then(function(sessionData) {
           if (!hadLegacyInMain) return sessionData;
           return self.persistGlobalSettings().catch(function() {

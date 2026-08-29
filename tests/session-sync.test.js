@@ -369,9 +369,10 @@ test('session storage move writes sessions to the target without deleting the ol
     assert.equal(plugin.getSessionStorageLocation(), 'plugin-folder');
     assert.equal(plugin.persistCalls, 1);
     assert.deepEqual(writes.map((w) => w.path), [
+        '.obsidian/plugins/workspace-plus-plus/history.json',
         '.obsidian/plugins/workspace-plus-plus/sessions.backup.json',
         '.obsidian/plugins/workspace-plus-plus/sessions.json',
     ]);
-    assert.equal(writes[1].data.sessions.local.name, 'Local');
+    assert.equal(writes[2].data.sessions.local.name, 'Local');
     assert.deepEqual(removed, []);
 });

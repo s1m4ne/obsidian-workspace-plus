@@ -9,6 +9,8 @@ var SESSION_STORAGE_VAULT = 'vault-folder';
 var SESSION_STORAGE_PLUGIN = 'plugin-folder';
 var SESSIONS_FILE_NAME = 'sessions.json';
 var SESSIONS_BACKUP_FILE_NAME = 'sessions.backup.json';
+var HISTORY_FILE_NAME = 'history.json';
+var HISTORY_FORMAT_VERSION = 1;
 var LOCAL_SETTINGS_FILE = STORAGE_DIR + '/settings.local.json';
 var EXPORT_DIR_NAME = 'exports';
 var BACKUPS_DIR_NAME = 'backups';
@@ -64,6 +66,91 @@ function normalizeSessionStorageLocation(value) {
     if (value === SESSION_STORAGE_PLUGIN) return SESSION_STORAGE_PLUGIN;
     if (value === SESSION_STORAGE_VAULT) return SESSION_STORAGE_VAULT;
     return null;
+}
+
+function readHistoryMap(raw) {
+    if (!raw || typeof raw !== 'object') return {};
+    // Accept the versioned wrapper, and tolerate a bare map for forward safety.
+    var map = (raw.history && typeof raw.history === 'object') ? raw.history : raw;
+    var out = {};
+    var ids = Object.keys(map);
+    for (var i = 0; i < ids.length; i++) {
+        var entries = map[ids[i]];
+        if (Array.isArray(entries) && entries.length > 0) out[ids[i]] = entries;
+    }
+    return out;
+}
+
+// Split session data into what gets persisted next to the sessions and the
+// per-session version history, which is kept in a local-only file.
+//
+// The input is never mutated: extractSessionData() returns the live
+// this.data.sessions object by reference (pickKeys and normalizeSessionData
+// both copy shallowly), so deleting history in place would wipe the history
+// the UI is still showing.
+//
+// Sessions that no longer exist are dropped from the history map, which keeps
+// entries from leaking after a reset or a sessions import.
+function splitSessionHistory(sessionData) {
+    var sessions = (sessionData && sessionData.sessions) || {};
+    var strippedSessions = {};
+    var history = {};
+    var ids = Object.keys(sessions);
+
+    for (var i = 0; i < ids.length; i++) {
+        var id = ids[i];
+        var session = sessions[id];
+        if (!session || typeof session !== 'object') continue;
+
+        var copy = {};
+        var keys = Object.keys(session);
+        for (var k = 0; k < keys.length; k++) {
+            if (keys[k] === 'history') continue;
+            copy[keys[k]] = session[keys[k]];
+        }
+        strippedSessions[id] = copy;
+
+        if (Array.isArray(session.history) && session.history.length > 0) {
+            history[id] = session.history;
+        }
+    }
+
+    return {
+        data: Object.assign({}, sessionData, { sessions: strippedSessions }),
+        history: history,
+    };
+}
+
+// Attach history entries back onto the in-memory sessions. history.json is the
+// canonical source; history still inlined in sessions.json is the pre-split
+// format and is only used when the split file has nothing for that session.
+function mergeSessionHistory(sessionData, historyMap) {
+    var sessions = (sessionData && sessionData.sessions) || {};
+    var ids = Object.keys(sessions);
+
+    for (var i = 0; i < ids.length; i++) {
+        var session = sessions[ids[i]];
+        if (!session || typeof session !== 'object') continue;
+
+        var entries = historyMap && historyMap[ids[i]];
+        if (Array.isArray(entries) && entries.length > 0) {
+            session.history = entries;
+        } else if (!Array.isArray(session.history) || session.history.length === 0) {
+            delete session.history;
+        }
+    }
+
+    return sessionData;
+}
+
+function hasInlineSessionHistory(sessionData) {
+    var sessions = (sessionData && sessionData.sessions) || {};
+    var ids = Object.keys(sessions);
+    for (var i = 0; i < ids.length; i++) {
+        var session = sessions[ids[i]];
+        if (session && Array.isArray(session.history) && session.history.length > 0) return true;
+    }
+    return false;
 }
 
 function pickKeys(data, keys) {
@@ -190,6 +277,64 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
         return this.getSessionsBackupPathForLocation(this.getSessionStorageLocation());
     };
 
+    WorkspacePlusPlus.prototype.getHistoryPathForLocation = function (location) {
+        return joinPath(this.getSessionStorageDirPathForLocation(location), HISTORY_FILE_NAME);
+    };
+
+    WorkspacePlusPlus.prototype.getHistoryPath = function () {
+        return this.getHistoryPathForLocation(this.getSessionStorageLocation());
+    };
+
+    WorkspacePlusPlus.prototype.writeSessionHistory = function (historyMap) {
+        var payload = {
+            version: HISTORY_FORMAT_VERSION,
+            history: historyMap || {},
+        };
+        return this.writeJson(this.getHistoryPath(), payload);
+    };
+
+    WorkspacePlusPlus.prototype.readSessionHistory = function () {
+        return this.readJsonIfExists(this.getHistoryPath()).then(function (res) {
+            if (!res.exists || res.error) return {};
+            return readHistoryMap(res.data);
+        });
+    };
+
+    // Re-attach version history to freshly loaded session data.
+    //
+    // Sessions saved before the split still carry their history inline. Those
+    // entries are kept as-is and written out to history.json right away, so the
+    // migration completes on load instead of waiting for the next save.
+    WorkspacePlusPlus.prototype.attachSessionHistory = function (sessionData) {
+        var self = this;
+        if (!sessionData) return Promise.resolve(sessionData);
+
+        var hadInline = hasInlineSessionHistory(sessionData);
+
+        return this.readSessionHistory().then(function (historyMap) {
+            mergeSessionHistory(sessionData, historyMap);
+
+            if (!hadInline || Object.keys(historyMap).length > 0) return sessionData;
+
+            var split = splitSessionHistory(sessionData);
+            if (Object.keys(split.history).length === 0) return sessionData;
+
+            return self.ensureSessionStorageDir()
+                .then(function () {
+                    return self.writeSessionHistory(split.history);
+                })
+                .catch(function () {
+                    // Migration is best-effort: the inline copy is still intact.
+                    return;
+                })
+                .then(function () {
+                    return sessionData;
+                });
+        }).catch(function () {
+            return sessionData;
+        });
+    };
+
     WorkspacePlusPlus.prototype.getLocalSettingsPath = function () {
         return LOCAL_SETTINGS_FILE;
     };
@@ -216,6 +361,9 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
             this.getRotationBackupPathForLocation(location, 1),
             this.getRotationBackupPathForLocation(location, 2),
             this.getRotationBackupPathForLocation(location, 3),
+            // history.json is not a backup, but it is recovery-only data that the
+            // reset flows are expected to clear alongside the backups.
+            this.getHistoryPathForLocation(location),
         ];
     };
 
@@ -447,7 +595,8 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
         if (next === this.getSessionStorageLocation()) return Promise.resolve(false);
 
         var previousLocation = this.getSessionStorageLocation();
-        var sessionData = this.extractSessionData(this.data);
+        var split = splitSessionHistory(this.extractSessionData(this.data));
+        var sessionData = split.data;
         var now = Date.now();
         if (typeof this._lastPersistStamp === 'number' && now <= this._lastPersistStamp) {
             now = this._lastPersistStamp + 1;
@@ -459,6 +608,9 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
         this._lastRotationBackupAt = 0;
 
         return this.ensureSessionStorageDir()
+            .then(function () {
+                return self.writeSessionHistory(split.history);
+            })
             .then(function () {
                 return self.writeJsonWithBackup(
                     self.getSessionsPath(),
@@ -638,7 +790,9 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
         var payload = {
             exportedAt: Date.now(),
             source: this.manifest.id,
-            data: this.extractSessionData(this.data),
+            // History is device-specific layout data; exports are meant to move
+            // sessions to another vault or device, so it is left behind.
+            data: splitSessionHistory(this.extractSessionData(this.data)).data,
         };
 
         return this.ensureSessionStorageDir()
@@ -721,7 +875,10 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
 
         return syncBeforeWrite
             .then(function () {
-                var sessionData = self.extractSessionData(self.data);
+                // Version history lives in its own local-only file, so the sessions
+                // written here (and the backups derived from them) are history-free.
+                var split = splitSessionHistory(self.extractSessionData(self.data));
+                var sessionData = split.data;
                 var settingsData = Object.assign({}, self.getDefaultSettingsData(), self.extractSettingsData(self.data));
                 var now = Date.now();
                 if (typeof self._lastPersistStamp === 'number' && now <= self._lastPersistStamp) {
@@ -739,6 +896,9 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
                 }
 
                 return self.ensureSessionStorageDir()
+                    .then(function () {
+                        return self.writeSessionHistory(split.history);
+                    })
                     .then(function () {
                         return self.writeJsonWithBackup(
                             self.getSessionsPath(),
@@ -1098,6 +1258,9 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
                     }
                     return self.getDefaultSessionData();
                 });
+            })
+            .then(function (sessionData) {
+                return self.attachSessionHistory(sessionData);
             })
             .then(function (sessionData) {
                 if (!hadLegacyInMain) return sessionData;
