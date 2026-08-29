@@ -90,7 +90,6 @@ function createPlugin(options) {
     plugin.syncSessionOrder = () => {};
     plugin.normalizeGroupFeatureState = () => {};
     plugin.rotateBackupIfNeeded = () => Promise.resolve();
-    plugin.loadLocalSettingsData = () => Promise.resolve(null);
 
     return plugin;
 }

@@ -671,7 +671,6 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
 
     WorkspacePlusPlus.prototype.getStorageDiagnosticsInfo = function () {
         return {
-            sessionStorageLocation: this.getSessionStorageLocation(),
             syncedByObsidianSync: this.isSessionStorageInPluginData(),
             sessionsPath: this.getSessionsPath(),
             sessionsBackupPath: this.getSessionsBackupPath(),
