@@ -9661,6 +9661,291 @@ var require_i18n = __commonJS({
         settingsStorageFieldHistory: "\u30D0\u30FC\u30B8\u30E7\u30F3\u5C65\u6B74\u30D5\u30A1\u30A4\u30EB",
         settingsStorageFieldDataSize: "\u30BB\u30C3\u30B7\u30E7\u30F3\u4FDD\u5B58\u30B5\u30A4\u30BA",
         settingsStorageSyncHint: "Obsidian Sync\u304C\u3053\u306E\u30D5\u30A1\u30A4\u30EB\u3092\u540C\u671F\u3059\u308B\u306B\u306F\u3001Sync\u8A2D\u5B9A\u3067\u300CInstalled community plugins\u300D\u3092\u6709\u52B9\u306B\u3059\u308B\u5FC5\u8981\u304C\u3042\u308A\u307E\u3059\u3002\u30D0\u30FC\u30B8\u30E7\u30F3\u5C65\u6B74\u3068\u30D0\u30C3\u30AF\u30A2\u30C3\u30D7\u306F\u3053\u306E\u7AEF\u672B\u306B\u306E\u307F\u4FDD\u5B58\u3055\u308C\u307E\u3059\u3002"
+      },
+      zh: {
+        settingsSessionStorageLocation: "\u4F1A\u8BDD\u5B58\u50A8\u4F4D\u7F6E",
+        settingsSessionStorageLocationDesc: function(path) {
+          return "\u5F53\u524D\u4F1A\u8BDD\u6587\u4EF6: " + path;
+        },
+        settingsVaultOnlySessions: "\u4EC5\u5728\u6B64\u4ED3\u5E93\u4E2D\u4FDD\u7559\u4F1A\u8BDD",
+        settingsVaultOnlySessionsDesc: "\u4F1A\u8BDD\u901A\u5E38\u4FDD\u5B58\u5728\u63D2\u4EF6\u7684 data.json \u4E2D\uFF0C\u4EE5\u4FBF Obsidian Sync \u5728\u8BBE\u5907\u4E4B\u95F4\u540C\u6B65\u3002\u542F\u7528\u540E\u4F1A\u6539\u4E3A\u4FDD\u5B58\u5230 .workspace-plus-plus\uFF0C\u8FD9\u6837\u5171\u4EAB .obsidian \u7684\u4ED3\u5E93\uFF08\u4F8B\u5982\u4F7F\u7528 Settings Profiles \u65F6\uFF09\u5C31\u4E0D\u4F1A\u6DF7\u7528\u4F1A\u8BDD\u3002\u4F46\u8BE5\u4F4D\u7F6E\u4E0D\u5728 Obsidian Sync \u7684\u540C\u6B65\u8303\u56F4\u5185\u3002",
+        sessionStorageMoved: function(path) {
+          return "Workspace++: \u4F1A\u8BDD\u5B58\u50A8\u4F4D\u7F6E\u5DF2\u79FB\u81F3 " + path;
+        },
+        sessionStorageMoveFailed: "Workspace++: \u79FB\u52A8\u4F1A\u8BDD\u5B58\u50A8\u4F4D\u7F6E\u5931\u8D25\u3002",
+        settingsStorageFieldHistory: "\u7248\u672C\u5386\u53F2\u6587\u4EF6",
+        settingsStorageFieldDataSize: "\u4F1A\u8BDD\u5B58\u50A8\u5927\u5C0F",
+        settingsStorageSyncHint: "\u53EA\u6709\u5728 Obsidian Sync \u8BBE\u7F6E\u4E2D\u542F\u7528\u201CInstalled community plugins\u201D\u540E\uFF0C\u8BE5\u6587\u4EF6\u624D\u4F1A\u88AB\u540C\u6B65\u3002\u7248\u672C\u5386\u53F2\u548C\u5907\u4EFD\u4EC5\u4FDD\u7559\u5728\u672C\u8BBE\u5907\u4E0A\u3002"
+      },
+      "zh-TW": {
+        settingsSessionStorageLocation: "\u5DE5\u4F5C\u968E\u6BB5\u5132\u5B58\u4F4D\u7F6E",
+        settingsSessionStorageLocationDesc: function(path) {
+          return "\u76EE\u524D\u7684\u5DE5\u4F5C\u968E\u6BB5\u6A94\u6848: " + path;
+        },
+        settingsVaultOnlySessions: "\u50C5\u5728\u6B64\u5132\u5B58\u5EAB\u4E2D\u4FDD\u7559\u5DE5\u4F5C\u968E\u6BB5",
+        settingsVaultOnlySessionsDesc: "\u5DE5\u4F5C\u968E\u6BB5\u901A\u5E38\u5132\u5B58\u5728\u5916\u639B\u7684 data.json \u4E2D\uFF0C\u4EE5\u4FBF Obsidian Sync \u5728\u88DD\u7F6E\u4E4B\u9593\u540C\u6B65\u3002\u555F\u7528\u5F8C\u6703\u6539\u70BA\u5132\u5B58\u5230 .workspace-plus-plus\uFF0C\u5982\u6B64\u5171\u7528 .obsidian \u7684\u5132\u5B58\u5EAB\uFF08\u4F8B\u5982\u4F7F\u7528 Settings Profiles \u6642\uFF09\u5C31\u4E0D\u6703\u6DF7\u7528\u5DE5\u4F5C\u968E\u6BB5\u3002\u4F46\u8A72\u4F4D\u7F6E\u4E0D\u5728 Obsidian Sync \u7684\u540C\u6B65\u7BC4\u570D\u5167\u3002",
+        sessionStorageMoved: function(path) {
+          return "Workspace++: \u5DE5\u4F5C\u968E\u6BB5\u5132\u5B58\u4F4D\u7F6E\u5DF2\u79FB\u81F3 " + path;
+        },
+        sessionStorageMoveFailed: "Workspace++: \u79FB\u52D5\u5DE5\u4F5C\u968E\u6BB5\u5132\u5B58\u4F4D\u7F6E\u5931\u6557\u3002",
+        settingsStorageFieldHistory: "\u7248\u672C\u6B77\u53F2\u6A94\u6848",
+        settingsStorageFieldDataSize: "\u5DE5\u4F5C\u968E\u6BB5\u5132\u5B58\u5927\u5C0F",
+        settingsStorageSyncHint: "\u53EA\u6709\u5728 Obsidian Sync \u8A2D\u5B9A\u4E2D\u555F\u7528\u300CInstalled community plugins\u300D\u5F8C\uFF0C\u6B64\u6A94\u6848\u624D\u6703\u88AB\u540C\u6B65\u3002\u7248\u672C\u6B77\u53F2\u8207\u5099\u4EFD\u50C5\u4FDD\u7559\u5728\u672C\u88DD\u7F6E\u4E0A\u3002"
+      },
+      ko: {
+        settingsSessionStorageLocation: "\uC138\uC158 \uC800\uC7A5 \uC704\uCE58",
+        settingsSessionStorageLocationDesc: function(path) {
+          return "\uD604\uC7AC \uC138\uC158 \uD30C\uC77C: " + path;
+        },
+        settingsVaultOnlySessions: "\uC774 \uBCF4\uAD00\uD568\uC5D0\uC11C\uB9CC \uC138\uC158 \uC720\uC9C0",
+        settingsVaultOnlySessionsDesc: "\uC138\uC158\uC740 Obsidian Sync\uAC00 \uAE30\uAE30 \uAC04\uC5D0 \uB3D9\uAE30\uD654\uD560 \uC218 \uC788\uB3C4\uB85D \uAE30\uBCF8\uC801\uC73C\uB85C \uD50C\uB7EC\uADF8\uC778\uC758 data.json\uC5D0 \uC800\uC7A5\uB429\uB2C8\uB2E4. \uC774 \uC635\uC158\uC744 \uCF1C\uBA74 .workspace-plus-plus\uC5D0 \uC800\uC7A5\uB418\uC5B4, .obsidian\uC744 \uACF5\uC720\uD558\uB294 \uBCF4\uAD00\uD568\uB07C\uB9AC(\uC608: Settings Profiles \uC0AC\uC6A9 \uC2DC) \uC138\uC158\uC774 \uC11E\uC774\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4. \uB2E4\uB9CC \uADF8 \uC704\uCE58\uB294 Obsidian Sync\uC758 \uB3D9\uAE30\uD654 \uB300\uC0C1\uC774 \uC544\uB2D9\uB2C8\uB2E4.",
+        sessionStorageMoved: function(path) {
+          return "Workspace++: \uC138\uC158 \uC800\uC7A5 \uC704\uCE58\uB97C " + path + " \uC73C\uB85C \uC62E\uACBC\uC2B5\uB2C8\uB2E4.";
+        },
+        sessionStorageMoveFailed: "Workspace++: \uC138\uC158 \uC800\uC7A5 \uC704\uCE58\uB97C \uC62E\uAE30\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4.",
+        settingsStorageFieldHistory: "\uBC84\uC804 \uAE30\uB85D \uD30C\uC77C",
+        settingsStorageFieldDataSize: "\uC138\uC158 \uC800\uC7A5 \uD06C\uAE30",
+        settingsStorageSyncHint: 'Obsidian Sync \uC124\uC815\uC5D0\uC11C "Installed community plugins"\uB97C \uCF1C\uC57C \uC774 \uD30C\uC77C\uC774 \uB3D9\uAE30\uD654\uB429\uB2C8\uB2E4. \uBC84\uC804 \uAE30\uB85D\uACFC \uBC31\uC5C5\uC740 \uC774 \uAE30\uAE30\uC5D0\uB9CC \uBCF4\uAD00\uB429\uB2C8\uB2E4.'
+      },
+      de: {
+        settingsSessionStorageLocation: "Speicherort der Sitzungen",
+        settingsSessionStorageLocationDesc: function(path) {
+          return "Aktuelle Sitzungsdatei: " + path;
+        },
+        settingsVaultOnlySessions: "Sitzungen nur in diesem Vault behalten",
+        settingsVaultOnlySessionsDesc: "Sitzungen werden normalerweise in der data.json des Plugins gespeichert, damit Obsidian Sync sie zwischen deinen Ger\xE4ten \xFCbertragen kann. Ist diese Option aktiv, liegen sie stattdessen in .workspace-plus-plus, sodass Vaults, die sich .obsidian teilen (etwa mit Settings Profiles), getrennte Sitzungen behalten. Dort abgelegte Sitzungen kann Obsidian Sync jedoch nicht synchronisieren.",
+        sessionStorageMoved: function(path) {
+          return "Workspace++: Speicherort der Sitzungen verschoben nach " + path;
+        },
+        sessionStorageMoveFailed: "Workspace++: Speicherort der Sitzungen konnte nicht verschoben werden.",
+        settingsStorageFieldHistory: "Datei des Versionsverlaufs",
+        settingsStorageFieldDataSize: "Gr\xF6\xDFe des Sitzungsspeichers",
+        settingsStorageSyncHint: 'Obsidian Sync \xFCbertr\xE4gt diese Datei nur, wenn in seinen Einstellungen "Installed community plugins" aktiviert ist. Versionsverlauf und Sicherungen bleiben auf diesem Ger\xE4t.'
+      },
+      fr: {
+        settingsSessionStorageLocation: "Emplacement de stockage des sessions",
+        settingsSessionStorageLocationDesc: function(path) {
+          return "Fichier de sessions actuel : " + path;
+        },
+        settingsVaultOnlySessions: "Conserver les sessions uniquement dans ce coffre",
+        settingsVaultOnlySessionsDesc: "Les sessions sont normalement stock\xE9es dans le data.json du plugin afin qu'Obsidian Sync puisse les transf\xE9rer entre vos appareils. Activez cette option pour les stocker dans .workspace-plus-plus \xE0 la place, afin que les coffres partageant .obsidian (par exemple avec Settings Profiles) conservent des sessions distinctes. Obsidian Sync ne peut pas synchroniser les sessions stock\xE9es \xE0 cet endroit.",
+        sessionStorageMoved: function(path) {
+          return "Workspace++ : stockage des sessions d\xE9plac\xE9 vers " + path;
+        },
+        sessionStorageMoveFailed: "Workspace++ : \xE9chec du d\xE9placement du stockage des sessions.",
+        settingsStorageFieldHistory: "Fichier d'historique des versions",
+        settingsStorageFieldDataSize: "Taille du stockage des sessions",
+        settingsStorageSyncHint: `Obsidian Sync ne transf\xE8re ce fichier que si "Installed community plugins" est activ\xE9 dans ses param\xE8tres. L'historique des versions et les sauvegardes restent sur cet appareil.`
+      },
+      es: {
+        settingsSessionStorageLocation: "Ubicaci\xF3n de almacenamiento de sesiones",
+        settingsSessionStorageLocationDesc: function(path) {
+          return "Archivo de sesiones actual: " + path;
+        },
+        settingsVaultOnlySessions: "Mantener las sesiones solo en esta b\xF3veda",
+        settingsVaultOnlySessionsDesc: "Las sesiones se guardan normalmente en el data.json del plugin para que Obsidian Sync pueda llevarlas entre tus dispositivos. Activa esta opci\xF3n para guardarlas en .workspace-plus-plus, de modo que las b\xF3vedas que comparten .obsidian (por ejemplo con Settings Profiles) mantengan sesiones separadas. Obsidian Sync no puede sincronizar las sesiones guardadas ah\xED.",
+        sessionStorageMoved: function(path) {
+          return "Workspace++: almacenamiento de sesiones movido a " + path;
+        },
+        sessionStorageMoveFailed: "Workspace++: no se pudo mover el almacenamiento de sesiones.",
+        settingsStorageFieldHistory: "Archivo de historial de versiones",
+        settingsStorageFieldDataSize: "Tama\xF1o del almacenamiento de sesiones",
+        settingsStorageSyncHint: 'Obsidian Sync solo transfiere este archivo si "Installed community plugins" est\xE1 habilitado en sus ajustes. El historial de versiones y las copias de seguridad permanecen en este dispositivo.'
+      },
+      pt: {
+        settingsSessionStorageLocation: "Local de armazenamento das sess\xF5es",
+        settingsSessionStorageLocationDesc: function(path) {
+          return "Arquivo de sess\xF5es atual: " + path;
+        },
+        settingsVaultOnlySessions: "Manter as sess\xF5es apenas neste cofre",
+        settingsVaultOnlySessionsDesc: "As sess\xF5es normalmente ficam no data.json do plugin para que o Obsidian Sync possa lev\xE1-las entre os seus dispositivos. Ative esta op\xE7\xE3o para guard\xE1-las em .workspace-plus-plus, assim cofres que compartilham .obsidian (por exemplo com o Settings Profiles) mant\xEAm sess\xF5es separadas. O Obsidian Sync n\xE3o consegue sincronizar as sess\xF5es guardadas ali.",
+        sessionStorageMoved: function(path) {
+          return "Workspace++: armazenamento de sess\xF5es movido para " + path;
+        },
+        sessionStorageMoveFailed: "Workspace++: falha ao mover o armazenamento de sess\xF5es.",
+        settingsStorageFieldHistory: "Arquivo de hist\xF3rico de vers\xF5es",
+        settingsStorageFieldDataSize: "Tamanho do armazenamento de sess\xF5es",
+        settingsStorageSyncHint: 'O Obsidian Sync s\xF3 leva este arquivo quando "Installed community plugins" est\xE1 ativado nas configura\xE7\xF5es dele. O hist\xF3rico de vers\xF5es e os backups permanecem neste dispositivo.'
+      },
+      it: {
+        settingsSessionStorageLocation: "Posizione di archiviazione delle sessioni",
+        settingsSessionStorageLocationDesc: function(path) {
+          return "File delle sessioni corrente: " + path;
+        },
+        settingsVaultOnlySessions: "Mantieni le sessioni solo in questo vault",
+        settingsVaultOnlySessionsDesc: "Le sessioni vengono normalmente salvate nel data.json del plugin, cos\xEC Obsidian Sync pu\xF2 trasferirle tra i tuoi dispositivi. Attiva questa opzione per salvarle invece in .workspace-plus-plus, in modo che i vault che condividono .obsidian (per esempio con Settings Profiles) mantengano sessioni separate. Obsidian Sync non pu\xF2 sincronizzare le sessioni salvate l\xEC.",
+        sessionStorageMoved: function(path) {
+          return "Workspace++: archiviazione delle sessioni spostata in " + path;
+        },
+        sessionStorageMoveFailed: "Workspace++: impossibile spostare l'archiviazione delle sessioni.",
+        settingsStorageFieldHistory: "File della cronologia versioni",
+        settingsStorageFieldDataSize: "Dimensione dell'archivio sessioni",
+        settingsStorageSyncHint: 'Obsidian Sync trasferisce questo file solo se "Installed community plugins" \xE8 attivo nelle sue impostazioni. Cronologia versioni e backup restano su questo dispositivo.'
+      },
+      ru: {
+        settingsSessionStorageLocation: "\u0420\u0430\u0441\u043F\u043E\u043B\u043E\u0436\u0435\u043D\u0438\u0435 \u0445\u0440\u0430\u043D\u0438\u043B\u0438\u0449\u0430 \u0441\u0435\u0441\u0441\u0438\u0439",
+        settingsSessionStorageLocationDesc: function(path) {
+          return "\u0422\u0435\u043A\u0443\u0449\u0438\u0439 \u0444\u0430\u0439\u043B \u0441\u0435\u0441\u0441\u0438\u0439: " + path;
+        },
+        settingsVaultOnlySessions: "\u0425\u0440\u0430\u043D\u0438\u0442\u044C \u0441\u0435\u0441\u0441\u0438\u0438 \u0442\u043E\u043B\u044C\u043A\u043E \u0432 \u044D\u0442\u043E\u043C \u0445\u0440\u0430\u043D\u0438\u043B\u0438\u0449\u0435",
+        settingsVaultOnlySessionsDesc: "\u041E\u0431\u044B\u0447\u043D\u043E \u0441\u0435\u0441\u0441\u0438\u0438 \u0445\u0440\u0430\u043D\u044F\u0442\u0441\u044F \u0432 data.json \u043F\u043B\u0430\u0433\u0438\u043D\u0430, \u0447\u0442\u043E\u0431\u044B Obsidian Sync \u043C\u043E\u0433 \u043F\u0435\u0440\u0435\u043D\u043E\u0441\u0438\u0442\u044C \u0438\u0445 \u043C\u0435\u0436\u0434\u0443 \u0432\u0430\u0448\u0438\u043C\u0438 \u0443\u0441\u0442\u0440\u043E\u0439\u0441\u0442\u0432\u0430\u043C\u0438. \u0412\u043A\u043B\u044E\u0447\u0438\u0442\u0435 \u044D\u0442\u043E\u0442 \u043F\u0430\u0440\u0430\u043C\u0435\u0442\u0440, \u0447\u0442\u043E\u0431\u044B \u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0438\u0445 \u0432 .workspace-plus-plus \u2014 \u0442\u043E\u0433\u0434\u0430 \u0445\u0440\u0430\u043D\u0438\u043B\u0438\u0449\u0430 \u0441 \u043E\u0431\u0449\u0438\u043C .obsidian (\u043D\u0430\u043F\u0440\u0438\u043C\u0435\u0440, \u043F\u0440\u0438 \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u043D\u0438\u0438 Settings Profiles) \u0431\u0443\u0434\u0443\u0442 \u0434\u0435\u0440\u0436\u0430\u0442\u044C \u0441\u0435\u0441\u0441\u0438\u0438 \u0440\u0430\u0437\u0434\u0435\u043B\u044C\u043D\u043E. Obsidian Sync \u043D\u0435 \u0441\u0438\u043D\u0445\u0440\u043E\u043D\u0438\u0437\u0438\u0440\u0443\u0435\u0442 \u0441\u0435\u0441\u0441\u0438\u0438, \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u044B\u0435 \u0442\u0430\u043C.",
+        sessionStorageMoved: function(path) {
+          return "Workspace++: \u0445\u0440\u0430\u043D\u0438\u043B\u0438\u0449\u0435 \u0441\u0435\u0441\u0441\u0438\u0439 \u043F\u0435\u0440\u0435\u043C\u0435\u0449\u0435\u043D\u043E \u0432 " + path;
+        },
+        sessionStorageMoveFailed: "Workspace++: \u043D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u043F\u0435\u0440\u0435\u043C\u0435\u0441\u0442\u0438\u0442\u044C \u0445\u0440\u0430\u043D\u0438\u043B\u0438\u0449\u0435 \u0441\u0435\u0441\u0441\u0438\u0439.",
+        settingsStorageFieldHistory: "\u0424\u0430\u0439\u043B \u0438\u0441\u0442\u043E\u0440\u0438\u0438 \u0432\u0435\u0440\u0441\u0438\u0439",
+        settingsStorageFieldDataSize: "\u0420\u0430\u0437\u043C\u0435\u0440 \u0445\u0440\u0430\u043D\u0438\u043B\u0438\u0449\u0430 \u0441\u0435\u0441\u0441\u0438\u0439",
+        settingsStorageSyncHint: 'Obsidian Sync \u043F\u0435\u0440\u0435\u043D\u043E\u0441\u0438\u0442 \u044D\u0442\u043E\u0442 \u0444\u0430\u0439\u043B, \u0442\u043E\u043B\u044C\u043A\u043E \u0435\u0441\u043B\u0438 \u0432 \u0435\u0433\u043E \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0430\u0445 \u0432\u043A\u043B\u044E\u0447\u0435\u043D\u043E "Installed community plugins". \u0418\u0441\u0442\u043E\u0440\u0438\u044F \u0432\u0435\u0440\u0441\u0438\u0439 \u0438 \u0440\u0435\u0437\u0435\u0440\u0432\u043D\u044B\u0435 \u043A\u043E\u043F\u0438\u0438 \u043E\u0441\u0442\u0430\u044E\u0442\u0441\u044F \u043D\u0430 \u044D\u0442\u043E\u043C \u0443\u0441\u0442\u0440\u043E\u0439\u0441\u0442\u0432\u0435.'
+      },
+      tr: {
+        settingsSessionStorageLocation: "Oturum depolama konumu",
+        settingsSessionStorageLocationDesc: function(path) {
+          return "Ge\xE7erli oturum dosyas\u0131: " + path;
+        },
+        settingsVaultOnlySessions: "Oturumlar\u0131 yaln\u0131zca bu kasada tut",
+        settingsVaultOnlySessionsDesc: "Oturumlar, Obsidian Sync cihazlar\u0131n\u0131z aras\u0131nda ta\u015F\u0131yabilsin diye normalde eklentinin data.json dosyas\u0131nda saklan\u0131r. Bunu a\xE7t\u0131\u011F\u0131n\u0131zda .workspace-plus-plus i\xE7inde saklan\u0131r; b\xF6ylece .obsidian dosyas\u0131n\u0131 payla\u015Fan kasalar (\xF6rne\u011Fin Settings Profiles ile) ayr\u0131 oturumlar tutar. Ancak orada saklanan oturumlar\u0131 Obsidian Sync e\u015Fitleyemez.",
+        sessionStorageMoved: function(path) {
+          return "Workspace++: oturum depolama konumu \u015Furaya ta\u015F\u0131nd\u0131: " + path;
+        },
+        sessionStorageMoveFailed: "Workspace++: oturum depolama konumu ta\u015F\u0131namad\u0131.",
+        settingsStorageFieldHistory: "S\xFCr\xFCm ge\xE7mi\u015Fi dosyas\u0131",
+        settingsStorageFieldDataSize: "Oturum deposu boyutu",
+        settingsStorageSyncHint: 'Obsidian Sync bu dosyay\u0131 yaln\u0131zca ayarlar\u0131nda "Installed community plugins" etkinken ta\u015F\u0131r. S\xFCr\xFCm ge\xE7mi\u015Fi ve yedekler bu cihazda kal\u0131r.'
+      },
+      id: {
+        settingsSessionStorageLocation: "Lokasi penyimpanan sesi",
+        settingsSessionStorageLocationDesc: function(path) {
+          return "Berkas sesi saat ini: " + path;
+        },
+        settingsVaultOnlySessions: "Simpan sesi hanya di vault ini",
+        settingsVaultOnlySessionsDesc: "Sesi biasanya disimpan di data.json milik plugin agar Obsidian Sync dapat membawanya antar perangkat Anda. Aktifkan opsi ini untuk menyimpannya di .workspace-plus-plus, sehingga vault yang berbagi .obsidian (misalnya dengan Settings Profiles) menyimpan sesi terpisah. Sesi yang disimpan di sana tidak dapat disinkronkan oleh Obsidian Sync.",
+        sessionStorageMoved: function(path) {
+          return "Workspace++: penyimpanan sesi dipindahkan ke " + path;
+        },
+        sessionStorageMoveFailed: "Workspace++: gagal memindahkan penyimpanan sesi.",
+        settingsStorageFieldHistory: "Berkas riwayat versi",
+        settingsStorageFieldDataSize: "Ukuran penyimpanan sesi",
+        settingsStorageSyncHint: 'Obsidian Sync hanya membawa berkas ini bila "Installed community plugins" diaktifkan di pengaturannya. Riwayat versi dan cadangan tetap di perangkat ini.'
+      },
+      ms: {
+        settingsSessionStorageLocation: "Lokasi storan sesi",
+        settingsSessionStorageLocationDesc: function(path) {
+          return "Fail sesi semasa: " + path;
+        },
+        settingsVaultOnlySessions: "Simpan sesi dalam bilik kebal ini sahaja",
+        settingsVaultOnlySessionsDesc: "Sesi biasanya disimpan dalam data.json pemalam supaya Obsidian Sync boleh membawanya antara peranti anda. Hidupkan pilihan ini untuk menyimpannya dalam .workspace-plus-plus, supaya bilik kebal yang berkongsi .obsidian (contohnya dengan Settings Profiles) menyimpan sesi berasingan. Sesi yang disimpan di situ tidak boleh disegerakkan oleh Obsidian Sync.",
+        sessionStorageMoved: function(path) {
+          return "Workspace++: storan sesi dipindahkan ke " + path;
+        },
+        sessionStorageMoveFailed: "Workspace++: gagal memindahkan storan sesi.",
+        settingsStorageFieldHistory: "Fail sejarah versi",
+        settingsStorageFieldDataSize: "Saiz storan sesi",
+        settingsStorageSyncHint: 'Obsidian Sync hanya membawa fail ini apabila "Installed community plugins" dihidupkan dalam tetapannya. Sejarah versi dan sandaran kekal pada peranti ini.'
+      },
+      vi: {
+        settingsSessionStorageLocation: "V\u1ECB tr\xED l\u01B0u tr\u1EEF phi\xEAn",
+        settingsSessionStorageLocationDesc: function(path) {
+          return "T\u1EC7p phi\xEAn hi\u1EC7n t\u1EA1i: " + path;
+        },
+        settingsVaultOnlySessions: "Ch\u1EC9 gi\u1EEF phi\xEAn trong kho n\xE0y",
+        settingsVaultOnlySessionsDesc: "C\xE1c phi\xEAn th\u01B0\u1EDDng \u0111\u01B0\u1EE3c l\u01B0u trong data.json c\u1EE7a plugin \u0111\u1EC3 Obsidian Sync c\xF3 th\u1EC3 mang ch\xFAng gi\u1EEFa c\xE1c thi\u1EBFt b\u1ECB c\u1EE7a b\u1EA1n. B\u1EADt t\xF9y ch\u1ECDn n\xE0y \u0111\u1EC3 l\u01B0u v\xE0o .workspace-plus-plus, nh\u1EDD \u0111\xF3 c\xE1c kho d\xF9ng chung .obsidian (v\xED d\u1EE5 v\u1EDBi Settings Profiles) gi\u1EEF phi\xEAn ri\xEAng bi\u1EC7t. Tuy nhi\xEAn Obsidian Sync kh\xF4ng \u0111\u1ED3ng b\u1ED9 c\xE1c phi\xEAn l\u01B0u \u1EDF \u0111\xF3.",
+        sessionStorageMoved: function(path) {
+          return "Workspace++: \u0111\xE3 chuy\u1EC3n n\u01A1i l\u01B0u tr\u1EEF phi\xEAn sang " + path;
+        },
+        sessionStorageMoveFailed: "Workspace++: kh\xF4ng th\u1EC3 chuy\u1EC3n n\u01A1i l\u01B0u tr\u1EEF phi\xEAn.",
+        settingsStorageFieldHistory: "T\u1EC7p l\u1ECBch s\u1EED phi\xEAn b\u1EA3n",
+        settingsStorageFieldDataSize: "Dung l\u01B0\u1EE3ng l\u01B0u tr\u1EEF phi\xEAn",
+        settingsStorageSyncHint: 'Obsidian Sync ch\u1EC9 mang t\u1EC7p n\xE0y khi "Installed community plugins" \u0111\u01B0\u1EE3c b\u1EADt trong c\xE0i \u0111\u1EB7t c\u1EE7a n\xF3. L\u1ECBch s\u1EED phi\xEAn b\u1EA3n v\xE0 b\u1EA3n sao l\u01B0u ch\u1EC9 n\u1EB1m tr\xEAn thi\u1EBFt b\u1ECB n\xE0y.'
+      },
+      th: {
+        settingsSessionStorageLocation: "\u0E15\u0E33\u0E41\u0E2B\u0E19\u0E48\u0E07\u0E08\u0E31\u0E14\u0E40\u0E01\u0E47\u0E1A\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19",
+        settingsSessionStorageLocationDesc: function(path) {
+          return "\u0E44\u0E1F\u0E25\u0E4C\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E1B\u0E31\u0E08\u0E08\u0E38\u0E1A\u0E31\u0E19: " + path;
+        },
+        settingsVaultOnlySessions: "\u0E40\u0E01\u0E47\u0E1A\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E44\u0E27\u0E49\u0E40\u0E09\u0E1E\u0E32\u0E30\u0E43\u0E19\u0E27\u0E2D\u0E25\u0E15\u0E4C\u0E19\u0E35\u0E49",
+        settingsVaultOnlySessionsDesc: "\u0E42\u0E14\u0E22\u0E1B\u0E01\u0E15\u0E34\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E08\u0E30\u0E16\u0E39\u0E01\u0E40\u0E01\u0E47\u0E1A\u0E44\u0E27\u0E49\u0E43\u0E19 data.json \u0E02\u0E2D\u0E07\u0E1B\u0E25\u0E31\u0E4A\u0E01\u0E2D\u0E34\u0E19 \u0E40\u0E1E\u0E37\u0E48\u0E2D\u0E43\u0E2B\u0E49 Obsidian Sync \u0E2A\u0E48\u0E07\u0E15\u0E48\u0E2D\u0E23\u0E30\u0E2B\u0E27\u0E48\u0E32\u0E07\u0E2D\u0E38\u0E1B\u0E01\u0E23\u0E13\u0E4C\u0E02\u0E2D\u0E07\u0E04\u0E38\u0E13\u0E44\u0E14\u0E49 \u0E40\u0E1B\u0E34\u0E14\u0E15\u0E31\u0E27\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E19\u0E35\u0E49\u0E40\u0E1E\u0E37\u0E48\u0E2D\u0E40\u0E01\u0E47\u0E1A\u0E44\u0E27\u0E49\u0E43\u0E19 .workspace-plus-plus \u0E41\u0E17\u0E19 \u0E27\u0E2D\u0E25\u0E15\u0E4C\u0E17\u0E35\u0E48\u0E43\u0E0A\u0E49 .obsidian \u0E23\u0E48\u0E27\u0E21\u0E01\u0E31\u0E19 (\u0E40\u0E0A\u0E48\u0E19\u0E40\u0E21\u0E37\u0E48\u0E2D\u0E43\u0E0A\u0E49 Settings Profiles) \u0E08\u0E30\u0E44\u0E14\u0E49\u0E41\u0E22\u0E01\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E01\u0E31\u0E19 \u0E41\u0E15\u0E48 Obsidian Sync \u0E08\u0E30\u0E44\u0E21\u0E48\u0E0B\u0E34\u0E07\u0E01\u0E4C\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E17\u0E35\u0E48\u0E40\u0E01\u0E47\u0E1A\u0E44\u0E27\u0E49\u0E17\u0E35\u0E48\u0E19\u0E31\u0E48\u0E19",
+        sessionStorageMoved: function(path) {
+          return "Workspace++: \u0E22\u0E49\u0E32\u0E22\u0E15\u0E33\u0E41\u0E2B\u0E19\u0E48\u0E07\u0E08\u0E31\u0E14\u0E40\u0E01\u0E47\u0E1A\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E44\u0E1B\u0E17\u0E35\u0E48 " + path;
+        },
+        sessionStorageMoveFailed: "Workspace++: \u0E22\u0E49\u0E32\u0E22\u0E15\u0E33\u0E41\u0E2B\u0E19\u0E48\u0E07\u0E08\u0E31\u0E14\u0E40\u0E01\u0E47\u0E1A\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E44\u0E21\u0E48\u0E2A\u0E33\u0E40\u0E23\u0E47\u0E08",
+        settingsStorageFieldHistory: "\u0E44\u0E1F\u0E25\u0E4C\u0E1B\u0E23\u0E30\u0E27\u0E31\u0E15\u0E34\u0E40\u0E27\u0E2D\u0E23\u0E4C\u0E0A\u0E31\u0E19",
+        settingsStorageFieldDataSize: "\u0E02\u0E19\u0E32\u0E14\u0E17\u0E35\u0E48\u0E08\u0E31\u0E14\u0E40\u0E01\u0E47\u0E1A\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19",
+        settingsStorageSyncHint: 'Obsidian Sync \u0E08\u0E30\u0E2A\u0E48\u0E07\u0E44\u0E1F\u0E25\u0E4C\u0E19\u0E35\u0E49\u0E01\u0E47\u0E15\u0E48\u0E2D\u0E40\u0E21\u0E37\u0E48\u0E2D\u0E40\u0E1B\u0E34\u0E14 "Installed community plugins" \u0E43\u0E19\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E02\u0E2D\u0E07\u0E21\u0E31\u0E19\u0E40\u0E17\u0E48\u0E32\u0E19\u0E31\u0E49\u0E19 \u0E1B\u0E23\u0E30\u0E27\u0E31\u0E15\u0E34\u0E40\u0E27\u0E2D\u0E23\u0E4C\u0E0A\u0E31\u0E19\u0E41\u0E25\u0E30\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E2A\u0E33\u0E23\u0E2D\u0E07\u0E08\u0E30\u0E2D\u0E22\u0E39\u0E48\u0E1A\u0E19\u0E2D\u0E38\u0E1B\u0E01\u0E23\u0E13\u0E4C\u0E19\u0E35\u0E49'
+      },
+      hi: {
+        settingsSessionStorageLocation: "\u0938\u0924\u094D\u0930 \u0938\u0902\u0917\u094D\u0930\u0939\u0923 \u0938\u094D\u0925\u093E\u0928",
+        settingsSessionStorageLocationDesc: function(path) {
+          return "\u0935\u0930\u094D\u0924\u092E\u093E\u0928 \u0938\u0924\u094D\u0930 \u092B\u093C\u093E\u0907\u0932: " + path;
+        },
+        settingsVaultOnlySessions: "\u0938\u0924\u094D\u0930 \u0915\u0947\u0935\u0932 \u0907\u0938\u0940 \u0935\u0949\u0932\u094D\u091F \u092E\u0947\u0902 \u0930\u0916\u0947\u0902",
+        settingsVaultOnlySessionsDesc: "\u0938\u0924\u094D\u0930 \u0938\u093E\u092E\u093E\u0928\u094D\u092F\u0924\u0903 \u092A\u094D\u0932\u0917\u0907\u0928 \u0915\u0940 data.json \u092E\u0947\u0902 \u0938\u0902\u0917\u094D\u0930\u0939\u093F\u0924 \u0939\u094B\u0924\u0947 \u0939\u0948\u0902 \u0924\u093E\u0915\u093F Obsidian Sync \u0909\u0928\u094D\u0939\u0947\u0902 \u0906\u092A\u0915\u0947 \u0909\u092A\u0915\u0930\u0923\u094B\u0902 \u0915\u0947 \u092C\u0940\u091A \u0932\u0947 \u091C\u093E \u0938\u0915\u0947\u0964 \u0907\u0938\u0947 \u091A\u093E\u0932\u0942 \u0915\u0930\u0928\u0947 \u092A\u0930 \u0935\u0947 .workspace-plus-plus \u092E\u0947\u0902 \u0938\u0902\u0917\u094D\u0930\u0939\u093F\u0924 \u0939\u094B\u0902\u0917\u0947, \u091C\u093F\u0938\u0938\u0947 .obsidian \u0938\u093E\u091D\u093E \u0915\u0930\u0928\u0947 \u0935\u093E\u0932\u0947 \u0935\u0949\u0932\u094D\u091F (\u0909\u0926\u093E\u0939\u0930\u0923 \u0915\u0947 \u0932\u093F\u090F Settings Profiles \u0915\u0947 \u0938\u093E\u0925) \u0905\u0932\u0917-\u0905\u0932\u0917 \u0938\u0924\u094D\u0930 \u0930\u0916 \u0938\u0915\u0947\u0902\u0964 \u0935\u0939\u093E\u0901 \u0930\u0916\u0947 \u0917\u090F \u0938\u0924\u094D\u0930\u094B\u0902 \u0915\u094B Obsidian Sync \u0938\u093F\u0902\u0915 \u0928\u0939\u0940\u0902 \u0915\u0930 \u0938\u0915\u0924\u093E\u0964",
+        sessionStorageMoved: function(path) {
+          return "Workspace++: \u0938\u0924\u094D\u0930 \u0938\u0902\u0917\u094D\u0930\u0939\u0923 " + path + " \u092A\u0930 \u0932\u0947 \u091C\u093E\u092F\u093E \u0917\u092F\u093E\u0964";
+        },
+        sessionStorageMoveFailed: "Workspace++: \u0938\u0924\u094D\u0930 \u0938\u0902\u0917\u094D\u0930\u0939\u0923 \u0938\u094D\u0925\u093E\u0928 \u092C\u0926\u0932\u0928\u0947 \u092E\u0947\u0902 \u0935\u093F\u092B\u0932\u0964",
+        settingsStorageFieldHistory: "\u0938\u0902\u0938\u094D\u0915\u0930\u0923 \u0907\u0924\u093F\u0939\u093E\u0938 \u092B\u093C\u093E\u0907\u0932",
+        settingsStorageFieldDataSize: "\u0938\u0924\u094D\u0930 \u0938\u0902\u0917\u094D\u0930\u0939\u0923 \u0906\u0915\u093E\u0930",
+        settingsStorageSyncHint: 'Obsidian Sync \u0907\u0938 \u092B\u093C\u093E\u0907\u0932 \u0915\u094B \u0924\u092D\u0940 \u0932\u0947 \u091C\u093E\u0924\u093E \u0939\u0948 \u091C\u092C \u0909\u0938\u0915\u0940 \u0938\u0947\u091F\u093F\u0902\u0917\u094D\u0938 \u092E\u0947\u0902 "Installed community plugins" \u0938\u0915\u094D\u0937\u092E \u0939\u094B\u0964 \u0938\u0902\u0938\u094D\u0915\u0930\u0923 \u0907\u0924\u093F\u0939\u093E\u0938 \u0914\u0930 \u092C\u0948\u0915\u0905\u092A \u0907\u0938\u0940 \u0909\u092A\u0915\u0930\u0923 \u092A\u0930 \u0930\u0939\u0924\u0947 \u0939\u0948\u0902\u0964'
+      },
+      bn: {
+        settingsSessionStorageLocation: "\u09B8\u09C7\u09B6\u09A8 \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3\u09C7\u09B0 \u0985\u09AC\u09B8\u09CD\u09A5\u09BE\u09A8",
+        settingsSessionStorageLocationDesc: function(path) {
+          return "\u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u09B8\u09C7\u09B6\u09A8 \u09AB\u09BE\u0987\u09B2: " + path;
+        },
+        settingsVaultOnlySessions: "\u09B8\u09C7\u09B6\u09A8 \u09B6\u09C1\u09A7\u09C1 \u098F\u0987 \u09AD\u09B2\u09CD\u099F\u09C7\u0987 \u09B0\u09BE\u0996\u09C1\u09A8",
+        settingsVaultOnlySessionsDesc: "\u09B8\u09C7\u09B6\u09A8 \u09B8\u09BE\u09A7\u09BE\u09B0\u09A3\u09A4 \u09AA\u09CD\u09B2\u09BE\u0997\u0987\u09A8\u09C7\u09B0 data.json-\u098F \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09BF\u09A4 \u09B9\u09AF\u09BC, \u09AF\u09BE\u09A4\u09C7 Obsidian Sync \u09B8\u09C7\u0997\u09C1\u09B2\u09CB \u0986\u09AA\u09A8\u09BE\u09B0 \u09A1\u09BF\u09AD\u09BE\u0987\u09B8\u0997\u09C1\u09B2\u09CB\u09B0 \u09AE\u09A7\u09CD\u09AF\u09C7 \u09A8\u09BF\u09A4\u09C7 \u09AA\u09BE\u09B0\u09C7\u0964 \u098F\u099F\u09BF \u099A\u09BE\u09B2\u09C1 \u0995\u09B0\u09B2\u09C7 \u09B8\u09C7\u0997\u09C1\u09B2\u09CB .workspace-plus-plus-\u098F \u09B0\u09BE\u0996\u09BE \u09B9\u09AC\u09C7, \u09AB\u09B2\u09C7 \u09AF\u09C7\u09B8\u09AC \u09AD\u09B2\u09CD\u099F .obsidian \u09AD\u09BE\u0997 \u0995\u09B0\u09C7 (\u09AF\u09C7\u09AE\u09A8 Settings Profiles \u09AC\u09CD\u09AF\u09AC\u09B9\u09BE\u09B0\u09C7) \u09B8\u09C7\u0997\u09C1\u09B2\u09CB \u0986\u09B2\u09BE\u09A6\u09BE \u09B8\u09C7\u09B6\u09A8 \u09B0\u09BE\u0996\u09A4\u09C7 \u09AA\u09BE\u09B0\u09AC\u09C7\u0964 \u09A4\u09AC\u09C7 \u09B8\u09C7\u0996\u09BE\u09A8\u09C7 \u09B0\u09BE\u0996\u09BE \u09B8\u09C7\u09B6\u09A8 Obsidian Sync \u09B8\u09BF\u0999\u09CD\u0995 \u0995\u09B0\u09A4\u09C7 \u09AA\u09BE\u09B0\u09C7 \u09A8\u09BE\u0964",
+        sessionStorageMoved: function(path) {
+          return "Workspace++: \u09B8\u09C7\u09B6\u09A8 \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3\u09C7\u09B0 \u0985\u09AC\u09B8\u09CD\u09A5\u09BE\u09A8 " + path + "-\u098F \u09B8\u09B0\u09BE\u09A8\u09CB \u09B9\u09AF\u09BC\u09C7\u099B\u09C7\u0964";
+        },
+        sessionStorageMoveFailed: "Workspace++: \u09B8\u09C7\u09B6\u09A8 \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3\u09C7\u09B0 \u0985\u09AC\u09B8\u09CD\u09A5\u09BE\u09A8 \u09B8\u09B0\u09BE\u09A4\u09C7 \u09AC\u09CD\u09AF\u09B0\u09CD\u09A5\u0964",
+        settingsStorageFieldHistory: "\u09B8\u0982\u09B8\u09CD\u0995\u09B0\u09A3 \u0987\u09A4\u09BF\u09B9\u09BE\u09B8 \u09AB\u09BE\u0987\u09B2",
+        settingsStorageFieldDataSize: "\u09B8\u09C7\u09B6\u09A8 \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3\u09C7\u09B0 \u0986\u0995\u09BE\u09B0",
+        settingsStorageSyncHint: 'Obsidian Sync-\u098F\u09B0 \u09B8\u09C7\u099F\u09BF\u0982\u09B8\u09C7 "Installed community plugins" \u099A\u09BE\u09B2\u09C1 \u09A5\u09BE\u0995\u09B2\u09C7\u0987 \u0995\u09C7\u09AC\u09B2 \u098F\u0987 \u09AB\u09BE\u0987\u09B2\u099F\u09BF \u09B8\u09BF\u0999\u09CD\u0995 \u09B9\u09AF\u09BC\u0964 \u09B8\u0982\u09B8\u09CD\u0995\u09B0\u09A3 \u0987\u09A4\u09BF\u09B9\u09BE\u09B8 \u0993 \u09AC\u09CD\u09AF\u09BE\u0995\u0986\u09AA \u098F\u0987 \u09A1\u09BF\u09AD\u09BE\u0987\u09B8\u09C7\u0987 \u09A5\u09BE\u0995\u09C7\u0964'
+      },
+      fa: {
+        settingsSessionStorageLocation: "\u0645\u062D\u0644 \u0630\u062E\u06CC\u0631\u0647\u200C\u0633\u0627\u0632\u06CC \u0646\u0634\u0633\u062A\u200C\u0647\u0627",
+        settingsSessionStorageLocationDesc: function(path) {
+          return "\u0641\u0627\u06CC\u0644 \u0646\u0634\u0633\u062A \u0641\u0639\u0644\u06CC: " + path;
+        },
+        settingsVaultOnlySessions: "\u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u0641\u0642\u0637 \u062F\u0631 \u0647\u0645\u06CC\u0646 \u06AF\u0627\u0648\u0635\u0646\u062F\u0648\u0642 \u0646\u06AF\u0647 \u062F\u0627\u0634\u062A\u0647 \u0634\u0648\u0646\u062F",
+        settingsVaultOnlySessionsDesc: "\u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u0645\u0639\u0645\u0648\u0644\u0627\u064B \u062F\u0631 data.json \u0627\u0641\u0632\u0648\u0646\u0647 \u0630\u062E\u06CC\u0631\u0647 \u0645\u06CC\u200C\u0634\u0648\u0646\u062F \u062A\u0627 Obsidian Sync \u0628\u062A\u0648\u0627\u0646\u062F \u0622\u0646\u200C\u0647\u0627 \u0631\u0627 \u0645\u06CC\u0627\u0646 \u062F\u0633\u062A\u06AF\u0627\u0647\u200C\u0647\u0627\u06CC \u0634\u0645\u0627 \u062C\u0627\u0628\u0647\u200C\u062C\u0627 \u06A9\u0646\u062F. \u0628\u0627 \u0631\u0648\u0634\u0646 \u06A9\u0631\u062F\u0646 \u0627\u06CC\u0646 \u06AF\u0632\u06CC\u0646\u0647\u060C \u0628\u0647 \u062C\u0627\u06CC \u0622\u0646 \u062F\u0631 .workspace-plus-plus \u0630\u062E\u06CC\u0631\u0647 \u0645\u06CC\u200C\u0634\u0648\u0646\u062F \u062A\u0627 \u06AF\u0627\u0648\u0635\u0646\u062F\u0648\u0642\u200C\u0647\u0627\u06CC\u06CC \u06A9\u0647 .obsidian \u0631\u0627 \u0628\u0647 \u0627\u0634\u062A\u0631\u0627\u06A9 \u0645\u06CC\u200C\u06AF\u0630\u0627\u0631\u0646\u062F (\u0645\u062B\u0644\u0627\u064B \u0628\u0627 Settings Profiles) \u0646\u0634\u0633\u062A\u200C\u0647\u0627\u06CC \u062C\u062F\u0627\u06AF\u0627\u0646\u0647 \u062F\u0627\u0634\u062A\u0647 \u0628\u0627\u0634\u0646\u062F. \u0627\u0645\u0627 Obsidian Sync \u0646\u0634\u0633\u062A\u200C\u0647\u0627\u06CC \u0630\u062E\u06CC\u0631\u0647\u200C\u0634\u062F\u0647 \u062F\u0631 \u0622\u0646\u062C\u0627 \u0631\u0627 \u0647\u0645\u06AF\u0627\u0645\u200C\u0633\u0627\u0632\u06CC \u0646\u0645\u06CC\u200C\u06A9\u0646\u062F.",
+        sessionStorageMoved: function(path) {
+          return "Workspace++: \u0645\u062D\u0644 \u0630\u062E\u06CC\u0631\u0647\u200C\u0633\u0627\u0632\u06CC \u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u0628\u0647 " + path + " \u0645\u0646\u062A\u0642\u0644 \u0634\u062F.";
+        },
+        sessionStorageMoveFailed: "Workspace++: \u0627\u0646\u062A\u0642\u0627\u0644 \u0645\u062D\u0644 \u0630\u062E\u06CC\u0631\u0647\u200C\u0633\u0627\u0632\u06CC \u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u0646\u0627\u0645\u0648\u0641\u0642 \u0628\u0648\u062F.",
+        settingsStorageFieldHistory: "\u0641\u0627\u06CC\u0644 \u062A\u0627\u0631\u06CC\u062E\u0686\u0647 \u0646\u0633\u062E\u0647\u200C\u0647\u0627",
+        settingsStorageFieldDataSize: "\u062D\u062C\u0645 \u0630\u062E\u06CC\u0631\u0647\u200C\u0633\u0627\u0632\u06CC \u0646\u0634\u0633\u062A\u200C\u0647\u0627",
+        settingsStorageSyncHint: 'Obsidian Sync \u062A\u0646\u0647\u0627 \u0632\u0645\u0627\u0646\u06CC \u0627\u06CC\u0646 \u0641\u0627\u06CC\u0644 \u0631\u0627 \u0645\u0646\u062A\u0642\u0644 \u0645\u06CC\u200C\u06A9\u0646\u062F \u06A9\u0647 \u062F\u0631 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A\u0634 "Installed community plugins" \u0641\u0639\u0627\u0644 \u0628\u0627\u0634\u062F. \u062A\u0627\u0631\u06CC\u062E\u0686\u0647 \u0646\u0633\u062E\u0647\u200C\u0647\u0627 \u0648 \u067E\u0634\u062A\u06CC\u0628\u0627\u0646\u200C\u0647\u0627 \u0631\u0648\u06CC \u0647\u0645\u06CC\u0646 \u062F\u0633\u062A\u06AF\u0627\u0647 \u0645\u06CC\u200C\u0645\u0627\u0646\u0646\u062F.'
+      },
+      ar: {
+        settingsSessionStorageLocation: "\u0645\u0648\u0642\u0639 \u062A\u062E\u0632\u064A\u0646 \u0627\u0644\u062C\u0644\u0633\u0627\u062A",
+        settingsSessionStorageLocationDesc: function(path) {
+          return "\u0645\u0644\u0641 \u0627\u0644\u062C\u0644\u0633\u0627\u062A \u0627\u0644\u062D\u0627\u0644\u064A: " + path;
+        },
+        settingsVaultOnlySessions: "\u0627\u0644\u0627\u062D\u062A\u0641\u0627\u0638 \u0628\u0627\u0644\u062C\u0644\u0633\u0627\u062A \u0641\u064A \u0647\u0630\u0647 \u0627\u0644\u062E\u0632\u0646\u0629 \u0641\u0642\u0637",
+        settingsVaultOnlySessionsDesc: "\u062A\u064F\u062D\u0641\u0638 \u0627\u0644\u062C\u0644\u0633\u0627\u062A \u0639\u0627\u062F\u0629\u064B \u0641\u064A \u0645\u0644\u0641 data.json \u0627\u0644\u062E\u0627\u0635 \u0628\u0627\u0644\u0625\u0636\u0627\u0641\u0629 \u0643\u064A \u064A\u062A\u0645\u0643\u0646 Obsidian Sync \u0645\u0646 \u0646\u0642\u0644\u0647\u0627 \u0628\u064A\u0646 \u0623\u062C\u0647\u0632\u062A\u0643. \u0641\u0639\u0650\u0651\u0644 \u0647\u0630\u0627 \u0627\u0644\u062E\u064A\u0627\u0631 \u0644\u062D\u0641\u0638\u0647\u0627 \u0641\u064A .workspace-plus-plus \u0628\u062F\u0644\u0627\u064B \u0645\u0646 \u0630\u0644\u0643\u060C \u062D\u062A\u0649 \u062A\u062D\u062A\u0641\u0638 \u0627\u0644\u062E\u0632\u0627\u0626\u0646 \u0627\u0644\u062A\u064A \u062A\u062A\u0634\u0627\u0631\u0643 \u0645\u0644\u0641 .obsidian (\u0645\u0639 Settings Profiles \u0645\u062B\u0644\u0627\u064B) \u0628\u062C\u0644\u0633\u0627\u062A \u0645\u0646\u0641\u0635\u0644\u0629. \u063A\u064A\u0631 \u0623\u0646 Obsidian Sync \u0644\u0627 \u064A\u0633\u062A\u0637\u064A\u0639 \u0645\u0632\u0627\u0645\u0646\u0629 \u0627\u0644\u062C\u0644\u0633\u0627\u062A \u0627\u0644\u0645\u062D\u0641\u0648\u0638\u0629 \u0647\u0646\u0627\u0643.",
+        sessionStorageMoved: function(path) {
+          return "Workspace++: \u062A\u0645 \u0646\u0642\u0644 \u062A\u062E\u0632\u064A\u0646 \u0627\u0644\u062C\u0644\u0633\u0627\u062A \u0625\u0644\u0649 " + path;
+        },
+        sessionStorageMoveFailed: "Workspace++: \u062A\u0639\u0630\u0651\u0631 \u0646\u0642\u0644 \u0645\u0648\u0642\u0639 \u062A\u062E\u0632\u064A\u0646 \u0627\u0644\u062C\u0644\u0633\u0627\u062A.",
+        settingsStorageFieldHistory: "\u0645\u0644\u0641 \u0633\u062C\u0644 \u0627\u0644\u0625\u0635\u062F\u0627\u0631\u0627\u062A",
+        settingsStorageFieldDataSize: "\u062D\u062C\u0645 \u062A\u062E\u0632\u064A\u0646 \u0627\u0644\u062C\u0644\u0633\u0627\u062A",
+        settingsStorageSyncHint: '\u0644\u0627 \u064A\u0646\u0642\u0644 Obsidian Sync \u0647\u0630\u0627 \u0627\u0644\u0645\u0644\u0641 \u0625\u0644\u0627 \u0639\u0646\u062F \u062A\u0641\u0639\u064A\u0644 "Installed community plugins" \u0641\u064A \u0625\u0639\u062F\u0627\u062F\u0627\u062A\u0647. \u064A\u0628\u0642\u0649 \u0633\u062C\u0644 \u0627\u0644\u0625\u0635\u062F\u0627\u0631\u0627\u062A \u0648\u0627\u0644\u0646\u0633\u062E \u0627\u0644\u0627\u062D\u062A\u064A\u0627\u0637\u064A\u0629 \u0639\u0644\u0649 \u0647\u0630\u0627 \u0627\u0644\u062C\u0647\u0627\u0632.'
+      },
+      pl: {
+        settingsSessionStorageLocation: "Lokalizacja przechowywania sesji",
+        settingsSessionStorageLocationDesc: function(path) {
+          return "Bie\u017C\u0105cy plik sesji: " + path;
+        },
+        settingsVaultOnlySessions: "Trzymaj sesje tylko w tym sejfie",
+        settingsVaultOnlySessionsDesc: "Sesje s\u0105 zwykle zapisywane w pliku data.json wtyczki, aby Obsidian Sync m\xF3g\u0142 przenosi\u0107 je mi\u0119dzy Twoimi urz\u0105dzeniami. W\u0142\u0105cz t\u0119 opcj\u0119, aby zapisywa\u0107 je w .workspace-plus-plus \u2014 wtedy sejfy wsp\xF3\u0142dziel\u0105ce .obsidian (na przyk\u0142ad przy u\u017Cyciu Settings Profiles) zachowaj\u0105 osobne sesje. Obsidian Sync nie zsynchronizuje jednak sesji zapisanych w tym miejscu.",
+        sessionStorageMoved: function(path) {
+          return "Workspace++: przeniesiono przechowywanie sesji do " + path;
+        },
+        sessionStorageMoveFailed: "Workspace++: nie uda\u0142o si\u0119 przenie\u015B\u0107 przechowywania sesji.",
+        settingsStorageFieldHistory: "Plik historii wersji",
+        settingsStorageFieldDataSize: "Rozmiar magazynu sesji",
+        settingsStorageSyncHint: 'Obsidian Sync przenosi ten plik tylko wtedy, gdy w jego ustawieniach w\u0142\u0105czono "Installed community plugins". Historia wersji i kopie zapasowe pozostaj\u0105 na tym urz\u0105dzeniu.'
       }
     };
     var sessionStorageLangs = Object.keys(STRINGS);
