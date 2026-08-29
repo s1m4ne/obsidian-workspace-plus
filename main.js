@@ -529,10 +529,10 @@ var require_i18n = __commonJS({
           return "\u201C" + n + "\u201D\u662F\u5F53\u524D\u6D3B\u52A8\u4F1A\u8BDD\uFF0C\u786E\u5B9A\u5220\u9664\uFF1F";
         },
         confirmSaveSession: function(n) {
-          return '\u4FDD\u5B58\u4F1A\u8BDD "' + n + '"\uFF1F';
+          return "\u4FDD\u5B58\u4F1A\u8BDD\u201C" + n + "\u201D\uFF1F";
         },
         confirmReloadSession: function(n) {
-          return '\u91CD\u65B0\u52A0\u8F7D\u4F1A\u8BDD "' + n + '"\uFF1F\u672A\u4FDD\u5B58\u7684\u66F4\u6539\u5C06\u4E22\u5931\u3002';
+          return "\u91CD\u65B0\u52A0\u8F7D\u4F1A\u8BDD\u201C" + n + "\u201D\uFF1F\u672A\u4FDD\u5B58\u7684\u66F4\u6539\u5C06\u4E22\u5931\u3002";
         },
         renameTitle: "\u91CD\u547D\u540D\u4F1A\u8BDD",
         renamePlaceholder: "\u65B0\u540D\u79F0\u2026",
@@ -569,13 +569,13 @@ var require_i18n = __commonJS({
           return name ? "\u5207\u6362\u81F3\u4F1A\u8BDD " + n + ": " + name : "\u5207\u6362\u81F3\u4F1A\u8BDD " + n;
         },
         cmdSwitchToNamed: function(name) {
-          return '\u5207\u6362\u81F3 "' + name + '"';
+          return "\u5207\u6362\u81F3\u201C" + name + "\u201D";
         },
         cmdPrevious: "\u4E0A\u4E00\u4E2A\u4F1A\u8BDD",
         cmdNext: "\u4E0B\u4E00\u4E2A\u4F1A\u8BDD",
         cmdSaveCurrent: "\u4FDD\u5B58\u5F53\u524D\u4F1A\u8BDD",
         cmdSaveAs: "\u5C06\u5F53\u524D\u4F1A\u8BDD\u53E6\u5B58\u4E3A...",
-        cmdToggleAutoSave: "\u5207\u6362\u4F1A\u8BDD\u5207\u6362\u65F6\u81EA\u52A8\u4FDD\u5B58",
+        cmdToggleAutoSave: "\u5207\u6362\u201C\u5207\u6362\u65F6\u81EA\u52A8\u4FDD\u5B58\u201D",
         cmdEnableAutoSave: "\u542F\u7528\u4F1A\u8BDD\u5207\u6362\u65F6\u81EA\u52A8\u4FDD\u5B58",
         cmdDisableAutoSave: "\u7981\u7528\u4F1A\u8BDD\u5207\u6362\u65F6\u81EA\u52A8\u4FDD\u5B58",
         cmdSearchOverlay: "\u641C\u7D22\u4F1A\u8BDD",
@@ -584,10 +584,10 @@ var require_i18n = __commonJS({
         switchGroup: "\u5206\u7EC4",
         keyTab: "Tab",
         savedSession: function(n) {
-          return "\u5DF2\u4FDD\u5B58\u4F1A\u8BDD\u201D" + n + "\u201D";
+          return "\u5DF2\u4FDD\u5B58\u4F1A\u8BDD\u201C" + n + "\u201D";
         },
         savedAs: function(n) {
-          return "\u5DF2\u53E6\u5B58\u4E3A\u201D" + n + "\u201D";
+          return "\u5DF2\u53E6\u5B58\u4E3A\u201C" + n + "\u201D";
         },
         noChanges: "\u6CA1\u6709\u9700\u8981\u4FDD\u5B58\u7684\u66F4\u6539",
         autoSaveEnabled: "\u5DF2\u542F\u7528\u4F1A\u8BDD\u5207\u6362\u65F6\u81EA\u52A8\u4FDD\u5B58\u3002",
@@ -609,8 +609,8 @@ var require_i18n = __commonJS({
         settingsLanguageDesc: "\u63D2\u4EF6\u754C\u9762\u8BED\u8A00\u3002\u91CD\u542F Obsidian \u540E\u547D\u4EE4\u540D\u79F0\u624D\u4F1A\u66F4\u65B0\u3002",
         settingsSectionGeneral: "\u5E38\u89C4",
         settingsTabSessions: "\u4F1A\u8BDD",
-        settingsSectionSwitching: "\u4F1A\u8BDD\u81EA\u52A8\u4FDD\u5B58",
-        settingsSectionSwitchPreview: "\u4F1A\u8BDD\u5207\u6362",
+        settingsSectionSwitching: "\u4F1A\u8BDD\u5207\u6362",
+        settingsSectionSwitchPreview: "\u5207\u6362\u524D\u9884\u89C8",
         settingsSectionDeletion: "\u4F1A\u8BDD\u5220\u9664",
         settingsLangAuto: "\u81EA\u52A8\uFF08\u7CFB\u7EDF\u8BED\u8A00\uFF09",
         settingsTranslationHelp: "\u53D1\u73B0\u7FFB\u8BD1\u9519\u8BEF\uFF1F\u8BF7\u5728 GitHub \u4E0A\u63D0\u4EA4 issue \u6216 Pull request\u3002",
@@ -759,13 +759,13 @@ var require_i18n = __commonJS({
         historyEmpty: "\u6B64\u4F1A\u8BDD\u6682\u65E0\u7248\u672C\u5386\u53F2\u3002",
         historyRestore: "\u6062\u590D",
         historyRestoreConfirm: function(name, time) {
-          return "\u5C06\u300C" + name + "\u300D\u7684\u5E03\u5C40\u6062\u590D\u5230 " + time + " \u7684\u72B6\u6001\uFF1F";
+          return "\u5C06\u201C" + name + "\u201D\u7684\u5E03\u5C40\u6062\u590D\u5230 " + time + " \u7684\u72B6\u6001\uFF1F";
         },
         historyRestored: function(name) {
-          return "\u5DF2\u6062\u590D\u300C" + name + "\u300D\u7684\u5E03\u5C40";
+          return "\u5DF2\u6062\u590D\u201C" + name + "\u201D\u7684\u5E03\u5C40";
         },
         historyQuickRestored: function(name) {
-          return "\u5DF2\u5FEB\u901F\u6062\u590D\u300C" + name + "\u300D\u7684\u4E0A\u4E00\u4E2A\u5E03\u5C40";
+          return "\u5DF2\u5FEB\u901F\u6062\u590D\u201C" + name + "\u201D\u7684\u4E0A\u4E00\u4E2A\u5E03\u5C40";
         },
         historyNoEntries: "\u6CA1\u6709\u53EF\u6062\u590D\u7684\u5386\u53F2\u8BB0\u5F55\u3002",
         historyToday: "\u4ECA\u5929",
@@ -861,10 +861,10 @@ var require_i18n = __commonJS({
           return "\u300C" + n + "\u300D\u662F\u76EE\u524D\u4F7F\u7528\u4E2D\u7684\u5DE5\u4F5C\u968E\u6BB5\uFF0C\u78BA\u5B9A\u522A\u9664\uFF1F";
         },
         confirmSaveSession: function(n) {
-          return '\u5132\u5B58\u5DE5\u4F5C\u968E\u6BB5 "' + n + '"\uFF1F';
+          return "\u5132\u5B58\u5DE5\u4F5C\u968E\u6BB5\u300C" + n + "\u300D\uFF1F";
         },
         confirmReloadSession: function(n) {
-          return '\u91CD\u65B0\u8F09\u5165\u5DE5\u4F5C\u968E\u6BB5 "' + n + '"\uFF1F\u672A\u5132\u5B58\u7684\u8B8A\u66F4\u5C07\u907A\u5931\u3002';
+          return "\u91CD\u65B0\u8F09\u5165\u5DE5\u4F5C\u968E\u6BB5\u300C" + n + "\u300D\uFF1F\u672A\u5132\u5B58\u7684\u8B8A\u66F4\u5C07\u907A\u5931\u3002";
         },
         renameTitle: "\u91CD\u65B0\u547D\u540D\u5DE5\u4F5C\u968E\u6BB5",
         renamePlaceholder: "\u65B0\u540D\u7A31\u2026",
@@ -901,13 +901,13 @@ var require_i18n = __commonJS({
           return name ? "\u5207\u63DB\u81F3\u5DE5\u4F5C\u968E\u6BB5 " + n + ": " + name : "\u5207\u63DB\u81F3\u5DE5\u4F5C\u968E\u6BB5 " + n;
         },
         cmdSwitchToNamed: function(name) {
-          return '\u5207\u63DB\u81F3 "' + name + '"';
+          return "\u5207\u63DB\u81F3\u300C" + name + "\u300D";
         },
         cmdPrevious: "\u4E0A\u4E00\u500B\u5DE5\u4F5C\u968E\u6BB5",
         cmdNext: "\u4E0B\u4E00\u500B\u5DE5\u4F5C\u968E\u6BB5",
         cmdSaveCurrent: "\u5132\u5B58\u76EE\u524D\u5DE5\u4F5C\u968E\u6BB5",
         cmdSaveAs: "\u5C07\u76EE\u524D\u5DE5\u4F5C\u968E\u6BB5\u53E6\u5B58\u70BA...",
-        cmdToggleAutoSave: "\u5207\u63DB\u5DE5\u4F5C\u968E\u6BB5\u5207\u63DB\u6642\u81EA\u52D5\u5132\u5B58",
+        cmdToggleAutoSave: "\u5207\u63DB\u300C\u5207\u63DB\u6642\u81EA\u52D5\u5132\u5B58\u300D",
         cmdEnableAutoSave: "\u555F\u7528\u5DE5\u4F5C\u968E\u6BB5\u5207\u63DB\u6642\u81EA\u52D5\u5132\u5B58",
         cmdDisableAutoSave: "\u505C\u7528\u5DE5\u4F5C\u968E\u6BB5\u5207\u63DB\u6642\u81EA\u52D5\u5132\u5B58",
         cmdSearchOverlay: "\u641C\u5C0B\u5DE5\u4F5C\u968E\u6BB5",
@@ -941,8 +941,8 @@ var require_i18n = __commonJS({
         settingsLanguageDesc: "\u5916\u639B\u4ECB\u9762\u8A9E\u8A00\u3002\u91CD\u65B0\u555F\u52D5 Obsidian \u5F8C\u547D\u4EE4\u540D\u7A31\u624D\u6703\u66F4\u65B0\u3002",
         settingsSectionGeneral: "\u4E00\u822C",
         settingsTabSessions: "\u5DE5\u4F5C\u968E\u6BB5",
-        settingsSectionSwitching: "\u5DE5\u4F5C\u968E\u6BB5\u81EA\u52D5\u5132\u5B58",
-        settingsSectionSwitchPreview: "\u5DE5\u4F5C\u968E\u6BB5\u5207\u63DB",
+        settingsSectionSwitching: "\u5DE5\u4F5C\u968E\u6BB5\u5207\u63DB",
+        settingsSectionSwitchPreview: "\u5207\u63DB\u524D\u9810\u89BD",
         settingsSectionDeletion: "\u5DE5\u4F5C\u968E\u6BB5\u522A\u9664",
         settingsLangAuto: "\u81EA\u52D5\uFF08\u7CFB\u7D71\u8A9E\u8A00\uFF09",
         settingsTranslationHelp: "\u767C\u73FE\u7FFB\u8B6F\u932F\u8AA4\uFF1F\u8ACB\u5728 GitHub \u4E0A\u63D0\u4EA4 issue \u6216 Pull request\u3002",
@@ -988,7 +988,7 @@ var require_i18n = __commonJS({
         statusBarActionRestoreLatestHistory: "\u9084\u539F\u6700\u65B0\u6B77\u53F2",
         statusBarActionSessionMenu: "\u5DE5\u4F5C\u968E\u6BB5\u4E0A\u4E0B\u6587\u9078\u55AE",
         statusBarActionSettingsMenu: "\u8A2D\u5B9A\u4E0A\u4E0B\u6587\u9078\u55AE",
-        contextResetOverlayPosition: "\u91CD\u7F6E\u4F4D\u7F6E\u548C\u5927\u5C0F",
+        contextResetOverlayPosition: "\u91CD\u8A2D\u4F4D\u7F6E\u8207\u5927\u5C0F",
         settingsConfirmDelete: "\u522A\u9664\u5DE5\u4F5C\u968E\u6BB5\u524D\u78BA\u8A8D",
         settingsConfirmDeleteDesc: "\u522A\u9664\u5DE5\u4F5C\u968E\u6BB5\u524D\u986F\u793A\u78BA\u8A8D\u5C0D\u8A71\u6846\u3002",
         settingsConfirmQuickActions: "\u5FEB\u901F\u5207\u63DB\u5668\u4E2D\u5132\u5B58/\u91CD\u8F09\u524D\u78BA\u8A8D",
@@ -2016,7 +2016,7 @@ var require_i18n = __commonJS({
           return '\u062A\u0645\u062A \u0625\u0639\u0627\u062F\u0629 \u062A\u0633\u0645\u064A\u0629 \u0627\u0644\u0645\u062C\u0645\u0648\u0639\u0629: "' + o + '" \u2192 "' + n + '"';
         },
         groupAll: "\u0627\u0644\u0643\u0644",
-        groupDuplicateName: "\u064A\u0648\u062C\u062F \u0645\u062C\u0645\u0648\u0639\u0629 \u0628\u0647\u0630\u0627 \u0627\u0644\u0627\u0633\u0645 \u0628\u0627\u0644\u0641\u0639\u0644.",
+        groupDuplicateName: "\u062A\u0648\u062C\u062F \u0645\u062C\u0645\u0648\u0639\u0629 \u0628\u0647\u0630\u0627 \u0627\u0644\u0627\u0633\u0645 \u0628\u0627\u0644\u0641\u0639\u0644.",
         groupEmptyName: "\u0644\u0627 \u064A\u0645\u0643\u0646 \u0623\u0646 \u064A\u0643\u0648\u0646 \u0627\u0633\u0645 \u0627\u0644\u0645\u062C\u0645\u0648\u0639\u0629 \u0641\u0627\u0631\u063A\u064B\u0627.",
         cmdSwitchGroup: "\u062A\u0628\u062F\u064A\u0644 \u0627\u0644\u0645\u062C\u0645\u0648\u0639\u0629",
         cmdExitGroup: "\u0639\u0631\u0636 \u062C\u0645\u064A\u0639 \u0627\u0644\u062C\u0644\u0633\u0627\u062A (\u0645\u063A\u0627\u062F\u0631\u0629 \u0627\u0644\u0645\u062C\u0645\u0648\u0639\u0629)",
@@ -2072,14 +2072,14 @@ var require_i18n = __commonJS({
           return "\u062D\u0630\u0641 \u062C\u0645\u064A\u0639 \u0627\u0644\u0645\u062C\u0645\u0648\u0639\u0627\u062A (" + n + ")\u061F \u0644\u0646 \u064A\u062A\u0645 \u062D\u0630\u0641 \u0627\u0644\u062C\u0644\u0633\u0627\u062A.";
         },
         deletedAllGroups: function(n) {
-          return "\u062A\u0645 \u062D\u0630\u0641 " + n + " \u0645\u062C\u0645\u0648\u0639\u0629";
+          return "\u062A\u0645 \u062D\u0630\u0641 " + arPlural(n, "\u0645\u062C\u0645\u0648\u0639\u0629 \u0648\u0627\u062D\u062F\u0629", "\u0645\u062C\u0645\u0648\u0639\u062A\u064A\u0646", "\u0645\u062C\u0645\u0648\u0639\u0627\u062A", "\u0645\u062C\u0645\u0648\u0639\u0629");
         },
         contextDeleteAllSessions: "\u062D\u0630\u0641 \u062C\u0645\u064A\u0639 \u0627\u0644\u062C\u0644\u0633\u0627\u062A",
         confirmDeleteAllSessions: function(n) {
-          return "\u062D\u0630\u0641 " + n + " \u062C\u0644\u0633\u0629\u061F \u0633\u064A\u062A\u0645 \u0627\u0644\u0627\u062D\u062A\u0641\u0627\u0638 \u0628\u0627\u0644\u062C\u0644\u0633\u0629 \u0627\u0644\u0646\u0634\u0637\u0629.";
+          return "\u062D\u0630\u0641 " + arPlural(n, "\u062C\u0644\u0633\u0629 \u0648\u0627\u062D\u062F\u0629", "\u062C\u0644\u0633\u062A\u064A\u0646", "\u062C\u0644\u0633\u0627\u062A", "\u062C\u0644\u0633\u0629") + "\u061F \u0633\u064A\u062A\u0645 \u0627\u0644\u0627\u062D\u062A\u0641\u0627\u0638 \u0628\u0627\u0644\u062C\u0644\u0633\u0629 \u0627\u0644\u0646\u0634\u0637\u0629.";
         },
         deletedAllSessions: function(n) {
-          return "\u062A\u0645 \u062D\u0630\u0641 " + n + " \u062C\u0644\u0633\u0629";
+          return "\u062A\u0645 \u062D\u0630\u0641 " + arPlural(n, "\u062C\u0644\u0633\u0629 \u0648\u0627\u062D\u062F\u0629", "\u062C\u0644\u0633\u062A\u064A\u0646", "\u062C\u0644\u0633\u0627\u062A", "\u062C\u0644\u0633\u0629");
         },
         contextVersionHistory: "\u0633\u062C\u0644 \u0627\u0644\u0625\u0635\u062F\u0627\u0631\u0627\u062A",
         cmdVersionHistory: "\u0639\u0631\u0636 \u0633\u062C\u0644 \u0625\u0635\u062F\u0627\u0631\u0627\u062A \u0627\u0644\u062C\u0644\u0633\u0629",
@@ -2090,20 +2090,20 @@ var require_i18n = __commonJS({
           return '\u0627\u0633\u062A\u0639\u0627\u062F\u0629 \u062A\u062E\u0637\u064A\u0637 "' + name + '" \u0645\u0646 ' + time + "\u061F";
         },
         historyRestored: function(name) {
-          return '\u062A\u0645 \u0627\u0633\u062A\u0639\u0627\u062F\u0629 \u062A\u062E\u0637\u064A\u0637 "' + name + '"';
+          return '\u062A\u0645\u062A \u0627\u0633\u062A\u0639\u0627\u062F\u0629 \u062A\u062E\u0637\u064A\u0637 "' + name + '"';
         },
         historyQuickRestored: function(name) {
-          return '\u062A\u0645 \u0627\u0633\u062A\u0639\u0627\u062F\u0629 \u0627\u0644\u062A\u062E\u0637\u064A\u0637 \u0627\u0644\u0633\u0627\u0628\u0642 \u0644\u0640 "' + name + '" \u0628\u0633\u0631\u0639\u0629';
+          return '\u062A\u0645\u062A \u0627\u0633\u062A\u0639\u0627\u062F\u0629 \u0627\u0644\u062A\u062E\u0637\u064A\u0637 \u0627\u0644\u0633\u0627\u0628\u0642 \u0644\u0640 "' + name + '" \u0628\u0633\u0631\u0639\u0629';
         },
         historyNoEntries: "\u0644\u0627 \u062A\u0648\u062C\u062F \u062A\u062E\u0637\u064A\u0637\u0627\u062A \u0633\u0627\u0628\u0642\u0629 \u0644\u0644\u0627\u0633\u062A\u0639\u0627\u062F\u0629.",
         historyToday: "\u0627\u0644\u064A\u0648\u0645",
         historyYesterday: "\u0623\u0645\u0633",
         historyThisWeek: "\u0647\u0630\u0627 \u0627\u0644\u0623\u0633\u0628\u0648\u0639",
         historyFiles: function(n) {
-          return n + " \u0645\u0644\u0641";
+          return arPlural(n, "\u0645\u0644\u0641 \u0648\u0627\u062D\u062F", "\u0645\u0644\u0641\u0627\u0646", "\u0645\u0644\u0641\u0627\u062A", "\u0645\u0644\u0641");
         },
         historyPanes: function(n) {
-          return n + " \u0644\u0648\u062D\u0629";
+          return arPlural(n, "\u0644\u0648\u062D\u0629 \u0648\u0627\u062D\u062F\u0629", "\u0644\u0648\u062D\u062A\u0627\u0646", "\u0644\u0648\u062D\u0627\u062A", "\u0644\u0648\u062D\u0629");
         },
         settingsVersionHistoryEnabled: "\u062A\u0641\u0639\u064A\u0644 \u0633\u062C\u0644 \u0627\u0644\u0625\u0635\u062F\u0627\u0631\u0627\u062A",
         settingsVersionHistoryEnabledDesc: "\u0627\u0644\u0627\u062D\u062A\u0641\u0627\u0638 \u0628\u0633\u062C\u0644 \u062A\u063A\u064A\u064A\u0631\u0627\u062A \u0627\u0644\u062A\u062E\u0637\u064A\u0637 \u0644\u0643\u0644 \u062C\u0644\u0633\u0629.",
@@ -2121,13 +2121,13 @@ var require_i18n = __commonJS({
         rotationBackupDesc: "\u064A\u062A\u0645 \u0625\u0646\u0634\u0627\u0621 \u0646\u0633\u062E \u0627\u062D\u062A\u064A\u0627\u0637\u064A\u0629 \u062A\u0644\u0642\u0627\u0626\u064A\u0627\u064B \u0639\u0646\u062F \u0627\u0644\u062D\u0641\u0638 (\u0643\u0644 \u0633\u0627\u0639\u0629\u060C \u062D\u062A\u0649 3 \u0623\u062C\u064A\u0627\u0644).",
         rotationBackupRestore: "\u0627\u0633\u062A\u0639\u0627\u062F\u0629",
         rotationBackupRestoreConfirm: function(time, count) {
-          return "\u0627\u0633\u062A\u0639\u0627\u062F\u0629 \u0645\u0646 \u0627\u0644\u0646\u0633\u062E\u0629 \u0627\u0644\u0627\u062D\u062A\u064A\u0627\u0637\u064A\u0629 \u0641\u064A " + time + " (" + count + " \u062C\u0644\u0633\u0629)\u061F \u0633\u064A\u062A\u0645 \u0627\u0644\u0643\u062A\u0627\u0628\u0629 \u0641\u0648\u0642 \u0627\u0644\u0628\u064A\u0627\u0646\u0627\u062A \u0627\u0644\u062D\u0627\u0644\u064A\u0629.";
+          return "\u0627\u0633\u062A\u0639\u0627\u062F\u0629 \u0645\u0646 \u0627\u0644\u0646\u0633\u062E\u0629 \u0627\u0644\u0627\u062D\u062A\u064A\u0627\u0637\u064A\u0629 \u0641\u064A " + time + " (" + arPlural(count, "\u062C\u0644\u0633\u0629 \u0648\u0627\u062D\u062F\u0629", "\u062C\u0644\u0633\u062A\u0627\u0646", "\u062C\u0644\u0633\u0627\u062A", "\u062C\u0644\u0633\u0629") + ")\u061F \u0633\u064A\u062A\u0645 \u0627\u0644\u0643\u062A\u0627\u0628\u0629 \u0641\u0648\u0642 \u0627\u0644\u0628\u064A\u0627\u0646\u0627\u062A \u0627\u0644\u062D\u0627\u0644\u064A\u0629.";
         },
         rotationBackupRestored: "\u062A\u0645\u062A \u0627\u0644\u0627\u0633\u062A\u0639\u0627\u062F\u0629 \u0645\u0646 \u0627\u0644\u0646\u0633\u062E\u0629 \u0627\u0644\u0627\u062D\u062A\u064A\u0627\u0637\u064A\u0629.",
         rotationBackupRestoreFailed: "\u0641\u0634\u0644\u062A \u0627\u0644\u0627\u0633\u062A\u0639\u0627\u062F\u0629 \u0645\u0646 \u0627\u0644\u0646\u0633\u062E\u0629 \u0627\u0644\u0627\u062D\u062A\u064A\u0627\u0637\u064A\u0629.",
         rotationBackupNone: "\u0644\u0627 \u062A\u0648\u062C\u062F \u0646\u0633\u062E \u0627\u062D\u062A\u064A\u0627\u0637\u064A\u0629 \u0645\u062A\u0627\u062D\u0629.",
         rotationBackupGeneration: function(count) {
-          return count + " \u062C\u0644\u0633\u0629";
+          return arPlural(count, "\u062C\u0644\u0633\u0629 \u0648\u0627\u062D\u062F\u0629", "\u062C\u0644\u0633\u062A\u0627\u0646", "\u062C\u0644\u0633\u0627\u062A", "\u062C\u0644\u0633\u0629");
         },
         frontmatterSessionNotFound: function(n) {
           return "\u0627\u0644\u062C\u0644\u0633\u0629 \u201C" + n + "\u201D \u063A\u064A\u0631 \u0645\u0648\u062C\u0648\u062F\u0629 (workspace-session)";
@@ -2435,7 +2435,7 @@ var require_i18n = __commonJS({
           return n + " arquivo" + (n !== 1 ? "s" : "");
         },
         historyPanes: function(n) {
-          return n + " painel" + (n !== 1 ? "s" : "");
+          return n + (n !== 1 ? " pain\xE9is" : " painel");
         },
         settingsVersionHistoryEnabled: "Ativar hist\xF3rico de vers\xF5es",
         settingsVersionHistoryEnabledDesc: "Manter um hist\xF3rico de altera\xE7\xF5es de layout para cada sess\xE3o.",
@@ -2453,13 +2453,13 @@ var require_i18n = __commonJS({
         rotationBackupDesc: "Backups autom\xE1ticos s\xE3o criados ao salvar (a cada hora, at\xE9 3 gera\xE7\xF5es).",
         rotationBackupRestore: "Restaurar",
         rotationBackupRestoreConfirm: function(time, count) {
-          return "Restaurar do backup de " + time + " (" + count + " sess\xE3o" + (count !== 1 ? "\xF5es" : "") + ")? Os dados atuais ser\xE3o sobrescritos.";
+          return "Restaurar do backup de " + time + " (" + count + (count !== 1 ? " sess\xF5es" : " sess\xE3o") + ")? Os dados atuais ser\xE3o sobrescritos.";
         },
         rotationBackupRestored: "Restaurado a partir do backup.",
         rotationBackupRestoreFailed: "Falha ao restaurar a partir do backup.",
         rotationBackupNone: "Nenhum backup dispon\xEDvel.",
         rotationBackupGeneration: function(count) {
-          return count + " sess\xE3o" + (count !== 1 ? "\xF5es" : "");
+          return count + (count !== 1 ? " sess\xF5es" : " sess\xE3o");
         },
         frontmatterSessionNotFound: function(n) {
           return "Sess\xE3o \u201C" + n + "\u201D n\xE3o encontrada (workspace-session)";
@@ -2521,10 +2521,10 @@ var require_i18n = __commonJS({
           return "\xAB" + n + "\xBB \u2014 \u0430\u043A\u0442\u0438\u0432\u043D\u0430\u044F \u0441\u0435\u0441\u0441\u0438\u044F. \u0412\u0441\u0451 \u0440\u0430\u0432\u043D\u043E \u0443\u0434\u0430\u043B\u0438\u0442\u044C?";
         },
         confirmSaveSession: function(n) {
-          return '\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0441\u0435\u0441\u0441\u0438\u044E "' + n + '"?';
+          return "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0441\u0435\u0441\u0441\u0438\u044E \xAB" + n + "\xBB?";
         },
         confirmReloadSession: function(n) {
-          return '\u041F\u0435\u0440\u0435\u0437\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044C \u0441\u0435\u0441\u0441\u0438\u044E "' + n + '"? \u041D\u0435\u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u044B\u0435 \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u044F \u0431\u0443\u0434\u0443\u0442 \u043F\u043E\u0442\u0435\u0440\u044F\u043D\u044B.';
+          return "\u041F\u0435\u0440\u0435\u0437\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044C \u0441\u0435\u0441\u0441\u0438\u044E \xAB" + n + "\xBB? \u041D\u0435\u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u044B\u0435 \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u044F \u0431\u0443\u0434\u0443\u0442 \u043F\u043E\u0442\u0435\u0440\u044F\u043D\u044B.";
         },
         renameTitle: "\u041F\u0435\u0440\u0435\u0438\u043C\u0435\u043D\u043E\u0432\u0430\u0442\u044C \u0441\u0435\u0441\u0441\u0438\u044E",
         renamePlaceholder: "\u041D\u043E\u0432\u043E\u0435 \u0438\u043C\u044F...",
@@ -2561,7 +2561,7 @@ var require_i18n = __commonJS({
           return name ? "\u041F\u0435\u0440\u0435\u0439\u0442\u0438 \u043A \u0441\u0435\u0441\u0441\u0438\u0438 " + n + ": " + name : "\u041F\u0435\u0440\u0435\u0439\u0442\u0438 \u043A \u0441\u0435\u0441\u0441\u0438\u0438 " + n;
         },
         cmdSwitchToNamed: function(name) {
-          return '\u041F\u0435\u0440\u0435\u0439\u0442\u0438 \u043A "' + name + '"';
+          return "\u041F\u0435\u0440\u0435\u0439\u0442\u0438 \u043A \xAB" + name + "\xBB";
         },
         cmdPrevious: "\u041F\u0440\u0435\u0434\u044B\u0434\u0443\u0449\u0430\u044F \u0441\u0435\u0441\u0441\u0438\u044F",
         cmdNext: "\u0421\u043B\u0435\u0434\u0443\u044E\u0449\u0430\u044F \u0441\u0435\u0441\u0441\u0438\u044F",
@@ -2601,8 +2601,8 @@ var require_i18n = __commonJS({
         settingsLanguageDesc: "\u042F\u0437\u044B\u043A \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u0430 \u043F\u043B\u0430\u0433\u0438\u043D\u0430. \u041F\u0435\u0440\u0435\u0437\u0430\u043F\u0443\u0441\u0442\u0438\u0442\u0435 Obsidian \u0434\u043B\u044F \u043E\u0431\u043D\u043E\u0432\u043B\u0435\u043D\u0438\u044F \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0439 \u043A\u043E\u043C\u0430\u043D\u0434.",
         settingsSectionGeneral: "\u041E\u0431\u0449\u0438\u0435",
         settingsTabSessions: "\u0421\u0435\u0441\u0441\u0438\u0438",
-        settingsSectionSwitching: "\u0410\u0432\u0442\u043E\u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0435 \u0441\u0435\u0441\u0441\u0438\u0439",
-        settingsSectionSwitchPreview: "\u041F\u0435\u0440\u0435\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u0435 \u0441\u0435\u0441\u0441\u0438\u0439",
+        settingsSectionSwitching: "\u041F\u0435\u0440\u0435\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u0435 \u0441\u0435\u0441\u0441\u0438\u0439",
+        settingsSectionSwitchPreview: "\u041F\u0440\u0435\u0434\u043F\u0440\u043E\u0441\u043C\u043E\u0442\u0440 \u043F\u0435\u0440\u0435\u0434 \u043F\u0435\u0440\u0435\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u0435\u043C",
         settingsSectionDeletion: "\u0423\u0434\u0430\u043B\u0435\u043D\u0438\u0435 \u0441\u0435\u0441\u0441\u0438\u0439",
         settingsLangAuto: "\u0410\u0432\u0442\u043E (\u044F\u0437\u044B\u043A \u0441\u0438\u0441\u0442\u0435\u043C\u044B)",
         settingsTranslationHelp: "\u041D\u0430\u0448\u043B\u0438 \u043E\u0448\u0438\u0431\u043A\u0443 \u0432 \u043F\u0435\u0440\u0435\u0432\u043E\u0434\u0435? \u0421\u043E\u0437\u0434\u0430\u0439\u0442\u0435 issue \u0438\u043B\u0438 pull request \u043D\u0430 GitHub.",
@@ -2785,19 +2785,19 @@ var require_i18n = __commonJS({
         rotationBackupDesc: "\u0420\u0435\u0437\u0435\u0440\u0432\u043D\u044B\u0435 \u043A\u043E\u043F\u0438\u0438 \u0441\u043E\u0437\u0434\u0430\u044E\u0442\u0441\u044F \u0430\u0432\u0442\u043E\u043C\u0430\u0442\u0438\u0447\u0435\u0441\u043A\u0438 \u043F\u0440\u0438 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0438 (\u043A\u0430\u0436\u0434\u044B\u0439 \u0447\u0430\u0441, \u0434\u043E 3 \u043F\u043E\u043A\u043E\u043B\u0435\u043D\u0438\u0439).",
         rotationBackupRestore: "\u0412\u043E\u0441\u0441\u0442\u0430\u043D\u043E\u0432\u0438\u0442\u044C",
         rotationBackupRestoreConfirm: function(time, count) {
-          return "\u0412\u043E\u0441\u0441\u0442\u0430\u043D\u043E\u0432\u0438\u0442\u044C \u0438\u0437 \u0440\u0435\u0437\u0435\u0440\u0432\u043D\u043E\u0439 \u043A\u043E\u043F\u0438\u0438 \u043E\u0442 " + time + " (" + count + " \u0441\u0435\u0430\u043D\u0441" + (count === 1 ? "" : "\u043E\u0432") + ")? \u0422\u0435\u043A\u0443\u0449\u0438\u0435 \u0434\u0430\u043D\u043D\u044B\u0435 \u0431\u0443\u0434\u0443\u0442 \u043F\u0435\u0440\u0435\u0437\u0430\u043F\u0438\u0441\u0430\u043D\u044B.";
+          return "\u0412\u043E\u0441\u0441\u0442\u0430\u043D\u043E\u0432\u0438\u0442\u044C \u0438\u0437 \u0440\u0435\u0437\u0435\u0440\u0432\u043D\u043E\u0439 \u043A\u043E\u043F\u0438\u0438 \u043E\u0442 " + time + " (" + count + " " + ruPlural(count, "\u0441\u0435\u0441\u0441\u0438\u044F", "\u0441\u0435\u0441\u0441\u0438\u0438", "\u0441\u0435\u0441\u0441\u0438\u0439") + ")? \u0422\u0435\u043A\u0443\u0449\u0438\u0435 \u0434\u0430\u043D\u043D\u044B\u0435 \u0431\u0443\u0434\u0443\u0442 \u043F\u0435\u0440\u0435\u0437\u0430\u043F\u0438\u0441\u0430\u043D\u044B.";
         },
         rotationBackupRestored: "\u0412\u043E\u0441\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D\u043E \u0438\u0437 \u0440\u0435\u0437\u0435\u0440\u0432\u043D\u043E\u0439 \u043A\u043E\u043F\u0438\u0438.",
         rotationBackupRestoreFailed: "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0432\u043E\u0441\u0441\u0442\u0430\u043D\u043E\u0432\u0438\u0442\u044C \u0438\u0437 \u0440\u0435\u0437\u0435\u0440\u0432\u043D\u043E\u0439 \u043A\u043E\u043F\u0438\u0438.",
         rotationBackupNone: "\u041D\u0435\u0442 \u0434\u043E\u0441\u0442\u0443\u043F\u043D\u044B\u0445 \u0440\u0435\u0437\u0435\u0440\u0432\u043D\u044B\u0445 \u043A\u043E\u043F\u0438\u0439.",
         rotationBackupGeneration: function(count) {
-          return count + " \u0441\u0435\u0430\u043D\u0441" + (count === 1 ? "" : "\u043E\u0432");
+          return count + " " + ruPlural(count, "\u0441\u0435\u0441\u0441\u0438\u044F", "\u0441\u0435\u0441\u0441\u0438\u0438", "\u0441\u0435\u0441\u0441\u0438\u0439");
         },
         frontmatterSessionNotFound: function(n) {
-          return "\u0421\u0435\u0430\u043D\u0441 \xAB" + n + "\xBB \u043D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D (workspace-session)";
+          return "\u0421\u0435\u0441\u0441\u0438\u044F \xAB" + n + "\xBB \u043D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D\u0430 (workspace-session)";
         },
         frontmatterAlreadyActive: function(n) {
-          return "\u0421\u0435\u0430\u043D\u0441 \xAB" + n + "\xBB \u0443\u0436\u0435 \u0430\u043A\u0442\u0438\u0432\u0435\u043D";
+          return "\u0421\u0435\u0441\u0441\u0438\u044F \xAB" + n + "\xBB \u0443\u0436\u0435 \u0430\u043A\u0442\u0438\u0432\u043D\u0430";
         }
       },
       de: {
@@ -2853,10 +2853,10 @@ var require_i18n = __commonJS({
           return "\u201E" + n + "\u201C ist die aktive Sitzung. Trotzdem l\xF6schen?";
         },
         confirmSaveSession: function(n) {
-          return 'Sitzung "' + n + '" speichern?';
+          return "Sitzung \u201E" + n + "\u201C speichern?";
         },
         confirmReloadSession: function(n) {
-          return 'Sitzung "' + n + '" neu laden? Nicht gespeicherte \xC4nderungen gehen verloren.';
+          return "Sitzung \u201E" + n + "\u201C neu laden? Nicht gespeicherte \xC4nderungen gehen verloren.";
         },
         renameTitle: "Sitzung umbenennen",
         renamePlaceholder: "Neuer Name...",
@@ -2893,7 +2893,7 @@ var require_i18n = __commonJS({
           return name ? "Zu Sitzung " + n + " wechseln: " + name : "Zu Sitzung " + n + " wechseln";
         },
         cmdSwitchToNamed: function(name) {
-          return 'Zu "' + name + '" wechseln';
+          return "Zu \u201E" + name + "\u201C wechseln";
         },
         cmdPrevious: "Vorherige Sitzung",
         cmdNext: "N\xE4chste Sitzung",
@@ -2933,8 +2933,8 @@ var require_i18n = __commonJS({
         settingsLanguageDesc: "Sprache der Oberfl\xE4che. Starten Sie Obsidian neu, um Befehlsnamen zu aktualisieren.",
         settingsSectionGeneral: "Allgemein",
         settingsTabSessions: "Sitzungen",
-        settingsSectionSwitching: "Automatische Sitzungsspeicherung",
-        settingsSectionSwitchPreview: "Sitzungswechsel",
+        settingsSectionSwitching: "Sitzungswechsel",
+        settingsSectionSwitchPreview: "Vorschau vor dem Wechsel",
         settingsSectionDeletion: "Sitzungsl\xF6schung",
         settingsLangAuto: "Automatisch (Systemsprache)",
         settingsTranslationHelp: "\xDCbersetzungsfehler gefunden? Erstellen Sie ein Issue oder einen Pull Request auf GitHub.",
@@ -3021,7 +3021,7 @@ var require_i18n = __commonJS({
         searchOverlayHelpWithGroups: "\u2191\u2193 bewegen  /  Tab Gruppe  /  Enter wechseln  /  \u21E7Enter speichern  /  \u232B l\xF6schen  /  Esc schlie\xDFen",
         settingsSectionGroups: "Sitzungsgruppen",
         contextToggleGroups: "Sitzungsgruppen aktivieren",
-        settingsSectionGroupsDesc: "Verwende Gruppen, um Sitzungen zu organisieren. Wenn deaktiviert, werden Gruppen-Tabs und Gruppenwechsel-Aktionen ausgeblendet.",
+        settingsSectionGroupsDesc: "Verwenden Sie Gruppen, um Sitzungen zu organisieren. Wenn deaktiviert, werden Gruppen-Tabs und Gruppenwechsel-Aktionen ausgeblendet.",
         settingsGroupCreate: "Gruppe erstellen",
         settingsGroupCreateDesc: "Eine neue Sitzungsgruppe erstellen.",
         settingsGroupCreatePlaceholder: "Gruppenname...",
@@ -3083,13 +3083,13 @@ var require_i18n = __commonJS({
         historyEmpty: "Kein Versionsverlauf f\xFCr diese Sitzung.",
         historyRestore: "Wiederherstellen",
         historyRestoreConfirm: function(name, time) {
-          return "Layout von \u201E" + name + '" von ' + time + " wiederherstellen?";
+          return "Layout von \u201E" + name + "\u201C von " + time + " wiederherstellen?";
         },
         historyRestored: function(name) {
-          return "Layout von \u201E" + name + '" wiederhergestellt';
+          return "Layout von \u201E" + name + "\u201C wiederhergestellt";
         },
         historyQuickRestored: function(name) {
-          return "Vorheriges Layout von \u201E" + name + '" schnell wiederhergestellt';
+          return "Vorheriges Layout von \u201E" + name + "\u201C schnell wiederhergestellt";
         },
         historyNoEntries: "Keine vorherigen Layouts zum Wiederherstellen.",
         historyToday: "Heute",
@@ -3671,7 +3671,7 @@ var require_i18n = __commonJS({
         cmdNext: "\uB2E4\uC74C \uC138\uC158",
         cmdSaveCurrent: "\uD604\uC7AC \uC138\uC158 \uC800\uC7A5",
         cmdSaveAs: "\uD604\uC7AC \uC138\uC158\uC744 \uB2E4\uB978 \uC774\uB984\uC73C\uB85C \uC800\uC7A5...",
-        cmdToggleAutoSave: "\uC804\uD658 \uC2DC \uC790\uB3D9 \uC800\uC7A5 \uC804\uD658",
+        cmdToggleAutoSave: "\uC804\uD658 \uC2DC \uC790\uB3D9 \uC800\uC7A5 \uCF1C\uAE30/\uB044\uAE30",
         cmdEnableAutoSave: "\uC804\uD658 \uC2DC \uC790\uB3D9 \uC800\uC7A5 \uCF1C\uAE30",
         cmdDisableAutoSave: "\uC804\uD658 \uC2DC \uC790\uB3D9 \uC800\uC7A5 \uB044\uAE30",
         cmdSearchOverlay: "\uC138\uC158 \uAC80\uC0C9",
@@ -3705,8 +3705,8 @@ var require_i18n = __commonJS({
         settingsLanguageDesc: "\uD50C\uB7EC\uADF8\uC778 UI \uC5B8\uC5B4. \uBA85\uB839\uC5B4 \uC774\uB984\uC5D0 \uC801\uC6A9\uD558\uB824\uBA74 Obsidian\uC744 \uB2E4\uC2DC \uC2DC\uC791\uD558\uC138\uC694.",
         settingsSectionGeneral: "\uC77C\uBC18",
         settingsTabSessions: "\uC138\uC158",
-        settingsSectionSwitching: "\uC138\uC158 \uC790\uB3D9 \uC800\uC7A5",
-        settingsSectionSwitchPreview: "\uC138\uC158 \uC804\uD658",
+        settingsSectionSwitching: "\uC138\uC158 \uC804\uD658",
+        settingsSectionSwitchPreview: "\uC804\uD658 \uC804 \uBBF8\uB9AC\uBCF4\uAE30",
         settingsSectionDeletion: "\uC138\uC158 \uC0AD\uC81C",
         settingsLangAuto: "\uC790\uB3D9 (\uC2DC\uC2A4\uD15C \uC5B8\uC5B4)",
         settingsTranslationHelp: "\uBC88\uC5ED \uC624\uB958\uB97C \uBC1C\uACAC\uD558\uC168\uB098\uC694? GitHub\uC5D0\uC11C issue \uB610\uB294 Pull request\uB97C \uBCF4\uB0B4\uC8FC\uC138\uC694.",
@@ -4475,10 +4475,10 @@ var require_i18n = __commonJS({
           return '"' + n + '" grubu silinsin mi? Gruptaki oturumlar S\u0130L\u0130NMEYECEK.';
         },
         groupAddedSession: function(s, g) {
-          return '"' + s + '" grubuna "' + g + '" eklendi';
+          return '"' + g + '" grubuna "' + s + '" eklendi';
         },
         groupRemovedSession: function(s, g) {
-          return '"' + s + '" grubundan "' + g + '" \xE7\u0131kar\u0131ld\u0131';
+          return '"' + g + '" grubundan "' + s + '" \xE7\u0131kar\u0131ld\u0131';
         },
         groupRemoveFromGroup: "Gruptan \xE7\u0131kar",
         groupMoveToGroup: "Gruba ta\u015F\u0131",
@@ -4519,7 +4519,7 @@ var require_i18n = __commonJS({
         historyEmpty: "Bu oturum i\xE7in s\xFCr\xFCm ge\xE7mi\u015Fi yok.",
         historyRestore: "Geri y\xFCkle",
         historyRestoreConfirm: function(name, time) {
-          return '"' + name + '" d\xFCzenini ' + time + " durumuna geri y\xFCklensin mi?";
+          return '"' + name + '" d\xFCzeni ' + time + " durumuna geri y\xFCklensin mi?";
         },
         historyRestored: function(name) {
           return '"' + name + '" d\xFCzeni geri y\xFCklendi';
@@ -4795,7 +4795,7 @@ var require_i18n = __commonJS({
         settingsGroupCreatePlaceholder: "Nama grup...",
         settingsGroupCreateBtn: "Buat",
         settingsGroupManageSessions: "Kelola sesi",
-        settingsGroupManageSessionsDesc: "Tambah atau hapus sesi dari grup ini.",
+        settingsGroupManageSessionsDesc: "Tambah atau keluarkan sesi dari grup ini.",
         settingsGroupSessionCount: function(n) {
           return n + " sesi";
         },
@@ -5083,11 +5083,11 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollPresetCustom: "T\xF9y ch\u1EC9nh",
         settingsStatusBarScrollModifier: "Ph\xEDm b\u1ED5 tr\u1EE3 b\u1EAFt bu\u1ED9c",
         settingsStatusBarScrollModifierDesc: "Ch\u1ECDn ph\xEDm b\u1ED5 tr\u1EE3 c\u1EA7n gi\u1EEF khi cu\u1ED9n tr\xEAn m\u1EE5c thanh tr\u1EA1ng th\xE1i.",
-        settingsStatusBarScrollModifierRecommended: "Cmd ho\u1EB7c Option",
+        settingsStatusBarScrollModifierRecommended: platformLabel("Cmd ho\u1EB7c Option", "Ctrl ho\u1EB7c Alt"),
         settingsStatusBarScrollModifierNone: "Kh\xF4ng",
-        settingsStatusBarScrollModifierModOnly: "Ch\u1EC9 Cmd",
-        settingsStatusBarScrollModifierAltOnly: "Ch\u1EC9 Option",
-        settingsStatusBarScrollModifierModOrAlt: "Cmd ho\u1EB7c Option",
+        settingsStatusBarScrollModifierModOnly: platformLabel("Ch\u1EC9 Cmd", "Ch\u1EC9 Ctrl"),
+        settingsStatusBarScrollModifierAltOnly: platformLabel("Ch\u1EC9 Option", "Ch\u1EC9 Alt"),
+        settingsStatusBarScrollModifierModOrAlt: platformLabel("Cmd ho\u1EB7c Option", "Ctrl ho\u1EB7c Alt"),
         settingsStatusBarScrollThreshold: "Ng\u01B0\u1EE1ng \u0111\u1ED9 nh\u1EA1y",
         settingsStatusBarScrollThresholdDesc: "Gi\xE1 tr\u1ECB th\u1EA5p h\u01A1n s\u1EBD chuy\u1EC3n phi\xEAn d\u1EC5 h\u01A1n. Ch\u1EC9 d\xF9ng khi c\u1EA5u h\xECnh l\xE0 T\xF9y ch\u1EC9nh.",
         settingsStatusBarScrollCooldown: "Th\u1EDDi gian ch\u1EDD",
@@ -5353,7 +5353,7 @@ var require_i18n = __commonJS({
           return "\u0E41\u0E01\u0E49\u0E44\u0E02\u0E40\u0E21\u0E37\u0E48\u0E2D " + n + " \u0E27\u0E31\u0E19\u0E17\u0E35\u0E48\u0E41\u0E25\u0E49\u0E27";
         },
         duplicateName: "\u0E21\u0E35\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E0A\u0E37\u0E48\u0E2D\u0E19\u0E35\u0E49\u0E2D\u0E22\u0E39\u0E48\u0E41\u0E25\u0E49\u0E27",
-        emptyName: "\u0E0A\u0E37\u0E48\u0E2D\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E15\u0E49\u0E2D\u0E07\u0E44\u0E21\u0E48\u0E27\u0E48\u0E32\u0E07",
+        emptyName: "\u0E0A\u0E37\u0E48\u0E2D\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E44\u0E21\u0E48\u0E2A\u0E32\u0E21\u0E32\u0E23\u0E16\u0E40\u0E27\u0E49\u0E19\u0E27\u0E48\u0E32\u0E07\u0E44\u0E14\u0E49",
         created: function(n) {
           return '\u0E2A\u0E23\u0E49\u0E32\u0E07\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19 "' + n + '" \u0E41\u0E25\u0E49\u0E27';
         },
@@ -5379,7 +5379,7 @@ var require_i18n = __commonJS({
           return '\u0E40\u0E02\u0E35\u0E22\u0E19\u0E17\u0E31\u0E1A "' + n + '" \u0E14\u0E49\u0E27\u0E22\u0E40\u0E04\u0E49\u0E32\u0E42\u0E04\u0E23\u0E07\u0E1B\u0E31\u0E08\u0E08\u0E38\u0E1A\u0E31\u0E19?';
         },
         confirmReloadSession: function(n) {
-          return '\u0E42\u0E2B\u0E25\u0E14\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19 "' + n + '" \u0E0B\u0E49\u0E33? \u0E01\u0E32\u0E23\u0E40\u0E1B\u0E25\u0E35\u0E48\u0E22\u0E19\u0E41\u0E1B\u0E25\u0E07\u0E17\u0E35\u0E48\u0E22\u0E31\u0E07\u0E44\u0E21\u0E48\u0E44\u0E14\u0E49\u0E1A\u0E31\u0E19\u0E17\u0E36\u0E01\u0E08\u0E30\u0E2B\u0E32\u0E22\u0E44\u0E1B';
+          return '\u0E42\u0E2B\u0E25\u0E14\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19 "' + n + '" \u0E0B\u0E49\u0E33\u0E2B\u0E23\u0E37\u0E2D\u0E44\u0E21\u0E48? \u0E01\u0E32\u0E23\u0E40\u0E1B\u0E25\u0E35\u0E48\u0E22\u0E19\u0E41\u0E1B\u0E25\u0E07\u0E17\u0E35\u0E48\u0E22\u0E31\u0E07\u0E44\u0E21\u0E48\u0E44\u0E14\u0E49\u0E1A\u0E31\u0E19\u0E17\u0E36\u0E01\u0E08\u0E30\u0E2A\u0E39\u0E0D\u0E2B\u0E32\u0E22';
         },
         renameTitle: "\u0E40\u0E1B\u0E25\u0E35\u0E48\u0E22\u0E19\u0E0A\u0E37\u0E48\u0E2D\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19",
         renamePlaceholder: "\u0E0A\u0E37\u0E48\u0E2D\u0E43\u0E2B\u0E21\u0E48...",
@@ -5504,11 +5504,11 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollPresetCustom: "\u0E01\u0E33\u0E2B\u0E19\u0E14\u0E40\u0E2D\u0E07",
         settingsStatusBarScrollModifier: "\u0E1B\u0E38\u0E48\u0E21\u0E1B\u0E23\u0E31\u0E1A\u0E41\u0E15\u0E48\u0E07\u0E17\u0E35\u0E48\u0E15\u0E49\u0E2D\u0E07\u0E01\u0E14",
         settingsStatusBarScrollModifierDesc: "\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E1B\u0E38\u0E48\u0E21\u0E1B\u0E23\u0E31\u0E1A\u0E41\u0E15\u0E48\u0E07\u0E17\u0E35\u0E48\u0E15\u0E49\u0E2D\u0E07\u0E01\u0E14\u0E04\u0E49\u0E32\u0E07\u0E44\u0E27\u0E49\u0E02\u0E13\u0E30\u0E40\u0E25\u0E37\u0E48\u0E2D\u0E19\u0E1A\u0E19\u0E23\u0E32\u0E22\u0E01\u0E32\u0E23\u0E41\u0E16\u0E1A\u0E2A\u0E16\u0E32\u0E19\u0E30",
-        settingsStatusBarScrollModifierRecommended: "Cmd \u0E2B\u0E23\u0E37\u0E2D Option",
+        settingsStatusBarScrollModifierRecommended: platformLabel("Cmd \u0E2B\u0E23\u0E37\u0E2D Option", "Ctrl \u0E2B\u0E23\u0E37\u0E2D Alt"),
         settingsStatusBarScrollModifierNone: "\u0E44\u0E21\u0E48\u0E21\u0E35",
-        settingsStatusBarScrollModifierModOnly: "Cmd \u0E40\u0E17\u0E48\u0E32\u0E19\u0E31\u0E49\u0E19",
-        settingsStatusBarScrollModifierAltOnly: "Option \u0E40\u0E17\u0E48\u0E32\u0E19\u0E31\u0E49\u0E19",
-        settingsStatusBarScrollModifierModOrAlt: "Cmd \u0E2B\u0E23\u0E37\u0E2D Option",
+        settingsStatusBarScrollModifierModOnly: platformLabel("Cmd \u0E40\u0E17\u0E48\u0E32\u0E19\u0E31\u0E49\u0E19", "Ctrl \u0E40\u0E17\u0E48\u0E32\u0E19\u0E31\u0E49\u0E19"),
+        settingsStatusBarScrollModifierAltOnly: platformLabel("Option \u0E40\u0E17\u0E48\u0E32\u0E19\u0E31\u0E49\u0E19", "Alt \u0E40\u0E17\u0E48\u0E32\u0E19\u0E31\u0E49\u0E19"),
+        settingsStatusBarScrollModifierModOrAlt: platformLabel("Cmd \u0E2B\u0E23\u0E37\u0E2D Option", "Ctrl \u0E2B\u0E23\u0E37\u0E2D Alt"),
         settingsStatusBarScrollThreshold: "\u0E40\u0E01\u0E13\u0E11\u0E4C\u0E04\u0E27\u0E32\u0E21\u0E44\u0E27",
         settingsStatusBarScrollThresholdDesc: "\u0E04\u0E48\u0E32\u0E17\u0E35\u0E48\u0E15\u0E48\u0E33\u0E01\u0E27\u0E48\u0E32\u0E08\u0E30\u0E2A\u0E25\u0E31\u0E1A\u0E44\u0E14\u0E49\u0E07\u0E48\u0E32\u0E22\u0E02\u0E36\u0E49\u0E19 \u0E43\u0E0A\u0E49\u0E40\u0E09\u0E1E\u0E32\u0E30\u0E40\u0E21\u0E37\u0E48\u0E2D\u0E1E\u0E23\u0E35\u0E40\u0E0B\u0E47\u0E15\u0E40\u0E1B\u0E47\u0E19\u0E01\u0E33\u0E2B\u0E19\u0E14\u0E40\u0E2D\u0E07",
         settingsStatusBarScrollCooldown: "\u0E0A\u0E48\u0E27\u0E07\u0E1E\u0E31\u0E01",
@@ -5622,7 +5622,7 @@ var require_i18n = __commonJS({
         },
         groupAll: "\u0E17\u0E31\u0E49\u0E07\u0E2B\u0E21\u0E14",
         groupDuplicateName: "\u0E21\u0E35\u0E01\u0E25\u0E38\u0E48\u0E21\u0E0A\u0E37\u0E48\u0E2D\u0E19\u0E35\u0E49\u0E2D\u0E22\u0E39\u0E48\u0E41\u0E25\u0E49\u0E27",
-        groupEmptyName: "\u0E0A\u0E37\u0E48\u0E2D\u0E01\u0E25\u0E38\u0E48\u0E21\u0E15\u0E49\u0E2D\u0E07\u0E44\u0E21\u0E48\u0E27\u0E48\u0E32\u0E07",
+        groupEmptyName: "\u0E0A\u0E37\u0E48\u0E2D\u0E01\u0E25\u0E38\u0E48\u0E21\u0E44\u0E21\u0E48\u0E2A\u0E32\u0E21\u0E32\u0E23\u0E16\u0E40\u0E27\u0E49\u0E19\u0E27\u0E48\u0E32\u0E07\u0E44\u0E14\u0E49",
         cmdSwitchGroup: "\u0E2A\u0E25\u0E31\u0E1A\u0E01\u0E25\u0E38\u0E48\u0E21",
         cmdExitGroup: "\u0E41\u0E2A\u0E14\u0E07\u0E17\u0E38\u0E01\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19 (\u0E2D\u0E2D\u0E01\u0E08\u0E32\u0E01\u0E01\u0E25\u0E38\u0E48\u0E21)",
         cmdNextGroup: "\u0E01\u0E25\u0E38\u0E48\u0E21\u0E16\u0E31\u0E14\u0E44\u0E1B",
@@ -5925,11 +5925,11 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollPresetCustom: "\u0915\u0938\u094D\u091F\u092E",
         settingsStatusBarScrollModifier: "\u0906\u0935\u0936\u094D\u092F\u0915 \u092E\u0949\u0921\u093F\u092B\u093C\u093E\u092F\u0930",
         settingsStatusBarScrollModifierDesc: "\u0938\u094D\u091F\u0947\u091F\u0938 \u092C\u093E\u0930 \u0906\u0907\u091F\u092E \u092A\u0930 \u0938\u094D\u0915\u094D\u0930\u0949\u0932 \u0915\u0930\u0924\u0947 \u0938\u092E\u092F \u0915\u094C\u0928-\u0938\u0940 \u092E\u0949\u0921\u093F\u092B\u093C\u093E\u092F\u0930 \u0915\u0941\u0902\u091C\u0940 \u0926\u092C\u093E\u090F \u0930\u0916\u0928\u0940 \u0939\u0948, \u092F\u0939 \u091A\u0941\u0928\u0947\u0902\u0964",
-        settingsStatusBarScrollModifierRecommended: "Cmd \u092F\u093E Option",
+        settingsStatusBarScrollModifierRecommended: platformLabel("Cmd \u092F\u093E Option", "Ctrl \u092F\u093E Alt"),
         settingsStatusBarScrollModifierNone: "\u0915\u094B\u0908 \u0928\u0939\u0940\u0902",
-        settingsStatusBarScrollModifierModOnly: "\u0915\u0947\u0935\u0932 Cmd",
-        settingsStatusBarScrollModifierAltOnly: "\u0915\u0947\u0935\u0932 Option",
-        settingsStatusBarScrollModifierModOrAlt: "Cmd \u092F\u093E Option",
+        settingsStatusBarScrollModifierModOnly: platformLabel("\u0915\u0947\u0935\u0932 Cmd", "\u0915\u0947\u0935\u0932 Ctrl"),
+        settingsStatusBarScrollModifierAltOnly: platformLabel("\u0915\u0947\u0935\u0932 Option", "\u0915\u0947\u0935\u0932 Alt"),
+        settingsStatusBarScrollModifierModOrAlt: platformLabel("Cmd \u092F\u093E Option", "Ctrl \u092F\u093E Alt"),
         settingsStatusBarScrollThreshold: "\u0938\u0902\u0935\u0947\u0926\u0928\u0936\u0940\u0932\u0924\u093E \u0925\u094D\u0930\u0947\u0936\u0939\u094B\u0932\u094D\u0921",
         settingsStatusBarScrollThresholdDesc: "\u0915\u092E \u092E\u093E\u0928 \u0938\u0947 \u0938\u094D\u0935\u093F\u091A \u0915\u0930\u0928\u093E \u0906\u0938\u093E\u0928 \u0939\u094B\u0917\u093E\u0964 \u0915\u0947\u0935\u0932 \u0915\u0938\u094D\u091F\u092E \u092A\u094D\u0930\u0940\u0938\u0947\u091F \u092E\u0947\u0902 \u0907\u0938\u094D\u0924\u0947\u092E\u093E\u0932 \u0939\u094B\u0924\u093E \u0939\u0948\u0964",
         settingsStatusBarScrollCooldown: "\u0915\u0942\u0932\u0921\u093E\u0909\u0928",
@@ -6346,11 +6346,11 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollPresetCustom: "\u0995\u09BE\u09B8\u09CD\u099F\u09AE",
         settingsStatusBarScrollModifier: "\u09AA\u09CD\u09B0\u09AF\u09BC\u09CB\u099C\u09A8\u09C0\u09AF\u09BC \u09AE\u09A1\u09BF\u09AB\u09BE\u09AF\u09BC\u09BE\u09B0",
         settingsStatusBarScrollModifierDesc: "\u09B8\u09CD\u099F\u09C7\u099F\u09BE\u09B8 \u09AC\u09BE\u09B0 \u0986\u0987\u099F\u09C7\u09AE\u09C7 \u09B8\u09CD\u0995\u09CD\u09B0\u09B2 \u0995\u09B0\u09BE\u09B0 \u09B8\u09AE\u09AF\u09BC \u0995\u09CB\u09A8 \u09AE\u09A1\u09BF\u09AB\u09BE\u09AF\u09BC\u09BE\u09B0 \u0995\u09C0 \u09A7\u09B0\u09C7 \u09B0\u09BE\u0996\u09A4\u09C7 \u09B9\u09AC\u09C7 \u09A4\u09BE \u09AC\u09C7\u099B\u09C7 \u09A8\u09BF\u09A8\u0964",
-        settingsStatusBarScrollModifierRecommended: "Cmd \u09AC\u09BE Option",
+        settingsStatusBarScrollModifierRecommended: platformLabel("Cmd \u09AC\u09BE Option", "Ctrl \u09AC\u09BE Alt"),
         settingsStatusBarScrollModifierNone: "\u0995\u09CB\u09A8\u09CB\u099F\u09BF \u09A8\u09AF\u09BC",
-        settingsStatusBarScrollModifierModOnly: "\u09B6\u09C1\u09A7\u09C1 Cmd",
-        settingsStatusBarScrollModifierAltOnly: "\u09B6\u09C1\u09A7\u09C1 Option",
-        settingsStatusBarScrollModifierModOrAlt: "Cmd \u09AC\u09BE Option",
+        settingsStatusBarScrollModifierModOnly: platformLabel("\u09B6\u09C1\u09A7\u09C1 Cmd", "\u09B6\u09C1\u09A7\u09C1 Ctrl"),
+        settingsStatusBarScrollModifierAltOnly: platformLabel("\u09B6\u09C1\u09A7\u09C1 Option", "\u09B6\u09C1\u09A7\u09C1 Alt"),
+        settingsStatusBarScrollModifierModOrAlt: platformLabel("Cmd \u09AC\u09BE Option", "Ctrl \u09AC\u09BE Alt"),
         settingsStatusBarScrollThreshold: "\u09B8\u0982\u09AC\u09C7\u09A6\u09A8\u09B6\u09C0\u09B2\u09A4\u09BE\u09B0 \u09A5\u09CD\u09B0\u09C7\u09B6\u09B9\u09CB\u09B2\u09CD\u09A1",
         settingsStatusBarScrollThresholdDesc: "\u09AE\u09BE\u09A8 \u0995\u09AE \u09B9\u09B2\u09C7 \u09B8\u09B9\u099C\u09C7 \u09B8\u09C1\u0987\u099A \u09B9\u09AC\u09C7\u0964 \u09B6\u09C1\u09A7\u09C1 \u0995\u09BE\u09B8\u09CD\u099F\u09AE \u09AA\u09CD\u09B0\u09BF\u09B8\u09C7\u099F\u09C7 \u09AC\u09CD\u09AF\u09AC\u09B9\u09C3\u09A4 \u09B9\u09AF\u09BC\u0964",
         settingsStatusBarScrollCooldown: "\u0995\u09C1\u09B2\u09A1\u09BE\u0989\u09A8",
@@ -6767,11 +6767,11 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollPresetCustom: "\u0633\u0641\u0627\u0631\u0634\u06CC",
         settingsStatusBarScrollModifier: "\u06A9\u0644\u06CC\u062F \u062A\u063A\u06CC\u06CC\u0631\u062F\u0647\u0646\u062F\u0647 \u0644\u0627\u0632\u0645",
         settingsStatusBarScrollModifierDesc: "\u0627\u0646\u062A\u062E\u0627\u0628 \u06A9\u0646\u06CC\u062F \u0647\u0646\u06AF\u0627\u0645 \u0627\u0633\u06A9\u0631\u0648\u0644 \u0631\u0648\u06CC \u0622\u06CC\u062A\u0645 \u0646\u0648\u0627\u0631 \u0648\u0636\u0639\u06CC\u062A\u060C \u06A9\u062F\u0627\u0645 \u06A9\u0644\u06CC\u062F \u062A\u063A\u06CC\u06CC\u0631\u062F\u0647\u0646\u062F\u0647 \u0628\u0627\u06CC\u062F \u0646\u06AF\u0647 \u062F\u0627\u0634\u062A\u0647 \u0634\u0648\u062F.",
-        settingsStatusBarScrollModifierRecommended: "Cmd \u06CC\u0627 Option",
+        settingsStatusBarScrollModifierRecommended: platformLabel("Cmd \u06CC\u0627 Option", "Ctrl \u06CC\u0627 Alt"),
         settingsStatusBarScrollModifierNone: "\u0647\u06CC\u0686\u200C\u06A9\u062F\u0627\u0645",
-        settingsStatusBarScrollModifierModOnly: "\u0641\u0642\u0637 Cmd",
-        settingsStatusBarScrollModifierAltOnly: "\u0641\u0642\u0637 Option",
-        settingsStatusBarScrollModifierModOrAlt: "Cmd \u06CC\u0627 Option",
+        settingsStatusBarScrollModifierModOnly: platformLabel("\u0641\u0642\u0637 Cmd", "\u0641\u0642\u0637 Ctrl"),
+        settingsStatusBarScrollModifierAltOnly: platformLabel("\u0641\u0642\u0637 Option", "\u0641\u0642\u0637 Alt"),
+        settingsStatusBarScrollModifierModOrAlt: platformLabel("Cmd \u06CC\u0627 Option", "Ctrl \u06CC\u0627 Alt"),
         settingsStatusBarScrollThreshold: "\u0622\u0633\u062A\u0627\u0646\u0647 \u062D\u0633\u0627\u0633\u06CC\u062A",
         settingsStatusBarScrollThresholdDesc: "\u0645\u0642\u0627\u062F\u06CC\u0631 \u06A9\u0645\u062A\u0631 \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u0631\u0627 \u0622\u0633\u0627\u0646\u200C\u062A\u0631 \u0645\u06CC\u200C\u06A9\u0646\u0646\u062F. \u0641\u0642\u0637 \u0648\u0642\u062A\u06CC \u067E\u06CC\u0634\u200C\u062A\u0646\u0638\u06CC\u0645 \u0633\u0641\u0627\u0631\u0634\u06CC \u0628\u0627\u0634\u062F \u0627\u0633\u062A\u0641\u0627\u062F\u0647 \u0645\u06CC\u200C\u0634\u0648\u062F.",
         settingsStatusBarScrollCooldown: "\u0645\u06A9\u062B",
@@ -6782,7 +6782,7 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollInvertDesc: "\u062C\u0647\u062A \u0642\u0628\u0644\u06CC/\u0628\u0639\u062F\u06CC \u0631\u0627 \u0628\u0631\u0627\u06CC \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u0646\u0634\u0633\u062A \u0628\u0627 \u0627\u0633\u06A9\u0631\u0648\u0644 \u0631\u0648\u06CC \u0646\u0648\u0627\u0631 \u0648\u0636\u0639\u06CC\u062A \u0648\u0627\u0631\u0648\u0646\u0647 \u0645\u06CC\u200C\u06A9\u0646\u062F.",
         settingsLangAuto: "\u062E\u0648\u062F\u06A9\u0627\u0631 (\u0632\u0628\u0627\u0646 \u0633\u06CC\u0633\u062A\u0645)",
         settingsGitHubLink: "GitHub",
-        settingsTranslationHelp: "\u062E\u0637\u0627\u06CC \u062A\u0631\u062C\u0645\u0647 \u067E\u06CC\u062F\u0627 \u06A9\u0631\u062F\u06CC\u062F\u061F \u0644\u0637\u0641\u0627 \u062F\u0631 GitHub \u06CC\u06A9 issue \u06CC\u0627 pull request \u0628\u0627\u0632 \u06A9\u0646\u06CC\u062F.",
+        settingsTranslationHelp: "\u062E\u0637\u0627\u06CC \u062A\u0631\u062C\u0645\u0647 \u067E\u06CC\u062F\u0627 \u06A9\u0631\u062F\u06CC\u062F\u061F \u0644\u0637\u0641\u0627\u064B \u062F\u0631 GitHub \u06CC\u06A9 issue \u06CC\u0627 pull request \u0628\u0627\u0632 \u06A9\u0646\u06CC\u062F.",
         settingsPreviewHeading: "\u0641\u0639\u0627\u0644 \u06A9\u0631\u062F\u0646 \u067E\u06CC\u0634\u200C\u0646\u0645\u0627\u06CC\u0634 \u067E\u06CC\u0634 \u0627\u0632 \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u0646\u0634\u0633\u062A",
         settingsPreviewDesc: "\u0647\u0646\u06AF\u0627\u0645 \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u0646\u0634\u0633\u062A \u0628\u0627 \u0645\u06CC\u0627\u0646\u0628\u0631\u060C \u0641\u0634\u0627\u0631 \u0627\u0648\u0644 \u0641\u0642\u0637 \u0645\u0648\u0642\u0639\u06CC\u062A \u0641\u0639\u0644\u06CC \u0631\u0627 \u0646\u0634\u0627\u0646 \u0645\u06CC\u200C\u062F\u0647\u062F \u0648 \u062C\u0627\u0628\u0647\u200C\u062C\u0627 \u0646\u0645\u06CC\u200C\u06A9\u0646\u062F.",
         settingsPreviewNext: "\u0646\u0634\u0633\u062A \u0628\u0639\u062F\u06CC",
@@ -7188,11 +7188,11 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollPresetCustom: "Tersuai",
         settingsStatusBarScrollModifier: "Pengubah yang diperlukan",
         settingsStatusBarScrollModifierDesc: "Pilih kekunci pengubah yang mesti ditahan semasa menatal pada item bar status.",
-        settingsStatusBarScrollModifierRecommended: "Cmd atau Option",
+        settingsStatusBarScrollModifierRecommended: platformLabel("Cmd atau Option", "Ctrl atau Alt"),
         settingsStatusBarScrollModifierNone: "Tiada",
-        settingsStatusBarScrollModifierModOnly: "Cmd sahaja",
-        settingsStatusBarScrollModifierAltOnly: "Option sahaja",
-        settingsStatusBarScrollModifierModOrAlt: "Cmd atau Option",
+        settingsStatusBarScrollModifierModOnly: platformLabel("Cmd sahaja", "Ctrl sahaja"),
+        settingsStatusBarScrollModifierAltOnly: platformLabel("Option sahaja", "Alt sahaja"),
+        settingsStatusBarScrollModifierModOrAlt: platformLabel("Cmd atau Option", "Ctrl atau Alt"),
         settingsStatusBarScrollThreshold: "Ambang kepekaan",
         settingsStatusBarScrollThresholdDesc: "Nilai lebih rendah membuatkan pertukaran lebih mudah. Hanya digunakan apabila praset ialah Tersuai.",
         settingsStatusBarScrollCooldown: "Jeda",
@@ -7256,7 +7256,7 @@ var require_i18n = __commonJS({
         settingsWarnUnsavedSwitch: "Beri amaran sebelum bertukar tanpa menyimpan",
         settingsWarnUnsavedSwitchDesc: "Apabila auto-simpan dimatikan dan sesi semasa mempunyai perubahan yang belum disimpan, tunjukkan amaran sebelum bertukar.",
         settingsHighlightUnsavedSessionChanges: "Serlahkan perubahan sesi yang belum disimpan",
-        settingsHighlightUnsavedSessionChangesDesc: "Apabila auto-simpan semasa bertukar dimatikan, serlahkan bar status jika susun atur ruang kerja semasa berbeza daripada sesi yang disimpan.",
+        settingsHighlightUnsavedSessionChangesDesc: "Apabila auto-simpan semasa bertukar dimatikan, serlahkan bar status jika tataletak ruang kerja semasa berbeza daripada sesi yang disimpan.",
         settingsStatusBarQuickSwitcher: "Penukar pantas pada klik bar status",
         settingsStatusBarQuickSwitcherDesc: "Apabila dihidupkan, mengklik bar status membuka overlay penukar pantas dan bukannya pengurus sesi penuh.",
         settingsAdvancedStorageSubsection: "Tingkah laku storan",
@@ -7609,11 +7609,11 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollPresetCustom: "W\u0142asne",
         settingsStatusBarScrollModifier: "Wymagany modyfikator",
         settingsStatusBarScrollModifierDesc: "Wybierz modyfikator, kt\xF3ry trzeba trzyma\u0107 podczas przewijania na elemencie paska stanu.",
-        settingsStatusBarScrollModifierRecommended: "Cmd albo Option",
+        settingsStatusBarScrollModifierRecommended: platformLabel("Cmd albo Option", "Ctrl albo Alt"),
         settingsStatusBarScrollModifierNone: "Brak",
-        settingsStatusBarScrollModifierModOnly: "Tylko Cmd",
-        settingsStatusBarScrollModifierAltOnly: "Tylko Option",
-        settingsStatusBarScrollModifierModOrAlt: "Cmd albo Option",
+        settingsStatusBarScrollModifierModOnly: platformLabel("Tylko Cmd", "Tylko Ctrl"),
+        settingsStatusBarScrollModifierAltOnly: platformLabel("Tylko Option", "Tylko Alt"),
+        settingsStatusBarScrollModifierModOrAlt: platformLabel("Cmd albo Option", "Ctrl albo Alt"),
         settingsStatusBarScrollThreshold: "Pr\xF3g czu\u0142o\u015Bci",
         settingsStatusBarScrollThresholdDesc: "Ni\u017Csze warto\u015Bci u\u0142atwiaj\u0105 prze\u0142\u0105czenie. U\u017Cywane tylko, gdy preset to W\u0142asne.",
         settingsStatusBarScrollCooldown: "Czas odnowienia",
@@ -7711,7 +7711,7 @@ var require_i18n = __commonJS({
         resetSessionsFailed: "Nie uda\u0142o si\u0119 zresetowa\u0107 sesji.",
         settingsResetSessionsAndSettings: "Resetuj sesje i ustawienia",
         settingsResetSessionsAndSettingsDesc: "Resetuje zapisane sesje i ustawienia Workspace++ jednocze\u015Bnie.",
-        settingsResetSessionsAndSettingsBtn: "Resetuj oba",
+        settingsResetSessionsAndSettingsBtn: "Zresetuj wszystko",
         confirmResetSessionsAndSettings: "Zresetowa\u0107 sesje i ustawienia? Tego nie mo\u017Cna cofn\u0105\u0107.",
         resetSessionsAndSettingsDone: "Sesje i ustawienia zosta\u0142y zresetowane.",
         resetSessionsAndSettingsFailed: "Nie uda\u0142o si\u0119 zresetowa\u0107 sesji i ustawie\u0144.",
@@ -7977,20 +7977,20 @@ var require_i18n = __commonJS({
         settingsGitHubLink: "GitHub",
         settingsSectionSessionListSearch: "\u5DE5\u4F5C\u968E\u6BB5\u6E05\u55AE\u8207\u641C\u5C0B",
         settingsSectionSwitchCommands: "\u5207\u63DB\u547D\u4EE4",
-        settingsSectionScrollSwitch: "\u6EFE\u52D5\u5207\u63DB",
+        settingsSectionScrollSwitch: "\u6372\u52D5\u5207\u63DB",
         settingsSubsectionSwitchSaving: "\u5207\u63DB\u5DE5\u4F5C\u968E\u6BB5\u6642\u7684\u5132\u5B58",
         settingsSubsectionAutoSaveMode: "\u5DE5\u4F5C\u968E\u6BB5\u81EA\u52D5\u5132\u5B58\u6A21\u5F0F",
         settingsSubsectionSwitchCommands: "\u5DE5\u4F5C\u968E\u6BB5\u5207\u63DB\u547D\u4EE4",
-        settingsSubsectionScrollSwitch: "\u900F\u904E\u6EFE\u52D5\u5207\u63DB\u5DE5\u4F5C\u968E\u6BB5",
+        settingsSubsectionScrollSwitch: "\u900F\u904E\u6372\u52D5\u5207\u63DB\u5DE5\u4F5C\u968E\u6BB5",
         settingsSubsectionSwitchPreview: "\u5207\u63DB\u5DE5\u4F5C\u968E\u6BB5\u524D\u9810\u89BD",
-        settingsStatusBarScrollPreset: "\u6EFE\u52D5\u8F38\u5165\u9810\u8A2D",
+        settingsStatusBarScrollPreset: "\u6372\u52D5\u8F38\u5165\u9810\u8A2D",
         settingsStatusBarScrollPresetDesc: "\u9078\u64C7\u9069\u5408\u4F60\u88DD\u7F6E\u7684\u9810\u8A2D\uFF0C\u6216\u5207\u63DB\u5230\u300C\u81EA\u8A02\u300D\u81EA\u884C\u8ABF\u6574\u6578\u503C\u3002",
         settingsStatusBarScrollPresetTrackpad: "\u89F8\u63A7\u677F",
         settingsStatusBarScrollPresetNotchedWheel: "\u6709\u6BB5\u843D\u611F\u7684\u6ED1\u9F20\u6EFE\u8F2A",
         settingsStatusBarScrollPresetFreeSpinWheel: "\u81EA\u7531\u65CB\u8F49\u6ED1\u9F20\u6EFE\u8F2A",
         settingsStatusBarScrollPresetCustom: "\u81EA\u8A02",
         settingsStatusBarScrollModifier: "\u9700\u8981\u7684\u4FEE\u98FE\u9375",
-        settingsStatusBarScrollModifierDesc: "\u9078\u64C7\u5728\u72C0\u614B\u5217\u9805\u76EE\u4E0A\u6EFE\u52D5\u6642\u5FC5\u9808\u6309\u4F4F\u7684\u4FEE\u98FE\u9375\u3002",
+        settingsStatusBarScrollModifierDesc: "\u9078\u64C7\u5728\u72C0\u614B\u5217\u9805\u76EE\u4E0A\u6372\u52D5\u6642\u5FC5\u9808\u6309\u4F4F\u7684\u4FEE\u98FE\u9375\u3002",
         settingsStatusBarScrollModifierRecommended: platformLabel("Cmd \u6216 Option", "Ctrl \u6216 Alt"),
         settingsStatusBarScrollModifierNone: "\u7121",
         settingsStatusBarScrollModifierModOnly: platformLabel("\u50C5 Cmd", "\u50C5 Ctrl"),
@@ -7999,11 +7999,11 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollThreshold: "\u9748\u654F\u5EA6\u9580\u6ABB",
         settingsStatusBarScrollThresholdDesc: "\u6578\u503C\u8D8A\u5C0F\uFF0C\u8D8A\u5BB9\u6613\u5207\u63DB\u3002\u50C5\u5728\u300C\u81EA\u8A02\u300D\u9810\u8A2D\u6642\u4F7F\u7528\u3002",
         settingsStatusBarScrollCooldown: "\u51B7\u537B\u6642\u9593",
-        settingsStatusBarScrollCooldownDesc: "\u5169\u6B21\u7531\u6EFE\u52D5\u89F8\u767C\u7684\u5DE5\u4F5C\u968E\u6BB5\u5207\u63DB\u4E4B\u9593\u7684\u6700\u77ED\u9593\u9694\u3002\u50C5\u5728\u300C\u81EA\u8A02\u300D\u9810\u8A2D\u6642\u4F7F\u7528\u3002",
+        settingsStatusBarScrollCooldownDesc: "\u5169\u6B21\u7531\u6372\u52D5\u89F8\u767C\u7684\u5DE5\u4F5C\u968E\u6BB5\u5207\u63DB\u4E4B\u9593\u7684\u6700\u77ED\u9593\u9694\u3002\u50C5\u5728\u300C\u81EA\u8A02\u300D\u9810\u8A2D\u6642\u4F7F\u7528\u3002",
         settingsStatusBarScrollResetWindow: "\u7D2F\u7A4D\u91CD\u8A2D\u6642\u9593\u7A97",
-        settingsStatusBarScrollResetWindowDesc: "\u5728\u91CD\u8A2D\u524D\uFF0C\u6301\u7E8C\u7D2F\u7A4D\u8F03\u5C0F\u6EFE\u52D5\u91CF\u7684\u6642\u9593\u3002\u50C5\u5728\u300C\u81EA\u8A02\u300D\u9810\u8A2D\u6642\u4F7F\u7528\u3002",
-        settingsStatusBarScrollInvert: "\u53CD\u8F49\u6EFE\u52D5\u65B9\u5411",
-        settingsStatusBarScrollInvertDesc: "\u53CD\u8F49\u72C0\u614B\u5217\u6EFE\u52D5\u5207\u63DB\u6642\u4E0A\u4E00\u500B/\u4E0B\u4E00\u500B\u7684\u65B9\u5411\u3002",
+        settingsStatusBarScrollResetWindowDesc: "\u5728\u91CD\u8A2D\u524D\uFF0C\u6301\u7E8C\u7D2F\u7A4D\u8F03\u5C0F\u6372\u52D5\u91CF\u7684\u6642\u9593\u3002\u50C5\u5728\u300C\u81EA\u8A02\u300D\u9810\u8A2D\u6642\u4F7F\u7528\u3002",
+        settingsStatusBarScrollInvert: "\u53CD\u8F49\u6372\u52D5\u65B9\u5411",
+        settingsStatusBarScrollInvertDesc: "\u53CD\u8F49\u72C0\u614B\u5217\u6372\u52D5\u5207\u63DB\u6642\u4E0A\u4E00\u500B/\u4E0B\u4E00\u500B\u7684\u65B9\u5411\u3002",
         settingsAdvancedStorageSubsection: "\u5132\u5B58\u884C\u70BA",
         settingsAdvancedTransferSubsection: "\u8CC7\u6599\u79FB\u8F49",
         settingsDeveloperSection: "\u958B\u767C\u8005\u5DE5\u5177",
@@ -8488,7 +8488,7 @@ var require_i18n = __commonJS({
         resetSettingsFailed: "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0441\u0431\u0440\u043E\u0441\u0438\u0442\u044C \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 Workspace++.",
         settingsResetSessionsAndSettings: "\u0421\u0431\u0440\u043E\u0441\u0438\u0442\u044C \u0441\u0435\u0441\u0441\u0438\u0438 \u0438 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438",
         settingsResetSessionsAndSettingsDesc: "\u041E\u0434\u043D\u043E\u0432\u0440\u0435\u043C\u0435\u043D\u043D\u043E \u0441\u0431\u0440\u0430\u0441\u044B\u0432\u0430\u0435\u0442 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u043D\u044B\u0435 \u0441\u0435\u0441\u0441\u0438\u0438 \u0438 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 Workspace++.",
-        settingsResetSessionsAndSettingsBtn: "\u0421\u0431\u0440\u043E\u0441\u0438\u0442\u044C \u043E\u0431\u0430",
+        settingsResetSessionsAndSettingsBtn: "\u0421\u0431\u0440\u043E\u0441\u0438\u0442\u044C \u0432\u0441\u0451",
         confirmResetSessionsAndSettings: "\u0421\u0431\u0440\u043E\u0441\u0438\u0442\u044C \u0441\u0435\u0441\u0441\u0438\u0438 \u0438 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438? \u042D\u0442\u043E \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0435 \u043D\u0435\u043B\u044C\u0437\u044F \u043E\u0442\u043C\u0435\u043D\u0438\u0442\u044C.",
         resetSessionsAndSettingsDone: "\u0421\u0435\u0441\u0441\u0438\u0438 \u0438 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u0441\u0431\u0440\u043E\u0448\u0435\u043D\u044B.",
         resetSessionsAndSettingsFailed: "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0441\u0431\u0440\u043E\u0441\u0438\u0442\u044C \u0441\u0435\u0441\u0441\u0438\u0438 \u0438 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438."
@@ -8504,13 +8504,13 @@ var require_i18n = __commonJS({
         saveCurrentLayoutToSessionPlaceholder: "Zu \xFCberschreibende Sitzung ausw\xE4hlen...",
         contextSaveCurrentLayoutToThisSession: "Aktuelles Layout in diese Sitzung speichern",
         cmdExportSessions: "Sitzungs-Snapshot exportieren",
-        cmdImportSessions: "Neueste Sitzungs-Snapshot importieren",
+        cmdImportSessions: "Neuesten Sitzungs-Snapshot importieren",
         cmdReloadCurrentWithoutSaving: "Aktuelle Sitzung neu laden (ohne Speichern)",
         reloadedSession: function(n) {
           return "Sitzung \u201E" + n + "\u201C neu geladen";
         },
         defaultSessionName: "Standard",
-        nameSessionTitle: "Mit Sitzungsname speichern",
+        nameSessionTitle: "Mit Sitzungsnamen speichern",
         nameSessionPlaceholder: "Sitzungsname...",
         saveWithoutNaming: "Ohne Namen speichern",
         sessionDataMigrated: "Workspace++: Sitzungsdaten wurden nach .workspace-plus-plus/sessions.json verschoben.",
@@ -8543,11 +8543,11 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollPresetCustom: "Benutzerdefiniert",
         settingsStatusBarScrollModifier: "Erforderliche Zusatztaste",
         settingsStatusBarScrollModifierDesc: "W\xE4hlen Sie, welche Zusatztaste beim Scrollen \xFCber das Element in der Statusleiste gehalten werden muss.",
-        settingsStatusBarScrollModifierRecommended: platformLabel("Cmd oder Option", "Ctrl oder Alt"),
+        settingsStatusBarScrollModifierRecommended: platformLabel("Cmd oder Option", "Strg oder Alt"),
         settingsStatusBarScrollModifierNone: "Keine",
-        settingsStatusBarScrollModifierModOnly: platformLabel("Nur Cmd", "Nur Ctrl"),
+        settingsStatusBarScrollModifierModOnly: platformLabel("Nur Cmd", "Nur Strg"),
         settingsStatusBarScrollModifierAltOnly: platformLabel("Nur Option", "Nur Alt"),
-        settingsStatusBarScrollModifierModOrAlt: platformLabel("Cmd oder Option", "Ctrl oder Alt"),
+        settingsStatusBarScrollModifierModOrAlt: platformLabel("Cmd oder Option", "Strg oder Alt"),
         settingsStatusBarScrollThreshold: "Empfindlichkeitsschwelle",
         settingsStatusBarScrollThresholdDesc: "Niedrigere Werte schalten leichter um. Wird nur mit der Voreinstellung Benutzerdefiniert verwendet.",
         settingsStatusBarScrollCooldown: "Abklingzeit",
@@ -8608,11 +8608,11 @@ var require_i18n = __commonJS({
         sessionDataMigrated: "Workspace++: \uC138\uC158 \uB370\uC774\uD130\uAC00 .workspace-plus-plus/sessions.json \uC73C\uB85C \uC774\uB3D9\uB418\uC5C8\uC2B5\uB2C8\uB2E4.",
         sessionDataMigrationFailed: "Workspace++: \uC138\uC158 \uB370\uC774\uD130 \uB9C8\uC774\uADF8\uB808\uC774\uC158\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4. \uAE30\uC874 \uB370\uC774\uD130\uB294 \uC720\uC9C0\uB429\uB2C8\uB2E4.",
         exportSessionsDone: function(path) {
-          return "Workspace++: \uC138\uC158\uC744 " + path + " \uB85C \uB0B4\uBCF4\uB0C8\uC2B5\uB2C8\uB2E4.";
+          return "Workspace++: \uC138\uC158\uC744 " + path + "(\uC73C)\uB85C \uB0B4\uBCF4\uB0C8\uC2B5\uB2C8\uB2E4.";
         },
         exportSessionsFailed: "Workspace++: \uC138\uC158 \uB0B4\uBCF4\uB0B4\uAE30\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4.",
         importSessionsDone: function(path) {
-          return "Workspace++: " + path + " \uC5D0\uC11C \uC138\uC158\uC744 \uAC00\uC838\uC654\uC2B5\uB2C8\uB2E4.";
+          return "Workspace++: " + path + "\uC5D0\uC11C \uC138\uC158\uC744 \uAC00\uC838\uC654\uC2B5\uB2C8\uB2E4.";
         },
         importSessionsNoFile: "Workspace++: .workspace-plus-plus/exports \uC5D0 \uAC00\uC838\uC62C \uD30C\uC77C\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.",
         importSessionsFailed: "Workspace++: \uC138\uC158 \uAC00\uC838\uC624\uAE30\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4.",
@@ -8757,7 +8757,7 @@ var require_i18n = __commonJS({
         settingsImportSessionsBtn: "Importa ultimo",
         confirmImportSessions: "Importare le sessioni esportate pi\xF9 di recente? Le sessioni correnti saranno sostituite.",
         settingsResetSettings: "Reimposta impostazioni",
-        settingsResetSettingsDesc: "Reimposta le impostazioni di Workspace++ ai valori predefiniti nell ambito corrente.",
+        settingsResetSettingsDesc: "Reimposta le impostazioni di Workspace++ ai valori predefiniti nell'ambito corrente.",
         settingsResetSettingsBtn: "Reimposta impostazioni",
         confirmResetSettings: "Reimpostare le impostazioni di Workspace++ ai valori predefiniti?",
         resetSettingsDone: "Le impostazioni di Workspace++ sono state reimpostate.",
@@ -9100,12 +9100,12 @@ var require_i18n = __commonJS({
         saveCurrentNoteNameAsSessionFailed: "\u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u09A8\u09CB\u099F\u09C7\u09B0 \u09A8\u09BE\u09AE \u09B8\u09C7\u09B6\u09A8 \u09B9\u09BF\u09B8\u09C7\u09AC\u09C7 \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3 \u0995\u09B0\u09BE \u09AF\u09BE\u09AF\u09BC\u09A8\u09BF\u0964"
       },
       fa: {
-        cmdSaveCurrentNoteNameAsSession: "\u0630\u062E\u06CC\u0631\u0647 \u0646\u0627\u0645 \u06CC\u0627\u062F\u062F\u0627\u0634\u062A \u0641\u0639\u0644\u06CC \u0628\u0647 \u0639\u0646\u0648\u0627\u0646 \u0646\u0634\u0633\u062A",
+        cmdSaveCurrentNoteNameAsSession: "\u0630\u062E\u06CC\u0631\u0647 \u0646\u0627\u0645 \u06CC\u0627\u062F\u062F\u0627\u0634\u062A \u0641\u0639\u0644\u06CC \u0628\u0647\u200C\u0639\u0646\u0648\u0627\u0646 \u0646\u0634\u0633\u062A",
         noActiveMarkdownFile: "\u0647\u06CC\u0686 \u06CC\u0627\u062F\u062F\u0627\u0634\u062A Markdown \u0641\u0639\u0627\u0644\u06CC \u0648\u062C\u0648\u062F \u0646\u062F\u0627\u0631\u062F.",
         savedCurrentNoteNameAsSession: function(n) {
-          return '\u06CC\u0627\u062F\u062F\u0627\u0634\u062A \u0641\u0639\u0644\u06CC \u0628\u0647 \u0639\u0646\u0648\u0627\u0646 \u0646\u0634\u0633\u062A "' + n + '" \u0630\u062E\u06CC\u0631\u0647 \u0634\u062F';
+          return '\u06CC\u0627\u062F\u062F\u0627\u0634\u062A \u0641\u0639\u0644\u06CC \u0628\u0647\u200C\u0639\u0646\u0648\u0627\u0646 \u0646\u0634\u0633\u062A "' + n + '" \u0630\u062E\u06CC\u0631\u0647 \u0634\u062F';
         },
-        saveCurrentNoteNameAsSessionFailed: "\u0630\u062E\u06CC\u0631\u0647 \u0646\u0627\u0645 \u06CC\u0627\u062F\u062F\u0627\u0634\u062A \u0641\u0639\u0644\u06CC \u0628\u0647 \u0639\u0646\u0648\u0627\u0646 \u0646\u0634\u0633\u062A \u0646\u0627\u0645\u0648\u0641\u0642 \u0628\u0648\u062F."
+        saveCurrentNoteNameAsSessionFailed: "\u0630\u062E\u06CC\u0631\u0647 \u0646\u0627\u0645 \u06CC\u0627\u062F\u062F\u0627\u0634\u062A \u0641\u0639\u0644\u06CC \u0628\u0647\u200C\u0639\u0646\u0648\u0627\u0646 \u0646\u0634\u0633\u062A \u0646\u0627\u0645\u0648\u0641\u0642 \u0628\u0648\u062F."
       },
       ms: {
         cmdSaveCurrentNoteNameAsSession: "Simpan nama nota semasa sebagai sesi",
@@ -9679,7 +9679,7 @@ var require_i18n = __commonJS({
         settingsVaultOnlySessions: "\uC774 \uBCF4\uAD00\uD568\uC5D0\uC11C\uB9CC \uC138\uC158 \uC720\uC9C0",
         settingsVaultOnlySessionsDesc: "\uC138\uC158\uC744 \uC774 \uBCF4\uAD00\uD568 \uC548\uC5D0\uB9CC \uC800\uC7A5\uD569\uB2C8\uB2E4. \uC5EC\uB7EC \uBCF4\uAD00\uD568\uC774 .obsidian\uC744 \uACF5\uC720\uD558\uBA74\uC11C(\uC608: Settings Profiles) \uC138\uC158\uC774 \uC11E\uC774\uC9C0 \uC54A\uAC8C \uD558\uB824\uBA74 \uC0AC\uC6A9\uD558\uC138\uC694. \uCF1C\uC838 \uC788\uB294 \uB3D9\uC548\uC5D0\uB294 Obsidian Sync\uAC00 \uB3D9\uAE30\uD654\uD558\uC9C0 \uBABB\uD569\uB2C8\uB2E4.",
         sessionStorageMoved: function(path) {
-          return "Workspace++: \uC138\uC158 \uC800\uC7A5 \uC704\uCE58\uB97C " + path + " \uC73C\uB85C \uC62E\uACBC\uC2B5\uB2C8\uB2E4.";
+          return "Workspace++: \uC138\uC158 \uC800\uC7A5 \uC704\uCE58\uB97C " + path + "(\uC73C)\uB85C \uC62E\uACBC\uC2B5\uB2C8\uB2E4.";
         },
         sessionStorageMoveFailed: "Workspace++: \uC138\uC158 \uC800\uC7A5 \uC704\uCE58\uB97C \uC62E\uAE30\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4.",
         settingsStorageFieldHistory: "\uBC84\uC804 \uAE30\uB85D \uD30C\uC77C",
@@ -9827,11 +9827,11 @@ var require_i18n = __commonJS({
           return "T\u1EC7p phi\xEAn hi\u1EC7n t\u1EA1i: " + path;
         },
         settingsVaultOnlySessions: "Ch\u1EC9 gi\u1EEF phi\xEAn trong kho n\xE0y",
-        settingsVaultOnlySessionsDesc: "Ch\u1EC9 l\u01B0u phi\xEAn b\xEAn trong kho n\xE0y. H\u1EEFu \xEDch khi nhi\u1EC1u kho d\xF9ng chung th\u01B0 m\u1EE5c .obsidian, v\xED d\u1EE5 v\u1EDBi Settings Profiles, v\xE0 kh\xF4ng n\xEAn tr\u1ED9n l\u1EABn phi\xEAn. Khi b\u1EADt, Obsidian Sync kh\xF4ng th\u1EC3 mang ch\xFAng \u0111i.",
+        settingsVaultOnlySessionsDesc: "Ch\u1EC9 l\u01B0u phi\xEAn b\xEAn trong kho n\xE0y. H\u1EEFu \xEDch khi nhi\u1EC1u kho d\xF9ng chung th\u01B0 m\u1EE5c .obsidian, v\xED d\u1EE5 v\u1EDBi Settings Profiles, v\xE0 kh\xF4ng n\xEAn tr\u1ED9n l\u1EABn phi\xEAn. Obsidian Sync kh\xF4ng th\u1EC3 \u0111\u1ED3ng b\u1ED9 ch\xFAng khi t\xF9y ch\u1ECDn n\xE0y \u0111ang b\u1EADt.",
         sessionStorageMoved: function(path) {
-          return "Workspace++: \u0111\xE3 chuy\u1EC3n n\u01A1i l\u01B0u tr\u1EEF phi\xEAn sang " + path;
+          return "Workspace++: \u0110\xE3 chuy\u1EC3n n\u01A1i l\u01B0u tr\u1EEF phi\xEAn sang " + path;
         },
-        sessionStorageMoveFailed: "Workspace++: kh\xF4ng th\u1EC3 chuy\u1EC3n n\u01A1i l\u01B0u tr\u1EEF phi\xEAn.",
+        sessionStorageMoveFailed: "Workspace++: Kh\xF4ng th\u1EC3 chuy\u1EC3n n\u01A1i l\u01B0u tr\u1EEF phi\xEAn.",
         settingsStorageFieldHistory: "T\u1EC7p l\u1ECBch s\u1EED phi\xEAn b\u1EA3n",
         settingsStorageFieldDataSize: "K\xEDch th\u01B0\u1EDBc t\u1EC7p \u0111\xE3 l\u01B0u",
         settingsStorageSyncHint: '\u0110\u1EC3 \u0111\u1ED3ng b\u1ED9 b\u1EB1ng Obsidian Sync, h\xE3y b\u1EADt "Installed community plugins" trong c\xE0i \u0111\u1EB7t c\u1EE7a n\xF3. L\u1ECBch s\u1EED v\xE0 b\u1EA3n sao l\u01B0u kh\xF4ng \u0111\u01B0\u1EE3c \u0111\u1ED3ng b\u1ED9.'
@@ -9842,9 +9842,9 @@ var require_i18n = __commonJS({
           return "\u0E44\u0E1F\u0E25\u0E4C\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E1B\u0E31\u0E08\u0E08\u0E38\u0E1A\u0E31\u0E19: " + path;
         },
         settingsVaultOnlySessions: "\u0E40\u0E01\u0E47\u0E1A\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E44\u0E27\u0E49\u0E40\u0E09\u0E1E\u0E32\u0E30\u0E43\u0E19\u0E27\u0E2D\u0E25\u0E15\u0E4C\u0E19\u0E35\u0E49",
-        settingsVaultOnlySessionsDesc: "\u0E40\u0E01\u0E47\u0E1A\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E44\u0E27\u0E49\u0E20\u0E32\u0E22\u0E43\u0E19\u0E27\u0E2D\u0E25\u0E15\u0E4C\u0E19\u0E35\u0E49\u0E40\u0E17\u0E48\u0E32\u0E19\u0E31\u0E49\u0E19 \u0E40\u0E2B\u0E21\u0E32\u0E30\u0E40\u0E21\u0E37\u0E48\u0E2D\u0E21\u0E35\u0E2B\u0E25\u0E32\u0E22\u0E27\u0E2D\u0E25\u0E15\u0E4C\u0E43\u0E0A\u0E49 .obsidian \u0E23\u0E48\u0E27\u0E21\u0E01\u0E31\u0E19 \u0E40\u0E0A\u0E48\u0E19\u0E40\u0E21\u0E37\u0E48\u0E2D\u0E43\u0E0A\u0E49 Settings Profiles \u0E41\u0E25\u0E30\u0E44\u0E21\u0E48\u0E15\u0E49\u0E2D\u0E07\u0E01\u0E32\u0E23\u0E43\u0E2B\u0E49\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E1B\u0E19\u0E01\u0E31\u0E19 \u0E02\u0E13\u0E30\u0E40\u0E1B\u0E34\u0E14\u0E2D\u0E22\u0E39\u0E48 Obsidian Sync \u0E08\u0E30\u0E44\u0E21\u0E48\u0E2A\u0E32\u0E21\u0E32\u0E23\u0E16\u0E0B\u0E34\u0E07\u0E01\u0E4C\u0E44\u0E14\u0E49",
+        settingsVaultOnlySessionsDesc: "\u0E40\u0E01\u0E47\u0E1A\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E44\u0E27\u0E49\u0E20\u0E32\u0E22\u0E43\u0E19\u0E27\u0E2D\u0E25\u0E15\u0E4C\u0E19\u0E35\u0E49\u0E40\u0E17\u0E48\u0E32\u0E19\u0E31\u0E49\u0E19 \u0E40\u0E2B\u0E21\u0E32\u0E30\u0E40\u0E21\u0E37\u0E48\u0E2D\u0E21\u0E35\u0E2B\u0E25\u0E32\u0E22\u0E27\u0E2D\u0E25\u0E15\u0E4C\u0E43\u0E0A\u0E49 .obsidian \u0E23\u0E48\u0E27\u0E21\u0E01\u0E31\u0E19 \u0E40\u0E0A\u0E48\u0E19\u0E40\u0E21\u0E37\u0E48\u0E2D\u0E43\u0E0A\u0E49 Settings Profiles \u0E41\u0E25\u0E30\u0E44\u0E21\u0E48\u0E15\u0E49\u0E2D\u0E07\u0E01\u0E32\u0E23\u0E43\u0E2B\u0E49\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E1B\u0E19\u0E01\u0E31\u0E19 \u0E02\u0E13\u0E30\u0E40\u0E1B\u0E34\u0E14\u0E15\u0E31\u0E27\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E19\u0E35\u0E49\u0E2D\u0E22\u0E39\u0E48 Obsidian Sync \u0E08\u0E30\u0E44\u0E21\u0E48\u0E2A\u0E32\u0E21\u0E32\u0E23\u0E16\u0E0B\u0E34\u0E07\u0E01\u0E4C\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E40\u0E2B\u0E25\u0E48\u0E32\u0E19\u0E35\u0E49\u0E44\u0E14\u0E49",
         sessionStorageMoved: function(path) {
-          return "Workspace++: \u0E22\u0E49\u0E32\u0E22\u0E15\u0E33\u0E41\u0E2B\u0E19\u0E48\u0E07\u0E08\u0E31\u0E14\u0E40\u0E01\u0E47\u0E1A\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E44\u0E1B\u0E17\u0E35\u0E48 " + path;
+          return "Workspace++: \u0E22\u0E49\u0E32\u0E22\u0E15\u0E33\u0E41\u0E2B\u0E19\u0E48\u0E07\u0E08\u0E31\u0E14\u0E40\u0E01\u0E47\u0E1A\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E44\u0E1B\u0E22\u0E31\u0E07 " + path + " \u0E41\u0E25\u0E49\u0E27";
         },
         sessionStorageMoveFailed: "Workspace++: \u0E22\u0E49\u0E32\u0E22\u0E15\u0E33\u0E41\u0E2B\u0E19\u0E48\u0E07\u0E08\u0E31\u0E14\u0E40\u0E01\u0E47\u0E1A\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E44\u0E21\u0E48\u0E2A\u0E33\u0E40\u0E23\u0E47\u0E08",
         settingsStorageFieldHistory: "\u0E44\u0E1F\u0E25\u0E4C\u0E1B\u0E23\u0E30\u0E27\u0E31\u0E15\u0E34\u0E40\u0E27\u0E2D\u0E23\u0E4C\u0E0A\u0E31\u0E19",
@@ -9857,9 +9857,9 @@ var require_i18n = __commonJS({
           return "\u0935\u0930\u094D\u0924\u092E\u093E\u0928 \u0938\u0924\u094D\u0930 \u092B\u093C\u093E\u0907\u0932: " + path;
         },
         settingsVaultOnlySessions: "\u0938\u0924\u094D\u0930 \u0915\u0947\u0935\u0932 \u0907\u0938\u0940 \u0935\u0949\u0932\u094D\u091F \u092E\u0947\u0902 \u0930\u0916\u0947\u0902",
-        settingsVaultOnlySessionsDesc: "\u0938\u0924\u094D\u0930\u094B\u0902 \u0915\u094B \u0915\u0947\u0935\u0932 \u0907\u0938\u0940 \u0935\u0949\u0932\u094D\u091F \u0915\u0947 \u092D\u0940\u0924\u0930 \u0938\u0939\u0947\u091C\u0924\u093E \u0939\u0948\u0964 \u091C\u092C \u0915\u0908 \u0935\u0949\u0932\u094D\u091F \u090F\u0915 \u0939\u0940 .obsidian \u0938\u093E\u091D\u093E \u0915\u0930\u0924\u0947 \u0939\u094B\u0902, \u091C\u0948\u0938\u0947 Settings Profiles \u0915\u0947 \u0938\u093E\u0925, \u0914\u0930 \u0909\u0928\u0915\u0947 \u0938\u0924\u094D\u0930 \u0906\u092A\u0938 \u092E\u0947\u0902 \u0928 \u092E\u093F\u0932\u0947\u0902, \u0924\u092C \u0909\u092A\u092F\u094B\u0917\u0940 \u0939\u0948\u0964 \u091A\u093E\u0932\u0942 \u0930\u0939\u0928\u0947 \u092A\u0930 Obsidian Sync \u0907\u0928\u094D\u0939\u0947\u0902 \u0928\u0939\u0940\u0902 \u0932\u0947 \u091C\u093E \u0938\u0915\u0924\u093E\u0964",
+        settingsVaultOnlySessionsDesc: "\u0938\u0924\u094D\u0930\u094B\u0902 \u0915\u094B \u0915\u0947\u0935\u0932 \u0907\u0938\u0940 \u0935\u0949\u0932\u094D\u091F \u0915\u0947 \u092D\u0940\u0924\u0930 \u0938\u0939\u0947\u091C\u0924\u093E \u0939\u0948\u0964 \u091C\u092C \u0915\u0908 \u0935\u0949\u0932\u094D\u091F \u090F\u0915 \u0939\u0940 .obsidian \u0938\u093E\u091D\u093E \u0915\u0930\u0924\u0947 \u0939\u094B\u0902, \u091C\u0948\u0938\u0947 Settings Profiles \u0915\u0947 \u0938\u093E\u0925, \u0914\u0930 \u0909\u0928\u0915\u0947 \u0938\u0924\u094D\u0930 \u0906\u092A\u0938 \u092E\u0947\u0902 \u0928 \u092E\u093F\u0932\u0947\u0902, \u0924\u092C \u0909\u092A\u092F\u094B\u0917\u0940 \u0939\u0948\u0964 \u091A\u093E\u0932\u0942 \u0930\u0939\u0928\u0947 \u092A\u0930 Obsidian Sync \u0907\u0928\u094D\u0939\u0947\u0902 \u0938\u093F\u0902\u0915 \u0928\u0939\u0940\u0902 \u0915\u0930 \u0938\u0915\u0924\u093E\u0964",
         sessionStorageMoved: function(path) {
-          return "Workspace++: \u0938\u0924\u094D\u0930 \u0938\u0902\u0917\u094D\u0930\u0939\u0923 " + path + " \u092A\u0930 \u0932\u0947 \u091C\u093E\u092F\u093E \u0917\u092F\u093E\u0964";
+          return "Workspace++: \u0938\u0924\u094D\u0930 \u0938\u0902\u0917\u094D\u0930\u0939\u0923 " + path + " \u092E\u0947\u0902 \u0938\u094D\u0925\u093E\u0928\u093E\u0902\u0924\u0930\u093F\u0924 \u0915\u093F\u092F\u093E \u0917\u092F\u093E\u0964";
         },
         sessionStorageMoveFailed: "Workspace++: \u0938\u0924\u094D\u0930 \u0938\u0902\u0917\u094D\u0930\u0939\u0923 \u0938\u094D\u0925\u093E\u0928 \u092C\u0926\u0932\u0928\u0947 \u092E\u0947\u0902 \u0935\u093F\u092B\u0932\u0964",
         settingsStorageFieldHistory: "\u0938\u0902\u0938\u094D\u0915\u0930\u0923 \u0907\u0924\u093F\u0939\u093E\u0938 \u092B\u093C\u093E\u0907\u0932",
@@ -9872,11 +9872,11 @@ var require_i18n = __commonJS({
           return "\u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u09B8\u09C7\u09B6\u09A8 \u09AB\u09BE\u0987\u09B2: " + path;
         },
         settingsVaultOnlySessions: "\u09B8\u09C7\u09B6\u09A8 \u09B6\u09C1\u09A7\u09C1 \u098F\u0987 \u09AD\u09B2\u09CD\u099F\u09C7\u0987 \u09B0\u09BE\u0996\u09C1\u09A8",
-        settingsVaultOnlySessionsDesc: "\u09B8\u09C7\u09B6\u09A8 \u09B6\u09C1\u09A7\u09C1 \u098F\u0987 \u09AD\u09B2\u09CD\u099F\u09C7\u09B0 \u09AD\u09C7\u09A4\u09B0\u09C7\u0987 \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3 \u0995\u09B0\u09C7\u0964 \u098F\u0995\u09BE\u09A7\u09BF\u0995 \u09AD\u09B2\u09CD\u099F \u098F\u0995\u0987 .obsidian \u09AD\u09BE\u0997 \u0995\u09B0\u09C7 \u09A8\u09BF\u09B2\u09C7, \u09AF\u09C7\u09AE\u09A8 Settings Profiles-\u098F\u09B0 \u09B8\u0999\u09CD\u0997\u09C7, \u098F\u09AC\u0982 \u09B8\u09C7\u09B6\u09A8 \u09AE\u09BF\u09B6\u09C7 \u09AF\u09BE\u0993\u09AF\u09BC\u09BE \u09A0\u09C7\u0995\u09BE\u09A4\u09C7 \u099A\u09BE\u0987\u09B2\u09C7 \u0995\u09BE\u099C\u09C7 \u09B2\u09BE\u0997\u09C7\u0964 \u099A\u09BE\u09B2\u09C1 \u09A5\u09BE\u0995\u09B2\u09C7 Obsidian Sync \u09B8\u09C7\u0997\u09C1\u09B2\u09CB \u09A8\u09BF\u09A4\u09C7 \u09AA\u09BE\u09B0\u09C7 \u09A8\u09BE\u0964",
+        settingsVaultOnlySessionsDesc: "\u09B8\u09C7\u09B6\u09A8 \u09B6\u09C1\u09A7\u09C1 \u098F\u0987 \u09AD\u09B2\u09CD\u099F\u09C7\u09B0 \u09AD\u09C7\u09A4\u09B0\u09C7\u0987 \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3 \u0995\u09B0\u09C7\u0964 \u098F\u0995\u09BE\u09A7\u09BF\u0995 \u09AD\u09B2\u09CD\u099F \u098F\u0995\u0987 .obsidian \u09AD\u09BE\u0997 \u0995\u09B0\u09C7 \u09A8\u09BF\u09B2\u09C7, \u09AF\u09C7\u09AE\u09A8 Settings Profiles-\u098F\u09B0 \u09B8\u0999\u09CD\u0997\u09C7, \u098F\u09AC\u0982 \u09B8\u09C7\u09B6\u09A8 \u09AE\u09BF\u09B6\u09C7 \u09AF\u09BE\u0993\u09AF\u09BC\u09BE \u09A0\u09C7\u0995\u09BE\u09A4\u09C7 \u099A\u09BE\u0987\u09B2\u09C7 \u0995\u09BE\u099C\u09C7 \u09B2\u09BE\u0997\u09C7\u0964 \u099A\u09BE\u09B2\u09C1 \u09A5\u09BE\u0995\u09B2\u09C7 Obsidian Sync \u09B8\u09C7\u0997\u09C1\u09B2\u09CB \u09B8\u09BF\u0999\u09CD\u0995 \u0995\u09B0\u09A4\u09C7 \u09AA\u09BE\u09B0\u09C7 \u09A8\u09BE\u0964",
         sessionStorageMoved: function(path) {
           return "Workspace++: \u09B8\u09C7\u09B6\u09A8 \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3\u09C7\u09B0 \u0985\u09AC\u09B8\u09CD\u09A5\u09BE\u09A8 " + path + "-\u098F \u09B8\u09B0\u09BE\u09A8\u09CB \u09B9\u09AF\u09BC\u09C7\u099B\u09C7\u0964";
         },
-        sessionStorageMoveFailed: "Workspace++: \u09B8\u09C7\u09B6\u09A8 \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3\u09C7\u09B0 \u0985\u09AC\u09B8\u09CD\u09A5\u09BE\u09A8 \u09B8\u09B0\u09BE\u09A4\u09C7 \u09AC\u09CD\u09AF\u09B0\u09CD\u09A5\u0964",
+        sessionStorageMoveFailed: "Workspace++: \u09B8\u09C7\u09B6\u09A8 \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3\u09C7\u09B0 \u0985\u09AC\u09B8\u09CD\u09A5\u09BE\u09A8 \u09B8\u09B0\u09BE\u09A4\u09C7 \u09AC\u09CD\u09AF\u09B0\u09CD\u09A5 \u09B9\u09AF\u09BC\u09C7\u099B\u09C7\u0964",
         settingsStorageFieldHistory: "\u09B8\u0982\u09B8\u09CD\u0995\u09B0\u09A3 \u0987\u09A4\u09BF\u09B9\u09BE\u09B8 \u09AB\u09BE\u0987\u09B2",
         settingsStorageFieldDataSize: "\u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09BF\u09A4 \u09AB\u09BE\u0987\u09B2\u09C7\u09B0 \u0986\u0995\u09BE\u09B0",
         settingsStorageSyncHint: 'Obsidian Sync \u09A6\u09BF\u09AF\u09BC\u09C7 \u09B8\u09BF\u0999\u09CD\u0995 \u0995\u09B0\u09A4\u09C7 \u09B9\u09B2\u09C7 \u098F\u09B0 \u09B8\u09C7\u099F\u09BF\u0982\u09B8\u09C7 "Installed community plugins" \u099A\u09BE\u09B2\u09C1 \u0995\u09B0\u09C1\u09A8\u0964 \u0987\u09A4\u09BF\u09B9\u09BE\u09B8 \u0993 \u09AC\u09CD\u09AF\u09BE\u0995\u0986\u09AA \u09B8\u09BF\u0999\u09CD\u0995 \u09B9\u09AF\u09BC \u09A8\u09BE\u0964'
@@ -9887,7 +9887,7 @@ var require_i18n = __commonJS({
           return "\u0641\u0627\u06CC\u0644 \u0646\u0634\u0633\u062A \u0641\u0639\u0644\u06CC: " + path;
         },
         settingsVaultOnlySessions: "\u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u0641\u0642\u0637 \u062F\u0631 \u0647\u0645\u06CC\u0646 \u06AF\u0627\u0648\u0635\u0646\u062F\u0648\u0642 \u0646\u06AF\u0647 \u062F\u0627\u0634\u062A\u0647 \u0634\u0648\u0646\u062F",
-        settingsVaultOnlySessionsDesc: "\u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u0631\u0627 \u0641\u0642\u0637 \u062F\u0627\u062E\u0644 \u0647\u0645\u06CC\u0646 \u06AF\u0627\u0648\u0635\u0646\u062F\u0648\u0642 \u0630\u062E\u06CC\u0631\u0647 \u0645\u06CC\u200C\u06A9\u0646\u062F. \u0648\u0642\u062A\u06CC \u0686\u0646\u062F \u06AF\u0627\u0648\u0635\u0646\u062F\u0648\u0642 \u06CC\u06A9 .obsidian \u0645\u0634\u062A\u0631\u06A9 \u062F\u0627\u0631\u0646\u062F\u060C \u0645\u062B\u0644\u0627\u064B \u0628\u0627 Settings Profiles\u060C \u0648 \u0646\u0628\u0627\u06CC\u062F \u0646\u0634\u0633\u062A\u200C\u0647\u0627\u06CC\u0634\u0627\u0646 \u0642\u0627\u0637\u06CC \u0634\u0648\u062F \u0645\u0641\u06CC\u062F \u0627\u0633\u062A. \u062A\u0627 \u0648\u0642\u062A\u06CC \u0631\u0648\u0634\u0646 \u0628\u0627\u0634\u062F Obsidian Sync \u0646\u0645\u06CC\u200C\u062A\u0648\u0627\u0646\u062F \u0622\u0646\u200C\u0647\u0627 \u0631\u0627 \u0645\u0646\u062A\u0642\u0644 \u06A9\u0646\u062F.",
+        settingsVaultOnlySessionsDesc: "\u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u0631\u0627 \u0641\u0642\u0637 \u062F\u0627\u062E\u0644 \u0647\u0645\u06CC\u0646 \u06AF\u0627\u0648\u0635\u0646\u062F\u0648\u0642 \u0630\u062E\u06CC\u0631\u0647 \u0645\u06CC\u200C\u06A9\u0646\u062F. \u0632\u0645\u0627\u0646\u06CC \u0645\u0641\u06CC\u062F \u0627\u0633\u062A \u06A9\u0647 \u0686\u0646\u062F \u06AF\u0627\u0648\u0635\u0646\u062F\u0648\u0642 \u067E\u0648\u0634\u0647 .obsidian \u0645\u0634\u062A\u0631\u06A9 \u062F\u0627\u0631\u0646\u062F (\u0645\u062B\u0644\u0627\u064B \u0628\u0627 Settings Profiles) \u0648 \u0646\u0628\u0627\u06CC\u062F \u0646\u0634\u0633\u062A\u200C\u0647\u0627\u06CC\u0634\u0627\u0646 \u0628\u0627 \u06CC\u06A9\u062F\u06CC\u06AF\u0631 \u062A\u062F\u0627\u062E\u0644 \u062F\u0627\u0634\u062A\u0647 \u0628\u0627\u0634\u0646\u062F. \u062A\u0627 \u0632\u0645\u0627\u0646\u06CC \u06A9\u0647 \u0627\u06CC\u0646 \u06AF\u0632\u06CC\u0646\u0647 \u0631\u0648\u0634\u0646 \u0628\u0627\u0634\u062F\u060C Obsidian Sync \u0646\u0645\u06CC\u200C\u062A\u0648\u0627\u0646\u062F \u0622\u0646\u200C\u0647\u0627 \u0631\u0627 \u0647\u0645\u06AF\u0627\u0645\u200C\u0633\u0627\u0632\u06CC \u06A9\u0646\u062F.",
         sessionStorageMoved: function(path) {
           return "Workspace++: \u0645\u062D\u0644 \u0630\u062E\u06CC\u0631\u0647\u200C\u0633\u0627\u0632\u06CC \u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u0628\u0647 " + path + " \u0645\u0646\u062A\u0642\u0644 \u0634\u062F.";
         },
@@ -9902,7 +9902,7 @@ var require_i18n = __commonJS({
           return "\u0645\u0644\u0641 \u0627\u0644\u062C\u0644\u0633\u0627\u062A \u0627\u0644\u062D\u0627\u0644\u064A: " + path;
         },
         settingsVaultOnlySessions: "\u0627\u0644\u0627\u062D\u062A\u0641\u0627\u0638 \u0628\u0627\u0644\u062C\u0644\u0633\u0627\u062A \u0641\u064A \u0647\u0630\u0647 \u0627\u0644\u062E\u0632\u0646\u0629 \u0641\u0642\u0637",
-        settingsVaultOnlySessionsDesc: "\u064A\u062D\u0641\u0638 \u0627\u0644\u062C\u0644\u0633\u0627\u062A \u062F\u0627\u062E\u0644 \u0647\u0630\u0647 \u0627\u0644\u062E\u0632\u0646\u0629 \u0641\u0642\u0637. \u0645\u0641\u064A\u062F \u0639\u0646\u062F\u0645\u0627 \u062A\u062A\u0634\u0627\u0631\u0643 \u0639\u062F\u0629 \u062E\u0632\u0627\u0626\u0646 \u0645\u062C\u0644\u062F .obsidian \u0646\u0641\u0633\u0647\u060C \u0645\u0639 Settings Profiles \u0645\u062B\u0644\u0627\u064B\u060C \u0648\u0644\u0627 \u064A\u0646\u0628\u063A\u064A \u0623\u0646 \u062A\u062E\u062A\u0644\u0637 \u062C\u0644\u0633\u0627\u062A\u0647\u0627. \u0644\u0627 \u064A\u0633\u062A\u0637\u064A\u0639 Obsidian Sync \u0646\u0642\u0644\u0647\u0627 \u0623\u062B\u0646\u0627\u0621 \u062A\u0641\u0639\u064A\u0644 \u0647\u0630\u0627 \u0627\u0644\u062E\u064A\u0627\u0631.",
+        settingsVaultOnlySessionsDesc: "\u064A\u062D\u0641\u0638 \u0627\u0644\u062C\u0644\u0633\u0627\u062A \u062F\u0627\u062E\u0644 \u0647\u0630\u0647 \u0627\u0644\u062E\u0632\u0646\u0629 \u0641\u0642\u0637. \u0645\u0641\u064A\u062F \u0639\u0646\u062F\u0645\u0627 \u062A\u062A\u0634\u0627\u0631\u0643 \u0639\u062F\u0629 \u062E\u0632\u0627\u0626\u0646 \u0645\u062C\u0644\u062F .obsidian \u0646\u0641\u0633\u0647\u060C \u0645\u0639 Settings Profiles \u0645\u062B\u0644\u0627\u064B\u060C \u0648\u0644\u0627 \u064A\u0646\u0628\u063A\u064A \u0623\u0646 \u062A\u062E\u062A\u0644\u0637 \u062C\u0644\u0633\u0627\u062A\u0647\u0627. \u0644\u0627 \u064A\u0633\u062A\u0637\u064A\u0639 Obsidian Sync \u0645\u0632\u0627\u0645\u0646\u062A\u0647\u0627 \u0623\u062B\u0646\u0627\u0621 \u062A\u0641\u0639\u064A\u0644 \u0647\u0630\u0627 \u0627\u0644\u062E\u064A\u0627\u0631.",
         sessionStorageMoved: function(path) {
           return "Workspace++: \u062A\u0645 \u0646\u0642\u0644 \u062A\u062E\u0632\u064A\u0646 \u0627\u0644\u062C\u0644\u0633\u0627\u062A \u0625\u0644\u0649 " + path;
         },
