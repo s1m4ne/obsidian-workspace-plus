@@ -5,7 +5,10 @@ const assert = require('node:assert/strict');
 const { loadPluginMethods } = require('./helpers');
 
 
-const { persistence: attachPersistenceMethods, 'session-sync': attachSessionSyncMethods } = loadPluginMethods(['persistence', 'session-sync']);
+const methods = loadPluginMethods(['persistence', 'session-sync', 'storage-transfer']);
+const attachPersistenceMethods = methods.persistence;
+const attachSessionSyncMethods = methods['session-sync'];
+const attachStorageTransferMethods = methods['storage-transfer'];
 
 // plugin-folder mode keeps the sessions inside data.json.
 const DATA_PATH = '.obsidian/plugins/workspace-plus-plus/data.json';
@@ -21,6 +24,7 @@ function createPlugin(options) {
 
     function PluginMock() {}
     attachPersistenceMethods(PluginMock);
+    attachStorageTransferMethods(PluginMock);
     attachSessionSyncMethods(PluginMock);
 
     const plugin = new PluginMock();

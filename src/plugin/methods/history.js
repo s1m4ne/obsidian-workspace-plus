@@ -23,9 +23,6 @@ function attachHistoryMethods(WorkspacePlusPlus) {
         return val;
     };
 
-    WorkspacePlusPlus.prototype.isVersionHistoryCtrlRmbEnabled = function () {
-        return this.data.versionHistoryCtrlRmbRestore !== false;
-    };
 
     WorkspacePlusPlus.prototype.isVersionHistoryConfirmRestoreEnabled = function () {
         return this.data.versionHistoryConfirmRestore !== false;

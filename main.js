@@ -14943,26 +14943,10 @@ var require_overlays = __commonJS({
   }
 });
 
-// src/plugin/methods/persistence.js
-var require_persistence = __commonJS({
-  "src/plugin/methods/persistence.js"(exports2, module2) {
+// src/plugin/session-data.js
+var require_session_data = __commonJS({
+  "src/plugin/session-data.js"(exports2, module2) {
     "use strict";
-    var obsidian2 = require("obsidian");
-    var i18n2 = require_i18n();
-    var DEFAULT_DATA2 = require_default_data();
-    var STORAGE_DIR = ".workspace-plus-plus";
-    var SESSION_STORAGE_VAULT = "vault-folder";
-    var SESSION_STORAGE_PLUGIN = "plugin-folder";
-    var SESSIONS_FILE_NAME = "sessions.json";
-    var PLUGIN_DATA_FILE_NAME = "data.json";
-    var SESSIONS_BACKUP_FILE_NAME = "sessions.backup.json";
-    var HISTORY_FILE_NAME = "history.json";
-    var HISTORY_FORMAT_VERSION = 1;
-    var LEGACY_LOCAL_SETTINGS_FILE = STORAGE_DIR + "/settings.local.json";
-    var LEGACY_LOCAL_SETTINGS_BACKUP = STORAGE_DIR + "/settings.local.json.migrated";
-    var EXPORT_DIR_NAME = "exports";
-    var BACKUPS_DIR_NAME = "backups";
-    var BACKUP_ROTATION_INTERVAL = 36e5;
     var SESSION_KEYS = [
       "activeSessionId",
       "sessions",
@@ -14972,44 +14956,8 @@ var require_persistence = __commonJS({
       "sessionGroups",
       "activeGroupId"
     ];
-    var SETTINGS_KEYS = [
-      "language",
-      "previewNext",
-      "previewPrevious",
-      "confirmDeleteByHotkey",
-      "autoSaveOnSwitch",
-      "warnOnUnsavedSwitch",
-      "restoreSidebars",
-      "highlightUnsavedSessionChanges",
-      "statusBarQuickSwitcher",
-      "statusBarModScrollSwitch",
-      "groupFeatureEnabled",
-      "overlayDefaultFocus",
-      "searchOverlayPosition",
-      "searchOverlaySize",
-      "versionHistoryEnabled",
-      "versionHistorySnapshotInterval",
-      "versionHistoryCtrlRmbRestore",
-      "versionHistoryConfirmRestore",
-      "statusBarScrollPreset",
-      "statusBarScrollModifierMode",
-      "statusBarScrollThreshold",
-      "statusBarScrollCooldownMs",
-      "statusBarScrollResetMs",
-      "statusBarScrollInvert",
-      "statusBarActions",
-      "confirmQuickActions",
-      "showFilterInput",
-      "showActiveSwitchCommand",
-      "numberedSwitchCommands"
-    ];
     function joinPath(base, child) {
       return String(base || "").replace(/\/+$/, "") + "/" + child;
-    }
-    function normalizeSessionStorageLocation(value) {
-      if (value === SESSION_STORAGE_PLUGIN) return SESSION_STORAGE_PLUGIN;
-      if (value === SESSION_STORAGE_VAULT) return SESSION_STORAGE_VAULT;
-      return null;
     }
     function readHistoryMap(raw) {
       if (!raw || typeof raw !== "object") return {};
@@ -15102,23 +15050,88 @@ var require_persistence = __commonJS({
       if (typeof stamp !== "number" || !isFinite(stamp)) return 0;
       return stamp;
     }
-    function getBackupPlatformLabel() {
-      var platform = obsidian2.Platform || {};
-      if (platform.isAndroidApp) return "Android";
-      if (platform.isIosApp) return "iOS";
-      if (platform.isMacOS) return "macOS";
-      if (platform.isWin) return "Windows";
-      if (platform.isLinux) return "Linux";
-      if (platform.isMobileApp || platform.isMobile) return "Mobile";
-      if (platform.isDesktopApp || platform.isDesktop) return "Desktop";
-      return "";
-    }
-    function pad2(n) {
-      return n < 10 ? "0" + n : String(n);
-    }
-    function formatExportStamp(ts) {
-      var d = new Date(ts);
-      return String(d.getFullYear()) + pad2(d.getMonth() + 1) + pad2(d.getDate()) + "-" + pad2(d.getHours()) + pad2(d.getMinutes()) + pad2(d.getSeconds());
+    module2.exports = {
+      SESSION_KEYS,
+      joinPath,
+      readHistoryMap,
+      splitSessionHistory,
+      mergeSessionHistory,
+      hasInlineSessionHistory,
+      pickSessionPayload,
+      pickKeys,
+      hasSessionShape,
+      hasNonEmptySessions,
+      getPersistStamp
+    };
+  }
+});
+
+// src/plugin/methods/persistence.js
+var require_persistence = __commonJS({
+  "src/plugin/methods/persistence.js"(exports2, module2) {
+    "use strict";
+    var obsidian2 = require("obsidian");
+    var i18n2 = require_i18n();
+    var DEFAULT_DATA2 = require_default_data();
+    var sessionData = require_session_data();
+    var SESSION_KEYS = sessionData.SESSION_KEYS;
+    var joinPath = sessionData.joinPath;
+    var pickKeys = sessionData.pickKeys;
+    var pickSessionPayload = sessionData.pickSessionPayload;
+    var hasSessionShape = sessionData.hasSessionShape;
+    var hasNonEmptySessions = sessionData.hasNonEmptySessions;
+    var getPersistStamp = sessionData.getPersistStamp;
+    var readHistoryMap = sessionData.readHistoryMap;
+    var splitSessionHistory = sessionData.splitSessionHistory;
+    var mergeSessionHistory = sessionData.mergeSessionHistory;
+    var hasInlineSessionHistory = sessionData.hasInlineSessionHistory;
+    var STORAGE_DIR = ".workspace-plus-plus";
+    var SESSION_STORAGE_VAULT = "vault-folder";
+    var SESSION_STORAGE_PLUGIN = "plugin-folder";
+    var SESSIONS_FILE_NAME = "sessions.json";
+    var PLUGIN_DATA_FILE_NAME = "data.json";
+    var SESSIONS_BACKUP_FILE_NAME = "sessions.backup.json";
+    var HISTORY_FILE_NAME = "history.json";
+    var HISTORY_FORMAT_VERSION = 1;
+    var LEGACY_LOCAL_SETTINGS_FILE = STORAGE_DIR + "/settings.local.json";
+    var LEGACY_LOCAL_SETTINGS_BACKUP = STORAGE_DIR + "/settings.local.json.migrated";
+    var EXPORT_DIR_NAME = "exports";
+    var BACKUPS_DIR_NAME = "backups";
+    var SETTINGS_KEYS = [
+      "language",
+      "previewNext",
+      "previewPrevious",
+      "confirmDeleteByHotkey",
+      "autoSaveOnSwitch",
+      "warnOnUnsavedSwitch",
+      "restoreSidebars",
+      "highlightUnsavedSessionChanges",
+      "statusBarQuickSwitcher",
+      "statusBarModScrollSwitch",
+      "groupFeatureEnabled",
+      "overlayDefaultFocus",
+      "searchOverlayPosition",
+      "searchOverlaySize",
+      "versionHistoryEnabled",
+      "versionHistorySnapshotInterval",
+      "versionHistoryCtrlRmbRestore",
+      "versionHistoryConfirmRestore",
+      "statusBarScrollPreset",
+      "statusBarScrollModifierMode",
+      "statusBarScrollThreshold",
+      "statusBarScrollCooldownMs",
+      "statusBarScrollResetMs",
+      "statusBarScrollInvert",
+      "statusBarActions",
+      "confirmQuickActions",
+      "showFilterInput",
+      "showActiveSwitchCommand",
+      "numberedSwitchCommands"
+    ];
+    function normalizeSessionStorageLocation(value) {
+      if (value === SESSION_STORAGE_PLUGIN) return SESSION_STORAGE_PLUGIN;
+      if (value === SESSION_STORAGE_VAULT) return SESSION_STORAGE_VAULT;
+      return null;
     }
     function attachPersistenceMethods(WorkspacePlusPlus2) {
       WorkspacePlusPlus2.prototype.getBackupPath = function() {
@@ -15132,9 +15145,6 @@ var require_persistence = __commonJS({
       };
       WorkspacePlusPlus2.prototype.getDefaultSessionStorageLocation = function() {
         return SESSION_STORAGE_PLUGIN;
-      };
-      WorkspacePlusPlus2.prototype.normalizeSessionStorageLocation = function(location) {
-        return normalizeSessionStorageLocation(location);
       };
       WorkspacePlusPlus2.prototype.getSessionStorageLocation = function() {
         return normalizeSessionStorageLocation(this.data && this.data.sessionStorageLocation) || normalizeSessionStorageLocation(this._sessionStorageLocation) || this.getDefaultSessionStorageLocation();
@@ -15193,24 +15203,24 @@ var require_persistence = __commonJS({
           return readHistoryMap(res.data);
         });
       };
-      WorkspacePlusPlus2.prototype.attachSessionHistory = function(sessionData) {
+      WorkspacePlusPlus2.prototype.attachSessionHistory = function(sessionData2) {
         var self = this;
-        if (!sessionData) return Promise.resolve(sessionData);
-        var hadInline = hasInlineSessionHistory(sessionData);
+        if (!sessionData2) return Promise.resolve(sessionData2);
+        var hadInline = hasInlineSessionHistory(sessionData2);
         return this.readSessionHistory().then(function(historyMap) {
-          mergeSessionHistory(sessionData, historyMap);
-          if (!hadInline || Object.keys(historyMap).length > 0) return sessionData;
-          var split = splitSessionHistory(sessionData);
-          if (Object.keys(split.history).length === 0) return sessionData;
+          mergeSessionHistory(sessionData2, historyMap);
+          if (!hadInline || Object.keys(historyMap).length > 0) return sessionData2;
+          var split = splitSessionHistory(sessionData2);
+          if (Object.keys(split.history).length === 0) return sessionData2;
           return self.ensureSessionStorageDir().then(function() {
             return self.writeSessionHistory(split.history);
           }).catch(function() {
             return;
           }).then(function() {
-            return sessionData;
+            return sessionData2;
           });
         }).catch(function() {
-          return sessionData;
+          return sessionData2;
         });
       };
       WorkspacePlusPlus2.prototype.getExportDirPath = function() {
@@ -15240,15 +15250,6 @@ var require_persistence = __commonJS({
         return [
           this.getBackupPath()
         ].concat(this.getSessionBackupFilePathsForLocation(SESSION_STORAGE_VAULT)).concat(this.getSessionBackupFilePathsForLocation(SESSION_STORAGE_PLUGIN));
-      };
-      WorkspacePlusPlus2.prototype.getBackupPlatformLabel = function() {
-        return getBackupPlatformLabel();
-      };
-      WorkspacePlusPlus2.prototype.prepareRotationBackupData = function(sessionData) {
-        var backupData = Object.assign({}, sessionData);
-        var platform = this.getBackupPlatformLabel();
-        if (platform) backupData._wppBackupPlatform = platform;
-        return backupData;
       };
       WorkspacePlusPlus2.prototype.getDefaultSettingsData = function() {
         return pickKeys(DEFAULT_DATA2, SETTINGS_KEYS);
@@ -15334,9 +15335,6 @@ var require_persistence = __commonJS({
             });
           });
         });
-      };
-      WorkspacePlusPlus2.prototype.ensureStorageDir = function() {
-        return this.ensureDir(this.getStorageDirPath());
       };
       WorkspacePlusPlus2.prototype.ensureSessionStorageDir = function() {
         return this.ensureDir(this.getSessionStorageDirPath());
@@ -15426,22 +15424,22 @@ var require_persistence = __commonJS({
         if (next === this.getSessionStorageLocation()) return Promise.resolve(false);
         var previousLocation = this.getSessionStorageLocation();
         var split = splitSessionHistory(this.extractSessionData(this.data));
-        var sessionData = split.data;
+        var sessionData2 = split.data;
         var now = Date.now();
         if (typeof this._lastPersistStamp === "number" && now <= this._lastPersistStamp) {
           now = this._lastPersistStamp + 1;
         }
-        sessionData._wppSavedAt = now;
+        sessionData2._wppSavedAt = now;
         this.setRuntimeSessionStorageLocation(next);
         this._lastPersistStamp = now;
         this._lastRotationBackupAt = 0;
         return this.ensureSessionStorageDir().then(function() {
           return self.writeSessionHistory(split.history);
         }).then(function() {
-          return self.writeSessionStore(sessionData, { pretty: true });
+          return self.writeSessionStore(sessionData2, { pretty: true });
         }).then(function() {
           if (typeof self.recordSessionDataStored !== "function") return true;
-          return self.recordSessionDataStored(sessionData);
+          return self.recordSessionDataStored(sessionData2);
         }).then(function() {
           return self.persistData();
         }).then(function() {
@@ -15460,7 +15458,7 @@ var require_persistence = __commonJS({
           return self.saveData(data);
         });
       };
-      WorkspacePlusPlus2.prototype.persistGlobalSettings = function(sessionData) {
+      WorkspacePlusPlus2.prototype.persistGlobalSettings = function(sessionData2) {
         var self = this;
         if (!this.globalSettings) {
           this.globalSettings = Object.assign({}, this.getDefaultSettingsData());
@@ -15471,8 +15469,8 @@ var require_persistence = __commonJS({
         if (!this.isSessionStorageInPluginData()) {
           return this.writePluginData(settings2);
         }
-        if (sessionData) {
-          return this.writePluginData(Object.assign({}, settings2, sessionData));
+        if (sessionData2) {
+          return this.writePluginData(Object.assign({}, settings2, sessionData2));
         }
         return Promise.resolve().then(function() {
           return self.loadData();
@@ -15484,19 +15482,19 @@ var require_persistence = __commonJS({
           );
         });
       };
-      WorkspacePlusPlus2.prototype.writeSessionStore = function(sessionData, options) {
+      WorkspacePlusPlus2.prototype.writeSessionStore = function(sessionData2, options) {
         var self = this;
         options = options || {};
-        return this.writeJson(this.getSessionsBackupPath(), sessionData, options.pretty).then(function() {
-          return self.writeSessionMain(sessionData, options);
+        return this.writeJson(this.getSessionsBackupPath(), sessionData2, options.pretty).then(function() {
+          return self.writeSessionMain(sessionData2, options);
         });
       };
-      WorkspacePlusPlus2.prototype.writeSessionMain = function(sessionData, options) {
+      WorkspacePlusPlus2.prototype.writeSessionMain = function(sessionData2, options) {
         options = options || {};
         if (this.isSessionStorageInPluginData()) {
-          return this.persistGlobalSettings(sessionData);
+          return this.persistGlobalSettings(sessionData2);
         }
-        return this.writeJson(this.getSessionsPath(), sessionData, options.pretty);
+        return this.writeJson(this.getSessionsPath(), sessionData2, options.pretty);
       };
       WorkspacePlusPlus2.prototype.migrateLegacyLocalSettings = function() {
         var self = this;
@@ -15583,104 +15581,32 @@ var require_persistence = __commonJS({
           return null;
         });
       };
-      WorkspacePlusPlus2.prototype.exportSessionsSnapshot = function() {
-        var self = this;
-        var L = i18n2.L;
-        var stamp = formatExportStamp(Date.now());
-        var filePath = this.getExportDirPath() + "/sessions-" + stamp + ".json";
-        var payload = {
-          exportedAt: Date.now(),
-          source: this.manifest.id,
-          // History is device-specific layout data; exports are meant to move
-          // sessions to another vault or device, so it is left behind.
-          data: splitSessionHistory(this.extractSessionData(this.data)).data
-        };
-        return this.ensureSessionStorageDir().then(function() {
-          return self.ensureDir(self.getExportDirPath());
-        }).then(function() {
-          return self.writeJson(filePath, payload, true);
-        }).then(function() {
-          new obsidian2.Notice(L.exportSessionsDone(filePath), 7e3);
-          return filePath;
-        });
-      };
-      WorkspacePlusPlus2.prototype.importSessionsFromLatestExport = function() {
-        var self = this;
-        var L = i18n2.L;
-        return this.app.vault.adapter.exists(this.getExportDirPath()).then(function(exists) {
-          if (!exists) return null;
-          return self.app.vault.adapter.list(self.getExportDirPath());
-        }).then(function(listed) {
-          if (!listed || !listed.files || listed.files.length === 0) return null;
-          var files = listed.files.filter(function(path) {
-            return /\.json$/i.test(path);
-          });
-          if (files.length === 0) return null;
-          files.sort();
-          return files[files.length - 1];
-        }).then(function(latestPath) {
-          if (!latestPath) {
-            new obsidian2.Notice(L.importSessionsNoFile);
-            return false;
-          }
-          return self.app.vault.adapter.read(latestPath).then(function(raw) {
-            var parsed = JSON.parse(raw);
-            var candidate = parsed && parsed.data ? parsed.data : parsed;
-            if (!hasSessionShape(candidate)) {
-              new obsidian2.Notice(L.importSessionsFailed);
-              return false;
-            }
-            var imported = self.normalizeSessionData(candidate);
-            if (!hasNonEmptySessions(imported)) {
-              new obsidian2.Notice(L.importSessionsFailed);
-              return false;
-            }
-            self.data.activeSessionId = imported.activeSessionId;
-            self.data.sessions = imported.sessions;
-            self.data.sessionOrder = imported.sessionOrder;
-            self.data.groups = imported.groups || {};
-            self.data.groupOrder = typeof self.normalizeGroupTabOrder === "function" ? self.normalizeGroupTabOrder(imported.groupOrder || []) : imported.groupOrder || [];
-            self.data.sessionGroups = imported.sessionGroups || {};
-            self.data.activeGroupId = imported.activeGroupId || null;
-            self.syncSessionOrder();
-            self.updateStatusBar();
-            self.syncSessionCommands();
-            return self.persistData().then(function() {
-              new obsidian2.Notice(L.importSessionsDone(latestPath), 7e3);
-              return true;
-            });
-          }).catch(function() {
-            new obsidian2.Notice(L.importSessionsFailed);
-            return false;
-          });
-        });
-      };
       WorkspacePlusPlus2.prototype.persistDataImmediate = function() {
         var self = this;
         var syncBeforeWrite = typeof this.reloadExternalSessionStorageIfChanged === "function" ? this.reloadExternalSessionStorageIfChanged({ mergeLocal: true }) : Promise.resolve(false);
         return syncBeforeWrite.then(function() {
           var split = splitSessionHistory(self.extractSessionData(self.data));
-          var sessionData = split.data;
+          var sessionData2 = split.data;
           var settingsData = Object.assign({}, self.getDefaultSettingsData(), self.extractSettingsData(self.data));
           var now = Date.now();
           if (typeof self._lastPersistStamp === "number" && now <= self._lastPersistStamp) {
             now = self._lastPersistStamp + 1;
           }
           self._lastPersistStamp = now;
-          sessionData._wppSavedAt = now;
+          sessionData2._wppSavedAt = now;
           self.globalSettings = Object.assign({}, settingsData);
           return self.ensureSessionStorageDir().then(function() {
             return self.writeSessionHistory(split.history);
           }).then(function() {
-            return self.writeSessionStore(sessionData);
+            return self.writeSessionStore(sessionData2);
           }).then(function() {
             if (self.isSessionStorageInPluginData()) return;
             return self.persistGlobalSettings();
           }).then(function() {
             if (typeof self.recordSessionDataStored !== "function") return true;
-            return self.recordSessionDataStored(sessionData);
+            return self.recordSessionDataStored(sessionData2);
           }).then(function() {
-            return self.rotateBackupIfNeeded(sessionData);
+            return self.rotateBackupIfNeeded(sessionData2);
           });
         });
       };
@@ -15703,6 +15629,208 @@ var require_persistence = __commonJS({
           return;
         });
       };
+      WorkspacePlusPlus2.prototype.readSessionCandidate = function(path) {
+        return Promise.all([
+          this.readJsonIfExists(path),
+          this.getFileMtime(path)
+        ]).then(function(parts) {
+          var res = parts[0];
+          var valid = res.exists && !res.error && hasSessionShape(res.data);
+          return {
+            valid,
+            data: res.data,
+            mtime: parts[1] || 0,
+            stamp: valid ? getPersistStamp(res.data) : 0
+          };
+        });
+      };
+      WorkspacePlusPlus2.prototype.loadSessionDataFromStorage = function() {
+        var self = this;
+        var L = i18n2.L;
+        var backupPath = this.getSessionsBackupPath();
+        var legacyPath = this.isSessionStorageInPluginData() ? this.getLegacyPluginSessionsPath() : null;
+        return this.readSessionCandidate(this.getSessionsPath()).then(function(main) {
+          if (main.valid || !legacyPath) return main;
+          return self.readSessionCandidate(legacyPath);
+        }).then(function(main) {
+          return self.readSessionCandidate(backupPath).then(function(backup) {
+            if (!main.valid && !backup.valid) return null;
+            var useBackup = false;
+            if (!main.valid && backup.valid) {
+              useBackup = true;
+            } else if (main.valid && backup.valid) {
+              if (backup.stamp > main.stamp) {
+                useBackup = true;
+              } else if (backup.stamp === main.stamp && backup.mtime > main.mtime) {
+                useBackup = true;
+              }
+            }
+            if (!useBackup) {
+              var mainData = self.normalizeSessionData(main.data);
+              if (typeof self.recordSessionStorageState === "function") {
+                self.recordSessionStorageState(main.stamp, main.mtime, mainData);
+              }
+              return mainData;
+            }
+            var restored = self.normalizeSessionData(backup.data);
+            return self.writeSessionMain(backup.data).catch(function() {
+              return;
+            }).then(function() {
+              return self.getFileMtime(self.getSessionsPath());
+            }).then(function(restoredMtime) {
+              if (typeof self.recordSessionStorageState === "function") {
+                self.recordSessionStorageState(backup.stamp, restoredMtime || backup.mtime, restored);
+              }
+              if (!main.valid) new obsidian2.Notice(L.backupRestored);
+              return restored;
+            });
+          });
+        });
+      };
+      WorkspacePlusPlus2.prototype.migrateLegacyPluginSessions = function(sessionData2) {
+        var self = this;
+        if (!this.isSessionStorageInPluginData()) return Promise.resolve(false);
+        if (!sessionData2 || !hasNonEmptySessions(sessionData2)) return Promise.resolve(false);
+        return this.app.vault.adapter.exists(this.getLegacyPluginSessionsPath()).then(function(exists) {
+          if (!exists) return false;
+          return Promise.resolve().then(function() {
+            return self.loadData();
+          }).catch(function() {
+            return null;
+          }).then(function(existing) {
+            if (hasSessionShape(existing)) return false;
+            var payload = splitSessionHistory(sessionData2).data;
+            return self.ensureSessionStorageDir().then(function() {
+              return self.writeSessionStore(payload);
+            }).then(function() {
+              if (typeof self.recordSessionDataStored !== "function") return true;
+              return self.recordSessionDataStored(payload);
+            }).then(function() {
+              return true;
+            });
+          });
+        }).catch(function() {
+          return false;
+        });
+      };
+      WorkspacePlusPlus2.prototype.migrateLegacySessions = function(sessionData2) {
+        var self = this;
+        var normalized = this.normalizeSessionData(sessionData2);
+        return this.ensureSessionStorageDir().then(function() {
+          return self.writeSessionStore(normalized);
+        }).then(function() {
+          return true;
+        }).catch(function() {
+          return false;
+        });
+      };
+      WorkspacePlusPlus2.prototype.loadWithBackup = function() {
+        var self = this;
+        var L = i18n2.L;
+        var loadedMain = null;
+        var rawSaved = null;
+        var legacyMain = null;
+        var hadLegacyInMain = false;
+        return this.loadData().catch(function() {
+          return null;
+        }).then(function(saved) {
+          rawSaved = saved;
+          loadedMain = saved || {};
+          self.globalSettings = Object.assign(
+            {},
+            self.getDefaultSettingsData(),
+            self.extractSettingsData(loadedMain)
+          );
+          return self.resolveSessionStorageLocation({
+            sessionStorageLocation: loadedMain.sessionStorageLocation
+          });
+        }).then(function() {
+          return self.migrateLegacyLocalSettings();
+        }).then(function() {
+          hadLegacyInMain = hasSessionShape(loadedMain) && !self.isSessionStorageInPluginData();
+          legacyMain = hadLegacyInMain ? self.normalizeSessionData(loadedMain) : null;
+          return self.loadSessionDataFromStorage();
+        }).then(function(sessionData2) {
+          if (sessionData2 && hasNonEmptySessions(sessionData2)) return sessionData2;
+          if (legacyMain && hasNonEmptySessions(legacyMain)) {
+            return self.migrateLegacySessions(legacyMain).then(function(ok) {
+              if (ok) new obsidian2.Notice(L.sessionDataMigrated);
+              else new obsidian2.Notice(L.sessionDataMigrationFailed);
+              return legacyMain;
+            });
+          }
+          if (sessionData2) return sessionData2;
+          return self.readJsonIfExists(self.getBackupPath()).then(function(legacyBackupRes) {
+            if (legacyBackupRes.exists && !legacyBackupRes.error && hasSessionShape(legacyBackupRes.data) && hasNonEmptySessions(legacyBackupRes.data)) {
+              var fromLegacyBackup = self.normalizeSessionData(legacyBackupRes.data);
+              return self.migrateLegacySessions(fromLegacyBackup).then(function(ok) {
+                if (ok) new obsidian2.Notice(L.sessionDataMigrated);
+                else new obsidian2.Notice(L.sessionDataMigrationFailed);
+                return fromLegacyBackup;
+              });
+            }
+            return self.getDefaultSessionData();
+          });
+        }).then(function(sessionData2) {
+          return self.attachSessionHistory(sessionData2);
+        }).then(function(sessionData2) {
+          return self.migrateLegacyPluginSessions(sessionData2).then(function() {
+            return sessionData2;
+          });
+        }).then(function(sessionData2) {
+          if (!hadLegacyInMain) return sessionData2;
+          return self.persistGlobalSettings().catch(function() {
+            return;
+          }).then(function() {
+            return sessionData2;
+          });
+        }).then(function(sessionData2) {
+          var effectiveSettings = Object.assign({}, self.globalSettings);
+          effectiveSettings.sessionStorageLocation = self.getSessionStorageLocation();
+          if (rawSaved !== null && rawSaved !== void 0 && rawSaved.showFilterInput === void 0) {
+            effectiveSettings.showFilterInput = true;
+          }
+          var merged = Object.assign({}, self.getDefaultSessionData(), sessionData2 || {});
+          return Object.assign(merged, effectiveSettings);
+        });
+      };
+    }
+    module2.exports = attachPersistenceMethods;
+  }
+});
+
+// src/plugin/methods/storage-backup.js
+var require_storage_backup = __commonJS({
+  "src/plugin/methods/storage-backup.js"(exports2, module2) {
+    "use strict";
+    var obsidian2 = require("obsidian");
+    var i18n2 = require_i18n();
+    var sessionData = require_session_data();
+    var getPersistStamp = sessionData.getPersistStamp;
+    var hasSessionShape = sessionData.hasSessionShape;
+    var hasNonEmptySessions = sessionData.hasNonEmptySessions;
+    var BACKUP_ROTATION_INTERVAL = 36e5;
+    function getBackupPlatformLabel() {
+      var platform = obsidian2.Platform || {};
+      if (platform.isAndroidApp) return "Android";
+      if (platform.isIosApp) return "iOS";
+      if (platform.isMacOS) return "macOS";
+      if (platform.isWin) return "Windows";
+      if (platform.isLinux) return "Linux";
+      if (platform.isMobileApp || platform.isMobile) return "Mobile";
+      if (platform.isDesktopApp || platform.isDesktop) return "Desktop";
+      return "";
+    }
+    function attachStorageBackupMethods(WorkspacePlusPlus2) {
+      WorkspacePlusPlus2.prototype.getBackupPlatformLabel = function() {
+        return getBackupPlatformLabel();
+      };
+      WorkspacePlusPlus2.prototype.prepareRotationBackupData = function(sessionData2) {
+        var backupData = Object.assign({}, sessionData2);
+        var platform = this.getBackupPlatformLabel();
+        if (platform) backupData._wppBackupPlatform = platform;
+        return backupData;
+      };
       WorkspacePlusPlus2.prototype.initRotationBackupTimestamp = function() {
         var self = this;
         return this.readJsonIfExists(this.getRotationBackupPath(1)).then(function(res) {
@@ -15715,7 +15843,7 @@ var require_persistence = __commonJS({
           self._lastRotationBackupAt = 0;
         });
       };
-      WorkspacePlusPlus2.prototype.rotateBackupIfNeeded = function(sessionData) {
+      WorkspacePlusPlus2.prototype.rotateBackupIfNeeded = function(sessionData2) {
         var now = Date.now();
         var last = this._lastRotationBackupAt || 0;
         if (now - last < BACKUP_ROTATION_INTERVAL) return Promise.resolve();
@@ -15734,7 +15862,7 @@ var require_persistence = __commonJS({
         }).then(function() {
           return self.writeJson(
             self.getRotationBackupPath(1),
-            self.prepareRotationBackupData(sessionData)
+            self.prepareRotationBackupData(sessionData2)
           );
         }).catch(function() {
           return;
@@ -15823,173 +15951,103 @@ var require_persistence = __commonJS({
           return false;
         });
       };
-      WorkspacePlusPlus2.prototype.readSessionCandidate = function(path) {
-        return Promise.all([
-          this.readJsonIfExists(path),
-          this.getFileMtime(path)
-        ]).then(function(parts) {
-          var res = parts[0];
-          var valid = res.exists && !res.error && hasSessionShape(res.data);
-          return {
-            valid,
-            data: res.data,
-            mtime: parts[1] || 0,
-            stamp: valid ? getPersistStamp(res.data) : 0
-          };
-        });
-      };
-      WorkspacePlusPlus2.prototype.loadSessionDataFromStorage = function() {
+    }
+    module2.exports = attachStorageBackupMethods;
+  }
+});
+
+// src/plugin/methods/storage-transfer.js
+var require_storage_transfer = __commonJS({
+  "src/plugin/methods/storage-transfer.js"(exports2, module2) {
+    "use strict";
+    var obsidian2 = require("obsidian");
+    var i18n2 = require_i18n();
+    var sessionData = require_session_data();
+    var hasSessionShape = sessionData.hasSessionShape;
+    var hasNonEmptySessions = sessionData.hasNonEmptySessions;
+    var splitSessionHistory = sessionData.splitSessionHistory;
+    function pad2(n) {
+      return n < 10 ? "0" + n : String(n);
+    }
+    function formatExportStamp(ts) {
+      var d = new Date(ts);
+      return String(d.getFullYear()) + pad2(d.getMonth() + 1) + pad2(d.getDate()) + "-" + pad2(d.getHours()) + pad2(d.getMinutes()) + pad2(d.getSeconds());
+    }
+    function attachStorageTransferMethods(WorkspacePlusPlus2) {
+      WorkspacePlusPlus2.prototype.exportSessionsSnapshot = function() {
         var self = this;
         var L = i18n2.L;
-        var backupPath = this.getSessionsBackupPath();
-        var legacyPath = this.isSessionStorageInPluginData() ? this.getLegacyPluginSessionsPath() : null;
-        return this.readSessionCandidate(this.getSessionsPath()).then(function(main) {
-          if (main.valid || !legacyPath) return main;
-          return self.readSessionCandidate(legacyPath);
-        }).then(function(main) {
-          return self.readSessionCandidate(backupPath).then(function(backup) {
-            if (!main.valid && !backup.valid) return null;
-            var useBackup = false;
-            if (!main.valid && backup.valid) {
-              useBackup = true;
-            } else if (main.valid && backup.valid) {
-              if (backup.stamp > main.stamp) {
-                useBackup = true;
-              } else if (backup.stamp === main.stamp && backup.mtime > main.mtime) {
-                useBackup = true;
-              }
-            }
-            if (!useBackup) {
-              var mainData = self.normalizeSessionData(main.data);
-              if (typeof self.recordSessionStorageState === "function") {
-                self.recordSessionStorageState(main.stamp, main.mtime, mainData);
-              }
-              return mainData;
-            }
-            var restored = self.normalizeSessionData(backup.data);
-            return self.writeSessionMain(backup.data).catch(function() {
-              return;
-            }).then(function() {
-              return self.getFileMtime(self.getSessionsPath());
-            }).then(function(restoredMtime) {
-              if (typeof self.recordSessionStorageState === "function") {
-                self.recordSessionStorageState(backup.stamp, restoredMtime || backup.mtime, restored);
-              }
-              if (!main.valid) new obsidian2.Notice(L.backupRestored);
-              return restored;
-            });
-          });
+        var stamp = formatExportStamp(Date.now());
+        var filePath = this.getExportDirPath() + "/sessions-" + stamp + ".json";
+        var payload = {
+          exportedAt: Date.now(),
+          source: this.manifest.id,
+          // History is device-specific layout data; exports are meant to move
+          // sessions to another vault or device, so it is left behind.
+          data: splitSessionHistory(this.extractSessionData(this.data)).data
+        };
+        return this.ensureSessionStorageDir().then(function() {
+          return self.ensureDir(self.getExportDirPath());
+        }).then(function() {
+          return self.writeJson(filePath, payload, true);
+        }).then(function() {
+          new obsidian2.Notice(L.exportSessionsDone(filePath), 7e3);
+          return filePath;
         });
       };
-      WorkspacePlusPlus2.prototype.migrateLegacyPluginSessions = function(sessionData) {
+      WorkspacePlusPlus2.prototype.importSessionsFromLatestExport = function() {
         var self = this;
-        if (!this.isSessionStorageInPluginData()) return Promise.resolve(false);
-        if (!sessionData || !hasNonEmptySessions(sessionData)) return Promise.resolve(false);
-        return this.app.vault.adapter.exists(this.getLegacyPluginSessionsPath()).then(function(exists) {
-          if (!exists) return false;
-          return Promise.resolve().then(function() {
-            return self.loadData();
-          }).catch(function() {
-            return null;
-          }).then(function(existing) {
-            if (hasSessionShape(existing)) return false;
-            var payload = splitSessionHistory(sessionData).data;
-            return self.ensureSessionStorageDir().then(function() {
-              return self.writeSessionStore(payload);
-            }).then(function() {
-              if (typeof self.recordSessionDataStored !== "function") return true;
-              return self.recordSessionDataStored(payload);
-            }).then(function() {
+        var L = i18n2.L;
+        return this.app.vault.adapter.exists(this.getExportDirPath()).then(function(exists) {
+          if (!exists) return null;
+          return self.app.vault.adapter.list(self.getExportDirPath());
+        }).then(function(listed) {
+          if (!listed || !listed.files || listed.files.length === 0) return null;
+          var files = listed.files.filter(function(path) {
+            return /\.json$/i.test(path);
+          });
+          if (files.length === 0) return null;
+          files.sort();
+          return files[files.length - 1];
+        }).then(function(latestPath) {
+          if (!latestPath) {
+            new obsidian2.Notice(L.importSessionsNoFile);
+            return false;
+          }
+          return self.app.vault.adapter.read(latestPath).then(function(raw) {
+            var parsed = JSON.parse(raw);
+            var candidate = parsed && parsed.data ? parsed.data : parsed;
+            if (!hasSessionShape(candidate)) {
+              new obsidian2.Notice(L.importSessionsFailed);
+              return false;
+            }
+            var imported = self.normalizeSessionData(candidate);
+            if (!hasNonEmptySessions(imported)) {
+              new obsidian2.Notice(L.importSessionsFailed);
+              return false;
+            }
+            self.data.activeSessionId = imported.activeSessionId;
+            self.data.sessions = imported.sessions;
+            self.data.sessionOrder = imported.sessionOrder;
+            self.data.groups = imported.groups || {};
+            self.data.groupOrder = typeof self.normalizeGroupTabOrder === "function" ? self.normalizeGroupTabOrder(imported.groupOrder || []) : imported.groupOrder || [];
+            self.data.sessionGroups = imported.sessionGroups || {};
+            self.data.activeGroupId = imported.activeGroupId || null;
+            self.syncSessionOrder();
+            self.updateStatusBar();
+            self.syncSessionCommands();
+            return self.persistData().then(function() {
+              new obsidian2.Notice(L.importSessionsDone(latestPath), 7e3);
               return true;
             });
+          }).catch(function() {
+            new obsidian2.Notice(L.importSessionsFailed);
+            return false;
           });
-        }).catch(function() {
-          return false;
-        });
-      };
-      WorkspacePlusPlus2.prototype.migrateLegacySessions = function(sessionData) {
-        var self = this;
-        var normalized = this.normalizeSessionData(sessionData);
-        return this.ensureSessionStorageDir().then(function() {
-          return self.writeSessionStore(normalized);
-        }).then(function() {
-          return true;
-        }).catch(function() {
-          return false;
-        });
-      };
-      WorkspacePlusPlus2.prototype.loadWithBackup = function() {
-        var self = this;
-        var L = i18n2.L;
-        var loadedMain = null;
-        var rawSaved = null;
-        var legacyMain = null;
-        var hadLegacyInMain = false;
-        return this.loadData().catch(function() {
-          return null;
-        }).then(function(saved) {
-          rawSaved = saved;
-          loadedMain = saved || {};
-          self.globalSettings = Object.assign(
-            {},
-            self.getDefaultSettingsData(),
-            self.extractSettingsData(loadedMain)
-          );
-          return self.resolveSessionStorageLocation({
-            sessionStorageLocation: loadedMain.sessionStorageLocation
-          });
-        }).then(function() {
-          return self.migrateLegacyLocalSettings();
-        }).then(function() {
-          hadLegacyInMain = hasSessionShape(loadedMain) && !self.isSessionStorageInPluginData();
-          legacyMain = hadLegacyInMain ? self.normalizeSessionData(loadedMain) : null;
-          return self.loadSessionDataFromStorage();
-        }).then(function(sessionData) {
-          if (sessionData && hasNonEmptySessions(sessionData)) return sessionData;
-          if (legacyMain && hasNonEmptySessions(legacyMain)) {
-            return self.migrateLegacySessions(legacyMain).then(function(ok) {
-              if (ok) new obsidian2.Notice(L.sessionDataMigrated);
-              else new obsidian2.Notice(L.sessionDataMigrationFailed);
-              return legacyMain;
-            });
-          }
-          if (sessionData) return sessionData;
-          return self.readJsonIfExists(self.getBackupPath()).then(function(legacyBackupRes) {
-            if (legacyBackupRes.exists && !legacyBackupRes.error && hasSessionShape(legacyBackupRes.data) && hasNonEmptySessions(legacyBackupRes.data)) {
-              var fromLegacyBackup = self.normalizeSessionData(legacyBackupRes.data);
-              return self.migrateLegacySessions(fromLegacyBackup).then(function(ok) {
-                if (ok) new obsidian2.Notice(L.sessionDataMigrated);
-                else new obsidian2.Notice(L.sessionDataMigrationFailed);
-                return fromLegacyBackup;
-              });
-            }
-            return self.getDefaultSessionData();
-          });
-        }).then(function(sessionData) {
-          return self.attachSessionHistory(sessionData);
-        }).then(function(sessionData) {
-          return self.migrateLegacyPluginSessions(sessionData).then(function() {
-            return sessionData;
-          });
-        }).then(function(sessionData) {
-          if (!hadLegacyInMain) return sessionData;
-          return self.persistGlobalSettings().catch(function() {
-            return;
-          }).then(function() {
-            return sessionData;
-          });
-        }).then(function(sessionData) {
-          var effectiveSettings = Object.assign({}, self.globalSettings);
-          effectiveSettings.sessionStorageLocation = self.getSessionStorageLocation();
-          if (rawSaved !== null && rawSaved !== void 0 && rawSaved.showFilterInput === void 0) {
-            effectiveSettings.showFilterInput = true;
-          }
-          var merged = Object.assign({}, self.getDefaultSessionData(), sessionData || {});
-          return Object.assign(merged, effectiveSettings);
         });
       };
     }
-    module2.exports = attachPersistenceMethods;
+    module2.exports = attachStorageTransferMethods;
   }
 });
 
@@ -15997,21 +16055,15 @@ var require_persistence = __commonJS({
 var require_session_sync = __commonJS({
   "src/plugin/methods/session-sync.js"(exports2, module2) {
     "use strict";
+    var sessionData = require_session_data();
+    var getPersistStamp = sessionData.getPersistStamp;
+    var isSessionDataShape = sessionData.hasSessionShape;
     var EXTERNAL_SESSION_RELOAD_DEBOUNCE_MS = 500;
     var SESSION_FILE_MTIME_EPSILON_MS = 25;
     var STARTUP_SESSION_RECHECK_DELAYS = [3e3, 1e4];
-    function getPersistStamp(data) {
-      if (!data || typeof data !== "object") return 0;
-      var stamp = data._wppSavedAt;
-      if (typeof stamp !== "number" || !isFinite(stamp)) return 0;
-      return stamp;
-    }
     function cloneJson(value) {
       if (value === void 0) return void 0;
       return JSON.parse(JSON.stringify(value));
-    }
-    function isSessionDataShape(data) {
-      return !!(data && typeof data === "object" && (data.sessions !== void 0 || data.sessionOrder !== void 0 || data.activeSessionId !== void 0));
     }
     function getSessionModified(session) {
       if (!session || typeof session.modified !== "number" || !isFinite(session.modified)) return 0;
@@ -16079,12 +16131,12 @@ var require_session_sync = __commonJS({
           this._sessionStorageDataJson = JSON.stringify(comparable);
         }
       };
-      WorkspacePlusPlus2.prototype.recordSessionDataStored = function(sessionData) {
+      WorkspacePlusPlus2.prototype.recordSessionDataStored = function(sessionData2) {
         var self = this;
-        var stamp = getPersistStamp(sessionData);
-        this.recordSessionStorageState(stamp, Date.now(), sessionData);
+        var stamp = getPersistStamp(sessionData2);
+        this.recordSessionStorageState(stamp, Date.now(), sessionData2);
         return this.getFileMtime(this.getSessionsPath()).then(function(mtime) {
-          self.recordSessionStorageState(stamp, mtime || self._sessionStorageMtime || 0, sessionData);
+          self.recordSessionStorageState(stamp, mtime || self._sessionStorageMtime || 0, sessionData2);
           return true;
         }).catch(function() {
           return true;
@@ -16177,12 +16229,12 @@ var require_session_sync = __commonJS({
           activeGroupId: local.activeGroupId || external.activeGroupId
         });
       };
-      WorkspacePlusPlus2.prototype.applySessionDataFromStorage = function(sessionData, options) {
+      WorkspacePlusPlus2.prototype.applySessionDataFromStorage = function(sessionData2, options) {
         options = options || {};
-        if (!sessionData) return false;
+        if (!sessionData2) return false;
         var localActiveSessionId = this.data && this.data.activeSessionId;
         var localActiveGroupId = this.data && this.data.activeGroupId;
-        var next = options.mergeLocal ? this.mergeExternalSessionDataForWrite(sessionData) : this.normalizeSessionData(sessionData);
+        var next = options.mergeLocal ? this.mergeExternalSessionDataForWrite(sessionData2) : this.normalizeSessionData(sessionData2);
         this.data.sessions = next.sessions || {};
         this.data.sessionOrder = next.sessionOrder || [];
         this.data.groups = next.groups || {};
@@ -16221,15 +16273,15 @@ var require_session_sync = __commonJS({
           var mergeLocal = !!options.mergeLocal && self.hasLocalSessionChangesSinceStorage();
           var previousComparable = self._sessionStorageComparableData ? cloneJson(self._sessionStorageComparableData) : null;
           var previousComparableJson = self._sessionStorageDataJson || "";
-          return self.loadSessionDataFromStorage().then(function(sessionData) {
-            if (!sessionData) return false;
+          return self.loadSessionDataFromStorage().then(function(sessionData2) {
+            if (!sessionData2) return false;
             var externalComparable = self._sessionStorageComparableData ? cloneJson(self._sessionStorageComparableData) : null;
             var externalComparableJson = self._sessionStorageDataJson || "";
             if (mergeLocal && previousComparable) {
               self._sessionStorageComparableData = previousComparable;
               self._sessionStorageDataJson = previousComparableJson;
             }
-            var applied = self.applySessionDataFromStorage(sessionData, {
+            var applied = self.applySessionDataFromStorage(sessionData2, {
               mergeLocal
             });
             if (mergeLocal && externalComparable) {
@@ -18149,9 +18201,6 @@ var require_history = __commonJS({
         if (typeof val !== "number" || val < 1) return 5;
         return val;
       };
-      WorkspacePlusPlus2.prototype.isVersionHistoryCtrlRmbEnabled = function() {
-        return this.data.versionHistoryCtrlRmbRestore !== false;
-      };
       WorkspacePlusPlus2.prototype.isVersionHistoryConfirmRestoreEnabled = function() {
         return this.data.versionHistoryConfirmRestore !== false;
       };
@@ -18634,6 +18683,8 @@ var require_methods = __commonJS({
     var attachHotkeyMethods = require_hotkeys();
     var attachOverlayMethods = require_overlays();
     var attachPersistenceMethods = require_persistence();
+    var attachStorageBackupMethods = require_storage_backup();
+    var attachStorageTransferMethods = require_storage_transfer();
     var attachSessionSyncMethods = require_session_sync();
     var attachSessionMethods = require_sessions();
     var attachLayoutRestoreMethods = require_layout_restore();
@@ -18652,6 +18703,8 @@ var require_methods = __commonJS({
       attachHotkeyMethods(WorkspacePlusPlus2);
       attachOverlayMethods(WorkspacePlusPlus2);
       attachPersistenceMethods(WorkspacePlusPlus2);
+      attachStorageBackupMethods(WorkspacePlusPlus2);
+      attachStorageTransferMethods(WorkspacePlusPlus2);
       attachSessionSyncMethods(WorkspacePlusPlus2);
       attachSessionMethods(WorkspacePlusPlus2);
       attachLayoutRestoreMethods(WorkspacePlusPlus2);

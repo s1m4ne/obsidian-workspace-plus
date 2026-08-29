@@ -5,13 +5,15 @@ const assert = require('node:assert/strict');
 const { loadPluginMethods } = require('./helpers');
 
 
-const methods = loadPluginMethods(['persistence', 'session-sync']);
+const methods = loadPluginMethods(['persistence', 'session-sync', 'storage-backup']);
 const attachPersistenceMethods = methods.persistence;
 const attachSessionSyncMethods = methods['session-sync'];
+const attachStorageBackupMethods = methods['storage-backup'];
 
 function createPlugin(initialData) {
     function PluginMock() {}
     attachPersistenceMethods(PluginMock);
+    attachStorageBackupMethods(PluginMock);
     attachSessionSyncMethods(PluginMock);
 
     const plugin = new PluginMock();

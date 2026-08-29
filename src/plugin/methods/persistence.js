@@ -3,6 +3,19 @@
 var obsidian = require('obsidian');
 var i18n = require('../../i18n');
 var DEFAULT_DATA = require('../default-data');
+var sessionData = require('../session-data');
+
+var SESSION_KEYS = sessionData.SESSION_KEYS;
+var joinPath = sessionData.joinPath;
+var pickKeys = sessionData.pickKeys;
+var pickSessionPayload = sessionData.pickSessionPayload;
+var hasSessionShape = sessionData.hasSessionShape;
+var hasNonEmptySessions = sessionData.hasNonEmptySessions;
+var getPersistStamp = sessionData.getPersistStamp;
+var readHistoryMap = sessionData.readHistoryMap;
+var splitSessionHistory = sessionData.splitSessionHistory;
+var mergeSessionHistory = sessionData.mergeSessionHistory;
+var hasInlineSessionHistory = sessionData.hasInlineSessionHistory;
 
 var STORAGE_DIR = '.workspace-plus-plus';
 var SESSION_STORAGE_VAULT = 'vault-folder';
@@ -18,17 +31,7 @@ var LEGACY_LOCAL_SETTINGS_FILE = STORAGE_DIR + '/settings.local.json';
 var LEGACY_LOCAL_SETTINGS_BACKUP = STORAGE_DIR + '/settings.local.json.migrated';
 var EXPORT_DIR_NAME = 'exports';
 var BACKUPS_DIR_NAME = 'backups';
-var BACKUP_ROTATION_INTERVAL = 3600000; // 1 hour
 
-var SESSION_KEYS = [
-    'activeSessionId',
-    'sessions',
-    'sessionOrder',
-    'groups',
-    'groupOrder',
-    'sessionGroups',
-    'activeGroupId',
-];
 
 var SETTINGS_KEYS = [
     'language',
@@ -62,9 +65,6 @@ var SETTINGS_KEYS = [
     'numberedSwitchCommands',
 ];
 
-function joinPath(base, child) {
-    return String(base || '').replace(/\/+$/, '') + '/' + child;
-}
 
 function normalizeSessionStorageLocation(value) {
     if (value === SESSION_STORAGE_PLUGIN) return SESSION_STORAGE_PLUGIN;
@@ -72,164 +72,17 @@ function normalizeSessionStorageLocation(value) {
     return null;
 }
 
-function readHistoryMap(raw) {
-    if (!raw || typeof raw !== 'object') return {};
-    // Accept the versioned wrapper, and tolerate a bare map for forward safety.
-    var map = (raw.history && typeof raw.history === 'object') ? raw.history : raw;
-    var out = {};
-    var ids = Object.keys(map);
-    for (var i = 0; i < ids.length; i++) {
-        var entries = map[ids[i]];
-        if (Array.isArray(entries) && entries.length > 0) out[ids[i]] = entries;
-    }
-    return out;
-}
 
-// Split session data into what gets persisted next to the sessions and the
-// per-session version history, which is kept in a local-only file.
-//
-// The input is never mutated: extractSessionData() returns the live
-// this.data.sessions object by reference (pickKeys and normalizeSessionData
-// both copy shallowly), so deleting history in place would wipe the history
-// the UI is still showing.
-//
-// Sessions that no longer exist are dropped from the history map, which keeps
-// entries from leaking after a reset or a sessions import.
-function splitSessionHistory(sessionData) {
-    var sessions = (sessionData && sessionData.sessions) || {};
-    var strippedSessions = {};
-    var history = {};
-    var ids = Object.keys(sessions);
 
-    for (var i = 0; i < ids.length; i++) {
-        var id = ids[i];
-        var session = sessions[id];
-        if (!session || typeof session !== 'object') continue;
 
-        var copy = {};
-        var keys = Object.keys(session);
-        for (var k = 0; k < keys.length; k++) {
-            if (keys[k] === 'history') continue;
-            copy[keys[k]] = session[keys[k]];
-        }
-        strippedSessions[id] = copy;
 
-        if (Array.isArray(session.history) && session.history.length > 0) {
-            history[id] = session.history;
-        }
-    }
 
-    return {
-        data: Object.assign({}, sessionData, { sessions: strippedSessions }),
-        history: history,
-    };
-}
 
-// Attach history entries back onto the in-memory sessions. history.json is the
-// canonical source; history still inlined in sessions.json is the pre-split
-// format and is only used when the split file has nothing for that session.
-function mergeSessionHistory(sessionData, historyMap) {
-    var sessions = (sessionData && sessionData.sessions) || {};
-    var ids = Object.keys(sessions);
 
-    for (var i = 0; i < ids.length; i++) {
-        var session = sessions[ids[i]];
-        if (!session || typeof session !== 'object') continue;
 
-        var entries = historyMap && historyMap[ids[i]];
-        if (Array.isArray(entries) && entries.length > 0) {
-            session.history = entries;
-        } else if (!Array.isArray(session.history) || session.history.length === 0) {
-            delete session.history;
-        }
-    }
 
-    return sessionData;
-}
 
-function hasInlineSessionHistory(sessionData) {
-    var sessions = (sessionData && sessionData.sessions) || {};
-    var ids = Object.keys(sessions);
-    for (var i = 0; i < ids.length; i++) {
-        var session = sessions[ids[i]];
-        if (session && Array.isArray(session.history) && session.history.length > 0) return true;
-    }
-    return false;
-}
 
-// The session-shaped part of a stored object, including the save stamp that the
-// external-change detection compares.
-function pickSessionPayload(data) {
-    var out = {};
-    if (!data || typeof data !== 'object') return out;
-    for (var i = 0; i < SESSION_KEYS.length; i++) {
-        var key = SESSION_KEYS[i];
-        if (data[key] !== undefined) out[key] = data[key];
-    }
-    if (typeof data._wppSavedAt === 'number') out._wppSavedAt = data._wppSavedAt;
-    return out;
-}
-
-function pickKeys(data, keys) {
-    var out = {};
-    if (!data) return out;
-    for (var i = 0; i < keys.length; i++) {
-        var key = keys[i];
-        if (data[key] !== undefined) out[key] = data[key];
-    }
-    return out;
-}
-
-function hasSessionShape(data) {
-    return !!(
-        data
-        && typeof data === 'object'
-        && (data.sessions !== undefined || data.sessionOrder !== undefined || data.activeSessionId !== undefined)
-    );
-}
-
-function hasNonEmptySessions(data) {
-    return !!(
-        data
-        && data.sessions
-        && typeof data.sessions === 'object'
-        && Object.keys(data.sessions).length > 0
-    );
-}
-
-function getPersistStamp(data) {
-    if (!data || typeof data !== 'object') return 0;
-    var stamp = data._wppSavedAt;
-    if (typeof stamp !== 'number' || !isFinite(stamp)) return 0;
-    return stamp;
-}
-
-function getBackupPlatformLabel() {
-    var platform = obsidian.Platform || {};
-    if (platform.isAndroidApp) return 'Android';
-    if (platform.isIosApp) return 'iOS';
-    if (platform.isMacOS) return 'macOS';
-    if (platform.isWin) return 'Windows';
-    if (platform.isLinux) return 'Linux';
-    if (platform.isMobileApp || platform.isMobile) return 'Mobile';
-    if (platform.isDesktopApp || platform.isDesktop) return 'Desktop';
-    return '';
-}
-
-function pad2(n) {
-    return n < 10 ? '0' + n : String(n);
-}
-
-function formatExportStamp(ts) {
-    var d = new Date(ts);
-    return String(d.getFullYear())
-        + pad2(d.getMonth() + 1)
-        + pad2(d.getDate())
-        + '-'
-        + pad2(d.getHours())
-        + pad2(d.getMinutes())
-        + pad2(d.getSeconds());
-}
 
 function attachPersistenceMethods(WorkspacePlusPlus) {
     // --- Data persistence ---
@@ -250,9 +103,6 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
         return SESSION_STORAGE_PLUGIN;
     };
 
-    WorkspacePlusPlus.prototype.normalizeSessionStorageLocation = function (location) {
-        return normalizeSessionStorageLocation(location);
-    };
 
     WorkspacePlusPlus.prototype.getSessionStorageLocation = function () {
         return normalizeSessionStorageLocation(this.data && this.data.sessionStorageLocation)
@@ -408,16 +258,7 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
             .concat(this.getSessionBackupFilePathsForLocation(SESSION_STORAGE_PLUGIN));
     };
 
-    WorkspacePlusPlus.prototype.getBackupPlatformLabel = function () {
-        return getBackupPlatformLabel();
-    };
 
-    WorkspacePlusPlus.prototype.prepareRotationBackupData = function (sessionData) {
-        var backupData = Object.assign({}, sessionData);
-        var platform = this.getBackupPlatformLabel();
-        if (platform) backupData._wppBackupPlatform = platform;
-        return backupData;
-    };
 
     WorkspacePlusPlus.prototype.getDefaultSettingsData = function () {
         return pickKeys(DEFAULT_DATA, SETTINGS_KEYS);
@@ -532,9 +373,6 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
         });
     };
 
-    WorkspacePlusPlus.prototype.ensureStorageDir = function () {
-        return this.ensureDir(this.getStorageDirPath());
-    };
 
     WorkspacePlusPlus.prototype.ensureSessionStorageDir = function () {
         return this.ensureDir(this.getSessionStorageDirPath());
@@ -858,90 +696,7 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
             });
     };
 
-    WorkspacePlusPlus.prototype.exportSessionsSnapshot = function () {
-        var self = this;
-        var L = i18n.L;
-        var stamp = formatExportStamp(Date.now());
-        var filePath = this.getExportDirPath() + '/sessions-' + stamp + '.json';
-        var payload = {
-            exportedAt: Date.now(),
-            source: this.manifest.id,
-            // History is device-specific layout data; exports are meant to move
-            // sessions to another vault or device, so it is left behind.
-            data: splitSessionHistory(this.extractSessionData(this.data)).data,
-        };
 
-        return this.ensureSessionStorageDir()
-            .then(function () {
-                return self.ensureDir(self.getExportDirPath());
-            })
-            .then(function () {
-                return self.writeJson(filePath, payload, true);
-            })
-            .then(function () {
-                new obsidian.Notice(L.exportSessionsDone(filePath), 7000);
-                return filePath;
-            });
-    };
-
-    WorkspacePlusPlus.prototype.importSessionsFromLatestExport = function () {
-        var self = this;
-        var L = i18n.L;
-
-        return this.app.vault.adapter.exists(this.getExportDirPath())
-            .then(function (exists) {
-                if (!exists) return null;
-                return self.app.vault.adapter.list(self.getExportDirPath());
-            })
-            .then(function (listed) {
-                if (!listed || !listed.files || listed.files.length === 0) return null;
-                var files = listed.files.filter(function (path) {
-                    return /\.json$/i.test(path);
-                });
-                if (files.length === 0) return null;
-                files.sort();
-                return files[files.length - 1];
-            })
-            .then(function (latestPath) {
-                if (!latestPath) {
-                    new obsidian.Notice(L.importSessionsNoFile);
-                    return false;
-                }
-                return self.app.vault.adapter.read(latestPath).then(function (raw) {
-                    var parsed = JSON.parse(raw);
-                    var candidate = parsed && parsed.data ? parsed.data : parsed;
-                    if (!hasSessionShape(candidate)) {
-                        new obsidian.Notice(L.importSessionsFailed);
-                        return false;
-                    }
-                    var imported = self.normalizeSessionData(candidate);
-                    if (!hasNonEmptySessions(imported)) {
-                        new obsidian.Notice(L.importSessionsFailed);
-                        return false;
-                    }
-
-                    self.data.activeSessionId = imported.activeSessionId;
-                    self.data.sessions = imported.sessions;
-                    self.data.sessionOrder = imported.sessionOrder;
-                    self.data.groups = imported.groups || {};
-                    self.data.groupOrder = typeof self.normalizeGroupTabOrder === 'function'
-                        ? self.normalizeGroupTabOrder(imported.groupOrder || [])
-                        : (imported.groupOrder || []);
-                    self.data.sessionGroups = imported.sessionGroups || {};
-                    self.data.activeGroupId = imported.activeGroupId || null;
-                    self.syncSessionOrder();
-                    self.updateStatusBar();
-                    self.syncSessionCommands();
-                    return self.persistData().then(function () {
-                        new obsidian.Notice(L.importSessionsDone(latestPath), 7000);
-                        return true;
-                    });
-                }).catch(function () {
-                    new obsidian.Notice(L.importSessionsFailed);
-                    return false;
-                });
-            });
-    };
 
     WorkspacePlusPlus.prototype.persistDataImmediate = function () {
         var self = this;
@@ -1017,154 +772,10 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
 
     // --- Rotation backup ---
 
-    WorkspacePlusPlus.prototype.initRotationBackupTimestamp = function () {
-        var self = this;
-        return this.readJsonIfExists(this.getRotationBackupPath(1))
-            .then(function (res) {
-                if (res.exists && res.data) {
-                    self._lastRotationBackupAt = getPersistStamp(res.data) || 0;
-                } else {
-                    self._lastRotationBackupAt = 0;
-                }
-            })
-            .catch(function () {
-                self._lastRotationBackupAt = 0;
-            });
-    };
 
-    WorkspacePlusPlus.prototype.rotateBackupIfNeeded = function (sessionData) {
-        var now = Date.now();
-        var last = this._lastRotationBackupAt || 0;
-        if (now - last < BACKUP_ROTATION_INTERVAL) return Promise.resolve();
 
-        var self = this;
-        this._lastRotationBackupAt = now;
 
-        return this.ensureDir(this.getBackupsDirPath())
-            .then(function () {
-                // Shift generations: 2→3, 1→2
-                return self.copyFileIfExists(
-                    self.getRotationBackupPath(2),
-                    self.getRotationBackupPath(3)
-                );
-            })
-            .then(function () {
-                return self.copyFileIfExists(
-                    self.getRotationBackupPath(1),
-                    self.getRotationBackupPath(2)
-                );
-            })
-            .then(function () {
-                // Write current data as generation 1
-                return self.writeJson(
-                    self.getRotationBackupPath(1),
-                    self.prepareRotationBackupData(sessionData)
-                );
-            })
-            .catch(function () {
-                // Backup failure should not block normal persistence
-                return;
-            });
-    };
 
-    WorkspacePlusPlus.prototype.copyFileIfExists = function (srcPath, dstPath) {
-        var self = this;
-        return this.app.vault.adapter.exists(srcPath).then(function (exists) {
-            if (!exists) return;
-            return self.app.vault.adapter.read(srcPath).then(function (raw) {
-                return self.app.vault.adapter.write(dstPath, raw);
-            });
-        });
-    };
-
-    WorkspacePlusPlus.prototype.getRotationBackupInfo = function () {
-        var self = this;
-        var results = [];
-
-        function readGeneration(n) {
-            return self.readJsonIfExists(self.getRotationBackupPath(n))
-                .then(function (res) {
-                    if (!res.exists || !res.data) return null;
-                    var stamp = getPersistStamp(res.data);
-                    var sessions = res.data.sessions;
-                    var count = (sessions && typeof sessions === 'object')
-                        ? Object.keys(sessions).length : 0;
-                    var platform = typeof res.data._wppBackupPlatform === 'string'
-                        ? res.data._wppBackupPlatform
-                        : '';
-                    return {
-                        generation: n,
-                        savedAt: stamp,
-                        sessionCount: count,
-                        backupPlatform: platform,
-                    };
-                })
-                .catch(function () {
-                    return null;
-                });
-        }
-
-        return Promise.all([
-            readGeneration(1),
-            readGeneration(2),
-            readGeneration(3),
-        ]).then(function (items) {
-            for (var i = 0; i < items.length; i++) {
-                if (items[i]) results.push(items[i]);
-            }
-            return results;
-        });
-    };
-
-    WorkspacePlusPlus.prototype.restoreFromRotationBackup = function (generation) {
-        var self = this;
-        var L = i18n.L;
-        return this.readJsonIfExists(this.getRotationBackupPath(generation))
-            .then(function (res) {
-                if (!res.exists || res.error || !res.data) {
-                    new obsidian.Notice(L.rotationBackupRestoreFailed);
-                    return false;
-                }
-                if (!hasSessionShape(res.data)) {
-                    new obsidian.Notice(L.rotationBackupRestoreFailed);
-                    return false;
-                }
-                var imported = self.normalizeSessionData(res.data);
-                if (!hasNonEmptySessions(imported)) {
-                    new obsidian.Notice(L.rotationBackupRestoreFailed);
-                    return false;
-                }
-
-                self.data.activeSessionId = imported.activeSessionId;
-                self.data.sessions = imported.sessions;
-                self.data.sessionOrder = imported.sessionOrder;
-                self.data.groups = imported.groups || {};
-                self.data.groupOrder = typeof self.normalizeGroupTabOrder === 'function'
-                    ? self.normalizeGroupTabOrder(imported.groupOrder || [])
-                    : (imported.groupOrder || []);
-                self.data.sessionGroups = imported.sessionGroups || {};
-                self.data.activeGroupId = imported.activeGroupId || null;
-                self.syncSessionOrder();
-                self.updateStatusBar();
-                self.syncSessionCommands();
-
-                return self.persistData().then(function () {
-                    var active = self.getActiveSession();
-                    if (active && active.layout) {
-                        return self.applyWorkspaceLayout(active.layout, { catchErrors: false }).then(function () {
-                            new obsidian.Notice(L.rotationBackupRestored);
-                            return true;
-                        });
-                    }
-                    new obsidian.Notice(L.rotationBackupRestored);
-                    return true;
-                });
-            })
-            .catch(function () {
-                new obsidian.Notice(L.rotationBackupRestoreFailed);
-                return false;
-            });
-    };
 
     WorkspacePlusPlus.prototype.readSessionCandidate = function (path) {
         return Promise.all([

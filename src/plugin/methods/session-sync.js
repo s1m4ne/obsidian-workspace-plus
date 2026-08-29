@@ -1,28 +1,21 @@
 'use strict';
 
+var sessionData = require('../session-data');
+
+var getPersistStamp = sessionData.getPersistStamp;
+// Same predicate persistence.js uses; it was duplicated here under another name.
+var isSessionDataShape = sessionData.hasSessionShape;
+
 var EXTERNAL_SESSION_RELOAD_DEBOUNCE_MS = 500;
 var SESSION_FILE_MTIME_EPSILON_MS = 25;
 var STARTUP_SESSION_RECHECK_DELAYS = [3000, 10000];
 
-function getPersistStamp(data) {
-    if (!data || typeof data !== 'object') return 0;
-    var stamp = data._wppSavedAt;
-    if (typeof stamp !== 'number' || !isFinite(stamp)) return 0;
-    return stamp;
-}
 
 function cloneJson(value) {
     if (value === undefined) return undefined;
     return JSON.parse(JSON.stringify(value));
 }
 
-function isSessionDataShape(data) {
-    return !!(
-        data
-        && typeof data === 'object'
-        && (data.sessions !== undefined || data.sessionOrder !== undefined || data.activeSessionId !== undefined)
-    );
-}
 
 function getSessionModified(session) {
     if (!session || typeof session.modified !== 'number' || !isFinite(session.modified)) return 0;

@@ -5,14 +5,16 @@ const assert = require('node:assert/strict');
 const { loadPluginMethods } = require('./helpers');
 
 
-const methods = loadPluginMethods(['persistence', 'history']);
+const methods = loadPluginMethods(['persistence', 'history', 'storage-backup']);
 const attachPersistenceMethods = methods.persistence;
 const attachHistoryMethods = methods.history;
+const attachStorageBackupMethods = methods['storage-backup'];
 
 function createPlugin(options) {
     options = options || {};
     function PluginMock() {}
     attachPersistenceMethods(PluginMock);
+    attachStorageBackupMethods(PluginMock);
     attachHistoryMethods(PluginMock);
 
     const existingFiles = new Set(options.files || []);
