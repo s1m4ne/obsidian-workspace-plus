@@ -15310,6 +15310,7 @@ var require_persistence = __commonJS({
       "confirmDeleteByHotkey",
       "autoSaveOnSwitch",
       "warnOnUnsavedSwitch",
+      "restoreSidebars",
       "highlightUnsavedSessionChanges",
       "statusBarQuickSwitcher",
       "statusBarModScrollSwitch",
