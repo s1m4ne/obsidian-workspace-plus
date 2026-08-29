@@ -675,7 +675,6 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
             sessionsPath: this.getSessionsPath(),
             sessionsBackupPath: this.getSessionsBackupPath(),
             historyPath: this.getHistoryPath(),
-            globalSettingsPath: joinPath(this.getPluginStorageDirPath(), PLUGIN_DATA_FILE_NAME),
             sessionCount: Object.keys((this.data && this.data.sessions) || {}).length,
             updatedAt: Date.now(),
         };

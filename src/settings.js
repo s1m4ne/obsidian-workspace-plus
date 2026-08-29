@@ -785,7 +785,6 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
             addDevCardRow(L.settingsStorageFieldSessions, diagnosticsInfo.sessionsPath, { code: true });
             addDevCardRow(L.settingsStorageFieldSessionsBackup, diagnosticsInfo.sessionsBackupPath, { code: true });
             addDevCardRow(L.settingsStorageFieldHistory, diagnosticsInfo.historyPath, { code: true });
-            addDevCardRow(L.settingsStorageFieldGlobalSettings, diagnosticsInfo.globalSettingsPath, { code: true });
             addDevCardRow(L.settingsStorageFieldSessionCount, diagnosticsInfo.sessionCount);
 
             var sizeValueEl = addDevCardRow(L.settingsStorageFieldDataSize, '…');

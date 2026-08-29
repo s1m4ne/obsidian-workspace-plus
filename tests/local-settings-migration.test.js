@@ -160,11 +160,13 @@ test('the vault-local settings API is gone', function () {
     }
 });
 
-test('storage diagnostics no longer advertise a local settings file', function () {
+test('storage diagnostics no longer advertise a settings file at all', function () {
     const plugin = createPlugin();
 
     const info = plugin.getStorageDiagnosticsInfo();
 
+    // There is only one settings file now, and it is the same data.json the
+    // sessions row already points at, so neither row carries information.
     assert.equal(info.localSettingsPath, undefined);
-    assert.equal(info.globalSettingsPath, DATA_PATH, 'settings live in exactly one place now');
+    assert.equal(info.globalSettingsPath, undefined);
 });
