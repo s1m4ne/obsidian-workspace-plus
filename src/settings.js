@@ -666,52 +666,6 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                 failureNotice: L.sessionStorageMoveFailed,
             });
 
-            var useLocalSettings = self.plugin.isUsingLocalSettings();
-
-            addToggleSetting(contentEl, {
-                name: L.settingsUseLocalSettings,
-                desc: L.settingsUseLocalSettingsDesc,
-                value: useLocalSettings,
-                onChange: function (value) {
-                    self.plugin.setUseLocalSettings(value, { notify: true })
-                        .then(function () {
-                            self.display();
-                        })
-                        .catch(function () {
-                            new obsidian.Notice(L.localSettingsOperationFailed);
-                            self.display();
-                        });
-                },
-            });
-
-            addAsyncActionSetting(contentEl, {
-                name: L.settingsCopyGlobalToLocal,
-                desc: L.settingsCopyGlobalToLocalDesc,
-                buttonText: L.settingsCopyGlobalToLocalBtn,
-                disabled: !useLocalSettings,
-                run: function () {
-                    return self.plugin.copyGlobalSettingsToLocal({ notify: true });
-                },
-                onSuccess: function () {
-                    self.display();
-                },
-                failureNotice: L.localSettingsOperationFailed,
-            });
-
-            addAsyncActionSetting(contentEl, {
-                name: L.settingsResetLocalSettings,
-                desc: L.settingsResetLocalSettingsDesc,
-                buttonText: L.settingsResetLocalSettingsBtn,
-                disabled: !useLocalSettings,
-                run: function () {
-                    return self.plugin.resetLocalSettings({ notify: true });
-                },
-                onSuccess: function () {
-                    self.display();
-                },
-                failureNotice: L.localSettingsOperationFailed,
-            });
-
             addSection(L.settingsAdvancedTransferSubsection);
 
             new obsidian.Setting(contentEl)
@@ -836,7 +790,6 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
             addDevCardRow(L.settingsStorageFieldSessions, diagnosticsInfo.sessionsPath, { code: true });
             addDevCardRow(L.settingsStorageFieldSessionsBackup, diagnosticsInfo.sessionsBackupPath, { code: true });
             addDevCardRow(L.settingsStorageFieldSessionStorageLocation, diagnosticsInfo.sessionStorageLocation, { code: true });
-            addDevCardRow(L.settingsStorageFieldLocalSettings, diagnosticsInfo.localSettingsPath, { code: true });
             addDevCardRow(L.settingsStorageFieldGlobalSettings, diagnosticsInfo.globalSettingsPath, { code: true });
             addDevCardRow(L.settingsStorageFieldSessionCount, diagnosticsInfo.sessionCount);
             addDevCardRow(L.settingsStorageFieldUpdatedAt, diagnosticsUpdatedText);

@@ -11,7 +11,10 @@ var SESSIONS_FILE_NAME = 'sessions.json';
 var SESSIONS_BACKUP_FILE_NAME = 'sessions.backup.json';
 var HISTORY_FILE_NAME = 'history.json';
 var HISTORY_FORMAT_VERSION = 1;
-var LOCAL_SETTINGS_FILE = STORAGE_DIR + '/settings.local.json';
+// Settings used to be splittable into a vault-local file. That is gone; these
+// paths exist only to migrate anyone still carrying the old file.
+var LEGACY_LOCAL_SETTINGS_FILE = STORAGE_DIR + '/settings.local.json';
+var LEGACY_LOCAL_SETTINGS_BACKUP = STORAGE_DIR + '/settings.local.json.migrated';
 var EXPORT_DIR_NAME = 'exports';
 var BACKUPS_DIR_NAME = 'backups';
 var BACKUP_ROTATION_INTERVAL = 3600000; // 1 hour
@@ -335,10 +338,6 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
         });
     };
 
-    WorkspacePlusPlus.prototype.getLocalSettingsPath = function () {
-        return LOCAL_SETTINGS_FILE;
-    };
-
     WorkspacePlusPlus.prototype.getExportDirPath = function () {
         return joinPath(this.getSessionStorageDirPath(), EXPORT_DIR_NAME);
     };
@@ -545,6 +544,16 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
         });
     };
 
+    WorkspacePlusPlus.prototype.renameIfExists = function (fromPath, toPath) {
+        var self = this;
+        return this.app.vault.adapter.exists(fromPath).then(function (exists) {
+            if (!exists) return;
+            return self.app.vault.adapter.rename(fromPath, toPath).catch(function () {
+                return;
+            });
+        });
+    };
+
     WorkspacePlusPlus.prototype.removeIfExists = function (path) {
         var self = this;
         return this.app.vault.adapter.exists(path).then(function (exists) {
@@ -651,78 +660,49 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
         });
     };
 
-    WorkspacePlusPlus.prototype.isUsingLocalSettings = function () {
-        return !!this.useLocalSettings;
-    };
-
-    WorkspacePlusPlus.prototype.setUseLocalSettings = function (enabled, options) {
+    // Vault-local settings (.workspace-plus-plus/settings.local.json) are gone.
+    // Nobody ever asked for them - issue #4, the only multi-vault request, asked
+    // for per-vault *workspaces* while explicitly wanting settings to stay in
+    // sync - and keeping them meant carrying a second settings layer that could
+    // not reach other devices anyway, since dot-folders are excluded from
+    // Obsidian Sync.
+    //
+    // Anyone still holding the old file gets it folded into data.json on load.
+    // The local copy is what they actually saw, so it wins over the frozen
+    // values in data.json; the file is renamed rather than deleted.
+    WorkspacePlusPlus.prototype.migrateLegacyLocalSettings = function () {
         var self = this;
-        var L = i18n.L;
-        options = options || {};
-        var next = !!enabled;
-        if (next === this.isUsingLocalSettings()) return Promise.resolve(next);
 
-        if (next) {
-            var current = Object.assign({}, this.getDefaultSettingsData(), this.extractSettingsData(this.data));
-            this.globalSettings = Object.assign({}, current);
-            this.useLocalSettings = true;
-            return this.ensureStorageDir()
-                .then(function () {
-                    return self.writeJson(self.getLocalSettingsPath(), current, true);
-                })
-                .then(function () {
-                    return self.persistData();
-                })
-                .then(function () {
-                    if (options.notify) new obsidian.Notice(L.localSettingsEnabled);
-                    return true;
-                });
-        }
+        return this.readJsonIfExists(LEGACY_LOCAL_SETTINGS_FILE)
+            .then(function (res) {
+                if (!res.exists) return false;
+                if (res.error || !res.data || typeof res.data !== 'object') {
+                    // Leave an unreadable file in place rather than discarding
+                    // settings we cannot merge.
+                    return false;
+                }
 
-        this.useLocalSettings = false;
-        var global = Object.assign({}, this.getDefaultSettingsData(), this.globalSettings || {});
-        for (var i = 0; i < SETTINGS_KEYS.length; i++) {
-            this.data[SETTINGS_KEYS[i]] = global[SETTINGS_KEYS[i]];
-        }
-        return this.removeIfExists(this.getLocalSettingsPath())
-            .then(function () {
-                return self.persistData();
+                self.globalSettings = Object.assign(
+                    {},
+                    self.getDefaultSettingsData(),
+                    self.globalSettings || {},
+                    pickKeys(res.data, SETTINGS_KEYS)
+                );
+
+                return self.persistGlobalSettings()
+                    .then(function () {
+                        return self.renameIfExists(
+                            LEGACY_LOCAL_SETTINGS_FILE,
+                            LEGACY_LOCAL_SETTINGS_BACKUP
+                        );
+                    })
+                    .then(function () {
+                        return true;
+                    });
             })
-            .then(function () {
-                if (options.notify) new obsidian.Notice(L.localSettingsDisabled);
+            .catch(function () {
                 return false;
             });
-    };
-
-    WorkspacePlusPlus.prototype.copyGlobalSettingsToLocal = function (options) {
-        var self = this;
-        var L = i18n.L;
-        options = options || {};
-        var global = Object.assign({}, this.getDefaultSettingsData(), this.globalSettings || {});
-        this.useLocalSettings = true;
-        for (var i = 0; i < SETTINGS_KEYS.length; i++) {
-            this.data[SETTINGS_KEYS[i]] = global[SETTINGS_KEYS[i]];
-        }
-        return this.ensureStorageDir()
-            .then(function () {
-                return self.writeJson(self.getLocalSettingsPath(), global, true);
-            })
-            .then(function () {
-                return self.persistData();
-            })
-            .then(function () {
-                if (options.notify) new obsidian.Notice(L.localSettingsCopied);
-                return true;
-            });
-    };
-
-    WorkspacePlusPlus.prototype.resetLocalSettings = function (options) {
-        var self = this;
-        options = options || {};
-        if (!this.isUsingLocalSettings()) return Promise.resolve(false);
-        return this.copyGlobalSettingsToLocal(options).then(function () {
-            return self.isUsingLocalSettings();
-        });
     };
 
     WorkspacePlusPlus.prototype.applyDefaultSettingsToCurrentScope = function () {
@@ -775,7 +755,6 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
             sessionStorageLocation: this.getSessionStorageLocation(),
             sessionsPath: this.getSessionsPath(),
             sessionsBackupPath: this.getSessionsBackupPath(),
-            localSettingsPath: this.getLocalSettingsPath(),
             globalSettingsPath: this.manifest.dir + '/data.json',
             sessionCount: Object.keys((this.data && this.data.sessions) || {}).length,
             updatedAt: Date.now(),
@@ -887,13 +866,7 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
                 self._lastPersistStamp = now;
                 sessionData._wppSavedAt = now;
 
-                if (self.isUsingLocalSettings()) {
-                    if (!self.globalSettings) {
-                        self.globalSettings = Object.assign({}, settingsData);
-                    }
-                } else {
-                    self.globalSettings = Object.assign({}, settingsData);
-                }
+                self.globalSettings = Object.assign({}, settingsData);
 
                 return self.ensureSessionStorageDir()
                     .then(function () {
@@ -912,10 +885,6 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
                     })
                     .then(function () {
                         return self.rotateBackupIfNeeded(sessionData);
-                    })
-                    .then(function () {
-                        if (!self.isUsingLocalSettings()) return;
-                        return self.writeJson(self.getLocalSettingsPath(), settingsData, true);
                     })
                     .then(function () {
                         return self.persistGlobalSettings();
@@ -1099,18 +1068,6 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
             });
     };
 
-    WorkspacePlusPlus.prototype.loadLocalSettingsData = function () {
-        var L = i18n.L;
-        return this.readJsonIfExists(this.getLocalSettingsPath()).then(function (res) {
-            if (!res.exists) return null;
-            if (res.error || !res.data || typeof res.data !== 'object') {
-                new obsidian.Notice(L.localSettingsLoadFailed);
-                return null;
-            }
-            return pickKeys(res.data, SETTINGS_KEYS);
-        });
-    };
-
     WorkspacePlusPlus.prototype.loadSessionDataFromStorage = function () {
         var self = this;
         var L = i18n.L;
@@ -1201,7 +1158,6 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
         var rawSaved = null;
         var legacyMain = null;
         var hadLegacyInMain = false;
-        var loadedLocalSettings = null;
 
         return this.loadData()
             .catch(function () {
@@ -1217,11 +1173,9 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
                 );
                 hadLegacyInMain = hasSessionShape(loadedMain);
                 legacyMain = hadLegacyInMain ? self.normalizeSessionData(loadedMain) : null;
-                return self.loadLocalSettingsData();
+                return self.migrateLegacyLocalSettings();
             })
-            .then(function (localSettings) {
-                loadedLocalSettings = localSettings;
-                self.useLocalSettings = !!loadedLocalSettings;
+            .then(function () {
                 return self.resolveSessionStorageLocation({
                     sessionStorageLocation: loadedMain.sessionStorageLocation,
                 });
@@ -1273,9 +1227,7 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
                     });
             })
             .then(function (sessionData) {
-                var effectiveSettings = self.isUsingLocalSettings()
-                    ? Object.assign({}, self.globalSettings, loadedLocalSettings)
-                    : Object.assign({}, self.globalSettings);
+                var effectiveSettings = Object.assign({}, self.globalSettings);
                 effectiveSettings.sessionStorageLocation = self.getSessionStorageLocation();
                 // Migrate: existing users keep filter visible (new default is OFF).
                 // rawSaved is null for new installs; for existing users it is the raw
