@@ -15523,7 +15523,7 @@ var require_persistence = __commonJS({
           return false;
         });
       };
-      WorkspacePlusPlus2.prototype.applyDefaultSettingsToCurrentScope = function() {
+      WorkspacePlusPlus2.prototype.applyDefaultSettings = function() {
         var defaults = this.getDefaultSettingsData();
         for (var i = 0; i < SETTINGS_KEYS.length; i++) {
           this.data[SETTINGS_KEYS[i]] = defaults[SETTINGS_KEYS[i]];
@@ -15531,12 +15531,12 @@ var require_persistence = __commonJS({
         i18n2.resolveLocale(this.data.language || "auto");
       };
       WorkspacePlusPlus2.prototype.resetSettingsToDefault = function() {
-        this.applyDefaultSettingsToCurrentScope();
+        this.applyDefaultSettings();
         return this.persistData();
       };
       WorkspacePlusPlus2.prototype.resetSessionsAndSettingsToDefault = function() {
         var self = this;
-        this.applyDefaultSettingsToCurrentScope();
+        this.applyDefaultSettings();
         return this.resetSessionsToDefault().then(function() {
           return self.clearBackupFiles();
         });

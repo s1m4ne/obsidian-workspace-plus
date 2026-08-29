@@ -2,30 +2,10 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const Module = require('module');
+const { loadPluginMethods } = require('./helpers');
 
-function loadMethods() {
-    const obsidianStub = {
-        Notice: class {
-            constructor(_message) {}
-        },
-        Platform: { isDesktop: true, isDesktopApp: true, isMacOS: true },
-    };
-    const originalLoad = Module._load;
-    Module._load = function (request, parent, isMain) {
-        if (request === 'obsidian') return obsidianStub;
-        return originalLoad(request, parent, isMain);
-    };
-    try {
-        const i18n = require('../src/i18n');
-        i18n.resolveLocale('en');
-        return require('../src/plugin/methods/persistence');
-    } finally {
-        Module._load = originalLoad;
-    }
-}
 
-const attachPersistenceMethods = loadMethods();
+const { persistence: attachPersistenceMethods } = loadPluginMethods(['persistence']);
 
 const LEGACY_PATH = '.workspace-plus-plus/settings.local.json';
 const MIGRATED_PATH = '.workspace-plus-plus/settings.local.json.migrated';

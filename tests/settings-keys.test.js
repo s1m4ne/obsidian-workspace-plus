@@ -2,36 +2,10 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const Module = require('module');
+const { loadPluginMethods } = require('./helpers');
 
-function loadMethods() {
-    const obsidianStub = {
-        Notice: class {
-            constructor(_message) {}
-        },
-        Platform: {
-            isDesktop: true,
-            isDesktopApp: true,
-            isMacOS: true,
-        },
-    };
-    const originalLoad = Module._load;
-    Module._load = function (request, parent, isMain) {
-        if (request === 'obsidian') return obsidianStub;
-        return originalLoad(request, parent, isMain);
-    };
 
-    try {
-        return {
-            attachPersistenceMethods: require('../src/plugin/methods/persistence'),
-            DEFAULT_DATA: require('../src/plugin/default-data'),
-        };
-    } finally {
-        Module._load = originalLoad;
-    }
-}
-
-const { attachPersistenceMethods, DEFAULT_DATA } = loadMethods();
+const { persistence: attachPersistenceMethods, DEFAULT_DATA } = loadPluginMethods(['persistence']);
 
 // Keys that are intentionally persisted outside SETTINGS_KEYS / SESSION_KEYS.
 // sessionStorageLocation is written explicitly by persistGlobalSettings() because

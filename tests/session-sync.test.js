@@ -2,38 +2,12 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const Module = require('module');
+const { loadPluginMethods } = require('./helpers');
 
-function loadMethods() {
-    const obsidianStub = {
-        Notice: class {
-            constructor(_message) {}
-        },
-        Platform: {
-            isDesktop: true,
-            isDesktopApp: true,
-            isMacOS: true,
-        },
-    };
-    const originalLoad = Module._load;
-    Module._load = function (request, parent, isMain) {
-        if (request === 'obsidian') return obsidianStub;
-        return originalLoad(request, parent, isMain);
-    };
 
-    try {
-        return {
-            attachPersistenceMethods: require('../src/plugin/methods/persistence'),
-            attachSessionSyncMethods: require('../src/plugin/methods/session-sync'),
-        };
-    } finally {
-        Module._load = originalLoad;
-    }
-}
-
-const methods = loadMethods();
-const attachPersistenceMethods = methods.attachPersistenceMethods;
-const attachSessionSyncMethods = methods.attachSessionSyncMethods;
+const methods = loadPluginMethods(['persistence', 'session-sync']);
+const attachPersistenceMethods = methods.persistence;
+const attachSessionSyncMethods = methods['session-sync'];
 
 function createPlugin(initialData) {
     function PluginMock() {}

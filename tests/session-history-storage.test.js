@@ -2,35 +2,10 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const Module = require('module');
+const { loadPluginMethods } = require('./helpers');
 
-function loadMethods() {
-    const obsidianStub = {
-        Notice: class {
-            constructor(_message) {}
-        },
-        Platform: { isDesktop: true, isDesktopApp: true, isMacOS: true },
-    };
-    const originalLoad = Module._load;
-    Module._load = function (request, parent, isMain) {
-        if (request === 'obsidian') return obsidianStub;
-        return originalLoad(request, parent, isMain);
-    };
-    try {
-        const i18n = require('../src/i18n');
-        // persistence.js reads i18n.L for its notices; it is only populated once
-        // a locale has been resolved.
-        i18n.resolveLocale('en');
-        return {
-            attachPersistenceMethods: require('../src/plugin/methods/persistence'),
-            attachSessionSyncMethods: require('../src/plugin/methods/session-sync'),
-        };
-    } finally {
-        Module._load = originalLoad;
-    }
-}
 
-const { attachPersistenceMethods, attachSessionSyncMethods } = loadMethods();
+const { persistence: attachPersistenceMethods, 'session-sync': attachSessionSyncMethods } = loadPluginMethods(['persistence', 'session-sync']);
 
 // plugin-folder mode keeps the sessions inside data.json.
 const DATA_PATH = '.obsidian/plugins/workspace-plus-plus/data.json';

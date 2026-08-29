@@ -2,7 +2,6 @@ media/
 docs/
 .DS_Store
 node_modules/
-/main.js
 data.json
 data.backup.json
 sessions.json

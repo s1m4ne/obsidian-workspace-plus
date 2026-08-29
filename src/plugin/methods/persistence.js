@@ -431,6 +431,11 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
         return pickKeys(data, SETTINGS_KEYS);
     };
 
+    // NOTE: the returned object shares its `sessions` map with the input - both
+    // pickKeys() and normalizeSessionData() copy shallowly, so this is a view of
+    // this.data, not a snapshot of it. Mutating what comes back (dropping history
+    // before a write, for instance) corrupts the live data the UI is reading.
+    // Build a copy first; see splitSessionHistory().
     WorkspacePlusPlus.prototype.extractSessionData = function (data) {
         return this.normalizeSessionData(pickKeys(data, SESSION_KEYS));
     };
@@ -781,7 +786,7 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
             });
     };
 
-    WorkspacePlusPlus.prototype.applyDefaultSettingsToCurrentScope = function () {
+    WorkspacePlusPlus.prototype.applyDefaultSettings = function () {
         var defaults = this.getDefaultSettingsData();
         for (var i = 0; i < SETTINGS_KEYS.length; i++) {
             this.data[SETTINGS_KEYS[i]] = defaults[SETTINGS_KEYS[i]];
@@ -790,13 +795,13 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
     };
 
     WorkspacePlusPlus.prototype.resetSettingsToDefault = function () {
-        this.applyDefaultSettingsToCurrentScope();
+        this.applyDefaultSettings();
         return this.persistData();
     };
 
     WorkspacePlusPlus.prototype.resetSessionsAndSettingsToDefault = function () {
         var self = this;
-        this.applyDefaultSettingsToCurrentScope();
+        this.applyDefaultSettings();
         return this.resetSessionsToDefault().then(function () {
             return self.clearBackupFiles();
         });

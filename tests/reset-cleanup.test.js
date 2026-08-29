@@ -2,34 +2,12 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const Module = require('module');
+const { loadPluginMethods } = require('./helpers');
 
-function loadMethods() {
-    const obsidianStub = {
-        Notice: class {
-            constructor(_message) {}
-        },
-        Platform: {},
-    };
-    const originalLoad = Module._load;
-    Module._load = function (request, parent, isMain) {
-        if (request === 'obsidian') return obsidianStub;
-        return originalLoad(request, parent, isMain);
-    };
 
-    try {
-        return {
-            attachPersistenceMethods: require('../src/plugin/methods/persistence'),
-            attachHistoryMethods: require('../src/plugin/methods/history'),
-        };
-    } finally {
-        Module._load = originalLoad;
-    }
-}
-
-const methods = loadMethods();
-const attachPersistenceMethods = methods.attachPersistenceMethods;
-const attachHistoryMethods = methods.attachHistoryMethods;
+const methods = loadPluginMethods(['persistence', 'history']);
+const attachPersistenceMethods = methods.persistence;
+const attachHistoryMethods = methods.history;
 
 function createPlugin(options) {
     options = options || {};

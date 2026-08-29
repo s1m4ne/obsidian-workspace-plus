@@ -2,37 +2,10 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const Module = require('module');
+const { loadPluginMethods } = require('./helpers');
 
-function loadMethods() {
-    const obsidianStub = {
-        Notice: class {
-            constructor(message) {
-                obsidianStub.notices.push(message);
-            }
-        },
-        Platform: { isDesktop: true, isDesktopApp: true, isMacOS: true },
-    };
-    obsidianStub.notices = [];
-    const originalLoad = Module._load;
-    Module._load = function (request, parent, isMain) {
-        if (request === 'obsidian') return obsidianStub;
-        return originalLoad(request, parent, isMain);
-    };
-    try {
-        const i18n = require('../src/i18n');
-        i18n.resolveLocale('en');
-        return {
-            attachPersistenceMethods: require('../src/plugin/methods/persistence'),
-            attachSessionSyncMethods: require('../src/plugin/methods/session-sync'),
-            notices: obsidianStub.notices,
-        };
-    } finally {
-        Module._load = originalLoad;
-    }
-}
 
-const { attachPersistenceMethods, attachSessionSyncMethods } = loadMethods();
+const { persistence: attachPersistenceMethods, 'session-sync': attachSessionSyncMethods } = loadPluginMethods(['persistence', 'session-sync']);
 
 const PLUGIN_DIR = '.obsidian/plugins/workspace-plus-plus';
 const DATA_PATH = PLUGIN_DIR + '/data.json';
