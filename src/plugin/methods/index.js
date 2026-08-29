@@ -3,6 +3,8 @@
 var attachHotkeyMethods = require('./hotkeys');
 var attachOverlayMethods = require('./overlays');
 var attachPersistenceMethods = require('./persistence');
+var attachStorageBackupMethods = require('./storage-backup');
+var attachStorageTransferMethods = require('./storage-transfer');
 var attachSessionSyncMethods = require('./session-sync');
 var attachSessionMethods = require('./sessions');
 var attachLayoutRestoreMethods = require('./layout-restore');
@@ -22,6 +24,8 @@ function attachPluginMethods(WorkspacePlusPlus) {
     attachHotkeyMethods(WorkspacePlusPlus);
     attachOverlayMethods(WorkspacePlusPlus);
     attachPersistenceMethods(WorkspacePlusPlus);
+    attachStorageBackupMethods(WorkspacePlusPlus);
+    attachStorageTransferMethods(WorkspacePlusPlus);
     attachSessionSyncMethods(WorkspacePlusPlus);
     attachSessionMethods(WorkspacePlusPlus);
     attachLayoutRestoreMethods(WorkspacePlusPlus);

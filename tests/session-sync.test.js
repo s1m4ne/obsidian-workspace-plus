@@ -2,42 +2,18 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const Module = require('module');
+const { loadPluginMethods } = require('./helpers');
 
-function loadMethods() {
-    const obsidianStub = {
-        Notice: class {
-            constructor(_message) {}
-        },
-        Platform: {
-            isDesktop: true,
-            isDesktopApp: true,
-            isMacOS: true,
-        },
-    };
-    const originalLoad = Module._load;
-    Module._load = function (request, parent, isMain) {
-        if (request === 'obsidian') return obsidianStub;
-        return originalLoad(request, parent, isMain);
-    };
 
-    try {
-        return {
-            attachPersistenceMethods: require('../src/plugin/methods/persistence'),
-            attachSessionSyncMethods: require('../src/plugin/methods/session-sync'),
-        };
-    } finally {
-        Module._load = originalLoad;
-    }
-}
-
-const methods = loadMethods();
-const attachPersistenceMethods = methods.attachPersistenceMethods;
-const attachSessionSyncMethods = methods.attachSessionSyncMethods;
+const methods = loadPluginMethods(['persistence', 'session-sync', 'storage-backup']);
+const attachPersistenceMethods = methods.persistence;
+const attachSessionSyncMethods = methods['session-sync'];
+const attachStorageBackupMethods = methods['storage-backup'];
 
 function createPlugin(initialData) {
     function PluginMock() {}
     attachPersistenceMethods(PluginMock);
+    attachStorageBackupMethods(PluginMock);
     attachSessionSyncMethods(PluginMock);
 
     const plugin = new PluginMock();
@@ -304,7 +280,8 @@ test('session storage defaults new installs to the Obsidian plugin folder', asyn
 
     assert.equal(location, 'plugin-folder');
     assert.equal(plugin.getSessionStorageLocation(), 'plugin-folder');
-    assert.equal(plugin.getSessionsPath(), '.obsidian/plugins/workspace-plus-plus/sessions.json');
+    // Sessions ride along in data.json, the only plugin file Obsidian Sync carries.
+    assert.equal(plugin.getSessionsPath(), '.obsidian/plugins/workspace-plus-plus/data.json');
 });
 
 test('session storage keeps existing vault-local files when no setting is explicit', async function () {
@@ -331,7 +308,7 @@ test('session storage explicit setting wins over detected legacy files', async f
     });
 
     assert.equal(location, 'plugin-folder');
-    assert.equal(plugin.getSessionsPath(), '.obsidian/plugins/workspace-plus-plus/sessions.json');
+    assert.equal(plugin.getSessionsPath(), '.obsidian/plugins/workspace-plus-plus/data.json');
 });
 
 test('session storage move writes sessions to the target without deleting the old file', async function () {
@@ -362,16 +339,26 @@ test('session storage move writes sessions to the target without deleting the ol
     plugin.app.vault.adapter.stat = function () {
         return Promise.resolve({ mtime: 2000 });
     };
+    plugin.saveData = function (data) {
+        plugin.savedData = data;
+        return Promise.resolve();
+    };
+    plugin.loadData = function () {
+        return Promise.resolve(plugin.savedData);
+    };
 
     const moved = await plugin.setSessionStorageLocation('plugin-folder', { silent: true });
 
     assert.equal(moved, true);
     assert.equal(plugin.getSessionStorageLocation(), 'plugin-folder');
     assert.equal(plugin.persistCalls, 1);
+    // data.json goes out through saveData(), so only the adapter-level writes show
+    // up here; the merged settings+sessions payload is asserted via savedData.
     assert.deepEqual(writes.map((w) => w.path), [
+        '.obsidian/plugins/workspace-plus-plus/history.json',
         '.obsidian/plugins/workspace-plus-plus/sessions.backup.json',
-        '.obsidian/plugins/workspace-plus-plus/sessions.json',
+        '.obsidian/plugins/workspace-plus-plus/data.backup.json',
     ]);
-    assert.equal(writes[1].data.sessions.local.name, 'Local');
+    assert.equal(plugin.savedData.sessions.local.name, 'Local');
     assert.deepEqual(removed, []);
 });

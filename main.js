@@ -184,11 +184,6 @@ var require_i18n = __commonJS({
         backupRestored: "Workspace++: Restored sessions from backup.",
         sessionDataMigrated: "Workspace++: Session data moved to .workspace-plus-plus/sessions.json.",
         sessionDataMigrationFailed: "Workspace++: Failed to migrate session data. Legacy data is still kept.",
-        localSettingsEnabled: "Workspace++: Vault-local settings enabled.",
-        localSettingsDisabled: "Workspace++: Vault-local settings disabled.",
-        localSettingsCopied: "Workspace++: Copied global settings to vault-local settings.",
-        localSettingsLoadFailed: "Workspace++: Failed to load vault-local settings. Using global settings.",
-        localSettingsOperationFailed: "Workspace++: Failed to update vault-local settings.",
         exportSessionsDone: function(path) {
           return "Workspace++: Exported sessions to " + path;
         },
@@ -309,14 +304,6 @@ var require_i18n = __commonJS({
         settingsHighlightUnsavedSessionChangesDesc: "When auto-save on switch is off, highlight the status bar when the current workspace layout differs from the saved session.",
         settingsStatusBarQuickSwitcher: "Quick switcher on status bar click",
         settingsStatusBarQuickSwitcherDesc: "When enabled, clicking the status bar opens the quick switcher overlay instead of the full session manager.",
-        settingsUseLocalSettings: "Use vault-local settings",
-        settingsUseLocalSettingsDesc: "Turn this on if you sync .obsidian between vaults (for example, with Settings Profiles) and want Workspace++ settings to stay different per vault.",
-        settingsCopyGlobalToLocal: "Copy global settings to this vault",
-        settingsCopyGlobalToLocalDesc: "Overwrite vault-local settings with your current global settings.",
-        settingsCopyGlobalToLocalBtn: "Copy",
-        settingsResetLocalSettings: "Reset vault-local settings",
-        settingsResetLocalSettingsDesc: "Reset vault-local settings back to your global settings.",
-        settingsResetLocalSettingsBtn: "Reset local",
         settingsAdvancedStorageSubsection: "Storage behavior",
         settingsAdvancedTransferSubsection: "Data transfer",
         settingsDeveloperSection: "Developer tools",
@@ -324,8 +311,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "Storage details currently used by Workspace++.",
         settingsStorageFieldSessions: "Sessions file",
         settingsStorageFieldSessionsBackup: "Sessions backup",
-        settingsStorageFieldLocalSettings: "Local settings file",
-        settingsStorageFieldGlobalSettings: "Global settings file",
         settingsStorageFieldSessionCount: "Session count",
         settingsStorageFieldUpdatedAt: "Updated at",
         settingsExportSessions: "Export sessions",
@@ -544,10 +529,10 @@ var require_i18n = __commonJS({
           return "\u201C" + n + "\u201D\u662F\u5F53\u524D\u6D3B\u52A8\u4F1A\u8BDD\uFF0C\u786E\u5B9A\u5220\u9664\uFF1F";
         },
         confirmSaveSession: function(n) {
-          return '\u4FDD\u5B58\u4F1A\u8BDD "' + n + '"\uFF1F';
+          return "\u4FDD\u5B58\u4F1A\u8BDD\u201C" + n + "\u201D\uFF1F";
         },
         confirmReloadSession: function(n) {
-          return '\u91CD\u65B0\u52A0\u8F7D\u4F1A\u8BDD "' + n + '"\uFF1F\u672A\u4FDD\u5B58\u7684\u66F4\u6539\u5C06\u4E22\u5931\u3002';
+          return "\u91CD\u65B0\u52A0\u8F7D\u4F1A\u8BDD\u201C" + n + "\u201D\uFF1F\u672A\u4FDD\u5B58\u7684\u66F4\u6539\u5C06\u4E22\u5931\u3002";
         },
         renameTitle: "\u91CD\u547D\u540D\u4F1A\u8BDD",
         renamePlaceholder: "\u65B0\u540D\u79F0\u2026",
@@ -584,13 +569,13 @@ var require_i18n = __commonJS({
           return name ? "\u5207\u6362\u81F3\u4F1A\u8BDD " + n + ": " + name : "\u5207\u6362\u81F3\u4F1A\u8BDD " + n;
         },
         cmdSwitchToNamed: function(name) {
-          return '\u5207\u6362\u81F3 "' + name + '"';
+          return "\u5207\u6362\u81F3\u201C" + name + "\u201D";
         },
         cmdPrevious: "\u4E0A\u4E00\u4E2A\u4F1A\u8BDD",
         cmdNext: "\u4E0B\u4E00\u4E2A\u4F1A\u8BDD",
         cmdSaveCurrent: "\u4FDD\u5B58\u5F53\u524D\u4F1A\u8BDD",
         cmdSaveAs: "\u5C06\u5F53\u524D\u4F1A\u8BDD\u53E6\u5B58\u4E3A...",
-        cmdToggleAutoSave: "\u5207\u6362\u4F1A\u8BDD\u5207\u6362\u65F6\u81EA\u52A8\u4FDD\u5B58",
+        cmdToggleAutoSave: "\u5207\u6362\u201C\u5207\u6362\u65F6\u81EA\u52A8\u4FDD\u5B58\u201D",
         cmdEnableAutoSave: "\u542F\u7528\u4F1A\u8BDD\u5207\u6362\u65F6\u81EA\u52A8\u4FDD\u5B58",
         cmdDisableAutoSave: "\u7981\u7528\u4F1A\u8BDD\u5207\u6362\u65F6\u81EA\u52A8\u4FDD\u5B58",
         cmdSearchOverlay: "\u641C\u7D22\u4F1A\u8BDD",
@@ -599,10 +584,10 @@ var require_i18n = __commonJS({
         switchGroup: "\u5206\u7EC4",
         keyTab: "Tab",
         savedSession: function(n) {
-          return "\u5DF2\u4FDD\u5B58\u4F1A\u8BDD\u201D" + n + "\u201D";
+          return "\u5DF2\u4FDD\u5B58\u4F1A\u8BDD\u201C" + n + "\u201D";
         },
         savedAs: function(n) {
-          return "\u5DF2\u53E6\u5B58\u4E3A\u201D" + n + "\u201D";
+          return "\u5DF2\u53E6\u5B58\u4E3A\u201C" + n + "\u201D";
         },
         noChanges: "\u6CA1\u6709\u9700\u8981\u4FDD\u5B58\u7684\u66F4\u6539",
         autoSaveEnabled: "\u5DF2\u542F\u7528\u4F1A\u8BDD\u5207\u6362\u65F6\u81EA\u52A8\u4FDD\u5B58\u3002",
@@ -624,8 +609,8 @@ var require_i18n = __commonJS({
         settingsLanguageDesc: "\u63D2\u4EF6\u754C\u9762\u8BED\u8A00\u3002\u91CD\u542F Obsidian \u540E\u547D\u4EE4\u540D\u79F0\u624D\u4F1A\u66F4\u65B0\u3002",
         settingsSectionGeneral: "\u5E38\u89C4",
         settingsTabSessions: "\u4F1A\u8BDD",
-        settingsSectionSwitching: "\u4F1A\u8BDD\u81EA\u52A8\u4FDD\u5B58",
-        settingsSectionSwitchPreview: "\u4F1A\u8BDD\u5207\u6362",
+        settingsSectionSwitching: "\u4F1A\u8BDD\u5207\u6362",
+        settingsSectionSwitchPreview: "\u5207\u6362\u524D\u9884\u89C8",
         settingsSectionDeletion: "\u4F1A\u8BDD\u5220\u9664",
         settingsLangAuto: "\u81EA\u52A8\uFF08\u7CFB\u7EDF\u8BED\u8A00\uFF09",
         settingsTranslationHelp: "\u53D1\u73B0\u7FFB\u8BD1\u9519\u8BEF\uFF1F\u8BF7\u5728 GitHub \u4E0A\u63D0\u4EA4 issue \u6216 Pull request\u3002",
@@ -774,13 +759,13 @@ var require_i18n = __commonJS({
         historyEmpty: "\u6B64\u4F1A\u8BDD\u6682\u65E0\u7248\u672C\u5386\u53F2\u3002",
         historyRestore: "\u6062\u590D",
         historyRestoreConfirm: function(name, time) {
-          return "\u5C06\u300C" + name + "\u300D\u7684\u5E03\u5C40\u6062\u590D\u5230 " + time + " \u7684\u72B6\u6001\uFF1F";
+          return "\u5C06\u201C" + name + "\u201D\u7684\u5E03\u5C40\u6062\u590D\u5230 " + time + " \u7684\u72B6\u6001\uFF1F";
         },
         historyRestored: function(name) {
-          return "\u5DF2\u6062\u590D\u300C" + name + "\u300D\u7684\u5E03\u5C40";
+          return "\u5DF2\u6062\u590D\u201C" + name + "\u201D\u7684\u5E03\u5C40";
         },
         historyQuickRestored: function(name) {
-          return "\u5DF2\u5FEB\u901F\u6062\u590D\u300C" + name + "\u300D\u7684\u4E0A\u4E00\u4E2A\u5E03\u5C40";
+          return "\u5DF2\u5FEB\u901F\u6062\u590D\u201C" + name + "\u201D\u7684\u4E0A\u4E00\u4E2A\u5E03\u5C40";
         },
         historyNoEntries: "\u6CA1\u6709\u53EF\u6062\u590D\u7684\u5386\u53F2\u8BB0\u5F55\u3002",
         historyToday: "\u4ECA\u5929",
@@ -876,10 +861,10 @@ var require_i18n = __commonJS({
           return "\u300C" + n + "\u300D\u662F\u76EE\u524D\u4F7F\u7528\u4E2D\u7684\u5DE5\u4F5C\u968E\u6BB5\uFF0C\u78BA\u5B9A\u522A\u9664\uFF1F";
         },
         confirmSaveSession: function(n) {
-          return '\u5132\u5B58\u5DE5\u4F5C\u968E\u6BB5 "' + n + '"\uFF1F';
+          return "\u5132\u5B58\u5DE5\u4F5C\u968E\u6BB5\u300C" + n + "\u300D\uFF1F";
         },
         confirmReloadSession: function(n) {
-          return '\u91CD\u65B0\u8F09\u5165\u5DE5\u4F5C\u968E\u6BB5 "' + n + '"\uFF1F\u672A\u5132\u5B58\u7684\u8B8A\u66F4\u5C07\u907A\u5931\u3002';
+          return "\u91CD\u65B0\u8F09\u5165\u5DE5\u4F5C\u968E\u6BB5\u300C" + n + "\u300D\uFF1F\u672A\u5132\u5B58\u7684\u8B8A\u66F4\u5C07\u907A\u5931\u3002";
         },
         renameTitle: "\u91CD\u65B0\u547D\u540D\u5DE5\u4F5C\u968E\u6BB5",
         renamePlaceholder: "\u65B0\u540D\u7A31\u2026",
@@ -916,13 +901,13 @@ var require_i18n = __commonJS({
           return name ? "\u5207\u63DB\u81F3\u5DE5\u4F5C\u968E\u6BB5 " + n + ": " + name : "\u5207\u63DB\u81F3\u5DE5\u4F5C\u968E\u6BB5 " + n;
         },
         cmdSwitchToNamed: function(name) {
-          return '\u5207\u63DB\u81F3 "' + name + '"';
+          return "\u5207\u63DB\u81F3\u300C" + name + "\u300D";
         },
         cmdPrevious: "\u4E0A\u4E00\u500B\u5DE5\u4F5C\u968E\u6BB5",
         cmdNext: "\u4E0B\u4E00\u500B\u5DE5\u4F5C\u968E\u6BB5",
         cmdSaveCurrent: "\u5132\u5B58\u76EE\u524D\u5DE5\u4F5C\u968E\u6BB5",
         cmdSaveAs: "\u5C07\u76EE\u524D\u5DE5\u4F5C\u968E\u6BB5\u53E6\u5B58\u70BA...",
-        cmdToggleAutoSave: "\u5207\u63DB\u5DE5\u4F5C\u968E\u6BB5\u5207\u63DB\u6642\u81EA\u52D5\u5132\u5B58",
+        cmdToggleAutoSave: "\u5207\u63DB\u300C\u5207\u63DB\u6642\u81EA\u52D5\u5132\u5B58\u300D",
         cmdEnableAutoSave: "\u555F\u7528\u5DE5\u4F5C\u968E\u6BB5\u5207\u63DB\u6642\u81EA\u52D5\u5132\u5B58",
         cmdDisableAutoSave: "\u505C\u7528\u5DE5\u4F5C\u968E\u6BB5\u5207\u63DB\u6642\u81EA\u52D5\u5132\u5B58",
         cmdSearchOverlay: "\u641C\u5C0B\u5DE5\u4F5C\u968E\u6BB5",
@@ -956,8 +941,8 @@ var require_i18n = __commonJS({
         settingsLanguageDesc: "\u5916\u639B\u4ECB\u9762\u8A9E\u8A00\u3002\u91CD\u65B0\u555F\u52D5 Obsidian \u5F8C\u547D\u4EE4\u540D\u7A31\u624D\u6703\u66F4\u65B0\u3002",
         settingsSectionGeneral: "\u4E00\u822C",
         settingsTabSessions: "\u5DE5\u4F5C\u968E\u6BB5",
-        settingsSectionSwitching: "\u5DE5\u4F5C\u968E\u6BB5\u81EA\u52D5\u5132\u5B58",
-        settingsSectionSwitchPreview: "\u5DE5\u4F5C\u968E\u6BB5\u5207\u63DB",
+        settingsSectionSwitching: "\u5DE5\u4F5C\u968E\u6BB5\u5207\u63DB",
+        settingsSectionSwitchPreview: "\u5207\u63DB\u524D\u9810\u89BD",
         settingsSectionDeletion: "\u5DE5\u4F5C\u968E\u6BB5\u522A\u9664",
         settingsLangAuto: "\u81EA\u52D5\uFF08\u7CFB\u7D71\u8A9E\u8A00\uFF09",
         settingsTranslationHelp: "\u767C\u73FE\u7FFB\u8B6F\u932F\u8AA4\uFF1F\u8ACB\u5728 GitHub \u4E0A\u63D0\u4EA4 issue \u6216 Pull request\u3002",
@@ -1003,7 +988,7 @@ var require_i18n = __commonJS({
         statusBarActionRestoreLatestHistory: "\u9084\u539F\u6700\u65B0\u6B77\u53F2",
         statusBarActionSessionMenu: "\u5DE5\u4F5C\u968E\u6BB5\u4E0A\u4E0B\u6587\u9078\u55AE",
         statusBarActionSettingsMenu: "\u8A2D\u5B9A\u4E0A\u4E0B\u6587\u9078\u55AE",
-        contextResetOverlayPosition: "\u91CD\u7F6E\u4F4D\u7F6E\u548C\u5927\u5C0F",
+        contextResetOverlayPosition: "\u91CD\u8A2D\u4F4D\u7F6E\u8207\u5927\u5C0F",
         settingsConfirmDelete: "\u522A\u9664\u5DE5\u4F5C\u968E\u6BB5\u524D\u78BA\u8A8D",
         settingsConfirmDeleteDesc: "\u522A\u9664\u5DE5\u4F5C\u968E\u6BB5\u524D\u986F\u793A\u78BA\u8A8D\u5C0D\u8A71\u6846\u3002",
         settingsConfirmQuickActions: "\u5FEB\u901F\u5207\u63DB\u5668\u4E2D\u5132\u5B58/\u91CD\u8F09\u524D\u78BA\u8A8D",
@@ -2031,7 +2016,7 @@ var require_i18n = __commonJS({
           return '\u062A\u0645\u062A \u0625\u0639\u0627\u062F\u0629 \u062A\u0633\u0645\u064A\u0629 \u0627\u0644\u0645\u062C\u0645\u0648\u0639\u0629: "' + o + '" \u2192 "' + n + '"';
         },
         groupAll: "\u0627\u0644\u0643\u0644",
-        groupDuplicateName: "\u064A\u0648\u062C\u062F \u0645\u062C\u0645\u0648\u0639\u0629 \u0628\u0647\u0630\u0627 \u0627\u0644\u0627\u0633\u0645 \u0628\u0627\u0644\u0641\u0639\u0644.",
+        groupDuplicateName: "\u062A\u0648\u062C\u062F \u0645\u062C\u0645\u0648\u0639\u0629 \u0628\u0647\u0630\u0627 \u0627\u0644\u0627\u0633\u0645 \u0628\u0627\u0644\u0641\u0639\u0644.",
         groupEmptyName: "\u0644\u0627 \u064A\u0645\u0643\u0646 \u0623\u0646 \u064A\u0643\u0648\u0646 \u0627\u0633\u0645 \u0627\u0644\u0645\u062C\u0645\u0648\u0639\u0629 \u0641\u0627\u0631\u063A\u064B\u0627.",
         cmdSwitchGroup: "\u062A\u0628\u062F\u064A\u0644 \u0627\u0644\u0645\u062C\u0645\u0648\u0639\u0629",
         cmdExitGroup: "\u0639\u0631\u0636 \u062C\u0645\u064A\u0639 \u0627\u0644\u062C\u0644\u0633\u0627\u062A (\u0645\u063A\u0627\u062F\u0631\u0629 \u0627\u0644\u0645\u062C\u0645\u0648\u0639\u0629)",
@@ -2087,14 +2072,14 @@ var require_i18n = __commonJS({
           return "\u062D\u0630\u0641 \u062C\u0645\u064A\u0639 \u0627\u0644\u0645\u062C\u0645\u0648\u0639\u0627\u062A (" + n + ")\u061F \u0644\u0646 \u064A\u062A\u0645 \u062D\u0630\u0641 \u0627\u0644\u062C\u0644\u0633\u0627\u062A.";
         },
         deletedAllGroups: function(n) {
-          return "\u062A\u0645 \u062D\u0630\u0641 " + n + " \u0645\u062C\u0645\u0648\u0639\u0629";
+          return "\u062A\u0645 \u062D\u0630\u0641 " + arPlural(n, "\u0645\u062C\u0645\u0648\u0639\u0629 \u0648\u0627\u062D\u062F\u0629", "\u0645\u062C\u0645\u0648\u0639\u062A\u064A\u0646", "\u0645\u062C\u0645\u0648\u0639\u0627\u062A", "\u0645\u062C\u0645\u0648\u0639\u0629");
         },
         contextDeleteAllSessions: "\u062D\u0630\u0641 \u062C\u0645\u064A\u0639 \u0627\u0644\u062C\u0644\u0633\u0627\u062A",
         confirmDeleteAllSessions: function(n) {
-          return "\u062D\u0630\u0641 " + n + " \u062C\u0644\u0633\u0629\u061F \u0633\u064A\u062A\u0645 \u0627\u0644\u0627\u062D\u062A\u0641\u0627\u0638 \u0628\u0627\u0644\u062C\u0644\u0633\u0629 \u0627\u0644\u0646\u0634\u0637\u0629.";
+          return "\u062D\u0630\u0641 " + arPlural(n, "\u062C\u0644\u0633\u0629 \u0648\u0627\u062D\u062F\u0629", "\u062C\u0644\u0633\u062A\u064A\u0646", "\u062C\u0644\u0633\u0627\u062A", "\u062C\u0644\u0633\u0629") + "\u061F \u0633\u064A\u062A\u0645 \u0627\u0644\u0627\u062D\u062A\u0641\u0627\u0638 \u0628\u0627\u0644\u062C\u0644\u0633\u0629 \u0627\u0644\u0646\u0634\u0637\u0629.";
         },
         deletedAllSessions: function(n) {
-          return "\u062A\u0645 \u062D\u0630\u0641 " + n + " \u062C\u0644\u0633\u0629";
+          return "\u062A\u0645 \u062D\u0630\u0641 " + arPlural(n, "\u062C\u0644\u0633\u0629 \u0648\u0627\u062D\u062F\u0629", "\u062C\u0644\u0633\u062A\u064A\u0646", "\u062C\u0644\u0633\u0627\u062A", "\u062C\u0644\u0633\u0629");
         },
         contextVersionHistory: "\u0633\u062C\u0644 \u0627\u0644\u0625\u0635\u062F\u0627\u0631\u0627\u062A",
         cmdVersionHistory: "\u0639\u0631\u0636 \u0633\u062C\u0644 \u0625\u0635\u062F\u0627\u0631\u0627\u062A \u0627\u0644\u062C\u0644\u0633\u0629",
@@ -2105,20 +2090,20 @@ var require_i18n = __commonJS({
           return '\u0627\u0633\u062A\u0639\u0627\u062F\u0629 \u062A\u062E\u0637\u064A\u0637 "' + name + '" \u0645\u0646 ' + time + "\u061F";
         },
         historyRestored: function(name) {
-          return '\u062A\u0645 \u0627\u0633\u062A\u0639\u0627\u062F\u0629 \u062A\u062E\u0637\u064A\u0637 "' + name + '"';
+          return '\u062A\u0645\u062A \u0627\u0633\u062A\u0639\u0627\u062F\u0629 \u062A\u062E\u0637\u064A\u0637 "' + name + '"';
         },
         historyQuickRestored: function(name) {
-          return '\u062A\u0645 \u0627\u0633\u062A\u0639\u0627\u062F\u0629 \u0627\u0644\u062A\u062E\u0637\u064A\u0637 \u0627\u0644\u0633\u0627\u0628\u0642 \u0644\u0640 "' + name + '" \u0628\u0633\u0631\u0639\u0629';
+          return '\u062A\u0645\u062A \u0627\u0633\u062A\u0639\u0627\u062F\u0629 \u0627\u0644\u062A\u062E\u0637\u064A\u0637 \u0627\u0644\u0633\u0627\u0628\u0642 \u0644\u0640 "' + name + '" \u0628\u0633\u0631\u0639\u0629';
         },
         historyNoEntries: "\u0644\u0627 \u062A\u0648\u062C\u062F \u062A\u062E\u0637\u064A\u0637\u0627\u062A \u0633\u0627\u0628\u0642\u0629 \u0644\u0644\u0627\u0633\u062A\u0639\u0627\u062F\u0629.",
         historyToday: "\u0627\u0644\u064A\u0648\u0645",
         historyYesterday: "\u0623\u0645\u0633",
         historyThisWeek: "\u0647\u0630\u0627 \u0627\u0644\u0623\u0633\u0628\u0648\u0639",
         historyFiles: function(n) {
-          return n + " \u0645\u0644\u0641";
+          return arPlural(n, "\u0645\u0644\u0641 \u0648\u0627\u062D\u062F", "\u0645\u0644\u0641\u0627\u0646", "\u0645\u0644\u0641\u0627\u062A", "\u0645\u0644\u0641");
         },
         historyPanes: function(n) {
-          return n + " \u0644\u0648\u062D\u0629";
+          return arPlural(n, "\u0644\u0648\u062D\u0629 \u0648\u0627\u062D\u062F\u0629", "\u0644\u0648\u062D\u062A\u0627\u0646", "\u0644\u0648\u062D\u0627\u062A", "\u0644\u0648\u062D\u0629");
         },
         settingsVersionHistoryEnabled: "\u062A\u0641\u0639\u064A\u0644 \u0633\u062C\u0644 \u0627\u0644\u0625\u0635\u062F\u0627\u0631\u0627\u062A",
         settingsVersionHistoryEnabledDesc: "\u0627\u0644\u0627\u062D\u062A\u0641\u0627\u0638 \u0628\u0633\u062C\u0644 \u062A\u063A\u064A\u064A\u0631\u0627\u062A \u0627\u0644\u062A\u062E\u0637\u064A\u0637 \u0644\u0643\u0644 \u062C\u0644\u0633\u0629.",
@@ -2136,13 +2121,13 @@ var require_i18n = __commonJS({
         rotationBackupDesc: "\u064A\u062A\u0645 \u0625\u0646\u0634\u0627\u0621 \u0646\u0633\u062E \u0627\u062D\u062A\u064A\u0627\u0637\u064A\u0629 \u062A\u0644\u0642\u0627\u0626\u064A\u0627\u064B \u0639\u0646\u062F \u0627\u0644\u062D\u0641\u0638 (\u0643\u0644 \u0633\u0627\u0639\u0629\u060C \u062D\u062A\u0649 3 \u0623\u062C\u064A\u0627\u0644).",
         rotationBackupRestore: "\u0627\u0633\u062A\u0639\u0627\u062F\u0629",
         rotationBackupRestoreConfirm: function(time, count) {
-          return "\u0627\u0633\u062A\u0639\u0627\u062F\u0629 \u0645\u0646 \u0627\u0644\u0646\u0633\u062E\u0629 \u0627\u0644\u0627\u062D\u062A\u064A\u0627\u0637\u064A\u0629 \u0641\u064A " + time + " (" + count + " \u062C\u0644\u0633\u0629)\u061F \u0633\u064A\u062A\u0645 \u0627\u0644\u0643\u062A\u0627\u0628\u0629 \u0641\u0648\u0642 \u0627\u0644\u0628\u064A\u0627\u0646\u0627\u062A \u0627\u0644\u062D\u0627\u0644\u064A\u0629.";
+          return "\u0627\u0633\u062A\u0639\u0627\u062F\u0629 \u0645\u0646 \u0627\u0644\u0646\u0633\u062E\u0629 \u0627\u0644\u0627\u062D\u062A\u064A\u0627\u0637\u064A\u0629 \u0641\u064A " + time + " (" + arPlural(count, "\u062C\u0644\u0633\u0629 \u0648\u0627\u062D\u062F\u0629", "\u062C\u0644\u0633\u062A\u0627\u0646", "\u062C\u0644\u0633\u0627\u062A", "\u062C\u0644\u0633\u0629") + ")\u061F \u0633\u064A\u062A\u0645 \u0627\u0644\u0643\u062A\u0627\u0628\u0629 \u0641\u0648\u0642 \u0627\u0644\u0628\u064A\u0627\u0646\u0627\u062A \u0627\u0644\u062D\u0627\u0644\u064A\u0629.";
         },
         rotationBackupRestored: "\u062A\u0645\u062A \u0627\u0644\u0627\u0633\u062A\u0639\u0627\u062F\u0629 \u0645\u0646 \u0627\u0644\u0646\u0633\u062E\u0629 \u0627\u0644\u0627\u062D\u062A\u064A\u0627\u0637\u064A\u0629.",
         rotationBackupRestoreFailed: "\u0641\u0634\u0644\u062A \u0627\u0644\u0627\u0633\u062A\u0639\u0627\u062F\u0629 \u0645\u0646 \u0627\u0644\u0646\u0633\u062E\u0629 \u0627\u0644\u0627\u062D\u062A\u064A\u0627\u0637\u064A\u0629.",
         rotationBackupNone: "\u0644\u0627 \u062A\u0648\u062C\u062F \u0646\u0633\u062E \u0627\u062D\u062A\u064A\u0627\u0637\u064A\u0629 \u0645\u062A\u0627\u062D\u0629.",
         rotationBackupGeneration: function(count) {
-          return count + " \u062C\u0644\u0633\u0629";
+          return arPlural(count, "\u062C\u0644\u0633\u0629 \u0648\u0627\u062D\u062F\u0629", "\u062C\u0644\u0633\u062A\u0627\u0646", "\u062C\u0644\u0633\u0627\u062A", "\u062C\u0644\u0633\u0629");
         },
         frontmatterSessionNotFound: function(n) {
           return "\u0627\u0644\u062C\u0644\u0633\u0629 \u201C" + n + "\u201D \u063A\u064A\u0631 \u0645\u0648\u062C\u0648\u062F\u0629 (workspace-session)";
@@ -2450,7 +2435,7 @@ var require_i18n = __commonJS({
           return n + " arquivo" + (n !== 1 ? "s" : "");
         },
         historyPanes: function(n) {
-          return n + " painel" + (n !== 1 ? "s" : "");
+          return n + (n !== 1 ? " pain\xE9is" : " painel");
         },
         settingsVersionHistoryEnabled: "Ativar hist\xF3rico de vers\xF5es",
         settingsVersionHistoryEnabledDesc: "Manter um hist\xF3rico de altera\xE7\xF5es de layout para cada sess\xE3o.",
@@ -2468,13 +2453,13 @@ var require_i18n = __commonJS({
         rotationBackupDesc: "Backups autom\xE1ticos s\xE3o criados ao salvar (a cada hora, at\xE9 3 gera\xE7\xF5es).",
         rotationBackupRestore: "Restaurar",
         rotationBackupRestoreConfirm: function(time, count) {
-          return "Restaurar do backup de " + time + " (" + count + " sess\xE3o" + (count !== 1 ? "\xF5es" : "") + ")? Os dados atuais ser\xE3o sobrescritos.";
+          return "Restaurar do backup de " + time + " (" + count + (count !== 1 ? " sess\xF5es" : " sess\xE3o") + ")? Os dados atuais ser\xE3o sobrescritos.";
         },
         rotationBackupRestored: "Restaurado a partir do backup.",
         rotationBackupRestoreFailed: "Falha ao restaurar a partir do backup.",
         rotationBackupNone: "Nenhum backup dispon\xEDvel.",
         rotationBackupGeneration: function(count) {
-          return count + " sess\xE3o" + (count !== 1 ? "\xF5es" : "");
+          return count + (count !== 1 ? " sess\xF5es" : " sess\xE3o");
         },
         frontmatterSessionNotFound: function(n) {
           return "Sess\xE3o \u201C" + n + "\u201D n\xE3o encontrada (workspace-session)";
@@ -2536,10 +2521,10 @@ var require_i18n = __commonJS({
           return "\xAB" + n + "\xBB \u2014 \u0430\u043A\u0442\u0438\u0432\u043D\u0430\u044F \u0441\u0435\u0441\u0441\u0438\u044F. \u0412\u0441\u0451 \u0440\u0430\u0432\u043D\u043E \u0443\u0434\u0430\u043B\u0438\u0442\u044C?";
         },
         confirmSaveSession: function(n) {
-          return '\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0441\u0435\u0441\u0441\u0438\u044E "' + n + '"?';
+          return "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0441\u0435\u0441\u0441\u0438\u044E \xAB" + n + "\xBB?";
         },
         confirmReloadSession: function(n) {
-          return '\u041F\u0435\u0440\u0435\u0437\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044C \u0441\u0435\u0441\u0441\u0438\u044E "' + n + '"? \u041D\u0435\u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u044B\u0435 \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u044F \u0431\u0443\u0434\u0443\u0442 \u043F\u043E\u0442\u0435\u0440\u044F\u043D\u044B.';
+          return "\u041F\u0435\u0440\u0435\u0437\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044C \u0441\u0435\u0441\u0441\u0438\u044E \xAB" + n + "\xBB? \u041D\u0435\u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u044B\u0435 \u0438\u0437\u043C\u0435\u043D\u0435\u043D\u0438\u044F \u0431\u0443\u0434\u0443\u0442 \u043F\u043E\u0442\u0435\u0440\u044F\u043D\u044B.";
         },
         renameTitle: "\u041F\u0435\u0440\u0435\u0438\u043C\u0435\u043D\u043E\u0432\u0430\u0442\u044C \u0441\u0435\u0441\u0441\u0438\u044E",
         renamePlaceholder: "\u041D\u043E\u0432\u043E\u0435 \u0438\u043C\u044F...",
@@ -2576,7 +2561,7 @@ var require_i18n = __commonJS({
           return name ? "\u041F\u0435\u0440\u0435\u0439\u0442\u0438 \u043A \u0441\u0435\u0441\u0441\u0438\u0438 " + n + ": " + name : "\u041F\u0435\u0440\u0435\u0439\u0442\u0438 \u043A \u0441\u0435\u0441\u0441\u0438\u0438 " + n;
         },
         cmdSwitchToNamed: function(name) {
-          return '\u041F\u0435\u0440\u0435\u0439\u0442\u0438 \u043A "' + name + '"';
+          return "\u041F\u0435\u0440\u0435\u0439\u0442\u0438 \u043A \xAB" + name + "\xBB";
         },
         cmdPrevious: "\u041F\u0440\u0435\u0434\u044B\u0434\u0443\u0449\u0430\u044F \u0441\u0435\u0441\u0441\u0438\u044F",
         cmdNext: "\u0421\u043B\u0435\u0434\u0443\u044E\u0449\u0430\u044F \u0441\u0435\u0441\u0441\u0438\u044F",
@@ -2616,8 +2601,8 @@ var require_i18n = __commonJS({
         settingsLanguageDesc: "\u042F\u0437\u044B\u043A \u0438\u043D\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u0430 \u043F\u043B\u0430\u0433\u0438\u043D\u0430. \u041F\u0435\u0440\u0435\u0437\u0430\u043F\u0443\u0441\u0442\u0438\u0442\u0435 Obsidian \u0434\u043B\u044F \u043E\u0431\u043D\u043E\u0432\u043B\u0435\u043D\u0438\u044F \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0439 \u043A\u043E\u043C\u0430\u043D\u0434.",
         settingsSectionGeneral: "\u041E\u0431\u0449\u0438\u0435",
         settingsTabSessions: "\u0421\u0435\u0441\u0441\u0438\u0438",
-        settingsSectionSwitching: "\u0410\u0432\u0442\u043E\u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0435 \u0441\u0435\u0441\u0441\u0438\u0439",
-        settingsSectionSwitchPreview: "\u041F\u0435\u0440\u0435\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u0435 \u0441\u0435\u0441\u0441\u0438\u0439",
+        settingsSectionSwitching: "\u041F\u0435\u0440\u0435\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u0435 \u0441\u0435\u0441\u0441\u0438\u0439",
+        settingsSectionSwitchPreview: "\u041F\u0440\u0435\u0434\u043F\u0440\u043E\u0441\u043C\u043E\u0442\u0440 \u043F\u0435\u0440\u0435\u0434 \u043F\u0435\u0440\u0435\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u0435\u043C",
         settingsSectionDeletion: "\u0423\u0434\u0430\u043B\u0435\u043D\u0438\u0435 \u0441\u0435\u0441\u0441\u0438\u0439",
         settingsLangAuto: "\u0410\u0432\u0442\u043E (\u044F\u0437\u044B\u043A \u0441\u0438\u0441\u0442\u0435\u043C\u044B)",
         settingsTranslationHelp: "\u041D\u0430\u0448\u043B\u0438 \u043E\u0448\u0438\u0431\u043A\u0443 \u0432 \u043F\u0435\u0440\u0435\u0432\u043E\u0434\u0435? \u0421\u043E\u0437\u0434\u0430\u0439\u0442\u0435 issue \u0438\u043B\u0438 pull request \u043D\u0430 GitHub.",
@@ -2800,19 +2785,19 @@ var require_i18n = __commonJS({
         rotationBackupDesc: "\u0420\u0435\u0437\u0435\u0440\u0432\u043D\u044B\u0435 \u043A\u043E\u043F\u0438\u0438 \u0441\u043E\u0437\u0434\u0430\u044E\u0442\u0441\u044F \u0430\u0432\u0442\u043E\u043C\u0430\u0442\u0438\u0447\u0435\u0441\u043A\u0438 \u043F\u0440\u0438 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u0438 (\u043A\u0430\u0436\u0434\u044B\u0439 \u0447\u0430\u0441, \u0434\u043E 3 \u043F\u043E\u043A\u043E\u043B\u0435\u043D\u0438\u0439).",
         rotationBackupRestore: "\u0412\u043E\u0441\u0441\u0442\u0430\u043D\u043E\u0432\u0438\u0442\u044C",
         rotationBackupRestoreConfirm: function(time, count) {
-          return "\u0412\u043E\u0441\u0441\u0442\u0430\u043D\u043E\u0432\u0438\u0442\u044C \u0438\u0437 \u0440\u0435\u0437\u0435\u0440\u0432\u043D\u043E\u0439 \u043A\u043E\u043F\u0438\u0438 \u043E\u0442 " + time + " (" + count + " \u0441\u0435\u0430\u043D\u0441" + (count === 1 ? "" : "\u043E\u0432") + ")? \u0422\u0435\u043A\u0443\u0449\u0438\u0435 \u0434\u0430\u043D\u043D\u044B\u0435 \u0431\u0443\u0434\u0443\u0442 \u043F\u0435\u0440\u0435\u0437\u0430\u043F\u0438\u0441\u0430\u043D\u044B.";
+          return "\u0412\u043E\u0441\u0441\u0442\u0430\u043D\u043E\u0432\u0438\u0442\u044C \u0438\u0437 \u0440\u0435\u0437\u0435\u0440\u0432\u043D\u043E\u0439 \u043A\u043E\u043F\u0438\u0438 \u043E\u0442 " + time + " (" + count + " " + ruPlural(count, "\u0441\u0435\u0441\u0441\u0438\u044F", "\u0441\u0435\u0441\u0441\u0438\u0438", "\u0441\u0435\u0441\u0441\u0438\u0439") + ")? \u0422\u0435\u043A\u0443\u0449\u0438\u0435 \u0434\u0430\u043D\u043D\u044B\u0435 \u0431\u0443\u0434\u0443\u0442 \u043F\u0435\u0440\u0435\u0437\u0430\u043F\u0438\u0441\u0430\u043D\u044B.";
         },
         rotationBackupRestored: "\u0412\u043E\u0441\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D\u043E \u0438\u0437 \u0440\u0435\u0437\u0435\u0440\u0432\u043D\u043E\u0439 \u043A\u043E\u043F\u0438\u0438.",
         rotationBackupRestoreFailed: "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0432\u043E\u0441\u0441\u0442\u0430\u043D\u043E\u0432\u0438\u0442\u044C \u0438\u0437 \u0440\u0435\u0437\u0435\u0440\u0432\u043D\u043E\u0439 \u043A\u043E\u043F\u0438\u0438.",
         rotationBackupNone: "\u041D\u0435\u0442 \u0434\u043E\u0441\u0442\u0443\u043F\u043D\u044B\u0445 \u0440\u0435\u0437\u0435\u0440\u0432\u043D\u044B\u0445 \u043A\u043E\u043F\u0438\u0439.",
         rotationBackupGeneration: function(count) {
-          return count + " \u0441\u0435\u0430\u043D\u0441" + (count === 1 ? "" : "\u043E\u0432");
+          return count + " " + ruPlural(count, "\u0441\u0435\u0441\u0441\u0438\u044F", "\u0441\u0435\u0441\u0441\u0438\u0438", "\u0441\u0435\u0441\u0441\u0438\u0439");
         },
         frontmatterSessionNotFound: function(n) {
-          return "\u0421\u0435\u0430\u043D\u0441 \xAB" + n + "\xBB \u043D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D (workspace-session)";
+          return "\u0421\u0435\u0441\u0441\u0438\u044F \xAB" + n + "\xBB \u043D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D\u0430 (workspace-session)";
         },
         frontmatterAlreadyActive: function(n) {
-          return "\u0421\u0435\u0430\u043D\u0441 \xAB" + n + "\xBB \u0443\u0436\u0435 \u0430\u043A\u0442\u0438\u0432\u0435\u043D";
+          return "\u0421\u0435\u0441\u0441\u0438\u044F \xAB" + n + "\xBB \u0443\u0436\u0435 \u0430\u043A\u0442\u0438\u0432\u043D\u0430";
         }
       },
       de: {
@@ -2868,10 +2853,10 @@ var require_i18n = __commonJS({
           return "\u201E" + n + "\u201C ist die aktive Sitzung. Trotzdem l\xF6schen?";
         },
         confirmSaveSession: function(n) {
-          return 'Sitzung "' + n + '" speichern?';
+          return "Sitzung \u201E" + n + "\u201C speichern?";
         },
         confirmReloadSession: function(n) {
-          return 'Sitzung "' + n + '" neu laden? Nicht gespeicherte \xC4nderungen gehen verloren.';
+          return "Sitzung \u201E" + n + "\u201C neu laden? Nicht gespeicherte \xC4nderungen gehen verloren.";
         },
         renameTitle: "Sitzung umbenennen",
         renamePlaceholder: "Neuer Name...",
@@ -2908,7 +2893,7 @@ var require_i18n = __commonJS({
           return name ? "Zu Sitzung " + n + " wechseln: " + name : "Zu Sitzung " + n + " wechseln";
         },
         cmdSwitchToNamed: function(name) {
-          return 'Zu "' + name + '" wechseln';
+          return "Zu \u201E" + name + "\u201C wechseln";
         },
         cmdPrevious: "Vorherige Sitzung",
         cmdNext: "N\xE4chste Sitzung",
@@ -2948,8 +2933,8 @@ var require_i18n = __commonJS({
         settingsLanguageDesc: "Sprache der Oberfl\xE4che. Starten Sie Obsidian neu, um Befehlsnamen zu aktualisieren.",
         settingsSectionGeneral: "Allgemein",
         settingsTabSessions: "Sitzungen",
-        settingsSectionSwitching: "Automatische Sitzungsspeicherung",
-        settingsSectionSwitchPreview: "Sitzungswechsel",
+        settingsSectionSwitching: "Sitzungswechsel",
+        settingsSectionSwitchPreview: "Vorschau vor dem Wechsel",
         settingsSectionDeletion: "Sitzungsl\xF6schung",
         settingsLangAuto: "Automatisch (Systemsprache)",
         settingsTranslationHelp: "\xDCbersetzungsfehler gefunden? Erstellen Sie ein Issue oder einen Pull Request auf GitHub.",
@@ -3036,7 +3021,7 @@ var require_i18n = __commonJS({
         searchOverlayHelpWithGroups: "\u2191\u2193 bewegen  /  Tab Gruppe  /  Enter wechseln  /  \u21E7Enter speichern  /  \u232B l\xF6schen  /  Esc schlie\xDFen",
         settingsSectionGroups: "Sitzungsgruppen",
         contextToggleGroups: "Sitzungsgruppen aktivieren",
-        settingsSectionGroupsDesc: "Verwende Gruppen, um Sitzungen zu organisieren. Wenn deaktiviert, werden Gruppen-Tabs und Gruppenwechsel-Aktionen ausgeblendet.",
+        settingsSectionGroupsDesc: "Verwenden Sie Gruppen, um Sitzungen zu organisieren. Wenn deaktiviert, werden Gruppen-Tabs und Gruppenwechsel-Aktionen ausgeblendet.",
         settingsGroupCreate: "Gruppe erstellen",
         settingsGroupCreateDesc: "Eine neue Sitzungsgruppe erstellen.",
         settingsGroupCreatePlaceholder: "Gruppenname...",
@@ -3098,13 +3083,13 @@ var require_i18n = __commonJS({
         historyEmpty: "Kein Versionsverlauf f\xFCr diese Sitzung.",
         historyRestore: "Wiederherstellen",
         historyRestoreConfirm: function(name, time) {
-          return "Layout von \u201E" + name + '" von ' + time + " wiederherstellen?";
+          return "Layout von \u201E" + name + "\u201C von " + time + " wiederherstellen?";
         },
         historyRestored: function(name) {
-          return "Layout von \u201E" + name + '" wiederhergestellt';
+          return "Layout von \u201E" + name + "\u201C wiederhergestellt";
         },
         historyQuickRestored: function(name) {
-          return "Vorheriges Layout von \u201E" + name + '" schnell wiederhergestellt';
+          return "Vorheriges Layout von \u201E" + name + "\u201C schnell wiederhergestellt";
         },
         historyNoEntries: "Keine vorherigen Layouts zum Wiederherstellen.",
         historyToday: "Heute",
@@ -3295,11 +3280,6 @@ var require_i18n = __commonJS({
         backupRestored: "Workspace++: \u30D0\u30C3\u30AF\u30A2\u30C3\u30D7\u304B\u3089\u30BB\u30C3\u30B7\u30E7\u30F3\u3092\u5FA9\u5143\u3057\u307E\u3057\u305F\u3002",
         sessionDataMigrated: "Workspace++: \u30BB\u30C3\u30B7\u30E7\u30F3\u30C7\u30FC\u30BF\u3092 .workspace-plus-plus/sessions.json \u306B\u79FB\u884C\u3057\u307E\u3057\u305F\u3002",
         sessionDataMigrationFailed: "Workspace++: \u30BB\u30C3\u30B7\u30E7\u30F3\u30C7\u30FC\u30BF\u306E\u79FB\u884C\u306B\u5931\u6557\u3057\u307E\u3057\u305F\u3002\u65E2\u5B58\u30C7\u30FC\u30BF\u306F\u4FDD\u6301\u3055\u308C\u3066\u3044\u307E\u3059\u3002",
-        localSettingsEnabled: "Workspace++: Vault\u3054\u3068\u306E\u8A2D\u5B9A\u3092\u6709\u52B9\u306B\u3057\u307E\u3057\u305F\u3002",
-        localSettingsDisabled: "Workspace++: Vault\u3054\u3068\u306E\u8A2D\u5B9A\u3092\u7121\u52B9\u306B\u3057\u307E\u3057\u305F\u3002",
-        localSettingsCopied: "Workspace++: \u30B0\u30ED\u30FC\u30D0\u30EB\u8A2D\u5B9A\u3092Vault\u3054\u3068\u306E\u8A2D\u5B9A\u306B\u30B3\u30D4\u30FC\u3057\u307E\u3057\u305F\u3002",
-        localSettingsLoadFailed: "Workspace++: Vault\u3054\u3068\u306E\u8A2D\u5B9A\u3092\u8AAD\u307F\u8FBC\u3081\u307E\u305B\u3093\u3067\u3057\u305F\u3002\u30B0\u30ED\u30FC\u30D0\u30EB\u8A2D\u5B9A\u3092\u4F7F\u7528\u3057\u307E\u3059\u3002",
-        localSettingsOperationFailed: "Workspace++: Vault\u3054\u3068\u306E\u8A2D\u5B9A\u306E\u66F4\u65B0\u306B\u5931\u6557\u3057\u307E\u3057\u305F\u3002",
         exportSessionsDone: function(path) {
           return "Workspace++: \u30BB\u30C3\u30B7\u30E7\u30F3\u3092 " + path + " \u306B\u66F8\u304D\u51FA\u3057\u307E\u3057\u305F\u3002";
         },
@@ -3420,14 +3400,6 @@ var require_i18n = __commonJS({
         settingsHighlightUnsavedSessionChangesDesc: "\u30BB\u30C3\u30B7\u30E7\u30F3\u5207\u308A\u66FF\u3048\u6642\u306E\u81EA\u52D5\u4FDD\u5B58\u304C\u30AA\u30D5\u306E\u3068\u304D\u3001\u73FE\u5728\u306E\u30EF\u30FC\u30AF\u30B9\u30DA\u30FC\u30B9\u914D\u7F6E\u304C\u4FDD\u5B58\u6E08\u307F\u30BB\u30C3\u30B7\u30E7\u30F3\u3068\u7570\u306A\u308B\u5834\u5408\u306B\u30B9\u30C6\u30FC\u30BF\u30B9\u30D0\u30FC\u3092\u5F37\u8ABF\u8868\u793A\u3057\u307E\u3059\u3002",
         settingsStatusBarQuickSwitcher: "\u30B9\u30C6\u30FC\u30BF\u30B9\u30D0\u30FC\u30AF\u30EA\u30C3\u30AF\u3067\u30AF\u30A4\u30C3\u30AF\u30B9\u30A4\u30C3\u30C1\u30E3\u30FC\u3092\u958B\u304F",
         settingsStatusBarQuickSwitcherDesc: "\u6709\u52B9\u306B\u3059\u308B\u3068\u3001\u30B9\u30C6\u30FC\u30BF\u30B9\u30D0\u30FC\u306E\u30AF\u30EA\u30C3\u30AF\u3067\u30BB\u30C3\u30B7\u30E7\u30F3\u30DE\u30CD\u30FC\u30B8\u30E3\u30FC\u306E\u4EE3\u308F\u308A\u306B\u30AF\u30A4\u30C3\u30AF\u30B9\u30A4\u30C3\u30C1\u30E3\u30FC\u3092\u958B\u304D\u307E\u3059\u3002",
-        settingsUseLocalSettings: "Vault\u3054\u3068\u306E\u8A2D\u5B9A\u3092\u4F7F\u3046",
-        settingsUseLocalSettingsDesc: "\u8907\u6570Vault\u3067 .obsidian \u3092\u540C\u671F\u3057\u3066\u3044\u308B\u5834\u5408\uFF08\u4F8B: Settings Profiles\uFF09\u306B\u6709\u52B9\u3067\u3059\u3002Workspace++ \u306E\u8A2D\u5B9A\u3092Vault\u3054\u3068\u306B\u5206\u3051\u3066\u4FDD\u5B58\u3057\u307E\u3059\u3002",
-        settingsCopyGlobalToLocal: "\u30B0\u30ED\u30FC\u30D0\u30EB\u8A2D\u5B9A\u3092\u3053\u306EVault\u3078\u30B3\u30D4\u30FC",
-        settingsCopyGlobalToLocalDesc: "\u73FE\u5728\u306E\u30B0\u30ED\u30FC\u30D0\u30EB\u8A2D\u5B9A\u3067Vault\u3054\u3068\u306E\u8A2D\u5B9A\u3092\u4E0A\u66F8\u304D\u3057\u307E\u3059\u3002",
-        settingsCopyGlobalToLocalBtn: "\u30B3\u30D4\u30FC",
-        settingsResetLocalSettings: "Vault\u3054\u3068\u306E\u8A2D\u5B9A\u3092\u30EA\u30BB\u30C3\u30C8",
-        settingsResetLocalSettingsDesc: "Vault\u3054\u3068\u306E\u8A2D\u5B9A\u3092\u30B0\u30ED\u30FC\u30D0\u30EB\u8A2D\u5B9A\u306B\u623B\u3057\u307E\u3059\u3002",
-        settingsResetLocalSettingsBtn: "\u30ED\u30FC\u30AB\u30EB\u3092\u30EA\u30BB\u30C3\u30C8",
         settingsAdvancedStorageSubsection: "\u4FDD\u5B58\u5148\u306E\u6319\u52D5",
         settingsAdvancedTransferSubsection: "\u30C7\u30FC\u30BF\u79FB\u884C",
         settingsDeveloperSection: "\u958B\u767A\u8005\u5411\u3051",
@@ -3435,8 +3407,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "Workspace++ \u304C\u73FE\u5728\u4F7F\u3063\u3066\u3044\u308B\u4FDD\u5B58\u5148\u60C5\u5831\u3067\u3059\u3002",
         settingsStorageFieldSessions: "\u30BB\u30C3\u30B7\u30E7\u30F3\u4FDD\u5B58\u30D5\u30A1\u30A4\u30EB",
         settingsStorageFieldSessionsBackup: "\u30BB\u30C3\u30B7\u30E7\u30F3\u30D0\u30C3\u30AF\u30A2\u30C3\u30D7",
-        settingsStorageFieldLocalSettings: "\u30ED\u30FC\u30AB\u30EB\u8A2D\u5B9A\u30D5\u30A1\u30A4\u30EB",
-        settingsStorageFieldGlobalSettings: "\u30B0\u30ED\u30FC\u30D0\u30EB\u8A2D\u5B9A\u30D5\u30A1\u30A4\u30EB",
         settingsStorageFieldSessionCount: "\u30BB\u30C3\u30B7\u30E7\u30F3\u6570",
         settingsStorageFieldUpdatedAt: "\u66F4\u65B0\u65E5\u6642",
         settingsExportSessions: "\u30BB\u30C3\u30B7\u30E7\u30F3\u3092\u66F8\u304D\u51FA\u3057",
@@ -3701,7 +3671,7 @@ var require_i18n = __commonJS({
         cmdNext: "\uB2E4\uC74C \uC138\uC158",
         cmdSaveCurrent: "\uD604\uC7AC \uC138\uC158 \uC800\uC7A5",
         cmdSaveAs: "\uD604\uC7AC \uC138\uC158\uC744 \uB2E4\uB978 \uC774\uB984\uC73C\uB85C \uC800\uC7A5...",
-        cmdToggleAutoSave: "\uC804\uD658 \uC2DC \uC790\uB3D9 \uC800\uC7A5 \uC804\uD658",
+        cmdToggleAutoSave: "\uC804\uD658 \uC2DC \uC790\uB3D9 \uC800\uC7A5 \uCF1C\uAE30/\uB044\uAE30",
         cmdEnableAutoSave: "\uC804\uD658 \uC2DC \uC790\uB3D9 \uC800\uC7A5 \uCF1C\uAE30",
         cmdDisableAutoSave: "\uC804\uD658 \uC2DC \uC790\uB3D9 \uC800\uC7A5 \uB044\uAE30",
         cmdSearchOverlay: "\uC138\uC158 \uAC80\uC0C9",
@@ -3735,8 +3705,8 @@ var require_i18n = __commonJS({
         settingsLanguageDesc: "\uD50C\uB7EC\uADF8\uC778 UI \uC5B8\uC5B4. \uBA85\uB839\uC5B4 \uC774\uB984\uC5D0 \uC801\uC6A9\uD558\uB824\uBA74 Obsidian\uC744 \uB2E4\uC2DC \uC2DC\uC791\uD558\uC138\uC694.",
         settingsSectionGeneral: "\uC77C\uBC18",
         settingsTabSessions: "\uC138\uC158",
-        settingsSectionSwitching: "\uC138\uC158 \uC790\uB3D9 \uC800\uC7A5",
-        settingsSectionSwitchPreview: "\uC138\uC158 \uC804\uD658",
+        settingsSectionSwitching: "\uC138\uC158 \uC804\uD658",
+        settingsSectionSwitchPreview: "\uC804\uD658 \uC804 \uBBF8\uB9AC\uBCF4\uAE30",
         settingsSectionDeletion: "\uC138\uC158 \uC0AD\uC81C",
         settingsLangAuto: "\uC790\uB3D9 (\uC2DC\uC2A4\uD15C \uC5B8\uC5B4)",
         settingsTranslationHelp: "\uBC88\uC5ED \uC624\uB958\uB97C \uBC1C\uACAC\uD558\uC168\uB098\uC694? GitHub\uC5D0\uC11C issue \uB610\uB294 Pull request\uB97C \uBCF4\uB0B4\uC8FC\uC138\uC694.",
@@ -4505,10 +4475,10 @@ var require_i18n = __commonJS({
           return '"' + n + '" grubu silinsin mi? Gruptaki oturumlar S\u0130L\u0130NMEYECEK.';
         },
         groupAddedSession: function(s, g) {
-          return '"' + s + '" grubuna "' + g + '" eklendi';
+          return '"' + g + '" grubuna "' + s + '" eklendi';
         },
         groupRemovedSession: function(s, g) {
-          return '"' + s + '" grubundan "' + g + '" \xE7\u0131kar\u0131ld\u0131';
+          return '"' + g + '" grubundan "' + s + '" \xE7\u0131kar\u0131ld\u0131';
         },
         groupRemoveFromGroup: "Gruptan \xE7\u0131kar",
         groupMoveToGroup: "Gruba ta\u015F\u0131",
@@ -4549,7 +4519,7 @@ var require_i18n = __commonJS({
         historyEmpty: "Bu oturum i\xE7in s\xFCr\xFCm ge\xE7mi\u015Fi yok.",
         historyRestore: "Geri y\xFCkle",
         historyRestoreConfirm: function(name, time) {
-          return '"' + name + '" d\xFCzenini ' + time + " durumuna geri y\xFCklensin mi?";
+          return '"' + name + '" d\xFCzeni ' + time + " durumuna geri y\xFCklensin mi?";
         },
         historyRestored: function(name) {
           return '"' + name + '" d\xFCzeni geri y\xFCklendi';
@@ -4825,7 +4795,7 @@ var require_i18n = __commonJS({
         settingsGroupCreatePlaceholder: "Nama grup...",
         settingsGroupCreateBtn: "Buat",
         settingsGroupManageSessions: "Kelola sesi",
-        settingsGroupManageSessionsDesc: "Tambah atau hapus sesi dari grup ini.",
+        settingsGroupManageSessionsDesc: "Tambah atau keluarkan sesi dari grup ini.",
         settingsGroupSessionCount: function(n) {
           return n + " sesi";
         },
@@ -5078,11 +5048,6 @@ var require_i18n = __commonJS({
         backupRestored: "Workspace++: \u0110\xE3 kh\xF4i ph\u1EE5c phi\xEAn l\xE0m vi\u1EC7c t\u1EEB b\u1EA3n sao l\u01B0u.",
         sessionDataMigrated: "Workspace++: D\u1EEF li\u1EC7u phi\xEAn l\xE0m vi\u1EC7c \u0111\xE3 \u0111\u01B0\u1EE3c chuy\u1EC3n sang .workspace-plus-plus/sessions.json.",
         sessionDataMigrationFailed: "Workspace++: Kh\xF4ng th\u1EC3 chuy\u1EC3n d\u1EEF li\u1EC7u phi\xEAn l\xE0m vi\u1EC7c. D\u1EEF li\u1EC7u c\u0169 v\u1EABn \u0111\u01B0\u1EE3c gi\u1EEF l\u1EA1i.",
-        localSettingsEnabled: "Workspace++: \u0110\xE3 b\u1EADt c\xE0i \u0111\u1EB7t ri\xEAng cho vault.",
-        localSettingsDisabled: "Workspace++: \u0110\xE3 t\u1EAFt c\xE0i \u0111\u1EB7t ri\xEAng cho vault.",
-        localSettingsCopied: "Workspace++: \u0110\xE3 sao ch\xE9p c\xE0i \u0111\u1EB7t to\xE0n c\u1EE5c sang c\xE0i \u0111\u1EB7t ri\xEAng cho vault.",
-        localSettingsLoadFailed: "Workspace++: Kh\xF4ng th\u1EC3 t\u1EA3i c\xE0i \u0111\u1EB7t ri\xEAng cho vault. S\u1EBD d\xF9ng c\xE0i \u0111\u1EB7t to\xE0n c\u1EE5c.",
-        localSettingsOperationFailed: "Workspace++: Kh\xF4ng th\u1EC3 c\u1EADp nh\u1EADt c\xE0i \u0111\u1EB7t ri\xEAng cho vault.",
         exportSessionsDone: function(path) {
           return "Workspace++: \u0110\xE3 xu\u1EA5t phi\xEAn l\xE0m vi\u1EC7c t\u1EDBi " + path;
         },
@@ -5118,11 +5083,11 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollPresetCustom: "T\xF9y ch\u1EC9nh",
         settingsStatusBarScrollModifier: "Ph\xEDm b\u1ED5 tr\u1EE3 b\u1EAFt bu\u1ED9c",
         settingsStatusBarScrollModifierDesc: "Ch\u1ECDn ph\xEDm b\u1ED5 tr\u1EE3 c\u1EA7n gi\u1EEF khi cu\u1ED9n tr\xEAn m\u1EE5c thanh tr\u1EA1ng th\xE1i.",
-        settingsStatusBarScrollModifierRecommended: "Cmd ho\u1EB7c Option",
+        settingsStatusBarScrollModifierRecommended: platformLabel("Cmd ho\u1EB7c Option", "Ctrl ho\u1EB7c Alt"),
         settingsStatusBarScrollModifierNone: "Kh\xF4ng",
-        settingsStatusBarScrollModifierModOnly: "Ch\u1EC9 Cmd",
-        settingsStatusBarScrollModifierAltOnly: "Ch\u1EC9 Option",
-        settingsStatusBarScrollModifierModOrAlt: "Cmd ho\u1EB7c Option",
+        settingsStatusBarScrollModifierModOnly: platformLabel("Ch\u1EC9 Cmd", "Ch\u1EC9 Ctrl"),
+        settingsStatusBarScrollModifierAltOnly: platformLabel("Ch\u1EC9 Option", "Ch\u1EC9 Alt"),
+        settingsStatusBarScrollModifierModOrAlt: platformLabel("Cmd ho\u1EB7c Option", "Ctrl ho\u1EB7c Alt"),
         settingsStatusBarScrollThreshold: "Ng\u01B0\u1EE1ng \u0111\u1ED9 nh\u1EA1y",
         settingsStatusBarScrollThresholdDesc: "Gi\xE1 tr\u1ECB th\u1EA5p h\u01A1n s\u1EBD chuy\u1EC3n phi\xEAn d\u1EC5 h\u01A1n. Ch\u1EC9 d\xF9ng khi c\u1EA5u h\xECnh l\xE0 T\xF9y ch\u1EC9nh.",
         settingsStatusBarScrollCooldown: "Th\u1EDDi gian ch\u1EDD",
@@ -5189,14 +5154,6 @@ var require_i18n = __commonJS({
         settingsHighlightUnsavedSessionChangesDesc: "Khi t\u1EF1 \u0111\u1ED9ng l\u01B0u l\xFAc chuy\u1EC3n phi\xEAn b\u1ECB t\u1EAFt, t\xF4 s\xE1ng thanh tr\u1EA1ng th\xE1i n\u1EBFu b\u1ED1 c\u1EE5c kh\xF4ng gian l\xE0m vi\u1EC7c hi\u1EC7n t\u1EA1i kh\xE1c v\u1EDBi phi\xEAn \u0111\xE3 l\u01B0u.",
         settingsStatusBarQuickSwitcher: "M\u1EDF tr\xECnh chuy\u1EC3n nhanh khi nh\u1EA5p thanh tr\u1EA1ng th\xE1i",
         settingsStatusBarQuickSwitcherDesc: "Khi b\u1EADt, nh\u1EA5p v\xE0o thanh tr\u1EA1ng th\xE1i s\u1EBD m\u1EDF l\u1EDBp ph\u1EE7 tr\xECnh chuy\u1EC3n nhanh thay v\xEC tr\xECnh qu\u1EA3n l\xFD phi\xEAn \u0111\u1EA7y \u0111\u1EE7.",
-        settingsUseLocalSettings: "D\xF9ng c\xE0i \u0111\u1EB7t ri\xEAng cho vault",
-        settingsUseLocalSettingsDesc: "B\u1EADt t\xF9y ch\u1ECDn n\xE0y n\u1EBFu b\u1EA1n \u0111\u1ED3ng b\u1ED9 .obsidian gi\u1EEFa nhi\u1EC1u vault (v\xED d\u1EE5 b\u1EB1ng Settings Profiles) v\xE0 mu\u1ED1n c\xE0i \u0111\u1EB7t Workspace++ kh\xE1c nhau theo t\u1EEBng vault.",
-        settingsCopyGlobalToLocal: "Sao ch\xE9p c\xE0i \u0111\u1EB7t to\xE0n c\u1EE5c v\xE0o vault n\xE0y",
-        settingsCopyGlobalToLocalDesc: "Ghi \u0111\xE8 c\xE0i \u0111\u1EB7t ri\xEAng cho vault b\u1EB1ng c\xE0i \u0111\u1EB7t to\xE0n c\u1EE5c hi\u1EC7n t\u1EA1i.",
-        settingsCopyGlobalToLocalBtn: "Sao ch\xE9p",
-        settingsResetLocalSettings: "\u0110\u1EB7t l\u1EA1i c\xE0i \u0111\u1EB7t ri\xEAng cho vault",
-        settingsResetLocalSettingsDesc: "\u0110\u1EB7t l\u1EA1i c\xE0i \u0111\u1EB7t ri\xEAng cho vault v\u1EC1 c\xE0i \u0111\u1EB7t to\xE0n c\u1EE5c.",
-        settingsResetLocalSettingsBtn: "\u0110\u1EB7t l\u1EA1i c\u1EE5c b\u1ED9",
         settingsAdvancedStorageSubsection: "H\xE0nh vi l\u01B0u tr\u1EEF",
         settingsAdvancedTransferSubsection: "Chuy\u1EC3n d\u1EEF li\u1EC7u",
         settingsDeveloperSection: "C\xF4ng c\u1EE5 nh\xE0 ph\xE1t tri\u1EC3n",
@@ -5204,8 +5161,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "Th\xF4ng tin l\u01B0u tr\u1EEF Workspace++ \u0111ang d\xF9ng.",
         settingsStorageFieldSessions: "T\u1EC7p phi\xEAn l\xE0m vi\u1EC7c",
         settingsStorageFieldSessionsBackup: "B\u1EA3n sao l\u01B0u phi\xEAn",
-        settingsStorageFieldLocalSettings: "T\u1EC7p c\xE0i \u0111\u1EB7t c\u1EE5c b\u1ED9",
-        settingsStorageFieldGlobalSettings: "T\u1EC7p c\xE0i \u0111\u1EB7t to\xE0n c\u1EE5c",
         settingsStorageFieldSessionCount: "S\u1ED1 phi\xEAn",
         settingsStorageFieldUpdatedAt: "C\u1EADp nh\u1EADt l\xFAc",
         settingsExportSessions: "Xu\u1EA5t phi\xEAn l\xE0m vi\u1EC7c",
@@ -5398,7 +5353,7 @@ var require_i18n = __commonJS({
           return "\u0E41\u0E01\u0E49\u0E44\u0E02\u0E40\u0E21\u0E37\u0E48\u0E2D " + n + " \u0E27\u0E31\u0E19\u0E17\u0E35\u0E48\u0E41\u0E25\u0E49\u0E27";
         },
         duplicateName: "\u0E21\u0E35\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E0A\u0E37\u0E48\u0E2D\u0E19\u0E35\u0E49\u0E2D\u0E22\u0E39\u0E48\u0E41\u0E25\u0E49\u0E27",
-        emptyName: "\u0E0A\u0E37\u0E48\u0E2D\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E15\u0E49\u0E2D\u0E07\u0E44\u0E21\u0E48\u0E27\u0E48\u0E32\u0E07",
+        emptyName: "\u0E0A\u0E37\u0E48\u0E2D\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E44\u0E21\u0E48\u0E2A\u0E32\u0E21\u0E32\u0E23\u0E16\u0E40\u0E27\u0E49\u0E19\u0E27\u0E48\u0E32\u0E07\u0E44\u0E14\u0E49",
         created: function(n) {
           return '\u0E2A\u0E23\u0E49\u0E32\u0E07\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19 "' + n + '" \u0E41\u0E25\u0E49\u0E27';
         },
@@ -5424,7 +5379,7 @@ var require_i18n = __commonJS({
           return '\u0E40\u0E02\u0E35\u0E22\u0E19\u0E17\u0E31\u0E1A "' + n + '" \u0E14\u0E49\u0E27\u0E22\u0E40\u0E04\u0E49\u0E32\u0E42\u0E04\u0E23\u0E07\u0E1B\u0E31\u0E08\u0E08\u0E38\u0E1A\u0E31\u0E19?';
         },
         confirmReloadSession: function(n) {
-          return '\u0E42\u0E2B\u0E25\u0E14\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19 "' + n + '" \u0E0B\u0E49\u0E33? \u0E01\u0E32\u0E23\u0E40\u0E1B\u0E25\u0E35\u0E48\u0E22\u0E19\u0E41\u0E1B\u0E25\u0E07\u0E17\u0E35\u0E48\u0E22\u0E31\u0E07\u0E44\u0E21\u0E48\u0E44\u0E14\u0E49\u0E1A\u0E31\u0E19\u0E17\u0E36\u0E01\u0E08\u0E30\u0E2B\u0E32\u0E22\u0E44\u0E1B';
+          return '\u0E42\u0E2B\u0E25\u0E14\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19 "' + n + '" \u0E0B\u0E49\u0E33\u0E2B\u0E23\u0E37\u0E2D\u0E44\u0E21\u0E48? \u0E01\u0E32\u0E23\u0E40\u0E1B\u0E25\u0E35\u0E48\u0E22\u0E19\u0E41\u0E1B\u0E25\u0E07\u0E17\u0E35\u0E48\u0E22\u0E31\u0E07\u0E44\u0E21\u0E48\u0E44\u0E14\u0E49\u0E1A\u0E31\u0E19\u0E17\u0E36\u0E01\u0E08\u0E30\u0E2A\u0E39\u0E0D\u0E2B\u0E32\u0E22';
         },
         renameTitle: "\u0E40\u0E1B\u0E25\u0E35\u0E48\u0E22\u0E19\u0E0A\u0E37\u0E48\u0E2D\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19",
         renamePlaceholder: "\u0E0A\u0E37\u0E48\u0E2D\u0E43\u0E2B\u0E21\u0E48...",
@@ -5514,11 +5469,6 @@ var require_i18n = __commonJS({
         backupRestored: "Workspace++: \u0E01\u0E39\u0E49\u0E04\u0E37\u0E19\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E08\u0E32\u0E01\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E2A\u0E33\u0E23\u0E2D\u0E07\u0E41\u0E25\u0E49\u0E27",
         sessionDataMigrated: "Workspace++: \u0E22\u0E49\u0E32\u0E22\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E44\u0E1B\u0E22\u0E31\u0E07 .workspace-plus-plus/sessions.json \u0E41\u0E25\u0E49\u0E27",
         sessionDataMigrationFailed: "Workspace++: \u0E44\u0E21\u0E48\u0E2A\u0E32\u0E21\u0E32\u0E23\u0E16\u0E22\u0E49\u0E32\u0E22\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E44\u0E14\u0E49 \u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E40\u0E14\u0E34\u0E21\u0E22\u0E31\u0E07\u0E04\u0E07\u0E16\u0E39\u0E01\u0E40\u0E01\u0E47\u0E1A\u0E44\u0E27\u0E49",
-        localSettingsEnabled: "Workspace++: \u0E40\u0E1B\u0E34\u0E14\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E40\u0E09\u0E1E\u0E32\u0E30 vault \u0E41\u0E25\u0E49\u0E27",
-        localSettingsDisabled: "Workspace++: \u0E1B\u0E34\u0E14\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E40\u0E09\u0E1E\u0E32\u0E30 vault \u0E41\u0E25\u0E49\u0E27",
-        localSettingsCopied: "Workspace++: \u0E04\u0E31\u0E14\u0E25\u0E2D\u0E01\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E2A\u0E48\u0E27\u0E19\u0E01\u0E25\u0E32\u0E07\u0E44\u0E1B\u0E22\u0E31\u0E07\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E40\u0E09\u0E1E\u0E32\u0E30 vault \u0E41\u0E25\u0E49\u0E27",
-        localSettingsLoadFailed: "Workspace++: \u0E44\u0E21\u0E48\u0E2A\u0E32\u0E21\u0E32\u0E23\u0E16\u0E42\u0E2B\u0E25\u0E14\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E40\u0E09\u0E1E\u0E32\u0E30 vault \u0E44\u0E14\u0E49 \u0E08\u0E30\u0E43\u0E0A\u0E49\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E2A\u0E48\u0E27\u0E19\u0E01\u0E25\u0E32\u0E07",
-        localSettingsOperationFailed: "Workspace++: \u0E44\u0E21\u0E48\u0E2A\u0E32\u0E21\u0E32\u0E23\u0E16\u0E2D\u0E31\u0E1B\u0E40\u0E14\u0E15\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E40\u0E09\u0E1E\u0E32\u0E30 vault \u0E44\u0E14\u0E49",
         exportSessionsDone: function(path) {
           return "Workspace++: \u0E2A\u0E48\u0E07\u0E2D\u0E2D\u0E01\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E44\u0E1B\u0E22\u0E31\u0E07 " + path + " \u0E41\u0E25\u0E49\u0E27";
         },
@@ -5554,11 +5504,11 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollPresetCustom: "\u0E01\u0E33\u0E2B\u0E19\u0E14\u0E40\u0E2D\u0E07",
         settingsStatusBarScrollModifier: "\u0E1B\u0E38\u0E48\u0E21\u0E1B\u0E23\u0E31\u0E1A\u0E41\u0E15\u0E48\u0E07\u0E17\u0E35\u0E48\u0E15\u0E49\u0E2D\u0E07\u0E01\u0E14",
         settingsStatusBarScrollModifierDesc: "\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E1B\u0E38\u0E48\u0E21\u0E1B\u0E23\u0E31\u0E1A\u0E41\u0E15\u0E48\u0E07\u0E17\u0E35\u0E48\u0E15\u0E49\u0E2D\u0E07\u0E01\u0E14\u0E04\u0E49\u0E32\u0E07\u0E44\u0E27\u0E49\u0E02\u0E13\u0E30\u0E40\u0E25\u0E37\u0E48\u0E2D\u0E19\u0E1A\u0E19\u0E23\u0E32\u0E22\u0E01\u0E32\u0E23\u0E41\u0E16\u0E1A\u0E2A\u0E16\u0E32\u0E19\u0E30",
-        settingsStatusBarScrollModifierRecommended: "Cmd \u0E2B\u0E23\u0E37\u0E2D Option",
+        settingsStatusBarScrollModifierRecommended: platformLabel("Cmd \u0E2B\u0E23\u0E37\u0E2D Option", "Ctrl \u0E2B\u0E23\u0E37\u0E2D Alt"),
         settingsStatusBarScrollModifierNone: "\u0E44\u0E21\u0E48\u0E21\u0E35",
-        settingsStatusBarScrollModifierModOnly: "Cmd \u0E40\u0E17\u0E48\u0E32\u0E19\u0E31\u0E49\u0E19",
-        settingsStatusBarScrollModifierAltOnly: "Option \u0E40\u0E17\u0E48\u0E32\u0E19\u0E31\u0E49\u0E19",
-        settingsStatusBarScrollModifierModOrAlt: "Cmd \u0E2B\u0E23\u0E37\u0E2D Option",
+        settingsStatusBarScrollModifierModOnly: platformLabel("Cmd \u0E40\u0E17\u0E48\u0E32\u0E19\u0E31\u0E49\u0E19", "Ctrl \u0E40\u0E17\u0E48\u0E32\u0E19\u0E31\u0E49\u0E19"),
+        settingsStatusBarScrollModifierAltOnly: platformLabel("Option \u0E40\u0E17\u0E48\u0E32\u0E19\u0E31\u0E49\u0E19", "Alt \u0E40\u0E17\u0E48\u0E32\u0E19\u0E31\u0E49\u0E19"),
+        settingsStatusBarScrollModifierModOrAlt: platformLabel("Cmd \u0E2B\u0E23\u0E37\u0E2D Option", "Ctrl \u0E2B\u0E23\u0E37\u0E2D Alt"),
         settingsStatusBarScrollThreshold: "\u0E40\u0E01\u0E13\u0E11\u0E4C\u0E04\u0E27\u0E32\u0E21\u0E44\u0E27",
         settingsStatusBarScrollThresholdDesc: "\u0E04\u0E48\u0E32\u0E17\u0E35\u0E48\u0E15\u0E48\u0E33\u0E01\u0E27\u0E48\u0E32\u0E08\u0E30\u0E2A\u0E25\u0E31\u0E1A\u0E44\u0E14\u0E49\u0E07\u0E48\u0E32\u0E22\u0E02\u0E36\u0E49\u0E19 \u0E43\u0E0A\u0E49\u0E40\u0E09\u0E1E\u0E32\u0E30\u0E40\u0E21\u0E37\u0E48\u0E2D\u0E1E\u0E23\u0E35\u0E40\u0E0B\u0E47\u0E15\u0E40\u0E1B\u0E47\u0E19\u0E01\u0E33\u0E2B\u0E19\u0E14\u0E40\u0E2D\u0E07",
         settingsStatusBarScrollCooldown: "\u0E0A\u0E48\u0E27\u0E07\u0E1E\u0E31\u0E01",
@@ -5625,14 +5575,6 @@ var require_i18n = __commonJS({
         settingsHighlightUnsavedSessionChangesDesc: "\u0E40\u0E21\u0E37\u0E48\u0E2D\u0E1B\u0E34\u0E14\u0E01\u0E32\u0E23\u0E1A\u0E31\u0E19\u0E17\u0E36\u0E01\u0E2D\u0E31\u0E15\u0E42\u0E19\u0E21\u0E31\u0E15\u0E34\u0E02\u0E13\u0E30\u0E2A\u0E25\u0E31\u0E1A\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19 \u0E43\u0E2B\u0E49\u0E40\u0E19\u0E49\u0E19\u0E41\u0E16\u0E1A\u0E2A\u0E16\u0E32\u0E19\u0E30\u0E2B\u0E32\u0E01\u0E40\u0E04\u0E49\u0E32\u0E42\u0E04\u0E23\u0E07\u0E1E\u0E37\u0E49\u0E19\u0E17\u0E35\u0E48\u0E17\u0E33\u0E07\u0E32\u0E19\u0E1B\u0E31\u0E08\u0E08\u0E38\u0E1A\u0E31\u0E19\u0E15\u0E48\u0E32\u0E07\u0E08\u0E32\u0E01\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E17\u0E35\u0E48\u0E1A\u0E31\u0E19\u0E17\u0E36\u0E01\u0E44\u0E27\u0E49",
         settingsStatusBarQuickSwitcher: "\u0E40\u0E1B\u0E34\u0E14\u0E15\u0E31\u0E27\u0E2A\u0E25\u0E31\u0E1A\u0E14\u0E48\u0E27\u0E19\u0E40\u0E21\u0E37\u0E48\u0E2D\u0E04\u0E25\u0E34\u0E01\u0E41\u0E16\u0E1A\u0E2A\u0E16\u0E32\u0E19\u0E30",
         settingsStatusBarQuickSwitcherDesc: "\u0E40\u0E21\u0E37\u0E48\u0E2D\u0E40\u0E1B\u0E34\u0E14\u0E43\u0E0A\u0E49\u0E07\u0E32\u0E19 \u0E01\u0E32\u0E23\u0E04\u0E25\u0E34\u0E01\u0E41\u0E16\u0E1A\u0E2A\u0E16\u0E32\u0E19\u0E30\u0E08\u0E30\u0E40\u0E1B\u0E34\u0E14\u0E42\u0E2D\u0E40\u0E27\u0E2D\u0E23\u0E4C\u0E40\u0E25\u0E22\u0E4C\u0E15\u0E31\u0E27\u0E2A\u0E25\u0E31\u0E1A\u0E14\u0E48\u0E27\u0E19\u0E41\u0E17\u0E19\u0E15\u0E31\u0E27\u0E08\u0E31\u0E14\u0E01\u0E32\u0E23\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E40\u0E15\u0E47\u0E21",
-        settingsUseLocalSettings: "\u0E43\u0E0A\u0E49\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E40\u0E09\u0E1E\u0E32\u0E30 vault",
-        settingsUseLocalSettingsDesc: "\u0E40\u0E1B\u0E34\u0E14\u0E15\u0E31\u0E27\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E19\u0E35\u0E49\u0E2B\u0E32\u0E01\u0E04\u0E38\u0E13\u0E0B\u0E34\u0E07\u0E04\u0E4C .obsidian \u0E23\u0E30\u0E2B\u0E27\u0E48\u0E32\u0E07\u0E2B\u0E25\u0E32\u0E22 vault (\u0E40\u0E0A\u0E48\u0E19 \u0E14\u0E49\u0E27\u0E22 Settings Profiles) \u0E41\u0E25\u0E30\u0E15\u0E49\u0E2D\u0E07\u0E01\u0E32\u0E23\u0E43\u0E2B\u0E49\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32 Workspace++ \u0E41\u0E22\u0E01\u0E01\u0E31\u0E19\u0E43\u0E19\u0E41\u0E15\u0E48\u0E25\u0E30 vault",
-        settingsCopyGlobalToLocal: "\u0E04\u0E31\u0E14\u0E25\u0E2D\u0E01\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E2A\u0E48\u0E27\u0E19\u0E01\u0E25\u0E32\u0E07\u0E44\u0E1B\u0E22\u0E31\u0E07 vault \u0E19\u0E35\u0E49",
-        settingsCopyGlobalToLocalDesc: "\u0E40\u0E02\u0E35\u0E22\u0E19\u0E17\u0E31\u0E1A\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E40\u0E09\u0E1E\u0E32\u0E30 vault \u0E14\u0E49\u0E27\u0E22\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E2A\u0E48\u0E27\u0E19\u0E01\u0E25\u0E32\u0E07\u0E1B\u0E31\u0E08\u0E08\u0E38\u0E1A\u0E31\u0E19",
-        settingsCopyGlobalToLocalBtn: "\u0E04\u0E31\u0E14\u0E25\u0E2D\u0E01",
-        settingsResetLocalSettings: "\u0E23\u0E35\u0E40\u0E0B\u0E47\u0E15\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E40\u0E09\u0E1E\u0E32\u0E30 vault",
-        settingsResetLocalSettingsDesc: "\u0E23\u0E35\u0E40\u0E0B\u0E47\u0E15\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E40\u0E09\u0E1E\u0E32\u0E30 vault \u0E01\u0E25\u0E31\u0E1A\u0E44\u0E1B\u0E40\u0E1B\u0E47\u0E19\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E2A\u0E48\u0E27\u0E19\u0E01\u0E25\u0E32\u0E07",
-        settingsResetLocalSettingsBtn: "\u0E23\u0E35\u0E40\u0E0B\u0E47\u0E15\u0E40\u0E09\u0E1E\u0E32\u0E30\u0E40\u0E04\u0E23\u0E37\u0E48\u0E2D\u0E07",
         settingsAdvancedStorageSubsection: "\u0E1E\u0E24\u0E15\u0E34\u0E01\u0E23\u0E23\u0E21\u0E01\u0E32\u0E23\u0E08\u0E31\u0E14\u0E40\u0E01\u0E47\u0E1A",
         settingsAdvancedTransferSubsection: "\u0E01\u0E32\u0E23\u0E16\u0E48\u0E32\u0E22\u0E42\u0E2D\u0E19\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25",
         settingsDeveloperSection: "\u0E40\u0E04\u0E23\u0E37\u0E48\u0E2D\u0E07\u0E21\u0E37\u0E2D\u0E19\u0E31\u0E01\u0E1E\u0E31\u0E12\u0E19\u0E32",
@@ -5640,8 +5582,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "\u0E23\u0E32\u0E22\u0E25\u0E30\u0E40\u0E2D\u0E35\u0E22\u0E14\u0E1E\u0E37\u0E49\u0E19\u0E17\u0E35\u0E48\u0E08\u0E31\u0E14\u0E40\u0E01\u0E47\u0E1A\u0E17\u0E35\u0E48 Workspace++ \u0E43\u0E0A\u0E49\u0E2D\u0E22\u0E39\u0E48\u0E43\u0E19\u0E02\u0E13\u0E30\u0E19\u0E35\u0E49",
         settingsStorageFieldSessions: "\u0E44\u0E1F\u0E25\u0E4C\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19",
         settingsStorageFieldSessionsBackup: "\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E2A\u0E33\u0E23\u0E2D\u0E07\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19",
-        settingsStorageFieldLocalSettings: "\u0E44\u0E1F\u0E25\u0E4C\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E40\u0E09\u0E1E\u0E32\u0E30\u0E40\u0E04\u0E23\u0E37\u0E48\u0E2D\u0E07",
-        settingsStorageFieldGlobalSettings: "\u0E44\u0E1F\u0E25\u0E4C\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E2A\u0E48\u0E27\u0E19\u0E01\u0E25\u0E32\u0E07",
         settingsStorageFieldSessionCount: "\u0E08\u0E33\u0E19\u0E27\u0E19\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19",
         settingsStorageFieldUpdatedAt: "\u0E2D\u0E31\u0E1B\u0E40\u0E14\u0E15\u0E40\u0E21\u0E37\u0E48\u0E2D",
         settingsExportSessions: "\u0E2A\u0E48\u0E07\u0E2D\u0E2D\u0E01\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19",
@@ -5682,7 +5622,7 @@ var require_i18n = __commonJS({
         },
         groupAll: "\u0E17\u0E31\u0E49\u0E07\u0E2B\u0E21\u0E14",
         groupDuplicateName: "\u0E21\u0E35\u0E01\u0E25\u0E38\u0E48\u0E21\u0E0A\u0E37\u0E48\u0E2D\u0E19\u0E35\u0E49\u0E2D\u0E22\u0E39\u0E48\u0E41\u0E25\u0E49\u0E27",
-        groupEmptyName: "\u0E0A\u0E37\u0E48\u0E2D\u0E01\u0E25\u0E38\u0E48\u0E21\u0E15\u0E49\u0E2D\u0E07\u0E44\u0E21\u0E48\u0E27\u0E48\u0E32\u0E07",
+        groupEmptyName: "\u0E0A\u0E37\u0E48\u0E2D\u0E01\u0E25\u0E38\u0E48\u0E21\u0E44\u0E21\u0E48\u0E2A\u0E32\u0E21\u0E32\u0E23\u0E16\u0E40\u0E27\u0E49\u0E19\u0E27\u0E48\u0E32\u0E07\u0E44\u0E14\u0E49",
         cmdSwitchGroup: "\u0E2A\u0E25\u0E31\u0E1A\u0E01\u0E25\u0E38\u0E48\u0E21",
         cmdExitGroup: "\u0E41\u0E2A\u0E14\u0E07\u0E17\u0E38\u0E01\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19 (\u0E2D\u0E2D\u0E01\u0E08\u0E32\u0E01\u0E01\u0E25\u0E38\u0E48\u0E21)",
         cmdNextGroup: "\u0E01\u0E25\u0E38\u0E48\u0E21\u0E16\u0E31\u0E14\u0E44\u0E1B",
@@ -5950,11 +5890,6 @@ var require_i18n = __commonJS({
         backupRestored: "Workspace++: \u092C\u0948\u0915\u0905\u092A \u0938\u0947 \u0938\u0924\u094D\u0930 \u092A\u0941\u0928\u0930\u094D\u0938\u094D\u0925\u093E\u092A\u093F\u0924 \u0915\u093F\u090F \u0917\u090F\u0964",
         sessionDataMigrated: "Workspace++: \u0938\u0924\u094D\u0930 \u0921\u0947\u091F\u093E .workspace-plus-plus/sessions.json \u092E\u0947\u0902 \u0938\u094D\u0925\u093E\u0928\u093E\u0902\u0924\u0930\u093F\u0924 \u0915\u093F\u092F\u093E \u0917\u092F\u093E\u0964",
         sessionDataMigrationFailed: "Workspace++: \u0938\u0924\u094D\u0930 \u0921\u0947\u091F\u093E \u0938\u094D\u0925\u093E\u0928\u093E\u0902\u0924\u0930\u093F\u0924 \u0928\u0939\u0940\u0902 \u0939\u094B \u0938\u0915\u093E\u0964 \u092A\u0941\u0930\u093E\u0928\u093E \u0921\u0947\u091F\u093E \u0905\u092D\u0940 \u092D\u0940 \u0930\u0916\u093E \u0917\u092F\u093E \u0939\u0948\u0964",
-        localSettingsEnabled: "Workspace++: vault-\u0935\u093F\u0936\u093F\u0937\u094D\u091F \u0938\u0947\u091F\u093F\u0902\u0917 \u091A\u093E\u0932\u0942 \u0915\u0940 \u0917\u0908\u0964",
-        localSettingsDisabled: "Workspace++: vault-\u0935\u093F\u0936\u093F\u0937\u094D\u091F \u0938\u0947\u091F\u093F\u0902\u0917 \u092C\u0902\u0926 \u0915\u0940 \u0917\u0908\u0964",
-        localSettingsCopied: "Workspace++: \u0935\u0948\u0936\u094D\u0935\u093F\u0915 \u0938\u0947\u091F\u093F\u0902\u0917 \u0915\u094B vault-\u0935\u093F\u0936\u093F\u0937\u094D\u091F \u0938\u0947\u091F\u093F\u0902\u0917 \u092E\u0947\u0902 \u0915\u0949\u092A\u0940 \u0915\u093F\u092F\u093E \u0917\u092F\u093E\u0964",
-        localSettingsLoadFailed: "Workspace++: vault-\u0935\u093F\u0936\u093F\u0937\u094D\u091F \u0938\u0947\u091F\u093F\u0902\u0917 \u0932\u094B\u0921 \u0928\u0939\u0940\u0902 \u0939\u094B \u0938\u0915\u0940\u0964 \u0935\u0948\u0936\u094D\u0935\u093F\u0915 \u0938\u0947\u091F\u093F\u0902\u0917 \u0907\u0938\u094D\u0924\u0947\u092E\u093E\u0932 \u0939\u094B\u0917\u0940\u0964",
-        localSettingsOperationFailed: "Workspace++: vault-\u0935\u093F\u0936\u093F\u0937\u094D\u091F \u0938\u0947\u091F\u093F\u0902\u0917 \u0905\u092A\u0921\u0947\u091F \u0928\u0939\u0940\u0902 \u0939\u094B \u0938\u0915\u0940\u0964",
         exportSessionsDone: function(path) {
           return "Workspace++: \u0938\u0924\u094D\u0930 " + path + " \u092E\u0947\u0902 \u0928\u093F\u0930\u094D\u092F\u093E\u0924 \u0915\u093F\u090F \u0917\u090F";
         },
@@ -5990,11 +5925,11 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollPresetCustom: "\u0915\u0938\u094D\u091F\u092E",
         settingsStatusBarScrollModifier: "\u0906\u0935\u0936\u094D\u092F\u0915 \u092E\u0949\u0921\u093F\u092B\u093C\u093E\u092F\u0930",
         settingsStatusBarScrollModifierDesc: "\u0938\u094D\u091F\u0947\u091F\u0938 \u092C\u093E\u0930 \u0906\u0907\u091F\u092E \u092A\u0930 \u0938\u094D\u0915\u094D\u0930\u0949\u0932 \u0915\u0930\u0924\u0947 \u0938\u092E\u092F \u0915\u094C\u0928-\u0938\u0940 \u092E\u0949\u0921\u093F\u092B\u093C\u093E\u092F\u0930 \u0915\u0941\u0902\u091C\u0940 \u0926\u092C\u093E\u090F \u0930\u0916\u0928\u0940 \u0939\u0948, \u092F\u0939 \u091A\u0941\u0928\u0947\u0902\u0964",
-        settingsStatusBarScrollModifierRecommended: "Cmd \u092F\u093E Option",
+        settingsStatusBarScrollModifierRecommended: platformLabel("Cmd \u092F\u093E Option", "Ctrl \u092F\u093E Alt"),
         settingsStatusBarScrollModifierNone: "\u0915\u094B\u0908 \u0928\u0939\u0940\u0902",
-        settingsStatusBarScrollModifierModOnly: "\u0915\u0947\u0935\u0932 Cmd",
-        settingsStatusBarScrollModifierAltOnly: "\u0915\u0947\u0935\u0932 Option",
-        settingsStatusBarScrollModifierModOrAlt: "Cmd \u092F\u093E Option",
+        settingsStatusBarScrollModifierModOnly: platformLabel("\u0915\u0947\u0935\u0932 Cmd", "\u0915\u0947\u0935\u0932 Ctrl"),
+        settingsStatusBarScrollModifierAltOnly: platformLabel("\u0915\u0947\u0935\u0932 Option", "\u0915\u0947\u0935\u0932 Alt"),
+        settingsStatusBarScrollModifierModOrAlt: platformLabel("Cmd \u092F\u093E Option", "Ctrl \u092F\u093E Alt"),
         settingsStatusBarScrollThreshold: "\u0938\u0902\u0935\u0947\u0926\u0928\u0936\u0940\u0932\u0924\u093E \u0925\u094D\u0930\u0947\u0936\u0939\u094B\u0932\u094D\u0921",
         settingsStatusBarScrollThresholdDesc: "\u0915\u092E \u092E\u093E\u0928 \u0938\u0947 \u0938\u094D\u0935\u093F\u091A \u0915\u0930\u0928\u093E \u0906\u0938\u093E\u0928 \u0939\u094B\u0917\u093E\u0964 \u0915\u0947\u0935\u0932 \u0915\u0938\u094D\u091F\u092E \u092A\u094D\u0930\u0940\u0938\u0947\u091F \u092E\u0947\u0902 \u0907\u0938\u094D\u0924\u0947\u092E\u093E\u0932 \u0939\u094B\u0924\u093E \u0939\u0948\u0964",
         settingsStatusBarScrollCooldown: "\u0915\u0942\u0932\u0921\u093E\u0909\u0928",
@@ -6061,14 +5996,6 @@ var require_i18n = __commonJS({
         settingsHighlightUnsavedSessionChangesDesc: "\u091C\u092C \u0938\u094D\u0935\u093F\u091A \u092A\u0930 \u0911\u091F\u094B-\u0938\u0947\u0935 \u092C\u0902\u0926 \u0939\u094B, \u0924\u094B \u0935\u0930\u094D\u0924\u092E\u093E\u0928 \u0915\u093E\u0930\u094D\u092F\u0915\u094D\u0937\u0947\u0924\u094D\u0930 \u0932\u0947\u0906\u0909\u091F \u0938\u0939\u0947\u091C\u0947 \u0917\u090F \u0938\u0924\u094D\u0930 \u0938\u0947 \u0905\u0932\u0917 \u0939\u094B\u0928\u0947 \u092A\u0930 \u0938\u094D\u091F\u0947\u091F\u0938 \u092C\u093E\u0930 \u0939\u093E\u0907\u0932\u093E\u0907\u091F \u0915\u0930\u0947\u0902\u0964",
         settingsStatusBarQuickSwitcher: "\u0938\u094D\u091F\u0947\u091F\u0938 \u092C\u093E\u0930 \u0915\u094D\u0932\u093F\u0915 \u092A\u0930 \u0915\u094D\u0935\u093F\u0915 \u0938\u094D\u0935\u093F\u091A\u0930",
         settingsStatusBarQuickSwitcherDesc: "\u091A\u093E\u0932\u0942 \u0939\u094B\u0928\u0947 \u092A\u0930, \u0938\u094D\u091F\u0947\u091F\u0938 \u092C\u093E\u0930 \u0915\u094D\u0932\u093F\u0915 \u0915\u0930\u0928\u0947 \u0938\u0947 \u092A\u0942\u0930\u094D\u0923 \u0938\u0924\u094D\u0930 \u092A\u094D\u0930\u092C\u0902\u0927\u0915 \u0915\u0947 \u092C\u091C\u093E\u092F \u0915\u094D\u0935\u093F\u0915 \u0938\u094D\u0935\u093F\u091A\u0930 \u0913\u0935\u0930\u0932\u0947 \u0916\u0941\u0932\u0924\u093E \u0939\u0948\u0964",
-        settingsUseLocalSettings: "vault-\u0935\u093F\u0936\u093F\u0937\u094D\u091F \u0938\u0947\u091F\u093F\u0902\u0917 \u0907\u0938\u094D\u0924\u0947\u092E\u093E\u0932 \u0915\u0930\u0947\u0902",
-        settingsUseLocalSettingsDesc: "\u092F\u0926\u093F \u0906\u092A \u0915\u0908 vault \u0915\u0947 \u092C\u0940\u091A .obsidian \u0938\u093F\u0902\u0915 \u0915\u0930\u0924\u0947 \u0939\u0948\u0902 (\u0909\u0926\u093E\u0939\u0930\u0923: Settings Profiles \u0938\u0947) \u0914\u0930 Workspace++ \u0938\u0947\u091F\u093F\u0902\u0917 \u0939\u0930 vault \u092E\u0947\u0902 \u0905\u0932\u0917 \u0930\u0916\u0928\u093E \u091A\u093E\u0939\u0924\u0947 \u0939\u0948\u0902, \u0924\u094B \u0907\u0938\u0947 \u091A\u093E\u0932\u0942 \u0915\u0930\u0947\u0902\u0964",
-        settingsCopyGlobalToLocal: "\u0935\u0948\u0936\u094D\u0935\u093F\u0915 \u0938\u0947\u091F\u093F\u0902\u0917 \u0907\u0938 vault \u092E\u0947\u0902 \u0915\u0949\u092A\u0940 \u0915\u0930\u0947\u0902",
-        settingsCopyGlobalToLocalDesc: "\u0935\u0930\u094D\u0924\u092E\u093E\u0928 \u0935\u0948\u0936\u094D\u0935\u093F\u0915 \u0938\u0947\u091F\u093F\u0902\u0917 \u0938\u0947 vault-\u0935\u093F\u0936\u093F\u0937\u094D\u091F \u0938\u0947\u091F\u093F\u0902\u0917 \u0913\u0935\u0930\u0930\u093E\u0907\u091F \u0915\u0930\u0947\u0902\u0964",
-        settingsCopyGlobalToLocalBtn: "\u0915\u0949\u092A\u0940 \u0915\u0930\u0947\u0902",
-        settingsResetLocalSettings: "vault-\u0935\u093F\u0936\u093F\u0937\u094D\u091F \u0938\u0947\u091F\u093F\u0902\u0917 \u0930\u0940\u0938\u0947\u091F \u0915\u0930\u0947\u0902",
-        settingsResetLocalSettingsDesc: "vault-\u0935\u093F\u0936\u093F\u0937\u094D\u091F \u0938\u0947\u091F\u093F\u0902\u0917 \u0915\u094B \u0935\u093E\u092A\u0938 \u0935\u0948\u0936\u094D\u0935\u093F\u0915 \u0938\u0947\u091F\u093F\u0902\u0917 \u092A\u0930 \u0930\u0940\u0938\u0947\u091F \u0915\u0930\u0947\u0902\u0964",
-        settingsResetLocalSettingsBtn: "\u0932\u094B\u0915\u0932 \u0930\u0940\u0938\u0947\u091F",
         settingsAdvancedStorageSubsection: "\u0938\u094D\u091F\u094B\u0930\u0947\u091C \u0935\u094D\u092F\u0935\u0939\u093E\u0930",
         settingsAdvancedTransferSubsection: "\u0921\u0947\u091F\u093E \u0938\u094D\u0925\u093E\u0928\u093E\u0902\u0924\u0930\u0923",
         settingsDeveloperSection: "\u0921\u0947\u0935\u0932\u092A\u0930 \u091F\u0942\u0932",
@@ -6076,8 +6003,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "Workspace++ \u0926\u094D\u0935\u093E\u0930\u093E \u0905\u092D\u0940 \u0907\u0938\u094D\u0924\u0947\u092E\u093E\u0932 \u0939\u094B \u0930\u0939\u0940 \u0938\u094D\u091F\u094B\u0930\u0947\u091C \u091C\u093E\u0928\u0915\u093E\u0930\u0940\u0964",
         settingsStorageFieldSessions: "\u0938\u0924\u094D\u0930 \u092B\u093C\u093E\u0907\u0932",
         settingsStorageFieldSessionsBackup: "\u0938\u0924\u094D\u0930 \u092C\u0948\u0915\u0905\u092A",
-        settingsStorageFieldLocalSettings: "\u0932\u094B\u0915\u0932 \u0938\u0947\u091F\u093F\u0902\u0917 \u092B\u093C\u093E\u0907\u0932",
-        settingsStorageFieldGlobalSettings: "\u0935\u0948\u0936\u094D\u0935\u093F\u0915 \u0938\u0947\u091F\u093F\u0902\u0917 \u092B\u093C\u093E\u0907\u0932",
         settingsStorageFieldSessionCount: "\u0938\u0924\u094D\u0930 \u0938\u0902\u0916\u094D\u092F\u093E",
         settingsStorageFieldUpdatedAt: "\u0905\u092A\u0921\u0947\u091F \u0938\u092E\u092F",
         settingsExportSessions: "\u0938\u0924\u094D\u0930 \u0928\u093F\u0930\u094D\u092F\u093E\u0924 \u0915\u0930\u0947\u0902",
@@ -6386,11 +6311,6 @@ var require_i18n = __commonJS({
         backupRestored: "Workspace++: \u09AC\u09CD\u09AF\u09BE\u0995\u0986\u09AA \u09A5\u09C7\u0995\u09C7 \u09B8\u09C7\u09B6\u09A8 \u09AA\u09C1\u09A8\u09B0\u09C1\u09A6\u09CD\u09A7\u09BE\u09B0 \u0995\u09B0\u09BE \u09B9\u09AF\u09BC\u09C7\u099B\u09C7\u0964",
         sessionDataMigrated: "Workspace++: \u09B8\u09C7\u09B6\u09A8 \u09A1\u09C7\u099F\u09BE .workspace-plus-plus/sessions.json-\u098F \u09B8\u09B0\u09BE\u09A8\u09CB \u09B9\u09AF\u09BC\u09C7\u099B\u09C7\u0964",
         sessionDataMigrationFailed: "Workspace++: \u09B8\u09C7\u09B6\u09A8 \u09A1\u09C7\u099F\u09BE \u09B8\u09B0\u09BE\u09A8\u09CB \u09AF\u09BE\u09AF\u09BC\u09A8\u09BF\u0964 \u09AA\u09C1\u09B0\u09CB\u09A8\u09CB \u09A1\u09C7\u099F\u09BE \u098F\u0996\u09A8\u0993 \u09B0\u09BE\u0996\u09BE \u09B9\u09AF\u09BC\u09C7\u099B\u09C7\u0964",
-        localSettingsEnabled: "Workspace++: vault-\u09A8\u09BF\u09B0\u09CD\u09A6\u09BF\u09B7\u09CD\u099F \u09B8\u09C7\u099F\u09BF\u0982 \u099A\u09BE\u09B2\u09C1 \u09B9\u09AF\u09BC\u09C7\u099B\u09C7\u0964",
-        localSettingsDisabled: "Workspace++: vault-\u09A8\u09BF\u09B0\u09CD\u09A6\u09BF\u09B7\u09CD\u099F \u09B8\u09C7\u099F\u09BF\u0982 \u09AC\u09A8\u09CD\u09A7 \u09B9\u09AF\u09BC\u09C7\u099B\u09C7\u0964",
-        localSettingsCopied: "Workspace++: \u0997\u09CD\u09B2\u09CB\u09AC\u09BE\u09B2 \u09B8\u09C7\u099F\u09BF\u0982 vault-\u09A8\u09BF\u09B0\u09CD\u09A6\u09BF\u09B7\u09CD\u099F \u09B8\u09C7\u099F\u09BF\u0982\u09AF\u09BC\u09C7 \u0995\u09AA\u09BF \u0995\u09B0\u09BE \u09B9\u09AF\u09BC\u09C7\u099B\u09C7\u0964",
-        localSettingsLoadFailed: "Workspace++: vault-\u09A8\u09BF\u09B0\u09CD\u09A6\u09BF\u09B7\u09CD\u099F \u09B8\u09C7\u099F\u09BF\u0982 \u09B2\u09CB\u09A1 \u0995\u09B0\u09BE \u09AF\u09BE\u09AF\u09BC\u09A8\u09BF\u0964 \u0997\u09CD\u09B2\u09CB\u09AC\u09BE\u09B2 \u09B8\u09C7\u099F\u09BF\u0982 \u09AC\u09CD\u09AF\u09AC\u09B9\u09BE\u09B0 \u0995\u09B0\u09BE \u09B9\u09AC\u09C7\u0964",
-        localSettingsOperationFailed: "Workspace++: vault-\u09A8\u09BF\u09B0\u09CD\u09A6\u09BF\u09B7\u09CD\u099F \u09B8\u09C7\u099F\u09BF\u0982 \u0986\u09AA\u09A1\u09C7\u099F \u0995\u09B0\u09BE \u09AF\u09BE\u09AF\u09BC\u09A8\u09BF\u0964",
         exportSessionsDone: function(path) {
           return "Workspace++: \u09B8\u09C7\u09B6\u09A8 " + path + "-\u098F \u098F\u0995\u09CD\u09B8\u09AA\u09CB\u09B0\u09CD\u099F \u0995\u09B0\u09BE \u09B9\u09AF\u09BC\u09C7\u099B\u09C7";
         },
@@ -6426,11 +6346,11 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollPresetCustom: "\u0995\u09BE\u09B8\u09CD\u099F\u09AE",
         settingsStatusBarScrollModifier: "\u09AA\u09CD\u09B0\u09AF\u09BC\u09CB\u099C\u09A8\u09C0\u09AF\u09BC \u09AE\u09A1\u09BF\u09AB\u09BE\u09AF\u09BC\u09BE\u09B0",
         settingsStatusBarScrollModifierDesc: "\u09B8\u09CD\u099F\u09C7\u099F\u09BE\u09B8 \u09AC\u09BE\u09B0 \u0986\u0987\u099F\u09C7\u09AE\u09C7 \u09B8\u09CD\u0995\u09CD\u09B0\u09B2 \u0995\u09B0\u09BE\u09B0 \u09B8\u09AE\u09AF\u09BC \u0995\u09CB\u09A8 \u09AE\u09A1\u09BF\u09AB\u09BE\u09AF\u09BC\u09BE\u09B0 \u0995\u09C0 \u09A7\u09B0\u09C7 \u09B0\u09BE\u0996\u09A4\u09C7 \u09B9\u09AC\u09C7 \u09A4\u09BE \u09AC\u09C7\u099B\u09C7 \u09A8\u09BF\u09A8\u0964",
-        settingsStatusBarScrollModifierRecommended: "Cmd \u09AC\u09BE Option",
+        settingsStatusBarScrollModifierRecommended: platformLabel("Cmd \u09AC\u09BE Option", "Ctrl \u09AC\u09BE Alt"),
         settingsStatusBarScrollModifierNone: "\u0995\u09CB\u09A8\u09CB\u099F\u09BF \u09A8\u09AF\u09BC",
-        settingsStatusBarScrollModifierModOnly: "\u09B6\u09C1\u09A7\u09C1 Cmd",
-        settingsStatusBarScrollModifierAltOnly: "\u09B6\u09C1\u09A7\u09C1 Option",
-        settingsStatusBarScrollModifierModOrAlt: "Cmd \u09AC\u09BE Option",
+        settingsStatusBarScrollModifierModOnly: platformLabel("\u09B6\u09C1\u09A7\u09C1 Cmd", "\u09B6\u09C1\u09A7\u09C1 Ctrl"),
+        settingsStatusBarScrollModifierAltOnly: platformLabel("\u09B6\u09C1\u09A7\u09C1 Option", "\u09B6\u09C1\u09A7\u09C1 Alt"),
+        settingsStatusBarScrollModifierModOrAlt: platformLabel("Cmd \u09AC\u09BE Option", "Ctrl \u09AC\u09BE Alt"),
         settingsStatusBarScrollThreshold: "\u09B8\u0982\u09AC\u09C7\u09A6\u09A8\u09B6\u09C0\u09B2\u09A4\u09BE\u09B0 \u09A5\u09CD\u09B0\u09C7\u09B6\u09B9\u09CB\u09B2\u09CD\u09A1",
         settingsStatusBarScrollThresholdDesc: "\u09AE\u09BE\u09A8 \u0995\u09AE \u09B9\u09B2\u09C7 \u09B8\u09B9\u099C\u09C7 \u09B8\u09C1\u0987\u099A \u09B9\u09AC\u09C7\u0964 \u09B6\u09C1\u09A7\u09C1 \u0995\u09BE\u09B8\u09CD\u099F\u09AE \u09AA\u09CD\u09B0\u09BF\u09B8\u09C7\u099F\u09C7 \u09AC\u09CD\u09AF\u09AC\u09B9\u09C3\u09A4 \u09B9\u09AF\u09BC\u0964",
         settingsStatusBarScrollCooldown: "\u0995\u09C1\u09B2\u09A1\u09BE\u0989\u09A8",
@@ -6497,14 +6417,6 @@ var require_i18n = __commonJS({
         settingsHighlightUnsavedSessionChangesDesc: "\u09B8\u09C1\u0987\u099A\u09C7\u09B0 \u09B8\u09AE\u09AF\u09BC \u0985\u099F\u09CB-\u09B8\u09C7\u09AD \u09AC\u09A8\u09CD\u09A7 \u09A5\u09BE\u0995\u09B2\u09C7, \u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u0993\u09AF\u09BC\u09BE\u09B0\u09CD\u0995\u09B8\u09CD\u09AA\u09C7\u09B8 \u09B2\u09C7\u0986\u0989\u099F \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09BF\u09A4 \u09B8\u09C7\u09B6\u09A8 \u09A5\u09C7\u0995\u09C7 \u0986\u09B2\u09BE\u09A6\u09BE \u09B9\u09B2\u09C7 \u09B8\u09CD\u099F\u09C7\u099F\u09BE\u09B8 \u09AC\u09BE\u09B0 \u09B9\u09BE\u0987\u09B2\u09BE\u0987\u099F \u0995\u09B0\u09C1\u09A8\u0964",
         settingsStatusBarQuickSwitcher: "\u09B8\u09CD\u099F\u09C7\u099F\u09BE\u09B8 \u09AC\u09BE\u09B0 \u0995\u09CD\u09B2\u09BF\u0995\u09C7 \u0995\u09C1\u0987\u0995 \u09B8\u09C1\u0987\u099A\u09BE\u09B0",
         settingsStatusBarQuickSwitcherDesc: "\u099A\u09BE\u09B2\u09C1 \u09A5\u09BE\u0995\u09B2\u09C7, \u09B8\u09CD\u099F\u09C7\u099F\u09BE\u09B8 \u09AC\u09BE\u09B0\u09C7 \u0995\u09CD\u09B2\u09BF\u0995 \u0995\u09B0\u09B2\u09C7 \u09AA\u09C2\u09B0\u09CD\u09A3 \u09B8\u09C7\u09B6\u09A8 \u09AE\u09CD\u09AF\u09BE\u09A8\u09C7\u099C\u09BE\u09B0\u09C7\u09B0 \u09AC\u09A6\u09B2\u09C7 \u0995\u09C1\u0987\u0995 \u09B8\u09C1\u0987\u099A\u09BE\u09B0 \u0993\u09AD\u09BE\u09B0\u09B2\u09C7 \u0996\u09C1\u09B2\u09AC\u09C7\u0964",
-        settingsUseLocalSettings: "vault-\u09A8\u09BF\u09B0\u09CD\u09A6\u09BF\u09B7\u09CD\u099F \u09B8\u09C7\u099F\u09BF\u0982 \u09AC\u09CD\u09AF\u09AC\u09B9\u09BE\u09B0 \u0995\u09B0\u09C1\u09A8",
-        settingsUseLocalSettingsDesc: "\u0986\u09AA\u09A8\u09BF \u09AF\u09A6\u09BF \u098F\u0995\u09BE\u09A7\u09BF\u0995 vault-\u098F\u09B0 \u09AE\u09A7\u09CD\u09AF\u09C7 .obsidian \u09B8\u09BF\u0999\u09CD\u0995 \u0995\u09B0\u09C7\u09A8 (\u09AF\u09C7\u09AE\u09A8 Settings Profiles \u09A6\u09BF\u09AF\u09BC\u09C7) \u098F\u09AC\u0982 Workspace++ \u09B8\u09C7\u099F\u09BF\u0982 \u09AA\u09CD\u09B0\u09A4\u09BF\u099F\u09BF vault-\u098F \u0986\u09B2\u09BE\u09A6\u09BE \u09B0\u09BE\u0996\u09A4\u09C7 \u099A\u09BE\u09A8, \u098F\u099F\u09BF \u099A\u09BE\u09B2\u09C1 \u0995\u09B0\u09C1\u09A8\u0964",
-        settingsCopyGlobalToLocal: "\u0997\u09CD\u09B2\u09CB\u09AC\u09BE\u09B2 \u09B8\u09C7\u099F\u09BF\u0982 \u098F\u0987 vault-\u098F \u0995\u09AA\u09BF \u0995\u09B0\u09C1\u09A8",
-        settingsCopyGlobalToLocalDesc: "\u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u0997\u09CD\u09B2\u09CB\u09AC\u09BE\u09B2 \u09B8\u09C7\u099F\u09BF\u0982 \u09A6\u09BF\u09AF\u09BC\u09C7 vault-\u09A8\u09BF\u09B0\u09CD\u09A6\u09BF\u09B7\u09CD\u099F \u09B8\u09C7\u099F\u09BF\u0982 \u0993\u09AD\u09BE\u09B0\u09B0\u09BE\u0987\u099F \u0995\u09B0\u09C1\u09A8\u0964",
-        settingsCopyGlobalToLocalBtn: "\u0995\u09AA\u09BF",
-        settingsResetLocalSettings: "vault-\u09A8\u09BF\u09B0\u09CD\u09A6\u09BF\u09B7\u09CD\u099F \u09B8\u09C7\u099F\u09BF\u0982 \u09B0\u09BF\u09B8\u09C7\u099F \u0995\u09B0\u09C1\u09A8",
-        settingsResetLocalSettingsDesc: "vault-\u09A8\u09BF\u09B0\u09CD\u09A6\u09BF\u09B7\u09CD\u099F \u09B8\u09C7\u099F\u09BF\u0982 \u0986\u09AC\u09BE\u09B0 \u0997\u09CD\u09B2\u09CB\u09AC\u09BE\u09B2 \u09B8\u09C7\u099F\u09BF\u0982\u09AF\u09BC\u09C7 \u09AB\u09BF\u09B0\u09BF\u09AF\u09BC\u09C7 \u09A6\u09BF\u09A8\u0964",
-        settingsResetLocalSettingsBtn: "\u09B2\u09CB\u0995\u09BE\u09B2 \u09B0\u09BF\u09B8\u09C7\u099F",
         settingsAdvancedStorageSubsection: "\u09B8\u09CD\u099F\u09CB\u09B0\u09C7\u099C \u0986\u099A\u09B0\u09A3",
         settingsAdvancedTransferSubsection: "\u09A1\u09C7\u099F\u09BE \u09B8\u09CD\u09A5\u09BE\u09A8\u09BE\u09A8\u09CD\u09A4\u09B0",
         settingsDeveloperSection: "\u09A1\u09C7\u09AD\u09C7\u09B2\u09AA\u09BE\u09B0 \u099F\u09C1\u09B2",
@@ -6512,8 +6424,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "Workspace++ \u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8\u09C7 \u09AF\u09C7 \u09B8\u09CD\u099F\u09CB\u09B0\u09C7\u099C \u09A4\u09A5\u09CD\u09AF \u09AC\u09CD\u09AF\u09AC\u09B9\u09BE\u09B0 \u0995\u09B0\u099B\u09C7\u0964",
         settingsStorageFieldSessions: "\u09B8\u09C7\u09B6\u09A8 \u09AB\u09BE\u0987\u09B2",
         settingsStorageFieldSessionsBackup: "\u09B8\u09C7\u09B6\u09A8 \u09AC\u09CD\u09AF\u09BE\u0995\u0986\u09AA",
-        settingsStorageFieldLocalSettings: "\u09B2\u09CB\u0995\u09BE\u09B2 \u09B8\u09C7\u099F\u09BF\u0982 \u09AB\u09BE\u0987\u09B2",
-        settingsStorageFieldGlobalSettings: "\u0997\u09CD\u09B2\u09CB\u09AC\u09BE\u09B2 \u09B8\u09C7\u099F\u09BF\u0982 \u09AB\u09BE\u0987\u09B2",
         settingsStorageFieldSessionCount: "\u09B8\u09C7\u09B6\u09A8 \u09B8\u0982\u0996\u09CD\u09AF\u09BE",
         settingsStorageFieldUpdatedAt: "\u0986\u09AA\u09A1\u09C7\u099F \u09B8\u09AE\u09AF\u09BC",
         settingsExportSessions: "\u09B8\u09C7\u09B6\u09A8 \u098F\u0995\u09CD\u09B8\u09AA\u09CB\u09B0\u09CD\u099F \u0995\u09B0\u09C1\u09A8",
@@ -6822,11 +6732,6 @@ var require_i18n = __commonJS({
         backupRestored: "Workspace++: \u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u0627\u0632 \u067E\u0634\u062A\u06CC\u0628\u0627\u0646 \u0628\u0627\u0632\u06CC\u0627\u0628\u06CC \u0634\u062F\u0646\u062F.",
         sessionDataMigrated: "Workspace++: \u062F\u0627\u062F\u0647 \u0646\u0634\u0633\u062A \u0628\u0647 .workspace-plus-plus/sessions.json \u0645\u0646\u062A\u0642\u0644 \u0634\u062F.",
         sessionDataMigrationFailed: "Workspace++: \u0627\u0646\u062A\u0642\u0627\u0644 \u062F\u0627\u062F\u0647 \u0646\u0634\u0633\u062A \u0646\u0627\u0645\u0648\u0641\u0642 \u0628\u0648\u062F. \u062F\u0627\u062F\u0647 \u0642\u062F\u06CC\u0645\u06CC \u0647\u0645\u0686\u0646\u0627\u0646 \u0646\u06AF\u0647 \u062F\u0627\u0634\u062A\u0647 \u0634\u062F\u0647 \u0627\u0633\u062A.",
-        localSettingsEnabled: "Workspace++: \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u062E\u0635\u0648\u0635 vault \u0641\u0639\u0627\u0644 \u0634\u062F.",
-        localSettingsDisabled: "Workspace++: \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u062E\u0635\u0648\u0635 vault \u063A\u06CC\u0631\u0641\u0639\u0627\u0644 \u0634\u062F.",
-        localSettingsCopied: "Workspace++: \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0633\u0631\u0627\u0633\u0631\u06CC \u062F\u0631 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u062E\u0635\u0648\u0635 vault \u06A9\u067E\u06CC \u0634\u062F.",
-        localSettingsLoadFailed: "Workspace++: \u0628\u0627\u0631\u06AF\u0630\u0627\u0631\u06CC \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u062E\u0635\u0648\u0635 vault \u0646\u0627\u0645\u0648\u0641\u0642 \u0628\u0648\u062F. \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0633\u0631\u0627\u0633\u0631\u06CC \u0627\u0633\u062A\u0641\u0627\u062F\u0647 \u0645\u06CC\u200C\u0634\u0648\u062F.",
-        localSettingsOperationFailed: "Workspace++: \u0628\u0647\u200C\u0631\u0648\u0632\u0631\u0633\u0627\u0646\u06CC \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u062E\u0635\u0648\u0635 vault \u0646\u0627\u0645\u0648\u0641\u0642 \u0628\u0648\u062F.",
         exportSessionsDone: function(path) {
           return "Workspace++: \u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u0628\u0647 " + path + " \u062E\u0631\u0648\u062C\u06CC \u06AF\u0631\u0641\u062A\u0647 \u0634\u062F\u0646\u062F";
         },
@@ -6862,11 +6767,11 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollPresetCustom: "\u0633\u0641\u0627\u0631\u0634\u06CC",
         settingsStatusBarScrollModifier: "\u06A9\u0644\u06CC\u062F \u062A\u063A\u06CC\u06CC\u0631\u062F\u0647\u0646\u062F\u0647 \u0644\u0627\u0632\u0645",
         settingsStatusBarScrollModifierDesc: "\u0627\u0646\u062A\u062E\u0627\u0628 \u06A9\u0646\u06CC\u062F \u0647\u0646\u06AF\u0627\u0645 \u0627\u0633\u06A9\u0631\u0648\u0644 \u0631\u0648\u06CC \u0622\u06CC\u062A\u0645 \u0646\u0648\u0627\u0631 \u0648\u0636\u0639\u06CC\u062A\u060C \u06A9\u062F\u0627\u0645 \u06A9\u0644\u06CC\u062F \u062A\u063A\u06CC\u06CC\u0631\u062F\u0647\u0646\u062F\u0647 \u0628\u0627\u06CC\u062F \u0646\u06AF\u0647 \u062F\u0627\u0634\u062A\u0647 \u0634\u0648\u062F.",
-        settingsStatusBarScrollModifierRecommended: "Cmd \u06CC\u0627 Option",
+        settingsStatusBarScrollModifierRecommended: platformLabel("Cmd \u06CC\u0627 Option", "Ctrl \u06CC\u0627 Alt"),
         settingsStatusBarScrollModifierNone: "\u0647\u06CC\u0686\u200C\u06A9\u062F\u0627\u0645",
-        settingsStatusBarScrollModifierModOnly: "\u0641\u0642\u0637 Cmd",
-        settingsStatusBarScrollModifierAltOnly: "\u0641\u0642\u0637 Option",
-        settingsStatusBarScrollModifierModOrAlt: "Cmd \u06CC\u0627 Option",
+        settingsStatusBarScrollModifierModOnly: platformLabel("\u0641\u0642\u0637 Cmd", "\u0641\u0642\u0637 Ctrl"),
+        settingsStatusBarScrollModifierAltOnly: platformLabel("\u0641\u0642\u0637 Option", "\u0641\u0642\u0637 Alt"),
+        settingsStatusBarScrollModifierModOrAlt: platformLabel("Cmd \u06CC\u0627 Option", "Ctrl \u06CC\u0627 Alt"),
         settingsStatusBarScrollThreshold: "\u0622\u0633\u062A\u0627\u0646\u0647 \u062D\u0633\u0627\u0633\u06CC\u062A",
         settingsStatusBarScrollThresholdDesc: "\u0645\u0642\u0627\u062F\u06CC\u0631 \u06A9\u0645\u062A\u0631 \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u0631\u0627 \u0622\u0633\u0627\u0646\u200C\u062A\u0631 \u0645\u06CC\u200C\u06A9\u0646\u0646\u062F. \u0641\u0642\u0637 \u0648\u0642\u062A\u06CC \u067E\u06CC\u0634\u200C\u062A\u0646\u0638\u06CC\u0645 \u0633\u0641\u0627\u0631\u0634\u06CC \u0628\u0627\u0634\u062F \u0627\u0633\u062A\u0641\u0627\u062F\u0647 \u0645\u06CC\u200C\u0634\u0648\u062F.",
         settingsStatusBarScrollCooldown: "\u0645\u06A9\u062B",
@@ -6877,7 +6782,7 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollInvertDesc: "\u062C\u0647\u062A \u0642\u0628\u0644\u06CC/\u0628\u0639\u062F\u06CC \u0631\u0627 \u0628\u0631\u0627\u06CC \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u0646\u0634\u0633\u062A \u0628\u0627 \u0627\u0633\u06A9\u0631\u0648\u0644 \u0631\u0648\u06CC \u0646\u0648\u0627\u0631 \u0648\u0636\u0639\u06CC\u062A \u0648\u0627\u0631\u0648\u0646\u0647 \u0645\u06CC\u200C\u06A9\u0646\u062F.",
         settingsLangAuto: "\u062E\u0648\u062F\u06A9\u0627\u0631 (\u0632\u0628\u0627\u0646 \u0633\u06CC\u0633\u062A\u0645)",
         settingsGitHubLink: "GitHub",
-        settingsTranslationHelp: "\u062E\u0637\u0627\u06CC \u062A\u0631\u062C\u0645\u0647 \u067E\u06CC\u062F\u0627 \u06A9\u0631\u062F\u06CC\u062F\u061F \u0644\u0637\u0641\u0627 \u062F\u0631 GitHub \u06CC\u06A9 issue \u06CC\u0627 pull request \u0628\u0627\u0632 \u06A9\u0646\u06CC\u062F.",
+        settingsTranslationHelp: "\u062E\u0637\u0627\u06CC \u062A\u0631\u062C\u0645\u0647 \u067E\u06CC\u062F\u0627 \u06A9\u0631\u062F\u06CC\u062F\u061F \u0644\u0637\u0641\u0627\u064B \u062F\u0631 GitHub \u06CC\u06A9 issue \u06CC\u0627 pull request \u0628\u0627\u0632 \u06A9\u0646\u06CC\u062F.",
         settingsPreviewHeading: "\u0641\u0639\u0627\u0644 \u06A9\u0631\u062F\u0646 \u067E\u06CC\u0634\u200C\u0646\u0645\u0627\u06CC\u0634 \u067E\u06CC\u0634 \u0627\u0632 \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u0646\u0634\u0633\u062A",
         settingsPreviewDesc: "\u0647\u0646\u06AF\u0627\u0645 \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u0646\u0634\u0633\u062A \u0628\u0627 \u0645\u06CC\u0627\u0646\u0628\u0631\u060C \u0641\u0634\u0627\u0631 \u0627\u0648\u0644 \u0641\u0642\u0637 \u0645\u0648\u0642\u0639\u06CC\u062A \u0641\u0639\u0644\u06CC \u0631\u0627 \u0646\u0634\u0627\u0646 \u0645\u06CC\u200C\u062F\u0647\u062F \u0648 \u062C\u0627\u0628\u0647\u200C\u062C\u0627 \u0646\u0645\u06CC\u200C\u06A9\u0646\u062F.",
         settingsPreviewNext: "\u0646\u0634\u0633\u062A \u0628\u0639\u062F\u06CC",
@@ -6933,14 +6838,6 @@ var require_i18n = __commonJS({
         settingsHighlightUnsavedSessionChangesDesc: "\u0648\u0642\u062A\u06CC \u0630\u062E\u06CC\u0631\u0647 \u062E\u0648\u062F\u06A9\u0627\u0631 \u0647\u0646\u06AF\u0627\u0645 \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u062E\u0627\u0645\u0648\u0634 \u0627\u0633\u062A\u060C \u0627\u06AF\u0631 \u0686\u06CC\u062F\u0645\u0627\u0646 \u0641\u0639\u0644\u06CC \u0641\u0636\u0627\u06CC \u06A9\u0627\u0631\u06CC \u0628\u0627 \u0646\u0634\u0633\u062A \u0630\u062E\u06CC\u0631\u0647\u200C\u0634\u062F\u0647 \u0641\u0631\u0642 \u062F\u0627\u0634\u062A\u0647 \u0628\u0627\u0634\u062F\u060C \u0646\u0648\u0627\u0631 \u0648\u0636\u0639\u06CC\u062A \u0631\u0627 \u0628\u0631\u062C\u0633\u062A\u0647 \u06A9\u0646\u06CC\u062F.",
         settingsStatusBarQuickSwitcher: "\u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06A9\u0646\u0646\u062F\u0647 \u0633\u0631\u06CC\u0639 \u0628\u0627 \u06A9\u0644\u06CC\u06A9 \u0646\u0648\u0627\u0631 \u0648\u0636\u0639\u06CC\u062A",
         settingsStatusBarQuickSwitcherDesc: "\u0627\u06AF\u0631 \u0641\u0639\u0627\u0644 \u0628\u0627\u0634\u062F\u060C \u06A9\u0644\u06CC\u06A9 \u0631\u0648\u06CC \u0646\u0648\u0627\u0631 \u0648\u0636\u0639\u06CC\u062A \u0628\u0647\u200C\u062C\u0627\u06CC \u0645\u062F\u06CC\u0631 \u0646\u0634\u0633\u062A \u06A9\u0627\u0645\u0644\u060C \u067E\u0648\u0634\u0634 \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06A9\u0646\u0646\u062F\u0647 \u0633\u0631\u06CC\u0639 \u0631\u0627 \u0628\u0627\u0632 \u0645\u06CC\u200C\u06A9\u0646\u062F.",
-        settingsUseLocalSettings: "\u0627\u0633\u062A\u0641\u0627\u062F\u0647 \u0627\u0632 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u062E\u0635\u0648\u0635 vault",
-        settingsUseLocalSettingsDesc: "\u0627\u06AF\u0631 .obsidian \u0631\u0627 \u0628\u06CC\u0646 \u0686\u0646\u062F vault \u0647\u0645\u06AF\u0627\u0645 \u0645\u06CC\u200C\u06A9\u0646\u06CC\u062F (\u0645\u062B\u0644\u0627 \u0628\u0627 Settings Profiles) \u0648 \u0645\u06CC\u200C\u062E\u0648\u0627\u0647\u06CC\u062F \u062A\u0646\u0638\u06CC\u0645\u0627\u062A Workspace++ \u0628\u0631\u0627\u06CC \u0647\u0631 vault \u062C\u062F\u0627 \u0628\u0645\u0627\u0646\u062F\u060C \u0627\u06CC\u0646 \u0631\u0627 \u0631\u0648\u0634\u0646 \u06A9\u0646\u06CC\u062F.",
-        settingsCopyGlobalToLocal: "\u06A9\u067E\u06CC \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0633\u0631\u0627\u0633\u0631\u06CC \u0628\u0647 \u0627\u06CC\u0646 vault",
-        settingsCopyGlobalToLocalDesc: "\u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u062E\u0635\u0648\u0635 vault \u0631\u0627 \u0628\u0627 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0633\u0631\u0627\u0633\u0631\u06CC \u0641\u0639\u0644\u06CC \u0628\u0627\u0632\u0646\u0648\u06CC\u0633\u06CC \u0645\u06CC\u200C\u06A9\u0646\u062F.",
-        settingsCopyGlobalToLocalBtn: "\u06A9\u067E\u06CC",
-        settingsResetLocalSettings: "\u0628\u0627\u0632\u0646\u0634\u0627\u0646\u06CC \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u062E\u0635\u0648\u0635 vault",
-        settingsResetLocalSettingsDesc: "\u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u062E\u0635\u0648\u0635 vault \u0631\u0627 \u0628\u0647 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0633\u0631\u0627\u0633\u0631\u06CC \u0628\u0631\u0645\u06CC\u200C\u06AF\u0631\u062F\u0627\u0646\u062F.",
-        settingsResetLocalSettingsBtn: "\u0628\u0627\u0632\u0646\u0634\u0627\u0646\u06CC \u0645\u062D\u0644\u06CC",
         settingsAdvancedStorageSubsection: "\u0631\u0641\u062A\u0627\u0631 \u0630\u062E\u06CC\u0631\u0647\u200C\u0633\u0627\u0632\u06CC",
         settingsAdvancedTransferSubsection: "\u0627\u0646\u062A\u0642\u0627\u0644 \u062F\u0627\u062F\u0647",
         settingsDeveloperSection: "\u0627\u0628\u0632\u0627\u0631\u0647\u0627\u06CC \u062A\u0648\u0633\u0639\u0647\u200C\u062F\u0647\u0646\u062F\u0647",
@@ -6948,8 +6845,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "\u062C\u0632\u0626\u06CC\u0627\u062A \u0630\u062E\u06CC\u0631\u0647\u200C\u0633\u0627\u0632\u06CC \u06A9\u0647 Workspace++ \u0627\u06A9\u0646\u0648\u0646 \u0627\u0633\u062A\u0641\u0627\u062F\u0647 \u0645\u06CC\u200C\u06A9\u0646\u062F.",
         settingsStorageFieldSessions: "\u0641\u0627\u06CC\u0644 \u0646\u0634\u0633\u062A\u200C\u0647\u0627",
         settingsStorageFieldSessionsBackup: "\u067E\u0634\u062A\u06CC\u0628\u0627\u0646 \u0646\u0634\u0633\u062A\u200C\u0647\u0627",
-        settingsStorageFieldLocalSettings: "\u0641\u0627\u06CC\u0644 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u062D\u0644\u06CC",
-        settingsStorageFieldGlobalSettings: "\u0641\u0627\u06CC\u0644 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0633\u0631\u0627\u0633\u0631\u06CC",
         settingsStorageFieldSessionCount: "\u062A\u0639\u062F\u0627\u062F \u0646\u0634\u0633\u062A\u200C\u0647\u0627",
         settingsStorageFieldUpdatedAt: "\u0628\u0647\u200C\u0631\u0648\u0632\u0631\u0633\u0627\u0646\u06CC \u062F\u0631",
         settingsExportSessions: "\u062E\u0631\u0648\u062C\u06CC \u06AF\u0631\u0641\u062A\u0646 \u0627\u0632 \u0646\u0634\u0633\u062A\u200C\u0647\u0627",
@@ -7258,11 +7153,6 @@ var require_i18n = __commonJS({
         backupRestored: "Workspace++: Sesi dipulihkan daripada sandaran.",
         sessionDataMigrated: "Workspace++: Data sesi dipindahkan ke .workspace-plus-plus/sessions.json.",
         sessionDataMigrationFailed: "Workspace++: Gagal memindahkan data sesi. Data lama masih disimpan.",
-        localSettingsEnabled: "Workspace++: Tetapan setempat vault dihidupkan.",
-        localSettingsDisabled: "Workspace++: Tetapan setempat vault dimatikan.",
-        localSettingsCopied: "Workspace++: Tetapan global disalin ke tetapan setempat vault.",
-        localSettingsLoadFailed: "Workspace++: Gagal memuat tetapan setempat vault. Tetapan global akan digunakan.",
-        localSettingsOperationFailed: "Workspace++: Gagal mengemas kini tetapan setempat vault.",
         exportSessionsDone: function(path) {
           return "Workspace++: Sesi dieksport ke " + path;
         },
@@ -7298,11 +7188,11 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollPresetCustom: "Tersuai",
         settingsStatusBarScrollModifier: "Pengubah yang diperlukan",
         settingsStatusBarScrollModifierDesc: "Pilih kekunci pengubah yang mesti ditahan semasa menatal pada item bar status.",
-        settingsStatusBarScrollModifierRecommended: "Cmd atau Option",
+        settingsStatusBarScrollModifierRecommended: platformLabel("Cmd atau Option", "Ctrl atau Alt"),
         settingsStatusBarScrollModifierNone: "Tiada",
-        settingsStatusBarScrollModifierModOnly: "Cmd sahaja",
-        settingsStatusBarScrollModifierAltOnly: "Option sahaja",
-        settingsStatusBarScrollModifierModOrAlt: "Cmd atau Option",
+        settingsStatusBarScrollModifierModOnly: platformLabel("Cmd sahaja", "Ctrl sahaja"),
+        settingsStatusBarScrollModifierAltOnly: platformLabel("Option sahaja", "Alt sahaja"),
+        settingsStatusBarScrollModifierModOrAlt: platformLabel("Cmd atau Option", "Ctrl atau Alt"),
         settingsStatusBarScrollThreshold: "Ambang kepekaan",
         settingsStatusBarScrollThresholdDesc: "Nilai lebih rendah membuatkan pertukaran lebih mudah. Hanya digunakan apabila praset ialah Tersuai.",
         settingsStatusBarScrollCooldown: "Jeda",
@@ -7366,17 +7256,9 @@ var require_i18n = __commonJS({
         settingsWarnUnsavedSwitch: "Beri amaran sebelum bertukar tanpa menyimpan",
         settingsWarnUnsavedSwitchDesc: "Apabila auto-simpan dimatikan dan sesi semasa mempunyai perubahan yang belum disimpan, tunjukkan amaran sebelum bertukar.",
         settingsHighlightUnsavedSessionChanges: "Serlahkan perubahan sesi yang belum disimpan",
-        settingsHighlightUnsavedSessionChangesDesc: "Apabila auto-simpan semasa bertukar dimatikan, serlahkan bar status jika susun atur ruang kerja semasa berbeza daripada sesi yang disimpan.",
+        settingsHighlightUnsavedSessionChangesDesc: "Apabila auto-simpan semasa bertukar dimatikan, serlahkan bar status jika tataletak ruang kerja semasa berbeza daripada sesi yang disimpan.",
         settingsStatusBarQuickSwitcher: "Penukar pantas pada klik bar status",
         settingsStatusBarQuickSwitcherDesc: "Apabila dihidupkan, mengklik bar status membuka overlay penukar pantas dan bukannya pengurus sesi penuh.",
-        settingsUseLocalSettings: "Guna tetapan setempat vault",
-        settingsUseLocalSettingsDesc: "Hidupkan ini jika anda menyegerakkan .obsidian antara beberapa vault (contohnya dengan Settings Profiles) dan mahu tetapan Workspace++ kekal berbeza bagi setiap vault.",
-        settingsCopyGlobalToLocal: "Salin tetapan global ke vault ini",
-        settingsCopyGlobalToLocalDesc: "Tulis ganti tetapan setempat vault dengan tetapan global semasa anda.",
-        settingsCopyGlobalToLocalBtn: "Salin",
-        settingsResetLocalSettings: "Tetap semula tetapan setempat vault",
-        settingsResetLocalSettingsDesc: "Tetap semula tetapan setempat vault kepada tetapan global anda.",
-        settingsResetLocalSettingsBtn: "Tetap semula setempat",
         settingsAdvancedStorageSubsection: "Tingkah laku storan",
         settingsAdvancedTransferSubsection: "Pemindahan data",
         settingsDeveloperSection: "Alat pembangun",
@@ -7384,8 +7266,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "Butiran storan yang sedang digunakan oleh Workspace++.",
         settingsStorageFieldSessions: "Fail sesi",
         settingsStorageFieldSessionsBackup: "Sandaran sesi",
-        settingsStorageFieldLocalSettings: "Fail tetapan setempat",
-        settingsStorageFieldGlobalSettings: "Fail tetapan global",
         settingsStorageFieldSessionCount: "Bilangan sesi",
         settingsStorageFieldUpdatedAt: "Dikemas kini pada",
         settingsExportSessions: "Eksport sesi",
@@ -7694,11 +7574,6 @@ var require_i18n = __commonJS({
         backupRestored: "Workspace++: Przywr\xF3cono sesje z kopii zapasowej.",
         sessionDataMigrated: "Workspace++: Dane sesji przeniesiono do .workspace-plus-plus/sessions.json.",
         sessionDataMigrationFailed: "Workspace++: Nie uda\u0142o si\u0119 przenie\u015B\u0107 danych sesji. Stare dane zosta\u0142y zachowane.",
-        localSettingsEnabled: "Workspace++: W\u0142\u0105czono ustawienia lokalne vaultu.",
-        localSettingsDisabled: "Workspace++: Wy\u0142\u0105czono ustawienia lokalne vaultu.",
-        localSettingsCopied: "Workspace++: Skopiowano ustawienia globalne do ustawie\u0144 lokalnych vaultu.",
-        localSettingsLoadFailed: "Workspace++: Nie uda\u0142o si\u0119 wczyta\u0107 ustawie\u0144 lokalnych vaultu. U\u017Cyte zostan\u0105 ustawienia globalne.",
-        localSettingsOperationFailed: "Workspace++: Nie uda\u0142o si\u0119 zaktualizowa\u0107 ustawie\u0144 lokalnych vaultu.",
         exportSessionsDone: function(path) {
           return "Workspace++: Wyeksportowano sesje do " + path;
         },
@@ -7734,11 +7609,11 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollPresetCustom: "W\u0142asne",
         settingsStatusBarScrollModifier: "Wymagany modyfikator",
         settingsStatusBarScrollModifierDesc: "Wybierz modyfikator, kt\xF3ry trzeba trzyma\u0107 podczas przewijania na elemencie paska stanu.",
-        settingsStatusBarScrollModifierRecommended: "Cmd albo Option",
+        settingsStatusBarScrollModifierRecommended: platformLabel("Cmd albo Option", "Ctrl albo Alt"),
         settingsStatusBarScrollModifierNone: "Brak",
-        settingsStatusBarScrollModifierModOnly: "Tylko Cmd",
-        settingsStatusBarScrollModifierAltOnly: "Tylko Option",
-        settingsStatusBarScrollModifierModOrAlt: "Cmd albo Option",
+        settingsStatusBarScrollModifierModOnly: platformLabel("Tylko Cmd", "Tylko Ctrl"),
+        settingsStatusBarScrollModifierAltOnly: platformLabel("Tylko Option", "Tylko Alt"),
+        settingsStatusBarScrollModifierModOrAlt: platformLabel("Cmd albo Option", "Ctrl albo Alt"),
         settingsStatusBarScrollThreshold: "Pr\xF3g czu\u0142o\u015Bci",
         settingsStatusBarScrollThresholdDesc: "Ni\u017Csze warto\u015Bci u\u0142atwiaj\u0105 prze\u0142\u0105czenie. U\u017Cywane tylko, gdy preset to W\u0142asne.",
         settingsStatusBarScrollCooldown: "Czas odnowienia",
@@ -7805,14 +7680,6 @@ var require_i18n = __commonJS({
         settingsHighlightUnsavedSessionChangesDesc: "Gdy automatyczny zapis przy prze\u0142\u0105czaniu jest wy\u0142\u0105czony, wyr\xF3\u017Cnia pasek stanu, je\u015Bli bie\u017C\u0105cy uk\u0142ad obszaru roboczego r\xF3\u017Cni si\u0119 od zapisanej sesji.",
         settingsStatusBarQuickSwitcher: "Szybki prze\u0142\u0105cznik po klikni\u0119ciu paska stanu",
         settingsStatusBarQuickSwitcherDesc: "Po w\u0142\u0105czeniu klikni\u0119cie paska stanu otwiera nak\u0142adk\u0119 szybkiego prze\u0142\u0105cznika zamiast pe\u0142nego mened\u017Cera sesji.",
-        settingsUseLocalSettings: "U\u017Cywaj ustawie\u0144 lokalnych vaultu",
-        settingsUseLocalSettingsDesc: "W\u0142\u0105cz to, je\u015Bli synchronizujesz .obsidian mi\u0119dzy vaultami (np. przez Settings Profiles) i chcesz, aby ustawienia Workspace++ by\u0142y osobne dla ka\u017Cdego vaultu.",
-        settingsCopyGlobalToLocal: "Kopiuj ustawienia globalne do tego vaultu",
-        settingsCopyGlobalToLocalDesc: "Nadpisuje ustawienia lokalne vaultu bie\u017C\u0105cymi ustawieniami globalnymi.",
-        settingsCopyGlobalToLocalBtn: "Kopiuj",
-        settingsResetLocalSettings: "Resetuj ustawienia lokalne vaultu",
-        settingsResetLocalSettingsDesc: "Przywraca ustawienia lokalne vaultu do ustawie\u0144 globalnych.",
-        settingsResetLocalSettingsBtn: "Resetuj lokalne",
         settingsAdvancedStorageSubsection: "Zachowanie przechowywania",
         settingsAdvancedTransferSubsection: "Przenoszenie danych",
         settingsDeveloperSection: "Narz\u0119dzia deweloperskie",
@@ -7820,8 +7687,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "Szczeg\xF3\u0142y przechowywania obecnie u\u017Cywane przez Workspace++.",
         settingsStorageFieldSessions: "Plik sesji",
         settingsStorageFieldSessionsBackup: "Kopia zapasowa sesji",
-        settingsStorageFieldLocalSettings: "Plik ustawie\u0144 lokalnych",
-        settingsStorageFieldGlobalSettings: "Plik ustawie\u0144 globalnych",
         settingsStorageFieldSessionCount: "Liczba sesji",
         settingsStorageFieldUpdatedAt: "Zaktualizowano",
         settingsExportSessions: "Eksportuj sesje",
@@ -7846,7 +7711,7 @@ var require_i18n = __commonJS({
         resetSessionsFailed: "Nie uda\u0142o si\u0119 zresetowa\u0107 sesji.",
         settingsResetSessionsAndSettings: "Resetuj sesje i ustawienia",
         settingsResetSessionsAndSettingsDesc: "Resetuje zapisane sesje i ustawienia Workspace++ jednocze\u015Bnie.",
-        settingsResetSessionsAndSettingsBtn: "Resetuj oba",
+        settingsResetSessionsAndSettingsBtn: "Zresetuj wszystko",
         confirmResetSessionsAndSettings: "Zresetowa\u0107 sesje i ustawienia? Tego nie mo\u017Cna cofn\u0105\u0107.",
         resetSessionsAndSettingsDone: "Sesje i ustawienia zosta\u0142y zresetowane.",
         resetSessionsAndSettingsFailed: "Nie uda\u0142o si\u0119 zresetowa\u0107 sesji i ustawie\u0144.",
@@ -8006,11 +7871,6 @@ var require_i18n = __commonJS({
         saveWithoutNaming: "\u4E0D\u547D\u540D\u76F4\u63A5\u4FDD\u5B58",
         sessionDataMigrated: "Workspace++: \u4F1A\u8BDD\u6570\u636E\u5DF2\u8FC1\u79FB\u5230 .workspace-plus-plus/sessions.json\u3002",
         sessionDataMigrationFailed: "Workspace++: \u4F1A\u8BDD\u6570\u636E\u8FC1\u79FB\u5931\u8D25\u3002\u65E7\u7248\u6570\u636E\u5DF2\u4FDD\u7559\u3002",
-        localSettingsEnabled: "Workspace++: \u5DF2\u542F\u7528 Vault \u672C\u5730\u8BBE\u7F6E\u3002",
-        localSettingsDisabled: "Workspace++: \u5DF2\u7981\u7528 Vault \u672C\u5730\u8BBE\u7F6E\u3002",
-        localSettingsCopied: "Workspace++: \u5DF2\u5C06\u5168\u5C40\u8BBE\u7F6E\u590D\u5236\u5230 Vault \u672C\u5730\u8BBE\u7F6E\u3002",
-        localSettingsLoadFailed: "Workspace++: \u65E0\u6CD5\u52A0\u8F7D Vault \u672C\u5730\u8BBE\u7F6E\u3002\u5C06\u4F7F\u7528\u5168\u5C40\u8BBE\u7F6E\u3002",
-        localSettingsOperationFailed: "Workspace++: \u66F4\u65B0 Vault \u672C\u5730\u8BBE\u7F6E\u5931\u8D25\u3002",
         exportSessionsDone: function(path) {
           return "Workspace++: \u5DF2\u5C06\u4F1A\u8BDD\u5BFC\u51FA\u5230 " + path;
         },
@@ -8052,14 +7912,6 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollResetWindowDesc: "\u5728\u91CD\u7F6E\u524D\uFF0C\u5C06\u8F83\u5C0F\u6EDA\u52A8\u589E\u91CF\u6301\u7EED\u5408\u5E76\u7684\u65F6\u957F\u3002\u4EC5\u5728\u201C\u81EA\u5B9A\u4E49\u201D\u9884\u8BBE\u4E0B\u4F7F\u7528\u3002",
         settingsStatusBarScrollInvert: "\u53CD\u8F6C\u6EDA\u52A8\u65B9\u5411",
         settingsStatusBarScrollInvertDesc: "\u53CD\u8F6C\u72B6\u6001\u680F\u6EDA\u52A8\u5207\u6362\u65F6\u7684\u4E0A\u4E00\u9879/\u4E0B\u4E00\u9879\u65B9\u5411\u3002",
-        settingsUseLocalSettings: "\u4F7F\u7528 Vault \u672C\u5730\u8BBE\u7F6E",
-        settingsUseLocalSettingsDesc: "\u5982\u679C\u4F60\u5728\u591A\u4E2A Vault \u4E4B\u95F4\u540C\u6B65 .obsidian\uFF08\u4F8B\u5982\u4F7F\u7528 Settings Profiles\uFF09\uFF0C\u5E76\u5E0C\u671B Workspace++ \u8BBE\u7F6E\u6309 Vault \u5206\u5F00\u4FDD\u5B58\uFF0C\u8BF7\u5F00\u542F\u6B64\u9879\u3002",
-        settingsCopyGlobalToLocal: "\u5C06\u5168\u5C40\u8BBE\u7F6E\u590D\u5236\u5230\u6B64 Vault",
-        settingsCopyGlobalToLocalDesc: "\u7528\u5F53\u524D\u5168\u5C40\u8BBE\u7F6E\u8986\u76D6 Vault \u672C\u5730\u8BBE\u7F6E\u3002",
-        settingsCopyGlobalToLocalBtn: "\u590D\u5236",
-        settingsResetLocalSettings: "\u91CD\u7F6E Vault \u672C\u5730\u8BBE\u7F6E",
-        settingsResetLocalSettingsDesc: "\u5C06 Vault \u672C\u5730\u8BBE\u7F6E\u91CD\u7F6E\u4E3A\u5168\u5C40\u8BBE\u7F6E\u3002",
-        settingsResetLocalSettingsBtn: "\u91CD\u7F6E\u672C\u5730",
         settingsAdvancedStorageSubsection: "\u5B58\u50A8\u884C\u4E3A",
         settingsAdvancedTransferSubsection: "\u6570\u636E\u8FC1\u79FB",
         settingsDeveloperSection: "\u5F00\u53D1\u8005\u5DE5\u5177",
@@ -8067,8 +7919,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "Workspace++ \u5F53\u524D\u4F7F\u7528\u7684\u5B58\u50A8\u4FE1\u606F\u3002",
         settingsStorageFieldSessions: "\u4F1A\u8BDD\u6587\u4EF6",
         settingsStorageFieldSessionsBackup: "\u4F1A\u8BDD\u5907\u4EFD",
-        settingsStorageFieldLocalSettings: "\u672C\u5730\u8BBE\u7F6E\u6587\u4EF6",
-        settingsStorageFieldGlobalSettings: "\u5168\u5C40\u8BBE\u7F6E\u6587\u4EF6",
         settingsStorageFieldSessionCount: "\u4F1A\u8BDD\u6570\u91CF",
         settingsStorageFieldUpdatedAt: "\u66F4\u65B0\u65F6\u95F4",
         settingsExportSessions: "\u5BFC\u51FA\u4F1A\u8BDD",
@@ -8113,11 +7963,6 @@ var require_i18n = __commonJS({
         saveWithoutNaming: "\u4E0D\u547D\u540D\u76F4\u63A5\u5132\u5B58",
         sessionDataMigrated: "Workspace++: \u5DE5\u4F5C\u968E\u6BB5\u8CC7\u6599\u5DF2\u79FB\u81F3 .workspace-plus-plus/sessions.json\u3002",
         sessionDataMigrationFailed: "Workspace++: \u5DE5\u4F5C\u968E\u6BB5\u8CC7\u6599\u79FB\u8F49\u5931\u6557\u3002\u820A\u7248\u8CC7\u6599\u5DF2\u4FDD\u7559\u3002",
-        localSettingsEnabled: "Workspace++: \u5DF2\u555F\u7528 Vault \u672C\u6A5F\u8A2D\u5B9A\u3002",
-        localSettingsDisabled: "Workspace++: \u5DF2\u505C\u7528 Vault \u672C\u6A5F\u8A2D\u5B9A\u3002",
-        localSettingsCopied: "Workspace++: \u5DF2\u5C07\u5168\u57DF\u8A2D\u5B9A\u8907\u88FD\u5230 Vault \u672C\u6A5F\u8A2D\u5B9A\u3002",
-        localSettingsLoadFailed: "Workspace++: \u7121\u6CD5\u8F09\u5165 Vault \u672C\u6A5F\u8A2D\u5B9A\u3002\u5C07\u6539\u7528\u5168\u57DF\u8A2D\u5B9A\u3002",
-        localSettingsOperationFailed: "Workspace++: \u66F4\u65B0 Vault \u672C\u6A5F\u8A2D\u5B9A\u5931\u6557\u3002",
         exportSessionsDone: function(path) {
           return "Workspace++: \u5DF2\u5C07\u5DE5\u4F5C\u968E\u6BB5\u532F\u51FA\u5230 " + path;
         },
@@ -8132,20 +7977,20 @@ var require_i18n = __commonJS({
         settingsGitHubLink: "GitHub",
         settingsSectionSessionListSearch: "\u5DE5\u4F5C\u968E\u6BB5\u6E05\u55AE\u8207\u641C\u5C0B",
         settingsSectionSwitchCommands: "\u5207\u63DB\u547D\u4EE4",
-        settingsSectionScrollSwitch: "\u6EFE\u52D5\u5207\u63DB",
+        settingsSectionScrollSwitch: "\u6372\u52D5\u5207\u63DB",
         settingsSubsectionSwitchSaving: "\u5207\u63DB\u5DE5\u4F5C\u968E\u6BB5\u6642\u7684\u5132\u5B58",
         settingsSubsectionAutoSaveMode: "\u5DE5\u4F5C\u968E\u6BB5\u81EA\u52D5\u5132\u5B58\u6A21\u5F0F",
         settingsSubsectionSwitchCommands: "\u5DE5\u4F5C\u968E\u6BB5\u5207\u63DB\u547D\u4EE4",
-        settingsSubsectionScrollSwitch: "\u900F\u904E\u6EFE\u52D5\u5207\u63DB\u5DE5\u4F5C\u968E\u6BB5",
+        settingsSubsectionScrollSwitch: "\u900F\u904E\u6372\u52D5\u5207\u63DB\u5DE5\u4F5C\u968E\u6BB5",
         settingsSubsectionSwitchPreview: "\u5207\u63DB\u5DE5\u4F5C\u968E\u6BB5\u524D\u9810\u89BD",
-        settingsStatusBarScrollPreset: "\u6EFE\u52D5\u8F38\u5165\u9810\u8A2D",
+        settingsStatusBarScrollPreset: "\u6372\u52D5\u8F38\u5165\u9810\u8A2D",
         settingsStatusBarScrollPresetDesc: "\u9078\u64C7\u9069\u5408\u4F60\u88DD\u7F6E\u7684\u9810\u8A2D\uFF0C\u6216\u5207\u63DB\u5230\u300C\u81EA\u8A02\u300D\u81EA\u884C\u8ABF\u6574\u6578\u503C\u3002",
         settingsStatusBarScrollPresetTrackpad: "\u89F8\u63A7\u677F",
         settingsStatusBarScrollPresetNotchedWheel: "\u6709\u6BB5\u843D\u611F\u7684\u6ED1\u9F20\u6EFE\u8F2A",
         settingsStatusBarScrollPresetFreeSpinWheel: "\u81EA\u7531\u65CB\u8F49\u6ED1\u9F20\u6EFE\u8F2A",
         settingsStatusBarScrollPresetCustom: "\u81EA\u8A02",
         settingsStatusBarScrollModifier: "\u9700\u8981\u7684\u4FEE\u98FE\u9375",
-        settingsStatusBarScrollModifierDesc: "\u9078\u64C7\u5728\u72C0\u614B\u5217\u9805\u76EE\u4E0A\u6EFE\u52D5\u6642\u5FC5\u9808\u6309\u4F4F\u7684\u4FEE\u98FE\u9375\u3002",
+        settingsStatusBarScrollModifierDesc: "\u9078\u64C7\u5728\u72C0\u614B\u5217\u9805\u76EE\u4E0A\u6372\u52D5\u6642\u5FC5\u9808\u6309\u4F4F\u7684\u4FEE\u98FE\u9375\u3002",
         settingsStatusBarScrollModifierRecommended: platformLabel("Cmd \u6216 Option", "Ctrl \u6216 Alt"),
         settingsStatusBarScrollModifierNone: "\u7121",
         settingsStatusBarScrollModifierModOnly: platformLabel("\u50C5 Cmd", "\u50C5 Ctrl"),
@@ -8154,19 +7999,11 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollThreshold: "\u9748\u654F\u5EA6\u9580\u6ABB",
         settingsStatusBarScrollThresholdDesc: "\u6578\u503C\u8D8A\u5C0F\uFF0C\u8D8A\u5BB9\u6613\u5207\u63DB\u3002\u50C5\u5728\u300C\u81EA\u8A02\u300D\u9810\u8A2D\u6642\u4F7F\u7528\u3002",
         settingsStatusBarScrollCooldown: "\u51B7\u537B\u6642\u9593",
-        settingsStatusBarScrollCooldownDesc: "\u5169\u6B21\u7531\u6EFE\u52D5\u89F8\u767C\u7684\u5DE5\u4F5C\u968E\u6BB5\u5207\u63DB\u4E4B\u9593\u7684\u6700\u77ED\u9593\u9694\u3002\u50C5\u5728\u300C\u81EA\u8A02\u300D\u9810\u8A2D\u6642\u4F7F\u7528\u3002",
+        settingsStatusBarScrollCooldownDesc: "\u5169\u6B21\u7531\u6372\u52D5\u89F8\u767C\u7684\u5DE5\u4F5C\u968E\u6BB5\u5207\u63DB\u4E4B\u9593\u7684\u6700\u77ED\u9593\u9694\u3002\u50C5\u5728\u300C\u81EA\u8A02\u300D\u9810\u8A2D\u6642\u4F7F\u7528\u3002",
         settingsStatusBarScrollResetWindow: "\u7D2F\u7A4D\u91CD\u8A2D\u6642\u9593\u7A97",
-        settingsStatusBarScrollResetWindowDesc: "\u5728\u91CD\u8A2D\u524D\uFF0C\u6301\u7E8C\u7D2F\u7A4D\u8F03\u5C0F\u6EFE\u52D5\u91CF\u7684\u6642\u9593\u3002\u50C5\u5728\u300C\u81EA\u8A02\u300D\u9810\u8A2D\u6642\u4F7F\u7528\u3002",
-        settingsStatusBarScrollInvert: "\u53CD\u8F49\u6EFE\u52D5\u65B9\u5411",
-        settingsStatusBarScrollInvertDesc: "\u53CD\u8F49\u72C0\u614B\u5217\u6EFE\u52D5\u5207\u63DB\u6642\u4E0A\u4E00\u500B/\u4E0B\u4E00\u500B\u7684\u65B9\u5411\u3002",
-        settingsUseLocalSettings: "\u4F7F\u7528 Vault \u672C\u6A5F\u8A2D\u5B9A",
-        settingsUseLocalSettingsDesc: "\u82E5\u4F60\u5728\u591A\u500B Vault \u4E4B\u9593\u540C\u6B65 .obsidian\uFF08\u4F8B\u5982\u4F7F\u7528 Settings Profiles\uFF09\uFF0C\u4E26\u5E0C\u671B Workspace++ \u8A2D\u5B9A\u5728\u5404 Vault \u5206\u958B\u4FDD\u5B58\uFF0C\u8ACB\u555F\u7528\u6B64\u9805\u3002",
-        settingsCopyGlobalToLocal: "\u5C07\u5168\u57DF\u8A2D\u5B9A\u8907\u88FD\u5230\u6B64 Vault",
-        settingsCopyGlobalToLocalDesc: "\u4EE5\u76EE\u524D\u5168\u57DF\u8A2D\u5B9A\u8986\u5BEB Vault \u672C\u6A5F\u8A2D\u5B9A\u3002",
-        settingsCopyGlobalToLocalBtn: "\u8907\u88FD",
-        settingsResetLocalSettings: "\u91CD\u8A2D Vault \u672C\u6A5F\u8A2D\u5B9A",
-        settingsResetLocalSettingsDesc: "\u5C07 Vault \u672C\u6A5F\u8A2D\u5B9A\u91CD\u8A2D\u56DE\u5168\u57DF\u8A2D\u5B9A\u3002",
-        settingsResetLocalSettingsBtn: "\u91CD\u8A2D\u672C\u6A5F",
+        settingsStatusBarScrollResetWindowDesc: "\u5728\u91CD\u8A2D\u524D\uFF0C\u6301\u7E8C\u7D2F\u7A4D\u8F03\u5C0F\u6372\u52D5\u91CF\u7684\u6642\u9593\u3002\u50C5\u5728\u300C\u81EA\u8A02\u300D\u9810\u8A2D\u6642\u4F7F\u7528\u3002",
+        settingsStatusBarScrollInvert: "\u53CD\u8F49\u6372\u52D5\u65B9\u5411",
+        settingsStatusBarScrollInvertDesc: "\u53CD\u8F49\u72C0\u614B\u5217\u6372\u52D5\u5207\u63DB\u6642\u4E0A\u4E00\u500B/\u4E0B\u4E00\u500B\u7684\u65B9\u5411\u3002",
         settingsAdvancedStorageSubsection: "\u5132\u5B58\u884C\u70BA",
         settingsAdvancedTransferSubsection: "\u8CC7\u6599\u79FB\u8F49",
         settingsDeveloperSection: "\u958B\u767C\u8005\u5DE5\u5177",
@@ -8174,8 +8011,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "Workspace++ \u76EE\u524D\u4F7F\u7528\u7684\u5132\u5B58\u8CC7\u8A0A\u3002",
         settingsStorageFieldSessions: "\u5DE5\u4F5C\u968E\u6BB5\u6A94\u6848",
         settingsStorageFieldSessionsBackup: "\u5DE5\u4F5C\u968E\u6BB5\u5099\u4EFD",
-        settingsStorageFieldLocalSettings: "\u672C\u6A5F\u8A2D\u5B9A\u6A94\u6848",
-        settingsStorageFieldGlobalSettings: "\u5168\u57DF\u8A2D\u5B9A\u6A94\u6848",
         settingsStorageFieldSessionCount: "\u5DE5\u4F5C\u968E\u6BB5\u6578\u91CF",
         settingsStorageFieldUpdatedAt: "\u66F4\u65B0\u6642\u9593",
         settingsExportSessions: "\u532F\u51FA\u5DE5\u4F5C\u968E\u6BB5",
@@ -8220,11 +8055,6 @@ var require_i18n = __commonJS({
         saveWithoutNaming: "Guardar sin nombrar",
         sessionDataMigrated: "Workspace++: Los datos de sesi\xF3n se movieron a .workspace-plus-plus/sessions.json.",
         sessionDataMigrationFailed: "Workspace++: No se pudieron migrar los datos de sesi\xF3n. Los datos heredados se conservan.",
-        localSettingsEnabled: "Workspace++: Configuraci\xF3n local del vault activada.",
-        localSettingsDisabled: "Workspace++: Configuraci\xF3n local del vault desactivada.",
-        localSettingsCopied: "Workspace++: Se copiaron los ajustes globales a los ajustes locales del vault.",
-        localSettingsLoadFailed: "Workspace++: No se pudieron cargar los ajustes locales del vault. Se usar\xE1n los ajustes globales.",
-        localSettingsOperationFailed: "Workspace++: No se pudieron actualizar los ajustes locales del vault.",
         exportSessionsDone: function(path) {
           return "Workspace++: Sesiones exportadas a " + path;
         },
@@ -8266,14 +8096,6 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollResetWindowDesc: "Cu\xE1nto tiempo se siguen combinando peque\xF1os desplazamientos antes de reiniciarlos. Solo se usa con el preajuste Personalizado.",
         settingsStatusBarScrollInvert: "Invertir direcci\xF3n de desplazamiento",
         settingsStatusBarScrollInvertDesc: "Invierte la direcci\xF3n anterior/siguiente al cambiar sesiones con el desplazamiento en la barra de estado.",
-        settingsUseLocalSettings: "Usar configuraci\xF3n local del vault",
-        settingsUseLocalSettingsDesc: "Activa esto si sincronizas .obsidian entre varios vaults (por ejemplo, con Settings Profiles) y quieres que la configuraci\xF3n de Workspace++ sea diferente por vault.",
-        settingsCopyGlobalToLocal: "Copiar ajustes globales a este vault",
-        settingsCopyGlobalToLocalDesc: "Sobrescribe los ajustes locales del vault con los ajustes globales actuales.",
-        settingsCopyGlobalToLocalBtn: "Copiar",
-        settingsResetLocalSettings: "Restablecer ajustes locales del vault",
-        settingsResetLocalSettingsDesc: "Restablece los ajustes locales del vault a los ajustes globales.",
-        settingsResetLocalSettingsBtn: "Restablecer local",
         settingsAdvancedStorageSubsection: "Comportamiento de almacenamiento",
         settingsAdvancedTransferSubsection: "Transferencia de datos",
         settingsDeveloperSection: "Herramientas para desarrolladores",
@@ -8281,8 +8103,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "Detalles de almacenamiento usados actualmente por Workspace++.",
         settingsStorageFieldSessions: "Archivo de sesiones",
         settingsStorageFieldSessionsBackup: "Respaldo de sesiones",
-        settingsStorageFieldLocalSettings: "Archivo de ajustes locales",
-        settingsStorageFieldGlobalSettings: "Archivo de ajustes globales",
         settingsStorageFieldSessionCount: "Cantidad de sesiones",
         settingsStorageFieldUpdatedAt: "Actualizado el",
         settingsExportSessions: "Exportar sesiones",
@@ -8327,11 +8147,6 @@ var require_i18n = __commonJS({
         saveWithoutNaming: "Enregistrer sans nommer",
         sessionDataMigrated: "Workspace++ : les donn\xE9es de session ont \xE9t\xE9 d\xE9plac\xE9es vers .workspace-plus-plus/sessions.json.",
         sessionDataMigrationFailed: "Workspace++ : \xE9chec de la migration des donn\xE9es de session. Les donn\xE9es h\xE9rit\xE9es sont conserv\xE9es.",
-        localSettingsEnabled: "Workspace++ : param\xE8tres locaux du coffre activ\xE9s.",
-        localSettingsDisabled: "Workspace++ : param\xE8tres locaux du coffre d\xE9sactiv\xE9s.",
-        localSettingsCopied: "Workspace++ : param\xE8tres globaux copi\xE9s vers les param\xE8tres locaux du coffre.",
-        localSettingsLoadFailed: "Workspace++ : impossible de charger les param\xE8tres locaux du coffre. Les param\xE8tres globaux seront utilis\xE9s.",
-        localSettingsOperationFailed: "Workspace++ : impossible de mettre \xE0 jour les param\xE8tres locaux du coffre.",
         exportSessionsDone: function(path) {
           return "Workspace++ : sessions export\xE9es vers " + path;
         },
@@ -8373,14 +8188,6 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollResetWindowDesc: "Dur\xE9e pendant laquelle les petits deltas de d\xE9filement restent cumul\xE9s avant r\xE9initialisation. Utilis\xE9 uniquement avec le pr\xE9r\xE9glage Personnalis\xE9.",
         settingsStatusBarScrollInvert: "Inverser le sens du d\xE9filement",
         settingsStatusBarScrollInvertDesc: "Inverse le sens pr\xE9c\xE9dent/suivant pour le changement de session par d\xE9filement dans la barre d\u2019\xE9tat.",
-        settingsUseLocalSettings: "Utiliser des param\xE8tres locaux du coffre",
-        settingsUseLocalSettingsDesc: "Activez cette option si vous synchronisez .obsidian entre plusieurs coffres (par exemple avec Settings Profiles) et souhaitez des r\xE9glages Workspace++ diff\xE9rents par coffre.",
-        settingsCopyGlobalToLocal: "Copier les param\xE8tres globaux vers ce coffre",
-        settingsCopyGlobalToLocalDesc: "\xC9crase les param\xE8tres locaux du coffre avec les param\xE8tres globaux actuels.",
-        settingsCopyGlobalToLocalBtn: "Copier",
-        settingsResetLocalSettings: "R\xE9initialiser les param\xE8tres locaux du coffre",
-        settingsResetLocalSettingsDesc: "R\xE9initialise les param\xE8tres locaux du coffre vers les param\xE8tres globaux.",
-        settingsResetLocalSettingsBtn: "R\xE9initialiser local",
         settingsAdvancedStorageSubsection: "Comportement du stockage",
         settingsAdvancedTransferSubsection: "Transfert des donn\xE9es",
         settingsDeveloperSection: "Outils d\xE9veloppeur",
@@ -8388,8 +8195,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "Informations de stockage actuellement utilis\xE9es par Workspace++.",
         settingsStorageFieldSessions: "Fichier des sessions",
         settingsStorageFieldSessionsBackup: "Sauvegarde des sessions",
-        settingsStorageFieldLocalSettings: "Fichier des param\xE8tres locaux",
-        settingsStorageFieldGlobalSettings: "Fichier des param\xE8tres globaux",
         settingsStorageFieldSessionCount: "Nombre de sessions",
         settingsStorageFieldUpdatedAt: "Mis \xE0 jour le",
         settingsExportSessions: "Exporter les sessions",
@@ -8434,11 +8239,6 @@ var require_i18n = __commonJS({
         saveWithoutNaming: "\u062D\u0641\u0638 \u0628\u062F\u0648\u0646 \u062A\u0633\u0645\u064A\u0629",
         sessionDataMigrated: "Workspace++: \u062A\u0645 \u0646\u0642\u0644 \u0628\u064A\u0627\u0646\u0627\u062A \u0627\u0644\u062C\u0644\u0633\u0627\u062A \u0625\u0644\u0649 .workspace-plus-plus/sessions.json.",
         sessionDataMigrationFailed: "Workspace++: \u0641\u0634\u0644 \u0646\u0642\u0644 \u0628\u064A\u0627\u0646\u0627\u062A \u0627\u0644\u062C\u0644\u0633\u0627\u062A. \u062A\u0645 \u0627\u0644\u0627\u062D\u062A\u0641\u0627\u0638 \u0628\u0627\u0644\u0628\u064A\u0627\u0646\u0627\u062A \u0627\u0644\u0642\u062F\u064A\u0645\u0629.",
-        localSettingsEnabled: "Workspace++: \u062A\u0645 \u062A\u0641\u0639\u064A\u0644 \u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A \u0627\u0644\u0645\u062D\u0644\u064A\u0629 \u0644\u0644\u0645\u062E\u0632\u0646.",
-        localSettingsDisabled: "Workspace++: \u062A\u0645 \u062A\u0639\u0637\u064A\u0644 \u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A \u0627\u0644\u0645\u062D\u0644\u064A\u0629 \u0644\u0644\u0645\u062E\u0632\u0646.",
-        localSettingsCopied: "Workspace++: \u062A\u0645 \u0646\u0633\u062E \u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A \u0627\u0644\u0639\u0627\u0645\u0629 \u0625\u0644\u0649 \u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A \u0627\u0644\u0645\u062D\u0644\u064A\u0629 \u0644\u0644\u0645\u062E\u0632\u0646.",
-        localSettingsLoadFailed: "Workspace++: \u062A\u0639\u0630\u0631 \u062A\u062D\u0645\u064A\u0644 \u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A \u0627\u0644\u0645\u062D\u0644\u064A\u0629 \u0644\u0644\u0645\u062E\u0632\u0646. \u0633\u064A\u062A\u0645 \u0627\u0633\u062A\u062E\u062F\u0627\u0645 \u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A \u0627\u0644\u0639\u0627\u0645\u0629.",
-        localSettingsOperationFailed: "Workspace++: \u0641\u0634\u0644 \u062A\u062D\u062F\u064A\u062B \u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A \u0627\u0644\u0645\u062D\u0644\u064A\u0629 \u0644\u0644\u0645\u062E\u0632\u0646.",
         exportSessionsDone: function(path) {
           return "Workspace++: \u062A\u0645 \u062A\u0635\u062F\u064A\u0631 \u0627\u0644\u062C\u0644\u0633\u0627\u062A \u0625\u0644\u0649 " + path;
         },
@@ -8480,14 +8280,6 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollResetWindowDesc: '\u0627\u0644\u0645\u062F\u0629 \u0627\u0644\u062A\u064A \u062A\u0633\u062A\u0645\u0631 \u0641\u064A\u0647\u0627 \u0642\u064A\u0645 \u0627\u0644\u062A\u0645\u0631\u064A\u0631 \u0627\u0644\u0635\u063A\u064A\u0631\u0629 \u0641\u064A \u0627\u0644\u062A\u0631\u0627\u0643\u0645 \u0642\u0628\u0644 \u0625\u0639\u0627\u062F\u0629 \u0627\u0644\u0636\u0628\u0637. \u064A\u064F\u0633\u062A\u062E\u062F\u0645 \u0641\u0642\u0637 \u0639\u0646\u062F \u0627\u062E\u062A\u064A\u0627\u0631 \u0627\u0644\u0625\u0639\u062F\u0627\u062F \u0627\u0644\u0645\u0633\u0628\u0642 "\u0645\u062E\u0635\u0635".',
         settingsStatusBarScrollInvert: "\u0639\u0643\u0633 \u0627\u062A\u062C\u0627\u0647 \u0627\u0644\u062A\u0645\u0631\u064A\u0631",
         settingsStatusBarScrollInvertDesc: "\u064A\u0639\u0643\u0633 \u0627\u062A\u062C\u0627\u0647 \u0627\u0644\u0633\u0627\u0628\u0642/\u0627\u0644\u062A\u0627\u0644\u064A \u0639\u0646\u062F \u062A\u0628\u062F\u064A\u0644 \u0627\u0644\u062C\u0644\u0633\u0627\u062A \u0628\u0627\u0644\u062A\u0645\u0631\u064A\u0631 \u0641\u064A \u0634\u0631\u064A\u0637 \u0627\u0644\u062D\u0627\u0644\u0629.",
-        settingsUseLocalSettings: "\u0627\u0633\u062A\u062E\u062F\u0627\u0645 \u0625\u0639\u062F\u0627\u062F\u0627\u062A \u0645\u062D\u0644\u064A\u0629 \u0644\u0644\u0645\u062E\u0632\u0646",
-        settingsUseLocalSettingsDesc: "\u0641\u0639\u0651\u0644 \u0647\u0630\u0627 \u0625\u0630\u0627 \u0643\u0646\u062A \u062A\u0632\u0627\u0645\u0646 .obsidian \u0628\u064A\u0646 \u0639\u062F\u0629 \u0645\u062E\u0627\u0632\u0646 (\u0645\u062B\u0644 Settings Profiles) \u0648\u062A\u0631\u064A\u062F \u0623\u0646 \u062A\u0628\u0642\u0649 \u0625\u0639\u062F\u0627\u062F\u0627\u062A Workspace++ \u0645\u062E\u062A\u0644\u0641\u0629 \u0644\u0643\u0644 \u0645\u062E\u0632\u0646.",
-        settingsCopyGlobalToLocal: "\u0646\u0633\u062E \u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A \u0627\u0644\u0639\u0627\u0645\u0629 \u0625\u0644\u0649 \u0647\u0630\u0627 \u0627\u0644\u0645\u062E\u0632\u0646",
-        settingsCopyGlobalToLocalDesc: "\u0627\u0633\u062A\u0628\u062F\u0627\u0644 \u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A \u0627\u0644\u0645\u062D\u0644\u064A\u0629 \u0644\u0644\u0645\u062E\u0632\u0646 \u0628\u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A \u0627\u0644\u0639\u0627\u0645\u0629 \u0627\u0644\u062D\u0627\u0644\u064A\u0629.",
-        settingsCopyGlobalToLocalBtn: "\u0646\u0633\u062E",
-        settingsResetLocalSettings: "\u0625\u0639\u0627\u062F\u0629 \u062A\u0639\u064A\u064A\u0646 \u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A \u0627\u0644\u0645\u062D\u0644\u064A\u0629 \u0644\u0644\u0645\u062E\u0632\u0646",
-        settingsResetLocalSettingsDesc: "\u0625\u0639\u0627\u062F\u0629 \u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A \u0627\u0644\u0645\u062D\u0644\u064A\u0629 \u0644\u0644\u0645\u062E\u0632\u0646 \u0625\u0644\u0649 \u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A \u0627\u0644\u0639\u0627\u0645\u0629.",
-        settingsResetLocalSettingsBtn: "\u0625\u0639\u0627\u062F\u0629 \u062A\u0639\u064A\u064A\u0646 \u0627\u0644\u0645\u062D\u0644\u064A",
         settingsAdvancedStorageSubsection: "\u0633\u0644\u0648\u0643 \u0627\u0644\u062A\u062E\u0632\u064A\u0646",
         settingsAdvancedTransferSubsection: "\u0646\u0642\u0644 \u0627\u0644\u0628\u064A\u0627\u0646\u0627\u062A",
         settingsDeveloperSection: "\u0623\u062F\u0648\u0627\u062A \u0627\u0644\u0645\u0637\u0648\u0631",
@@ -8495,8 +8287,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "\u062A\u0641\u0627\u0635\u064A\u0644 \u0627\u0644\u062A\u062E\u0632\u064A\u0646 \u0627\u0644\u0645\u0633\u062A\u062E\u062F\u0645\u0629 \u062D\u0627\u0644\u064A\u0627\u064B \u0628\u0648\u0627\u0633\u0637\u0629 Workspace++.",
         settingsStorageFieldSessions: "\u0645\u0644\u0641 \u0627\u0644\u062C\u0644\u0633\u0627\u062A",
         settingsStorageFieldSessionsBackup: "\u0646\u0633\u062E\u0629 \u0627\u062D\u062A\u064A\u0627\u0637\u064A\u0629 \u0644\u0644\u062C\u0644\u0633\u0627\u062A",
-        settingsStorageFieldLocalSettings: "\u0645\u0644\u0641 \u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A \u0627\u0644\u0645\u062D\u0644\u064A\u0629",
-        settingsStorageFieldGlobalSettings: "\u0645\u0644\u0641 \u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A \u0627\u0644\u0639\u0627\u0645\u0629",
         settingsStorageFieldSessionCount: "\u0639\u062F\u062F \u0627\u0644\u062C\u0644\u0633\u0627\u062A",
         settingsStorageFieldUpdatedAt: "\u0622\u062E\u0631 \u062A\u062D\u062F\u064A\u062B",
         settingsExportSessions: "\u062A\u0635\u062F\u064A\u0631 \u0627\u0644\u062C\u0644\u0633\u0627\u062A",
@@ -8541,11 +8331,6 @@ var require_i18n = __commonJS({
         saveWithoutNaming: "Salvar sem nomear",
         sessionDataMigrated: "Workspace++: Os dados de sess\xE3o foram movidos para .workspace-plus-plus/sessions.json.",
         sessionDataMigrationFailed: "Workspace++: Falha ao migrar dados de sess\xE3o. Os dados legados foram mantidos.",
-        localSettingsEnabled: "Workspace++: Configura\xE7\xF5es locais do vault ativadas.",
-        localSettingsDisabled: "Workspace++: Configura\xE7\xF5es locais do vault desativadas.",
-        localSettingsCopied: "Workspace++: Configura\xE7\xF5es globais copiadas para as configura\xE7\xF5es locais do vault.",
-        localSettingsLoadFailed: "Workspace++: Falha ao carregar configura\xE7\xF5es locais do vault. Ser\xE3o usadas as configura\xE7\xF5es globais.",
-        localSettingsOperationFailed: "Workspace++: Falha ao atualizar configura\xE7\xF5es locais do vault.",
         exportSessionsDone: function(path) {
           return "Workspace++: Sess\xF5es exportadas para " + path;
         },
@@ -8587,14 +8372,6 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollResetWindowDesc: "Por quanto tempo pequenos deltas de rolagem continuam sendo acumulados antes de redefinir. Usado apenas quando a predefini\xE7\xE3o \xE9 Personalizado.",
         settingsStatusBarScrollInvert: "Inverter dire\xE7\xE3o da rolagem",
         settingsStatusBarScrollInvertDesc: "Inverte a dire\xE7\xE3o anterior/pr\xF3xima ao trocar sess\xF5es pela rolagem na barra de status.",
-        settingsUseLocalSettings: "Usar configura\xE7\xF5es locais do vault",
-        settingsUseLocalSettingsDesc: "Ative isto se voc\xEA sincroniza .obsidian entre v\xE1rios vaults (por exemplo, com Settings Profiles) e deseja manter as configura\xE7\xF5es do Workspace++ diferentes por vault.",
-        settingsCopyGlobalToLocal: "Copiar configura\xE7\xF5es globais para este vault",
-        settingsCopyGlobalToLocalDesc: "Substitui as configura\xE7\xF5es locais do vault pelas configura\xE7\xF5es globais atuais.",
-        settingsCopyGlobalToLocalBtn: "Copiar",
-        settingsResetLocalSettings: "Redefinir configura\xE7\xF5es locais do vault",
-        settingsResetLocalSettingsDesc: "Redefine as configura\xE7\xF5es locais do vault para as configura\xE7\xF5es globais.",
-        settingsResetLocalSettingsBtn: "Redefinir local",
         settingsAdvancedStorageSubsection: "Comportamento de armazenamento",
         settingsAdvancedTransferSubsection: "Transfer\xEAncia de dados",
         settingsDeveloperSection: "Ferramentas de desenvolvedor",
@@ -8602,8 +8379,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "Detalhes de armazenamento usados atualmente pelo Workspace++.",
         settingsStorageFieldSessions: "Arquivo de sess\xF5es",
         settingsStorageFieldSessionsBackup: "Backup de sess\xF5es",
-        settingsStorageFieldLocalSettings: "Arquivo de configura\xE7\xF5es locais",
-        settingsStorageFieldGlobalSettings: "Arquivo de configura\xE7\xF5es globais",
         settingsStorageFieldSessionCount: "Quantidade de sess\xF5es",
         settingsStorageFieldUpdatedAt: "Atualizado em",
         settingsExportSessions: "Exportar sess\xF5es",
@@ -8648,11 +8423,6 @@ var require_i18n = __commonJS({
         saveWithoutNaming: "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0431\u0435\u0437 \u0438\u043C\u0435\u043D\u0438",
         sessionDataMigrated: "Workspace++: \u0434\u0430\u043D\u043D\u044B\u0435 \u0441\u0435\u0441\u0441\u0438\u0439 \u043F\u0435\u0440\u0435\u043D\u0435\u0441\u0435\u043D\u044B \u0432 .workspace-plus-plus/sessions.json.",
         sessionDataMigrationFailed: "Workspace++: \u043D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u043F\u0435\u0440\u0435\u043D\u0435\u0441\u0442\u0438 \u0434\u0430\u043D\u043D\u044B\u0435 \u0441\u0435\u0441\u0441\u0438\u0439. \u0423\u0441\u0442\u0430\u0440\u0435\u0432\u0448\u0438\u0435 \u0434\u0430\u043D\u043D\u044B\u0435 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u044B.",
-        localSettingsEnabled: "Workspace++: \u043B\u043E\u043A\u0430\u043B\u044C\u043D\u044B\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u0445\u0440\u0430\u043D\u0438\u043B\u0438\u0449\u0430 \u0432\u043A\u043B\u044E\u0447\u0435\u043D\u044B.",
-        localSettingsDisabled: "Workspace++: \u043B\u043E\u043A\u0430\u043B\u044C\u043D\u044B\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u0445\u0440\u0430\u043D\u0438\u043B\u0438\u0449\u0430 \u043E\u0442\u043A\u043B\u044E\u0447\u0435\u043D\u044B.",
-        localSettingsCopied: "Workspace++: \u0433\u043B\u043E\u0431\u0430\u043B\u044C\u043D\u044B\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u0441\u043A\u043E\u043F\u0438\u0440\u043E\u0432\u0430\u043D\u044B \u0432 \u043B\u043E\u043A\u0430\u043B\u044C\u043D\u044B\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u0445\u0440\u0430\u043D\u0438\u043B\u0438\u0449\u0430.",
-        localSettingsLoadFailed: "Workspace++: \u043D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0437\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044C \u043B\u043E\u043A\u0430\u043B\u044C\u043D\u044B\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u0445\u0440\u0430\u043D\u0438\u043B\u0438\u0449\u0430. \u0411\u0443\u0434\u0443\u0442 \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u043D\u044B \u0433\u043B\u043E\u0431\u0430\u043B\u044C\u043D\u044B\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438.",
-        localSettingsOperationFailed: "Workspace++: \u043D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u043E\u0431\u043D\u043E\u0432\u0438\u0442\u044C \u043B\u043E\u043A\u0430\u043B\u044C\u043D\u044B\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u0445\u0440\u0430\u043D\u0438\u043B\u0438\u0449\u0430.",
         exportSessionsDone: function(path) {
           return "Workspace++: \u0441\u0435\u0441\u0441\u0438\u0438 \u044D\u043A\u0441\u043F\u043E\u0440\u0442\u0438\u0440\u043E\u0432\u0430\u043D\u044B \u0432 " + path;
         },
@@ -8694,14 +8464,6 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollResetWindowDesc: "\u041A\u0430\u043A \u0434\u043E\u043B\u0433\u043E \u0441\u0443\u043C\u043C\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u043D\u0435\u0431\u043E\u043B\u044C\u0448\u0438\u0435 \u0448\u0430\u0433\u0438 \u043F\u0440\u043E\u043A\u0440\u0443\u0442\u043A\u0438 \u043F\u0435\u0440\u0435\u0434 \u0441\u0431\u0440\u043E\u0441\u043E\u043C. \u0418\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0435\u0442\u0441\u044F \u0442\u043E\u043B\u044C\u043A\u043E \u0441 \u043F\u0440\u043E\u0444\u0438\u043B\u0435\u043C \xAB\u0421\u0432\u043E\u0439\xBB.",
         settingsStatusBarScrollInvert: "\u0418\u043D\u0432\u0435\u0440\u0442\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u043D\u0430\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u0438\u0435 \u043F\u0440\u043E\u043A\u0440\u0443\u0442\u043A\u0438",
         settingsStatusBarScrollInvertDesc: "\u041C\u0435\u043D\u044F\u0435\u0442 \u043C\u0435\u0441\u0442\u0430\u043C\u0438 \u043D\u0430\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u0438\u044F \xAB\u043F\u0440\u0435\u0434\u044B\u0434\u0443\u0449\u0430\u044F/\u0441\u043B\u0435\u0434\u0443\u044E\u0449\u0430\u044F\xBB \u0434\u043B\u044F \u043F\u0435\u0440\u0435\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u044F \u0441\u0435\u0441\u0441\u0438\u0439 \u043F\u0440\u043E\u043A\u0440\u0443\u0442\u043A\u043E\u0439 \u043F\u043E \u0441\u0442\u0440\u043E\u043A\u0435 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u044F.",
-        settingsUseLocalSettings: "\u0418\u0441\u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u044C \u043B\u043E\u043A\u0430\u043B\u044C\u043D\u044B\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u0445\u0440\u0430\u043D\u0438\u043B\u0438\u0449\u0430",
-        settingsUseLocalSettingsDesc: "\u0412\u043A\u043B\u044E\u0447\u0438\u0442\u0435, \u0435\u0441\u043B\u0438 \u0432\u044B \u0441\u0438\u043D\u0445\u0440\u043E\u043D\u0438\u0437\u0438\u0440\u0443\u0435\u0442\u0435 .obsidian \u043C\u0435\u0436\u0434\u0443 \u043D\u0435\u0441\u043A\u043E\u043B\u044C\u043A\u0438\u043C\u0438 \u0445\u0440\u0430\u043D\u0438\u043B\u0438\u0449\u0430\u043C\u0438 (\u043D\u0430\u043F\u0440\u0438\u043C\u0435\u0440, \u0447\u0435\u0440\u0435\u0437 Settings Profiles) \u0438 \u0445\u043E\u0442\u0438\u0442\u0435 \u0440\u0430\u0437\u043D\u044B\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 Workspace++ \u0434\u043B\u044F \u043A\u0430\u0436\u0434\u043E\u0433\u043E \u0445\u0440\u0430\u043D\u0438\u043B\u0438\u0449\u0430.",
-        settingsCopyGlobalToLocal: "\u041A\u043E\u043F\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u0433\u043B\u043E\u0431\u0430\u043B\u044C\u043D\u044B\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u0432 \u044D\u0442\u043E \u0445\u0440\u0430\u043D\u0438\u043B\u0438\u0449\u0435",
-        settingsCopyGlobalToLocalDesc: "\u041F\u0435\u0440\u0435\u0437\u0430\u043F\u0438\u0441\u044B\u0432\u0430\u0435\u0442 \u043B\u043E\u043A\u0430\u043B\u044C\u043D\u044B\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u0445\u0440\u0430\u043D\u0438\u043B\u0438\u0449\u0430 \u0442\u0435\u043A\u0443\u0449\u0438\u043C\u0438 \u0433\u043B\u043E\u0431\u0430\u043B\u044C\u043D\u044B\u043C\u0438 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0430\u043C\u0438.",
-        settingsCopyGlobalToLocalBtn: "\u041A\u043E\u043F\u0438\u0440\u043E\u0432\u0430\u0442\u044C",
-        settingsResetLocalSettings: "\u0421\u0431\u0440\u043E\u0441\u0438\u0442\u044C \u043B\u043E\u043A\u0430\u043B\u044C\u043D\u044B\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u0445\u0440\u0430\u043D\u0438\u043B\u0438\u0449\u0430",
-        settingsResetLocalSettingsDesc: "\u0421\u0431\u0440\u0430\u0441\u044B\u0432\u0430\u0435\u0442 \u043B\u043E\u043A\u0430\u043B\u044C\u043D\u044B\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u0445\u0440\u0430\u043D\u0438\u043B\u0438\u0449\u0430 \u0434\u043E \u0433\u043B\u043E\u0431\u0430\u043B\u044C\u043D\u044B\u0445 \u043D\u0430\u0441\u0442\u0440\u043E\u0435\u043A.",
-        settingsResetLocalSettingsBtn: "\u0421\u0431\u0440\u043E\u0441\u0438\u0442\u044C \u043B\u043E\u043A\u0430\u043B\u044C\u043D\u044B\u0435",
         settingsAdvancedStorageSubsection: "\u041F\u043E\u0432\u0435\u0434\u0435\u043D\u0438\u0435 \u0445\u0440\u0430\u043D\u0435\u043D\u0438\u044F",
         settingsAdvancedTransferSubsection: "\u041F\u0435\u0440\u0435\u0434\u0430\u0447\u0430 \u0434\u0430\u043D\u043D\u044B\u0445",
         settingsDeveloperSection: "\u0418\u043D\u0441\u0442\u0440\u0443\u043C\u0435\u043D\u0442\u044B \u0440\u0430\u0437\u0440\u0430\u0431\u043E\u0442\u0447\u0438\u043A\u0430",
@@ -8709,8 +8471,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "\u041F\u0430\u0440\u0430\u043C\u0435\u0442\u0440\u044B \u0445\u0440\u0430\u043D\u0435\u043D\u0438\u044F, \u043A\u043E\u0442\u043E\u0440\u044B\u0435 \u0441\u0435\u0439\u0447\u0430\u0441 \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0435\u0442 Workspace++.",
         settingsStorageFieldSessions: "\u0424\u0430\u0439\u043B \u0441\u0435\u0441\u0441\u0438\u0439",
         settingsStorageFieldSessionsBackup: "\u0420\u0435\u0437\u0435\u0440\u0432\u043D\u0430\u044F \u043A\u043E\u043F\u0438\u044F \u0441\u0435\u0441\u0441\u0438\u0439",
-        settingsStorageFieldLocalSettings: "\u0424\u0430\u0439\u043B \u043B\u043E\u043A\u0430\u043B\u044C\u043D\u044B\u0445 \u043D\u0430\u0441\u0442\u0440\u043E\u0435\u043A",
-        settingsStorageFieldGlobalSettings: "\u0424\u0430\u0439\u043B \u0433\u043B\u043E\u0431\u0430\u043B\u044C\u043D\u044B\u0445 \u043D\u0430\u0441\u0442\u0440\u043E\u0435\u043A",
         settingsStorageFieldSessionCount: "\u041A\u043E\u043B\u0438\u0447\u0435\u0441\u0442\u0432\u043E \u0441\u0435\u0441\u0441\u0438\u0439",
         settingsStorageFieldUpdatedAt: "\u041E\u0431\u043D\u043E\u0432\u043B\u0435\u043D\u043E",
         settingsExportSessions: "\u042D\u043A\u0441\u043F\u043E\u0440\u0442\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u0441\u0435\u0441\u0441\u0438\u0438",
@@ -8728,7 +8488,7 @@ var require_i18n = __commonJS({
         resetSettingsFailed: "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0441\u0431\u0440\u043E\u0441\u0438\u0442\u044C \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 Workspace++.",
         settingsResetSessionsAndSettings: "\u0421\u0431\u0440\u043E\u0441\u0438\u0442\u044C \u0441\u0435\u0441\u0441\u0438\u0438 \u0438 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438",
         settingsResetSessionsAndSettingsDesc: "\u041E\u0434\u043D\u043E\u0432\u0440\u0435\u043C\u0435\u043D\u043D\u043E \u0441\u0431\u0440\u0430\u0441\u044B\u0432\u0430\u0435\u0442 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u043D\u044B\u0435 \u0441\u0435\u0441\u0441\u0438\u0438 \u0438 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 Workspace++.",
-        settingsResetSessionsAndSettingsBtn: "\u0421\u0431\u0440\u043E\u0441\u0438\u0442\u044C \u043E\u0431\u0430",
+        settingsResetSessionsAndSettingsBtn: "\u0421\u0431\u0440\u043E\u0441\u0438\u0442\u044C \u0432\u0441\u0451",
         confirmResetSessionsAndSettings: "\u0421\u0431\u0440\u043E\u0441\u0438\u0442\u044C \u0441\u0435\u0441\u0441\u0438\u0438 \u0438 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438? \u042D\u0442\u043E \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0435 \u043D\u0435\u043B\u044C\u0437\u044F \u043E\u0442\u043C\u0435\u043D\u0438\u0442\u044C.",
         resetSessionsAndSettingsDone: "\u0421\u0435\u0441\u0441\u0438\u0438 \u0438 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u0441\u0431\u0440\u043E\u0448\u0435\u043D\u044B.",
         resetSessionsAndSettingsFailed: "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0441\u0431\u0440\u043E\u0441\u0438\u0442\u044C \u0441\u0435\u0441\u0441\u0438\u0438 \u0438 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438."
@@ -8744,22 +8504,17 @@ var require_i18n = __commonJS({
         saveCurrentLayoutToSessionPlaceholder: "Zu \xFCberschreibende Sitzung ausw\xE4hlen...",
         contextSaveCurrentLayoutToThisSession: "Aktuelles Layout in diese Sitzung speichern",
         cmdExportSessions: "Sitzungs-Snapshot exportieren",
-        cmdImportSessions: "Neueste Sitzungs-Snapshot importieren",
+        cmdImportSessions: "Neuesten Sitzungs-Snapshot importieren",
         cmdReloadCurrentWithoutSaving: "Aktuelle Sitzung neu laden (ohne Speichern)",
         reloadedSession: function(n) {
           return "Sitzung \u201E" + n + "\u201C neu geladen";
         },
         defaultSessionName: "Standard",
-        nameSessionTitle: "Mit Sitzungsname speichern",
+        nameSessionTitle: "Mit Sitzungsnamen speichern",
         nameSessionPlaceholder: "Sitzungsname...",
         saveWithoutNaming: "Ohne Namen speichern",
         sessionDataMigrated: "Workspace++: Sitzungsdaten wurden nach .workspace-plus-plus/sessions.json verschoben.",
         sessionDataMigrationFailed: "Workspace++: Sitzungsdaten konnten nicht migriert werden. Altdaten bleiben erhalten.",
-        localSettingsEnabled: "Workspace++: Vault-lokale Einstellungen aktiviert.",
-        localSettingsDisabled: "Workspace++: Vault-lokale Einstellungen deaktiviert.",
-        localSettingsCopied: "Workspace++: Globale Einstellungen wurden in die Vault-lokalen Einstellungen kopiert.",
-        localSettingsLoadFailed: "Workspace++: Vault-lokale Einstellungen konnten nicht geladen werden. Globale Einstellungen werden verwendet.",
-        localSettingsOperationFailed: "Workspace++: Vault-lokale Einstellungen konnten nicht aktualisiert werden.",
         exportSessionsDone: function(path) {
           return "Workspace++: Sitzungen nach " + path + " exportiert";
         },
@@ -8788,11 +8543,11 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollPresetCustom: "Benutzerdefiniert",
         settingsStatusBarScrollModifier: "Erforderliche Zusatztaste",
         settingsStatusBarScrollModifierDesc: "W\xE4hlen Sie, welche Zusatztaste beim Scrollen \xFCber das Element in der Statusleiste gehalten werden muss.",
-        settingsStatusBarScrollModifierRecommended: platformLabel("Cmd oder Option", "Ctrl oder Alt"),
+        settingsStatusBarScrollModifierRecommended: platformLabel("Cmd oder Option", "Strg oder Alt"),
         settingsStatusBarScrollModifierNone: "Keine",
-        settingsStatusBarScrollModifierModOnly: platformLabel("Nur Cmd", "Nur Ctrl"),
+        settingsStatusBarScrollModifierModOnly: platformLabel("Nur Cmd", "Nur Strg"),
         settingsStatusBarScrollModifierAltOnly: platformLabel("Nur Option", "Nur Alt"),
-        settingsStatusBarScrollModifierModOrAlt: platformLabel("Cmd oder Option", "Ctrl oder Alt"),
+        settingsStatusBarScrollModifierModOrAlt: platformLabel("Cmd oder Option", "Strg oder Alt"),
         settingsStatusBarScrollThreshold: "Empfindlichkeitsschwelle",
         settingsStatusBarScrollThresholdDesc: "Niedrigere Werte schalten leichter um. Wird nur mit der Voreinstellung Benutzerdefiniert verwendet.",
         settingsStatusBarScrollCooldown: "Abklingzeit",
@@ -8801,14 +8556,6 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollResetWindowDesc: "Wie lange kleine Scroll-Deltas vor dem Zur\xFCcksetzen weiter zusammengez\xE4hlt werden. Wird nur mit der Voreinstellung Benutzerdefiniert verwendet.",
         settingsStatusBarScrollInvert: "Scrollrichtung umkehren",
         settingsStatusBarScrollInvertDesc: "Kehrt die Richtung Vorherige/N\xE4chste f\xFCr den Sitzungswechsel per Scrollen in der Statusleiste um.",
-        settingsUseLocalSettings: "Vault-lokale Einstellungen verwenden",
-        settingsUseLocalSettingsDesc: "Aktiviere dies, wenn du .obsidian zwischen mehreren Vaults synchronisierst (z. B. mit Settings Profiles) und die Workspace++-Einstellungen pro Vault unterschiedlich halten m\xF6chtest.",
-        settingsCopyGlobalToLocal: "Globale Einstellungen in dieses Vault kopieren",
-        settingsCopyGlobalToLocalDesc: "\xDCberschreibt die Vault-lokalen Einstellungen mit den aktuellen globalen Einstellungen.",
-        settingsCopyGlobalToLocalBtn: "Kopieren",
-        settingsResetLocalSettings: "Vault-lokale Einstellungen zur\xFCcksetzen",
-        settingsResetLocalSettingsDesc: "Setzt Vault-lokale Einstellungen auf die globalen Einstellungen zur\xFCck.",
-        settingsResetLocalSettingsBtn: "Lokal zur\xFCcksetzen",
         settingsAdvancedStorageSubsection: "Speicherverhalten",
         settingsAdvancedTransferSubsection: "Daten\xFCbertragung",
         settingsDeveloperSection: "Entwicklerwerkzeuge",
@@ -8816,8 +8563,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "Speicherdetails, die Workspace++ aktuell verwendet.",
         settingsStorageFieldSessions: "Sitzungsdatei",
         settingsStorageFieldSessionsBackup: "Sitzungssicherung",
-        settingsStorageFieldLocalSettings: "Datei f\xFCr lokale Einstellungen",
-        settingsStorageFieldGlobalSettings: "Datei f\xFCr globale Einstellungen",
         settingsStorageFieldSessionCount: "Anzahl Sitzungen",
         settingsStorageFieldUpdatedAt: "Aktualisiert am",
         settingsExportSessions: "Sitzungen exportieren",
@@ -8862,17 +8607,12 @@ var require_i18n = __commonJS({
         saveWithoutNaming: "\uC774\uB984 \uC5C6\uC774 \uC800\uC7A5",
         sessionDataMigrated: "Workspace++: \uC138\uC158 \uB370\uC774\uD130\uAC00 .workspace-plus-plus/sessions.json \uC73C\uB85C \uC774\uB3D9\uB418\uC5C8\uC2B5\uB2C8\uB2E4.",
         sessionDataMigrationFailed: "Workspace++: \uC138\uC158 \uB370\uC774\uD130 \uB9C8\uC774\uADF8\uB808\uC774\uC158\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4. \uAE30\uC874 \uB370\uC774\uD130\uB294 \uC720\uC9C0\uB429\uB2C8\uB2E4.",
-        localSettingsEnabled: "Workspace++: \uBCFC\uD2B8 \uB85C\uCEEC \uC124\uC815\uC774 \uD65C\uC131\uD654\uB418\uC5C8\uC2B5\uB2C8\uB2E4.",
-        localSettingsDisabled: "Workspace++: \uBCFC\uD2B8 \uB85C\uCEEC \uC124\uC815\uC774 \uBE44\uD65C\uC131\uD654\uB418\uC5C8\uC2B5\uB2C8\uB2E4.",
-        localSettingsCopied: "Workspace++: \uC804\uC5ED \uC124\uC815\uC744 \uBCFC\uD2B8 \uB85C\uCEEC \uC124\uC815\uC73C\uB85C \uBCF5\uC0AC\uD588\uC2B5\uB2C8\uB2E4.",
-        localSettingsLoadFailed: "Workspace++: \uBCFC\uD2B8 \uB85C\uCEEC \uC124\uC815\uC744 \uBD88\uB7EC\uC624\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4. \uC804\uC5ED \uC124\uC815\uC744 \uC0AC\uC6A9\uD569\uB2C8\uB2E4.",
-        localSettingsOperationFailed: "Workspace++: \uBCFC\uD2B8 \uB85C\uCEEC \uC124\uC815\uC744 \uC5C5\uB370\uC774\uD2B8\uD558\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4.",
         exportSessionsDone: function(path) {
-          return "Workspace++: \uC138\uC158\uC744 " + path + " \uB85C \uB0B4\uBCF4\uB0C8\uC2B5\uB2C8\uB2E4.";
+          return "Workspace++: \uC138\uC158\uC744 " + path + "(\uC73C)\uB85C \uB0B4\uBCF4\uB0C8\uC2B5\uB2C8\uB2E4.";
         },
         exportSessionsFailed: "Workspace++: \uC138\uC158 \uB0B4\uBCF4\uB0B4\uAE30\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4.",
         importSessionsDone: function(path) {
-          return "Workspace++: " + path + " \uC5D0\uC11C \uC138\uC158\uC744 \uAC00\uC838\uC654\uC2B5\uB2C8\uB2E4.";
+          return "Workspace++: " + path + "\uC5D0\uC11C \uC138\uC158\uC744 \uAC00\uC838\uC654\uC2B5\uB2C8\uB2E4.";
         },
         importSessionsNoFile: "Workspace++: .workspace-plus-plus/exports \uC5D0 \uAC00\uC838\uC62C \uD30C\uC77C\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.",
         importSessionsFailed: "Workspace++: \uC138\uC158 \uAC00\uC838\uC624\uAE30\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4.",
@@ -8908,14 +8648,6 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollResetWindowDesc: "\uC791\uC740 \uC2A4\uD06C\uB864 \uBCC0\uD654\uB7C9\uC744 \uCD08\uAE30\uD654\uD558\uAE30 \uC804\uC5D0 \uC5BC\uB9C8\uB098 \uC624\uB798 \uB204\uC801\uD560\uC9C0 \uC124\uC815\uD569\uB2C8\uB2E4. \uC0AC\uC6A9\uC790 \uC9C0\uC815 \uD504\uB9AC\uC14B\uC5D0\uC11C\uB9CC \uC0AC\uC6A9\uB429\uB2C8\uB2E4.",
         settingsStatusBarScrollInvert: "\uC2A4\uD06C\uB864 \uBC29\uD5A5 \uBC18\uC804",
         settingsStatusBarScrollInvertDesc: "\uC0C1\uD0DC \uD45C\uC2DC\uC904 \uC2A4\uD06C\uB864 \uC804\uD658\uC5D0\uC11C \uC774\uC804/\uB2E4\uC74C \uBC29\uD5A5\uC744 \uBC18\uB300\uB85C \uD569\uB2C8\uB2E4.",
-        settingsUseLocalSettings: "\uBCFC\uD2B8 \uB85C\uCEEC \uC124\uC815 \uC0AC\uC6A9",
-        settingsUseLocalSettingsDesc: "\uC5EC\uB7EC \uBCFC\uD2B8\uC5D0\uC11C .obsidian\uC744 \uB3D9\uAE30\uD654\uD558\uB294 \uACBD\uC6B0(\uC608: Settings Profiles) Workspace++ \uC124\uC815\uC744 \uBCFC\uD2B8\uBCC4\uB85C \uB2E4\uB974\uAC8C \uC720\uC9C0\uD558\uB824\uBA74 \uCF1C\uC138\uC694.",
-        settingsCopyGlobalToLocal: "\uC804\uC5ED \uC124\uC815\uC744 \uC774 \uBCFC\uD2B8\uB85C \uBCF5\uC0AC",
-        settingsCopyGlobalToLocalDesc: "\uD604\uC7AC \uC804\uC5ED \uC124\uC815\uC73C\uB85C \uBCFC\uD2B8 \uB85C\uCEEC \uC124\uC815\uC744 \uB36E\uC5B4\uC501\uB2C8\uB2E4.",
-        settingsCopyGlobalToLocalBtn: "\uBCF5\uC0AC",
-        settingsResetLocalSettings: "\uBCFC\uD2B8 \uB85C\uCEEC \uC124\uC815 \uCD08\uAE30\uD654",
-        settingsResetLocalSettingsDesc: "\uBCFC\uD2B8 \uB85C\uCEEC \uC124\uC815\uC744 \uC804\uC5ED \uC124\uC815\uC73C\uB85C \uB418\uB3CC\uB9BD\uB2C8\uB2E4.",
-        settingsResetLocalSettingsBtn: "\uB85C\uCEEC \uCD08\uAE30\uD654",
         settingsAdvancedStorageSubsection: "\uC800\uC7A5 \uB3D9\uC791",
         settingsAdvancedTransferSubsection: "\uB370\uC774\uD130 \uC774\uC804",
         settingsDeveloperSection: "\uAC1C\uBC1C\uC790 \uB3C4\uAD6C",
@@ -8923,8 +8655,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "Workspace++\uAC00 \uD604\uC7AC \uC0AC\uC6A9\uD558\uB294 \uC800\uC7A5 \uC815\uBCF4\uC785\uB2C8\uB2E4.",
         settingsStorageFieldSessions: "\uC138\uC158 \uD30C\uC77C",
         settingsStorageFieldSessionsBackup: "\uC138\uC158 \uBC31\uC5C5",
-        settingsStorageFieldLocalSettings: "\uB85C\uCEEC \uC124\uC815 \uD30C\uC77C",
-        settingsStorageFieldGlobalSettings: "\uC804\uC5ED \uC124\uC815 \uD30C\uC77C",
         settingsStorageFieldSessionCount: "\uC138\uC158 \uC218",
         settingsStorageFieldUpdatedAt: "\uC5C5\uB370\uC774\uD2B8 \uC2DC\uAC04",
         settingsExportSessions: "\uC138\uC158 \uB0B4\uBCF4\uB0B4\uAE30",
@@ -8969,11 +8699,6 @@ var require_i18n = __commonJS({
         saveWithoutNaming: "Salva senza nome",
         sessionDataMigrated: "Workspace++: i dati delle sessioni sono stati spostati in .workspace-plus-plus/sessions.json.",
         sessionDataMigrationFailed: "Workspace++: migrazione dei dati delle sessioni non riuscita. I dati legacy sono stati mantenuti.",
-        localSettingsEnabled: "Workspace++: impostazioni locali del vault abilitate.",
-        localSettingsDisabled: "Workspace++: impostazioni locali del vault disabilitate.",
-        localSettingsCopied: "Workspace++: impostazioni globali copiate nelle impostazioni locali del vault.",
-        localSettingsLoadFailed: "Workspace++: impossibile caricare le impostazioni locali del vault. Verranno usate le impostazioni globali.",
-        localSettingsOperationFailed: "Workspace++: impossibile aggiornare le impostazioni locali del vault.",
         exportSessionsDone: function(path) {
           return "Workspace++: sessioni esportate in " + path;
         },
@@ -9015,14 +8740,6 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollResetWindowDesc: "Per quanto tempo continuare ad accumulare piccoli delta di scorrimento prima di azzerarli. Usato solo con la preimpostazione Personalizzato.",
         settingsStatusBarScrollInvert: "Inverti direzione di scorrimento",
         settingsStatusBarScrollInvertDesc: "Inverte la direzione precedente/successiva per il cambio sessione con lo scorrimento nella barra di stato.",
-        settingsUseLocalSettings: "Usa impostazioni locali del vault",
-        settingsUseLocalSettingsDesc: "Attiva questa opzione se sincronizzi .obsidian tra pi\xF9 vault (ad esempio con Settings Profiles) e vuoi mantenere impostazioni Workspace++ diverse per ogni vault.",
-        settingsCopyGlobalToLocal: "Copia impostazioni globali in questo vault",
-        settingsCopyGlobalToLocalDesc: "Sovrascrive le impostazioni locali del vault con le impostazioni globali correnti.",
-        settingsCopyGlobalToLocalBtn: "Copia",
-        settingsResetLocalSettings: "Reimposta impostazioni locali del vault",
-        settingsResetLocalSettingsDesc: "Reimposta le impostazioni locali del vault alle impostazioni globali.",
-        settingsResetLocalSettingsBtn: "Reimposta locale",
         settingsAdvancedStorageSubsection: "Comportamento di archiviazione",
         settingsAdvancedTransferSubsection: "Trasferimento dati",
         settingsDeveloperSection: "Strumenti sviluppatore",
@@ -9030,8 +8747,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "Dettagli di archiviazione attualmente usati da Workspace++.",
         settingsStorageFieldSessions: "File sessioni",
         settingsStorageFieldSessionsBackup: "Backup sessioni",
-        settingsStorageFieldLocalSettings: "File impostazioni locali",
-        settingsStorageFieldGlobalSettings: "File impostazioni globali",
         settingsStorageFieldSessionCount: "Numero sessioni",
         settingsStorageFieldUpdatedAt: "Aggiornato il",
         settingsExportSessions: "Esporta sessioni",
@@ -9042,7 +8757,7 @@ var require_i18n = __commonJS({
         settingsImportSessionsBtn: "Importa ultimo",
         confirmImportSessions: "Importare le sessioni esportate pi\xF9 di recente? Le sessioni correnti saranno sostituite.",
         settingsResetSettings: "Reimposta impostazioni",
-        settingsResetSettingsDesc: "Reimposta le impostazioni di Workspace++ ai valori predefiniti nell ambito corrente.",
+        settingsResetSettingsDesc: "Reimposta le impostazioni di Workspace++ ai valori predefiniti nell'ambito corrente.",
         settingsResetSettingsBtn: "Reimposta impostazioni",
         confirmResetSettings: "Reimpostare le impostazioni di Workspace++ ai valori predefiniti?",
         resetSettingsDone: "Le impostazioni di Workspace++ sono state reimpostate.",
@@ -9076,11 +8791,6 @@ var require_i18n = __commonJS({
         saveWithoutNaming: "Adland\u0131rmadan kaydet",
         sessionDataMigrated: "Workspace++: Oturum verileri .workspace-plus-plus/sessions.json konumuna ta\u015F\u0131nd\u0131.",
         sessionDataMigrationFailed: "Workspace++: Oturum verileri ta\u015F\u0131namad\u0131. Eski veriler korunuyor.",
-        localSettingsEnabled: "Workspace++: Vault yerel ayarlar\u0131 etkinle\u015Ftirildi.",
-        localSettingsDisabled: "Workspace++: Vault yerel ayarlar\u0131 devre d\u0131\u015F\u0131 b\u0131rak\u0131ld\u0131.",
-        localSettingsCopied: "Workspace++: Genel ayarlar vault yerel ayarlar\u0131na kopyaland\u0131.",
-        localSettingsLoadFailed: "Workspace++: Vault yerel ayarlar\u0131 y\xFCklenemedi. Genel ayarlar kullan\u0131lacak.",
-        localSettingsOperationFailed: "Workspace++: Vault yerel ayarlar\u0131 g\xFCncellenemedi.",
         exportSessionsDone: function(path) {
           return "Workspace++: Oturumlar " + path + " konumuna d\u0131\u015Fa aktar\u0131ld\u0131";
         },
@@ -9122,14 +8832,6 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollResetWindowDesc: "K\xFC\xE7\xFCk kayd\u0131rma farklar\u0131n\u0131n s\u0131f\u0131rlanmadan \xF6nce ne kadar s\xFCre biriktirilece\u011Fini belirler. Yaln\u0131zca \xD6zel \xF6n ayarda kullan\u0131l\u0131r.",
         settingsStatusBarScrollInvert: "Kayd\u0131rma y\xF6n\xFCn\xFC ters \xE7evir",
         settingsStatusBarScrollInvertDesc: "Durum \xE7ubu\u011Funda kayd\u0131rarak oturum de\u011Fi\u015Ftirirken \xF6nceki/sonraki y\xF6n\xFCn\xFC tersine \xE7evirir.",
-        settingsUseLocalSettings: "Vault yerel ayarlar\u0131n\u0131 kullan",
-        settingsUseLocalSettingsDesc: ".obsidian klas\xF6r\xFCn\xFC birden \xE7ok vault aras\u0131nda senkronize ediyorsan\u0131z (\xF6rne\u011Fin Settings Profiles ile) ve Workspace++ ayarlar\u0131n\u0131 vault baz\u0131nda farkl\u0131 tutmak istiyorsan\u0131z bunu a\xE7\u0131n.",
-        settingsCopyGlobalToLocal: "Genel ayarlar\u0131 bu vaulta kopyala",
-        settingsCopyGlobalToLocalDesc: "Vault yerel ayarlar\u0131n\u0131 mevcut genel ayarlarla \xFCzerine yazar.",
-        settingsCopyGlobalToLocalBtn: "Kopyala",
-        settingsResetLocalSettings: "Vault yerel ayarlar\u0131n\u0131 s\u0131f\u0131rla",
-        settingsResetLocalSettingsDesc: "Vault yerel ayarlar\u0131n\u0131 genel ayarlara geri d\xF6nd\xFCr\xFCr.",
-        settingsResetLocalSettingsBtn: "Yereli s\u0131f\u0131rla",
         settingsAdvancedStorageSubsection: "Depolama davran\u0131\u015F\u0131",
         settingsAdvancedTransferSubsection: "Veri aktar\u0131m\u0131",
         settingsDeveloperSection: "Geli\u015Ftirici ara\xE7lar\u0131",
@@ -9137,8 +8839,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "Workspace++ taraf\u0131ndan \u015Fu anda kullan\u0131lan depolama ayr\u0131nt\u0131lar\u0131.",
         settingsStorageFieldSessions: "Oturum dosyas\u0131",
         settingsStorageFieldSessionsBackup: "Oturum yede\u011Fi",
-        settingsStorageFieldLocalSettings: "Yerel ayar dosyas\u0131",
-        settingsStorageFieldGlobalSettings: "Genel ayar dosyas\u0131",
         settingsStorageFieldSessionCount: "Oturum say\u0131s\u0131",
         settingsStorageFieldUpdatedAt: "G\xFCncellenme zaman\u0131",
         settingsExportSessions: "Oturumlar\u0131 d\u0131\u015Fa aktar",
@@ -9183,11 +8883,6 @@ var require_i18n = __commonJS({
         saveWithoutNaming: "Simpan tanpa nama",
         sessionDataMigrated: "Workspace++: Data sesi dipindahkan ke .workspace-plus-plus/sessions.json.",
         sessionDataMigrationFailed: "Workspace++: Gagal memigrasikan data sesi. Data lama tetap disimpan.",
-        localSettingsEnabled: "Workspace++: Pengaturan lokal vault diaktifkan.",
-        localSettingsDisabled: "Workspace++: Pengaturan lokal vault dinonaktifkan.",
-        localSettingsCopied: "Workspace++: Pengaturan global disalin ke pengaturan lokal vault.",
-        localSettingsLoadFailed: "Workspace++: Gagal memuat pengaturan lokal vault. Pengaturan global akan digunakan.",
-        localSettingsOperationFailed: "Workspace++: Gagal memperbarui pengaturan lokal vault.",
         exportSessionsDone: function(path) {
           return "Workspace++: Sesi diekspor ke " + path;
         },
@@ -9229,14 +8924,6 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollResetWindowDesc: "Berapa lama delta gulir kecil tetap digabungkan sebelum direset. Hanya digunakan saat preset Kustom dipilih.",
         settingsStatusBarScrollInvert: "Balik arah gulir",
         settingsStatusBarScrollInvertDesc: "Membalik arah sebelumnya/berikutnya untuk pergantian sesi lewat gulir pada bilah status.",
-        settingsUseLocalSettings: "Gunakan pengaturan lokal vault",
-        settingsUseLocalSettingsDesc: "Aktifkan ini jika Anda menyinkronkan .obsidian di beberapa vault (misalnya dengan Settings Profiles) dan ingin pengaturan Workspace++ tetap berbeda per vault.",
-        settingsCopyGlobalToLocal: "Salin pengaturan global ke vault ini",
-        settingsCopyGlobalToLocalDesc: "Timpa pengaturan lokal vault dengan pengaturan global saat ini.",
-        settingsCopyGlobalToLocalBtn: "Salin",
-        settingsResetLocalSettings: "Setel ulang pengaturan lokal vault",
-        settingsResetLocalSettingsDesc: "Kembalikan pengaturan lokal vault ke pengaturan global.",
-        settingsResetLocalSettingsBtn: "Setel ulang lokal",
         settingsAdvancedStorageSubsection: "Perilaku penyimpanan",
         settingsAdvancedTransferSubsection: "Transfer data",
         settingsDeveloperSection: "Alat pengembang",
@@ -9244,8 +8931,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "Detail penyimpanan yang saat ini dipakai oleh Workspace++.",
         settingsStorageFieldSessions: "Berkas sesi",
         settingsStorageFieldSessionsBackup: "Cadangan sesi",
-        settingsStorageFieldLocalSettings: "Berkas pengaturan lokal",
-        settingsStorageFieldGlobalSettings: "Berkas pengaturan global",
         settingsStorageFieldSessionCount: "Jumlah sesi",
         settingsStorageFieldUpdatedAt: "Diperbarui pada",
         settingsExportSessions: "Ekspor sesi",
@@ -9415,12 +9100,12 @@ var require_i18n = __commonJS({
         saveCurrentNoteNameAsSessionFailed: "\u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u09A8\u09CB\u099F\u09C7\u09B0 \u09A8\u09BE\u09AE \u09B8\u09C7\u09B6\u09A8 \u09B9\u09BF\u09B8\u09C7\u09AC\u09C7 \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3 \u0995\u09B0\u09BE \u09AF\u09BE\u09AF\u09BC\u09A8\u09BF\u0964"
       },
       fa: {
-        cmdSaveCurrentNoteNameAsSession: "\u0630\u062E\u06CC\u0631\u0647 \u0646\u0627\u0645 \u06CC\u0627\u062F\u062F\u0627\u0634\u062A \u0641\u0639\u0644\u06CC \u0628\u0647 \u0639\u0646\u0648\u0627\u0646 \u0646\u0634\u0633\u062A",
+        cmdSaveCurrentNoteNameAsSession: "\u0630\u062E\u06CC\u0631\u0647 \u0646\u0627\u0645 \u06CC\u0627\u062F\u062F\u0627\u0634\u062A \u0641\u0639\u0644\u06CC \u0628\u0647\u200C\u0639\u0646\u0648\u0627\u0646 \u0646\u0634\u0633\u062A",
         noActiveMarkdownFile: "\u0647\u06CC\u0686 \u06CC\u0627\u062F\u062F\u0627\u0634\u062A Markdown \u0641\u0639\u0627\u0644\u06CC \u0648\u062C\u0648\u062F \u0646\u062F\u0627\u0631\u062F.",
         savedCurrentNoteNameAsSession: function(n) {
-          return '\u06CC\u0627\u062F\u062F\u0627\u0634\u062A \u0641\u0639\u0644\u06CC \u0628\u0647 \u0639\u0646\u0648\u0627\u0646 \u0646\u0634\u0633\u062A "' + n + '" \u0630\u062E\u06CC\u0631\u0647 \u0634\u062F';
+          return '\u06CC\u0627\u062F\u062F\u0627\u0634\u062A \u0641\u0639\u0644\u06CC \u0628\u0647\u200C\u0639\u0646\u0648\u0627\u0646 \u0646\u0634\u0633\u062A "' + n + '" \u0630\u062E\u06CC\u0631\u0647 \u0634\u062F';
         },
-        saveCurrentNoteNameAsSessionFailed: "\u0630\u062E\u06CC\u0631\u0647 \u0646\u0627\u0645 \u06CC\u0627\u062F\u062F\u0627\u0634\u062A \u0641\u0639\u0644\u06CC \u0628\u0647 \u0639\u0646\u0648\u0627\u0646 \u0646\u0634\u0633\u062A \u0646\u0627\u0645\u0648\u0641\u0642 \u0628\u0648\u062F."
+        saveCurrentNoteNameAsSessionFailed: "\u0630\u062E\u06CC\u0631\u0647 \u0646\u0627\u0645 \u06CC\u0627\u062F\u062F\u0627\u0634\u062A \u0641\u0639\u0644\u06CC \u0628\u0647\u200C\u0639\u0646\u0648\u0627\u0646 \u0646\u0634\u0633\u062A \u0646\u0627\u0645\u0648\u0641\u0642 \u0628\u0648\u062F."
       },
       ms: {
         cmdSaveCurrentNoteNameAsSession: "Simpan nama nota semasa sebagai sesi",
@@ -9931,34 +9616,315 @@ var require_i18n = __commonJS({
         settingsSessionStorageLocationDesc: function(path) {
           return "Current session file: " + path;
         },
-        settingsMoveSessionsToPluginFolder: "Move sessions to Obsidian plugin folder",
-        settingsMoveSessionsToPluginFolderDesc: "Use this if you want Obsidian Sync to sync Workspace++ sessions across devices. Avoid it if you share .obsidian across multiple vaults with Settings Profiles.",
-        settingsMoveSessionsToPluginFolderBtn: "Move to .obsidian",
-        settingsMoveSessionsToVaultFolder: "Move sessions outside .obsidian",
-        settingsMoveSessionsToVaultFolderDesc: "Use this if you share .obsidian across multiple vaults and want each vault to keep separate sessions.",
-        settingsMoveSessionsToVaultFolderBtn: "Move outside .obsidian",
+        settingsVaultOnlySessions: "Keep sessions in this vault only",
+        settingsVaultOnlySessionsDesc: "Stores sessions inside this vault only. Use it when several vaults share .obsidian, for example with Settings Profiles, and should not mix sessions. Obsidian Sync cannot carry them while this is on.",
         sessionStorageMoved: function(path) {
           return "Workspace++: Session storage moved to " + path;
         },
         sessionStorageMoveFailed: "Workspace++: Failed to move session storage.",
-        settingsStorageFieldSessionStorageLocation: "Session storage mode"
+        settingsStorageFieldHistory: "Version history file",
+        settingsStorageFieldDataSize: "Stored file size",
+        settingsStorageSyncHint: 'To sync this with Obsidian Sync, enable "Installed community plugins" in its settings. History and backups are not synced.'
       },
       ja: {
         settingsSessionStorageLocation: "\u30BB\u30C3\u30B7\u30E7\u30F3\u306E\u4FDD\u5B58\u5834\u6240",
         settingsSessionStorageLocationDesc: function(path) {
           return "\u73FE\u5728\u306E\u30BB\u30C3\u30B7\u30E7\u30F3\u30D5\u30A1\u30A4\u30EB: " + path;
         },
-        settingsMoveSessionsToPluginFolder: "\u30BB\u30C3\u30B7\u30E7\u30F3\u3092Obsidian\u30D7\u30E9\u30B0\u30A4\u30F3\u30D5\u30A9\u30EB\u30C0\u3078\u79FB\u52D5",
-        settingsMoveSessionsToPluginFolderDesc: "Obsidian Sync\u3067Workspace++\u306E\u30BB\u30C3\u30B7\u30E7\u30F3\u3092\u30C7\u30D0\u30A4\u30B9\u9593\u540C\u671F\u3057\u305F\u3044\u5834\u5408\u306B\u4F7F\u7528\u3057\u307E\u3059\u3002Settings Profiles\u306A\u3069\u3067\u8907\u6570Vault\u9593\u306E.obsidian\u3092\u5171\u6709\u3057\u3066\u3044\u308B\u5834\u5408\u306F\u907F\u3051\u3066\u304F\u3060\u3055\u3044\u3002",
-        settingsMoveSessionsToPluginFolderBtn: ".obsidian\u3078\u79FB\u52D5",
-        settingsMoveSessionsToVaultFolder: "\u30BB\u30C3\u30B7\u30E7\u30F3\u3092.obsidian\u306E\u5916\u3078\u79FB\u52D5",
-        settingsMoveSessionsToVaultFolderDesc: "\u8907\u6570Vault\u9593\u3067.obsidian\u3092\u5171\u6709\u3057\u3066\u3044\u3066\u3001\u5404Vault\u3067\u5225\u3005\u306E\u30BB\u30C3\u30B7\u30E7\u30F3\u3092\u4FDD\u6301\u3057\u305F\u3044\u5834\u5408\u306B\u4F7F\u7528\u3057\u307E\u3059\u3002",
-        settingsMoveSessionsToVaultFolderBtn: ".obsidian\u306E\u5916\u3078\u79FB\u52D5",
+        settingsVaultOnlySessions: "\u30BB\u30C3\u30B7\u30E7\u30F3\u3092\u3053\u306EVault\u3060\u3051\u3067\u4FDD\u6301\u3059\u308B",
+        settingsVaultOnlySessionsDesc: "\u30BB\u30C3\u30B7\u30E7\u30F3\u3092\u3053\u306E Vault \u5185\u3060\u3051\u306B\u4FDD\u5B58\u3057\u307E\u3059\u3002Settings Profiles \u306A\u3069\u3067 .obsidian \u3092\u8907\u6570\u306E Vault \u3067\u5171\u6709\u3057\u3066\u3044\u308B\u5834\u5408\u306B\u3001\u30BB\u30C3\u30B7\u30E7\u30F3\u304C\u6DF7\u3056\u308B\u306E\u3092\u9632\u3052\u307E\u3059\u3002\u30AA\u30F3\u306E\u9593\u306F Obsidian Sync \u3067\u306F\u540C\u671F\u3055\u308C\u307E\u305B\u3093\u3002",
         sessionStorageMoved: function(path) {
           return "Workspace++: \u30BB\u30C3\u30B7\u30E7\u30F3\u306E\u4FDD\u5B58\u5834\u6240\u3092 " + path + " \u306B\u79FB\u52D5\u3057\u307E\u3057\u305F\u3002";
         },
         sessionStorageMoveFailed: "Workspace++: \u30BB\u30C3\u30B7\u30E7\u30F3\u306E\u4FDD\u5B58\u5834\u6240\u306E\u79FB\u52D5\u306B\u5931\u6557\u3057\u307E\u3057\u305F\u3002",
-        settingsStorageFieldSessionStorageLocation: "\u30BB\u30C3\u30B7\u30E7\u30F3\u4FDD\u5B58\u30E2\u30FC\u30C9"
+        settingsStorageFieldHistory: "\u30D0\u30FC\u30B8\u30E7\u30F3\u5C65\u6B74\u30D5\u30A1\u30A4\u30EB",
+        settingsStorageFieldDataSize: "\u4FDD\u5B58\u30D5\u30A1\u30A4\u30EB\u306E\u30B5\u30A4\u30BA",
+        settingsStorageSyncHint: "Obsidian Sync \u3067\u540C\u671F\u3059\u308B\u306B\u306F\u3001Sync \u8A2D\u5B9A\u306E\u300CInstalled community plugins\u300D\u3092\u6709\u52B9\u306B\u3057\u3066\u304F\u3060\u3055\u3044\u3002\u5C65\u6B74\u3068\u30D0\u30C3\u30AF\u30A2\u30C3\u30D7\u306F\u540C\u671F\u3055\u308C\u307E\u305B\u3093\u3002"
+      },
+      zh: {
+        settingsSessionStorageLocation: "\u4F1A\u8BDD\u5B58\u50A8\u4F4D\u7F6E",
+        settingsSessionStorageLocationDesc: function(path) {
+          return "\u5F53\u524D\u4F1A\u8BDD\u6587\u4EF6: " + path;
+        },
+        settingsVaultOnlySessions: "\u4EC5\u5728\u6B64\u4ED3\u5E93\u4E2D\u4FDD\u7559\u4F1A\u8BDD",
+        settingsVaultOnlySessionsDesc: "\u4EC5\u5C06\u4F1A\u8BDD\u4FDD\u5B58\u5728\u6B64\u4ED3\u5E93\u5185\u3002\u5F53\u591A\u4E2A\u4ED3\u5E93\u5171\u4EAB .obsidian\uFF08\u4F8B\u5982\u4F7F\u7528 Settings Profiles\uFF09\u4E14\u4E0D\u5E0C\u671B\u4F1A\u8BDD\u6DF7\u5728\u4E00\u8D77\u65F6\u4F7F\u7528\u3002\u5F00\u542F\u671F\u95F4 Obsidian Sync \u65E0\u6CD5\u540C\u6B65\u4F1A\u8BDD\u3002",
+        sessionStorageMoved: function(path) {
+          return "Workspace++: \u4F1A\u8BDD\u5B58\u50A8\u4F4D\u7F6E\u5DF2\u79FB\u81F3 " + path;
+        },
+        sessionStorageMoveFailed: "Workspace++: \u79FB\u52A8\u4F1A\u8BDD\u5B58\u50A8\u4F4D\u7F6E\u5931\u8D25\u3002",
+        settingsStorageFieldHistory: "\u7248\u672C\u5386\u53F2\u6587\u4EF6",
+        settingsStorageFieldDataSize: "\u4FDD\u5B58\u6587\u4EF6\u5927\u5C0F",
+        settingsStorageSyncHint: "\u82E5\u8981\u7528 Obsidian Sync \u540C\u6B65\uFF0C\u8BF7\u5728\u5176\u8BBE\u7F6E\u4E2D\u542F\u7528\u201CInstalled community plugins\u201D\u3002\u5386\u53F2\u8BB0\u5F55\u548C\u5907\u4EFD\u4E0D\u4F1A\u540C\u6B65\u3002"
+      },
+      "zh-TW": {
+        settingsSessionStorageLocation: "\u5DE5\u4F5C\u968E\u6BB5\u5132\u5B58\u4F4D\u7F6E",
+        settingsSessionStorageLocationDesc: function(path) {
+          return "\u76EE\u524D\u7684\u5DE5\u4F5C\u968E\u6BB5\u6A94\u6848: " + path;
+        },
+        settingsVaultOnlySessions: "\u50C5\u5728\u6B64\u5132\u5B58\u5EAB\u4E2D\u4FDD\u7559\u5DE5\u4F5C\u968E\u6BB5",
+        settingsVaultOnlySessionsDesc: "\u50C5\u5C07\u5DE5\u4F5C\u968E\u6BB5\u5132\u5B58\u5728\u6B64\u5132\u5B58\u5EAB\u5167\u3002\u7576\u591A\u500B\u5132\u5B58\u5EAB\u5171\u7528 .obsidian\uFF08\u4F8B\u5982\u4F7F\u7528 Settings Profiles\uFF09\u4E14\u4E0D\u5E0C\u671B\u5DE5\u4F5C\u968E\u6BB5\u6DF7\u5728\u4E00\u8D77\u6642\u4F7F\u7528\u3002\u958B\u555F\u671F\u9593 Obsidian Sync \u7121\u6CD5\u540C\u6B65\u3002",
+        sessionStorageMoved: function(path) {
+          return "Workspace++: \u5DE5\u4F5C\u968E\u6BB5\u5132\u5B58\u4F4D\u7F6E\u5DF2\u79FB\u81F3 " + path;
+        },
+        sessionStorageMoveFailed: "Workspace++: \u79FB\u52D5\u5DE5\u4F5C\u968E\u6BB5\u5132\u5B58\u4F4D\u7F6E\u5931\u6557\u3002",
+        settingsStorageFieldHistory: "\u7248\u672C\u6B77\u53F2\u6A94\u6848",
+        settingsStorageFieldDataSize: "\u5132\u5B58\u6A94\u6848\u5927\u5C0F",
+        settingsStorageSyncHint: "\u82E5\u8981\u7528 Obsidian Sync \u540C\u6B65\uFF0C\u8ACB\u5728\u5176\u8A2D\u5B9A\u4E2D\u555F\u7528\u300CInstalled community plugins\u300D\u3002\u6B77\u53F2\u8A18\u9304\u8207\u5099\u4EFD\u4E0D\u6703\u540C\u6B65\u3002"
+      },
+      ko: {
+        settingsSessionStorageLocation: "\uC138\uC158 \uC800\uC7A5 \uC704\uCE58",
+        settingsSessionStorageLocationDesc: function(path) {
+          return "\uD604\uC7AC \uC138\uC158 \uD30C\uC77C: " + path;
+        },
+        settingsVaultOnlySessions: "\uC774 \uBCF4\uAD00\uD568\uC5D0\uC11C\uB9CC \uC138\uC158 \uC720\uC9C0",
+        settingsVaultOnlySessionsDesc: "\uC138\uC158\uC744 \uC774 \uBCF4\uAD00\uD568 \uC548\uC5D0\uB9CC \uC800\uC7A5\uD569\uB2C8\uB2E4. \uC5EC\uB7EC \uBCF4\uAD00\uD568\uC774 .obsidian\uC744 \uACF5\uC720\uD558\uBA74\uC11C(\uC608: Settings Profiles) \uC138\uC158\uC774 \uC11E\uC774\uC9C0 \uC54A\uAC8C \uD558\uB824\uBA74 \uC0AC\uC6A9\uD558\uC138\uC694. \uCF1C\uC838 \uC788\uB294 \uB3D9\uC548\uC5D0\uB294 Obsidian Sync\uAC00 \uB3D9\uAE30\uD654\uD558\uC9C0 \uBABB\uD569\uB2C8\uB2E4.",
+        sessionStorageMoved: function(path) {
+          return "Workspace++: \uC138\uC158 \uC800\uC7A5 \uC704\uCE58\uB97C " + path + "(\uC73C)\uB85C \uC62E\uACBC\uC2B5\uB2C8\uB2E4.";
+        },
+        sessionStorageMoveFailed: "Workspace++: \uC138\uC158 \uC800\uC7A5 \uC704\uCE58\uB97C \uC62E\uAE30\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4.",
+        settingsStorageFieldHistory: "\uBC84\uC804 \uAE30\uB85D \uD30C\uC77C",
+        settingsStorageFieldDataSize: "\uC800\uC7A5 \uD30C\uC77C \uD06C\uAE30",
+        settingsStorageSyncHint: 'Obsidian Sync\uB85C \uB3D9\uAE30\uD654\uD558\uB824\uBA74 \uD574\uB2F9 \uC124\uC815\uC5D0\uC11C "Installed community plugins"\uB97C \uCF1C\uC138\uC694. \uAE30\uB85D\uACFC \uBC31\uC5C5\uC740 \uB3D9\uAE30\uD654\uB418\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4.'
+      },
+      de: {
+        settingsSessionStorageLocation: "Speicherort der Sitzungen",
+        settingsSessionStorageLocationDesc: function(path) {
+          return "Aktuelle Sitzungsdatei: " + path;
+        },
+        settingsVaultOnlySessions: "Sitzungen nur in diesem Vault behalten",
+        settingsVaultOnlySessionsDesc: "Speichert Sitzungen nur in diesem Vault. N\xFCtzlich, wenn mehrere Vaults denselben .obsidian-Ordner teilen, etwa mit Settings Profiles, und ihre Sitzungen getrennt bleiben sollen. Obsidian Sync kann sie dann nicht \xFCbertragen.",
+        sessionStorageMoved: function(path) {
+          return "Workspace++: Speicherort der Sitzungen verschoben nach " + path;
+        },
+        sessionStorageMoveFailed: "Workspace++: Speicherort der Sitzungen konnte nicht verschoben werden.",
+        settingsStorageFieldHistory: "Datei des Versionsverlaufs",
+        settingsStorageFieldDataSize: "Gr\xF6\xDFe der gespeicherten Datei",
+        settingsStorageSyncHint: 'Zum Synchronisieren mit Obsidian Sync in dessen Einstellungen "Installed community plugins" aktivieren. Verlauf und Sicherungen werden nicht synchronisiert.'
+      },
+      fr: {
+        settingsSessionStorageLocation: "Emplacement de stockage des sessions",
+        settingsSessionStorageLocationDesc: function(path) {
+          return "Fichier de sessions actuel : " + path;
+        },
+        settingsVaultOnlySessions: "Conserver les sessions uniquement dans ce coffre",
+        settingsVaultOnlySessionsDesc: "Enregistre les sessions uniquement dans ce coffre. Utile lorsque plusieurs coffres partagent le dossier .obsidian, par exemple avec Settings Profiles, et ne doivent pas m\xE9langer leurs sessions. Obsidian Sync ne peut alors pas les transf\xE9rer.",
+        sessionStorageMoved: function(path) {
+          return "Workspace++ : stockage des sessions d\xE9plac\xE9 vers " + path;
+        },
+        sessionStorageMoveFailed: "Workspace++ : \xE9chec du d\xE9placement du stockage des sessions.",
+        settingsStorageFieldHistory: "Fichier d'historique des versions",
+        settingsStorageFieldDataSize: "Taille du fichier enregistr\xE9",
+        settingsStorageSyncHint: `Pour synchroniser avec Obsidian Sync, activez "Installed community plugins" dans ses param\xE8tres. L'historique et les sauvegardes ne sont pas synchronis\xE9s.`
+      },
+      es: {
+        settingsSessionStorageLocation: "Ubicaci\xF3n de almacenamiento de sesiones",
+        settingsSessionStorageLocationDesc: function(path) {
+          return "Archivo de sesiones actual: " + path;
+        },
+        settingsVaultOnlySessions: "Mantener las sesiones solo en esta b\xF3veda",
+        settingsVaultOnlySessionsDesc: "Guarda las sesiones solo dentro de esta b\xF3veda. \xDAtil cuando varias b\xF3vedas comparten la carpeta .obsidian, por ejemplo con Settings Profiles, y no deben mezclar sus sesiones. Obsidian Sync no podr\xE1 llevarlas mientras est\xE9 activado.",
+        sessionStorageMoved: function(path) {
+          return "Workspace++: almacenamiento de sesiones movido a " + path;
+        },
+        sessionStorageMoveFailed: "Workspace++: no se pudo mover el almacenamiento de sesiones.",
+        settingsStorageFieldHistory: "Archivo de historial de versiones",
+        settingsStorageFieldDataSize: "Tama\xF1o del archivo guardado",
+        settingsStorageSyncHint: 'Para sincronizar con Obsidian Sync, habilita "Installed community plugins" en sus ajustes. El historial y las copias de seguridad no se sincronizan.'
+      },
+      pt: {
+        settingsSessionStorageLocation: "Local de armazenamento das sess\xF5es",
+        settingsSessionStorageLocationDesc: function(path) {
+          return "Arquivo de sess\xF5es atual: " + path;
+        },
+        settingsVaultOnlySessions: "Manter as sess\xF5es apenas neste cofre",
+        settingsVaultOnlySessionsDesc: "Guarda as sess\xF5es apenas dentro deste cofre. \xDAtil quando v\xE1rios cofres compartilham a pasta .obsidian, por exemplo com o Settings Profiles, e n\xE3o devem misturar sess\xF5es. O Obsidian Sync n\xE3o consegue lev\xE1-las enquanto isso estiver ativo.",
+        sessionStorageMoved: function(path) {
+          return "Workspace++: armazenamento de sess\xF5es movido para " + path;
+        },
+        sessionStorageMoveFailed: "Workspace++: falha ao mover o armazenamento de sess\xF5es.",
+        settingsStorageFieldHistory: "Arquivo de hist\xF3rico de vers\xF5es",
+        settingsStorageFieldDataSize: "Tamanho do arquivo salvo",
+        settingsStorageSyncHint: 'Para sincronizar com o Obsidian Sync, ative "Installed community plugins" nas configura\xE7\xF5es dele. Hist\xF3rico e backups n\xE3o s\xE3o sincronizados.'
+      },
+      it: {
+        settingsSessionStorageLocation: "Posizione di archiviazione delle sessioni",
+        settingsSessionStorageLocationDesc: function(path) {
+          return "File delle sessioni corrente: " + path;
+        },
+        settingsVaultOnlySessions: "Mantieni le sessioni solo in questo vault",
+        settingsVaultOnlySessionsDesc: "Salva le sessioni solo dentro questo vault. Utile quando pi\xF9 vault condividono la cartella .obsidian, per esempio con Settings Profiles, e non devono mescolare le sessioni. Obsidian Sync non pu\xF2 trasferirle finch\xE9 \xE8 attivo.",
+        sessionStorageMoved: function(path) {
+          return "Workspace++: archiviazione delle sessioni spostata in " + path;
+        },
+        sessionStorageMoveFailed: "Workspace++: impossibile spostare l'archiviazione delle sessioni.",
+        settingsStorageFieldHistory: "File della cronologia versioni",
+        settingsStorageFieldDataSize: "Dimensione del file salvato",
+        settingsStorageSyncHint: 'Per sincronizzare con Obsidian Sync, attiva "Installed community plugins" nelle sue impostazioni. Cronologia e backup non vengono sincronizzati.'
+      },
+      ru: {
+        settingsSessionStorageLocation: "\u0420\u0430\u0441\u043F\u043E\u043B\u043E\u0436\u0435\u043D\u0438\u0435 \u0445\u0440\u0430\u043D\u0438\u043B\u0438\u0449\u0430 \u0441\u0435\u0441\u0441\u0438\u0439",
+        settingsSessionStorageLocationDesc: function(path) {
+          return "\u0422\u0435\u043A\u0443\u0449\u0438\u0439 \u0444\u0430\u0439\u043B \u0441\u0435\u0441\u0441\u0438\u0439: " + path;
+        },
+        settingsVaultOnlySessions: "\u0425\u0440\u0430\u043D\u0438\u0442\u044C \u0441\u0435\u0441\u0441\u0438\u0438 \u0442\u043E\u043B\u044C\u043A\u043E \u0432 \u044D\u0442\u043E\u043C \u0445\u0440\u0430\u043D\u0438\u043B\u0438\u0449\u0435",
+        settingsVaultOnlySessionsDesc: "\u0425\u0440\u0430\u043D\u0438\u0442 \u0441\u0435\u0441\u0441\u0438\u0438 \u0442\u043E\u043B\u044C\u043A\u043E \u0432\u043D\u0443\u0442\u0440\u0438 \u044D\u0442\u043E\u0433\u043E \u0445\u0440\u0430\u043D\u0438\u043B\u0438\u0449\u0430. \u041F\u0440\u0438\u0433\u043E\u0434\u0438\u0442\u0441\u044F, \u043A\u043E\u0433\u0434\u0430 \u043D\u0435\u0441\u043A\u043E\u043B\u044C\u043A\u043E \u0445\u0440\u0430\u043D\u0438\u043B\u0438\u0449 \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u044E\u0442 \u043E\u0431\u0449\u0443\u044E \u043F\u0430\u043F\u043A\u0443 .obsidian, \u043D\u0430\u043F\u0440\u0438\u043C\u0435\u0440 \u0441 Settings Profiles, \u0438 \u0438\u0445 \u0441\u0435\u0441\u0441\u0438\u0438 \u043D\u0435 \u0434\u043E\u043B\u0436\u043D\u044B \u0441\u043C\u0435\u0448\u0438\u0432\u0430\u0442\u044C\u0441\u044F. Obsidian Sync \u043F\u0440\u0438 \u044D\u0442\u043E\u043C \u043D\u0435 \u0441\u043C\u043E\u0436\u0435\u0442 \u0438\u0445 \u043F\u0435\u0440\u0435\u043D\u043E\u0441\u0438\u0442\u044C.",
+        sessionStorageMoved: function(path) {
+          return "Workspace++: \u0445\u0440\u0430\u043D\u0438\u043B\u0438\u0449\u0435 \u0441\u0435\u0441\u0441\u0438\u0439 \u043F\u0435\u0440\u0435\u043C\u0435\u0449\u0435\u043D\u043E \u0432 " + path;
+        },
+        sessionStorageMoveFailed: "Workspace++: \u043D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u043F\u0435\u0440\u0435\u043C\u0435\u0441\u0442\u0438\u0442\u044C \u0445\u0440\u0430\u043D\u0438\u043B\u0438\u0449\u0435 \u0441\u0435\u0441\u0441\u0438\u0439.",
+        settingsStorageFieldHistory: "\u0424\u0430\u0439\u043B \u0438\u0441\u0442\u043E\u0440\u0438\u0438 \u0432\u0435\u0440\u0441\u0438\u0439",
+        settingsStorageFieldDataSize: "\u0420\u0430\u0437\u043C\u0435\u0440 \u0441\u043E\u0445\u0440\u0430\u043D\u0451\u043D\u043D\u043E\u0433\u043E \u0444\u0430\u0439\u043B\u0430",
+        settingsStorageSyncHint: '\u0427\u0442\u043E\u0431\u044B \u0441\u0438\u043D\u0445\u0440\u043E\u043D\u0438\u0437\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u0447\u0435\u0440\u0435\u0437 Obsidian Sync, \u0432\u043A\u043B\u044E\u0447\u0438\u0442\u0435 \u0432 \u0435\u0433\u043E \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0430\u0445 "Installed community plugins". \u0418\u0441\u0442\u043E\u0440\u0438\u044F \u0438 \u0440\u0435\u0437\u0435\u0440\u0432\u043D\u044B\u0435 \u043A\u043E\u043F\u0438\u0438 \u043D\u0435 \u0441\u0438\u043D\u0445\u0440\u043E\u043D\u0438\u0437\u0438\u0440\u0443\u044E\u0442\u0441\u044F.'
+      },
+      tr: {
+        settingsSessionStorageLocation: "Oturum depolama konumu",
+        settingsSessionStorageLocationDesc: function(path) {
+          return "Ge\xE7erli oturum dosyas\u0131: " + path;
+        },
+        settingsVaultOnlySessions: "Oturumlar\u0131 yaln\u0131zca bu kasada tut",
+        settingsVaultOnlySessionsDesc: "Oturumlar\u0131 yaln\u0131zca bu kasan\u0131n i\xE7inde saklar. Birden fazla kasa ayn\u0131 .obsidian klas\xF6r\xFCn\xFC payla\u015F\u0131yorsa, \xF6rne\u011Fin Settings Profiles ile, ve oturumlar\u0131 kar\u0131\u015Fmamal\u0131ysa kullan\u0131n. A\xE7\u0131kken Obsidian Sync bunlar\u0131 ta\u015F\u0131yamaz.",
+        sessionStorageMoved: function(path) {
+          return "Workspace++: oturum depolama konumu \u015Furaya ta\u015F\u0131nd\u0131: " + path;
+        },
+        sessionStorageMoveFailed: "Workspace++: oturum depolama konumu ta\u015F\u0131namad\u0131.",
+        settingsStorageFieldHistory: "S\xFCr\xFCm ge\xE7mi\u015Fi dosyas\u0131",
+        settingsStorageFieldDataSize: "Kaydedilen dosya boyutu",
+        settingsStorageSyncHint: 'Obsidian Sync ile e\u015Fitlemek i\xE7in ayarlar\u0131ndan "Installed community plugins" se\xE7ene\u011Fini a\xE7\u0131n. Ge\xE7mi\u015F ve yedekler e\u015Fitlenmez.'
+      },
+      id: {
+        settingsSessionStorageLocation: "Lokasi penyimpanan sesi",
+        settingsSessionStorageLocationDesc: function(path) {
+          return "Berkas sesi saat ini: " + path;
+        },
+        settingsVaultOnlySessions: "Simpan sesi hanya di vault ini",
+        settingsVaultOnlySessionsDesc: "Menyimpan sesi hanya di dalam vault ini. Berguna bila beberapa vault berbagi folder .obsidian, misalnya dengan Settings Profiles, dan sesinya tidak boleh tercampur. Obsidian Sync tidak dapat membawanya selama ini aktif.",
+        sessionStorageMoved: function(path) {
+          return "Workspace++: penyimpanan sesi dipindahkan ke " + path;
+        },
+        sessionStorageMoveFailed: "Workspace++: gagal memindahkan penyimpanan sesi.",
+        settingsStorageFieldHistory: "Berkas riwayat versi",
+        settingsStorageFieldDataSize: "Ukuran berkas tersimpan",
+        settingsStorageSyncHint: 'Untuk menyinkronkan dengan Obsidian Sync, aktifkan "Installed community plugins" di pengaturannya. Riwayat dan cadangan tidak disinkronkan.'
+      },
+      ms: {
+        settingsSessionStorageLocation: "Lokasi storan sesi",
+        settingsSessionStorageLocationDesc: function(path) {
+          return "Fail sesi semasa: " + path;
+        },
+        settingsVaultOnlySessions: "Simpan sesi dalam bilik kebal ini sahaja",
+        settingsVaultOnlySessionsDesc: "Menyimpan sesi di dalam bilik kebal ini sahaja. Berguna apabila beberapa bilik kebal berkongsi folder .obsidian, contohnya dengan Settings Profiles, dan sesinya tidak boleh bercampur. Obsidian Sync tidak dapat membawanya semasa ini dihidupkan.",
+        sessionStorageMoved: function(path) {
+          return "Workspace++: storan sesi dipindahkan ke " + path;
+        },
+        sessionStorageMoveFailed: "Workspace++: gagal memindahkan storan sesi.",
+        settingsStorageFieldHistory: "Fail sejarah versi",
+        settingsStorageFieldDataSize: "Saiz fail tersimpan",
+        settingsStorageSyncHint: 'Untuk menyegerakkan dengan Obsidian Sync, hidupkan "Installed community plugins" dalam tetapannya. Sejarah dan sandaran tidak disegerakkan.'
+      },
+      vi: {
+        settingsSessionStorageLocation: "V\u1ECB tr\xED l\u01B0u tr\u1EEF phi\xEAn",
+        settingsSessionStorageLocationDesc: function(path) {
+          return "T\u1EC7p phi\xEAn hi\u1EC7n t\u1EA1i: " + path;
+        },
+        settingsVaultOnlySessions: "Ch\u1EC9 gi\u1EEF phi\xEAn trong kho n\xE0y",
+        settingsVaultOnlySessionsDesc: "Ch\u1EC9 l\u01B0u phi\xEAn b\xEAn trong kho n\xE0y. H\u1EEFu \xEDch khi nhi\u1EC1u kho d\xF9ng chung th\u01B0 m\u1EE5c .obsidian, v\xED d\u1EE5 v\u1EDBi Settings Profiles, v\xE0 kh\xF4ng n\xEAn tr\u1ED9n l\u1EABn phi\xEAn. Obsidian Sync kh\xF4ng th\u1EC3 \u0111\u1ED3ng b\u1ED9 ch\xFAng khi t\xF9y ch\u1ECDn n\xE0y \u0111ang b\u1EADt.",
+        sessionStorageMoved: function(path) {
+          return "Workspace++: \u0110\xE3 chuy\u1EC3n n\u01A1i l\u01B0u tr\u1EEF phi\xEAn sang " + path;
+        },
+        sessionStorageMoveFailed: "Workspace++: Kh\xF4ng th\u1EC3 chuy\u1EC3n n\u01A1i l\u01B0u tr\u1EEF phi\xEAn.",
+        settingsStorageFieldHistory: "T\u1EC7p l\u1ECBch s\u1EED phi\xEAn b\u1EA3n",
+        settingsStorageFieldDataSize: "K\xEDch th\u01B0\u1EDBc t\u1EC7p \u0111\xE3 l\u01B0u",
+        settingsStorageSyncHint: '\u0110\u1EC3 \u0111\u1ED3ng b\u1ED9 b\u1EB1ng Obsidian Sync, h\xE3y b\u1EADt "Installed community plugins" trong c\xE0i \u0111\u1EB7t c\u1EE7a n\xF3. L\u1ECBch s\u1EED v\xE0 b\u1EA3n sao l\u01B0u kh\xF4ng \u0111\u01B0\u1EE3c \u0111\u1ED3ng b\u1ED9.'
+      },
+      th: {
+        settingsSessionStorageLocation: "\u0E15\u0E33\u0E41\u0E2B\u0E19\u0E48\u0E07\u0E08\u0E31\u0E14\u0E40\u0E01\u0E47\u0E1A\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19",
+        settingsSessionStorageLocationDesc: function(path) {
+          return "\u0E44\u0E1F\u0E25\u0E4C\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E1B\u0E31\u0E08\u0E08\u0E38\u0E1A\u0E31\u0E19: " + path;
+        },
+        settingsVaultOnlySessions: "\u0E40\u0E01\u0E47\u0E1A\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E44\u0E27\u0E49\u0E40\u0E09\u0E1E\u0E32\u0E30\u0E43\u0E19\u0E27\u0E2D\u0E25\u0E15\u0E4C\u0E19\u0E35\u0E49",
+        settingsVaultOnlySessionsDesc: "\u0E40\u0E01\u0E47\u0E1A\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E44\u0E27\u0E49\u0E20\u0E32\u0E22\u0E43\u0E19\u0E27\u0E2D\u0E25\u0E15\u0E4C\u0E19\u0E35\u0E49\u0E40\u0E17\u0E48\u0E32\u0E19\u0E31\u0E49\u0E19 \u0E40\u0E2B\u0E21\u0E32\u0E30\u0E40\u0E21\u0E37\u0E48\u0E2D\u0E21\u0E35\u0E2B\u0E25\u0E32\u0E22\u0E27\u0E2D\u0E25\u0E15\u0E4C\u0E43\u0E0A\u0E49 .obsidian \u0E23\u0E48\u0E27\u0E21\u0E01\u0E31\u0E19 \u0E40\u0E0A\u0E48\u0E19\u0E40\u0E21\u0E37\u0E48\u0E2D\u0E43\u0E0A\u0E49 Settings Profiles \u0E41\u0E25\u0E30\u0E44\u0E21\u0E48\u0E15\u0E49\u0E2D\u0E07\u0E01\u0E32\u0E23\u0E43\u0E2B\u0E49\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E1B\u0E19\u0E01\u0E31\u0E19 \u0E02\u0E13\u0E30\u0E40\u0E1B\u0E34\u0E14\u0E15\u0E31\u0E27\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E19\u0E35\u0E49\u0E2D\u0E22\u0E39\u0E48 Obsidian Sync \u0E08\u0E30\u0E44\u0E21\u0E48\u0E2A\u0E32\u0E21\u0E32\u0E23\u0E16\u0E0B\u0E34\u0E07\u0E01\u0E4C\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E40\u0E2B\u0E25\u0E48\u0E32\u0E19\u0E35\u0E49\u0E44\u0E14\u0E49",
+        sessionStorageMoved: function(path) {
+          return "Workspace++: \u0E22\u0E49\u0E32\u0E22\u0E15\u0E33\u0E41\u0E2B\u0E19\u0E48\u0E07\u0E08\u0E31\u0E14\u0E40\u0E01\u0E47\u0E1A\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E44\u0E1B\u0E22\u0E31\u0E07 " + path + " \u0E41\u0E25\u0E49\u0E27";
+        },
+        sessionStorageMoveFailed: "Workspace++: \u0E22\u0E49\u0E32\u0E22\u0E15\u0E33\u0E41\u0E2B\u0E19\u0E48\u0E07\u0E08\u0E31\u0E14\u0E40\u0E01\u0E47\u0E1A\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E44\u0E21\u0E48\u0E2A\u0E33\u0E40\u0E23\u0E47\u0E08",
+        settingsStorageFieldHistory: "\u0E44\u0E1F\u0E25\u0E4C\u0E1B\u0E23\u0E30\u0E27\u0E31\u0E15\u0E34\u0E40\u0E27\u0E2D\u0E23\u0E4C\u0E0A\u0E31\u0E19",
+        settingsStorageFieldDataSize: "\u0E02\u0E19\u0E32\u0E14\u0E44\u0E1F\u0E25\u0E4C\u0E17\u0E35\u0E48\u0E1A\u0E31\u0E19\u0E17\u0E36\u0E01",
+        settingsStorageSyncHint: '\u0E2B\u0E32\u0E01\u0E15\u0E49\u0E2D\u0E07\u0E01\u0E32\u0E23\u0E0B\u0E34\u0E07\u0E01\u0E4C\u0E14\u0E49\u0E27\u0E22 Obsidian Sync \u0E43\u0E2B\u0E49\u0E40\u0E1B\u0E34\u0E14 "Installed community plugins" \u0E43\u0E19\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E02\u0E2D\u0E07\u0E21\u0E31\u0E19 \u0E1B\u0E23\u0E30\u0E27\u0E31\u0E15\u0E34\u0E41\u0E25\u0E30\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E2A\u0E33\u0E23\u0E2D\u0E07\u0E08\u0E30\u0E44\u0E21\u0E48\u0E16\u0E39\u0E01\u0E0B\u0E34\u0E07\u0E01\u0E4C'
+      },
+      hi: {
+        settingsSessionStorageLocation: "\u0938\u0924\u094D\u0930 \u0938\u0902\u0917\u094D\u0930\u0939\u0923 \u0938\u094D\u0925\u093E\u0928",
+        settingsSessionStorageLocationDesc: function(path) {
+          return "\u0935\u0930\u094D\u0924\u092E\u093E\u0928 \u0938\u0924\u094D\u0930 \u092B\u093C\u093E\u0907\u0932: " + path;
+        },
+        settingsVaultOnlySessions: "\u0938\u0924\u094D\u0930 \u0915\u0947\u0935\u0932 \u0907\u0938\u0940 \u0935\u0949\u0932\u094D\u091F \u092E\u0947\u0902 \u0930\u0916\u0947\u0902",
+        settingsVaultOnlySessionsDesc: "\u0938\u0924\u094D\u0930\u094B\u0902 \u0915\u094B \u0915\u0947\u0935\u0932 \u0907\u0938\u0940 \u0935\u0949\u0932\u094D\u091F \u0915\u0947 \u092D\u0940\u0924\u0930 \u0938\u0939\u0947\u091C\u0924\u093E \u0939\u0948\u0964 \u091C\u092C \u0915\u0908 \u0935\u0949\u0932\u094D\u091F \u090F\u0915 \u0939\u0940 .obsidian \u0938\u093E\u091D\u093E \u0915\u0930\u0924\u0947 \u0939\u094B\u0902, \u091C\u0948\u0938\u0947 Settings Profiles \u0915\u0947 \u0938\u093E\u0925, \u0914\u0930 \u0909\u0928\u0915\u0947 \u0938\u0924\u094D\u0930 \u0906\u092A\u0938 \u092E\u0947\u0902 \u0928 \u092E\u093F\u0932\u0947\u0902, \u0924\u092C \u0909\u092A\u092F\u094B\u0917\u0940 \u0939\u0948\u0964 \u091A\u093E\u0932\u0942 \u0930\u0939\u0928\u0947 \u092A\u0930 Obsidian Sync \u0907\u0928\u094D\u0939\u0947\u0902 \u0938\u093F\u0902\u0915 \u0928\u0939\u0940\u0902 \u0915\u0930 \u0938\u0915\u0924\u093E\u0964",
+        sessionStorageMoved: function(path) {
+          return "Workspace++: \u0938\u0924\u094D\u0930 \u0938\u0902\u0917\u094D\u0930\u0939\u0923 " + path + " \u092E\u0947\u0902 \u0938\u094D\u0925\u093E\u0928\u093E\u0902\u0924\u0930\u093F\u0924 \u0915\u093F\u092F\u093E \u0917\u092F\u093E\u0964";
+        },
+        sessionStorageMoveFailed: "Workspace++: \u0938\u0924\u094D\u0930 \u0938\u0902\u0917\u094D\u0930\u0939\u0923 \u0938\u094D\u0925\u093E\u0928 \u092C\u0926\u0932\u0928\u0947 \u092E\u0947\u0902 \u0935\u093F\u092B\u0932\u0964",
+        settingsStorageFieldHistory: "\u0938\u0902\u0938\u094D\u0915\u0930\u0923 \u0907\u0924\u093F\u0939\u093E\u0938 \u092B\u093C\u093E\u0907\u0932",
+        settingsStorageFieldDataSize: "\u0938\u0939\u0947\u091C\u0940 \u0917\u0908 \u092B\u093C\u093E\u0907\u0932 \u0915\u093E \u0906\u0915\u093E\u0930",
+        settingsStorageSyncHint: 'Obsidian Sync \u0938\u0947 \u0938\u093F\u0902\u0915 \u0915\u0930\u0928\u0947 \u0915\u0947 \u0932\u093F\u090F \u0909\u0938\u0915\u0940 \u0938\u0947\u091F\u093F\u0902\u0917\u094D\u0938 \u092E\u0947\u0902 "Installed community plugins" \u091A\u093E\u0932\u0942 \u0915\u0930\u0947\u0902\u0964 \u0907\u0924\u093F\u0939\u093E\u0938 \u0914\u0930 \u092C\u0948\u0915\u0905\u092A \u0938\u093F\u0902\u0915 \u0928\u0939\u0940\u0902 \u0939\u094B\u0924\u0947\u0964'
+      },
+      bn: {
+        settingsSessionStorageLocation: "\u09B8\u09C7\u09B6\u09A8 \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3\u09C7\u09B0 \u0985\u09AC\u09B8\u09CD\u09A5\u09BE\u09A8",
+        settingsSessionStorageLocationDesc: function(path) {
+          return "\u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u09B8\u09C7\u09B6\u09A8 \u09AB\u09BE\u0987\u09B2: " + path;
+        },
+        settingsVaultOnlySessions: "\u09B8\u09C7\u09B6\u09A8 \u09B6\u09C1\u09A7\u09C1 \u098F\u0987 \u09AD\u09B2\u09CD\u099F\u09C7\u0987 \u09B0\u09BE\u0996\u09C1\u09A8",
+        settingsVaultOnlySessionsDesc: "\u09B8\u09C7\u09B6\u09A8 \u09B6\u09C1\u09A7\u09C1 \u098F\u0987 \u09AD\u09B2\u09CD\u099F\u09C7\u09B0 \u09AD\u09C7\u09A4\u09B0\u09C7\u0987 \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3 \u0995\u09B0\u09C7\u0964 \u098F\u0995\u09BE\u09A7\u09BF\u0995 \u09AD\u09B2\u09CD\u099F \u098F\u0995\u0987 .obsidian \u09AD\u09BE\u0997 \u0995\u09B0\u09C7 \u09A8\u09BF\u09B2\u09C7, \u09AF\u09C7\u09AE\u09A8 Settings Profiles-\u098F\u09B0 \u09B8\u0999\u09CD\u0997\u09C7, \u098F\u09AC\u0982 \u09B8\u09C7\u09B6\u09A8 \u09AE\u09BF\u09B6\u09C7 \u09AF\u09BE\u0993\u09AF\u09BC\u09BE \u09A0\u09C7\u0995\u09BE\u09A4\u09C7 \u099A\u09BE\u0987\u09B2\u09C7 \u0995\u09BE\u099C\u09C7 \u09B2\u09BE\u0997\u09C7\u0964 \u099A\u09BE\u09B2\u09C1 \u09A5\u09BE\u0995\u09B2\u09C7 Obsidian Sync \u09B8\u09C7\u0997\u09C1\u09B2\u09CB \u09B8\u09BF\u0999\u09CD\u0995 \u0995\u09B0\u09A4\u09C7 \u09AA\u09BE\u09B0\u09C7 \u09A8\u09BE\u0964",
+        sessionStorageMoved: function(path) {
+          return "Workspace++: \u09B8\u09C7\u09B6\u09A8 \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3\u09C7\u09B0 \u0985\u09AC\u09B8\u09CD\u09A5\u09BE\u09A8 " + path + "-\u098F \u09B8\u09B0\u09BE\u09A8\u09CB \u09B9\u09AF\u09BC\u09C7\u099B\u09C7\u0964";
+        },
+        sessionStorageMoveFailed: "Workspace++: \u09B8\u09C7\u09B6\u09A8 \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09A3\u09C7\u09B0 \u0985\u09AC\u09B8\u09CD\u09A5\u09BE\u09A8 \u09B8\u09B0\u09BE\u09A4\u09C7 \u09AC\u09CD\u09AF\u09B0\u09CD\u09A5 \u09B9\u09AF\u09BC\u09C7\u099B\u09C7\u0964",
+        settingsStorageFieldHistory: "\u09B8\u0982\u09B8\u09CD\u0995\u09B0\u09A3 \u0987\u09A4\u09BF\u09B9\u09BE\u09B8 \u09AB\u09BE\u0987\u09B2",
+        settingsStorageFieldDataSize: "\u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09BF\u09A4 \u09AB\u09BE\u0987\u09B2\u09C7\u09B0 \u0986\u0995\u09BE\u09B0",
+        settingsStorageSyncHint: 'Obsidian Sync \u09A6\u09BF\u09AF\u09BC\u09C7 \u09B8\u09BF\u0999\u09CD\u0995 \u0995\u09B0\u09A4\u09C7 \u09B9\u09B2\u09C7 \u098F\u09B0 \u09B8\u09C7\u099F\u09BF\u0982\u09B8\u09C7 "Installed community plugins" \u099A\u09BE\u09B2\u09C1 \u0995\u09B0\u09C1\u09A8\u0964 \u0987\u09A4\u09BF\u09B9\u09BE\u09B8 \u0993 \u09AC\u09CD\u09AF\u09BE\u0995\u0986\u09AA \u09B8\u09BF\u0999\u09CD\u0995 \u09B9\u09AF\u09BC \u09A8\u09BE\u0964'
+      },
+      fa: {
+        settingsSessionStorageLocation: "\u0645\u062D\u0644 \u0630\u062E\u06CC\u0631\u0647\u200C\u0633\u0627\u0632\u06CC \u0646\u0634\u0633\u062A\u200C\u0647\u0627",
+        settingsSessionStorageLocationDesc: function(path) {
+          return "\u0641\u0627\u06CC\u0644 \u0646\u0634\u0633\u062A \u0641\u0639\u0644\u06CC: " + path;
+        },
+        settingsVaultOnlySessions: "\u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u0641\u0642\u0637 \u062F\u0631 \u0647\u0645\u06CC\u0646 \u06AF\u0627\u0648\u0635\u0646\u062F\u0648\u0642 \u0646\u06AF\u0647 \u062F\u0627\u0634\u062A\u0647 \u0634\u0648\u0646\u062F",
+        settingsVaultOnlySessionsDesc: "\u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u0631\u0627 \u0641\u0642\u0637 \u062F\u0627\u062E\u0644 \u0647\u0645\u06CC\u0646 \u06AF\u0627\u0648\u0635\u0646\u062F\u0648\u0642 \u0630\u062E\u06CC\u0631\u0647 \u0645\u06CC\u200C\u06A9\u0646\u062F. \u0632\u0645\u0627\u0646\u06CC \u0645\u0641\u06CC\u062F \u0627\u0633\u062A \u06A9\u0647 \u0686\u0646\u062F \u06AF\u0627\u0648\u0635\u0646\u062F\u0648\u0642 \u067E\u0648\u0634\u0647 .obsidian \u0645\u0634\u062A\u0631\u06A9 \u062F\u0627\u0631\u0646\u062F (\u0645\u062B\u0644\u0627\u064B \u0628\u0627 Settings Profiles) \u0648 \u0646\u0628\u0627\u06CC\u062F \u0646\u0634\u0633\u062A\u200C\u0647\u0627\u06CC\u0634\u0627\u0646 \u0628\u0627 \u06CC\u06A9\u062F\u06CC\u06AF\u0631 \u062A\u062F\u0627\u062E\u0644 \u062F\u0627\u0634\u062A\u0647 \u0628\u0627\u0634\u0646\u062F. \u062A\u0627 \u0632\u0645\u0627\u0646\u06CC \u06A9\u0647 \u0627\u06CC\u0646 \u06AF\u0632\u06CC\u0646\u0647 \u0631\u0648\u0634\u0646 \u0628\u0627\u0634\u062F\u060C Obsidian Sync \u0646\u0645\u06CC\u200C\u062A\u0648\u0627\u0646\u062F \u0622\u0646\u200C\u0647\u0627 \u0631\u0627 \u0647\u0645\u06AF\u0627\u0645\u200C\u0633\u0627\u0632\u06CC \u06A9\u0646\u062F.",
+        sessionStorageMoved: function(path) {
+          return "Workspace++: \u0645\u062D\u0644 \u0630\u062E\u06CC\u0631\u0647\u200C\u0633\u0627\u0632\u06CC \u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u0628\u0647 " + path + " \u0645\u0646\u062A\u0642\u0644 \u0634\u062F.";
+        },
+        sessionStorageMoveFailed: "Workspace++: \u0627\u0646\u062A\u0642\u0627\u0644 \u0645\u062D\u0644 \u0630\u062E\u06CC\u0631\u0647\u200C\u0633\u0627\u0632\u06CC \u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u0646\u0627\u0645\u0648\u0641\u0642 \u0628\u0648\u062F.",
+        settingsStorageFieldHistory: "\u0641\u0627\u06CC\u0644 \u062A\u0627\u0631\u06CC\u062E\u0686\u0647 \u0646\u0633\u062E\u0647\u200C\u0647\u0627",
+        settingsStorageFieldDataSize: "\u062D\u062C\u0645 \u0641\u0627\u06CC\u0644 \u0630\u062E\u06CC\u0631\u0647\u200C\u0634\u062F\u0647",
+        settingsStorageSyncHint: '\u0628\u0631\u0627\u06CC \u0647\u0645\u06AF\u0627\u0645\u200C\u0633\u0627\u0632\u06CC \u0628\u0627 Obsidian Sync\u060C \u062F\u0631 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0622\u0646 "Installed community plugins" \u0631\u0627 \u0631\u0648\u0634\u0646 \u06A9\u0646\u06CC\u062F. \u062A\u0627\u0631\u06CC\u062E\u0686\u0647 \u0648 \u067E\u0634\u062A\u06CC\u0628\u0627\u0646\u200C\u0647\u0627 \u0647\u0645\u06AF\u0627\u0645 \u0646\u0645\u06CC\u200C\u0634\u0648\u0646\u062F.'
+      },
+      ar: {
+        settingsSessionStorageLocation: "\u0645\u0648\u0642\u0639 \u062A\u062E\u0632\u064A\u0646 \u0627\u0644\u062C\u0644\u0633\u0627\u062A",
+        settingsSessionStorageLocationDesc: function(path) {
+          return "\u0645\u0644\u0641 \u0627\u0644\u062C\u0644\u0633\u0627\u062A \u0627\u0644\u062D\u0627\u0644\u064A: " + path;
+        },
+        settingsVaultOnlySessions: "\u0627\u0644\u0627\u062D\u062A\u0641\u0627\u0638 \u0628\u0627\u0644\u062C\u0644\u0633\u0627\u062A \u0641\u064A \u0647\u0630\u0647 \u0627\u0644\u062E\u0632\u0646\u0629 \u0641\u0642\u0637",
+        settingsVaultOnlySessionsDesc: "\u064A\u062D\u0641\u0638 \u0627\u0644\u062C\u0644\u0633\u0627\u062A \u062F\u0627\u062E\u0644 \u0647\u0630\u0647 \u0627\u0644\u062E\u0632\u0646\u0629 \u0641\u0642\u0637. \u0645\u0641\u064A\u062F \u0639\u0646\u062F\u0645\u0627 \u062A\u062A\u0634\u0627\u0631\u0643 \u0639\u062F\u0629 \u062E\u0632\u0627\u0626\u0646 \u0645\u062C\u0644\u062F .obsidian \u0646\u0641\u0633\u0647\u060C \u0645\u0639 Settings Profiles \u0645\u062B\u0644\u0627\u064B\u060C \u0648\u0644\u0627 \u064A\u0646\u0628\u063A\u064A \u0623\u0646 \u062A\u062E\u062A\u0644\u0637 \u062C\u0644\u0633\u0627\u062A\u0647\u0627. \u0644\u0627 \u064A\u0633\u062A\u0637\u064A\u0639 Obsidian Sync \u0645\u0632\u0627\u0645\u0646\u062A\u0647\u0627 \u0623\u062B\u0646\u0627\u0621 \u062A\u0641\u0639\u064A\u0644 \u0647\u0630\u0627 \u0627\u0644\u062E\u064A\u0627\u0631.",
+        sessionStorageMoved: function(path) {
+          return "Workspace++: \u062A\u0645 \u0646\u0642\u0644 \u062A\u062E\u0632\u064A\u0646 \u0627\u0644\u062C\u0644\u0633\u0627\u062A \u0625\u0644\u0649 " + path;
+        },
+        sessionStorageMoveFailed: "Workspace++: \u062A\u0639\u0630\u0651\u0631 \u0646\u0642\u0644 \u0645\u0648\u0642\u0639 \u062A\u062E\u0632\u064A\u0646 \u0627\u0644\u062C\u0644\u0633\u0627\u062A.",
+        settingsStorageFieldHistory: "\u0645\u0644\u0641 \u0633\u062C\u0644 \u0627\u0644\u0625\u0635\u062F\u0627\u0631\u0627\u062A",
+        settingsStorageFieldDataSize: "\u062D\u062C\u0645 \u0627\u0644\u0645\u0644\u0641 \u0627\u0644\u0645\u062D\u0641\u0648\u0638",
+        settingsStorageSyncHint: '\u0644\u0644\u0645\u0632\u0627\u0645\u0646\u0629 \u0639\u0628\u0631 Obsidian Sync\u060C \u0641\u0639\u0650\u0651\u0644 "Installed community plugins" \u0641\u064A \u0625\u0639\u062F\u0627\u062F\u0627\u062A\u0647. \u0644\u0627 \u062A\u062A\u0645 \u0645\u0632\u0627\u0645\u0646\u0629 \u0627\u0644\u0633\u062C\u0644 \u0648\u0627\u0644\u0646\u0633\u062E \u0627\u0644\u0627\u062D\u062A\u064A\u0627\u0637\u064A\u0629.'
+      },
+      pl: {
+        settingsSessionStorageLocation: "Lokalizacja przechowywania sesji",
+        settingsSessionStorageLocationDesc: function(path) {
+          return "Bie\u017C\u0105cy plik sesji: " + path;
+        },
+        settingsVaultOnlySessions: "Trzymaj sesje tylko w tym sejfie",
+        settingsVaultOnlySessionsDesc: "Zapisuje sesje wy\u0142\u0105cznie w tym sejfie. Przydatne, gdy kilka sejf\xF3w wsp\xF3\u0142dzieli folder .obsidian, na przyk\u0142ad przy Settings Profiles, a ich sesje nie powinny si\u0119 miesza\u0107. Obsidian Sync nie przeniesie ich, dop\xF3ki opcja jest w\u0142\u0105czona.",
+        sessionStorageMoved: function(path) {
+          return "Workspace++: przeniesiono przechowywanie sesji do " + path;
+        },
+        sessionStorageMoveFailed: "Workspace++: nie uda\u0142o si\u0119 przenie\u015B\u0107 przechowywania sesji.",
+        settingsStorageFieldHistory: "Plik historii wersji",
+        settingsStorageFieldDataSize: "Rozmiar zapisanego pliku",
+        settingsStorageSyncHint: 'Aby synchronizowa\u0107 przez Obsidian Sync, w\u0142\u0105cz w jego ustawieniach "Installed community plugins". Historia i kopie zapasowe nie s\u0105 synchronizowane.'
       }
     };
     var sessionStorageLangs = Object.keys(STRINGS);
@@ -12885,6 +12851,13 @@ var require_settings = __commonJS({
     "use strict";
     var obsidian2 = require("obsidian");
     var i18n2 = require_i18n();
+    function formatByteSize(bytes) {
+      if (typeof bytes !== "number" || !isFinite(bytes) || bytes < 0) return "\u2014";
+      if (bytes < 1024) return bytes + " B";
+      var kb = bytes / 1024;
+      if (kb < 1024) return kb.toFixed(1) + " KB";
+      return (kb / 1024).toFixed(1) + " MB";
+    }
     var modals2 = require_modals2();
     var formatRelativeTime = require_format_relative_time();
     var statusBarActions = require_statusbar_actions();
@@ -13399,79 +13372,25 @@ var require_settings = __commonJS({
               options = options || {};
               var row = devCardEl.createDiv({ cls: "wpp-dev-card-row" });
               row.createDiv({ text: label, cls: "wpp-dev-card-label" });
-              row.createDiv({
+              return row.createDiv({
                 text: String(value),
                 cls: options.code ? "wpp-dev-card-value wpp-dev-card-value-code" : "wpp-dev-card-value"
               });
             };
             addSection(L.settingsAdvancedStorageSubsection);
-            var sessionStorageLocation = self.plugin.getSessionStorageLocation();
             new obsidian2.Setting(contentEl).setName(L.settingsSessionStorageLocation).setDesc(L.settingsSessionStorageLocationDesc(self.plugin.getSessionsPath()));
-            addAsyncActionSetting(contentEl, {
-              name: L.settingsMoveSessionsToPluginFolder,
-              desc: L.settingsMoveSessionsToPluginFolderDesc,
-              buttonText: L.settingsMoveSessionsToPluginFolderBtn,
-              disabled: sessionStorageLocation === "plugin-folder",
-              run: function() {
-                return self.plugin.setSessionStorageLocation("plugin-folder");
-              },
-              onSuccess: function() {
-                self.display();
-              },
-              failureNotice: L.sessionStorageMoveFailed
-            });
-            addAsyncActionSetting(contentEl, {
-              name: L.settingsMoveSessionsToVaultFolder,
-              desc: L.settingsMoveSessionsToVaultFolderDesc,
-              buttonText: L.settingsMoveSessionsToVaultFolderBtn,
-              disabled: sessionStorageLocation === "vault-folder",
-              run: function() {
-                return self.plugin.setSessionStorageLocation("vault-folder");
-              },
-              onSuccess: function() {
-                self.display();
-              },
-              failureNotice: L.sessionStorageMoveFailed
-            });
-            var useLocalSettings = self.plugin.isUsingLocalSettings();
             addToggleSetting(contentEl, {
-              name: L.settingsUseLocalSettings,
-              desc: L.settingsUseLocalSettingsDesc,
-              value: useLocalSettings,
+              name: L.settingsVaultOnlySessions,
+              desc: L.settingsVaultOnlySessionsDesc,
+              value: self.plugin.getSessionStorageLocation() === "vault-folder",
               onChange: function(value) {
-                self.plugin.setUseLocalSettings(value, { notify: true }).then(function() {
+                self.plugin.setSessionStorageLocation(value ? "vault-folder" : "plugin-folder").then(function() {
                   self.display();
                 }).catch(function() {
-                  new obsidian2.Notice(L.localSettingsOperationFailed);
+                  new obsidian2.Notice(L.sessionStorageMoveFailed);
                   self.display();
                 });
               }
-            });
-            addAsyncActionSetting(contentEl, {
-              name: L.settingsCopyGlobalToLocal,
-              desc: L.settingsCopyGlobalToLocalDesc,
-              buttonText: L.settingsCopyGlobalToLocalBtn,
-              disabled: !useLocalSettings,
-              run: function() {
-                return self.plugin.copyGlobalSettingsToLocal({ notify: true });
-              },
-              onSuccess: function() {
-                self.display();
-              },
-              failureNotice: L.localSettingsOperationFailed
-            });
-            addAsyncActionSetting(contentEl, {
-              name: L.settingsResetLocalSettings,
-              desc: L.settingsResetLocalSettingsDesc,
-              buttonText: L.settingsResetLocalSettingsBtn,
-              disabled: !useLocalSettings,
-              run: function() {
-                return self.plugin.resetLocalSettings({ notify: true });
-              },
-              onSuccess: function() {
-                self.display();
-              },
-              failureNotice: L.localSettingsOperationFailed
             });
             addSection(L.settingsAdvancedTransferSubsection);
             new obsidian2.Setting(contentEl).setName(L.settingsExportSessions).setDesc(L.settingsExportSessionsDesc).addButton(function(btn) {
@@ -13568,11 +13487,20 @@ var require_settings = __commonJS({
             });
             addDevCardRow(L.settingsStorageFieldSessions, diagnosticsInfo.sessionsPath, { code: true });
             addDevCardRow(L.settingsStorageFieldSessionsBackup, diagnosticsInfo.sessionsBackupPath, { code: true });
-            addDevCardRow(L.settingsStorageFieldSessionStorageLocation, diagnosticsInfo.sessionStorageLocation, { code: true });
-            addDevCardRow(L.settingsStorageFieldLocalSettings, diagnosticsInfo.localSettingsPath, { code: true });
-            addDevCardRow(L.settingsStorageFieldGlobalSettings, diagnosticsInfo.globalSettingsPath, { code: true });
+            addDevCardRow(L.settingsStorageFieldHistory, diagnosticsInfo.historyPath, { code: true });
             addDevCardRow(L.settingsStorageFieldSessionCount, diagnosticsInfo.sessionCount);
+            var sizeValueEl = addDevCardRow(L.settingsStorageFieldDataSize, "\u2026");
+            self.plugin.getSessionStorageSize().then(function(size) {
+              if (!sizeValueEl) return;
+              sizeValueEl.setText(size === null ? "\u2014" : formatByteSize(size));
+            });
             addDevCardRow(L.settingsStorageFieldUpdatedAt, diagnosticsUpdatedText);
+            if (diagnosticsInfo.syncedByObsidianSync) {
+              devCardEl.createDiv({
+                text: L.settingsStorageSyncHint,
+                cls: "wpp-dev-card-desc"
+              });
+            }
           }
           var footerEl = containerEl.createDiv();
           footerEl.style.fontSize = "12px";
@@ -15278,22 +15206,10 @@ var require_overlays = __commonJS({
   }
 });
 
-// src/plugin/methods/persistence.js
-var require_persistence = __commonJS({
-  "src/plugin/methods/persistence.js"(exports2, module2) {
+// src/plugin/session-data.js
+var require_session_data = __commonJS({
+  "src/plugin/session-data.js"(exports2, module2) {
     "use strict";
-    var obsidian2 = require("obsidian");
-    var i18n2 = require_i18n();
-    var DEFAULT_DATA2 = require_default_data();
-    var STORAGE_DIR = ".workspace-plus-plus";
-    var SESSION_STORAGE_VAULT = "vault-folder";
-    var SESSION_STORAGE_PLUGIN = "plugin-folder";
-    var SESSIONS_FILE_NAME = "sessions.json";
-    var SESSIONS_BACKUP_FILE_NAME = "sessions.backup.json";
-    var LOCAL_SETTINGS_FILE = STORAGE_DIR + "/settings.local.json";
-    var EXPORT_DIR_NAME = "exports";
-    var BACKUPS_DIR_NAME = "backups";
-    var BACKUP_ROTATION_INTERVAL = 36e5;
     var SESSION_KEYS = [
       "activeSessionId",
       "sessions",
@@ -15303,6 +15219,147 @@ var require_persistence = __commonJS({
       "sessionGroups",
       "activeGroupId"
     ];
+    function joinPath(base, child) {
+      return String(base || "").replace(/\/+$/, "") + "/" + child;
+    }
+    function readHistoryMap(raw) {
+      if (!raw || typeof raw !== "object") return {};
+      var map = raw.history && typeof raw.history === "object" ? raw.history : raw;
+      var out = {};
+      var ids = Object.keys(map);
+      for (var i = 0; i < ids.length; i++) {
+        var entries = map[ids[i]];
+        if (Array.isArray(entries) && entries.length > 0) out[ids[i]] = entries;
+      }
+      return out;
+    }
+    function splitSessionHistory(sessionData) {
+      var sessions = sessionData && sessionData.sessions || {};
+      var strippedSessions = {};
+      var history = {};
+      var ids = Object.keys(sessions);
+      for (var i = 0; i < ids.length; i++) {
+        var id = ids[i];
+        var session = sessions[id];
+        if (!session || typeof session !== "object") continue;
+        var copy = {};
+        var keys = Object.keys(session);
+        for (var k = 0; k < keys.length; k++) {
+          if (keys[k] === "history") continue;
+          copy[keys[k]] = session[keys[k]];
+        }
+        strippedSessions[id] = copy;
+        if (Array.isArray(session.history) && session.history.length > 0) {
+          history[id] = session.history;
+        }
+      }
+      return {
+        data: Object.assign({}, sessionData, { sessions: strippedSessions }),
+        history
+      };
+    }
+    function mergeSessionHistory(sessionData, historyMap) {
+      var sessions = sessionData && sessionData.sessions || {};
+      var ids = Object.keys(sessions);
+      for (var i = 0; i < ids.length; i++) {
+        var session = sessions[ids[i]];
+        if (!session || typeof session !== "object") continue;
+        var entries = historyMap && historyMap[ids[i]];
+        if (Array.isArray(entries) && entries.length > 0) {
+          session.history = entries;
+        } else if (!Array.isArray(session.history) || session.history.length === 0) {
+          delete session.history;
+        }
+      }
+      return sessionData;
+    }
+    function hasInlineSessionHistory(sessionData) {
+      var sessions = sessionData && sessionData.sessions || {};
+      var ids = Object.keys(sessions);
+      for (var i = 0; i < ids.length; i++) {
+        var session = sessions[ids[i]];
+        if (session && Array.isArray(session.history) && session.history.length > 0) return true;
+      }
+      return false;
+    }
+    function pickSessionPayload(data) {
+      var out = {};
+      if (!data || typeof data !== "object") return out;
+      for (var i = 0; i < SESSION_KEYS.length; i++) {
+        var key = SESSION_KEYS[i];
+        if (data[key] !== void 0) out[key] = data[key];
+      }
+      if (typeof data._wppSavedAt === "number") out._wppSavedAt = data._wppSavedAt;
+      return out;
+    }
+    function pickKeys(data, keys) {
+      var out = {};
+      if (!data) return out;
+      for (var i = 0; i < keys.length; i++) {
+        var key = keys[i];
+        if (data[key] !== void 0) out[key] = data[key];
+      }
+      return out;
+    }
+    function hasSessionShape(data) {
+      return !!(data && typeof data === "object" && (data.sessions !== void 0 || data.sessionOrder !== void 0 || data.activeSessionId !== void 0));
+    }
+    function hasNonEmptySessions(data) {
+      return !!(data && data.sessions && typeof data.sessions === "object" && Object.keys(data.sessions).length > 0);
+    }
+    function getPersistStamp(data) {
+      if (!data || typeof data !== "object") return 0;
+      var stamp = data._wppSavedAt;
+      if (typeof stamp !== "number" || !isFinite(stamp)) return 0;
+      return stamp;
+    }
+    module2.exports = {
+      SESSION_KEYS,
+      joinPath,
+      readHistoryMap,
+      splitSessionHistory,
+      mergeSessionHistory,
+      hasInlineSessionHistory,
+      pickSessionPayload,
+      pickKeys,
+      hasSessionShape,
+      hasNonEmptySessions,
+      getPersistStamp
+    };
+  }
+});
+
+// src/plugin/methods/persistence.js
+var require_persistence = __commonJS({
+  "src/plugin/methods/persistence.js"(exports2, module2) {
+    "use strict";
+    var obsidian2 = require("obsidian");
+    var i18n2 = require_i18n();
+    var DEFAULT_DATA2 = require_default_data();
+    var sessionData = require_session_data();
+    var SESSION_KEYS = sessionData.SESSION_KEYS;
+    var joinPath = sessionData.joinPath;
+    var pickKeys = sessionData.pickKeys;
+    var pickSessionPayload = sessionData.pickSessionPayload;
+    var hasSessionShape = sessionData.hasSessionShape;
+    var hasNonEmptySessions = sessionData.hasNonEmptySessions;
+    var getPersistStamp = sessionData.getPersistStamp;
+    var readHistoryMap = sessionData.readHistoryMap;
+    var splitSessionHistory = sessionData.splitSessionHistory;
+    var mergeSessionHistory = sessionData.mergeSessionHistory;
+    var hasInlineSessionHistory = sessionData.hasInlineSessionHistory;
+    var STORAGE_DIR = ".workspace-plus-plus";
+    var SESSION_STORAGE_VAULT = "vault-folder";
+    var SESSION_STORAGE_PLUGIN = "plugin-folder";
+    var SESSIONS_FILE_NAME = "sessions.json";
+    var PLUGIN_DATA_FILE_NAME = "data.json";
+    var SESSIONS_BACKUP_FILE_NAME = "sessions.backup.json";
+    var HISTORY_FILE_NAME = "history.json";
+    var HISTORY_FORMAT_VERSION = 1;
+    var LEGACY_LOCAL_SETTINGS_FILE = STORAGE_DIR + "/settings.local.json";
+    var LEGACY_LOCAL_SETTINGS_BACKUP = STORAGE_DIR + "/settings.local.json.migrated";
+    var EXPORT_DIR_NAME = "exports";
+    var BACKUPS_DIR_NAME = "backups";
     var SETTINGS_KEYS = [
       "language",
       "previewNext",
@@ -15310,6 +15367,7 @@ var require_persistence = __commonJS({
       "confirmDeleteByHotkey",
       "autoSaveOnSwitch",
       "warnOnUnsavedSwitch",
+      "restoreSidebars",
       "highlightUnsavedSessionChanges",
       "statusBarQuickSwitcher",
       "statusBarModScrollSwitch",
@@ -15333,56 +15391,14 @@ var require_persistence = __commonJS({
       "showActiveSwitchCommand",
       "numberedSwitchCommands"
     ];
-    function joinPath(base, child) {
-      return String(base || "").replace(/\/+$/, "") + "/" + child;
-    }
     function normalizeSessionStorageLocation(value) {
       if (value === SESSION_STORAGE_PLUGIN) return SESSION_STORAGE_PLUGIN;
       if (value === SESSION_STORAGE_VAULT) return SESSION_STORAGE_VAULT;
       return null;
     }
-    function pickKeys(data, keys) {
-      var out = {};
-      if (!data) return out;
-      for (var i = 0; i < keys.length; i++) {
-        var key = keys[i];
-        if (data[key] !== void 0) out[key] = data[key];
-      }
-      return out;
-    }
-    function hasSessionShape(data) {
-      return !!(data && typeof data === "object" && (data.sessions !== void 0 || data.sessionOrder !== void 0 || data.activeSessionId !== void 0));
-    }
-    function hasNonEmptySessions(data) {
-      return !!(data && data.sessions && typeof data.sessions === "object" && Object.keys(data.sessions).length > 0);
-    }
-    function getPersistStamp(data) {
-      if (!data || typeof data !== "object") return 0;
-      var stamp = data._wppSavedAt;
-      if (typeof stamp !== "number" || !isFinite(stamp)) return 0;
-      return stamp;
-    }
-    function getBackupPlatformLabel() {
-      var platform = obsidian2.Platform || {};
-      if (platform.isAndroidApp) return "Android";
-      if (platform.isIosApp) return "iOS";
-      if (platform.isMacOS) return "macOS";
-      if (platform.isWin) return "Windows";
-      if (platform.isLinux) return "Linux";
-      if (platform.isMobileApp || platform.isMobile) return "Mobile";
-      if (platform.isDesktopApp || platform.isDesktop) return "Desktop";
-      return "";
-    }
-    function pad2(n) {
-      return n < 10 ? "0" + n : String(n);
-    }
-    function formatExportStamp(ts) {
-      var d = new Date(ts);
-      return String(d.getFullYear()) + pad2(d.getMonth() + 1) + pad2(d.getDate()) + "-" + pad2(d.getHours()) + pad2(d.getMinutes()) + pad2(d.getSeconds());
-    }
     function attachPersistenceMethods(WorkspacePlusPlus2) {
       WorkspacePlusPlus2.prototype.getBackupPath = function() {
-        return this.manifest.dir + "/data.backup.json";
+        return joinPath(this.getPluginStorageDirPath(), "data.backup.json");
       };
       WorkspacePlusPlus2.prototype.getStorageDirPath = function() {
         return STORAGE_DIR;
@@ -15392,9 +15408,6 @@ var require_persistence = __commonJS({
       };
       WorkspacePlusPlus2.prototype.getDefaultSessionStorageLocation = function() {
         return SESSION_STORAGE_PLUGIN;
-      };
-      WorkspacePlusPlus2.prototype.normalizeSessionStorageLocation = function(location) {
-        return normalizeSessionStorageLocation(location);
       };
       WorkspacePlusPlus2.prototype.getSessionStorageLocation = function() {
         return normalizeSessionStorageLocation(this.data && this.data.sessionStorageLocation) || normalizeSessionStorageLocation(this._sessionStorageLocation) || this.getDefaultSessionStorageLocation();
@@ -15412,8 +15425,18 @@ var require_persistence = __commonJS({
       WorkspacePlusPlus2.prototype.getSessionStorageDirPath = function() {
         return this.getSessionStorageDirPathForLocation(this.getSessionStorageLocation());
       };
+      WorkspacePlusPlus2.prototype.isSessionStorageInPluginData = function(location) {
+        var normalized = normalizeSessionStorageLocation(location) || this.getSessionStorageLocation();
+        return normalized === SESSION_STORAGE_PLUGIN;
+      };
       WorkspacePlusPlus2.prototype.getSessionsPathForLocation = function(location) {
+        if (this.isSessionStorageInPluginData(location)) {
+          return joinPath(this.getPluginStorageDirPath(), PLUGIN_DATA_FILE_NAME);
+        }
         return joinPath(this.getSessionStorageDirPathForLocation(location), SESSIONS_FILE_NAME);
+      };
+      WorkspacePlusPlus2.prototype.getLegacyPluginSessionsPath = function() {
+        return joinPath(this.getPluginStorageDirPath(), SESSIONS_FILE_NAME);
       };
       WorkspacePlusPlus2.prototype.getSessionsPath = function() {
         return this.getSessionsPathForLocation(this.getSessionStorageLocation());
@@ -15424,8 +15447,44 @@ var require_persistence = __commonJS({
       WorkspacePlusPlus2.prototype.getSessionsBackupPath = function() {
         return this.getSessionsBackupPathForLocation(this.getSessionStorageLocation());
       };
-      WorkspacePlusPlus2.prototype.getLocalSettingsPath = function() {
-        return LOCAL_SETTINGS_FILE;
+      WorkspacePlusPlus2.prototype.getHistoryPathForLocation = function(location) {
+        return joinPath(this.getSessionStorageDirPathForLocation(location), HISTORY_FILE_NAME);
+      };
+      WorkspacePlusPlus2.prototype.getHistoryPath = function() {
+        return this.getHistoryPathForLocation(this.getSessionStorageLocation());
+      };
+      WorkspacePlusPlus2.prototype.writeSessionHistory = function(historyMap) {
+        var payload = {
+          version: HISTORY_FORMAT_VERSION,
+          history: historyMap || {}
+        };
+        return this.writeJson(this.getHistoryPath(), payload);
+      };
+      WorkspacePlusPlus2.prototype.readSessionHistory = function() {
+        return this.readJsonIfExists(this.getHistoryPath()).then(function(res) {
+          if (!res.exists || res.error) return {};
+          return readHistoryMap(res.data);
+        });
+      };
+      WorkspacePlusPlus2.prototype.attachSessionHistory = function(sessionData2) {
+        var self = this;
+        if (!sessionData2) return Promise.resolve(sessionData2);
+        var hadInline = hasInlineSessionHistory(sessionData2);
+        return this.readSessionHistory().then(function(historyMap) {
+          mergeSessionHistory(sessionData2, historyMap);
+          if (!hadInline || Object.keys(historyMap).length > 0) return sessionData2;
+          var split = splitSessionHistory(sessionData2);
+          if (Object.keys(split.history).length === 0) return sessionData2;
+          return self.ensureSessionStorageDir().then(function() {
+            return self.writeSessionHistory(split.history);
+          }).catch(function() {
+            return;
+          }).then(function() {
+            return sessionData2;
+          });
+        }).catch(function() {
+          return sessionData2;
+        });
       };
       WorkspacePlusPlus2.prototype.getExportDirPath = function() {
         return joinPath(this.getSessionStorageDirPath(), EXPORT_DIR_NAME);
@@ -15444,22 +15503,16 @@ var require_persistence = __commonJS({
           this.getSessionsBackupPathForLocation(location),
           this.getRotationBackupPathForLocation(location, 1),
           this.getRotationBackupPathForLocation(location, 2),
-          this.getRotationBackupPathForLocation(location, 3)
+          this.getRotationBackupPathForLocation(location, 3),
+          // history.json is not a backup, but it is recovery-only data that the
+          // reset flows are expected to clear alongside the backups.
+          this.getHistoryPathForLocation(location)
         ];
       };
       WorkspacePlusPlus2.prototype.getBackupFilePaths = function() {
         return [
           this.getBackupPath()
         ].concat(this.getSessionBackupFilePathsForLocation(SESSION_STORAGE_VAULT)).concat(this.getSessionBackupFilePathsForLocation(SESSION_STORAGE_PLUGIN));
-      };
-      WorkspacePlusPlus2.prototype.getBackupPlatformLabel = function() {
-        return getBackupPlatformLabel();
-      };
-      WorkspacePlusPlus2.prototype.prepareRotationBackupData = function(sessionData) {
-        var backupData = Object.assign({}, sessionData);
-        var platform = this.getBackupPlatformLabel();
-        if (platform) backupData._wppBackupPlatform = platform;
-        return backupData;
       };
       WorkspacePlusPlus2.prototype.getDefaultSettingsData = function() {
         return pickKeys(DEFAULT_DATA2, SETTINGS_KEYS);
@@ -15546,9 +15599,6 @@ var require_persistence = __commonJS({
           });
         });
       };
-      WorkspacePlusPlus2.prototype.ensureStorageDir = function() {
-        return this.ensureDir(this.getStorageDirPath());
-      };
       WorkspacePlusPlus2.prototype.ensureSessionStorageDir = function() {
         return this.ensureDir(this.getSessionStorageDirPath());
       };
@@ -15581,10 +15631,13 @@ var require_persistence = __commonJS({
         var json = pretty ? JSON.stringify(data, null, 2) : JSON.stringify(data);
         return this.app.vault.adapter.write(path, json);
       };
-      WorkspacePlusPlus2.prototype.writeJsonWithBackup = function(path, backupPath, data, pretty) {
+      WorkspacePlusPlus2.prototype.renameIfExists = function(fromPath, toPath) {
         var self = this;
-        return this.writeJson(backupPath, data, pretty).then(function() {
-          return self.writeJson(path, data, pretty);
+        return this.app.vault.adapter.exists(fromPath).then(function(exists) {
+          if (!exists) return;
+          return self.app.vault.adapter.rename(fromPath, toPath).catch(function() {
+            return;
+          });
         });
       };
       WorkspacePlusPlus2.prototype.removeIfExists = function(path) {
@@ -15633,25 +15686,23 @@ var require_persistence = __commonJS({
         if (!next) return Promise.resolve(false);
         if (next === this.getSessionStorageLocation()) return Promise.resolve(false);
         var previousLocation = this.getSessionStorageLocation();
-        var sessionData = this.extractSessionData(this.data);
+        var split = splitSessionHistory(this.extractSessionData(this.data));
+        var sessionData2 = split.data;
         var now = Date.now();
         if (typeof this._lastPersistStamp === "number" && now <= this._lastPersistStamp) {
           now = this._lastPersistStamp + 1;
         }
-        sessionData._wppSavedAt = now;
+        sessionData2._wppSavedAt = now;
         this.setRuntimeSessionStorageLocation(next);
         this._lastPersistStamp = now;
         this._lastRotationBackupAt = 0;
         return this.ensureSessionStorageDir().then(function() {
-          return self.writeJsonWithBackup(
-            self.getSessionsPath(),
-            self.getSessionsBackupPath(),
-            sessionData,
-            true
-          );
+          return self.writeSessionHistory(split.history);
+        }).then(function() {
+          return self.writeSessionStore(sessionData2, { pretty: true });
         }).then(function() {
           if (typeof self.recordSessionDataStored !== "function") return true;
-          return self.recordSessionDataStored(sessionData);
+          return self.recordSessionDataStored(sessionData2);
         }).then(function() {
           return self.persistData();
         }).then(function() {
@@ -15663,80 +15714,77 @@ var require_persistence = __commonJS({
           throw error;
         });
       };
-      WorkspacePlusPlus2.prototype.persistGlobalSettings = function() {
+      WorkspacePlusPlus2.prototype.writePluginData = function(data) {
         var self = this;
-        if (!this.globalSettings) {
-          this.globalSettings = Object.assign({}, this.getDefaultSettingsData());
-        }
-        var data = Object.assign({}, this.globalSettings, {
-          sessionStorageLocation: this.getSessionStorageLocation()
-        });
         var json = JSON.stringify(data);
         return this.app.vault.adapter.write(this.getBackupPath(), json).then(function() {
           return self.saveData(data);
         });
       };
-      WorkspacePlusPlus2.prototype.isUsingLocalSettings = function() {
-        return !!this.useLocalSettings;
-      };
-      WorkspacePlusPlus2.prototype.setUseLocalSettings = function(enabled, options) {
+      WorkspacePlusPlus2.prototype.persistGlobalSettings = function(sessionData2) {
         var self = this;
-        var L = i18n2.L;
+        if (!this.globalSettings) {
+          this.globalSettings = Object.assign({}, this.getDefaultSettingsData());
+        }
+        var settings2 = Object.assign({}, this.globalSettings, {
+          sessionStorageLocation: this.getSessionStorageLocation()
+        });
+        if (!this.isSessionStorageInPluginData()) {
+          return this.writePluginData(settings2);
+        }
+        if (sessionData2) {
+          return this.writePluginData(Object.assign({}, settings2, sessionData2));
+        }
+        return Promise.resolve().then(function() {
+          return self.loadData();
+        }).catch(function() {
+          return null;
+        }).then(function(existing) {
+          return self.writePluginData(
+            Object.assign({}, settings2, pickSessionPayload(existing))
+          );
+        });
+      };
+      WorkspacePlusPlus2.prototype.writeSessionStore = function(sessionData2, options) {
+        var self = this;
         options = options || {};
-        var next = !!enabled;
-        if (next === this.isUsingLocalSettings()) return Promise.resolve(next);
-        if (next) {
-          var current = Object.assign({}, this.getDefaultSettingsData(), this.extractSettingsData(this.data));
-          this.globalSettings = Object.assign({}, current);
-          this.useLocalSettings = true;
-          return this.ensureStorageDir().then(function() {
-            return self.writeJson(self.getLocalSettingsPath(), current, true);
+        return this.writeJson(this.getSessionsBackupPath(), sessionData2, options.pretty).then(function() {
+          return self.writeSessionMain(sessionData2, options);
+        });
+      };
+      WorkspacePlusPlus2.prototype.writeSessionMain = function(sessionData2, options) {
+        options = options || {};
+        if (this.isSessionStorageInPluginData()) {
+          return this.persistGlobalSettings(sessionData2);
+        }
+        return this.writeJson(this.getSessionsPath(), sessionData2, options.pretty);
+      };
+      WorkspacePlusPlus2.prototype.migrateLegacyLocalSettings = function() {
+        var self = this;
+        return this.readJsonIfExists(LEGACY_LOCAL_SETTINGS_FILE).then(function(res) {
+          if (!res.exists) return false;
+          if (res.error || !res.data || typeof res.data !== "object") {
+            return false;
+          }
+          self.globalSettings = Object.assign(
+            {},
+            self.getDefaultSettingsData(),
+            self.globalSettings || {},
+            pickKeys(res.data, SETTINGS_KEYS)
+          );
+          return self.persistGlobalSettings().then(function() {
+            return self.renameIfExists(
+              LEGACY_LOCAL_SETTINGS_FILE,
+              LEGACY_LOCAL_SETTINGS_BACKUP
+            );
           }).then(function() {
-            return self.persistData();
-          }).then(function() {
-            if (options.notify) new obsidian2.Notice(L.localSettingsEnabled);
             return true;
           });
-        }
-        this.useLocalSettings = false;
-        var global = Object.assign({}, this.getDefaultSettingsData(), this.globalSettings || {});
-        for (var i = 0; i < SETTINGS_KEYS.length; i++) {
-          this.data[SETTINGS_KEYS[i]] = global[SETTINGS_KEYS[i]];
-        }
-        return this.removeIfExists(this.getLocalSettingsPath()).then(function() {
-          return self.persistData();
-        }).then(function() {
-          if (options.notify) new obsidian2.Notice(L.localSettingsDisabled);
+        }).catch(function() {
           return false;
         });
       };
-      WorkspacePlusPlus2.prototype.copyGlobalSettingsToLocal = function(options) {
-        var self = this;
-        var L = i18n2.L;
-        options = options || {};
-        var global = Object.assign({}, this.getDefaultSettingsData(), this.globalSettings || {});
-        this.useLocalSettings = true;
-        for (var i = 0; i < SETTINGS_KEYS.length; i++) {
-          this.data[SETTINGS_KEYS[i]] = global[SETTINGS_KEYS[i]];
-        }
-        return this.ensureStorageDir().then(function() {
-          return self.writeJson(self.getLocalSettingsPath(), global, true);
-        }).then(function() {
-          return self.persistData();
-        }).then(function() {
-          if (options.notify) new obsidian2.Notice(L.localSettingsCopied);
-          return true;
-        });
-      };
-      WorkspacePlusPlus2.prototype.resetLocalSettings = function(options) {
-        var self = this;
-        options = options || {};
-        if (!this.isUsingLocalSettings()) return Promise.resolve(false);
-        return this.copyGlobalSettingsToLocal(options).then(function() {
-          return self.isUsingLocalSettings();
-        });
-      };
-      WorkspacePlusPlus2.prototype.applyDefaultSettingsToCurrentScope = function() {
+      WorkspacePlusPlus2.prototype.applyDefaultSettings = function() {
         var defaults = this.getDefaultSettingsData();
         for (var i = 0; i < SETTINGS_KEYS.length; i++) {
           this.data[SETTINGS_KEYS[i]] = defaults[SETTINGS_KEYS[i]];
@@ -15744,12 +15792,12 @@ var require_persistence = __commonJS({
         i18n2.resolveLocale(this.data.language || "auto");
       };
       WorkspacePlusPlus2.prototype.resetSettingsToDefault = function() {
-        this.applyDefaultSettingsToCurrentScope();
+        this.applyDefaultSettings();
         return this.persistData();
       };
       WorkspacePlusPlus2.prototype.resetSessionsAndSettingsToDefault = function() {
         var self = this;
-        this.applyDefaultSettingsToCurrentScope();
+        this.applyDefaultSettings();
         return this.resetSessionsToDefault().then(function() {
           return self.clearBackupFiles();
         });
@@ -15778,120 +15826,48 @@ var require_persistence = __commonJS({
       };
       WorkspacePlusPlus2.prototype.getStorageDiagnosticsInfo = function() {
         return {
-          sessionStorageLocation: this.getSessionStorageLocation(),
+          syncedByObsidianSync: this.isSessionStorageInPluginData(),
           sessionsPath: this.getSessionsPath(),
           sessionsBackupPath: this.getSessionsBackupPath(),
-          localSettingsPath: this.getLocalSettingsPath(),
-          globalSettingsPath: this.manifest.dir + "/data.json",
+          historyPath: this.getHistoryPath(),
           sessionCount: Object.keys(this.data && this.data.sessions || {}).length,
           updatedAt: Date.now()
         };
       };
-      WorkspacePlusPlus2.prototype.exportSessionsSnapshot = function() {
-        var self = this;
-        var L = i18n2.L;
-        var stamp = formatExportStamp(Date.now());
-        var filePath = this.getExportDirPath() + "/sessions-" + stamp + ".json";
-        var payload = {
-          exportedAt: Date.now(),
-          source: this.manifest.id,
-          data: this.extractSessionData(this.data)
-        };
-        return this.ensureSessionStorageDir().then(function() {
-          return self.ensureDir(self.getExportDirPath());
-        }).then(function() {
-          return self.writeJson(filePath, payload, true);
-        }).then(function() {
-          new obsidian2.Notice(L.exportSessionsDone(filePath), 7e3);
-          return filePath;
-        });
-      };
-      WorkspacePlusPlus2.prototype.importSessionsFromLatestExport = function() {
-        var self = this;
-        var L = i18n2.L;
-        return this.app.vault.adapter.exists(this.getExportDirPath()).then(function(exists) {
-          if (!exists) return null;
-          return self.app.vault.adapter.list(self.getExportDirPath());
-        }).then(function(listed) {
-          if (!listed || !listed.files || listed.files.length === 0) return null;
-          var files = listed.files.filter(function(path) {
-            return /\.json$/i.test(path);
-          });
-          if (files.length === 0) return null;
-          files.sort();
-          return files[files.length - 1];
-        }).then(function(latestPath) {
-          if (!latestPath) {
-            new obsidian2.Notice(L.importSessionsNoFile);
-            return false;
-          }
-          return self.app.vault.adapter.read(latestPath).then(function(raw) {
-            var parsed = JSON.parse(raw);
-            var candidate = parsed && parsed.data ? parsed.data : parsed;
-            if (!hasSessionShape(candidate)) {
-              new obsidian2.Notice(L.importSessionsFailed);
-              return false;
-            }
-            var imported = self.normalizeSessionData(candidate);
-            if (!hasNonEmptySessions(imported)) {
-              new obsidian2.Notice(L.importSessionsFailed);
-              return false;
-            }
-            self.data.activeSessionId = imported.activeSessionId;
-            self.data.sessions = imported.sessions;
-            self.data.sessionOrder = imported.sessionOrder;
-            self.data.groups = imported.groups || {};
-            self.data.groupOrder = typeof self.normalizeGroupTabOrder === "function" ? self.normalizeGroupTabOrder(imported.groupOrder || []) : imported.groupOrder || [];
-            self.data.sessionGroups = imported.sessionGroups || {};
-            self.data.activeGroupId = imported.activeGroupId || null;
-            self.syncSessionOrder();
-            self.updateStatusBar();
-            self.syncSessionCommands();
-            return self.persistData().then(function() {
-              new obsidian2.Notice(L.importSessionsDone(latestPath), 7e3);
-              return true;
-            });
-          }).catch(function() {
-            new obsidian2.Notice(L.importSessionsFailed);
-            return false;
-          });
+      WorkspacePlusPlus2.prototype.getSessionStorageSize = function() {
+        return this.app.vault.adapter.stat(this.getSessionsPath()).then(function(stat) {
+          if (!stat || typeof stat.size !== "number") return null;
+          return stat.size;
+        }).catch(function() {
+          return null;
         });
       };
       WorkspacePlusPlus2.prototype.persistDataImmediate = function() {
         var self = this;
         var syncBeforeWrite = typeof this.reloadExternalSessionStorageIfChanged === "function" ? this.reloadExternalSessionStorageIfChanged({ mergeLocal: true }) : Promise.resolve(false);
         return syncBeforeWrite.then(function() {
-          var sessionData = self.extractSessionData(self.data);
+          var split = splitSessionHistory(self.extractSessionData(self.data));
+          var sessionData2 = split.data;
           var settingsData = Object.assign({}, self.getDefaultSettingsData(), self.extractSettingsData(self.data));
           var now = Date.now();
           if (typeof self._lastPersistStamp === "number" && now <= self._lastPersistStamp) {
             now = self._lastPersistStamp + 1;
           }
           self._lastPersistStamp = now;
-          sessionData._wppSavedAt = now;
-          if (self.isUsingLocalSettings()) {
-            if (!self.globalSettings) {
-              self.globalSettings = Object.assign({}, settingsData);
-            }
-          } else {
-            self.globalSettings = Object.assign({}, settingsData);
-          }
+          sessionData2._wppSavedAt = now;
+          self.globalSettings = Object.assign({}, settingsData);
           return self.ensureSessionStorageDir().then(function() {
-            return self.writeJsonWithBackup(
-              self.getSessionsPath(),
-              self.getSessionsBackupPath(),
-              sessionData
-            );
+            return self.writeSessionHistory(split.history);
+          }).then(function() {
+            return self.writeSessionStore(sessionData2);
+          }).then(function() {
+            if (self.isSessionStorageInPluginData()) return;
+            return self.persistGlobalSettings();
           }).then(function() {
             if (typeof self.recordSessionDataStored !== "function") return true;
-            return self.recordSessionDataStored(sessionData);
+            return self.recordSessionDataStored(sessionData2);
           }).then(function() {
-            return self.rotateBackupIfNeeded(sessionData);
-          }).then(function() {
-            if (!self.isUsingLocalSettings()) return;
-            return self.writeJson(self.getLocalSettingsPath(), settingsData, true);
-          }).then(function() {
-            return self.persistGlobalSettings();
+            return self.rotateBackupIfNeeded(sessionData2);
           });
         });
       };
@@ -15914,6 +15890,208 @@ var require_persistence = __commonJS({
           return;
         });
       };
+      WorkspacePlusPlus2.prototype.readSessionCandidate = function(path) {
+        return Promise.all([
+          this.readJsonIfExists(path),
+          this.getFileMtime(path)
+        ]).then(function(parts) {
+          var res = parts[0];
+          var valid = res.exists && !res.error && hasSessionShape(res.data);
+          return {
+            valid,
+            data: res.data,
+            mtime: parts[1] || 0,
+            stamp: valid ? getPersistStamp(res.data) : 0
+          };
+        });
+      };
+      WorkspacePlusPlus2.prototype.loadSessionDataFromStorage = function() {
+        var self = this;
+        var L = i18n2.L;
+        var backupPath = this.getSessionsBackupPath();
+        var legacyPath = this.isSessionStorageInPluginData() ? this.getLegacyPluginSessionsPath() : null;
+        return this.readSessionCandidate(this.getSessionsPath()).then(function(main) {
+          if (main.valid || !legacyPath) return main;
+          return self.readSessionCandidate(legacyPath);
+        }).then(function(main) {
+          return self.readSessionCandidate(backupPath).then(function(backup) {
+            if (!main.valid && !backup.valid) return null;
+            var useBackup = false;
+            if (!main.valid && backup.valid) {
+              useBackup = true;
+            } else if (main.valid && backup.valid) {
+              if (backup.stamp > main.stamp) {
+                useBackup = true;
+              } else if (backup.stamp === main.stamp && backup.mtime > main.mtime) {
+                useBackup = true;
+              }
+            }
+            if (!useBackup) {
+              var mainData = self.normalizeSessionData(main.data);
+              if (typeof self.recordSessionStorageState === "function") {
+                self.recordSessionStorageState(main.stamp, main.mtime, mainData);
+              }
+              return mainData;
+            }
+            var restored = self.normalizeSessionData(backup.data);
+            return self.writeSessionMain(backup.data).catch(function() {
+              return;
+            }).then(function() {
+              return self.getFileMtime(self.getSessionsPath());
+            }).then(function(restoredMtime) {
+              if (typeof self.recordSessionStorageState === "function") {
+                self.recordSessionStorageState(backup.stamp, restoredMtime || backup.mtime, restored);
+              }
+              if (!main.valid) new obsidian2.Notice(L.backupRestored);
+              return restored;
+            });
+          });
+        });
+      };
+      WorkspacePlusPlus2.prototype.migrateLegacyPluginSessions = function(sessionData2) {
+        var self = this;
+        if (!this.isSessionStorageInPluginData()) return Promise.resolve(false);
+        if (!sessionData2 || !hasNonEmptySessions(sessionData2)) return Promise.resolve(false);
+        return this.app.vault.adapter.exists(this.getLegacyPluginSessionsPath()).then(function(exists) {
+          if (!exists) return false;
+          return Promise.resolve().then(function() {
+            return self.loadData();
+          }).catch(function() {
+            return null;
+          }).then(function(existing) {
+            if (hasSessionShape(existing)) return false;
+            var payload = splitSessionHistory(sessionData2).data;
+            return self.ensureSessionStorageDir().then(function() {
+              return self.writeSessionStore(payload);
+            }).then(function() {
+              if (typeof self.recordSessionDataStored !== "function") return true;
+              return self.recordSessionDataStored(payload);
+            }).then(function() {
+              return true;
+            });
+          });
+        }).catch(function() {
+          return false;
+        });
+      };
+      WorkspacePlusPlus2.prototype.migrateLegacySessions = function(sessionData2) {
+        var self = this;
+        var normalized = this.normalizeSessionData(sessionData2);
+        return this.ensureSessionStorageDir().then(function() {
+          return self.writeSessionStore(normalized);
+        }).then(function() {
+          return true;
+        }).catch(function() {
+          return false;
+        });
+      };
+      WorkspacePlusPlus2.prototype.loadWithBackup = function() {
+        var self = this;
+        var L = i18n2.L;
+        var loadedMain = null;
+        var rawSaved = null;
+        var legacyMain = null;
+        var hadLegacyInMain = false;
+        return this.loadData().catch(function() {
+          return null;
+        }).then(function(saved) {
+          rawSaved = saved;
+          loadedMain = saved || {};
+          self.globalSettings = Object.assign(
+            {},
+            self.getDefaultSettingsData(),
+            self.extractSettingsData(loadedMain)
+          );
+          return self.resolveSessionStorageLocation({
+            sessionStorageLocation: loadedMain.sessionStorageLocation
+          });
+        }).then(function() {
+          return self.migrateLegacyLocalSettings();
+        }).then(function() {
+          hadLegacyInMain = hasSessionShape(loadedMain) && !self.isSessionStorageInPluginData();
+          legacyMain = hadLegacyInMain ? self.normalizeSessionData(loadedMain) : null;
+          return self.loadSessionDataFromStorage();
+        }).then(function(sessionData2) {
+          if (sessionData2 && hasNonEmptySessions(sessionData2)) return sessionData2;
+          if (legacyMain && hasNonEmptySessions(legacyMain)) {
+            return self.migrateLegacySessions(legacyMain).then(function(ok) {
+              if (ok) new obsidian2.Notice(L.sessionDataMigrated);
+              else new obsidian2.Notice(L.sessionDataMigrationFailed);
+              return legacyMain;
+            });
+          }
+          if (sessionData2) return sessionData2;
+          return self.readJsonIfExists(self.getBackupPath()).then(function(legacyBackupRes) {
+            if (legacyBackupRes.exists && !legacyBackupRes.error && hasSessionShape(legacyBackupRes.data) && hasNonEmptySessions(legacyBackupRes.data)) {
+              var fromLegacyBackup = self.normalizeSessionData(legacyBackupRes.data);
+              return self.migrateLegacySessions(fromLegacyBackup).then(function(ok) {
+                if (ok) new obsidian2.Notice(L.sessionDataMigrated);
+                else new obsidian2.Notice(L.sessionDataMigrationFailed);
+                return fromLegacyBackup;
+              });
+            }
+            return self.getDefaultSessionData();
+          });
+        }).then(function(sessionData2) {
+          return self.attachSessionHistory(sessionData2);
+        }).then(function(sessionData2) {
+          return self.migrateLegacyPluginSessions(sessionData2).then(function() {
+            return sessionData2;
+          });
+        }).then(function(sessionData2) {
+          if (!hadLegacyInMain) return sessionData2;
+          return self.persistGlobalSettings().catch(function() {
+            return;
+          }).then(function() {
+            return sessionData2;
+          });
+        }).then(function(sessionData2) {
+          var effectiveSettings = Object.assign({}, self.globalSettings);
+          effectiveSettings.sessionStorageLocation = self.getSessionStorageLocation();
+          if (rawSaved !== null && rawSaved !== void 0 && rawSaved.showFilterInput === void 0) {
+            effectiveSettings.showFilterInput = true;
+          }
+          var merged = Object.assign({}, self.getDefaultSessionData(), sessionData2 || {});
+          return Object.assign(merged, effectiveSettings);
+        });
+      };
+    }
+    module2.exports = attachPersistenceMethods;
+  }
+});
+
+// src/plugin/methods/storage-backup.js
+var require_storage_backup = __commonJS({
+  "src/plugin/methods/storage-backup.js"(exports2, module2) {
+    "use strict";
+    var obsidian2 = require("obsidian");
+    var i18n2 = require_i18n();
+    var sessionData = require_session_data();
+    var getPersistStamp = sessionData.getPersistStamp;
+    var hasSessionShape = sessionData.hasSessionShape;
+    var hasNonEmptySessions = sessionData.hasNonEmptySessions;
+    var BACKUP_ROTATION_INTERVAL = 36e5;
+    function getBackupPlatformLabel() {
+      var platform = obsidian2.Platform || {};
+      if (platform.isAndroidApp) return "Android";
+      if (platform.isIosApp) return "iOS";
+      if (platform.isMacOS) return "macOS";
+      if (platform.isWin) return "Windows";
+      if (platform.isLinux) return "Linux";
+      if (platform.isMobileApp || platform.isMobile) return "Mobile";
+      if (platform.isDesktopApp || platform.isDesktop) return "Desktop";
+      return "";
+    }
+    function attachStorageBackupMethods(WorkspacePlusPlus2) {
+      WorkspacePlusPlus2.prototype.getBackupPlatformLabel = function() {
+        return getBackupPlatformLabel();
+      };
+      WorkspacePlusPlus2.prototype.prepareRotationBackupData = function(sessionData2) {
+        var backupData = Object.assign({}, sessionData2);
+        var platform = this.getBackupPlatformLabel();
+        if (platform) backupData._wppBackupPlatform = platform;
+        return backupData;
+      };
       WorkspacePlusPlus2.prototype.initRotationBackupTimestamp = function() {
         var self = this;
         return this.readJsonIfExists(this.getRotationBackupPath(1)).then(function(res) {
@@ -15926,7 +16104,7 @@ var require_persistence = __commonJS({
           self._lastRotationBackupAt = 0;
         });
       };
-      WorkspacePlusPlus2.prototype.rotateBackupIfNeeded = function(sessionData) {
+      WorkspacePlusPlus2.prototype.rotateBackupIfNeeded = function(sessionData2) {
         var now = Date.now();
         var last = this._lastRotationBackupAt || 0;
         if (now - last < BACKUP_ROTATION_INTERVAL) return Promise.resolve();
@@ -15945,7 +16123,7 @@ var require_persistence = __commonJS({
         }).then(function() {
           return self.writeJson(
             self.getRotationBackupPath(1),
-            self.prepareRotationBackupData(sessionData)
+            self.prepareRotationBackupData(sessionData2)
           );
         }).catch(function() {
           return;
@@ -16034,155 +16212,103 @@ var require_persistence = __commonJS({
           return false;
         });
       };
-      WorkspacePlusPlus2.prototype.loadLocalSettingsData = function() {
-        var L = i18n2.L;
-        return this.readJsonIfExists(this.getLocalSettingsPath()).then(function(res) {
-          if (!res.exists) return null;
-          if (res.error || !res.data || typeof res.data !== "object") {
-            new obsidian2.Notice(L.localSettingsLoadFailed);
-            return null;
-          }
-          return pickKeys(res.data, SETTINGS_KEYS);
-        });
-      };
-      WorkspacePlusPlus2.prototype.loadSessionDataFromStorage = function() {
+    }
+    module2.exports = attachStorageBackupMethods;
+  }
+});
+
+// src/plugin/methods/storage-transfer.js
+var require_storage_transfer = __commonJS({
+  "src/plugin/methods/storage-transfer.js"(exports2, module2) {
+    "use strict";
+    var obsidian2 = require("obsidian");
+    var i18n2 = require_i18n();
+    var sessionData = require_session_data();
+    var hasSessionShape = sessionData.hasSessionShape;
+    var hasNonEmptySessions = sessionData.hasNonEmptySessions;
+    var splitSessionHistory = sessionData.splitSessionHistory;
+    function pad2(n) {
+      return n < 10 ? "0" + n : String(n);
+    }
+    function formatExportStamp(ts) {
+      var d = new Date(ts);
+      return String(d.getFullYear()) + pad2(d.getMonth() + 1) + pad2(d.getDate()) + "-" + pad2(d.getHours()) + pad2(d.getMinutes()) + pad2(d.getSeconds());
+    }
+    function attachStorageTransferMethods(WorkspacePlusPlus2) {
+      WorkspacePlusPlus2.prototype.exportSessionsSnapshot = function() {
         var self = this;
         var L = i18n2.L;
-        var mainPath = this.getSessionsPath();
-        var backupPath = this.getSessionsBackupPath();
-        return Promise.all([
-          this.readJsonIfExists(mainPath),
-          this.readJsonIfExists(backupPath),
-          this.getFileMtime(mainPath),
-          this.getFileMtime(backupPath)
-        ]).then(function(parts) {
-          var mainRes = parts[0];
-          var backupRes = parts[1];
-          var mainMtime = parts[2] || 0;
-          var backupMtime = parts[3] || 0;
-          var mainValid = mainRes.exists && !mainRes.error && hasSessionShape(mainRes.data);
-          var backupValid = backupRes.exists && !backupRes.error && hasSessionShape(backupRes.data);
-          var mainStamp = mainValid ? getPersistStamp(mainRes.data) : 0;
-          var backupStamp = backupValid ? getPersistStamp(backupRes.data) : 0;
-          if (!mainValid && !backupValid) return null;
-          var useBackup = false;
-          if (!mainValid && backupValid) {
-            useBackup = true;
-          } else if (mainValid && backupValid) {
-            if (backupStamp > mainStamp) {
-              useBackup = true;
-            } else if (backupStamp === mainStamp && backupMtime > mainMtime) {
-              useBackup = true;
-            }
-          }
-          if (!useBackup) {
-            var mainData = self.normalizeSessionData(mainRes.data);
-            if (typeof self.recordSessionStorageState === "function") {
-              self.recordSessionStorageState(mainStamp, mainMtime, mainData);
-            }
-            return mainData;
-          }
-          var restoredRaw = backupRes.data;
-          var restored = self.normalizeSessionData(restoredRaw);
-          return self.writeJson(mainPath, restoredRaw).catch(function() {
-            return;
-          }).then(function() {
-            return self.getFileMtime(mainPath);
-          }).then(function(restoredMtime) {
-            if (typeof self.recordSessionStorageState === "function") {
-              self.recordSessionStorageState(backupStamp, restoredMtime || backupMtime, restored);
-            }
-            if (!mainValid) new obsidian2.Notice(L.backupRestored);
-            return restored;
-          });
-        });
-      };
-      WorkspacePlusPlus2.prototype.migrateLegacySessions = function(sessionData) {
-        var self = this;
-        var normalized = this.normalizeSessionData(sessionData);
+        var stamp = formatExportStamp(Date.now());
+        var filePath = this.getExportDirPath() + "/sessions-" + stamp + ".json";
+        var payload = {
+          exportedAt: Date.now(),
+          source: this.manifest.id,
+          // History is device-specific layout data; exports are meant to move
+          // sessions to another vault or device, so it is left behind.
+          data: splitSessionHistory(this.extractSessionData(this.data)).data
+        };
         return this.ensureSessionStorageDir().then(function() {
-          return self.writeJsonWithBackup(
-            self.getSessionsPath(),
-            self.getSessionsBackupPath(),
-            normalized
-          );
+          return self.ensureDir(self.getExportDirPath());
         }).then(function() {
-          return self.persistGlobalSettings();
+          return self.writeJson(filePath, payload, true);
         }).then(function() {
-          return true;
-        }).catch(function() {
-          return false;
+          new obsidian2.Notice(L.exportSessionsDone(filePath), 7e3);
+          return filePath;
         });
       };
-      WorkspacePlusPlus2.prototype.loadWithBackup = function() {
+      WorkspacePlusPlus2.prototype.importSessionsFromLatestExport = function() {
         var self = this;
         var L = i18n2.L;
-        var loadedMain = null;
-        var rawSaved = null;
-        var legacyMain = null;
-        var hadLegacyInMain = false;
-        var loadedLocalSettings = null;
-        return this.loadData().catch(function() {
-          return null;
-        }).then(function(saved) {
-          rawSaved = saved;
-          loadedMain = saved || {};
-          self.globalSettings = Object.assign(
-            {},
-            self.getDefaultSettingsData(),
-            self.extractSettingsData(loadedMain)
-          );
-          hadLegacyInMain = hasSessionShape(loadedMain);
-          legacyMain = hadLegacyInMain ? self.normalizeSessionData(loadedMain) : null;
-          return self.loadLocalSettingsData();
-        }).then(function(localSettings) {
-          loadedLocalSettings = localSettings;
-          self.useLocalSettings = !!loadedLocalSettings;
-          return self.resolveSessionStorageLocation({
-            sessionStorageLocation: loadedMain.sessionStorageLocation
+        return this.app.vault.adapter.exists(this.getExportDirPath()).then(function(exists) {
+          if (!exists) return null;
+          return self.app.vault.adapter.list(self.getExportDirPath());
+        }).then(function(listed) {
+          if (!listed || !listed.files || listed.files.length === 0) return null;
+          var files = listed.files.filter(function(path) {
+            return /\.json$/i.test(path);
           });
-        }).then(function() {
-          return self.loadSessionDataFromStorage();
-        }).then(function(sessionData) {
-          if (sessionData && hasNonEmptySessions(sessionData)) return sessionData;
-          if (legacyMain && hasNonEmptySessions(legacyMain)) {
-            return self.migrateLegacySessions(legacyMain).then(function(ok) {
-              if (ok) new obsidian2.Notice(L.sessionDataMigrated);
-              else new obsidian2.Notice(L.sessionDataMigrationFailed);
-              return legacyMain;
-            });
+          if (files.length === 0) return null;
+          files.sort();
+          return files[files.length - 1];
+        }).then(function(latestPath) {
+          if (!latestPath) {
+            new obsidian2.Notice(L.importSessionsNoFile);
+            return false;
           }
-          if (sessionData) return sessionData;
-          return self.readJsonIfExists(self.getBackupPath()).then(function(legacyBackupRes) {
-            if (legacyBackupRes.exists && !legacyBackupRes.error && hasSessionShape(legacyBackupRes.data) && hasNonEmptySessions(legacyBackupRes.data)) {
-              var fromLegacyBackup = self.normalizeSessionData(legacyBackupRes.data);
-              return self.migrateLegacySessions(fromLegacyBackup).then(function(ok) {
-                if (ok) new obsidian2.Notice(L.sessionDataMigrated);
-                else new obsidian2.Notice(L.sessionDataMigrationFailed);
-                return fromLegacyBackup;
-              });
+          return self.app.vault.adapter.read(latestPath).then(function(raw) {
+            var parsed = JSON.parse(raw);
+            var candidate = parsed && parsed.data ? parsed.data : parsed;
+            if (!hasSessionShape(candidate)) {
+              new obsidian2.Notice(L.importSessionsFailed);
+              return false;
             }
-            return self.getDefaultSessionData();
+            var imported = self.normalizeSessionData(candidate);
+            if (!hasNonEmptySessions(imported)) {
+              new obsidian2.Notice(L.importSessionsFailed);
+              return false;
+            }
+            self.data.activeSessionId = imported.activeSessionId;
+            self.data.sessions = imported.sessions;
+            self.data.sessionOrder = imported.sessionOrder;
+            self.data.groups = imported.groups || {};
+            self.data.groupOrder = typeof self.normalizeGroupTabOrder === "function" ? self.normalizeGroupTabOrder(imported.groupOrder || []) : imported.groupOrder || [];
+            self.data.sessionGroups = imported.sessionGroups || {};
+            self.data.activeGroupId = imported.activeGroupId || null;
+            self.syncSessionOrder();
+            self.updateStatusBar();
+            self.syncSessionCommands();
+            return self.persistData().then(function() {
+              new obsidian2.Notice(L.importSessionsDone(latestPath), 7e3);
+              return true;
+            });
+          }).catch(function() {
+            new obsidian2.Notice(L.importSessionsFailed);
+            return false;
           });
-        }).then(function(sessionData) {
-          if (!hadLegacyInMain) return sessionData;
-          return self.persistGlobalSettings().catch(function() {
-            return;
-          }).then(function() {
-            return sessionData;
-          });
-        }).then(function(sessionData) {
-          var effectiveSettings = self.isUsingLocalSettings() ? Object.assign({}, self.globalSettings, loadedLocalSettings) : Object.assign({}, self.globalSettings);
-          effectiveSettings.sessionStorageLocation = self.getSessionStorageLocation();
-          if (rawSaved !== null && rawSaved !== void 0 && rawSaved.showFilterInput === void 0) {
-            effectiveSettings.showFilterInput = true;
-          }
-          var merged = Object.assign({}, self.getDefaultSessionData(), sessionData || {});
-          return Object.assign(merged, effectiveSettings);
         });
       };
     }
-    module2.exports = attachPersistenceMethods;
+    module2.exports = attachStorageTransferMethods;
   }
 });
 
@@ -16190,21 +16316,15 @@ var require_persistence = __commonJS({
 var require_session_sync = __commonJS({
   "src/plugin/methods/session-sync.js"(exports2, module2) {
     "use strict";
+    var sessionData = require_session_data();
+    var getPersistStamp = sessionData.getPersistStamp;
+    var isSessionDataShape = sessionData.hasSessionShape;
     var EXTERNAL_SESSION_RELOAD_DEBOUNCE_MS = 500;
     var SESSION_FILE_MTIME_EPSILON_MS = 25;
     var STARTUP_SESSION_RECHECK_DELAYS = [3e3, 1e4];
-    function getPersistStamp(data) {
-      if (!data || typeof data !== "object") return 0;
-      var stamp = data._wppSavedAt;
-      if (typeof stamp !== "number" || !isFinite(stamp)) return 0;
-      return stamp;
-    }
     function cloneJson(value) {
       if (value === void 0) return void 0;
       return JSON.parse(JSON.stringify(value));
-    }
-    function isSessionDataShape(data) {
-      return !!(data && typeof data === "object" && (data.sessions !== void 0 || data.sessionOrder !== void 0 || data.activeSessionId !== void 0));
     }
     function getSessionModified(session) {
       if (!session || typeof session.modified !== "number" || !isFinite(session.modified)) return 0;
@@ -16272,12 +16392,12 @@ var require_session_sync = __commonJS({
           this._sessionStorageDataJson = JSON.stringify(comparable);
         }
       };
-      WorkspacePlusPlus2.prototype.recordSessionDataStored = function(sessionData) {
+      WorkspacePlusPlus2.prototype.recordSessionDataStored = function(sessionData2) {
         var self = this;
-        var stamp = getPersistStamp(sessionData);
-        this.recordSessionStorageState(stamp, Date.now(), sessionData);
+        var stamp = getPersistStamp(sessionData2);
+        this.recordSessionStorageState(stamp, Date.now(), sessionData2);
         return this.getFileMtime(this.getSessionsPath()).then(function(mtime) {
-          self.recordSessionStorageState(stamp, mtime || self._sessionStorageMtime || 0, sessionData);
+          self.recordSessionStorageState(stamp, mtime || self._sessionStorageMtime || 0, sessionData2);
           return true;
         }).catch(function() {
           return true;
@@ -16370,12 +16490,12 @@ var require_session_sync = __commonJS({
           activeGroupId: local.activeGroupId || external.activeGroupId
         });
       };
-      WorkspacePlusPlus2.prototype.applySessionDataFromStorage = function(sessionData, options) {
+      WorkspacePlusPlus2.prototype.applySessionDataFromStorage = function(sessionData2, options) {
         options = options || {};
-        if (!sessionData) return false;
+        if (!sessionData2) return false;
         var localActiveSessionId = this.data && this.data.activeSessionId;
         var localActiveGroupId = this.data && this.data.activeGroupId;
-        var next = options.mergeLocal ? this.mergeExternalSessionDataForWrite(sessionData) : this.normalizeSessionData(sessionData);
+        var next = options.mergeLocal ? this.mergeExternalSessionDataForWrite(sessionData2) : this.normalizeSessionData(sessionData2);
         this.data.sessions = next.sessions || {};
         this.data.sessionOrder = next.sessionOrder || [];
         this.data.groups = next.groups || {};
@@ -16414,15 +16534,15 @@ var require_session_sync = __commonJS({
           var mergeLocal = !!options.mergeLocal && self.hasLocalSessionChangesSinceStorage();
           var previousComparable = self._sessionStorageComparableData ? cloneJson(self._sessionStorageComparableData) : null;
           var previousComparableJson = self._sessionStorageDataJson || "";
-          return self.loadSessionDataFromStorage().then(function(sessionData) {
-            if (!sessionData) return false;
+          return self.loadSessionDataFromStorage().then(function(sessionData2) {
+            if (!sessionData2) return false;
             var externalComparable = self._sessionStorageComparableData ? cloneJson(self._sessionStorageComparableData) : null;
             var externalComparableJson = self._sessionStorageDataJson || "";
             if (mergeLocal && previousComparable) {
               self._sessionStorageComparableData = previousComparable;
               self._sessionStorageDataJson = previousComparableJson;
             }
-            var applied = self.applySessionDataFromStorage(sessionData, {
+            var applied = self.applySessionDataFromStorage(sessionData2, {
               mergeLocal
             });
             if (mergeLocal && externalComparable) {
@@ -16450,22 +16570,15 @@ var require_session_sync = __commonJS({
         if (this._sessionStorageListenersRegistered) return;
         this._sessionStorageListenersRegistered = true;
         this._startupSessionStorageTimers = [];
-        function isSessionsFile(file) {
-          return !!(file && (file.path === self.getSessionsPath() || typeof self.getSessionsPathForLocation === "function" && (file.path === self.getSessionsPathForLocation("vault-folder") || file.path === self.getSessionsPathForLocation("plugin-folder"))));
-        }
-        this.registerEvent(this.app.vault.on("modify", function(file) {
-          if (!isSessionsFile(file)) return;
-          self.scheduleExternalSessionStorageReload();
-        }));
-        this.registerEvent(this.app.vault.on("create", function(file) {
-          if (!isSessionsFile(file)) return;
-          self.scheduleExternalSessionStorageReload();
-        }));
         if (typeof this.registerDomEvent === "function" && typeof window !== "undefined") {
           this.registerDomEvent(window, "focus", function() {
             self.scheduleExternalSessionStorageReload();
           });
         }
+      };
+      WorkspacePlusPlus2.prototype.onExternalSettingsChange = function() {
+        if (!this.data) return;
+        this.scheduleExternalSessionStorageReload();
       };
       WorkspacePlusPlus2.prototype.scheduleStartupSessionStorageChecks = function() {
         var self = this;
@@ -18349,9 +18462,6 @@ var require_history = __commonJS({
         if (typeof val !== "number" || val < 1) return 5;
         return val;
       };
-      WorkspacePlusPlus2.prototype.isVersionHistoryCtrlRmbEnabled = function() {
-        return this.data.versionHistoryCtrlRmbRestore !== false;
-      };
       WorkspacePlusPlus2.prototype.isVersionHistoryConfirmRestoreEnabled = function() {
         return this.data.versionHistoryConfirmRestore !== false;
       };
@@ -18834,6 +18944,8 @@ var require_methods = __commonJS({
     var attachHotkeyMethods = require_hotkeys();
     var attachOverlayMethods = require_overlays();
     var attachPersistenceMethods = require_persistence();
+    var attachStorageBackupMethods = require_storage_backup();
+    var attachStorageTransferMethods = require_storage_transfer();
     var attachSessionSyncMethods = require_session_sync();
     var attachSessionMethods = require_sessions();
     var attachLayoutRestoreMethods = require_layout_restore();
@@ -18852,6 +18964,8 @@ var require_methods = __commonJS({
       attachHotkeyMethods(WorkspacePlusPlus2);
       attachOverlayMethods(WorkspacePlusPlus2);
       attachPersistenceMethods(WorkspacePlusPlus2);
+      attachStorageBackupMethods(WorkspacePlusPlus2);
+      attachStorageTransferMethods(WorkspacePlusPlus2);
       attachSessionSyncMethods(WorkspacePlusPlus2);
       attachSessionMethods(WorkspacePlusPlus2);
       attachLayoutRestoreMethods(WorkspacePlusPlus2);
