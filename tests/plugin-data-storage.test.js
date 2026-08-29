@@ -241,3 +241,135 @@ test('restoring from the session backup preserves the settings in data.json', as
     assert.equal(stored.language, 'ja', 'the restore write must not blank the settings');
     assert.equal(stored.sessions.saved.name, 'Saved');
 });
+
+test('a pre-move install has its sessions written into data.json on load', async function () {
+    const plugin = createPlugin({
+        files: {
+            [DATA_PATH]: JSON.stringify({ language: 'ja', sessionStorageLocation: 'plugin-folder' }),
+            [LEGACY_SESSIONS_PATH]: JSON.stringify({
+                activeSessionId: 'old',
+                sessionOrder: ['old'],
+                sessions: { old: { id: 'old', name: 'Old', modified: 5, layout: {} } },
+                groups: {},
+                groupOrder: [],
+                sessionGroups: {},
+            }),
+        },
+    });
+
+    await plugin.loadWithBackup();
+
+    // flushOnStartup() only persists when auto-save on switch is enabled, so the
+    // move cannot be left to "whatever saves next" or the sessions stay unsynced.
+    const stored = readData(plugin);
+    assert.equal(stored.sessions.old.name, 'Old', 'sessions must be carried into data.json on load');
+    assert.equal(stored.language, 'ja', 'without clobbering the settings');
+    assert.ok(plugin.files[LEGACY_SESSIONS_PATH], 'the old file is left in place');
+});
+
+test('sessions already in data.json are not migrated a second time', async function () {
+    const plugin = createPlugin({
+        files: {
+            [DATA_PATH]: JSON.stringify({
+                language: 'ja',
+                sessionStorageLocation: 'plugin-folder',
+                activeSessionId: 'current',
+                sessionOrder: ['current'],
+                sessions: { current: { id: 'current', name: 'Current', modified: 50, layout: {} } },
+                groups: {},
+                groupOrder: [],
+                sessionGroups: {},
+            }),
+            [LEGACY_SESSIONS_PATH]: JSON.stringify({
+                activeSessionId: 'stale',
+                sessionOrder: ['stale'],
+                sessions: { stale: { id: 'stale', name: 'Stale', modified: 1, layout: {} } },
+                groups: {},
+                groupOrder: [],
+                sessionGroups: {},
+            }),
+        },
+    });
+
+    await plugin.loadWithBackup();
+
+    const stored = readData(plugin);
+    assert.ok(stored.sessions.current, 'data.json stays the source of truth');
+    assert.equal(stored.sessions.stale, undefined, 'the leftover file must not resurrect old sessions');
+});
+
+test('vault-folder installs are left where they are', async function () {
+    const plugin = createPlugin({
+        location: 'vault-folder',
+        files: {
+            [DATA_PATH]: JSON.stringify({ language: 'ja', sessionStorageLocation: 'vault-folder' }),
+            [VAULT_SESSIONS_PATH]: JSON.stringify({
+                activeSessionId: 'v',
+                sessionOrder: ['v'],
+                sessions: { v: { id: 'v', name: 'V', modified: 5, layout: {} } },
+                groups: {},
+                groupOrder: [],
+                sessionGroups: {},
+            }),
+        },
+    });
+
+    await plugin.loadWithBackup();
+
+    const stored = readData(plugin);
+    assert.equal(stored.sessions, undefined, 'multi-vault installs keep their sessions out of .obsidian');
+});
+
+test('an external data.json change is picked up', async function () {
+    const plugin = createPlugin();
+    await plugin.persistDataImmediate();
+
+    // Another device's copy arrives via Sync.
+    const incoming = JSON.parse(plugin.files[DATA_PATH]);
+    incoming.sessions.remote = { id: 'remote', name: 'Remote', modified: 999, layout: {} };
+    incoming.sessionOrder = ['a', 'remote'];
+    incoming._wppSavedAt = (incoming._wppSavedAt || 0) + 1000;
+    plugin.files[DATA_PATH] = JSON.stringify(incoming);
+
+    const applied = await plugin.reloadExternalSessionStorageIfChanged({ mergeLocal: true });
+
+    assert.equal(applied, true);
+    assert.ok(plugin.data.sessions.remote, 'the incoming session must show up locally');
+    assert.ok(plugin.data.sessions.a, 'and the local one must survive');
+});
+
+test('a reload right after our own write does nothing', async function () {
+    const plugin = createPlugin();
+    await plugin.persistDataImmediate();
+
+    // onExternalSettingsChange() can fire on writes we made ourselves; the
+    // staleness check has to make that a no-op rather than a reload loop.
+    const applied = await plugin.reloadExternalSessionStorageIfChanged({ mergeLocal: true });
+
+    assert.equal(applied, false);
+});
+
+test('onExternalSettingsChange schedules a reload', function () {
+    const plugin = createPlugin();
+    let scheduled = 0;
+    plugin.scheduleExternalSessionStorageReload = function () {
+        scheduled += 1;
+    };
+
+    plugin.onExternalSettingsChange();
+
+    assert.equal(scheduled, 1);
+});
+
+test('onExternalSettingsChange before load does nothing', function () {
+    const plugin = createPlugin();
+    plugin.data = null;
+    let scheduled = 0;
+    plugin.scheduleExternalSessionStorageReload = function () {
+        scheduled += 1;
+    };
+
+    plugin.onExternalSettingsChange();
+
+    assert.equal(scheduled, 0, 'a change arriving before onload must not touch anything');
+});

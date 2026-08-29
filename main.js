@@ -16165,6 +16165,32 @@ var require_persistence = __commonJS({
           });
         });
       };
+      WorkspacePlusPlus2.prototype.migrateLegacyPluginSessions = function(sessionData) {
+        var self = this;
+        if (!this.isSessionStorageInPluginData()) return Promise.resolve(false);
+        if (!sessionData || !hasNonEmptySessions(sessionData)) return Promise.resolve(false);
+        return this.app.vault.adapter.exists(this.getLegacyPluginSessionsPath()).then(function(exists) {
+          if (!exists) return false;
+          return Promise.resolve().then(function() {
+            return self.loadData();
+          }).catch(function() {
+            return null;
+          }).then(function(existing) {
+            if (hasSessionShape(existing)) return false;
+            var payload = splitSessionHistory(sessionData).data;
+            return self.ensureSessionStorageDir().then(function() {
+              return self.writeSessionStore(payload);
+            }).then(function() {
+              if (typeof self.recordSessionDataStored !== "function") return true;
+              return self.recordSessionDataStored(payload);
+            }).then(function() {
+              return true;
+            });
+          });
+        }).catch(function() {
+          return false;
+        });
+      };
       WorkspacePlusPlus2.prototype.migrateLegacySessions = function(sessionData) {
         var self = this;
         var normalized = this.normalizeSessionData(sessionData);
@@ -16225,6 +16251,10 @@ var require_persistence = __commonJS({
           });
         }).then(function(sessionData) {
           return self.attachSessionHistory(sessionData);
+        }).then(function(sessionData) {
+          return self.migrateLegacyPluginSessions(sessionData).then(function() {
+            return sessionData;
+          });
         }).then(function(sessionData) {
           if (!hadLegacyInMain) return sessionData;
           return self.persistGlobalSettings().catch(function() {
@@ -16511,22 +16541,15 @@ var require_session_sync = __commonJS({
         if (this._sessionStorageListenersRegistered) return;
         this._sessionStorageListenersRegistered = true;
         this._startupSessionStorageTimers = [];
-        function isSessionsFile(file) {
-          return !!(file && (file.path === self.getSessionsPath() || typeof self.getSessionsPathForLocation === "function" && (file.path === self.getSessionsPathForLocation("vault-folder") || file.path === self.getSessionsPathForLocation("plugin-folder"))));
-        }
-        this.registerEvent(this.app.vault.on("modify", function(file) {
-          if (!isSessionsFile(file)) return;
-          self.scheduleExternalSessionStorageReload();
-        }));
-        this.registerEvent(this.app.vault.on("create", function(file) {
-          if (!isSessionsFile(file)) return;
-          self.scheduleExternalSessionStorageReload();
-        }));
         if (typeof this.registerDomEvent === "function" && typeof window !== "undefined") {
           this.registerDomEvent(window, "focus", function() {
             self.scheduleExternalSessionStorageReload();
           });
         }
+      };
+      WorkspacePlusPlus2.prototype.onExternalSettingsChange = function() {
+        if (!this.data) return;
+        this.scheduleExternalSessionStorageReload();
       };
       WorkspacePlusPlus2.prototype.scheduleStartupSessionStorageChecks = function() {
         var self = this;

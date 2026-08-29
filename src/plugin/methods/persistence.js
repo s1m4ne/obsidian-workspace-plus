@@ -1219,6 +1219,54 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
             });
     };
 
+    // plugin-folder installs from before sessions moved into data.json still have
+    // them in the plugin folder's sessions.json, which Obsidian Sync ignores.
+    //
+    // The next save would move them anyway, but flushOnStartup() only runs when
+    // auto-save on switch is enabled, so a user who has that off and simply opens
+    // and closes Obsidian would stay unsynced. Write them across on load instead.
+    WorkspacePlusPlus.prototype.migrateLegacyPluginSessions = function (sessionData) {
+        var self = this;
+
+        if (!this.isSessionStorageInPluginData()) return Promise.resolve(false);
+        if (!sessionData || !hasNonEmptySessions(sessionData)) return Promise.resolve(false);
+
+        return this.app.vault.adapter.exists(this.getLegacyPluginSessionsPath())
+            .then(function (exists) {
+                if (!exists) return false;
+
+                return Promise.resolve()
+                    .then(function () {
+                        return self.loadData();
+                    })
+                    .catch(function () {
+                        return null;
+                    })
+                    .then(function (existing) {
+                        // Already carried over: data.json is the source of truth and
+                        // the old file is just a leftover.
+                        if (hasSessionShape(existing)) return false;
+
+                        var payload = splitSessionHistory(sessionData).data;
+                        return self.ensureSessionStorageDir()
+                            .then(function () {
+                                return self.writeSessionStore(payload);
+                            })
+                            .then(function () {
+                                if (typeof self.recordSessionDataStored !== 'function') return true;
+                                return self.recordSessionDataStored(payload);
+                            })
+                            .then(function () {
+                                return true;
+                            });
+                    });
+            })
+            .catch(function () {
+                // Best effort: the old file is still intact either way.
+                return false;
+            });
+    };
+
     WorkspacePlusPlus.prototype.migrateLegacySessions = function (sessionData) {
         var self = this;
         var normalized = this.normalizeSessionData(sessionData);
@@ -1304,6 +1352,11 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
             })
             .then(function (sessionData) {
                 return self.attachSessionHistory(sessionData);
+            })
+            .then(function (sessionData) {
+                return self.migrateLegacyPluginSessions(sessionData).then(function () {
+                    return sessionData;
+                });
             })
             .then(function (sessionData) {
                 if (!hadLegacyInMain) return sessionData;

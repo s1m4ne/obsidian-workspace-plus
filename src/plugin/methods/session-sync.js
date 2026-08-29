@@ -321,34 +321,25 @@ function attachSessionSyncMethods(WorkspacePlusPlus) {
         this._sessionStorageListenersRegistered = true;
         this._startupSessionStorageTimers = [];
 
-        function isSessionsFile(file) {
-            return !!(
-                file
-                && (
-                    file.path === self.getSessionsPath()
-                    || (typeof self.getSessionsPathForLocation === 'function'
-                        && (
-                            file.path === self.getSessionsPathForLocation('vault-folder')
-                            || file.path === self.getSessionsPathForLocation('plugin-folder')
-                        ))
-                )
-            );
-        }
-
-        this.registerEvent(this.app.vault.on('modify', function (file) {
-            if (!isSessionsFile(file)) return;
-            self.scheduleExternalSessionStorageReload();
-        }));
-        this.registerEvent(this.app.vault.on('create', function (file) {
-            if (!isSessionsFile(file)) return;
-            self.scheduleExternalSessionStorageReload();
-        }));
-
+        // No vault events here: vault.on('modify'/'create') only fire for files in
+        // the vault index, and both storage locations live under a dot-folder that
+        // the index skips. Those listeners never fired once. Sessions in data.json
+        // are covered by onExternalSettingsChange() instead; vault-folder installs
+        // rely on the focus and startup checks below.
         if (typeof this.registerDomEvent === 'function' && typeof window !== 'undefined') {
             this.registerDomEvent(window, 'focus', function () {
                 self.scheduleExternalSessionStorageReload();
             });
         }
+    };
+
+    // Obsidian calls this when data.json changes on disk behind its back, which is
+    // exactly what a sync service does when it brings another device's sessions
+    // over. Our own saveData() does not trigger it, and if it ever did the staleness
+    // check in reloadExternalSessionStorageIfChanged() makes the reload a no-op.
+    WorkspacePlusPlus.prototype.onExternalSettingsChange = function () {
+        if (!this.data) return;
+        this.scheduleExternalSessionStorageReload();
     };
 
     WorkspacePlusPlus.prototype.scheduleStartupSessionStorageChecks = function () {
