@@ -8,6 +8,7 @@ var STORAGE_DIR = '.workspace-plus-plus';
 var SESSION_STORAGE_VAULT = 'vault-folder';
 var SESSION_STORAGE_PLUGIN = 'plugin-folder';
 var SESSIONS_FILE_NAME = 'sessions.json';
+var PLUGIN_DATA_FILE_NAME = 'data.json';
 var SESSIONS_BACKUP_FILE_NAME = 'sessions.backup.json';
 var HISTORY_FILE_NAME = 'history.json';
 var HISTORY_FORMAT_VERSION = 1;
@@ -156,6 +157,19 @@ function hasInlineSessionHistory(sessionData) {
     return false;
 }
 
+// The session-shaped part of a stored object, including the save stamp that the
+// external-change detection compares.
+function pickSessionPayload(data) {
+    var out = {};
+    if (!data || typeof data !== 'object') return out;
+    for (var i = 0; i < SESSION_KEYS.length; i++) {
+        var key = SESSION_KEYS[i];
+        if (data[key] !== undefined) out[key] = data[key];
+    }
+    if (typeof data._wppSavedAt === 'number') out._wppSavedAt = data._wppSavedAt;
+    return out;
+}
+
 function pickKeys(data, keys) {
     var out = {};
     if (!data) return out;
@@ -221,7 +235,7 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
     // --- Data persistence ---
 
     WorkspacePlusPlus.prototype.getBackupPath = function () {
-        return this.manifest.dir + '/data.backup.json';
+        return joinPath(this.getPluginStorageDirPath(), 'data.backup.json');
     };
 
     WorkspacePlusPlus.prototype.getStorageDirPath = function () {
@@ -264,8 +278,28 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
         return this.getSessionStorageDirPathForLocation(this.getSessionStorageLocation());
     };
 
+    WorkspacePlusPlus.prototype.isSessionStorageInPluginData = function (location) {
+        var normalized = normalizeSessionStorageLocation(location) || this.getSessionStorageLocation();
+        return normalized === SESSION_STORAGE_PLUGIN;
+    };
+
+    // In plugin-folder mode the sessions live inside data.json, because that is
+    // the only file in a plugin folder that Obsidian Sync will carry between
+    // devices (it allows manifest.json, main.js, styles.css and data.json, and
+    // nothing else). Everything that only needs a path - stat, mtime tracking,
+    // diagnostics - keeps working; the writers are what have to be careful, since
+    // settings and sessions now share one file.
     WorkspacePlusPlus.prototype.getSessionsPathForLocation = function (location) {
+        if (this.isSessionStorageInPluginData(location)) {
+            return joinPath(this.getPluginStorageDirPath(), PLUGIN_DATA_FILE_NAME);
+        }
         return joinPath(this.getSessionStorageDirPathForLocation(location), SESSIONS_FILE_NAME);
+    };
+
+    // Where plugin-folder sessions used to live, before they moved into
+    // data.json. Still read so nobody loses sessions on upgrade.
+    WorkspacePlusPlus.prototype.getLegacyPluginSessionsPath = function () {
+        return joinPath(this.getPluginStorageDirPath(), SESSIONS_FILE_NAME);
     };
 
     WorkspacePlusPlus.prototype.getSessionsPath = function () {
@@ -537,13 +571,6 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
         return this.app.vault.adapter.write(path, json);
     };
 
-    WorkspacePlusPlus.prototype.writeJsonWithBackup = function (path, backupPath, data, pretty) {
-        var self = this;
-        return this.writeJson(backupPath, data, pretty).then(function () {
-            return self.writeJson(path, data, pretty);
-        });
-    };
-
     WorkspacePlusPlus.prototype.renameIfExists = function (fromPath, toPath) {
         var self = this;
         return this.app.vault.adapter.exists(fromPath).then(function (exists) {
@@ -621,12 +648,7 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
                 return self.writeSessionHistory(split.history);
             })
             .then(function () {
-                return self.writeJsonWithBackup(
-                    self.getSessionsPath(),
-                    self.getSessionsBackupPath(),
-                    sessionData,
-                    true
-                );
+                return self.writeSessionStore(sessionData, { pretty: true });
             })
             .then(function () {
                 if (typeof self.recordSessionDataStored !== 'function') return true;
@@ -646,18 +668,72 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
             });
     };
 
-    WorkspacePlusPlus.prototype.persistGlobalSettings = function () {
+    WorkspacePlusPlus.prototype.writePluginData = function (data) {
         var self = this;
-        if (!this.globalSettings) {
-            this.globalSettings = Object.assign({}, this.getDefaultSettingsData());
-        }
-        var data = Object.assign({}, this.globalSettings, {
-            sessionStorageLocation: this.getSessionStorageLocation(),
-        });
         var json = JSON.stringify(data);
         return this.app.vault.adapter.write(this.getBackupPath(), json).then(function () {
             return self.saveData(data);
         });
+    };
+
+    // Write the settings to data.json.
+    //
+    // In plugin-folder mode data.json also holds the sessions, so a settings-only
+    // write must not replace the file wholesale. When the caller has the session
+    // data at hand it passes it in; otherwise whatever data.json already holds is
+    // carried over, which is what keeps a stray settings write from wiping every
+    // session.
+    WorkspacePlusPlus.prototype.persistGlobalSettings = function (sessionData) {
+        var self = this;
+        if (!this.globalSettings) {
+            this.globalSettings = Object.assign({}, this.getDefaultSettingsData());
+        }
+        var settings = Object.assign({}, this.globalSettings, {
+            sessionStorageLocation: this.getSessionStorageLocation(),
+        });
+
+        if (!this.isSessionStorageInPluginData()) {
+            return this.writePluginData(settings);
+        }
+
+        if (sessionData) {
+            return this.writePluginData(Object.assign({}, settings, sessionData));
+        }
+
+        return Promise.resolve()
+            .then(function () {
+                return self.loadData();
+            })
+            .catch(function () {
+                return null;
+            })
+            .then(function (existing) {
+                return self.writePluginData(
+                    Object.assign({}, settings, pickSessionPayload(existing))
+                );
+            });
+    };
+
+    // Persist session data to whichever store the current mode uses, writing the
+    // recovery copy first so a crash between the two writes leaves the older but
+    // complete backup behind.
+    WorkspacePlusPlus.prototype.writeSessionStore = function (sessionData, options) {
+        var self = this;
+        options = options || {};
+
+        return this.writeJson(this.getSessionsBackupPath(), sessionData, options.pretty)
+            .then(function () {
+                return self.writeSessionMain(sessionData, options);
+            });
+    };
+
+    // Write only the primary session store, leaving the recovery copy alone.
+    WorkspacePlusPlus.prototype.writeSessionMain = function (sessionData, options) {
+        options = options || {};
+        if (this.isSessionStorageInPluginData()) {
+            return this.persistGlobalSettings(sessionData);
+        }
+        return this.writeJson(this.getSessionsPath(), sessionData, options.pretty);
     };
 
     // Vault-local settings (.workspace-plus-plus/settings.local.json) are gone.
@@ -755,7 +831,7 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
             sessionStorageLocation: this.getSessionStorageLocation(),
             sessionsPath: this.getSessionsPath(),
             sessionsBackupPath: this.getSessionsBackupPath(),
-            globalSettingsPath: this.manifest.dir + '/data.json',
+            globalSettingsPath: joinPath(this.getPluginStorageDirPath(), PLUGIN_DATA_FILE_NAME),
             sessionCount: Object.keys((this.data && this.data.sessions) || {}).length,
             updatedAt: Date.now(),
         };
@@ -873,11 +949,15 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
                         return self.writeSessionHistory(split.history);
                     })
                     .then(function () {
-                        return self.writeJsonWithBackup(
-                            self.getSessionsPath(),
-                            self.getSessionsBackupPath(),
-                            sessionData
-                        );
+                        // Settings and sessions go out together; writing them
+                        // separately would have each overwrite the other's file.
+                        return self.writeSessionStore(sessionData);
+                    })
+                    .then(function () {
+                        // In plugin-folder mode that write already covered data.json.
+                        // Otherwise the settings still need one of their own.
+                        if (self.isSessionStorageInPluginData()) return;
+                        return self.persistGlobalSettings();
                     })
                     .then(function () {
                         if (typeof self.recordSessionDataStored !== 'function') return true;
@@ -885,9 +965,6 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
                     })
                     .then(function () {
                         return self.rotateBackupIfNeeded(sessionData);
-                    })
-                    .then(function () {
-                        return self.persistGlobalSettings();
                     });
             });
     };
@@ -1068,65 +1145,78 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
             });
     };
 
+    WorkspacePlusPlus.prototype.readSessionCandidate = function (path) {
+        return Promise.all([
+            this.readJsonIfExists(path),
+            this.getFileMtime(path),
+        ]).then(function (parts) {
+            var res = parts[0];
+            var valid = res.exists && !res.error && hasSessionShape(res.data);
+            return {
+                valid: valid,
+                data: res.data,
+                mtime: parts[1] || 0,
+                stamp: valid ? getPersistStamp(res.data) : 0,
+            };
+        });
+    };
+
     WorkspacePlusPlus.prototype.loadSessionDataFromStorage = function () {
         var self = this;
         var L = i18n.L;
-        var mainPath = this.getSessionsPath();
         var backupPath = this.getSessionsBackupPath();
+        // Installs from before sessions moved into data.json still keep them in
+        // the plugin folder's sessions.json.
+        var legacyPath = this.isSessionStorageInPluginData()
+            ? this.getLegacyPluginSessionsPath()
+            : null;
 
-        return Promise.all([
-            this.readJsonIfExists(mainPath),
-            this.readJsonIfExists(backupPath),
-            this.getFileMtime(mainPath),
-            this.getFileMtime(backupPath),
-        ]).then(function (parts) {
-            var mainRes = parts[0];
-            var backupRes = parts[1];
-            var mainMtime = parts[2] || 0;
-            var backupMtime = parts[3] || 0;
+        return this.readSessionCandidate(this.getSessionsPath())
+            .then(function (main) {
+                if (main.valid || !legacyPath) return main;
+                return self.readSessionCandidate(legacyPath);
+            })
+            .then(function (main) {
+                return self.readSessionCandidate(backupPath).then(function (backup) {
+                    if (!main.valid && !backup.valid) return null;
 
-            var mainValid = mainRes.exists && !mainRes.error && hasSessionShape(mainRes.data);
-            var backupValid = backupRes.exists && !backupRes.error && hasSessionShape(backupRes.data);
-            var mainStamp = mainValid ? getPersistStamp(mainRes.data) : 0;
-            var backupStamp = backupValid ? getPersistStamp(backupRes.data) : 0;
+                    var useBackup = false;
+                    if (!main.valid && backup.valid) {
+                        useBackup = true;
+                    } else if (main.valid && backup.valid) {
+                        if (backup.stamp > main.stamp) {
+                            useBackup = true;
+                        } else if (backup.stamp === main.stamp && backup.mtime > main.mtime) {
+                            // If backup is newer (e.g. app quit between backup write and main write),
+                            // prefer backup to avoid losing the latest change.
+                            useBackup = true;
+                        }
+                    }
 
-            if (!mainValid && !backupValid) return null;
+                    if (!useBackup) {
+                        var mainData = self.normalizeSessionData(main.data);
+                        if (typeof self.recordSessionStorageState === 'function') {
+                            self.recordSessionStorageState(main.stamp, main.mtime, mainData);
+                        }
+                        return mainData;
+                    }
 
-            var useBackup = false;
-            if (!mainValid && backupValid) {
-                useBackup = true;
-            } else if (mainValid && backupValid) {
-                if (backupStamp > mainStamp) {
-                    useBackup = true;
-                } else if (backupStamp === mainStamp && backupMtime > mainMtime) {
-                    // If backup is newer (e.g. app quit between backup write and main write),
-                    // prefer backup to avoid losing the latest change.
-                    useBackup = true;
-                }
-            }
-
-            if (!useBackup) {
-                var mainData = self.normalizeSessionData(mainRes.data);
-                if (typeof self.recordSessionStorageState === 'function') {
-                    self.recordSessionStorageState(mainStamp, mainMtime, mainData);
-                }
-                return mainData;
-            }
-
-            var restoredRaw = backupRes.data;
-            var restored = self.normalizeSessionData(restoredRaw);
-            return self.writeJson(mainPath, restoredRaw).catch(function () {
-                return;
-            }).then(function () {
-                return self.getFileMtime(mainPath);
-            }).then(function (restoredMtime) {
-                if (typeof self.recordSessionStorageState === 'function') {
-                    self.recordSessionStorageState(backupStamp, restoredMtime || backupMtime, restored);
-                }
-                if (!mainValid) new obsidian.Notice(L.backupRestored);
-                return restored;
+                    var restored = self.normalizeSessionData(backup.data);
+                    // Restore through the mode-aware writer: in plugin-folder mode the
+                    // primary store is data.json, and a raw write would drop the settings.
+                    return self.writeSessionMain(backup.data).catch(function () {
+                        return;
+                    }).then(function () {
+                        return self.getFileMtime(self.getSessionsPath());
+                    }).then(function (restoredMtime) {
+                        if (typeof self.recordSessionStorageState === 'function') {
+                            self.recordSessionStorageState(backup.stamp, restoredMtime || backup.mtime, restored);
+                        }
+                        if (!main.valid) new obsidian.Notice(L.backupRestored);
+                        return restored;
+                    });
+                });
             });
-        });
     };
 
     WorkspacePlusPlus.prototype.migrateLegacySessions = function (sessionData) {
@@ -1134,14 +1224,7 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
         var normalized = this.normalizeSessionData(sessionData);
         return this.ensureSessionStorageDir()
             .then(function () {
-                return self.writeJsonWithBackup(
-                    self.getSessionsPath(),
-                    self.getSessionsBackupPath(),
-                    normalized
-                );
-            })
-            .then(function () {
-                return self.persistGlobalSettings();
+                return self.writeSessionStore(normalized);
             })
             .then(function () {
                 return true;
@@ -1171,16 +1254,22 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
                     self.getDefaultSettingsData(),
                     self.extractSettingsData(loadedMain)
                 );
-                hadLegacyInMain = hasSessionShape(loadedMain);
-                legacyMain = hadLegacyInMain ? self.normalizeSessionData(loadedMain) : null;
-                return self.migrateLegacyLocalSettings();
-            })
-            .then(function () {
+                // The storage location has to be settled first: whether sessions in
+                // data.json are the current format or the pre-#5 layout depends on it,
+                // and migrateLegacyLocalSettings() writes data.json.
                 return self.resolveSessionStorageLocation({
                     sessionStorageLocation: loadedMain.sessionStorageLocation,
                 });
             })
             .then(function () {
+                return self.migrateLegacyLocalSettings();
+            })
+            .then(function () {
+                // Sessions inside data.json are exactly where plugin-folder mode keeps
+                // them, so only vault-folder installs can be carrying the old layout
+                // that predates the move out of data.json.
+                hadLegacyInMain = hasSessionShape(loadedMain) && !self.isSessionStorageInPluginData();
+                legacyMain = hadLegacyInMain ? self.normalizeSessionData(loadedMain) : null;
                 return self.loadSessionDataFromStorage();
             })
             .then(function (sessionData) {

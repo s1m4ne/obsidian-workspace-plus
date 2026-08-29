@@ -32,6 +32,11 @@ function loadMethods() {
 
 const { attachPersistenceMethods, attachSessionSyncMethods } = loadMethods();
 
+// plugin-folder mode keeps the sessions inside data.json.
+const DATA_PATH = '.obsidian/plugins/workspace-plus-plus/data.json';
+const LEGACY_SESSIONS_PATH = '.obsidian/plugins/workspace-plus-plus/sessions.json';
+const HISTORY_PATH = '.obsidian/plugins/workspace-plus-plus/history.json';
+
 function historyEntry(at) {
     return { layout: { main: { id: 'leaf-' + at } }, savedAt: at };
 }
@@ -91,8 +96,16 @@ function createPlugin(options) {
         },
     };
 
-    plugin.saveData = () => Promise.resolve();
-    plugin.loadData = () => Promise.resolve(null);
+    plugin.saveData = (data) => {
+        plugin.savedData = data;
+        plugin.files[DATA_PATH] = JSON.stringify(data);
+        return Promise.resolve();
+    };
+    plugin.loadData = () => Promise.resolve(
+        Object.prototype.hasOwnProperty.call(plugin.files, DATA_PATH)
+            ? JSON.parse(plugin.files[DATA_PATH])
+            : null
+    );
     plugin.updateStatusBar = () => {};
     plugin.syncSessionCommands = () => {};
     plugin.syncSessionOrder = () => {};
@@ -103,17 +116,15 @@ function createPlugin(options) {
     return plugin;
 }
 
-const SESSIONS_PATH = '.obsidian/plugins/workspace-plus-plus/sessions.json';
-const HISTORY_PATH = '.obsidian/plugins/workspace-plus-plus/history.json';
 
 test('persisting writes history to its own file and keeps sessions history-free', async function () {
     const plugin = createPlugin();
 
     await plugin.persistDataImmediate();
 
-    const sessions = JSON.parse(plugin.files[SESSIONS_PATH]);
-    assert.equal(sessions.sessions.a.history, undefined, 'sessions.json must not carry history');
-    assert.equal(sessions.sessions.a.name, 'A');
+    const stored = JSON.parse(plugin.files[DATA_PATH]);
+    assert.equal(stored.sessions.a.history, undefined, 'the stored sessions must not carry history');
+    assert.equal(stored.sessions.a.name, 'A');
 
     const history = JSON.parse(plugin.files[HISTORY_PATH]);
     assert.equal(history.version, 1);
@@ -161,7 +172,7 @@ test('history for deleted sessions is pruned instead of leaking', async function
 test('loading merges history.json back onto the sessions', async function () {
     const plugin = createPlugin({
         files: {
-            [SESSIONS_PATH]: JSON.stringify({
+            [LEGACY_SESSIONS_PATH]: JSON.stringify({
                 activeSessionId: 'a',
                 sessionOrder: ['a'],
                 sessions: { a: { id: 'a', name: 'A', modified: 10, layout: { a: true } } },
@@ -182,7 +193,7 @@ test('loading merges history.json back onto the sessions', async function () {
 test('legacy inline history is kept and migrated to history.json on load', async function () {
     const plugin = createPlugin({
         files: {
-            [SESSIONS_PATH]: JSON.stringify({
+            [LEGACY_SESSIONS_PATH]: JSON.stringify({
                 activeSessionId: 'a',
                 sessionOrder: ['a'],
                 sessions: {
@@ -204,7 +215,7 @@ test('legacy inline history is kept and migrated to history.json on load', async
 test('history.json wins over stale inline history', async function () {
     const plugin = createPlugin({
         files: {
-            [SESSIONS_PATH]: JSON.stringify({
+            [LEGACY_SESSIONS_PATH]: JSON.stringify({
                 activeSessionId: 'a',
                 sessionOrder: ['a'],
                 sessions: {
