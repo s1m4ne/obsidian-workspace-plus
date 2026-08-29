@@ -2,6 +2,14 @@
 
 var obsidian = require('obsidian');
 var i18n = require('./i18n');
+
+function formatByteSize(bytes) {
+    if (typeof bytes !== 'number' || !isFinite(bytes) || bytes < 0) return '—';
+    if (bytes < 1024) return bytes + ' B';
+    var kb = bytes / 1024;
+    if (kb < 1024) return kb.toFixed(1) + ' KB';
+    return (kb / 1024).toFixed(1) + ' MB';
+}
 var modals = require('./modals');
 var formatRelativeTime = require('./modals/format-relative-time');
 var statusBarActions = require('./statusbar-actions');
@@ -632,38 +640,25 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
         if (self.activeTab === 'advanced') {
             addSection(L.settingsAdvancedStorageSubsection);
 
-            var sessionStorageLocation = self.plugin.getSessionStorageLocation();
-
             new obsidian.Setting(contentEl)
                 .setName(L.settingsSessionStorageLocation)
                 .setDesc(L.settingsSessionStorageLocationDesc(self.plugin.getSessionsPath()));
 
-            addAsyncActionSetting(contentEl, {
-                name: L.settingsMoveSessionsToPluginFolder,
-                desc: L.settingsMoveSessionsToPluginFolderDesc,
-                buttonText: L.settingsMoveSessionsToPluginFolderBtn,
-                disabled: sessionStorageLocation === 'plugin-folder',
-                run: function () {
-                    return self.plugin.setSessionStorageLocation('plugin-folder');
+            addToggleSetting(contentEl, {
+                name: L.settingsVaultOnlySessions,
+                desc: L.settingsVaultOnlySessionsDesc,
+                value: self.plugin.getSessionStorageLocation() === 'vault-folder',
+                onChange: function (value) {
+                    self.plugin
+                        .setSessionStorageLocation(value ? 'vault-folder' : 'plugin-folder')
+                        .then(function () {
+                            self.display();
+                        })
+                        .catch(function () {
+                            new obsidian.Notice(L.sessionStorageMoveFailed);
+                            self.display();
+                        });
                 },
-                onSuccess: function () {
-                    self.display();
-                },
-                failureNotice: L.sessionStorageMoveFailed,
-            });
-
-            addAsyncActionSetting(contentEl, {
-                name: L.settingsMoveSessionsToVaultFolder,
-                desc: L.settingsMoveSessionsToVaultFolderDesc,
-                buttonText: L.settingsMoveSessionsToVaultFolderBtn,
-                disabled: sessionStorageLocation === 'vault-folder',
-                run: function () {
-                    return self.plugin.setSessionStorageLocation('vault-folder');
-                },
-                onSuccess: function () {
-                    self.display();
-                },
-                failureNotice: L.sessionStorageMoveFailed,
             });
 
             addSection(L.settingsAdvancedTransferSubsection);
@@ -781,7 +776,7 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                 options = options || {};
                 var row = devCardEl.createDiv({ cls: 'wpp-dev-card-row' });
                 row.createDiv({ text: label, cls: 'wpp-dev-card-label' });
-                row.createDiv({
+                return row.createDiv({
                     text: String(value),
                     cls: options.code ? 'wpp-dev-card-value wpp-dev-card-value-code' : 'wpp-dev-card-value',
                 });
@@ -789,10 +784,24 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
 
             addDevCardRow(L.settingsStorageFieldSessions, diagnosticsInfo.sessionsPath, { code: true });
             addDevCardRow(L.settingsStorageFieldSessionsBackup, diagnosticsInfo.sessionsBackupPath, { code: true });
-            addDevCardRow(L.settingsStorageFieldSessionStorageLocation, diagnosticsInfo.sessionStorageLocation, { code: true });
+            addDevCardRow(L.settingsStorageFieldHistory, diagnosticsInfo.historyPath, { code: true });
             addDevCardRow(L.settingsStorageFieldGlobalSettings, diagnosticsInfo.globalSettingsPath, { code: true });
             addDevCardRow(L.settingsStorageFieldSessionCount, diagnosticsInfo.sessionCount);
+
+            var sizeValueEl = addDevCardRow(L.settingsStorageFieldDataSize, '…');
+            self.plugin.getSessionStorageSize().then(function (size) {
+                if (!sizeValueEl) return;
+                sizeValueEl.setText(size === null ? '—' : formatByteSize(size));
+            });
+
             addDevCardRow(L.settingsStorageFieldUpdatedAt, diagnosticsUpdatedText);
+
+            if (diagnosticsInfo.syncedByObsidianSync) {
+                devCardEl.createDiv({
+                    text: L.settingsStorageSyncHint,
+                    cls: 'wpp-dev-card-desc',
+                });
+            }
         }
 
         // ── Footer (all tabs) ──

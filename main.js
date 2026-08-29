@@ -184,11 +184,6 @@ var require_i18n = __commonJS({
         backupRestored: "Workspace++: Restored sessions from backup.",
         sessionDataMigrated: "Workspace++: Session data moved to .workspace-plus-plus/sessions.json.",
         sessionDataMigrationFailed: "Workspace++: Failed to migrate session data. Legacy data is still kept.",
-        localSettingsEnabled: "Workspace++: Vault-local settings enabled.",
-        localSettingsDisabled: "Workspace++: Vault-local settings disabled.",
-        localSettingsCopied: "Workspace++: Copied global settings to vault-local settings.",
-        localSettingsLoadFailed: "Workspace++: Failed to load vault-local settings. Using global settings.",
-        localSettingsOperationFailed: "Workspace++: Failed to update vault-local settings.",
         exportSessionsDone: function(path) {
           return "Workspace++: Exported sessions to " + path;
         },
@@ -309,14 +304,6 @@ var require_i18n = __commonJS({
         settingsHighlightUnsavedSessionChangesDesc: "When auto-save on switch is off, highlight the status bar when the current workspace layout differs from the saved session.",
         settingsStatusBarQuickSwitcher: "Quick switcher on status bar click",
         settingsStatusBarQuickSwitcherDesc: "When enabled, clicking the status bar opens the quick switcher overlay instead of the full session manager.",
-        settingsUseLocalSettings: "Use vault-local settings",
-        settingsUseLocalSettingsDesc: "Turn this on if you sync .obsidian between vaults (for example, with Settings Profiles) and want Workspace++ settings to stay different per vault.",
-        settingsCopyGlobalToLocal: "Copy global settings to this vault",
-        settingsCopyGlobalToLocalDesc: "Overwrite vault-local settings with your current global settings.",
-        settingsCopyGlobalToLocalBtn: "Copy",
-        settingsResetLocalSettings: "Reset vault-local settings",
-        settingsResetLocalSettingsDesc: "Reset vault-local settings back to your global settings.",
-        settingsResetLocalSettingsBtn: "Reset local",
         settingsAdvancedStorageSubsection: "Storage behavior",
         settingsAdvancedTransferSubsection: "Data transfer",
         settingsDeveloperSection: "Developer tools",
@@ -324,7 +311,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "Storage details currently used by Workspace++.",
         settingsStorageFieldSessions: "Sessions file",
         settingsStorageFieldSessionsBackup: "Sessions backup",
-        settingsStorageFieldLocalSettings: "Local settings file",
         settingsStorageFieldGlobalSettings: "Global settings file",
         settingsStorageFieldSessionCount: "Session count",
         settingsStorageFieldUpdatedAt: "Updated at",
@@ -3295,11 +3281,6 @@ var require_i18n = __commonJS({
         backupRestored: "Workspace++: \u30D0\u30C3\u30AF\u30A2\u30C3\u30D7\u304B\u3089\u30BB\u30C3\u30B7\u30E7\u30F3\u3092\u5FA9\u5143\u3057\u307E\u3057\u305F\u3002",
         sessionDataMigrated: "Workspace++: \u30BB\u30C3\u30B7\u30E7\u30F3\u30C7\u30FC\u30BF\u3092 .workspace-plus-plus/sessions.json \u306B\u79FB\u884C\u3057\u307E\u3057\u305F\u3002",
         sessionDataMigrationFailed: "Workspace++: \u30BB\u30C3\u30B7\u30E7\u30F3\u30C7\u30FC\u30BF\u306E\u79FB\u884C\u306B\u5931\u6557\u3057\u307E\u3057\u305F\u3002\u65E2\u5B58\u30C7\u30FC\u30BF\u306F\u4FDD\u6301\u3055\u308C\u3066\u3044\u307E\u3059\u3002",
-        localSettingsEnabled: "Workspace++: Vault\u3054\u3068\u306E\u8A2D\u5B9A\u3092\u6709\u52B9\u306B\u3057\u307E\u3057\u305F\u3002",
-        localSettingsDisabled: "Workspace++: Vault\u3054\u3068\u306E\u8A2D\u5B9A\u3092\u7121\u52B9\u306B\u3057\u307E\u3057\u305F\u3002",
-        localSettingsCopied: "Workspace++: \u30B0\u30ED\u30FC\u30D0\u30EB\u8A2D\u5B9A\u3092Vault\u3054\u3068\u306E\u8A2D\u5B9A\u306B\u30B3\u30D4\u30FC\u3057\u307E\u3057\u305F\u3002",
-        localSettingsLoadFailed: "Workspace++: Vault\u3054\u3068\u306E\u8A2D\u5B9A\u3092\u8AAD\u307F\u8FBC\u3081\u307E\u305B\u3093\u3067\u3057\u305F\u3002\u30B0\u30ED\u30FC\u30D0\u30EB\u8A2D\u5B9A\u3092\u4F7F\u7528\u3057\u307E\u3059\u3002",
-        localSettingsOperationFailed: "Workspace++: Vault\u3054\u3068\u306E\u8A2D\u5B9A\u306E\u66F4\u65B0\u306B\u5931\u6557\u3057\u307E\u3057\u305F\u3002",
         exportSessionsDone: function(path) {
           return "Workspace++: \u30BB\u30C3\u30B7\u30E7\u30F3\u3092 " + path + " \u306B\u66F8\u304D\u51FA\u3057\u307E\u3057\u305F\u3002";
         },
@@ -3420,14 +3401,6 @@ var require_i18n = __commonJS({
         settingsHighlightUnsavedSessionChangesDesc: "\u30BB\u30C3\u30B7\u30E7\u30F3\u5207\u308A\u66FF\u3048\u6642\u306E\u81EA\u52D5\u4FDD\u5B58\u304C\u30AA\u30D5\u306E\u3068\u304D\u3001\u73FE\u5728\u306E\u30EF\u30FC\u30AF\u30B9\u30DA\u30FC\u30B9\u914D\u7F6E\u304C\u4FDD\u5B58\u6E08\u307F\u30BB\u30C3\u30B7\u30E7\u30F3\u3068\u7570\u306A\u308B\u5834\u5408\u306B\u30B9\u30C6\u30FC\u30BF\u30B9\u30D0\u30FC\u3092\u5F37\u8ABF\u8868\u793A\u3057\u307E\u3059\u3002",
         settingsStatusBarQuickSwitcher: "\u30B9\u30C6\u30FC\u30BF\u30B9\u30D0\u30FC\u30AF\u30EA\u30C3\u30AF\u3067\u30AF\u30A4\u30C3\u30AF\u30B9\u30A4\u30C3\u30C1\u30E3\u30FC\u3092\u958B\u304F",
         settingsStatusBarQuickSwitcherDesc: "\u6709\u52B9\u306B\u3059\u308B\u3068\u3001\u30B9\u30C6\u30FC\u30BF\u30B9\u30D0\u30FC\u306E\u30AF\u30EA\u30C3\u30AF\u3067\u30BB\u30C3\u30B7\u30E7\u30F3\u30DE\u30CD\u30FC\u30B8\u30E3\u30FC\u306E\u4EE3\u308F\u308A\u306B\u30AF\u30A4\u30C3\u30AF\u30B9\u30A4\u30C3\u30C1\u30E3\u30FC\u3092\u958B\u304D\u307E\u3059\u3002",
-        settingsUseLocalSettings: "Vault\u3054\u3068\u306E\u8A2D\u5B9A\u3092\u4F7F\u3046",
-        settingsUseLocalSettingsDesc: "\u8907\u6570Vault\u3067 .obsidian \u3092\u540C\u671F\u3057\u3066\u3044\u308B\u5834\u5408\uFF08\u4F8B: Settings Profiles\uFF09\u306B\u6709\u52B9\u3067\u3059\u3002Workspace++ \u306E\u8A2D\u5B9A\u3092Vault\u3054\u3068\u306B\u5206\u3051\u3066\u4FDD\u5B58\u3057\u307E\u3059\u3002",
-        settingsCopyGlobalToLocal: "\u30B0\u30ED\u30FC\u30D0\u30EB\u8A2D\u5B9A\u3092\u3053\u306EVault\u3078\u30B3\u30D4\u30FC",
-        settingsCopyGlobalToLocalDesc: "\u73FE\u5728\u306E\u30B0\u30ED\u30FC\u30D0\u30EB\u8A2D\u5B9A\u3067Vault\u3054\u3068\u306E\u8A2D\u5B9A\u3092\u4E0A\u66F8\u304D\u3057\u307E\u3059\u3002",
-        settingsCopyGlobalToLocalBtn: "\u30B3\u30D4\u30FC",
-        settingsResetLocalSettings: "Vault\u3054\u3068\u306E\u8A2D\u5B9A\u3092\u30EA\u30BB\u30C3\u30C8",
-        settingsResetLocalSettingsDesc: "Vault\u3054\u3068\u306E\u8A2D\u5B9A\u3092\u30B0\u30ED\u30FC\u30D0\u30EB\u8A2D\u5B9A\u306B\u623B\u3057\u307E\u3059\u3002",
-        settingsResetLocalSettingsBtn: "\u30ED\u30FC\u30AB\u30EB\u3092\u30EA\u30BB\u30C3\u30C8",
         settingsAdvancedStorageSubsection: "\u4FDD\u5B58\u5148\u306E\u6319\u52D5",
         settingsAdvancedTransferSubsection: "\u30C7\u30FC\u30BF\u79FB\u884C",
         settingsDeveloperSection: "\u958B\u767A\u8005\u5411\u3051",
@@ -3435,7 +3408,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "Workspace++ \u304C\u73FE\u5728\u4F7F\u3063\u3066\u3044\u308B\u4FDD\u5B58\u5148\u60C5\u5831\u3067\u3059\u3002",
         settingsStorageFieldSessions: "\u30BB\u30C3\u30B7\u30E7\u30F3\u4FDD\u5B58\u30D5\u30A1\u30A4\u30EB",
         settingsStorageFieldSessionsBackup: "\u30BB\u30C3\u30B7\u30E7\u30F3\u30D0\u30C3\u30AF\u30A2\u30C3\u30D7",
-        settingsStorageFieldLocalSettings: "\u30ED\u30FC\u30AB\u30EB\u8A2D\u5B9A\u30D5\u30A1\u30A4\u30EB",
         settingsStorageFieldGlobalSettings: "\u30B0\u30ED\u30FC\u30D0\u30EB\u8A2D\u5B9A\u30D5\u30A1\u30A4\u30EB",
         settingsStorageFieldSessionCount: "\u30BB\u30C3\u30B7\u30E7\u30F3\u6570",
         settingsStorageFieldUpdatedAt: "\u66F4\u65B0\u65E5\u6642",
@@ -5078,11 +5050,6 @@ var require_i18n = __commonJS({
         backupRestored: "Workspace++: \u0110\xE3 kh\xF4i ph\u1EE5c phi\xEAn l\xE0m vi\u1EC7c t\u1EEB b\u1EA3n sao l\u01B0u.",
         sessionDataMigrated: "Workspace++: D\u1EEF li\u1EC7u phi\xEAn l\xE0m vi\u1EC7c \u0111\xE3 \u0111\u01B0\u1EE3c chuy\u1EC3n sang .workspace-plus-plus/sessions.json.",
         sessionDataMigrationFailed: "Workspace++: Kh\xF4ng th\u1EC3 chuy\u1EC3n d\u1EEF li\u1EC7u phi\xEAn l\xE0m vi\u1EC7c. D\u1EEF li\u1EC7u c\u0169 v\u1EABn \u0111\u01B0\u1EE3c gi\u1EEF l\u1EA1i.",
-        localSettingsEnabled: "Workspace++: \u0110\xE3 b\u1EADt c\xE0i \u0111\u1EB7t ri\xEAng cho vault.",
-        localSettingsDisabled: "Workspace++: \u0110\xE3 t\u1EAFt c\xE0i \u0111\u1EB7t ri\xEAng cho vault.",
-        localSettingsCopied: "Workspace++: \u0110\xE3 sao ch\xE9p c\xE0i \u0111\u1EB7t to\xE0n c\u1EE5c sang c\xE0i \u0111\u1EB7t ri\xEAng cho vault.",
-        localSettingsLoadFailed: "Workspace++: Kh\xF4ng th\u1EC3 t\u1EA3i c\xE0i \u0111\u1EB7t ri\xEAng cho vault. S\u1EBD d\xF9ng c\xE0i \u0111\u1EB7t to\xE0n c\u1EE5c.",
-        localSettingsOperationFailed: "Workspace++: Kh\xF4ng th\u1EC3 c\u1EADp nh\u1EADt c\xE0i \u0111\u1EB7t ri\xEAng cho vault.",
         exportSessionsDone: function(path) {
           return "Workspace++: \u0110\xE3 xu\u1EA5t phi\xEAn l\xE0m vi\u1EC7c t\u1EDBi " + path;
         },
@@ -5189,14 +5156,6 @@ var require_i18n = __commonJS({
         settingsHighlightUnsavedSessionChangesDesc: "Khi t\u1EF1 \u0111\u1ED9ng l\u01B0u l\xFAc chuy\u1EC3n phi\xEAn b\u1ECB t\u1EAFt, t\xF4 s\xE1ng thanh tr\u1EA1ng th\xE1i n\u1EBFu b\u1ED1 c\u1EE5c kh\xF4ng gian l\xE0m vi\u1EC7c hi\u1EC7n t\u1EA1i kh\xE1c v\u1EDBi phi\xEAn \u0111\xE3 l\u01B0u.",
         settingsStatusBarQuickSwitcher: "M\u1EDF tr\xECnh chuy\u1EC3n nhanh khi nh\u1EA5p thanh tr\u1EA1ng th\xE1i",
         settingsStatusBarQuickSwitcherDesc: "Khi b\u1EADt, nh\u1EA5p v\xE0o thanh tr\u1EA1ng th\xE1i s\u1EBD m\u1EDF l\u1EDBp ph\u1EE7 tr\xECnh chuy\u1EC3n nhanh thay v\xEC tr\xECnh qu\u1EA3n l\xFD phi\xEAn \u0111\u1EA7y \u0111\u1EE7.",
-        settingsUseLocalSettings: "D\xF9ng c\xE0i \u0111\u1EB7t ri\xEAng cho vault",
-        settingsUseLocalSettingsDesc: "B\u1EADt t\xF9y ch\u1ECDn n\xE0y n\u1EBFu b\u1EA1n \u0111\u1ED3ng b\u1ED9 .obsidian gi\u1EEFa nhi\u1EC1u vault (v\xED d\u1EE5 b\u1EB1ng Settings Profiles) v\xE0 mu\u1ED1n c\xE0i \u0111\u1EB7t Workspace++ kh\xE1c nhau theo t\u1EEBng vault.",
-        settingsCopyGlobalToLocal: "Sao ch\xE9p c\xE0i \u0111\u1EB7t to\xE0n c\u1EE5c v\xE0o vault n\xE0y",
-        settingsCopyGlobalToLocalDesc: "Ghi \u0111\xE8 c\xE0i \u0111\u1EB7t ri\xEAng cho vault b\u1EB1ng c\xE0i \u0111\u1EB7t to\xE0n c\u1EE5c hi\u1EC7n t\u1EA1i.",
-        settingsCopyGlobalToLocalBtn: "Sao ch\xE9p",
-        settingsResetLocalSettings: "\u0110\u1EB7t l\u1EA1i c\xE0i \u0111\u1EB7t ri\xEAng cho vault",
-        settingsResetLocalSettingsDesc: "\u0110\u1EB7t l\u1EA1i c\xE0i \u0111\u1EB7t ri\xEAng cho vault v\u1EC1 c\xE0i \u0111\u1EB7t to\xE0n c\u1EE5c.",
-        settingsResetLocalSettingsBtn: "\u0110\u1EB7t l\u1EA1i c\u1EE5c b\u1ED9",
         settingsAdvancedStorageSubsection: "H\xE0nh vi l\u01B0u tr\u1EEF",
         settingsAdvancedTransferSubsection: "Chuy\u1EC3n d\u1EEF li\u1EC7u",
         settingsDeveloperSection: "C\xF4ng c\u1EE5 nh\xE0 ph\xE1t tri\u1EC3n",
@@ -5204,7 +5163,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "Th\xF4ng tin l\u01B0u tr\u1EEF Workspace++ \u0111ang d\xF9ng.",
         settingsStorageFieldSessions: "T\u1EC7p phi\xEAn l\xE0m vi\u1EC7c",
         settingsStorageFieldSessionsBackup: "B\u1EA3n sao l\u01B0u phi\xEAn",
-        settingsStorageFieldLocalSettings: "T\u1EC7p c\xE0i \u0111\u1EB7t c\u1EE5c b\u1ED9",
         settingsStorageFieldGlobalSettings: "T\u1EC7p c\xE0i \u0111\u1EB7t to\xE0n c\u1EE5c",
         settingsStorageFieldSessionCount: "S\u1ED1 phi\xEAn",
         settingsStorageFieldUpdatedAt: "C\u1EADp nh\u1EADt l\xFAc",
@@ -5514,11 +5472,6 @@ var require_i18n = __commonJS({
         backupRestored: "Workspace++: \u0E01\u0E39\u0E49\u0E04\u0E37\u0E19\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E08\u0E32\u0E01\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E2A\u0E33\u0E23\u0E2D\u0E07\u0E41\u0E25\u0E49\u0E27",
         sessionDataMigrated: "Workspace++: \u0E22\u0E49\u0E32\u0E22\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E44\u0E1B\u0E22\u0E31\u0E07 .workspace-plus-plus/sessions.json \u0E41\u0E25\u0E49\u0E27",
         sessionDataMigrationFailed: "Workspace++: \u0E44\u0E21\u0E48\u0E2A\u0E32\u0E21\u0E32\u0E23\u0E16\u0E22\u0E49\u0E32\u0E22\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E44\u0E14\u0E49 \u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E40\u0E14\u0E34\u0E21\u0E22\u0E31\u0E07\u0E04\u0E07\u0E16\u0E39\u0E01\u0E40\u0E01\u0E47\u0E1A\u0E44\u0E27\u0E49",
-        localSettingsEnabled: "Workspace++: \u0E40\u0E1B\u0E34\u0E14\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E40\u0E09\u0E1E\u0E32\u0E30 vault \u0E41\u0E25\u0E49\u0E27",
-        localSettingsDisabled: "Workspace++: \u0E1B\u0E34\u0E14\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E40\u0E09\u0E1E\u0E32\u0E30 vault \u0E41\u0E25\u0E49\u0E27",
-        localSettingsCopied: "Workspace++: \u0E04\u0E31\u0E14\u0E25\u0E2D\u0E01\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E2A\u0E48\u0E27\u0E19\u0E01\u0E25\u0E32\u0E07\u0E44\u0E1B\u0E22\u0E31\u0E07\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E40\u0E09\u0E1E\u0E32\u0E30 vault \u0E41\u0E25\u0E49\u0E27",
-        localSettingsLoadFailed: "Workspace++: \u0E44\u0E21\u0E48\u0E2A\u0E32\u0E21\u0E32\u0E23\u0E16\u0E42\u0E2B\u0E25\u0E14\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E40\u0E09\u0E1E\u0E32\u0E30 vault \u0E44\u0E14\u0E49 \u0E08\u0E30\u0E43\u0E0A\u0E49\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E2A\u0E48\u0E27\u0E19\u0E01\u0E25\u0E32\u0E07",
-        localSettingsOperationFailed: "Workspace++: \u0E44\u0E21\u0E48\u0E2A\u0E32\u0E21\u0E32\u0E23\u0E16\u0E2D\u0E31\u0E1B\u0E40\u0E14\u0E15\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E40\u0E09\u0E1E\u0E32\u0E30 vault \u0E44\u0E14\u0E49",
         exportSessionsDone: function(path) {
           return "Workspace++: \u0E2A\u0E48\u0E07\u0E2D\u0E2D\u0E01\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E44\u0E1B\u0E22\u0E31\u0E07 " + path + " \u0E41\u0E25\u0E49\u0E27";
         },
@@ -5625,14 +5578,6 @@ var require_i18n = __commonJS({
         settingsHighlightUnsavedSessionChangesDesc: "\u0E40\u0E21\u0E37\u0E48\u0E2D\u0E1B\u0E34\u0E14\u0E01\u0E32\u0E23\u0E1A\u0E31\u0E19\u0E17\u0E36\u0E01\u0E2D\u0E31\u0E15\u0E42\u0E19\u0E21\u0E31\u0E15\u0E34\u0E02\u0E13\u0E30\u0E2A\u0E25\u0E31\u0E1A\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19 \u0E43\u0E2B\u0E49\u0E40\u0E19\u0E49\u0E19\u0E41\u0E16\u0E1A\u0E2A\u0E16\u0E32\u0E19\u0E30\u0E2B\u0E32\u0E01\u0E40\u0E04\u0E49\u0E32\u0E42\u0E04\u0E23\u0E07\u0E1E\u0E37\u0E49\u0E19\u0E17\u0E35\u0E48\u0E17\u0E33\u0E07\u0E32\u0E19\u0E1B\u0E31\u0E08\u0E08\u0E38\u0E1A\u0E31\u0E19\u0E15\u0E48\u0E32\u0E07\u0E08\u0E32\u0E01\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E17\u0E35\u0E48\u0E1A\u0E31\u0E19\u0E17\u0E36\u0E01\u0E44\u0E27\u0E49",
         settingsStatusBarQuickSwitcher: "\u0E40\u0E1B\u0E34\u0E14\u0E15\u0E31\u0E27\u0E2A\u0E25\u0E31\u0E1A\u0E14\u0E48\u0E27\u0E19\u0E40\u0E21\u0E37\u0E48\u0E2D\u0E04\u0E25\u0E34\u0E01\u0E41\u0E16\u0E1A\u0E2A\u0E16\u0E32\u0E19\u0E30",
         settingsStatusBarQuickSwitcherDesc: "\u0E40\u0E21\u0E37\u0E48\u0E2D\u0E40\u0E1B\u0E34\u0E14\u0E43\u0E0A\u0E49\u0E07\u0E32\u0E19 \u0E01\u0E32\u0E23\u0E04\u0E25\u0E34\u0E01\u0E41\u0E16\u0E1A\u0E2A\u0E16\u0E32\u0E19\u0E30\u0E08\u0E30\u0E40\u0E1B\u0E34\u0E14\u0E42\u0E2D\u0E40\u0E27\u0E2D\u0E23\u0E4C\u0E40\u0E25\u0E22\u0E4C\u0E15\u0E31\u0E27\u0E2A\u0E25\u0E31\u0E1A\u0E14\u0E48\u0E27\u0E19\u0E41\u0E17\u0E19\u0E15\u0E31\u0E27\u0E08\u0E31\u0E14\u0E01\u0E32\u0E23\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19\u0E40\u0E15\u0E47\u0E21",
-        settingsUseLocalSettings: "\u0E43\u0E0A\u0E49\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E40\u0E09\u0E1E\u0E32\u0E30 vault",
-        settingsUseLocalSettingsDesc: "\u0E40\u0E1B\u0E34\u0E14\u0E15\u0E31\u0E27\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E19\u0E35\u0E49\u0E2B\u0E32\u0E01\u0E04\u0E38\u0E13\u0E0B\u0E34\u0E07\u0E04\u0E4C .obsidian \u0E23\u0E30\u0E2B\u0E27\u0E48\u0E32\u0E07\u0E2B\u0E25\u0E32\u0E22 vault (\u0E40\u0E0A\u0E48\u0E19 \u0E14\u0E49\u0E27\u0E22 Settings Profiles) \u0E41\u0E25\u0E30\u0E15\u0E49\u0E2D\u0E07\u0E01\u0E32\u0E23\u0E43\u0E2B\u0E49\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32 Workspace++ \u0E41\u0E22\u0E01\u0E01\u0E31\u0E19\u0E43\u0E19\u0E41\u0E15\u0E48\u0E25\u0E30 vault",
-        settingsCopyGlobalToLocal: "\u0E04\u0E31\u0E14\u0E25\u0E2D\u0E01\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E2A\u0E48\u0E27\u0E19\u0E01\u0E25\u0E32\u0E07\u0E44\u0E1B\u0E22\u0E31\u0E07 vault \u0E19\u0E35\u0E49",
-        settingsCopyGlobalToLocalDesc: "\u0E40\u0E02\u0E35\u0E22\u0E19\u0E17\u0E31\u0E1A\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E40\u0E09\u0E1E\u0E32\u0E30 vault \u0E14\u0E49\u0E27\u0E22\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E2A\u0E48\u0E27\u0E19\u0E01\u0E25\u0E32\u0E07\u0E1B\u0E31\u0E08\u0E08\u0E38\u0E1A\u0E31\u0E19",
-        settingsCopyGlobalToLocalBtn: "\u0E04\u0E31\u0E14\u0E25\u0E2D\u0E01",
-        settingsResetLocalSettings: "\u0E23\u0E35\u0E40\u0E0B\u0E47\u0E15\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E40\u0E09\u0E1E\u0E32\u0E30 vault",
-        settingsResetLocalSettingsDesc: "\u0E23\u0E35\u0E40\u0E0B\u0E47\u0E15\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E40\u0E09\u0E1E\u0E32\u0E30 vault \u0E01\u0E25\u0E31\u0E1A\u0E44\u0E1B\u0E40\u0E1B\u0E47\u0E19\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E2A\u0E48\u0E27\u0E19\u0E01\u0E25\u0E32\u0E07",
-        settingsResetLocalSettingsBtn: "\u0E23\u0E35\u0E40\u0E0B\u0E47\u0E15\u0E40\u0E09\u0E1E\u0E32\u0E30\u0E40\u0E04\u0E23\u0E37\u0E48\u0E2D\u0E07",
         settingsAdvancedStorageSubsection: "\u0E1E\u0E24\u0E15\u0E34\u0E01\u0E23\u0E23\u0E21\u0E01\u0E32\u0E23\u0E08\u0E31\u0E14\u0E40\u0E01\u0E47\u0E1A",
         settingsAdvancedTransferSubsection: "\u0E01\u0E32\u0E23\u0E16\u0E48\u0E32\u0E22\u0E42\u0E2D\u0E19\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25",
         settingsDeveloperSection: "\u0E40\u0E04\u0E23\u0E37\u0E48\u0E2D\u0E07\u0E21\u0E37\u0E2D\u0E19\u0E31\u0E01\u0E1E\u0E31\u0E12\u0E19\u0E32",
@@ -5640,7 +5585,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "\u0E23\u0E32\u0E22\u0E25\u0E30\u0E40\u0E2D\u0E35\u0E22\u0E14\u0E1E\u0E37\u0E49\u0E19\u0E17\u0E35\u0E48\u0E08\u0E31\u0E14\u0E40\u0E01\u0E47\u0E1A\u0E17\u0E35\u0E48 Workspace++ \u0E43\u0E0A\u0E49\u0E2D\u0E22\u0E39\u0E48\u0E43\u0E19\u0E02\u0E13\u0E30\u0E19\u0E35\u0E49",
         settingsStorageFieldSessions: "\u0E44\u0E1F\u0E25\u0E4C\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19",
         settingsStorageFieldSessionsBackup: "\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E2A\u0E33\u0E23\u0E2D\u0E07\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19",
-        settingsStorageFieldLocalSettings: "\u0E44\u0E1F\u0E25\u0E4C\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E40\u0E09\u0E1E\u0E32\u0E30\u0E40\u0E04\u0E23\u0E37\u0E48\u0E2D\u0E07",
         settingsStorageFieldGlobalSettings: "\u0E44\u0E1F\u0E25\u0E4C\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E2A\u0E48\u0E27\u0E19\u0E01\u0E25\u0E32\u0E07",
         settingsStorageFieldSessionCount: "\u0E08\u0E33\u0E19\u0E27\u0E19\u0E40\u0E0B\u0E2A\u0E0A\u0E31\u0E19",
         settingsStorageFieldUpdatedAt: "\u0E2D\u0E31\u0E1B\u0E40\u0E14\u0E15\u0E40\u0E21\u0E37\u0E48\u0E2D",
@@ -5950,11 +5894,6 @@ var require_i18n = __commonJS({
         backupRestored: "Workspace++: \u092C\u0948\u0915\u0905\u092A \u0938\u0947 \u0938\u0924\u094D\u0930 \u092A\u0941\u0928\u0930\u094D\u0938\u094D\u0925\u093E\u092A\u093F\u0924 \u0915\u093F\u090F \u0917\u090F\u0964",
         sessionDataMigrated: "Workspace++: \u0938\u0924\u094D\u0930 \u0921\u0947\u091F\u093E .workspace-plus-plus/sessions.json \u092E\u0947\u0902 \u0938\u094D\u0925\u093E\u0928\u093E\u0902\u0924\u0930\u093F\u0924 \u0915\u093F\u092F\u093E \u0917\u092F\u093E\u0964",
         sessionDataMigrationFailed: "Workspace++: \u0938\u0924\u094D\u0930 \u0921\u0947\u091F\u093E \u0938\u094D\u0925\u093E\u0928\u093E\u0902\u0924\u0930\u093F\u0924 \u0928\u0939\u0940\u0902 \u0939\u094B \u0938\u0915\u093E\u0964 \u092A\u0941\u0930\u093E\u0928\u093E \u0921\u0947\u091F\u093E \u0905\u092D\u0940 \u092D\u0940 \u0930\u0916\u093E \u0917\u092F\u093E \u0939\u0948\u0964",
-        localSettingsEnabled: "Workspace++: vault-\u0935\u093F\u0936\u093F\u0937\u094D\u091F \u0938\u0947\u091F\u093F\u0902\u0917 \u091A\u093E\u0932\u0942 \u0915\u0940 \u0917\u0908\u0964",
-        localSettingsDisabled: "Workspace++: vault-\u0935\u093F\u0936\u093F\u0937\u094D\u091F \u0938\u0947\u091F\u093F\u0902\u0917 \u092C\u0902\u0926 \u0915\u0940 \u0917\u0908\u0964",
-        localSettingsCopied: "Workspace++: \u0935\u0948\u0936\u094D\u0935\u093F\u0915 \u0938\u0947\u091F\u093F\u0902\u0917 \u0915\u094B vault-\u0935\u093F\u0936\u093F\u0937\u094D\u091F \u0938\u0947\u091F\u093F\u0902\u0917 \u092E\u0947\u0902 \u0915\u0949\u092A\u0940 \u0915\u093F\u092F\u093E \u0917\u092F\u093E\u0964",
-        localSettingsLoadFailed: "Workspace++: vault-\u0935\u093F\u0936\u093F\u0937\u094D\u091F \u0938\u0947\u091F\u093F\u0902\u0917 \u0932\u094B\u0921 \u0928\u0939\u0940\u0902 \u0939\u094B \u0938\u0915\u0940\u0964 \u0935\u0948\u0936\u094D\u0935\u093F\u0915 \u0938\u0947\u091F\u093F\u0902\u0917 \u0907\u0938\u094D\u0924\u0947\u092E\u093E\u0932 \u0939\u094B\u0917\u0940\u0964",
-        localSettingsOperationFailed: "Workspace++: vault-\u0935\u093F\u0936\u093F\u0937\u094D\u091F \u0938\u0947\u091F\u093F\u0902\u0917 \u0905\u092A\u0921\u0947\u091F \u0928\u0939\u0940\u0902 \u0939\u094B \u0938\u0915\u0940\u0964",
         exportSessionsDone: function(path) {
           return "Workspace++: \u0938\u0924\u094D\u0930 " + path + " \u092E\u0947\u0902 \u0928\u093F\u0930\u094D\u092F\u093E\u0924 \u0915\u093F\u090F \u0917\u090F";
         },
@@ -6061,14 +6000,6 @@ var require_i18n = __commonJS({
         settingsHighlightUnsavedSessionChangesDesc: "\u091C\u092C \u0938\u094D\u0935\u093F\u091A \u092A\u0930 \u0911\u091F\u094B-\u0938\u0947\u0935 \u092C\u0902\u0926 \u0939\u094B, \u0924\u094B \u0935\u0930\u094D\u0924\u092E\u093E\u0928 \u0915\u093E\u0930\u094D\u092F\u0915\u094D\u0937\u0947\u0924\u094D\u0930 \u0932\u0947\u0906\u0909\u091F \u0938\u0939\u0947\u091C\u0947 \u0917\u090F \u0938\u0924\u094D\u0930 \u0938\u0947 \u0905\u0932\u0917 \u0939\u094B\u0928\u0947 \u092A\u0930 \u0938\u094D\u091F\u0947\u091F\u0938 \u092C\u093E\u0930 \u0939\u093E\u0907\u0932\u093E\u0907\u091F \u0915\u0930\u0947\u0902\u0964",
         settingsStatusBarQuickSwitcher: "\u0938\u094D\u091F\u0947\u091F\u0938 \u092C\u093E\u0930 \u0915\u094D\u0932\u093F\u0915 \u092A\u0930 \u0915\u094D\u0935\u093F\u0915 \u0938\u094D\u0935\u093F\u091A\u0930",
         settingsStatusBarQuickSwitcherDesc: "\u091A\u093E\u0932\u0942 \u0939\u094B\u0928\u0947 \u092A\u0930, \u0938\u094D\u091F\u0947\u091F\u0938 \u092C\u093E\u0930 \u0915\u094D\u0932\u093F\u0915 \u0915\u0930\u0928\u0947 \u0938\u0947 \u092A\u0942\u0930\u094D\u0923 \u0938\u0924\u094D\u0930 \u092A\u094D\u0930\u092C\u0902\u0927\u0915 \u0915\u0947 \u092C\u091C\u093E\u092F \u0915\u094D\u0935\u093F\u0915 \u0938\u094D\u0935\u093F\u091A\u0930 \u0913\u0935\u0930\u0932\u0947 \u0916\u0941\u0932\u0924\u093E \u0939\u0948\u0964",
-        settingsUseLocalSettings: "vault-\u0935\u093F\u0936\u093F\u0937\u094D\u091F \u0938\u0947\u091F\u093F\u0902\u0917 \u0907\u0938\u094D\u0924\u0947\u092E\u093E\u0932 \u0915\u0930\u0947\u0902",
-        settingsUseLocalSettingsDesc: "\u092F\u0926\u093F \u0906\u092A \u0915\u0908 vault \u0915\u0947 \u092C\u0940\u091A .obsidian \u0938\u093F\u0902\u0915 \u0915\u0930\u0924\u0947 \u0939\u0948\u0902 (\u0909\u0926\u093E\u0939\u0930\u0923: Settings Profiles \u0938\u0947) \u0914\u0930 Workspace++ \u0938\u0947\u091F\u093F\u0902\u0917 \u0939\u0930 vault \u092E\u0947\u0902 \u0905\u0932\u0917 \u0930\u0916\u0928\u093E \u091A\u093E\u0939\u0924\u0947 \u0939\u0948\u0902, \u0924\u094B \u0907\u0938\u0947 \u091A\u093E\u0932\u0942 \u0915\u0930\u0947\u0902\u0964",
-        settingsCopyGlobalToLocal: "\u0935\u0948\u0936\u094D\u0935\u093F\u0915 \u0938\u0947\u091F\u093F\u0902\u0917 \u0907\u0938 vault \u092E\u0947\u0902 \u0915\u0949\u092A\u0940 \u0915\u0930\u0947\u0902",
-        settingsCopyGlobalToLocalDesc: "\u0935\u0930\u094D\u0924\u092E\u093E\u0928 \u0935\u0948\u0936\u094D\u0935\u093F\u0915 \u0938\u0947\u091F\u093F\u0902\u0917 \u0938\u0947 vault-\u0935\u093F\u0936\u093F\u0937\u094D\u091F \u0938\u0947\u091F\u093F\u0902\u0917 \u0913\u0935\u0930\u0930\u093E\u0907\u091F \u0915\u0930\u0947\u0902\u0964",
-        settingsCopyGlobalToLocalBtn: "\u0915\u0949\u092A\u0940 \u0915\u0930\u0947\u0902",
-        settingsResetLocalSettings: "vault-\u0935\u093F\u0936\u093F\u0937\u094D\u091F \u0938\u0947\u091F\u093F\u0902\u0917 \u0930\u0940\u0938\u0947\u091F \u0915\u0930\u0947\u0902",
-        settingsResetLocalSettingsDesc: "vault-\u0935\u093F\u0936\u093F\u0937\u094D\u091F \u0938\u0947\u091F\u093F\u0902\u0917 \u0915\u094B \u0935\u093E\u092A\u0938 \u0935\u0948\u0936\u094D\u0935\u093F\u0915 \u0938\u0947\u091F\u093F\u0902\u0917 \u092A\u0930 \u0930\u0940\u0938\u0947\u091F \u0915\u0930\u0947\u0902\u0964",
-        settingsResetLocalSettingsBtn: "\u0932\u094B\u0915\u0932 \u0930\u0940\u0938\u0947\u091F",
         settingsAdvancedStorageSubsection: "\u0938\u094D\u091F\u094B\u0930\u0947\u091C \u0935\u094D\u092F\u0935\u0939\u093E\u0930",
         settingsAdvancedTransferSubsection: "\u0921\u0947\u091F\u093E \u0938\u094D\u0925\u093E\u0928\u093E\u0902\u0924\u0930\u0923",
         settingsDeveloperSection: "\u0921\u0947\u0935\u0932\u092A\u0930 \u091F\u0942\u0932",
@@ -6076,7 +6007,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "Workspace++ \u0926\u094D\u0935\u093E\u0930\u093E \u0905\u092D\u0940 \u0907\u0938\u094D\u0924\u0947\u092E\u093E\u0932 \u0939\u094B \u0930\u0939\u0940 \u0938\u094D\u091F\u094B\u0930\u0947\u091C \u091C\u093E\u0928\u0915\u093E\u0930\u0940\u0964",
         settingsStorageFieldSessions: "\u0938\u0924\u094D\u0930 \u092B\u093C\u093E\u0907\u0932",
         settingsStorageFieldSessionsBackup: "\u0938\u0924\u094D\u0930 \u092C\u0948\u0915\u0905\u092A",
-        settingsStorageFieldLocalSettings: "\u0932\u094B\u0915\u0932 \u0938\u0947\u091F\u093F\u0902\u0917 \u092B\u093C\u093E\u0907\u0932",
         settingsStorageFieldGlobalSettings: "\u0935\u0948\u0936\u094D\u0935\u093F\u0915 \u0938\u0947\u091F\u093F\u0902\u0917 \u092B\u093C\u093E\u0907\u0932",
         settingsStorageFieldSessionCount: "\u0938\u0924\u094D\u0930 \u0938\u0902\u0916\u094D\u092F\u093E",
         settingsStorageFieldUpdatedAt: "\u0905\u092A\u0921\u0947\u091F \u0938\u092E\u092F",
@@ -6386,11 +6316,6 @@ var require_i18n = __commonJS({
         backupRestored: "Workspace++: \u09AC\u09CD\u09AF\u09BE\u0995\u0986\u09AA \u09A5\u09C7\u0995\u09C7 \u09B8\u09C7\u09B6\u09A8 \u09AA\u09C1\u09A8\u09B0\u09C1\u09A6\u09CD\u09A7\u09BE\u09B0 \u0995\u09B0\u09BE \u09B9\u09AF\u09BC\u09C7\u099B\u09C7\u0964",
         sessionDataMigrated: "Workspace++: \u09B8\u09C7\u09B6\u09A8 \u09A1\u09C7\u099F\u09BE .workspace-plus-plus/sessions.json-\u098F \u09B8\u09B0\u09BE\u09A8\u09CB \u09B9\u09AF\u09BC\u09C7\u099B\u09C7\u0964",
         sessionDataMigrationFailed: "Workspace++: \u09B8\u09C7\u09B6\u09A8 \u09A1\u09C7\u099F\u09BE \u09B8\u09B0\u09BE\u09A8\u09CB \u09AF\u09BE\u09AF\u09BC\u09A8\u09BF\u0964 \u09AA\u09C1\u09B0\u09CB\u09A8\u09CB \u09A1\u09C7\u099F\u09BE \u098F\u0996\u09A8\u0993 \u09B0\u09BE\u0996\u09BE \u09B9\u09AF\u09BC\u09C7\u099B\u09C7\u0964",
-        localSettingsEnabled: "Workspace++: vault-\u09A8\u09BF\u09B0\u09CD\u09A6\u09BF\u09B7\u09CD\u099F \u09B8\u09C7\u099F\u09BF\u0982 \u099A\u09BE\u09B2\u09C1 \u09B9\u09AF\u09BC\u09C7\u099B\u09C7\u0964",
-        localSettingsDisabled: "Workspace++: vault-\u09A8\u09BF\u09B0\u09CD\u09A6\u09BF\u09B7\u09CD\u099F \u09B8\u09C7\u099F\u09BF\u0982 \u09AC\u09A8\u09CD\u09A7 \u09B9\u09AF\u09BC\u09C7\u099B\u09C7\u0964",
-        localSettingsCopied: "Workspace++: \u0997\u09CD\u09B2\u09CB\u09AC\u09BE\u09B2 \u09B8\u09C7\u099F\u09BF\u0982 vault-\u09A8\u09BF\u09B0\u09CD\u09A6\u09BF\u09B7\u09CD\u099F \u09B8\u09C7\u099F\u09BF\u0982\u09AF\u09BC\u09C7 \u0995\u09AA\u09BF \u0995\u09B0\u09BE \u09B9\u09AF\u09BC\u09C7\u099B\u09C7\u0964",
-        localSettingsLoadFailed: "Workspace++: vault-\u09A8\u09BF\u09B0\u09CD\u09A6\u09BF\u09B7\u09CD\u099F \u09B8\u09C7\u099F\u09BF\u0982 \u09B2\u09CB\u09A1 \u0995\u09B0\u09BE \u09AF\u09BE\u09AF\u09BC\u09A8\u09BF\u0964 \u0997\u09CD\u09B2\u09CB\u09AC\u09BE\u09B2 \u09B8\u09C7\u099F\u09BF\u0982 \u09AC\u09CD\u09AF\u09AC\u09B9\u09BE\u09B0 \u0995\u09B0\u09BE \u09B9\u09AC\u09C7\u0964",
-        localSettingsOperationFailed: "Workspace++: vault-\u09A8\u09BF\u09B0\u09CD\u09A6\u09BF\u09B7\u09CD\u099F \u09B8\u09C7\u099F\u09BF\u0982 \u0986\u09AA\u09A1\u09C7\u099F \u0995\u09B0\u09BE \u09AF\u09BE\u09AF\u09BC\u09A8\u09BF\u0964",
         exportSessionsDone: function(path) {
           return "Workspace++: \u09B8\u09C7\u09B6\u09A8 " + path + "-\u098F \u098F\u0995\u09CD\u09B8\u09AA\u09CB\u09B0\u09CD\u099F \u0995\u09B0\u09BE \u09B9\u09AF\u09BC\u09C7\u099B\u09C7";
         },
@@ -6497,14 +6422,6 @@ var require_i18n = __commonJS({
         settingsHighlightUnsavedSessionChangesDesc: "\u09B8\u09C1\u0987\u099A\u09C7\u09B0 \u09B8\u09AE\u09AF\u09BC \u0985\u099F\u09CB-\u09B8\u09C7\u09AD \u09AC\u09A8\u09CD\u09A7 \u09A5\u09BE\u0995\u09B2\u09C7, \u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u0993\u09AF\u09BC\u09BE\u09B0\u09CD\u0995\u09B8\u09CD\u09AA\u09C7\u09B8 \u09B2\u09C7\u0986\u0989\u099F \u09B8\u0982\u09B0\u0995\u09CD\u09B7\u09BF\u09A4 \u09B8\u09C7\u09B6\u09A8 \u09A5\u09C7\u0995\u09C7 \u0986\u09B2\u09BE\u09A6\u09BE \u09B9\u09B2\u09C7 \u09B8\u09CD\u099F\u09C7\u099F\u09BE\u09B8 \u09AC\u09BE\u09B0 \u09B9\u09BE\u0987\u09B2\u09BE\u0987\u099F \u0995\u09B0\u09C1\u09A8\u0964",
         settingsStatusBarQuickSwitcher: "\u09B8\u09CD\u099F\u09C7\u099F\u09BE\u09B8 \u09AC\u09BE\u09B0 \u0995\u09CD\u09B2\u09BF\u0995\u09C7 \u0995\u09C1\u0987\u0995 \u09B8\u09C1\u0987\u099A\u09BE\u09B0",
         settingsStatusBarQuickSwitcherDesc: "\u099A\u09BE\u09B2\u09C1 \u09A5\u09BE\u0995\u09B2\u09C7, \u09B8\u09CD\u099F\u09C7\u099F\u09BE\u09B8 \u09AC\u09BE\u09B0\u09C7 \u0995\u09CD\u09B2\u09BF\u0995 \u0995\u09B0\u09B2\u09C7 \u09AA\u09C2\u09B0\u09CD\u09A3 \u09B8\u09C7\u09B6\u09A8 \u09AE\u09CD\u09AF\u09BE\u09A8\u09C7\u099C\u09BE\u09B0\u09C7\u09B0 \u09AC\u09A6\u09B2\u09C7 \u0995\u09C1\u0987\u0995 \u09B8\u09C1\u0987\u099A\u09BE\u09B0 \u0993\u09AD\u09BE\u09B0\u09B2\u09C7 \u0996\u09C1\u09B2\u09AC\u09C7\u0964",
-        settingsUseLocalSettings: "vault-\u09A8\u09BF\u09B0\u09CD\u09A6\u09BF\u09B7\u09CD\u099F \u09B8\u09C7\u099F\u09BF\u0982 \u09AC\u09CD\u09AF\u09AC\u09B9\u09BE\u09B0 \u0995\u09B0\u09C1\u09A8",
-        settingsUseLocalSettingsDesc: "\u0986\u09AA\u09A8\u09BF \u09AF\u09A6\u09BF \u098F\u0995\u09BE\u09A7\u09BF\u0995 vault-\u098F\u09B0 \u09AE\u09A7\u09CD\u09AF\u09C7 .obsidian \u09B8\u09BF\u0999\u09CD\u0995 \u0995\u09B0\u09C7\u09A8 (\u09AF\u09C7\u09AE\u09A8 Settings Profiles \u09A6\u09BF\u09AF\u09BC\u09C7) \u098F\u09AC\u0982 Workspace++ \u09B8\u09C7\u099F\u09BF\u0982 \u09AA\u09CD\u09B0\u09A4\u09BF\u099F\u09BF vault-\u098F \u0986\u09B2\u09BE\u09A6\u09BE \u09B0\u09BE\u0996\u09A4\u09C7 \u099A\u09BE\u09A8, \u098F\u099F\u09BF \u099A\u09BE\u09B2\u09C1 \u0995\u09B0\u09C1\u09A8\u0964",
-        settingsCopyGlobalToLocal: "\u0997\u09CD\u09B2\u09CB\u09AC\u09BE\u09B2 \u09B8\u09C7\u099F\u09BF\u0982 \u098F\u0987 vault-\u098F \u0995\u09AA\u09BF \u0995\u09B0\u09C1\u09A8",
-        settingsCopyGlobalToLocalDesc: "\u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8 \u0997\u09CD\u09B2\u09CB\u09AC\u09BE\u09B2 \u09B8\u09C7\u099F\u09BF\u0982 \u09A6\u09BF\u09AF\u09BC\u09C7 vault-\u09A8\u09BF\u09B0\u09CD\u09A6\u09BF\u09B7\u09CD\u099F \u09B8\u09C7\u099F\u09BF\u0982 \u0993\u09AD\u09BE\u09B0\u09B0\u09BE\u0987\u099F \u0995\u09B0\u09C1\u09A8\u0964",
-        settingsCopyGlobalToLocalBtn: "\u0995\u09AA\u09BF",
-        settingsResetLocalSettings: "vault-\u09A8\u09BF\u09B0\u09CD\u09A6\u09BF\u09B7\u09CD\u099F \u09B8\u09C7\u099F\u09BF\u0982 \u09B0\u09BF\u09B8\u09C7\u099F \u0995\u09B0\u09C1\u09A8",
-        settingsResetLocalSettingsDesc: "vault-\u09A8\u09BF\u09B0\u09CD\u09A6\u09BF\u09B7\u09CD\u099F \u09B8\u09C7\u099F\u09BF\u0982 \u0986\u09AC\u09BE\u09B0 \u0997\u09CD\u09B2\u09CB\u09AC\u09BE\u09B2 \u09B8\u09C7\u099F\u09BF\u0982\u09AF\u09BC\u09C7 \u09AB\u09BF\u09B0\u09BF\u09AF\u09BC\u09C7 \u09A6\u09BF\u09A8\u0964",
-        settingsResetLocalSettingsBtn: "\u09B2\u09CB\u0995\u09BE\u09B2 \u09B0\u09BF\u09B8\u09C7\u099F",
         settingsAdvancedStorageSubsection: "\u09B8\u09CD\u099F\u09CB\u09B0\u09C7\u099C \u0986\u099A\u09B0\u09A3",
         settingsAdvancedTransferSubsection: "\u09A1\u09C7\u099F\u09BE \u09B8\u09CD\u09A5\u09BE\u09A8\u09BE\u09A8\u09CD\u09A4\u09B0",
         settingsDeveloperSection: "\u09A1\u09C7\u09AD\u09C7\u09B2\u09AA\u09BE\u09B0 \u099F\u09C1\u09B2",
@@ -6512,7 +6429,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "Workspace++ \u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8\u09C7 \u09AF\u09C7 \u09B8\u09CD\u099F\u09CB\u09B0\u09C7\u099C \u09A4\u09A5\u09CD\u09AF \u09AC\u09CD\u09AF\u09AC\u09B9\u09BE\u09B0 \u0995\u09B0\u099B\u09C7\u0964",
         settingsStorageFieldSessions: "\u09B8\u09C7\u09B6\u09A8 \u09AB\u09BE\u0987\u09B2",
         settingsStorageFieldSessionsBackup: "\u09B8\u09C7\u09B6\u09A8 \u09AC\u09CD\u09AF\u09BE\u0995\u0986\u09AA",
-        settingsStorageFieldLocalSettings: "\u09B2\u09CB\u0995\u09BE\u09B2 \u09B8\u09C7\u099F\u09BF\u0982 \u09AB\u09BE\u0987\u09B2",
         settingsStorageFieldGlobalSettings: "\u0997\u09CD\u09B2\u09CB\u09AC\u09BE\u09B2 \u09B8\u09C7\u099F\u09BF\u0982 \u09AB\u09BE\u0987\u09B2",
         settingsStorageFieldSessionCount: "\u09B8\u09C7\u09B6\u09A8 \u09B8\u0982\u0996\u09CD\u09AF\u09BE",
         settingsStorageFieldUpdatedAt: "\u0986\u09AA\u09A1\u09C7\u099F \u09B8\u09AE\u09AF\u09BC",
@@ -6822,11 +6738,6 @@ var require_i18n = __commonJS({
         backupRestored: "Workspace++: \u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u0627\u0632 \u067E\u0634\u062A\u06CC\u0628\u0627\u0646 \u0628\u0627\u0632\u06CC\u0627\u0628\u06CC \u0634\u062F\u0646\u062F.",
         sessionDataMigrated: "Workspace++: \u062F\u0627\u062F\u0647 \u0646\u0634\u0633\u062A \u0628\u0647 .workspace-plus-plus/sessions.json \u0645\u0646\u062A\u0642\u0644 \u0634\u062F.",
         sessionDataMigrationFailed: "Workspace++: \u0627\u0646\u062A\u0642\u0627\u0644 \u062F\u0627\u062F\u0647 \u0646\u0634\u0633\u062A \u0646\u0627\u0645\u0648\u0641\u0642 \u0628\u0648\u062F. \u062F\u0627\u062F\u0647 \u0642\u062F\u06CC\u0645\u06CC \u0647\u0645\u0686\u0646\u0627\u0646 \u0646\u06AF\u0647 \u062F\u0627\u0634\u062A\u0647 \u0634\u062F\u0647 \u0627\u0633\u062A.",
-        localSettingsEnabled: "Workspace++: \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u062E\u0635\u0648\u0635 vault \u0641\u0639\u0627\u0644 \u0634\u062F.",
-        localSettingsDisabled: "Workspace++: \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u062E\u0635\u0648\u0635 vault \u063A\u06CC\u0631\u0641\u0639\u0627\u0644 \u0634\u062F.",
-        localSettingsCopied: "Workspace++: \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0633\u0631\u0627\u0633\u0631\u06CC \u062F\u0631 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u062E\u0635\u0648\u0635 vault \u06A9\u067E\u06CC \u0634\u062F.",
-        localSettingsLoadFailed: "Workspace++: \u0628\u0627\u0631\u06AF\u0630\u0627\u0631\u06CC \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u062E\u0635\u0648\u0635 vault \u0646\u0627\u0645\u0648\u0641\u0642 \u0628\u0648\u062F. \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0633\u0631\u0627\u0633\u0631\u06CC \u0627\u0633\u062A\u0641\u0627\u062F\u0647 \u0645\u06CC\u200C\u0634\u0648\u062F.",
-        localSettingsOperationFailed: "Workspace++: \u0628\u0647\u200C\u0631\u0648\u0632\u0631\u0633\u0627\u0646\u06CC \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u062E\u0635\u0648\u0635 vault \u0646\u0627\u0645\u0648\u0641\u0642 \u0628\u0648\u062F.",
         exportSessionsDone: function(path) {
           return "Workspace++: \u0646\u0634\u0633\u062A\u200C\u0647\u0627 \u0628\u0647 " + path + " \u062E\u0631\u0648\u062C\u06CC \u06AF\u0631\u0641\u062A\u0647 \u0634\u062F\u0646\u062F";
         },
@@ -6933,14 +6844,6 @@ var require_i18n = __commonJS({
         settingsHighlightUnsavedSessionChangesDesc: "\u0648\u0642\u062A\u06CC \u0630\u062E\u06CC\u0631\u0647 \u062E\u0648\u062F\u06A9\u0627\u0631 \u0647\u0646\u06AF\u0627\u0645 \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06CC\u06CC \u062E\u0627\u0645\u0648\u0634 \u0627\u0633\u062A\u060C \u0627\u06AF\u0631 \u0686\u06CC\u062F\u0645\u0627\u0646 \u0641\u0639\u0644\u06CC \u0641\u0636\u0627\u06CC \u06A9\u0627\u0631\u06CC \u0628\u0627 \u0646\u0634\u0633\u062A \u0630\u062E\u06CC\u0631\u0647\u200C\u0634\u062F\u0647 \u0641\u0631\u0642 \u062F\u0627\u0634\u062A\u0647 \u0628\u0627\u0634\u062F\u060C \u0646\u0648\u0627\u0631 \u0648\u0636\u0639\u06CC\u062A \u0631\u0627 \u0628\u0631\u062C\u0633\u062A\u0647 \u06A9\u0646\u06CC\u062F.",
         settingsStatusBarQuickSwitcher: "\u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06A9\u0646\u0646\u062F\u0647 \u0633\u0631\u06CC\u0639 \u0628\u0627 \u06A9\u0644\u06CC\u06A9 \u0646\u0648\u0627\u0631 \u0648\u0636\u0639\u06CC\u062A",
         settingsStatusBarQuickSwitcherDesc: "\u0627\u06AF\u0631 \u0641\u0639\u0627\u0644 \u0628\u0627\u0634\u062F\u060C \u06A9\u0644\u06CC\u06A9 \u0631\u0648\u06CC \u0646\u0648\u0627\u0631 \u0648\u0636\u0639\u06CC\u062A \u0628\u0647\u200C\u062C\u0627\u06CC \u0645\u062F\u06CC\u0631 \u0646\u0634\u0633\u062A \u06A9\u0627\u0645\u0644\u060C \u067E\u0648\u0634\u0634 \u062C\u0627\u0628\u0647\u200C\u062C\u0627\u06A9\u0646\u0646\u062F\u0647 \u0633\u0631\u06CC\u0639 \u0631\u0627 \u0628\u0627\u0632 \u0645\u06CC\u200C\u06A9\u0646\u062F.",
-        settingsUseLocalSettings: "\u0627\u0633\u062A\u0641\u0627\u062F\u0647 \u0627\u0632 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u062E\u0635\u0648\u0635 vault",
-        settingsUseLocalSettingsDesc: "\u0627\u06AF\u0631 .obsidian \u0631\u0627 \u0628\u06CC\u0646 \u0686\u0646\u062F vault \u0647\u0645\u06AF\u0627\u0645 \u0645\u06CC\u200C\u06A9\u0646\u06CC\u062F (\u0645\u062B\u0644\u0627 \u0628\u0627 Settings Profiles) \u0648 \u0645\u06CC\u200C\u062E\u0648\u0627\u0647\u06CC\u062F \u062A\u0646\u0638\u06CC\u0645\u0627\u062A Workspace++ \u0628\u0631\u0627\u06CC \u0647\u0631 vault \u062C\u062F\u0627 \u0628\u0645\u0627\u0646\u062F\u060C \u0627\u06CC\u0646 \u0631\u0627 \u0631\u0648\u0634\u0646 \u06A9\u0646\u06CC\u062F.",
-        settingsCopyGlobalToLocal: "\u06A9\u067E\u06CC \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0633\u0631\u0627\u0633\u0631\u06CC \u0628\u0647 \u0627\u06CC\u0646 vault",
-        settingsCopyGlobalToLocalDesc: "\u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u062E\u0635\u0648\u0635 vault \u0631\u0627 \u0628\u0627 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0633\u0631\u0627\u0633\u0631\u06CC \u0641\u0639\u0644\u06CC \u0628\u0627\u0632\u0646\u0648\u06CC\u0633\u06CC \u0645\u06CC\u200C\u06A9\u0646\u062F.",
-        settingsCopyGlobalToLocalBtn: "\u06A9\u067E\u06CC",
-        settingsResetLocalSettings: "\u0628\u0627\u0632\u0646\u0634\u0627\u0646\u06CC \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u062E\u0635\u0648\u0635 vault",
-        settingsResetLocalSettingsDesc: "\u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u062E\u0635\u0648\u0635 vault \u0631\u0627 \u0628\u0647 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0633\u0631\u0627\u0633\u0631\u06CC \u0628\u0631\u0645\u06CC\u200C\u06AF\u0631\u062F\u0627\u0646\u062F.",
-        settingsResetLocalSettingsBtn: "\u0628\u0627\u0632\u0646\u0634\u0627\u0646\u06CC \u0645\u062D\u0644\u06CC",
         settingsAdvancedStorageSubsection: "\u0631\u0641\u062A\u0627\u0631 \u0630\u062E\u06CC\u0631\u0647\u200C\u0633\u0627\u0632\u06CC",
         settingsAdvancedTransferSubsection: "\u0627\u0646\u062A\u0642\u0627\u0644 \u062F\u0627\u062F\u0647",
         settingsDeveloperSection: "\u0627\u0628\u0632\u0627\u0631\u0647\u0627\u06CC \u062A\u0648\u0633\u0639\u0647\u200C\u062F\u0647\u0646\u062F\u0647",
@@ -6948,7 +6851,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "\u062C\u0632\u0626\u06CC\u0627\u062A \u0630\u062E\u06CC\u0631\u0647\u200C\u0633\u0627\u0632\u06CC \u06A9\u0647 Workspace++ \u0627\u06A9\u0646\u0648\u0646 \u0627\u0633\u062A\u0641\u0627\u062F\u0647 \u0645\u06CC\u200C\u06A9\u0646\u062F.",
         settingsStorageFieldSessions: "\u0641\u0627\u06CC\u0644 \u0646\u0634\u0633\u062A\u200C\u0647\u0627",
         settingsStorageFieldSessionsBackup: "\u067E\u0634\u062A\u06CC\u0628\u0627\u0646 \u0646\u0634\u0633\u062A\u200C\u0647\u0627",
-        settingsStorageFieldLocalSettings: "\u0641\u0627\u06CC\u0644 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0645\u062D\u0644\u06CC",
         settingsStorageFieldGlobalSettings: "\u0641\u0627\u06CC\u0644 \u062A\u0646\u0638\u06CC\u0645\u0627\u062A \u0633\u0631\u0627\u0633\u0631\u06CC",
         settingsStorageFieldSessionCount: "\u062A\u0639\u062F\u0627\u062F \u0646\u0634\u0633\u062A\u200C\u0647\u0627",
         settingsStorageFieldUpdatedAt: "\u0628\u0647\u200C\u0631\u0648\u0632\u0631\u0633\u0627\u0646\u06CC \u062F\u0631",
@@ -7258,11 +7160,6 @@ var require_i18n = __commonJS({
         backupRestored: "Workspace++: Sesi dipulihkan daripada sandaran.",
         sessionDataMigrated: "Workspace++: Data sesi dipindahkan ke .workspace-plus-plus/sessions.json.",
         sessionDataMigrationFailed: "Workspace++: Gagal memindahkan data sesi. Data lama masih disimpan.",
-        localSettingsEnabled: "Workspace++: Tetapan setempat vault dihidupkan.",
-        localSettingsDisabled: "Workspace++: Tetapan setempat vault dimatikan.",
-        localSettingsCopied: "Workspace++: Tetapan global disalin ke tetapan setempat vault.",
-        localSettingsLoadFailed: "Workspace++: Gagal memuat tetapan setempat vault. Tetapan global akan digunakan.",
-        localSettingsOperationFailed: "Workspace++: Gagal mengemas kini tetapan setempat vault.",
         exportSessionsDone: function(path) {
           return "Workspace++: Sesi dieksport ke " + path;
         },
@@ -7369,14 +7266,6 @@ var require_i18n = __commonJS({
         settingsHighlightUnsavedSessionChangesDesc: "Apabila auto-simpan semasa bertukar dimatikan, serlahkan bar status jika susun atur ruang kerja semasa berbeza daripada sesi yang disimpan.",
         settingsStatusBarQuickSwitcher: "Penukar pantas pada klik bar status",
         settingsStatusBarQuickSwitcherDesc: "Apabila dihidupkan, mengklik bar status membuka overlay penukar pantas dan bukannya pengurus sesi penuh.",
-        settingsUseLocalSettings: "Guna tetapan setempat vault",
-        settingsUseLocalSettingsDesc: "Hidupkan ini jika anda menyegerakkan .obsidian antara beberapa vault (contohnya dengan Settings Profiles) dan mahu tetapan Workspace++ kekal berbeza bagi setiap vault.",
-        settingsCopyGlobalToLocal: "Salin tetapan global ke vault ini",
-        settingsCopyGlobalToLocalDesc: "Tulis ganti tetapan setempat vault dengan tetapan global semasa anda.",
-        settingsCopyGlobalToLocalBtn: "Salin",
-        settingsResetLocalSettings: "Tetap semula tetapan setempat vault",
-        settingsResetLocalSettingsDesc: "Tetap semula tetapan setempat vault kepada tetapan global anda.",
-        settingsResetLocalSettingsBtn: "Tetap semula setempat",
         settingsAdvancedStorageSubsection: "Tingkah laku storan",
         settingsAdvancedTransferSubsection: "Pemindahan data",
         settingsDeveloperSection: "Alat pembangun",
@@ -7384,7 +7273,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "Butiran storan yang sedang digunakan oleh Workspace++.",
         settingsStorageFieldSessions: "Fail sesi",
         settingsStorageFieldSessionsBackup: "Sandaran sesi",
-        settingsStorageFieldLocalSettings: "Fail tetapan setempat",
         settingsStorageFieldGlobalSettings: "Fail tetapan global",
         settingsStorageFieldSessionCount: "Bilangan sesi",
         settingsStorageFieldUpdatedAt: "Dikemas kini pada",
@@ -7694,11 +7582,6 @@ var require_i18n = __commonJS({
         backupRestored: "Workspace++: Przywr\xF3cono sesje z kopii zapasowej.",
         sessionDataMigrated: "Workspace++: Dane sesji przeniesiono do .workspace-plus-plus/sessions.json.",
         sessionDataMigrationFailed: "Workspace++: Nie uda\u0142o si\u0119 przenie\u015B\u0107 danych sesji. Stare dane zosta\u0142y zachowane.",
-        localSettingsEnabled: "Workspace++: W\u0142\u0105czono ustawienia lokalne vaultu.",
-        localSettingsDisabled: "Workspace++: Wy\u0142\u0105czono ustawienia lokalne vaultu.",
-        localSettingsCopied: "Workspace++: Skopiowano ustawienia globalne do ustawie\u0144 lokalnych vaultu.",
-        localSettingsLoadFailed: "Workspace++: Nie uda\u0142o si\u0119 wczyta\u0107 ustawie\u0144 lokalnych vaultu. U\u017Cyte zostan\u0105 ustawienia globalne.",
-        localSettingsOperationFailed: "Workspace++: Nie uda\u0142o si\u0119 zaktualizowa\u0107 ustawie\u0144 lokalnych vaultu.",
         exportSessionsDone: function(path) {
           return "Workspace++: Wyeksportowano sesje do " + path;
         },
@@ -7805,14 +7688,6 @@ var require_i18n = __commonJS({
         settingsHighlightUnsavedSessionChangesDesc: "Gdy automatyczny zapis przy prze\u0142\u0105czaniu jest wy\u0142\u0105czony, wyr\xF3\u017Cnia pasek stanu, je\u015Bli bie\u017C\u0105cy uk\u0142ad obszaru roboczego r\xF3\u017Cni si\u0119 od zapisanej sesji.",
         settingsStatusBarQuickSwitcher: "Szybki prze\u0142\u0105cznik po klikni\u0119ciu paska stanu",
         settingsStatusBarQuickSwitcherDesc: "Po w\u0142\u0105czeniu klikni\u0119cie paska stanu otwiera nak\u0142adk\u0119 szybkiego prze\u0142\u0105cznika zamiast pe\u0142nego mened\u017Cera sesji.",
-        settingsUseLocalSettings: "U\u017Cywaj ustawie\u0144 lokalnych vaultu",
-        settingsUseLocalSettingsDesc: "W\u0142\u0105cz to, je\u015Bli synchronizujesz .obsidian mi\u0119dzy vaultami (np. przez Settings Profiles) i chcesz, aby ustawienia Workspace++ by\u0142y osobne dla ka\u017Cdego vaultu.",
-        settingsCopyGlobalToLocal: "Kopiuj ustawienia globalne do tego vaultu",
-        settingsCopyGlobalToLocalDesc: "Nadpisuje ustawienia lokalne vaultu bie\u017C\u0105cymi ustawieniami globalnymi.",
-        settingsCopyGlobalToLocalBtn: "Kopiuj",
-        settingsResetLocalSettings: "Resetuj ustawienia lokalne vaultu",
-        settingsResetLocalSettingsDesc: "Przywraca ustawienia lokalne vaultu do ustawie\u0144 globalnych.",
-        settingsResetLocalSettingsBtn: "Resetuj lokalne",
         settingsAdvancedStorageSubsection: "Zachowanie przechowywania",
         settingsAdvancedTransferSubsection: "Przenoszenie danych",
         settingsDeveloperSection: "Narz\u0119dzia deweloperskie",
@@ -7820,7 +7695,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "Szczeg\xF3\u0142y przechowywania obecnie u\u017Cywane przez Workspace++.",
         settingsStorageFieldSessions: "Plik sesji",
         settingsStorageFieldSessionsBackup: "Kopia zapasowa sesji",
-        settingsStorageFieldLocalSettings: "Plik ustawie\u0144 lokalnych",
         settingsStorageFieldGlobalSettings: "Plik ustawie\u0144 globalnych",
         settingsStorageFieldSessionCount: "Liczba sesji",
         settingsStorageFieldUpdatedAt: "Zaktualizowano",
@@ -8006,11 +7880,6 @@ var require_i18n = __commonJS({
         saveWithoutNaming: "\u4E0D\u547D\u540D\u76F4\u63A5\u4FDD\u5B58",
         sessionDataMigrated: "Workspace++: \u4F1A\u8BDD\u6570\u636E\u5DF2\u8FC1\u79FB\u5230 .workspace-plus-plus/sessions.json\u3002",
         sessionDataMigrationFailed: "Workspace++: \u4F1A\u8BDD\u6570\u636E\u8FC1\u79FB\u5931\u8D25\u3002\u65E7\u7248\u6570\u636E\u5DF2\u4FDD\u7559\u3002",
-        localSettingsEnabled: "Workspace++: \u5DF2\u542F\u7528 Vault \u672C\u5730\u8BBE\u7F6E\u3002",
-        localSettingsDisabled: "Workspace++: \u5DF2\u7981\u7528 Vault \u672C\u5730\u8BBE\u7F6E\u3002",
-        localSettingsCopied: "Workspace++: \u5DF2\u5C06\u5168\u5C40\u8BBE\u7F6E\u590D\u5236\u5230 Vault \u672C\u5730\u8BBE\u7F6E\u3002",
-        localSettingsLoadFailed: "Workspace++: \u65E0\u6CD5\u52A0\u8F7D Vault \u672C\u5730\u8BBE\u7F6E\u3002\u5C06\u4F7F\u7528\u5168\u5C40\u8BBE\u7F6E\u3002",
-        localSettingsOperationFailed: "Workspace++: \u66F4\u65B0 Vault \u672C\u5730\u8BBE\u7F6E\u5931\u8D25\u3002",
         exportSessionsDone: function(path) {
           return "Workspace++: \u5DF2\u5C06\u4F1A\u8BDD\u5BFC\u51FA\u5230 " + path;
         },
@@ -8052,14 +7921,6 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollResetWindowDesc: "\u5728\u91CD\u7F6E\u524D\uFF0C\u5C06\u8F83\u5C0F\u6EDA\u52A8\u589E\u91CF\u6301\u7EED\u5408\u5E76\u7684\u65F6\u957F\u3002\u4EC5\u5728\u201C\u81EA\u5B9A\u4E49\u201D\u9884\u8BBE\u4E0B\u4F7F\u7528\u3002",
         settingsStatusBarScrollInvert: "\u53CD\u8F6C\u6EDA\u52A8\u65B9\u5411",
         settingsStatusBarScrollInvertDesc: "\u53CD\u8F6C\u72B6\u6001\u680F\u6EDA\u52A8\u5207\u6362\u65F6\u7684\u4E0A\u4E00\u9879/\u4E0B\u4E00\u9879\u65B9\u5411\u3002",
-        settingsUseLocalSettings: "\u4F7F\u7528 Vault \u672C\u5730\u8BBE\u7F6E",
-        settingsUseLocalSettingsDesc: "\u5982\u679C\u4F60\u5728\u591A\u4E2A Vault \u4E4B\u95F4\u540C\u6B65 .obsidian\uFF08\u4F8B\u5982\u4F7F\u7528 Settings Profiles\uFF09\uFF0C\u5E76\u5E0C\u671B Workspace++ \u8BBE\u7F6E\u6309 Vault \u5206\u5F00\u4FDD\u5B58\uFF0C\u8BF7\u5F00\u542F\u6B64\u9879\u3002",
-        settingsCopyGlobalToLocal: "\u5C06\u5168\u5C40\u8BBE\u7F6E\u590D\u5236\u5230\u6B64 Vault",
-        settingsCopyGlobalToLocalDesc: "\u7528\u5F53\u524D\u5168\u5C40\u8BBE\u7F6E\u8986\u76D6 Vault \u672C\u5730\u8BBE\u7F6E\u3002",
-        settingsCopyGlobalToLocalBtn: "\u590D\u5236",
-        settingsResetLocalSettings: "\u91CD\u7F6E Vault \u672C\u5730\u8BBE\u7F6E",
-        settingsResetLocalSettingsDesc: "\u5C06 Vault \u672C\u5730\u8BBE\u7F6E\u91CD\u7F6E\u4E3A\u5168\u5C40\u8BBE\u7F6E\u3002",
-        settingsResetLocalSettingsBtn: "\u91CD\u7F6E\u672C\u5730",
         settingsAdvancedStorageSubsection: "\u5B58\u50A8\u884C\u4E3A",
         settingsAdvancedTransferSubsection: "\u6570\u636E\u8FC1\u79FB",
         settingsDeveloperSection: "\u5F00\u53D1\u8005\u5DE5\u5177",
@@ -8067,7 +7928,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "Workspace++ \u5F53\u524D\u4F7F\u7528\u7684\u5B58\u50A8\u4FE1\u606F\u3002",
         settingsStorageFieldSessions: "\u4F1A\u8BDD\u6587\u4EF6",
         settingsStorageFieldSessionsBackup: "\u4F1A\u8BDD\u5907\u4EFD",
-        settingsStorageFieldLocalSettings: "\u672C\u5730\u8BBE\u7F6E\u6587\u4EF6",
         settingsStorageFieldGlobalSettings: "\u5168\u5C40\u8BBE\u7F6E\u6587\u4EF6",
         settingsStorageFieldSessionCount: "\u4F1A\u8BDD\u6570\u91CF",
         settingsStorageFieldUpdatedAt: "\u66F4\u65B0\u65F6\u95F4",
@@ -8113,11 +7973,6 @@ var require_i18n = __commonJS({
         saveWithoutNaming: "\u4E0D\u547D\u540D\u76F4\u63A5\u5132\u5B58",
         sessionDataMigrated: "Workspace++: \u5DE5\u4F5C\u968E\u6BB5\u8CC7\u6599\u5DF2\u79FB\u81F3 .workspace-plus-plus/sessions.json\u3002",
         sessionDataMigrationFailed: "Workspace++: \u5DE5\u4F5C\u968E\u6BB5\u8CC7\u6599\u79FB\u8F49\u5931\u6557\u3002\u820A\u7248\u8CC7\u6599\u5DF2\u4FDD\u7559\u3002",
-        localSettingsEnabled: "Workspace++: \u5DF2\u555F\u7528 Vault \u672C\u6A5F\u8A2D\u5B9A\u3002",
-        localSettingsDisabled: "Workspace++: \u5DF2\u505C\u7528 Vault \u672C\u6A5F\u8A2D\u5B9A\u3002",
-        localSettingsCopied: "Workspace++: \u5DF2\u5C07\u5168\u57DF\u8A2D\u5B9A\u8907\u88FD\u5230 Vault \u672C\u6A5F\u8A2D\u5B9A\u3002",
-        localSettingsLoadFailed: "Workspace++: \u7121\u6CD5\u8F09\u5165 Vault \u672C\u6A5F\u8A2D\u5B9A\u3002\u5C07\u6539\u7528\u5168\u57DF\u8A2D\u5B9A\u3002",
-        localSettingsOperationFailed: "Workspace++: \u66F4\u65B0 Vault \u672C\u6A5F\u8A2D\u5B9A\u5931\u6557\u3002",
         exportSessionsDone: function(path) {
           return "Workspace++: \u5DF2\u5C07\u5DE5\u4F5C\u968E\u6BB5\u532F\u51FA\u5230 " + path;
         },
@@ -8159,14 +8014,6 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollResetWindowDesc: "\u5728\u91CD\u8A2D\u524D\uFF0C\u6301\u7E8C\u7D2F\u7A4D\u8F03\u5C0F\u6EFE\u52D5\u91CF\u7684\u6642\u9593\u3002\u50C5\u5728\u300C\u81EA\u8A02\u300D\u9810\u8A2D\u6642\u4F7F\u7528\u3002",
         settingsStatusBarScrollInvert: "\u53CD\u8F49\u6EFE\u52D5\u65B9\u5411",
         settingsStatusBarScrollInvertDesc: "\u53CD\u8F49\u72C0\u614B\u5217\u6EFE\u52D5\u5207\u63DB\u6642\u4E0A\u4E00\u500B/\u4E0B\u4E00\u500B\u7684\u65B9\u5411\u3002",
-        settingsUseLocalSettings: "\u4F7F\u7528 Vault \u672C\u6A5F\u8A2D\u5B9A",
-        settingsUseLocalSettingsDesc: "\u82E5\u4F60\u5728\u591A\u500B Vault \u4E4B\u9593\u540C\u6B65 .obsidian\uFF08\u4F8B\u5982\u4F7F\u7528 Settings Profiles\uFF09\uFF0C\u4E26\u5E0C\u671B Workspace++ \u8A2D\u5B9A\u5728\u5404 Vault \u5206\u958B\u4FDD\u5B58\uFF0C\u8ACB\u555F\u7528\u6B64\u9805\u3002",
-        settingsCopyGlobalToLocal: "\u5C07\u5168\u57DF\u8A2D\u5B9A\u8907\u88FD\u5230\u6B64 Vault",
-        settingsCopyGlobalToLocalDesc: "\u4EE5\u76EE\u524D\u5168\u57DF\u8A2D\u5B9A\u8986\u5BEB Vault \u672C\u6A5F\u8A2D\u5B9A\u3002",
-        settingsCopyGlobalToLocalBtn: "\u8907\u88FD",
-        settingsResetLocalSettings: "\u91CD\u8A2D Vault \u672C\u6A5F\u8A2D\u5B9A",
-        settingsResetLocalSettingsDesc: "\u5C07 Vault \u672C\u6A5F\u8A2D\u5B9A\u91CD\u8A2D\u56DE\u5168\u57DF\u8A2D\u5B9A\u3002",
-        settingsResetLocalSettingsBtn: "\u91CD\u8A2D\u672C\u6A5F",
         settingsAdvancedStorageSubsection: "\u5132\u5B58\u884C\u70BA",
         settingsAdvancedTransferSubsection: "\u8CC7\u6599\u79FB\u8F49",
         settingsDeveloperSection: "\u958B\u767C\u8005\u5DE5\u5177",
@@ -8174,7 +8021,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "Workspace++ \u76EE\u524D\u4F7F\u7528\u7684\u5132\u5B58\u8CC7\u8A0A\u3002",
         settingsStorageFieldSessions: "\u5DE5\u4F5C\u968E\u6BB5\u6A94\u6848",
         settingsStorageFieldSessionsBackup: "\u5DE5\u4F5C\u968E\u6BB5\u5099\u4EFD",
-        settingsStorageFieldLocalSettings: "\u672C\u6A5F\u8A2D\u5B9A\u6A94\u6848",
         settingsStorageFieldGlobalSettings: "\u5168\u57DF\u8A2D\u5B9A\u6A94\u6848",
         settingsStorageFieldSessionCount: "\u5DE5\u4F5C\u968E\u6BB5\u6578\u91CF",
         settingsStorageFieldUpdatedAt: "\u66F4\u65B0\u6642\u9593",
@@ -8220,11 +8066,6 @@ var require_i18n = __commonJS({
         saveWithoutNaming: "Guardar sin nombrar",
         sessionDataMigrated: "Workspace++: Los datos de sesi\xF3n se movieron a .workspace-plus-plus/sessions.json.",
         sessionDataMigrationFailed: "Workspace++: No se pudieron migrar los datos de sesi\xF3n. Los datos heredados se conservan.",
-        localSettingsEnabled: "Workspace++: Configuraci\xF3n local del vault activada.",
-        localSettingsDisabled: "Workspace++: Configuraci\xF3n local del vault desactivada.",
-        localSettingsCopied: "Workspace++: Se copiaron los ajustes globales a los ajustes locales del vault.",
-        localSettingsLoadFailed: "Workspace++: No se pudieron cargar los ajustes locales del vault. Se usar\xE1n los ajustes globales.",
-        localSettingsOperationFailed: "Workspace++: No se pudieron actualizar los ajustes locales del vault.",
         exportSessionsDone: function(path) {
           return "Workspace++: Sesiones exportadas a " + path;
         },
@@ -8266,14 +8107,6 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollResetWindowDesc: "Cu\xE1nto tiempo se siguen combinando peque\xF1os desplazamientos antes de reiniciarlos. Solo se usa con el preajuste Personalizado.",
         settingsStatusBarScrollInvert: "Invertir direcci\xF3n de desplazamiento",
         settingsStatusBarScrollInvertDesc: "Invierte la direcci\xF3n anterior/siguiente al cambiar sesiones con el desplazamiento en la barra de estado.",
-        settingsUseLocalSettings: "Usar configuraci\xF3n local del vault",
-        settingsUseLocalSettingsDesc: "Activa esto si sincronizas .obsidian entre varios vaults (por ejemplo, con Settings Profiles) y quieres que la configuraci\xF3n de Workspace++ sea diferente por vault.",
-        settingsCopyGlobalToLocal: "Copiar ajustes globales a este vault",
-        settingsCopyGlobalToLocalDesc: "Sobrescribe los ajustes locales del vault con los ajustes globales actuales.",
-        settingsCopyGlobalToLocalBtn: "Copiar",
-        settingsResetLocalSettings: "Restablecer ajustes locales del vault",
-        settingsResetLocalSettingsDesc: "Restablece los ajustes locales del vault a los ajustes globales.",
-        settingsResetLocalSettingsBtn: "Restablecer local",
         settingsAdvancedStorageSubsection: "Comportamiento de almacenamiento",
         settingsAdvancedTransferSubsection: "Transferencia de datos",
         settingsDeveloperSection: "Herramientas para desarrolladores",
@@ -8281,7 +8114,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "Detalles de almacenamiento usados actualmente por Workspace++.",
         settingsStorageFieldSessions: "Archivo de sesiones",
         settingsStorageFieldSessionsBackup: "Respaldo de sesiones",
-        settingsStorageFieldLocalSettings: "Archivo de ajustes locales",
         settingsStorageFieldGlobalSettings: "Archivo de ajustes globales",
         settingsStorageFieldSessionCount: "Cantidad de sesiones",
         settingsStorageFieldUpdatedAt: "Actualizado el",
@@ -8327,11 +8159,6 @@ var require_i18n = __commonJS({
         saveWithoutNaming: "Enregistrer sans nommer",
         sessionDataMigrated: "Workspace++ : les donn\xE9es de session ont \xE9t\xE9 d\xE9plac\xE9es vers .workspace-plus-plus/sessions.json.",
         sessionDataMigrationFailed: "Workspace++ : \xE9chec de la migration des donn\xE9es de session. Les donn\xE9es h\xE9rit\xE9es sont conserv\xE9es.",
-        localSettingsEnabled: "Workspace++ : param\xE8tres locaux du coffre activ\xE9s.",
-        localSettingsDisabled: "Workspace++ : param\xE8tres locaux du coffre d\xE9sactiv\xE9s.",
-        localSettingsCopied: "Workspace++ : param\xE8tres globaux copi\xE9s vers les param\xE8tres locaux du coffre.",
-        localSettingsLoadFailed: "Workspace++ : impossible de charger les param\xE8tres locaux du coffre. Les param\xE8tres globaux seront utilis\xE9s.",
-        localSettingsOperationFailed: "Workspace++ : impossible de mettre \xE0 jour les param\xE8tres locaux du coffre.",
         exportSessionsDone: function(path) {
           return "Workspace++ : sessions export\xE9es vers " + path;
         },
@@ -8373,14 +8200,6 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollResetWindowDesc: "Dur\xE9e pendant laquelle les petits deltas de d\xE9filement restent cumul\xE9s avant r\xE9initialisation. Utilis\xE9 uniquement avec le pr\xE9r\xE9glage Personnalis\xE9.",
         settingsStatusBarScrollInvert: "Inverser le sens du d\xE9filement",
         settingsStatusBarScrollInvertDesc: "Inverse le sens pr\xE9c\xE9dent/suivant pour le changement de session par d\xE9filement dans la barre d\u2019\xE9tat.",
-        settingsUseLocalSettings: "Utiliser des param\xE8tres locaux du coffre",
-        settingsUseLocalSettingsDesc: "Activez cette option si vous synchronisez .obsidian entre plusieurs coffres (par exemple avec Settings Profiles) et souhaitez des r\xE9glages Workspace++ diff\xE9rents par coffre.",
-        settingsCopyGlobalToLocal: "Copier les param\xE8tres globaux vers ce coffre",
-        settingsCopyGlobalToLocalDesc: "\xC9crase les param\xE8tres locaux du coffre avec les param\xE8tres globaux actuels.",
-        settingsCopyGlobalToLocalBtn: "Copier",
-        settingsResetLocalSettings: "R\xE9initialiser les param\xE8tres locaux du coffre",
-        settingsResetLocalSettingsDesc: "R\xE9initialise les param\xE8tres locaux du coffre vers les param\xE8tres globaux.",
-        settingsResetLocalSettingsBtn: "R\xE9initialiser local",
         settingsAdvancedStorageSubsection: "Comportement du stockage",
         settingsAdvancedTransferSubsection: "Transfert des donn\xE9es",
         settingsDeveloperSection: "Outils d\xE9veloppeur",
@@ -8388,7 +8207,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "Informations de stockage actuellement utilis\xE9es par Workspace++.",
         settingsStorageFieldSessions: "Fichier des sessions",
         settingsStorageFieldSessionsBackup: "Sauvegarde des sessions",
-        settingsStorageFieldLocalSettings: "Fichier des param\xE8tres locaux",
         settingsStorageFieldGlobalSettings: "Fichier des param\xE8tres globaux",
         settingsStorageFieldSessionCount: "Nombre de sessions",
         settingsStorageFieldUpdatedAt: "Mis \xE0 jour le",
@@ -8434,11 +8252,6 @@ var require_i18n = __commonJS({
         saveWithoutNaming: "\u062D\u0641\u0638 \u0628\u062F\u0648\u0646 \u062A\u0633\u0645\u064A\u0629",
         sessionDataMigrated: "Workspace++: \u062A\u0645 \u0646\u0642\u0644 \u0628\u064A\u0627\u0646\u0627\u062A \u0627\u0644\u062C\u0644\u0633\u0627\u062A \u0625\u0644\u0649 .workspace-plus-plus/sessions.json.",
         sessionDataMigrationFailed: "Workspace++: \u0641\u0634\u0644 \u0646\u0642\u0644 \u0628\u064A\u0627\u0646\u0627\u062A \u0627\u0644\u062C\u0644\u0633\u0627\u062A. \u062A\u0645 \u0627\u0644\u0627\u062D\u062A\u0641\u0627\u0638 \u0628\u0627\u0644\u0628\u064A\u0627\u0646\u0627\u062A \u0627\u0644\u0642\u062F\u064A\u0645\u0629.",
-        localSettingsEnabled: "Workspace++: \u062A\u0645 \u062A\u0641\u0639\u064A\u0644 \u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A \u0627\u0644\u0645\u062D\u0644\u064A\u0629 \u0644\u0644\u0645\u062E\u0632\u0646.",
-        localSettingsDisabled: "Workspace++: \u062A\u0645 \u062A\u0639\u0637\u064A\u0644 \u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A \u0627\u0644\u0645\u062D\u0644\u064A\u0629 \u0644\u0644\u0645\u062E\u0632\u0646.",
-        localSettingsCopied: "Workspace++: \u062A\u0645 \u0646\u0633\u062E \u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A \u0627\u0644\u0639\u0627\u0645\u0629 \u0625\u0644\u0649 \u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A \u0627\u0644\u0645\u062D\u0644\u064A\u0629 \u0644\u0644\u0645\u062E\u0632\u0646.",
-        localSettingsLoadFailed: "Workspace++: \u062A\u0639\u0630\u0631 \u062A\u062D\u0645\u064A\u0644 \u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A \u0627\u0644\u0645\u062D\u0644\u064A\u0629 \u0644\u0644\u0645\u062E\u0632\u0646. \u0633\u064A\u062A\u0645 \u0627\u0633\u062A\u062E\u062F\u0627\u0645 \u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A \u0627\u0644\u0639\u0627\u0645\u0629.",
-        localSettingsOperationFailed: "Workspace++: \u0641\u0634\u0644 \u062A\u062D\u062F\u064A\u062B \u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A \u0627\u0644\u0645\u062D\u0644\u064A\u0629 \u0644\u0644\u0645\u062E\u0632\u0646.",
         exportSessionsDone: function(path) {
           return "Workspace++: \u062A\u0645 \u062A\u0635\u062F\u064A\u0631 \u0627\u0644\u062C\u0644\u0633\u0627\u062A \u0625\u0644\u0649 " + path;
         },
@@ -8480,14 +8293,6 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollResetWindowDesc: '\u0627\u0644\u0645\u062F\u0629 \u0627\u0644\u062A\u064A \u062A\u0633\u062A\u0645\u0631 \u0641\u064A\u0647\u0627 \u0642\u064A\u0645 \u0627\u0644\u062A\u0645\u0631\u064A\u0631 \u0627\u0644\u0635\u063A\u064A\u0631\u0629 \u0641\u064A \u0627\u0644\u062A\u0631\u0627\u0643\u0645 \u0642\u0628\u0644 \u0625\u0639\u0627\u062F\u0629 \u0627\u0644\u0636\u0628\u0637. \u064A\u064F\u0633\u062A\u062E\u062F\u0645 \u0641\u0642\u0637 \u0639\u0646\u062F \u0627\u062E\u062A\u064A\u0627\u0631 \u0627\u0644\u0625\u0639\u062F\u0627\u062F \u0627\u0644\u0645\u0633\u0628\u0642 "\u0645\u062E\u0635\u0635".',
         settingsStatusBarScrollInvert: "\u0639\u0643\u0633 \u0627\u062A\u062C\u0627\u0647 \u0627\u0644\u062A\u0645\u0631\u064A\u0631",
         settingsStatusBarScrollInvertDesc: "\u064A\u0639\u0643\u0633 \u0627\u062A\u062C\u0627\u0647 \u0627\u0644\u0633\u0627\u0628\u0642/\u0627\u0644\u062A\u0627\u0644\u064A \u0639\u0646\u062F \u062A\u0628\u062F\u064A\u0644 \u0627\u0644\u062C\u0644\u0633\u0627\u062A \u0628\u0627\u0644\u062A\u0645\u0631\u064A\u0631 \u0641\u064A \u0634\u0631\u064A\u0637 \u0627\u0644\u062D\u0627\u0644\u0629.",
-        settingsUseLocalSettings: "\u0627\u0633\u062A\u062E\u062F\u0627\u0645 \u0625\u0639\u062F\u0627\u062F\u0627\u062A \u0645\u062D\u0644\u064A\u0629 \u0644\u0644\u0645\u062E\u0632\u0646",
-        settingsUseLocalSettingsDesc: "\u0641\u0639\u0651\u0644 \u0647\u0630\u0627 \u0625\u0630\u0627 \u0643\u0646\u062A \u062A\u0632\u0627\u0645\u0646 .obsidian \u0628\u064A\u0646 \u0639\u062F\u0629 \u0645\u062E\u0627\u0632\u0646 (\u0645\u062B\u0644 Settings Profiles) \u0648\u062A\u0631\u064A\u062F \u0623\u0646 \u062A\u0628\u0642\u0649 \u0625\u0639\u062F\u0627\u062F\u0627\u062A Workspace++ \u0645\u062E\u062A\u0644\u0641\u0629 \u0644\u0643\u0644 \u0645\u062E\u0632\u0646.",
-        settingsCopyGlobalToLocal: "\u0646\u0633\u062E \u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A \u0627\u0644\u0639\u0627\u0645\u0629 \u0625\u0644\u0649 \u0647\u0630\u0627 \u0627\u0644\u0645\u062E\u0632\u0646",
-        settingsCopyGlobalToLocalDesc: "\u0627\u0633\u062A\u0628\u062F\u0627\u0644 \u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A \u0627\u0644\u0645\u062D\u0644\u064A\u0629 \u0644\u0644\u0645\u062E\u0632\u0646 \u0628\u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A \u0627\u0644\u0639\u0627\u0645\u0629 \u0627\u0644\u062D\u0627\u0644\u064A\u0629.",
-        settingsCopyGlobalToLocalBtn: "\u0646\u0633\u062E",
-        settingsResetLocalSettings: "\u0625\u0639\u0627\u062F\u0629 \u062A\u0639\u064A\u064A\u0646 \u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A \u0627\u0644\u0645\u062D\u0644\u064A\u0629 \u0644\u0644\u0645\u062E\u0632\u0646",
-        settingsResetLocalSettingsDesc: "\u0625\u0639\u0627\u062F\u0629 \u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A \u0627\u0644\u0645\u062D\u0644\u064A\u0629 \u0644\u0644\u0645\u062E\u0632\u0646 \u0625\u0644\u0649 \u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A \u0627\u0644\u0639\u0627\u0645\u0629.",
-        settingsResetLocalSettingsBtn: "\u0625\u0639\u0627\u062F\u0629 \u062A\u0639\u064A\u064A\u0646 \u0627\u0644\u0645\u062D\u0644\u064A",
         settingsAdvancedStorageSubsection: "\u0633\u0644\u0648\u0643 \u0627\u0644\u062A\u062E\u0632\u064A\u0646",
         settingsAdvancedTransferSubsection: "\u0646\u0642\u0644 \u0627\u0644\u0628\u064A\u0627\u0646\u0627\u062A",
         settingsDeveloperSection: "\u0623\u062F\u0648\u0627\u062A \u0627\u0644\u0645\u0637\u0648\u0631",
@@ -8495,7 +8300,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "\u062A\u0641\u0627\u0635\u064A\u0644 \u0627\u0644\u062A\u062E\u0632\u064A\u0646 \u0627\u0644\u0645\u0633\u062A\u062E\u062F\u0645\u0629 \u062D\u0627\u0644\u064A\u0627\u064B \u0628\u0648\u0627\u0633\u0637\u0629 Workspace++.",
         settingsStorageFieldSessions: "\u0645\u0644\u0641 \u0627\u0644\u062C\u0644\u0633\u0627\u062A",
         settingsStorageFieldSessionsBackup: "\u0646\u0633\u062E\u0629 \u0627\u062D\u062A\u064A\u0627\u0637\u064A\u0629 \u0644\u0644\u062C\u0644\u0633\u0627\u062A",
-        settingsStorageFieldLocalSettings: "\u0645\u0644\u0641 \u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A \u0627\u0644\u0645\u062D\u0644\u064A\u0629",
         settingsStorageFieldGlobalSettings: "\u0645\u0644\u0641 \u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A \u0627\u0644\u0639\u0627\u0645\u0629",
         settingsStorageFieldSessionCount: "\u0639\u062F\u062F \u0627\u0644\u062C\u0644\u0633\u0627\u062A",
         settingsStorageFieldUpdatedAt: "\u0622\u062E\u0631 \u062A\u062D\u062F\u064A\u062B",
@@ -8541,11 +8345,6 @@ var require_i18n = __commonJS({
         saveWithoutNaming: "Salvar sem nomear",
         sessionDataMigrated: "Workspace++: Os dados de sess\xE3o foram movidos para .workspace-plus-plus/sessions.json.",
         sessionDataMigrationFailed: "Workspace++: Falha ao migrar dados de sess\xE3o. Os dados legados foram mantidos.",
-        localSettingsEnabled: "Workspace++: Configura\xE7\xF5es locais do vault ativadas.",
-        localSettingsDisabled: "Workspace++: Configura\xE7\xF5es locais do vault desativadas.",
-        localSettingsCopied: "Workspace++: Configura\xE7\xF5es globais copiadas para as configura\xE7\xF5es locais do vault.",
-        localSettingsLoadFailed: "Workspace++: Falha ao carregar configura\xE7\xF5es locais do vault. Ser\xE3o usadas as configura\xE7\xF5es globais.",
-        localSettingsOperationFailed: "Workspace++: Falha ao atualizar configura\xE7\xF5es locais do vault.",
         exportSessionsDone: function(path) {
           return "Workspace++: Sess\xF5es exportadas para " + path;
         },
@@ -8587,14 +8386,6 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollResetWindowDesc: "Por quanto tempo pequenos deltas de rolagem continuam sendo acumulados antes de redefinir. Usado apenas quando a predefini\xE7\xE3o \xE9 Personalizado.",
         settingsStatusBarScrollInvert: "Inverter dire\xE7\xE3o da rolagem",
         settingsStatusBarScrollInvertDesc: "Inverte a dire\xE7\xE3o anterior/pr\xF3xima ao trocar sess\xF5es pela rolagem na barra de status.",
-        settingsUseLocalSettings: "Usar configura\xE7\xF5es locais do vault",
-        settingsUseLocalSettingsDesc: "Ative isto se voc\xEA sincroniza .obsidian entre v\xE1rios vaults (por exemplo, com Settings Profiles) e deseja manter as configura\xE7\xF5es do Workspace++ diferentes por vault.",
-        settingsCopyGlobalToLocal: "Copiar configura\xE7\xF5es globais para este vault",
-        settingsCopyGlobalToLocalDesc: "Substitui as configura\xE7\xF5es locais do vault pelas configura\xE7\xF5es globais atuais.",
-        settingsCopyGlobalToLocalBtn: "Copiar",
-        settingsResetLocalSettings: "Redefinir configura\xE7\xF5es locais do vault",
-        settingsResetLocalSettingsDesc: "Redefine as configura\xE7\xF5es locais do vault para as configura\xE7\xF5es globais.",
-        settingsResetLocalSettingsBtn: "Redefinir local",
         settingsAdvancedStorageSubsection: "Comportamento de armazenamento",
         settingsAdvancedTransferSubsection: "Transfer\xEAncia de dados",
         settingsDeveloperSection: "Ferramentas de desenvolvedor",
@@ -8602,7 +8393,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "Detalhes de armazenamento usados atualmente pelo Workspace++.",
         settingsStorageFieldSessions: "Arquivo de sess\xF5es",
         settingsStorageFieldSessionsBackup: "Backup de sess\xF5es",
-        settingsStorageFieldLocalSettings: "Arquivo de configura\xE7\xF5es locais",
         settingsStorageFieldGlobalSettings: "Arquivo de configura\xE7\xF5es globais",
         settingsStorageFieldSessionCount: "Quantidade de sess\xF5es",
         settingsStorageFieldUpdatedAt: "Atualizado em",
@@ -8648,11 +8438,6 @@ var require_i18n = __commonJS({
         saveWithoutNaming: "\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0431\u0435\u0437 \u0438\u043C\u0435\u043D\u0438",
         sessionDataMigrated: "Workspace++: \u0434\u0430\u043D\u043D\u044B\u0435 \u0441\u0435\u0441\u0441\u0438\u0439 \u043F\u0435\u0440\u0435\u043D\u0435\u0441\u0435\u043D\u044B \u0432 .workspace-plus-plus/sessions.json.",
         sessionDataMigrationFailed: "Workspace++: \u043D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u043F\u0435\u0440\u0435\u043D\u0435\u0441\u0442\u0438 \u0434\u0430\u043D\u043D\u044B\u0435 \u0441\u0435\u0441\u0441\u0438\u0439. \u0423\u0441\u0442\u0430\u0440\u0435\u0432\u0448\u0438\u0435 \u0434\u0430\u043D\u043D\u044B\u0435 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u044B.",
-        localSettingsEnabled: "Workspace++: \u043B\u043E\u043A\u0430\u043B\u044C\u043D\u044B\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u0445\u0440\u0430\u043D\u0438\u043B\u0438\u0449\u0430 \u0432\u043A\u043B\u044E\u0447\u0435\u043D\u044B.",
-        localSettingsDisabled: "Workspace++: \u043B\u043E\u043A\u0430\u043B\u044C\u043D\u044B\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u0445\u0440\u0430\u043D\u0438\u043B\u0438\u0449\u0430 \u043E\u0442\u043A\u043B\u044E\u0447\u0435\u043D\u044B.",
-        localSettingsCopied: "Workspace++: \u0433\u043B\u043E\u0431\u0430\u043B\u044C\u043D\u044B\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u0441\u043A\u043E\u043F\u0438\u0440\u043E\u0432\u0430\u043D\u044B \u0432 \u043B\u043E\u043A\u0430\u043B\u044C\u043D\u044B\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u0445\u0440\u0430\u043D\u0438\u043B\u0438\u0449\u0430.",
-        localSettingsLoadFailed: "Workspace++: \u043D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0437\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044C \u043B\u043E\u043A\u0430\u043B\u044C\u043D\u044B\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u0445\u0440\u0430\u043D\u0438\u043B\u0438\u0449\u0430. \u0411\u0443\u0434\u0443\u0442 \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u043D\u044B \u0433\u043B\u043E\u0431\u0430\u043B\u044C\u043D\u044B\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438.",
-        localSettingsOperationFailed: "Workspace++: \u043D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u043E\u0431\u043D\u043E\u0432\u0438\u0442\u044C \u043B\u043E\u043A\u0430\u043B\u044C\u043D\u044B\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u0445\u0440\u0430\u043D\u0438\u043B\u0438\u0449\u0430.",
         exportSessionsDone: function(path) {
           return "Workspace++: \u0441\u0435\u0441\u0441\u0438\u0438 \u044D\u043A\u0441\u043F\u043E\u0440\u0442\u0438\u0440\u043E\u0432\u0430\u043D\u044B \u0432 " + path;
         },
@@ -8694,14 +8479,6 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollResetWindowDesc: "\u041A\u0430\u043A \u0434\u043E\u043B\u0433\u043E \u0441\u0443\u043C\u043C\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u043D\u0435\u0431\u043E\u043B\u044C\u0448\u0438\u0435 \u0448\u0430\u0433\u0438 \u043F\u0440\u043E\u043A\u0440\u0443\u0442\u043A\u0438 \u043F\u0435\u0440\u0435\u0434 \u0441\u0431\u0440\u043E\u0441\u043E\u043C. \u0418\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0435\u0442\u0441\u044F \u0442\u043E\u043B\u044C\u043A\u043E \u0441 \u043F\u0440\u043E\u0444\u0438\u043B\u0435\u043C \xAB\u0421\u0432\u043E\u0439\xBB.",
         settingsStatusBarScrollInvert: "\u0418\u043D\u0432\u0435\u0440\u0442\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u043D\u0430\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u0438\u0435 \u043F\u0440\u043E\u043A\u0440\u0443\u0442\u043A\u0438",
         settingsStatusBarScrollInvertDesc: "\u041C\u0435\u043D\u044F\u0435\u0442 \u043C\u0435\u0441\u0442\u0430\u043C\u0438 \u043D\u0430\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u0438\u044F \xAB\u043F\u0440\u0435\u0434\u044B\u0434\u0443\u0449\u0430\u044F/\u0441\u043B\u0435\u0434\u0443\u044E\u0449\u0430\u044F\xBB \u0434\u043B\u044F \u043F\u0435\u0440\u0435\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u044F \u0441\u0435\u0441\u0441\u0438\u0439 \u043F\u0440\u043E\u043A\u0440\u0443\u0442\u043A\u043E\u0439 \u043F\u043E \u0441\u0442\u0440\u043E\u043A\u0435 \u0441\u043E\u0441\u0442\u043E\u044F\u043D\u0438\u044F.",
-        settingsUseLocalSettings: "\u0418\u0441\u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u044C \u043B\u043E\u043A\u0430\u043B\u044C\u043D\u044B\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u0445\u0440\u0430\u043D\u0438\u043B\u0438\u0449\u0430",
-        settingsUseLocalSettingsDesc: "\u0412\u043A\u043B\u044E\u0447\u0438\u0442\u0435, \u0435\u0441\u043B\u0438 \u0432\u044B \u0441\u0438\u043D\u0445\u0440\u043E\u043D\u0438\u0437\u0438\u0440\u0443\u0435\u0442\u0435 .obsidian \u043C\u0435\u0436\u0434\u0443 \u043D\u0435\u0441\u043A\u043E\u043B\u044C\u043A\u0438\u043C\u0438 \u0445\u0440\u0430\u043D\u0438\u043B\u0438\u0449\u0430\u043C\u0438 (\u043D\u0430\u043F\u0440\u0438\u043C\u0435\u0440, \u0447\u0435\u0440\u0435\u0437 Settings Profiles) \u0438 \u0445\u043E\u0442\u0438\u0442\u0435 \u0440\u0430\u0437\u043D\u044B\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 Workspace++ \u0434\u043B\u044F \u043A\u0430\u0436\u0434\u043E\u0433\u043E \u0445\u0440\u0430\u043D\u0438\u043B\u0438\u0449\u0430.",
-        settingsCopyGlobalToLocal: "\u041A\u043E\u043F\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u0433\u043B\u043E\u0431\u0430\u043B\u044C\u043D\u044B\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u0432 \u044D\u0442\u043E \u0445\u0440\u0430\u043D\u0438\u043B\u0438\u0449\u0435",
-        settingsCopyGlobalToLocalDesc: "\u041F\u0435\u0440\u0435\u0437\u0430\u043F\u0438\u0441\u044B\u0432\u0430\u0435\u0442 \u043B\u043E\u043A\u0430\u043B\u044C\u043D\u044B\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u0445\u0440\u0430\u043D\u0438\u043B\u0438\u0449\u0430 \u0442\u0435\u043A\u0443\u0449\u0438\u043C\u0438 \u0433\u043B\u043E\u0431\u0430\u043B\u044C\u043D\u044B\u043C\u0438 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0430\u043C\u0438.",
-        settingsCopyGlobalToLocalBtn: "\u041A\u043E\u043F\u0438\u0440\u043E\u0432\u0430\u0442\u044C",
-        settingsResetLocalSettings: "\u0421\u0431\u0440\u043E\u0441\u0438\u0442\u044C \u043B\u043E\u043A\u0430\u043B\u044C\u043D\u044B\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u0445\u0440\u0430\u043D\u0438\u043B\u0438\u0449\u0430",
-        settingsResetLocalSettingsDesc: "\u0421\u0431\u0440\u0430\u0441\u044B\u0432\u0430\u0435\u0442 \u043B\u043E\u043A\u0430\u043B\u044C\u043D\u044B\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u0445\u0440\u0430\u043D\u0438\u043B\u0438\u0449\u0430 \u0434\u043E \u0433\u043B\u043E\u0431\u0430\u043B\u044C\u043D\u044B\u0445 \u043D\u0430\u0441\u0442\u0440\u043E\u0435\u043A.",
-        settingsResetLocalSettingsBtn: "\u0421\u0431\u0440\u043E\u0441\u0438\u0442\u044C \u043B\u043E\u043A\u0430\u043B\u044C\u043D\u044B\u0435",
         settingsAdvancedStorageSubsection: "\u041F\u043E\u0432\u0435\u0434\u0435\u043D\u0438\u0435 \u0445\u0440\u0430\u043D\u0435\u043D\u0438\u044F",
         settingsAdvancedTransferSubsection: "\u041F\u0435\u0440\u0435\u0434\u0430\u0447\u0430 \u0434\u0430\u043D\u043D\u044B\u0445",
         settingsDeveloperSection: "\u0418\u043D\u0441\u0442\u0440\u0443\u043C\u0435\u043D\u0442\u044B \u0440\u0430\u0437\u0440\u0430\u0431\u043E\u0442\u0447\u0438\u043A\u0430",
@@ -8709,7 +8486,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "\u041F\u0430\u0440\u0430\u043C\u0435\u0442\u0440\u044B \u0445\u0440\u0430\u043D\u0435\u043D\u0438\u044F, \u043A\u043E\u0442\u043E\u0440\u044B\u0435 \u0441\u0435\u0439\u0447\u0430\u0441 \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0435\u0442 Workspace++.",
         settingsStorageFieldSessions: "\u0424\u0430\u0439\u043B \u0441\u0435\u0441\u0441\u0438\u0439",
         settingsStorageFieldSessionsBackup: "\u0420\u0435\u0437\u0435\u0440\u0432\u043D\u0430\u044F \u043A\u043E\u043F\u0438\u044F \u0441\u0435\u0441\u0441\u0438\u0439",
-        settingsStorageFieldLocalSettings: "\u0424\u0430\u0439\u043B \u043B\u043E\u043A\u0430\u043B\u044C\u043D\u044B\u0445 \u043D\u0430\u0441\u0442\u0440\u043E\u0435\u043A",
         settingsStorageFieldGlobalSettings: "\u0424\u0430\u0439\u043B \u0433\u043B\u043E\u0431\u0430\u043B\u044C\u043D\u044B\u0445 \u043D\u0430\u0441\u0442\u0440\u043E\u0435\u043A",
         settingsStorageFieldSessionCount: "\u041A\u043E\u043B\u0438\u0447\u0435\u0441\u0442\u0432\u043E \u0441\u0435\u0441\u0441\u0438\u0439",
         settingsStorageFieldUpdatedAt: "\u041E\u0431\u043D\u043E\u0432\u043B\u0435\u043D\u043E",
@@ -8755,11 +8531,6 @@ var require_i18n = __commonJS({
         saveWithoutNaming: "Ohne Namen speichern",
         sessionDataMigrated: "Workspace++: Sitzungsdaten wurden nach .workspace-plus-plus/sessions.json verschoben.",
         sessionDataMigrationFailed: "Workspace++: Sitzungsdaten konnten nicht migriert werden. Altdaten bleiben erhalten.",
-        localSettingsEnabled: "Workspace++: Vault-lokale Einstellungen aktiviert.",
-        localSettingsDisabled: "Workspace++: Vault-lokale Einstellungen deaktiviert.",
-        localSettingsCopied: "Workspace++: Globale Einstellungen wurden in die Vault-lokalen Einstellungen kopiert.",
-        localSettingsLoadFailed: "Workspace++: Vault-lokale Einstellungen konnten nicht geladen werden. Globale Einstellungen werden verwendet.",
-        localSettingsOperationFailed: "Workspace++: Vault-lokale Einstellungen konnten nicht aktualisiert werden.",
         exportSessionsDone: function(path) {
           return "Workspace++: Sitzungen nach " + path + " exportiert";
         },
@@ -8801,14 +8572,6 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollResetWindowDesc: "Wie lange kleine Scroll-Deltas vor dem Zur\xFCcksetzen weiter zusammengez\xE4hlt werden. Wird nur mit der Voreinstellung Benutzerdefiniert verwendet.",
         settingsStatusBarScrollInvert: "Scrollrichtung umkehren",
         settingsStatusBarScrollInvertDesc: "Kehrt die Richtung Vorherige/N\xE4chste f\xFCr den Sitzungswechsel per Scrollen in der Statusleiste um.",
-        settingsUseLocalSettings: "Vault-lokale Einstellungen verwenden",
-        settingsUseLocalSettingsDesc: "Aktiviere dies, wenn du .obsidian zwischen mehreren Vaults synchronisierst (z. B. mit Settings Profiles) und die Workspace++-Einstellungen pro Vault unterschiedlich halten m\xF6chtest.",
-        settingsCopyGlobalToLocal: "Globale Einstellungen in dieses Vault kopieren",
-        settingsCopyGlobalToLocalDesc: "\xDCberschreibt die Vault-lokalen Einstellungen mit den aktuellen globalen Einstellungen.",
-        settingsCopyGlobalToLocalBtn: "Kopieren",
-        settingsResetLocalSettings: "Vault-lokale Einstellungen zur\xFCcksetzen",
-        settingsResetLocalSettingsDesc: "Setzt Vault-lokale Einstellungen auf die globalen Einstellungen zur\xFCck.",
-        settingsResetLocalSettingsBtn: "Lokal zur\xFCcksetzen",
         settingsAdvancedStorageSubsection: "Speicherverhalten",
         settingsAdvancedTransferSubsection: "Daten\xFCbertragung",
         settingsDeveloperSection: "Entwicklerwerkzeuge",
@@ -8816,7 +8579,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "Speicherdetails, die Workspace++ aktuell verwendet.",
         settingsStorageFieldSessions: "Sitzungsdatei",
         settingsStorageFieldSessionsBackup: "Sitzungssicherung",
-        settingsStorageFieldLocalSettings: "Datei f\xFCr lokale Einstellungen",
         settingsStorageFieldGlobalSettings: "Datei f\xFCr globale Einstellungen",
         settingsStorageFieldSessionCount: "Anzahl Sitzungen",
         settingsStorageFieldUpdatedAt: "Aktualisiert am",
@@ -8862,11 +8624,6 @@ var require_i18n = __commonJS({
         saveWithoutNaming: "\uC774\uB984 \uC5C6\uC774 \uC800\uC7A5",
         sessionDataMigrated: "Workspace++: \uC138\uC158 \uB370\uC774\uD130\uAC00 .workspace-plus-plus/sessions.json \uC73C\uB85C \uC774\uB3D9\uB418\uC5C8\uC2B5\uB2C8\uB2E4.",
         sessionDataMigrationFailed: "Workspace++: \uC138\uC158 \uB370\uC774\uD130 \uB9C8\uC774\uADF8\uB808\uC774\uC158\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4. \uAE30\uC874 \uB370\uC774\uD130\uB294 \uC720\uC9C0\uB429\uB2C8\uB2E4.",
-        localSettingsEnabled: "Workspace++: \uBCFC\uD2B8 \uB85C\uCEEC \uC124\uC815\uC774 \uD65C\uC131\uD654\uB418\uC5C8\uC2B5\uB2C8\uB2E4.",
-        localSettingsDisabled: "Workspace++: \uBCFC\uD2B8 \uB85C\uCEEC \uC124\uC815\uC774 \uBE44\uD65C\uC131\uD654\uB418\uC5C8\uC2B5\uB2C8\uB2E4.",
-        localSettingsCopied: "Workspace++: \uC804\uC5ED \uC124\uC815\uC744 \uBCFC\uD2B8 \uB85C\uCEEC \uC124\uC815\uC73C\uB85C \uBCF5\uC0AC\uD588\uC2B5\uB2C8\uB2E4.",
-        localSettingsLoadFailed: "Workspace++: \uBCFC\uD2B8 \uB85C\uCEEC \uC124\uC815\uC744 \uBD88\uB7EC\uC624\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4. \uC804\uC5ED \uC124\uC815\uC744 \uC0AC\uC6A9\uD569\uB2C8\uB2E4.",
-        localSettingsOperationFailed: "Workspace++: \uBCFC\uD2B8 \uB85C\uCEEC \uC124\uC815\uC744 \uC5C5\uB370\uC774\uD2B8\uD558\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4.",
         exportSessionsDone: function(path) {
           return "Workspace++: \uC138\uC158\uC744 " + path + " \uB85C \uB0B4\uBCF4\uB0C8\uC2B5\uB2C8\uB2E4.";
         },
@@ -8908,14 +8665,6 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollResetWindowDesc: "\uC791\uC740 \uC2A4\uD06C\uB864 \uBCC0\uD654\uB7C9\uC744 \uCD08\uAE30\uD654\uD558\uAE30 \uC804\uC5D0 \uC5BC\uB9C8\uB098 \uC624\uB798 \uB204\uC801\uD560\uC9C0 \uC124\uC815\uD569\uB2C8\uB2E4. \uC0AC\uC6A9\uC790 \uC9C0\uC815 \uD504\uB9AC\uC14B\uC5D0\uC11C\uB9CC \uC0AC\uC6A9\uB429\uB2C8\uB2E4.",
         settingsStatusBarScrollInvert: "\uC2A4\uD06C\uB864 \uBC29\uD5A5 \uBC18\uC804",
         settingsStatusBarScrollInvertDesc: "\uC0C1\uD0DC \uD45C\uC2DC\uC904 \uC2A4\uD06C\uB864 \uC804\uD658\uC5D0\uC11C \uC774\uC804/\uB2E4\uC74C \uBC29\uD5A5\uC744 \uBC18\uB300\uB85C \uD569\uB2C8\uB2E4.",
-        settingsUseLocalSettings: "\uBCFC\uD2B8 \uB85C\uCEEC \uC124\uC815 \uC0AC\uC6A9",
-        settingsUseLocalSettingsDesc: "\uC5EC\uB7EC \uBCFC\uD2B8\uC5D0\uC11C .obsidian\uC744 \uB3D9\uAE30\uD654\uD558\uB294 \uACBD\uC6B0(\uC608: Settings Profiles) Workspace++ \uC124\uC815\uC744 \uBCFC\uD2B8\uBCC4\uB85C \uB2E4\uB974\uAC8C \uC720\uC9C0\uD558\uB824\uBA74 \uCF1C\uC138\uC694.",
-        settingsCopyGlobalToLocal: "\uC804\uC5ED \uC124\uC815\uC744 \uC774 \uBCFC\uD2B8\uB85C \uBCF5\uC0AC",
-        settingsCopyGlobalToLocalDesc: "\uD604\uC7AC \uC804\uC5ED \uC124\uC815\uC73C\uB85C \uBCFC\uD2B8 \uB85C\uCEEC \uC124\uC815\uC744 \uB36E\uC5B4\uC501\uB2C8\uB2E4.",
-        settingsCopyGlobalToLocalBtn: "\uBCF5\uC0AC",
-        settingsResetLocalSettings: "\uBCFC\uD2B8 \uB85C\uCEEC \uC124\uC815 \uCD08\uAE30\uD654",
-        settingsResetLocalSettingsDesc: "\uBCFC\uD2B8 \uB85C\uCEEC \uC124\uC815\uC744 \uC804\uC5ED \uC124\uC815\uC73C\uB85C \uB418\uB3CC\uB9BD\uB2C8\uB2E4.",
-        settingsResetLocalSettingsBtn: "\uB85C\uCEEC \uCD08\uAE30\uD654",
         settingsAdvancedStorageSubsection: "\uC800\uC7A5 \uB3D9\uC791",
         settingsAdvancedTransferSubsection: "\uB370\uC774\uD130 \uC774\uC804",
         settingsDeveloperSection: "\uAC1C\uBC1C\uC790 \uB3C4\uAD6C",
@@ -8923,7 +8672,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "Workspace++\uAC00 \uD604\uC7AC \uC0AC\uC6A9\uD558\uB294 \uC800\uC7A5 \uC815\uBCF4\uC785\uB2C8\uB2E4.",
         settingsStorageFieldSessions: "\uC138\uC158 \uD30C\uC77C",
         settingsStorageFieldSessionsBackup: "\uC138\uC158 \uBC31\uC5C5",
-        settingsStorageFieldLocalSettings: "\uB85C\uCEEC \uC124\uC815 \uD30C\uC77C",
         settingsStorageFieldGlobalSettings: "\uC804\uC5ED \uC124\uC815 \uD30C\uC77C",
         settingsStorageFieldSessionCount: "\uC138\uC158 \uC218",
         settingsStorageFieldUpdatedAt: "\uC5C5\uB370\uC774\uD2B8 \uC2DC\uAC04",
@@ -8969,11 +8717,6 @@ var require_i18n = __commonJS({
         saveWithoutNaming: "Salva senza nome",
         sessionDataMigrated: "Workspace++: i dati delle sessioni sono stati spostati in .workspace-plus-plus/sessions.json.",
         sessionDataMigrationFailed: "Workspace++: migrazione dei dati delle sessioni non riuscita. I dati legacy sono stati mantenuti.",
-        localSettingsEnabled: "Workspace++: impostazioni locali del vault abilitate.",
-        localSettingsDisabled: "Workspace++: impostazioni locali del vault disabilitate.",
-        localSettingsCopied: "Workspace++: impostazioni globali copiate nelle impostazioni locali del vault.",
-        localSettingsLoadFailed: "Workspace++: impossibile caricare le impostazioni locali del vault. Verranno usate le impostazioni globali.",
-        localSettingsOperationFailed: "Workspace++: impossibile aggiornare le impostazioni locali del vault.",
         exportSessionsDone: function(path) {
           return "Workspace++: sessioni esportate in " + path;
         },
@@ -9015,14 +8758,6 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollResetWindowDesc: "Per quanto tempo continuare ad accumulare piccoli delta di scorrimento prima di azzerarli. Usato solo con la preimpostazione Personalizzato.",
         settingsStatusBarScrollInvert: "Inverti direzione di scorrimento",
         settingsStatusBarScrollInvertDesc: "Inverte la direzione precedente/successiva per il cambio sessione con lo scorrimento nella barra di stato.",
-        settingsUseLocalSettings: "Usa impostazioni locali del vault",
-        settingsUseLocalSettingsDesc: "Attiva questa opzione se sincronizzi .obsidian tra pi\xF9 vault (ad esempio con Settings Profiles) e vuoi mantenere impostazioni Workspace++ diverse per ogni vault.",
-        settingsCopyGlobalToLocal: "Copia impostazioni globali in questo vault",
-        settingsCopyGlobalToLocalDesc: "Sovrascrive le impostazioni locali del vault con le impostazioni globali correnti.",
-        settingsCopyGlobalToLocalBtn: "Copia",
-        settingsResetLocalSettings: "Reimposta impostazioni locali del vault",
-        settingsResetLocalSettingsDesc: "Reimposta le impostazioni locali del vault alle impostazioni globali.",
-        settingsResetLocalSettingsBtn: "Reimposta locale",
         settingsAdvancedStorageSubsection: "Comportamento di archiviazione",
         settingsAdvancedTransferSubsection: "Trasferimento dati",
         settingsDeveloperSection: "Strumenti sviluppatore",
@@ -9030,7 +8765,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "Dettagli di archiviazione attualmente usati da Workspace++.",
         settingsStorageFieldSessions: "File sessioni",
         settingsStorageFieldSessionsBackup: "Backup sessioni",
-        settingsStorageFieldLocalSettings: "File impostazioni locali",
         settingsStorageFieldGlobalSettings: "File impostazioni globali",
         settingsStorageFieldSessionCount: "Numero sessioni",
         settingsStorageFieldUpdatedAt: "Aggiornato il",
@@ -9076,11 +8810,6 @@ var require_i18n = __commonJS({
         saveWithoutNaming: "Adland\u0131rmadan kaydet",
         sessionDataMigrated: "Workspace++: Oturum verileri .workspace-plus-plus/sessions.json konumuna ta\u015F\u0131nd\u0131.",
         sessionDataMigrationFailed: "Workspace++: Oturum verileri ta\u015F\u0131namad\u0131. Eski veriler korunuyor.",
-        localSettingsEnabled: "Workspace++: Vault yerel ayarlar\u0131 etkinle\u015Ftirildi.",
-        localSettingsDisabled: "Workspace++: Vault yerel ayarlar\u0131 devre d\u0131\u015F\u0131 b\u0131rak\u0131ld\u0131.",
-        localSettingsCopied: "Workspace++: Genel ayarlar vault yerel ayarlar\u0131na kopyaland\u0131.",
-        localSettingsLoadFailed: "Workspace++: Vault yerel ayarlar\u0131 y\xFCklenemedi. Genel ayarlar kullan\u0131lacak.",
-        localSettingsOperationFailed: "Workspace++: Vault yerel ayarlar\u0131 g\xFCncellenemedi.",
         exportSessionsDone: function(path) {
           return "Workspace++: Oturumlar " + path + " konumuna d\u0131\u015Fa aktar\u0131ld\u0131";
         },
@@ -9122,14 +8851,6 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollResetWindowDesc: "K\xFC\xE7\xFCk kayd\u0131rma farklar\u0131n\u0131n s\u0131f\u0131rlanmadan \xF6nce ne kadar s\xFCre biriktirilece\u011Fini belirler. Yaln\u0131zca \xD6zel \xF6n ayarda kullan\u0131l\u0131r.",
         settingsStatusBarScrollInvert: "Kayd\u0131rma y\xF6n\xFCn\xFC ters \xE7evir",
         settingsStatusBarScrollInvertDesc: "Durum \xE7ubu\u011Funda kayd\u0131rarak oturum de\u011Fi\u015Ftirirken \xF6nceki/sonraki y\xF6n\xFCn\xFC tersine \xE7evirir.",
-        settingsUseLocalSettings: "Vault yerel ayarlar\u0131n\u0131 kullan",
-        settingsUseLocalSettingsDesc: ".obsidian klas\xF6r\xFCn\xFC birden \xE7ok vault aras\u0131nda senkronize ediyorsan\u0131z (\xF6rne\u011Fin Settings Profiles ile) ve Workspace++ ayarlar\u0131n\u0131 vault baz\u0131nda farkl\u0131 tutmak istiyorsan\u0131z bunu a\xE7\u0131n.",
-        settingsCopyGlobalToLocal: "Genel ayarlar\u0131 bu vaulta kopyala",
-        settingsCopyGlobalToLocalDesc: "Vault yerel ayarlar\u0131n\u0131 mevcut genel ayarlarla \xFCzerine yazar.",
-        settingsCopyGlobalToLocalBtn: "Kopyala",
-        settingsResetLocalSettings: "Vault yerel ayarlar\u0131n\u0131 s\u0131f\u0131rla",
-        settingsResetLocalSettingsDesc: "Vault yerel ayarlar\u0131n\u0131 genel ayarlara geri d\xF6nd\xFCr\xFCr.",
-        settingsResetLocalSettingsBtn: "Yereli s\u0131f\u0131rla",
         settingsAdvancedStorageSubsection: "Depolama davran\u0131\u015F\u0131",
         settingsAdvancedTransferSubsection: "Veri aktar\u0131m\u0131",
         settingsDeveloperSection: "Geli\u015Ftirici ara\xE7lar\u0131",
@@ -9137,7 +8858,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "Workspace++ taraf\u0131ndan \u015Fu anda kullan\u0131lan depolama ayr\u0131nt\u0131lar\u0131.",
         settingsStorageFieldSessions: "Oturum dosyas\u0131",
         settingsStorageFieldSessionsBackup: "Oturum yede\u011Fi",
-        settingsStorageFieldLocalSettings: "Yerel ayar dosyas\u0131",
         settingsStorageFieldGlobalSettings: "Genel ayar dosyas\u0131",
         settingsStorageFieldSessionCount: "Oturum say\u0131s\u0131",
         settingsStorageFieldUpdatedAt: "G\xFCncellenme zaman\u0131",
@@ -9183,11 +8903,6 @@ var require_i18n = __commonJS({
         saveWithoutNaming: "Simpan tanpa nama",
         sessionDataMigrated: "Workspace++: Data sesi dipindahkan ke .workspace-plus-plus/sessions.json.",
         sessionDataMigrationFailed: "Workspace++: Gagal memigrasikan data sesi. Data lama tetap disimpan.",
-        localSettingsEnabled: "Workspace++: Pengaturan lokal vault diaktifkan.",
-        localSettingsDisabled: "Workspace++: Pengaturan lokal vault dinonaktifkan.",
-        localSettingsCopied: "Workspace++: Pengaturan global disalin ke pengaturan lokal vault.",
-        localSettingsLoadFailed: "Workspace++: Gagal memuat pengaturan lokal vault. Pengaturan global akan digunakan.",
-        localSettingsOperationFailed: "Workspace++: Gagal memperbarui pengaturan lokal vault.",
         exportSessionsDone: function(path) {
           return "Workspace++: Sesi diekspor ke " + path;
         },
@@ -9229,14 +8944,6 @@ var require_i18n = __commonJS({
         settingsStatusBarScrollResetWindowDesc: "Berapa lama delta gulir kecil tetap digabungkan sebelum direset. Hanya digunakan saat preset Kustom dipilih.",
         settingsStatusBarScrollInvert: "Balik arah gulir",
         settingsStatusBarScrollInvertDesc: "Membalik arah sebelumnya/berikutnya untuk pergantian sesi lewat gulir pada bilah status.",
-        settingsUseLocalSettings: "Gunakan pengaturan lokal vault",
-        settingsUseLocalSettingsDesc: "Aktifkan ini jika Anda menyinkronkan .obsidian di beberapa vault (misalnya dengan Settings Profiles) dan ingin pengaturan Workspace++ tetap berbeda per vault.",
-        settingsCopyGlobalToLocal: "Salin pengaturan global ke vault ini",
-        settingsCopyGlobalToLocalDesc: "Timpa pengaturan lokal vault dengan pengaturan global saat ini.",
-        settingsCopyGlobalToLocalBtn: "Salin",
-        settingsResetLocalSettings: "Setel ulang pengaturan lokal vault",
-        settingsResetLocalSettingsDesc: "Kembalikan pengaturan lokal vault ke pengaturan global.",
-        settingsResetLocalSettingsBtn: "Setel ulang lokal",
         settingsAdvancedStorageSubsection: "Perilaku penyimpanan",
         settingsAdvancedTransferSubsection: "Transfer data",
         settingsDeveloperSection: "Alat pengembang",
@@ -9244,7 +8951,6 @@ var require_i18n = __commonJS({
         settingsStorageDiagnosticsDesc: "Detail penyimpanan yang saat ini dipakai oleh Workspace++.",
         settingsStorageFieldSessions: "Berkas sesi",
         settingsStorageFieldSessionsBackup: "Cadangan sesi",
-        settingsStorageFieldLocalSettings: "Berkas pengaturan lokal",
         settingsStorageFieldGlobalSettings: "Berkas pengaturan global",
         settingsStorageFieldSessionCount: "Jumlah sesi",
         settingsStorageFieldUpdatedAt: "Diperbarui pada",
@@ -9931,34 +9637,30 @@ var require_i18n = __commonJS({
         settingsSessionStorageLocationDesc: function(path) {
           return "Current session file: " + path;
         },
-        settingsMoveSessionsToPluginFolder: "Move sessions to Obsidian plugin folder",
-        settingsMoveSessionsToPluginFolderDesc: "Use this if you want Obsidian Sync to sync Workspace++ sessions across devices. Avoid it if you share .obsidian across multiple vaults with Settings Profiles.",
-        settingsMoveSessionsToPluginFolderBtn: "Move to .obsidian",
-        settingsMoveSessionsToVaultFolder: "Move sessions outside .obsidian",
-        settingsMoveSessionsToVaultFolderDesc: "Use this if you share .obsidian across multiple vaults and want each vault to keep separate sessions.",
-        settingsMoveSessionsToVaultFolderBtn: "Move outside .obsidian",
+        settingsVaultOnlySessions: "Keep sessions in this vault only",
+        settingsVaultOnlySessionsDesc: "Sessions are normally stored in the plugin's data.json so Obsidian Sync can carry them between your devices. Turn this on to store them in .workspace-plus-plus instead, so vaults that share .obsidian (for example with Settings Profiles) keep separate sessions. Sessions stored there cannot be synced by Obsidian Sync.",
         sessionStorageMoved: function(path) {
           return "Workspace++: Session storage moved to " + path;
         },
         sessionStorageMoveFailed: "Workspace++: Failed to move session storage.",
-        settingsStorageFieldSessionStorageLocation: "Session storage mode"
+        settingsStorageFieldHistory: "Version history file",
+        settingsStorageFieldDataSize: "Session storage size",
+        settingsStorageSyncHint: 'Obsidian Sync only carries this file when "Installed community plugins" is enabled in its settings. Version history and backups stay on this device.'
       },
       ja: {
         settingsSessionStorageLocation: "\u30BB\u30C3\u30B7\u30E7\u30F3\u306E\u4FDD\u5B58\u5834\u6240",
         settingsSessionStorageLocationDesc: function(path) {
           return "\u73FE\u5728\u306E\u30BB\u30C3\u30B7\u30E7\u30F3\u30D5\u30A1\u30A4\u30EB: " + path;
         },
-        settingsMoveSessionsToPluginFolder: "\u30BB\u30C3\u30B7\u30E7\u30F3\u3092Obsidian\u30D7\u30E9\u30B0\u30A4\u30F3\u30D5\u30A9\u30EB\u30C0\u3078\u79FB\u52D5",
-        settingsMoveSessionsToPluginFolderDesc: "Obsidian Sync\u3067Workspace++\u306E\u30BB\u30C3\u30B7\u30E7\u30F3\u3092\u30C7\u30D0\u30A4\u30B9\u9593\u540C\u671F\u3057\u305F\u3044\u5834\u5408\u306B\u4F7F\u7528\u3057\u307E\u3059\u3002Settings Profiles\u306A\u3069\u3067\u8907\u6570Vault\u9593\u306E.obsidian\u3092\u5171\u6709\u3057\u3066\u3044\u308B\u5834\u5408\u306F\u907F\u3051\u3066\u304F\u3060\u3055\u3044\u3002",
-        settingsMoveSessionsToPluginFolderBtn: ".obsidian\u3078\u79FB\u52D5",
-        settingsMoveSessionsToVaultFolder: "\u30BB\u30C3\u30B7\u30E7\u30F3\u3092.obsidian\u306E\u5916\u3078\u79FB\u52D5",
-        settingsMoveSessionsToVaultFolderDesc: "\u8907\u6570Vault\u9593\u3067.obsidian\u3092\u5171\u6709\u3057\u3066\u3044\u3066\u3001\u5404Vault\u3067\u5225\u3005\u306E\u30BB\u30C3\u30B7\u30E7\u30F3\u3092\u4FDD\u6301\u3057\u305F\u3044\u5834\u5408\u306B\u4F7F\u7528\u3057\u307E\u3059\u3002",
-        settingsMoveSessionsToVaultFolderBtn: ".obsidian\u306E\u5916\u3078\u79FB\u52D5",
+        settingsVaultOnlySessions: "\u30BB\u30C3\u30B7\u30E7\u30F3\u3092\u3053\u306EVault\u3060\u3051\u3067\u4FDD\u6301\u3059\u308B",
+        settingsVaultOnlySessionsDesc: "\u30BB\u30C3\u30B7\u30E7\u30F3\u306F\u901A\u5E38\u3001Obsidian Sync\u304C\u30C7\u30D0\u30A4\u30B9\u9593\u3067\u540C\u671F\u3067\u304D\u308B\u3088\u3046\u30D7\u30E9\u30B0\u30A4\u30F3\u306Edata.json\u306B\u4FDD\u5B58\u3055\u308C\u307E\u3059\u3002\u3053\u308C\u3092\u30AA\u30F3\u306B\u3059\u308B\u3068.workspace-plus-plus\u306B\u4FDD\u5B58\u3055\u308C\u3001Settings Profiles\u306A\u3069\u3067.obsidian\u3092\u5171\u6709\u3057\u3066\u3044\u308BVault\u540C\u58EB\u3067\u3082\u30BB\u30C3\u30B7\u30E7\u30F3\u304C\u6DF7\u3056\u308A\u307E\u305B\u3093\u3002\u305F\u3060\u3057\u305D\u306E\u5834\u6240\u306FObsidian Sync\u306E\u540C\u671F\u5BFE\u8C61\u5916\u3067\u3059\u3002",
         sessionStorageMoved: function(path) {
           return "Workspace++: \u30BB\u30C3\u30B7\u30E7\u30F3\u306E\u4FDD\u5B58\u5834\u6240\u3092 " + path + " \u306B\u79FB\u52D5\u3057\u307E\u3057\u305F\u3002";
         },
         sessionStorageMoveFailed: "Workspace++: \u30BB\u30C3\u30B7\u30E7\u30F3\u306E\u4FDD\u5B58\u5834\u6240\u306E\u79FB\u52D5\u306B\u5931\u6557\u3057\u307E\u3057\u305F\u3002",
-        settingsStorageFieldSessionStorageLocation: "\u30BB\u30C3\u30B7\u30E7\u30F3\u4FDD\u5B58\u30E2\u30FC\u30C9"
+        settingsStorageFieldHistory: "\u30D0\u30FC\u30B8\u30E7\u30F3\u5C65\u6B74\u30D5\u30A1\u30A4\u30EB",
+        settingsStorageFieldDataSize: "\u30BB\u30C3\u30B7\u30E7\u30F3\u4FDD\u5B58\u30B5\u30A4\u30BA",
+        settingsStorageSyncHint: "Obsidian Sync\u304C\u3053\u306E\u30D5\u30A1\u30A4\u30EB\u3092\u540C\u671F\u3059\u308B\u306B\u306F\u3001Sync\u8A2D\u5B9A\u3067\u300CInstalled community plugins\u300D\u3092\u6709\u52B9\u306B\u3059\u308B\u5FC5\u8981\u304C\u3042\u308A\u307E\u3059\u3002\u30D0\u30FC\u30B8\u30E7\u30F3\u5C65\u6B74\u3068\u30D0\u30C3\u30AF\u30A2\u30C3\u30D7\u306F\u3053\u306E\u7AEF\u672B\u306B\u306E\u307F\u4FDD\u5B58\u3055\u308C\u307E\u3059\u3002"
       }
     };
     var sessionStorageLangs = Object.keys(STRINGS);
@@ -12885,6 +12587,13 @@ var require_settings = __commonJS({
     "use strict";
     var obsidian2 = require("obsidian");
     var i18n2 = require_i18n();
+    function formatByteSize(bytes) {
+      if (typeof bytes !== "number" || !isFinite(bytes) || bytes < 0) return "\u2014";
+      if (bytes < 1024) return bytes + " B";
+      var kb = bytes / 1024;
+      if (kb < 1024) return kb.toFixed(1) + " KB";
+      return (kb / 1024).toFixed(1) + " MB";
+    }
     var modals2 = require_modals2();
     var formatRelativeTime = require_format_relative_time();
     var statusBarActions = require_statusbar_actions();
@@ -13399,39 +13108,25 @@ var require_settings = __commonJS({
               options = options || {};
               var row = devCardEl.createDiv({ cls: "wpp-dev-card-row" });
               row.createDiv({ text: label, cls: "wpp-dev-card-label" });
-              row.createDiv({
+              return row.createDiv({
                 text: String(value),
                 cls: options.code ? "wpp-dev-card-value wpp-dev-card-value-code" : "wpp-dev-card-value"
               });
             };
             addSection(L.settingsAdvancedStorageSubsection);
-            var sessionStorageLocation = self.plugin.getSessionStorageLocation();
             new obsidian2.Setting(contentEl).setName(L.settingsSessionStorageLocation).setDesc(L.settingsSessionStorageLocationDesc(self.plugin.getSessionsPath()));
-            addAsyncActionSetting(contentEl, {
-              name: L.settingsMoveSessionsToPluginFolder,
-              desc: L.settingsMoveSessionsToPluginFolderDesc,
-              buttonText: L.settingsMoveSessionsToPluginFolderBtn,
-              disabled: sessionStorageLocation === "plugin-folder",
-              run: function() {
-                return self.plugin.setSessionStorageLocation("plugin-folder");
-              },
-              onSuccess: function() {
-                self.display();
-              },
-              failureNotice: L.sessionStorageMoveFailed
-            });
-            addAsyncActionSetting(contentEl, {
-              name: L.settingsMoveSessionsToVaultFolder,
-              desc: L.settingsMoveSessionsToVaultFolderDesc,
-              buttonText: L.settingsMoveSessionsToVaultFolderBtn,
-              disabled: sessionStorageLocation === "vault-folder",
-              run: function() {
-                return self.plugin.setSessionStorageLocation("vault-folder");
-              },
-              onSuccess: function() {
-                self.display();
-              },
-              failureNotice: L.sessionStorageMoveFailed
+            addToggleSetting(contentEl, {
+              name: L.settingsVaultOnlySessions,
+              desc: L.settingsVaultOnlySessionsDesc,
+              value: self.plugin.getSessionStorageLocation() === "vault-folder",
+              onChange: function(value) {
+                self.plugin.setSessionStorageLocation(value ? "vault-folder" : "plugin-folder").then(function() {
+                  self.display();
+                }).catch(function() {
+                  new obsidian2.Notice(L.sessionStorageMoveFailed);
+                  self.display();
+                });
+              }
             });
             addSection(L.settingsAdvancedTransferSubsection);
             new obsidian2.Setting(contentEl).setName(L.settingsExportSessions).setDesc(L.settingsExportSessionsDesc).addButton(function(btn) {
@@ -13528,10 +13223,21 @@ var require_settings = __commonJS({
             });
             addDevCardRow(L.settingsStorageFieldSessions, diagnosticsInfo.sessionsPath, { code: true });
             addDevCardRow(L.settingsStorageFieldSessionsBackup, diagnosticsInfo.sessionsBackupPath, { code: true });
-            addDevCardRow(L.settingsStorageFieldSessionStorageLocation, diagnosticsInfo.sessionStorageLocation, { code: true });
+            addDevCardRow(L.settingsStorageFieldHistory, diagnosticsInfo.historyPath, { code: true });
             addDevCardRow(L.settingsStorageFieldGlobalSettings, diagnosticsInfo.globalSettingsPath, { code: true });
             addDevCardRow(L.settingsStorageFieldSessionCount, diagnosticsInfo.sessionCount);
+            var sizeValueEl = addDevCardRow(L.settingsStorageFieldDataSize, "\u2026");
+            self.plugin.getSessionStorageSize().then(function(size) {
+              if (!sizeValueEl) return;
+              sizeValueEl.setText(size === null ? "\u2014" : formatByteSize(size));
+            });
             addDevCardRow(L.settingsStorageFieldUpdatedAt, diagnosticsUpdatedText);
+            if (diagnosticsInfo.syncedByObsidianSync) {
+              devCardEl.createDiv({
+                text: L.settingsStorageSyncHint,
+                cls: "wpp-dev-card-desc"
+              });
+            }
           }
           var footerEl = containerEl.createDiv();
           footerEl.style.fontSize = "12px";
@@ -15860,12 +15566,22 @@ var require_persistence = __commonJS({
       WorkspacePlusPlus2.prototype.getStorageDiagnosticsInfo = function() {
         return {
           sessionStorageLocation: this.getSessionStorageLocation(),
+          syncedByObsidianSync: this.isSessionStorageInPluginData(),
           sessionsPath: this.getSessionsPath(),
           sessionsBackupPath: this.getSessionsBackupPath(),
+          historyPath: this.getHistoryPath(),
           globalSettingsPath: joinPath(this.getPluginStorageDirPath(), PLUGIN_DATA_FILE_NAME),
           sessionCount: Object.keys(this.data && this.data.sessions || {}).length,
           updatedAt: Date.now()
         };
+      };
+      WorkspacePlusPlus2.prototype.getSessionStorageSize = function() {
+        return this.app.vault.adapter.stat(this.getSessionsPath()).then(function(stat) {
+          if (!stat || typeof stat.size !== "number") return null;
+          return stat.size;
+        }).catch(function() {
+          return null;
+        });
       };
       WorkspacePlusPlus2.prototype.exportSessionsSnapshot = function() {
         var self = this;

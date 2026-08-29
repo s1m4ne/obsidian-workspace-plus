@@ -829,12 +829,28 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
     WorkspacePlusPlus.prototype.getStorageDiagnosticsInfo = function () {
         return {
             sessionStorageLocation: this.getSessionStorageLocation(),
+            syncedByObsidianSync: this.isSessionStorageInPluginData(),
             sessionsPath: this.getSessionsPath(),
             sessionsBackupPath: this.getSessionsBackupPath(),
+            historyPath: this.getHistoryPath(),
             globalSettingsPath: joinPath(this.getPluginStorageDirPath(), PLUGIN_DATA_FILE_NAME),
             sessionCount: Object.keys((this.data && this.data.sessions) || {}).length,
             updatedAt: Date.now(),
         };
+    };
+
+    // Size of the file Obsidian Sync actually carries. Obsidian's saveData() writes
+    // data.json indented, so this is meaningfully larger than the data it holds -
+    // and it is the number that counts against Sync's per-file limit.
+    WorkspacePlusPlus.prototype.getSessionStorageSize = function () {
+        return this.app.vault.adapter.stat(this.getSessionsPath())
+            .then(function (stat) {
+                if (!stat || typeof stat.size !== 'number') return null;
+                return stat.size;
+            })
+            .catch(function () {
+                return null;
+            });
     };
 
     WorkspacePlusPlus.prototype.exportSessionsSnapshot = function () {

@@ -79,10 +79,6 @@ workspace-session: My Session
 
 Workspace++ also provides a command, **Save current note name as session**, that writes `workspace-session: <note-name>` to the current Markdown note and creates or overwrites the matching session using the current layout.
 
-### Local settings
-
-Workspace++ can keep settings local to the current vault, while session data remains in the vault-level Workspace++ storage folder. This is useful when syncing `.obsidian` settings across vaults but keeping Workspace++ behavior different per vault.
-
 ## Installation
 
 ### From Community Plugins
@@ -148,28 +144,37 @@ All commands can be assigned custom hotkeys in **Settings** > **Hotkeys**.
 
 ## Sync and storage
 
-Workspace++ stores session data in the Obsidian plugin folder for new installs:
+Sessions and settings are stored together in the plugin's data file:
 
 ```text
-.obsidian/plugins/workspace-plus-plus/sessions.json
+.obsidian/plugins/workspace-plus-plus/data.json
 ```
 
-Existing installs that already use the older vault-local folder keep using it automatically:
+This is deliberate. Obsidian Sync only carries four files out of a plugin folder -- `manifest.json`, `main.js`, `styles.css` and `data.json` -- so `data.json` is the only place sessions can live and still reach your other devices. For that to happen, **Installed community plugins** has to be enabled in your Obsidian Sync settings.
+
+Version history and backups stay on the device that made them:
+
+```text
+sessions.backup.json
+history.json
+backups/
+```
+
+Version history holds snapshots of workspace layouts, and layouts are device-specific -- restoring another machine's snapshot would reproduce the very breakage it is there to undo. Keeping it local also keeps `data.json` small, which matters because Sync skips files over its per-file size limit.
+
+### Keeping sessions in one vault
+
+If you share `.obsidian` across several vaults, for example with Settings Profiles, every vault sees the same `data.json` and therefore the same sessions. Turn on **Keep sessions in this vault only** in **Settings** > **Workspace++** > **Advanced** to store them here instead:
 
 ```text
 .workspace-plus-plus/sessions.json
 ```
 
-You can move session storage in **Settings** > **Workspace++** > **Advanced**. Use the Obsidian plugin folder if you want Obsidian Sync to sync Workspace++ sessions across devices. Use the vault-local `.workspace-plus-plus` folder if you share `.obsidian` across multiple vaults with tools such as Settings Profiles and want each vault to keep separate sessions.
+Each vault then keeps its own sessions. Obsidian Sync cannot carry that file -- it excludes dot-folders -- so this trades device sync for vault separation. Third-party tools that sync the whole vault, such as Syncthing, still work.
 
-Immediate backups and rotation backups are stored next to the active session file:
+### Concurrent edits
 
-```text
-sessions.backup.json
-backups/
-```
-
-Workspace++ watches the active session file for external changes and reloads synced updates when possible, but concurrent edits are not a full conflict-free merge system. If you use Syncthing, Dropbox, iCloud, Obsidian Sync, or another file sync tool, let sync finish before editing sessions on another device. Automatic backups help recover from corrupted session data, but they are not a full multi-device conflict resolver.
+Workspace++ watches the session store and merges external changes when it can, but this is not a conflict-free merge system. If you use Obsidian Sync, Syncthing, Dropbox, iCloud, or another sync tool, let sync finish before editing sessions on another device. Backups help recover from corrupted session data; they do not resolve simultaneous edits.
 
 ## Languages
 
