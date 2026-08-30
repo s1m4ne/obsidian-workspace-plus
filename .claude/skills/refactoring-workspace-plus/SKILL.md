@@ -35,6 +35,8 @@ Never state that something passes, builds, or is complete without having run the
 
 Each commit migrates one module and leaves the repo fully working. Never leave a commit in a broken intermediate state — the strangler pattern exists so old and new can coexist.
 
+A migration commit converts the module to TypeScript, turns it into a class, **and fixes the Obsidian guideline violations that conversion makes visible** — all three, in one commit. They cannot be separated: making a file `.ts` is what lets the 33 type-aware lint rules see it, so its violation count rises at that moment. Verified on `src/utils.js`: 255 → 257 from the conversion alone. Deferring the fixes means the ratchet blocks every commit and every file is edited twice.
+
 ## Per-commit workflow
 
 Copy this checklist into your response and tick it off:
@@ -91,11 +93,18 @@ amend the plan, do not quietly abandon it.
 Leaf-first. Later modules depend on earlier ones, so do not reorder without reason.
 
 ```
-utils -> i18n -> storage/paths -> migrations -> SessionStore -> GroupManager
--> HistoryService -> SessionSwitcher -> SessionSaver -> FrontmatterLinker
--> StatusBarController -> CommandRegistry -> Modals -> shared/session-drag
--> shared/group-tabs -> Overlays -> SettingsTab -> main.ts
+utils -> layout-utils -> navigation-utils -> i18n -> storage/paths
+-> storage/json-file-store -> storage/migrations -> storage/session-storage
+-> storage/sync-watcher -> SessionStore -> GroupManager -> HistoryService
+-> SessionSwitcher -> SessionSaver -> FrontmatterLinker -> StatusBarController
+-> CommandRegistry -> Modals -> shared/session-drag -> shared/group-tabs
+-> SwitchOverlay -> SearchOverlay -> SettingsTab -> main.ts
 ```
+
+A module may not be migrated until the lock suite executes 80% of its functions
+(60% for `overlays.js`). Check with `--experimental-test-coverage` before
+starting. The final `main.ts` commit deletes the shims and updates
+`esbuild.config.mjs`, whose entry point is still `src/main.js`.
 
 Target structure and class responsibilities: [reference/architecture.md](reference/architecture.md).
 

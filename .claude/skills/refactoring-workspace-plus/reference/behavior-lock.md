@@ -36,6 +36,38 @@ Lock tests live in `tests/lock/` and are named `*.lock.test.ts`.
 
 The persisted-data lock matters most. Users' sessions live in these files; a format change is data loss, not a bug.
 
+## What a lock may observe
+
+Two constraints keep a lock stable across the migration. Both come from failures the plan review found before any lock was written.
+
+**1. Lock semantics, not presentation.**
+
+| Lock this | Never lock this |
+|---|---|
+| Which sessions appear, in what order | CSS class names |
+| Which item is active | Inline styles |
+| What a keypress or click does | ARIA attributes |
+| What is written to disk | Which document an element is attached to |
+| Which `Setting` rows are built, in what order, with which handlers | Icon names |
+
+The right column is what the compliance work changes deliberately: inline styles become CSS classes, ARIA labels get added, `document` becomes `activeDocument`. A lock snapshotting raw `outerHTML` fails on all of it and forces the edit this document forbids.
+
+**2. Never call an internal plugin method.**
+
+Observe through seams the migration preserves: rendered DOM, persisted files, recording stubs (`Notice`, `Setting`, `Menu`). A lock calling `plugin.switchRelativeFromCommand(1)` dies the moment that becomes `plugin.switcher.switchRelative(1)` and the shims are removed in the final commit.
+
+Ordinary tests may call internals and be updated as the surface moves. Locks may not.
+
+## The one exception to "behaviour does not change"
+
+Three observable changes are intended, because each is a defect being fixed:
+
+- `document` → `activeDocument`: overlays currently render into the wrong window when a popout has focus
+- ARIA labels and keyboard paths: icon-only controls currently have no accessible name
+- inline styles → CSS classes: themes and snippets currently cannot override plugin styling
+
+Named here so they cannot be smuggled in as "just refactoring". Anything else that changes observable behaviour is a bug in the refactor.
+
 ## How to write one
 
 Snapshot the observable output, not the implementation.
