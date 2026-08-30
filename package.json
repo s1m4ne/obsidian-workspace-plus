@@ -15,10 +15,12 @@
         "lint:ratchet": "node scripts/lint-ratchet.js"
     },
     "devDependencies": {
+        "@types/jsdom": "^30.0.0",
         "@types/node": "^26.4.0",
         "esbuild": "^0.24.0",
         "eslint": "^9.39.5",
         "eslint-plugin-obsidianmd": "^0.4.2",
+        "jsdom": "^30.0.1",
         "obsidian": "^1.12.3",
         "typescript": "~5.9",
         "typescript-eslint": "^8.68.0"

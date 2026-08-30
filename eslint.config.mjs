@@ -57,6 +57,21 @@ export default defineConfig([
             "obsidianmd/rule-custom-message": "off",
             "obsidianmd/hardcoded-config-path": "off",
             "obsidianmd/prefer-window-timers": "off",
+
+            // The lock harness stands in for Obsidian rather than consuming it:
+            // it *implements* createEl and hide(), and installs the globals that
+            // the plugin later reads. The rules guarding those calls in shipped
+            // code have nothing to check here.
+            "obsidianmd/prefer-create-el": "off",
+            "obsidianmd/no-static-styles-assignment": "off",
+            "obsidianmd/no-global-this": "off",
+
+            // Test titles are not user-facing UI strings.
+            "obsidianmd/ui/sentence-case": "off",
+
+            // node:test's test() returns a promise by design; the runner awaits
+            // it, and callers are not meant to.
+            "@typescript-eslint/no-floating-promises": "off",
         },
     },
 ]);
