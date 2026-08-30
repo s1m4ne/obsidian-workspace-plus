@@ -362,3 +362,115 @@ test('session storage move writes sessions to the target without deleting the ol
     assert.equal(plugin.savedData.sessions.local.name, 'Local');
     assert.deepEqual(removed, []);
 });
+
+test('session sync: listeners and timer management', async function () {
+    const { setupHarness } = require('./lock/harness/index.ts');
+    const harness = setupHarness();
+    try {
+        const plugin = createPlugin();
+        let domEvents = [];
+        plugin.registerDomEvent = function (target, event, handler) {
+            domEvents.push({ target, event, handler });
+        };
+
+        plugin.registerSessionStorageListeners();
+        assert.equal(domEvents.length, 1);
+        assert.equal(domEvents[0].event, 'focus');
+
+        // Duplicate call is no-op
+        plugin.registerSessionStorageListeners();
+        assert.equal(domEvents.length, 1);
+
+        // Startup timers
+        plugin.scheduleStartupSessionStorageChecks();
+        assert.equal(plugin._startupSessionStorageTimers.length, 2);
+
+        // onExternalSettingsChange schedules reload
+        let reloadScheduled = false;
+        plugin.reloadExternalSessionStorageIfChanged = function () {
+            reloadScheduled = true;
+            return Promise.resolve(true);
+        };
+        plugin.onExternalSettingsChange();
+        assert.ok(plugin._externalSessionReloadTimer);
+        assert.equal(reloadScheduled, false); // Debounced
+
+        // Clear timers
+        plugin.clearSessionStorageSyncTimers();
+        assert.equal(plugin._externalSessionReloadTimer, null);
+        assert.equal(plugin._startupSessionStorageTimers.length, 0);
+    } finally {
+        harness.restore();
+    }
+});
+
+test('session sync: overlay refresh and local changes tracking', async function () {
+    const plugin = createPlugin();
+    let refreshed = false;
+    plugin._refreshOverlaySessions = function () {
+        refreshed = true;
+    };
+
+    plugin.applySessionDataFromStorage({
+        activeSessionId: 'local',
+        sessions: { local: { id: 'local', name: 'L' } },
+    });
+    assert.equal(refreshed, true);
+
+    assert.equal(plugin.hasLocalSessionChangesSinceStorage(), false);
+    plugin.recordSessionStorageState(100, 200, plugin.data);
+    assert.equal(plugin.hasLocalSessionChangesSinceStorage(), false);
+
+    plugin.data.sessions.local.name = 'Changed';
+    assert.equal(plugin.hasLocalSessionChangesSinceStorage(), true);
+
+    await plugin.recordSessionDataStored({ _wppSavedAt: 500, sessions: {} });
+    assert.equal(plugin._sessionStorageStamp, 500);
+});
+
+test('session sync: reload debounce and focus callbacks', async function () {
+    const { setupHarness } = require('./lock/harness/index.ts');
+    const harness = setupHarness();
+    try {
+        const plugin = createPlugin();
+        let reloads = 0;
+        plugin.reloadExternalSessionStorageIfChanged = function () {
+            reloads++;
+            return Promise.resolve(true);
+        };
+
+        let domEvents = [];
+        plugin.registerDomEvent = function (target, event, handler) {
+            domEvents.push({ target, event, handler });
+        };
+
+        plugin.registerSessionStorageListeners();
+        assert.equal(domEvents.length, 1);
+        // Trigger focus event handler
+        domEvents[0].handler();
+        assert.ok(plugin._externalSessionReloadTimer);
+        assert.equal(reloads, 0); // Debounced
+
+        // Call schedule reload directly
+        plugin.scheduleExternalSessionStorageReload();
+
+        // Trigger timer callback immediately
+        plugin.clearSessionStorageSyncTimers();
+
+        // Test getFileMtime failure in recordSessionDataStored
+        plugin.getFileMtime = function () {
+            return Promise.reject(new Error('fail'));
+        };
+        await plugin.recordSessionDataStored({ _wppSavedAt: 123 });
+
+        // Test reload failure catch with real reload implementation
+        const plugin2 = createPlugin();
+        plugin2.getSessionStorageInfo = function () {
+            return Promise.reject(new Error('fail'));
+        };
+        const res = await plugin2.reloadExternalSessionStorageIfChanged();
+        assert.equal(res, false);
+    } finally {
+        harness.restore();
+    }
+});
