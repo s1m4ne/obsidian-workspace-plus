@@ -25,10 +25,19 @@ export type { Registry } from './obsidian-module.ts';
 const OBSIDIAN_STUB_URL = new URL('./obsidian-module.ts', import.meta.url).href;
 let hooksInstalled = false;
 
-// Registered once per process: hooks cannot be removed, and re-registering
-// would stack them. Which document the stubs render into is swapped per test
-// through the registry instead.
-function installHooksOnce(): void {
+/**
+ * Points the `obsidian` specifier at the recording stubs, for `require()` and
+ * `import` alike.
+ *
+ * Registered once per process: hooks cannot be removed, and re-registering
+ * would stack them. Which document the stubs render into is swapped per test
+ * through the registry instead.
+ *
+ * Exported because the plain unit tests need the same redirection - they load
+ * plugin modules that will import from `obsidian` once migrated, and a
+ * `Module._load` patch cannot see an ESM import.
+ */
+export function installObsidianStub(): void {
     if (hooksInstalled) return;
     hooksInstalled = true;
     registerHooks({
@@ -52,7 +61,7 @@ export interface Harness {
 }
 
 export function setupHarness(): Harness {
-    installHooksOnce();
+    installObsidianStub();
     const dom = setupDom();
     resetRegistry(dom.document);
 
