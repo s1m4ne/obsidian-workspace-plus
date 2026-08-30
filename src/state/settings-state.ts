@@ -3,7 +3,7 @@ import { resolveLocale } from '../i18n.ts';
 
 export interface SettingsStateHost {
     data: PluginData;
-    persistData?: () => Promise<boolean>;
+    persistData: () => Promise<boolean>;
     updateStatusBar?: () => void;
     syncSessionCommands?: () => void;
     startHistorySnapshotTimer?: () => void;
@@ -40,10 +40,7 @@ export class SettingsState {
 
     private persistIfNeeded(options?: SetOption): Promise<boolean> {
         if (options?.persist === false) return Promise.resolve(true);
-        if (typeof this.host.persistData === 'function') {
-            return this.host.persistData();
-        }
-        return Promise.resolve(true);
+        return this.host.persistData();
     }
 
     // --- Getters with central default fallbacks (P5) ---

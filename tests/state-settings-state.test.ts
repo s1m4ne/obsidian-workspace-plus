@@ -52,6 +52,7 @@ test('SettingsState: default fallback resolution for all settings (P5)', () => {
     const rawData = {} as PluginData;
     const host: SettingsStateHost = {
         data: rawData,
+        persistData: async () => true,
     };
 
     const state = new SettingsState(host);
@@ -86,6 +87,7 @@ test('SettingsState: container reference reads live reassigned data slice (P1)',
     let currentData = Object.assign({}, DEFAULT_DATA, { language: 'en' });
     const state = new SettingsState(() => ({
         data: currentData,
+        persistData: async () => true,
     }));
 
     assert.equal(state.language, 'en');
