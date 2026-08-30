@@ -1,6 +1,6 @@
 'use strict';
 
-var i18n = require('../i18n');
+var i18n = require('../i18n.ts');
 
 function formatRelativeTime(timestamp) {
     var L = i18n.L;

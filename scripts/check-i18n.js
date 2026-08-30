@@ -6,31 +6,21 @@ const path = require('path');
 const vm = require('vm');
 
 const repoRoot = path.resolve(__dirname, '..');
-const i18nPath = path.join(repoRoot, 'src', 'i18n.js');
+const i18nPath = fs.existsSync(path.join(repoRoot, 'src', 'i18n.ts'))
+    ? path.join(repoRoot, 'src', 'i18n.ts')
+    : path.join(repoRoot, 'src', 'i18n.js');
 const srcRoot = path.join(repoRoot, 'src');
 
-function loadI18nData() {
-    const source = fs.readFileSync(i18nPath, 'utf8')
-        + '\n;globalThis.__STRINGS=STRINGS;'
-        + 'globalThis.__EXTENDED_STRINGS=EXTENDED_STRINGS;'
-        + 'globalThis.__LANG_OPTIONS=LANG_OPTIONS;'
-        + 'globalThis.__LANG_ORDER=LANG_ORDER;';
-
-    const sandbox = {
-        exports: {},
-        module: { exports: {} },
-        navigator: { language: 'en-US' },
-        globalThis: {},
-    };
-
-    vm.createContext(sandbox);
-    vm.runInContext(source, sandbox, { filename: 'i18n.js' });
+async function loadI18nData() {
+    const { installObsidianStub } = await import('../tests/lock/harness/index.ts');
+    installObsidianStub();
+    const i18n = await import('../src/i18n.ts');
 
     return {
-        strings: sandbox.globalThis.__STRINGS || {},
-        extendedStrings: sandbox.globalThis.__EXTENDED_STRINGS || {},
-        langOptions: sandbox.globalThis.__LANG_OPTIONS || {},
-        langOrder: sandbox.globalThis.__LANG_ORDER || [],
+        strings: i18n.STRINGS || {},
+        extendedStrings: {},
+        langOptions: i18n.LANG_OPTIONS || {},
+        langOrder: i18n.LANG_ORDER || [],
     };
 }
 
@@ -105,7 +95,7 @@ function collectQuotedNames(sourceDir) {
 
     for (let i = 0; i < files.length; i++) {
         const rel = path.relative(repoRoot, files[i]);
-        if (rel === path.join('src', 'i18n.js')) continue;
+        if (rel === path.join('src', 'i18n.js') || rel === path.join('src', 'i18n.ts')) continue;
         const text = fs.readFileSync(files[i], 'utf8');
         let m;
         while ((m = re.exec(text))) {
@@ -127,8 +117,8 @@ function formatList(list, prefix) {
     return out.join('\n');
 }
 
-function main() {
-    const { strings, extendedStrings, langOptions, langOrder } = loadI18nData();
+async function main() {
+    const { strings, extendedStrings, langOptions, langOrder } = await loadI18nData();
     const merged = mergeStrings(strings, extendedStrings);
     const locales = Object.keys(merged).sort();
 

@@ -57,7 +57,7 @@ interface TestPlugin {
 }
 
 async function createLockPlugin(vault: MemoryVault, initialData?: Record<string, unknown>): Promise<TestPlugin> {
-    const i18nMod = await import('../../src/i18n.js');
+    const i18nMod = await import('../../src/i18n.ts');
     const i18n = (i18nMod.default ?? i18nMod) as { resolveLocale(l: string): void };
     i18n.resolveLocale('en');
 

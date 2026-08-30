@@ -18,7 +18,7 @@ const { installObsidianStub } = require('./lock/harness/index.ts');
 function loadPluginMethods(requestedModules) {
     installObsidianStub();
 
-    const i18n = require('../src/i18n');
+    const i18n = require('../src/i18n.ts');
     i18n.resolveLocale('en');
 
     const loaded = {};

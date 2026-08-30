@@ -30,7 +30,7 @@ interface I18nModule {
 }
 
 async function loadI18n(): Promise<I18nModule> {
-    const raw: unknown = await import('../../src/i18n.js');
+    const raw: unknown = await import('../../src/i18n.ts');
     const rec = raw as { default?: I18nModule } & I18nModule;
     return rec.default ?? rec;
 }

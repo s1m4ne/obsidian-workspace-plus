@@ -1,9 +1,11 @@
 'use strict';
 
+require('./lock/harness/index.ts').installObsidianStub();
+
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-const i18n = require('../src/i18n');
+const i18n = require('../src/i18n.ts');
 const attachSessionCommandMethods = require('../src/plugin/methods/session-commands');
 
 i18n.resolveLocale('en');

@@ -49,7 +49,7 @@ function loadStatusBarActions() {
     const originalLoad = Module._load;
     Module._load = function (request, parent, isMain) {
         if (request === 'obsidian') return obsidianStub;
-        if (request === './i18n') return i18nStub;
+        if (request === './i18n' || request === './i18n.ts') return i18nStub;
         if (request === './modals') return modalsStub;
         if (request === './session-context-actions') return sessionContextActionsStub;
         if (request === './settings-context-menu') return settingsContextMenuStub;

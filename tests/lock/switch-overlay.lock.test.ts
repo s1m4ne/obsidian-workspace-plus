@@ -61,7 +61,7 @@ async function createSwitchLockPlugin(
     harness: ReturnType<typeof setupHarness>,
     options: { names?: string[]; preview?: boolean; activeSessionId?: string } = {},
 ): Promise<TestSwitchPlugin> {
-    const i18nMod = await import('../../src/i18n.js');
+    const i18nMod = await import('../../src/i18n.ts');
     const i18n = (i18nMod.default ?? i18nMod) as { resolveLocale(l: string): void };
     i18n.resolveLocale('en');
 

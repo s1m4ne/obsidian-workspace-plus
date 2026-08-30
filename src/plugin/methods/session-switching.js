@@ -1,7 +1,7 @@
 'use strict';
 
 var obsidian = require('obsidian');
-var i18n = require('../../i18n');
+var i18n = require('../../i18n.ts');
 var UnsavedSwitchModal = require('../../modals/unsaved-switch-modal');
 
 var SESSION_SWITCH_NOTICE_DURATION_MS = 1200;

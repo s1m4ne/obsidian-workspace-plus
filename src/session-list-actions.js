@@ -1,7 +1,7 @@
 'use strict';
 
 var obsidian = require('obsidian');
-var i18n = require('./i18n');
+var i18n = require('./i18n.ts');
 var ConfirmModal = require('./modals/confirm-modal');
 var RenameModal = require('./modals/rename-modal');
 

@@ -1,7 +1,7 @@
 'use strict';
 
 var obsidian = require('obsidian');
-var i18n = require('../../i18n');
+var i18n = require('../../i18n.ts');
 var layoutUtils = require('../../layout-utils');
 
 var HOUR = 3600000;

@@ -291,7 +291,7 @@ test('the i18n tables see the platform the harness reports', async () => {
     const harness = setupHarness();
     try {
         harness.dom.setPlatform(PLATFORM.mac);
-        const i18n: { resolveLocale(l: string): Record<string, unknown> } = await import('../../src/i18n.js');
+        const i18n: { resolveLocale(l: string): Record<string, unknown> } = await import('../../src/i18n.ts');
         const onMac = i18n.resolveLocale('en');
         const macLabel = (onMac.statusBarSlotModClick as () => string)();
 

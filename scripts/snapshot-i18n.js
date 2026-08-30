@@ -32,7 +32,7 @@ function hash(value) {
 async function collect() {
     const { installObsidianStub } = await import('../tests/lock/harness/index.ts');
     installObsidianStub();
-    const i18n = await import('../src/i18n.js');
+    const i18n = await import('../src/i18n.ts');
 
     const snapshot = {};
     for (const locale of i18n.LANG_ORDER) {

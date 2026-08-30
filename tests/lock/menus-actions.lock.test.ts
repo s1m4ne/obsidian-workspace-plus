@@ -49,7 +49,7 @@ interface MenusPlugin {
 async function createMenusPlugin(
     initialData?: Partial<MenusPlugin['data']>,
 ): Promise<MenusPlugin> {
-    const i18nMod = await import('../../src/i18n.js');
+    const i18nMod = await import('../../src/i18n.ts');
     const i18n = (i18nMod.default ?? i18nMod) as { resolveLocale(l: string): void };
     i18n.resolveLocale('en');
 

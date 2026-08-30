@@ -1,7 +1,7 @@
 'use strict';
 
 var obsidian = require('obsidian');
-var i18n = require('./i18n');
+var i18n = require('./i18n.ts');
 
 /**
  * Open a context menu for a session item.

@@ -1,7 +1,7 @@
 'use strict';
 
 var obsidian = require('obsidian');
-var i18n = require('./i18n');
+var i18n = require('./i18n.ts');
 
 function formatByteSize(bytes) {
     if (typeof bytes !== 'number' || !isFinite(bytes) || bytes < 0) return '—';

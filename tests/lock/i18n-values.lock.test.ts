@@ -67,7 +67,7 @@ test('every key in every locale resolves to the value it resolved to before', as
     const harness = setupHarness();
     try {
         const expected = readFixture();
-        const i18n: I18nModule = await import('../../src/i18n.js');
+        const i18n: I18nModule = await import('../../src/i18n.ts');
 
         const changed: string[] = [];
         const seen = new Set<string>();

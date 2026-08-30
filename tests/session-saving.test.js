@@ -6,7 +6,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const Module = require('module');
 
-const i18n = require('../src/i18n');
+const i18n = require('../src/i18n.ts');
 
 i18n.resolveLocale('en');
 
