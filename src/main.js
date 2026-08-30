@@ -45,6 +45,7 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
             self.normalizeGroupFeatureState();
             self.isSwitchingSession = false;
             self.pendingSwitchRequest = null;
+            self.pendingSwitchTargetId = null;
             self.switchLockAt = 0;
             self.startupSettleStartedAt = 0;
             self.startupSettleUntil = 0;
@@ -104,6 +105,7 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
         this.hideSearchOverlay();
         this.clearSessionSwitchNotice();
         this.pendingSwitchRequest = null;
+        this.pendingSwitchTargetId = null;
         this.isSwitchingSession = false;
         this.statusBarScrollDelta = 0;
         this.statusBarScrollEventAt = 0;
