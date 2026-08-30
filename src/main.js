@@ -30,6 +30,9 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
             if (!self.data.sessions) self.data.sessions = {};
             if (!self.data.sessionOrder) self.data.sessionOrder = [];
 
+            self.sessionStorage = self.getSessionStorage();
+            self.syncWatcher = self.getSyncWatcher();
+
             // Migrate legacy settings into statusBarActions
             if (!self.data.statusBarActions) {
                 self.data.statusBarActions = Object.assign({}, DEFAULT_DATA.statusBarActions);

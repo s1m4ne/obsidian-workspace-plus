@@ -14,20 +14,35 @@ export interface ReadJsonResult<T = unknown> {
     error: Error | null;
 }
 
-export class JsonFileStore {
-    private readonly adapter: StorageAdapter;
+export type AdapterProvider = StorageAdapter | (() => StorageAdapter | null | undefined);
 
-    constructor(adapter: StorageAdapter) {
-        this.adapter = adapter;
+export class JsonFileStore {
+    private readonly getAdapter: () => StorageAdapter | null | undefined;
+
+    constructor(adapterProvider: AdapterProvider) {
+        if (typeof adapterProvider === 'function') {
+            this.getAdapter = adapterProvider;
+        } else {
+            this.getAdapter = () => adapterProvider;
+        }
+    }
+
+    private resolveAdapter(): StorageAdapter {
+        const adapter = this.getAdapter();
+        if (!adapter) {
+            throw new Error('Storage adapter not available');
+        }
+        return adapter;
     }
 
     async readJsonIfExists<T = unknown>(path: string): Promise<ReadJsonResult<T>> {
         try {
-            const exists = await this.adapter.exists(path);
+            const adapter = this.resolveAdapter();
+            const exists = await adapter.exists(path);
             if (!exists) {
                 return { exists: false, data: null, error: null };
             }
-            const raw = await this.adapter.read(path);
+            const raw = await adapter.read(path);
             try {
                 return { exists: true, data: JSON.parse(raw) as T, error: null };
             } catch (parseError) {
@@ -41,24 +56,27 @@ export class JsonFileStore {
     }
 
     async writeJson(path: string, data: unknown, pretty = false): Promise<void> {
+        const adapter = this.resolveAdapter();
         const json = pretty ? JSON.stringify(data, null, 2) : JSON.stringify(data);
-        await this.adapter.write(path, json);
+        await adapter.write(path, json);
     }
 
     async ensureDir(path: string): Promise<void> {
         try {
-            const exists = await this.adapter.exists(path);
-            if (!exists && typeof this.adapter.mkdir === 'function') {
-                await this.adapter.mkdir(path).catch(() => {});
+            const adapter = this.resolveAdapter();
+            const exists = await adapter.exists(path);
+            if (!exists && typeof adapter.mkdir === 'function') {
+                await adapter.mkdir(path).catch(() => {});
             }
         } catch {
-            // Ignore error if already exists
+            // Ignore error if already exists or adapter fails
         }
     }
 
     async getFileMtime(path: string): Promise<number> {
         try {
-            const stat = await this.adapter.stat(path);
+            const adapter = this.resolveAdapter();
+            const stat = await adapter.stat(path);
             if (!stat || typeof stat.mtime !== 'number') return 0;
             return stat.mtime;
         } catch {
@@ -68,9 +86,10 @@ export class JsonFileStore {
 
     async removeIfExists(path: string): Promise<void> {
         try {
-            const exists = await this.adapter.exists(path);
+            const adapter = this.resolveAdapter();
+            const exists = await adapter.exists(path);
             if (!exists) return;
-            await this.adapter.remove(path).catch(() => {});
+            await adapter.remove(path).catch(() => {});
         } catch {
             // Ignore
         }
@@ -78,9 +97,10 @@ export class JsonFileStore {
 
     async renameIfExists(fromPath: string, toPath: string): Promise<void> {
         try {
-            const exists = await this.adapter.exists(fromPath);
+            const adapter = this.resolveAdapter();
+            const exists = await adapter.exists(fromPath);
             if (!exists) return;
-            await this.adapter.rename(fromPath, toPath).catch(() => {});
+            await adapter.rename(fromPath, toPath).catch(() => {});
         } catch {
             // Ignore
         }

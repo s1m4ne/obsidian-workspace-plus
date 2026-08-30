@@ -20,6 +20,10 @@ export class SyncWatcher {
     }
 
     scheduleReload(debounceMs = EXTERNAL_SESSION_RELOAD_DEBOUNCE_MS): void {
+        if (typeof window === 'undefined') {
+            void this.onReload();
+            return;
+        }
         if (this.reloadTimer !== null) {
             window.clearTimeout(this.reloadTimer);
         }
@@ -45,6 +49,7 @@ export class SyncWatcher {
     }
 
     scheduleStartupChecks(): void {
+        if (typeof window === 'undefined') return;
         for (let i = 0; i < STARTUP_SESSION_RECHECK_DELAYS.length; i++) {
             const delayMs = STARTUP_SESSION_RECHECK_DELAYS[i]!;
             const timer = window.setTimeout(() => {
@@ -59,6 +64,11 @@ export class SyncWatcher {
     }
 
     clearTimers(): void {
+        if (typeof window === 'undefined') {
+            this.reloadTimer = null;
+            this.startupTimers = [];
+            return;
+        }
         if (this.reloadTimer !== null) {
             window.clearTimeout(this.reloadTimer);
             this.reloadTimer = null;

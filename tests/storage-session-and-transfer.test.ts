@@ -66,7 +66,7 @@ test('SessionStorage: path resolution and location switching with custom configD
     assert.equal(storage.getSessionsPath(), '.workspace-plus-plus/sessions.json');
 
     storage.setLocation('plugin-folder');
-    assert.equal(storage.getSessionsPath(), '.custom-config/plugins/workspace-plus-plus/sessions.json');
+    assert.equal(storage.getSessionsPath(), '.custom-config/plugins/workspace-plus-plus/data.json');
 });
 
 test('SessionStorage: history write, read and attach round-trip', async () => {

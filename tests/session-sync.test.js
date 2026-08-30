@@ -383,7 +383,7 @@ test('session sync: listeners and timer management', async function () {
 
         // Startup timers
         plugin.scheduleStartupSessionStorageChecks();
-        assert.equal(plugin._startupSessionStorageTimers.length, 2);
+        assert.equal(plugin.getSyncWatcher().hasActiveTimers(), true);
 
         // onExternalSettingsChange schedules reload
         let reloadScheduled = false;
@@ -392,13 +392,12 @@ test('session sync: listeners and timer management', async function () {
             return Promise.resolve(true);
         };
         plugin.onExternalSettingsChange();
-        assert.ok(plugin._externalSessionReloadTimer);
+        assert.equal(plugin.getSyncWatcher().hasActiveTimers(), true);
         assert.equal(reloadScheduled, false); // Debounced
 
         // Clear timers
         plugin.clearSessionStorageSyncTimers();
-        assert.equal(plugin._externalSessionReloadTimer, null);
-        assert.equal(plugin._startupSessionStorageTimers.length, 0);
+        assert.equal(plugin.getSyncWatcher().hasActiveTimers(), false);
     } finally {
         harness.restore();
     }
@@ -448,7 +447,7 @@ test('session sync: reload debounce and focus callbacks', async function () {
         assert.equal(domEvents.length, 1);
         // Trigger focus event handler
         domEvents[0].handler();
-        assert.ok(plugin._externalSessionReloadTimer);
+        assert.equal(plugin.getSyncWatcher().hasActiveTimers(), true);
         assert.equal(reloads, 0); // Debounced
 
         // Call schedule reload directly
@@ -456,6 +455,7 @@ test('session sync: reload debounce and focus callbacks', async function () {
 
         // Trigger timer callback immediately
         plugin.clearSessionStorageSyncTimers();
+        assert.equal(plugin.getSyncWatcher().hasActiveTimers(), false);
 
         // Test getFileMtime failure in recordSessionDataStored
         plugin.getFileMtime = function () {

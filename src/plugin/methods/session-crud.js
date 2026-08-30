@@ -133,8 +133,7 @@ function attachSessionCrudMethods(WorkspacePlusPlus) {
         new modals.ConfirmModal(this.app, L.confirmDeleteActive(session.name), doDelete, {
             hint: L.confirmDeleteSettingsHint,
             onHintClick: function () {
-                self.app.setting.open();
-                self.app.setting.openTabById(self.manifest.id);
+                obsidianInternals.openSettingTab(self.app, self.manifest.id);
             },
         }).open();
     };

@@ -6,225 +6,144 @@ var DEFAULT_DATA = require('../default-data');
 var sessionData = require('../session-data');
 
 var SESSION_KEYS = sessionData.SESSION_KEYS;
-var joinPath = sessionData.joinPath;
 var pickKeys = sessionData.pickKeys;
 var pickSessionPayload = sessionData.pickSessionPayload;
 var hasSessionShape = sessionData.hasSessionShape;
 var hasNonEmptySessions = sessionData.hasNonEmptySessions;
 var getPersistStamp = sessionData.getPersistStamp;
-var readHistoryMap = sessionData.readHistoryMap;
 var splitSessionHistory = sessionData.splitSessionHistory;
-var mergeSessionHistory = sessionData.mergeSessionHistory;
-var hasInlineSessionHistory = sessionData.hasInlineSessionHistory;
 
 var storagePaths = require('../../storage/paths.ts');
 var defaultData = require('../../storage/default-data.ts');
 var jsonFileStore = require('../../storage/json-file-store.ts');
+var sessionStorageModule = require('../../storage/session-storage.ts');
 
-var STORAGE_DIR = storagePaths.STORAGE_DIR;
-var SESSION_STORAGE_VAULT = storagePaths.SESSION_STORAGE_VAULT;
-var SESSION_STORAGE_PLUGIN = storagePaths.SESSION_STORAGE_PLUGIN;
-var SESSIONS_FILE_NAME = storagePaths.SESSIONS_FILE_NAME;
-var PLUGIN_DATA_FILE_NAME = storagePaths.PLUGIN_DATA_FILE_NAME;
-var SESSIONS_BACKUP_FILE_NAME = storagePaths.SESSIONS_BACKUP_FILE_NAME;
-var HISTORY_FILE_NAME = storagePaths.HISTORY_FILE_NAME;
-var HISTORY_FORMAT_VERSION = storagePaths.HISTORY_FORMAT_VERSION;
 var LEGACY_LOCAL_SETTINGS_FILE = storagePaths.LEGACY_LOCAL_SETTINGS_FILE;
 var LEGACY_LOCAL_SETTINGS_BACKUP = storagePaths.LEGACY_LOCAL_SETTINGS_BACKUP;
-var EXPORT_DIR_NAME = storagePaths.EXPORT_DIR_NAME;
-var BACKUPS_DIR_NAME = storagePaths.BACKUPS_DIR_NAME;
 var normalizeSessionStorageLocation = storagePaths.normalizeSessionStorageLocation;
 
 var SETTINGS_KEYS = defaultData.SETTINGS_KEYS;
 
-
-
-
-
-
-
-
-
-
-
-
-
 function attachPersistenceMethods(WorkspacePlusPlus) {
     // --- Data persistence ---
 
+    WorkspacePlusPlus.prototype.getSessionStorage = function () {
+        var self = this;
+        if (!this._sessionStorage) {
+            var initialLoc = normalizeSessionStorageLocation(this.data && this.data.sessionStorageLocation)
+                || normalizeSessionStorageLocation(this._sessionStorageLocation);
+
+            this._sessionStorage = new sessionStorageModule.SessionStorage({
+                store: this.getJsonStore(),
+                manifestDir: function () { return (self.manifest && self.manifest.dir) || null; },
+                configDir: function () { return (self.app && self.app.vault && typeof self.app.vault.configDir === 'string') ? self.app.vault.configDir : null; },
+                initialLocation: initialLoc,
+            });
+        }
+        return this._sessionStorage;
+    };
+
     WorkspacePlusPlus.prototype.getBackupPath = function () {
-        return joinPath(this.getPluginStorageDirPath(), 'data.backup.json');
+        return this.getSessionStorage().getBackupPath();
     };
 
     WorkspacePlusPlus.prototype.getStorageDirPath = function () {
-        return STORAGE_DIR;
+        return this.getSessionStorage().getStorageDirPath();
     };
 
     WorkspacePlusPlus.prototype.getPluginStorageDirPath = function () {
-        var configDir = (this.app && this.app.vault && typeof this.app.vault.configDir === 'string')
-            ? this.app.vault.configDir
-            : null;
-        var manifestDir = (this.manifest && this.manifest.dir) || null;
-        return storagePaths.getPluginStorageDirPath(manifestDir, configDir);
+        return this.getSessionStorage().getPluginStorageDirPath();
     };
 
     WorkspacePlusPlus.prototype.getDefaultSessionStorageLocation = function () {
-        return SESSION_STORAGE_PLUGIN;
+        return this.getSessionStorage().getDefaultSessionStorageLocation();
     };
 
-
     WorkspacePlusPlus.prototype.getSessionStorageLocation = function () {
-        return normalizeSessionStorageLocation(this.data && this.data.sessionStorageLocation)
-            || normalizeSessionStorageLocation(this._sessionStorageLocation)
-            || this.getDefaultSessionStorageLocation();
+        return this.getSessionStorage().getLocation();
     };
 
     WorkspacePlusPlus.prototype.setRuntimeSessionStorageLocation = function (location) {
-        var normalized = normalizeSessionStorageLocation(location) || this.getDefaultSessionStorageLocation();
+        var normalized = this.getSessionStorage().setLocation(location);
         this._sessionStorageLocation = normalized;
         if (this.data) this.data.sessionStorageLocation = normalized;
         return normalized;
     };
 
     WorkspacePlusPlus.prototype.getSessionStorageDirPathForLocation = function (location) {
-        var normalized = normalizeSessionStorageLocation(location) || this.getDefaultSessionStorageLocation();
-        return normalized === SESSION_STORAGE_PLUGIN
-            ? this.getPluginStorageDirPath()
-            : this.getStorageDirPath();
+        return this.getSessionStorage().getSessionStorageDirPathForLocation(location);
     };
 
     WorkspacePlusPlus.prototype.getSessionStorageDirPath = function () {
-        return this.getSessionStorageDirPathForLocation(this.getSessionStorageLocation());
+        return this.getSessionStorage().getSessionStorageDirPath();
     };
 
     WorkspacePlusPlus.prototype.isSessionStorageInPluginData = function (location) {
-        var normalized = normalizeSessionStorageLocation(location) || this.getSessionStorageLocation();
-        return normalized === SESSION_STORAGE_PLUGIN;
+        return this.getSessionStorage().isSessionStorageInPluginData(location);
     };
 
-    // In plugin-folder mode the sessions live inside data.json, because that is
-    // the only file in a plugin folder that Obsidian Sync will carry between
-    // devices (it allows manifest.json, main.js, styles.css and data.json, and
-    // nothing else). Everything that only needs a path - stat, mtime tracking,
-    // diagnostics - keeps working; the writers are what have to be careful, since
-    // settings and sessions now share one file.
     WorkspacePlusPlus.prototype.getSessionsPathForLocation = function (location) {
-        if (this.isSessionStorageInPluginData(location)) {
-            return joinPath(this.getPluginStorageDirPath(), PLUGIN_DATA_FILE_NAME);
-        }
-        return joinPath(this.getSessionStorageDirPathForLocation(location), SESSIONS_FILE_NAME);
+        return this.getSessionStorage().getSessionsPathForLocation(location);
     };
 
-    // Where plugin-folder sessions used to live, before they moved into
-    // data.json. Still read so nobody loses sessions on upgrade.
     WorkspacePlusPlus.prototype.getLegacyPluginSessionsPath = function () {
-        return joinPath(this.getPluginStorageDirPath(), SESSIONS_FILE_NAME);
+        return this.getSessionStorage().getLegacyPluginSessionsPath();
     };
 
     WorkspacePlusPlus.prototype.getSessionsPath = function () {
-        return this.getSessionsPathForLocation(this.getSessionStorageLocation());
+        return this.getSessionStorage().getSessionsPath();
     };
 
     WorkspacePlusPlus.prototype.getSessionsBackupPathForLocation = function (location) {
-        return joinPath(this.getSessionStorageDirPathForLocation(location), SESSIONS_BACKUP_FILE_NAME);
+        return this.getSessionStorage().getSessionsBackupPathForLocation(location);
     };
 
     WorkspacePlusPlus.prototype.getSessionsBackupPath = function () {
-        return this.getSessionsBackupPathForLocation(this.getSessionStorageLocation());
+        return this.getSessionStorage().getSessionsBackupPath();
     };
 
     WorkspacePlusPlus.prototype.getHistoryPathForLocation = function (location) {
-        return joinPath(this.getSessionStorageDirPathForLocation(location), HISTORY_FILE_NAME);
+        return this.getSessionStorage().getHistoryPathForLocation(location);
     };
 
     WorkspacePlusPlus.prototype.getHistoryPath = function () {
-        return this.getHistoryPathForLocation(this.getSessionStorageLocation());
+        return this.getSessionStorage().getHistoryPath();
     };
 
     WorkspacePlusPlus.prototype.writeSessionHistory = function (historyMap) {
-        var payload = {
-            version: HISTORY_FORMAT_VERSION,
-            history: historyMap || {},
-        };
-        return this.writeJson(this.getHistoryPath(), payload);
+        return this.getSessionStorage().writeSessionHistory(historyMap);
     };
 
     WorkspacePlusPlus.prototype.readSessionHistory = function () {
-        return this.readJsonIfExists(this.getHistoryPath()).then(function (res) {
-            if (!res.exists || res.error) return {};
-            return readHistoryMap(res.data);
-        });
+        return this.getSessionStorage().readSessionHistory();
     };
 
-    // Re-attach version history to freshly loaded session data.
-    //
-    // Sessions saved before the split still carry their history inline. Those
-    // entries are kept as-is and written out to history.json right away, so the
-    // migration completes on load instead of waiting for the next save.
     WorkspacePlusPlus.prototype.attachSessionHistory = function (sessionData) {
-        var self = this;
-        if (!sessionData) return Promise.resolve(sessionData);
-
-        var hadInline = hasInlineSessionHistory(sessionData);
-
-        return this.readSessionHistory().then(function (historyMap) {
-            mergeSessionHistory(sessionData, historyMap);
-
-            if (!hadInline || Object.keys(historyMap).length > 0) return sessionData;
-
-            var split = splitSessionHistory(sessionData);
-            if (Object.keys(split.history).length === 0) return sessionData;
-
-            return self.ensureSessionStorageDir()
-                .then(function () {
-                    return self.writeSessionHistory(split.history);
-                })
-                .catch(function () {
-                    // Migration is best-effort: the inline copy is still intact.
-                    return;
-                })
-                .then(function () {
-                    return sessionData;
-                });
-        }).catch(function () {
-            return sessionData;
-        });
+        return this.getSessionStorage().attachSessionHistory(sessionData);
     };
 
     WorkspacePlusPlus.prototype.getExportDirPath = function () {
-        return joinPath(this.getSessionStorageDirPath(), EXPORT_DIR_NAME);
+        return this.getSessionStorage().getExportDirPath();
     };
 
     WorkspacePlusPlus.prototype.getBackupsDirPath = function () {
-        return joinPath(this.getSessionStorageDirPath(), BACKUPS_DIR_NAME);
+        return this.getSessionStorage().getBackupsDirPath();
     };
 
     WorkspacePlusPlus.prototype.getRotationBackupPath = function (generation) {
-        return this.getBackupsDirPath() + '/sessions.' + generation + '.json';
+        return this.getSessionStorage().getRotationBackupPath(generation);
     };
 
     WorkspacePlusPlus.prototype.getRotationBackupPathForLocation = function (location, generation) {
-        return joinPath(this.getSessionStorageDirPathForLocation(location), BACKUPS_DIR_NAME) + '/sessions.' + generation + '.json';
+        return this.getSessionStorage().getRotationBackupPathForLocation(location, generation);
     };
 
     WorkspacePlusPlus.prototype.getSessionBackupFilePathsForLocation = function (location) {
-        return [
-            this.getSessionsBackupPathForLocation(location),
-            this.getRotationBackupPathForLocation(location, 1),
-            this.getRotationBackupPathForLocation(location, 2),
-            this.getRotationBackupPathForLocation(location, 3),
-            // history.json is not a backup, but it is recovery-only data that the
-            // reset flows are expected to clear alongside the backups.
-            this.getHistoryPathForLocation(location),
-        ];
+        return this.getSessionStorage().getSessionBackupFilePathsForLocation(location);
     };
 
     WorkspacePlusPlus.prototype.getBackupFilePaths = function () {
-        return [
-            this.getBackupPath(),
-        ]
-            .concat(this.getSessionBackupFilePathsForLocation(SESSION_STORAGE_VAULT))
-            .concat(this.getSessionBackupFilePathsForLocation(SESSION_STORAGE_PLUGIN));
+        return this.getSessionStorage().getBackupFilePaths();
     };
 
 
@@ -330,22 +249,12 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
         };
     };
 
-    WorkspacePlusPlus.prototype.ensureDir = function (path) {
-        var self = this;
-        return this.app.vault.adapter.exists(path).then(function (exists) {
-            if (exists) return;
-            return self.app.vault.adapter.mkdir(path).catch(function () {
-                return self.app.vault.adapter.exists(path).then(function (existsAfter) {
-                    if (!existsAfter) throw new Error('Failed to create directory: ' + path);
-                });
-            });
-        });
-    };
-
-
     WorkspacePlusPlus.prototype.getJsonStore = function () {
+        var self = this;
         if (!this._jsonStore) {
-            this._jsonStore = new jsonFileStore.JsonFileStore(this.app.vault.adapter);
+            this._jsonStore = new jsonFileStore.JsonFileStore(function () {
+                return self.app && self.app.vault && self.app.vault.adapter;
+            });
         }
         return this._jsonStore;
     };
@@ -379,33 +288,10 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
     };
 
     WorkspacePlusPlus.prototype.resolveSessionStorageLocation = function (settingsData) {
-        var explicit = normalizeSessionStorageLocation(settingsData && settingsData.sessionStorageLocation);
-        if (explicit) {
-            this.setRuntimeSessionStorageLocation(explicit);
-            return Promise.resolve(explicit);
-        }
-
         var self = this;
-        return Promise.all([
-            this.app.vault.adapter.exists(this.getSessionsPathForLocation(SESSION_STORAGE_VAULT)),
-            this.app.vault.adapter.exists(this.getSessionsBackupPathForLocation(SESSION_STORAGE_VAULT)),
-            this.app.vault.adapter.exists(this.getSessionsPathForLocation(SESSION_STORAGE_PLUGIN)),
-            this.app.vault.adapter.exists(this.getSessionsBackupPathForLocation(SESSION_STORAGE_PLUGIN)),
-        ]).then(function (exists) {
-            var location;
-            if (exists[0] || exists[1]) {
-                location = SESSION_STORAGE_VAULT;
-            } else if (exists[2] || exists[3]) {
-                location = SESSION_STORAGE_PLUGIN;
-            } else {
-                location = self.getDefaultSessionStorageLocation();
-            }
-            self.setRuntimeSessionStorageLocation(location);
-            return location;
-        }).catch(function () {
-            var fallback = self.getDefaultSessionStorageLocation();
-            self.setRuntimeSessionStorageLocation(fallback);
-            return fallback;
+        return this.getSessionStorage().resolveSessionStorageLocation(settingsData).then(function (loc) {
+            self.setRuntimeSessionStorageLocation(loc);
+            return loc;
         });
     };
 

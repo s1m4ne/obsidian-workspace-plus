@@ -3,6 +3,7 @@ import {
     SESSION_STORAGE_VAULT,
     SESSION_STORAGE_PLUGIN,
     SESSIONS_FILE_NAME,
+    PLUGIN_DATA_FILE_NAME,
     SESSIONS_BACKUP_FILE_NAME,
     HISTORY_FILE_NAME,
     HISTORY_FORMAT_VERSION,
@@ -22,23 +23,25 @@ import {
 import type { SessionHistoryEntry } from './default-data.ts';
 import type { JsonFileStore } from './json-file-store.ts';
 
+export type StringResolver = string | (() => string | null | undefined) | null | undefined;
+
 export interface SessionStorageOptions {
     store: JsonFileStore;
-    manifestDir?: string | null;
-    configDir?: string | null;
-    initialLocation?: SessionStorageLocation | null;
+    manifestDir?: StringResolver;
+    configDir?: StringResolver;
+    initialLocation?: SessionStorageLocation | null | undefined;
 }
 
 export class SessionStorage {
     private readonly store: JsonFileStore;
-    private readonly manifestDir: string | null;
-    private readonly configDir: string | null;
+    private readonly manifestDir: StringResolver;
+    private readonly configDir: StringResolver;
     private location: SessionStorageLocation;
 
     constructor(options: SessionStorageOptions) {
         this.store = options.store;
-        this.manifestDir = options.manifestDir ?? null;
-        this.configDir = options.configDir ?? null;
+        this.manifestDir = options.manifestDir;
+        this.configDir = options.configDir;
         this.location = options.initialLocation ?? SESSION_STORAGE_PLUGIN;
     }
 
@@ -61,42 +64,59 @@ export class SessionStorage {
     }
 
     getPluginStorageDirPath(): string {
-        return getPluginStorageDirPath(this.manifestDir, this.configDir);
+        const manifestDir = typeof this.manifestDir === 'function' ? this.manifestDir() : this.manifestDir;
+        const configDir = typeof this.configDir === 'function' ? this.configDir() : this.configDir;
+        return getPluginStorageDirPath(manifestDir ?? null, configDir ?? null);
     }
 
     getDefaultSessionStorageLocation(): SessionStorageLocation {
         return SESSION_STORAGE_PLUGIN;
     }
 
-    getSessionStorageDirPathForLocation(location: SessionStorageLocation): string {
-        if (location === SESSION_STORAGE_VAULT) {
-            return STORAGE_DIR;
-        }
-        return this.getPluginStorageDirPath();
+    getSessionStorageDirPathForLocation(location?: unknown): string {
+        const normalized = normalizeSessionStorageLocation(location) || this.getDefaultSessionStorageLocation();
+        return normalized === SESSION_STORAGE_PLUGIN
+            ? this.getPluginStorageDirPath()
+            : this.getStorageDirPath();
     }
 
     getSessionStorageDirPath(): string {
         return this.getSessionStorageDirPathForLocation(this.location);
     }
 
-    getSessionsPathForLocation(location: SessionStorageLocation): string {
-        return joinPath(this.getSessionStorageDirPathForLocation(location), SESSIONS_FILE_NAME);
+    isSessionStorageInPluginData(location?: unknown): boolean {
+        const normalized = normalizeSessionStorageLocation(location) || this.location;
+        return normalized === SESSION_STORAGE_PLUGIN;
+    }
+
+    getSessionsPathForLocation(location?: unknown): string {
+        const normalized = normalizeSessionStorageLocation(location) || this.location;
+        if (this.isSessionStorageInPluginData(normalized)) {
+            return joinPath(this.getPluginStorageDirPath(), PLUGIN_DATA_FILE_NAME);
+        }
+        return joinPath(this.getSessionStorageDirPathForLocation(normalized), SESSIONS_FILE_NAME);
+    }
+
+    getLegacyPluginSessionsPath(): string {
+        return joinPath(this.getPluginStorageDirPath(), SESSIONS_FILE_NAME);
     }
 
     getSessionsPath(): string {
         return this.getSessionsPathForLocation(this.location);
     }
 
-    getSessionsBackupPathForLocation(location: SessionStorageLocation): string {
-        return joinPath(this.getSessionStorageDirPathForLocation(location), SESSIONS_BACKUP_FILE_NAME);
+    getSessionsBackupPathForLocation(location?: unknown): string {
+        const normalized = normalizeSessionStorageLocation(location) || this.location;
+        return joinPath(this.getSessionStorageDirPathForLocation(normalized), SESSIONS_BACKUP_FILE_NAME);
     }
 
     getSessionsBackupPath(): string {
         return this.getSessionsBackupPathForLocation(this.location);
     }
 
-    getHistoryPathForLocation(location: SessionStorageLocation): string {
-        return joinPath(this.getSessionStorageDirPathForLocation(location), HISTORY_FILE_NAME);
+    getHistoryPathForLocation(location?: unknown): string {
+        const normalized = normalizeSessionStorageLocation(location) || this.location;
+        return joinPath(this.getSessionStorageDirPathForLocation(normalized), HISTORY_FILE_NAME);
     }
 
     getHistoryPath(): string {
@@ -115,25 +135,27 @@ export class SessionStorage {
         return `${this.getBackupsDirPath()}/sessions.${generation}.json`;
     }
 
-    getRotationBackupPathForLocation(location: SessionStorageLocation, generation: number): string {
-        return `${joinPath(this.getSessionStorageDirPathForLocation(location), BACKUPS_DIR_NAME)}/sessions.${generation}.json`;
+    getRotationBackupPathForLocation(location: unknown, generation: number): string {
+        const normalized = normalizeSessionStorageLocation(location) || this.location;
+        return `${joinPath(this.getSessionStorageDirPathForLocation(normalized), BACKUPS_DIR_NAME)}/sessions.${generation}.json`;
     }
 
-    getSessionBackupFilePathsForLocation(location: SessionStorageLocation): string[] {
+    getSessionBackupFilePathsForLocation(location?: unknown): string[] {
+        const normalized = normalizeSessionStorageLocation(location) || this.location;
         return [
-            this.getSessionsBackupPathForLocation(location),
-            this.getRotationBackupPathForLocation(location, 1),
-            this.getRotationBackupPathForLocation(location, 2),
-            this.getRotationBackupPathForLocation(location, 3),
-            this.getHistoryPathForLocation(location),
+            this.getSessionsBackupPathForLocation(normalized),
+            this.getRotationBackupPathForLocation(normalized, 1),
+            this.getRotationBackupPathForLocation(normalized, 2),
+            this.getRotationBackupPathForLocation(normalized, 3),
+            this.getHistoryPathForLocation(normalized),
         ];
     }
 
     getBackupFilePaths(): string[] {
         return [
             this.getBackupPath(),
-            ...this.getSessionBackupFilePathsForLocation(SESSION_STORAGE_PLUGIN),
             ...this.getSessionBackupFilePathsForLocation(SESSION_STORAGE_VAULT),
+            ...this.getSessionBackupFilePathsForLocation(SESSION_STORAGE_PLUGIN),
         ];
     }
 
@@ -144,24 +166,30 @@ export class SessionStorage {
             return explicit;
         }
 
-        const [hasVaultSessions, hasVaultBackup, hasPluginSessions, hasPluginBackup] = await Promise.all([
-            this.store.readJsonIfExists(this.getSessionsPathForLocation(SESSION_STORAGE_VAULT)),
-            this.store.readJsonIfExists(this.getSessionsBackupPathForLocation(SESSION_STORAGE_VAULT)),
-            this.store.readJsonIfExists(this.getSessionsPathForLocation(SESSION_STORAGE_PLUGIN)),
-            this.store.readJsonIfExists(this.getSessionsBackupPathForLocation(SESSION_STORAGE_PLUGIN)),
-        ]);
+        try {
+            const [hasVaultSessions, hasVaultBackup, hasPluginSessions, hasPluginBackup] = await Promise.all([
+                this.store.readJsonIfExists(this.getSessionsPathForLocation(SESSION_STORAGE_VAULT)),
+                this.store.readJsonIfExists(this.getSessionsBackupPathForLocation(SESSION_STORAGE_VAULT)),
+                this.store.readJsonIfExists(this.getSessionsPathForLocation(SESSION_STORAGE_PLUGIN)),
+                this.store.readJsonIfExists(this.getSessionsBackupPathForLocation(SESSION_STORAGE_PLUGIN)),
+            ]);
 
-        let location: SessionStorageLocation;
-        if (hasVaultSessions.exists || hasVaultBackup.exists) {
-            location = SESSION_STORAGE_VAULT;
-        } else if (hasPluginSessions.exists || hasPluginBackup.exists) {
-            location = SESSION_STORAGE_PLUGIN;
-        } else {
-            location = this.getDefaultSessionStorageLocation();
+            let location: SessionStorageLocation;
+            if (hasVaultSessions.exists || hasVaultBackup.exists) {
+                location = SESSION_STORAGE_VAULT;
+            } else if (hasPluginSessions.exists || hasPluginBackup.exists) {
+                location = SESSION_STORAGE_PLUGIN;
+            } else {
+                location = this.getDefaultSessionStorageLocation();
+            }
+
+            this.setLocation(location);
+            return location;
+        } catch {
+            const fallback = this.getDefaultSessionStorageLocation();
+            this.setLocation(fallback);
+            return fallback;
         }
-
-        this.setLocation(location);
-        return location;
     }
 
     async writeSessionHistory(historyMap: Record<string, SessionHistoryEntry[]>): Promise<void> {

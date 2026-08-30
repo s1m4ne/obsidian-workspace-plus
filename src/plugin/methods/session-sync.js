@@ -7,9 +7,6 @@ var syncWatcher = require('../../storage/sync-watcher.ts');
 var getPersistStamp = sessionData.getPersistStamp;
 var isSessionDataShape = sessionData.hasSessionShape;
 
-var EXTERNAL_SESSION_RELOAD_DEBOUNCE_MS = syncWatcher.EXTERNAL_SESSION_RELOAD_DEBOUNCE_MS;
-var STARTUP_SESSION_RECHECK_DELAYS = syncWatcher.STARTUP_SESSION_RECHECK_DELAYS;
-
 var cloneJson = sessionSync.cloneJson;
 
 function attachSessionSyncMethods(WorkspacePlusPlus) {
@@ -179,29 +176,27 @@ function attachSessionSyncMethods(WorkspacePlusPlus) {
         });
     };
 
-    WorkspacePlusPlus.prototype.scheduleExternalSessionStorageReload = function () {
+    WorkspacePlusPlus.prototype.getSyncWatcher = function () {
         var self = this;
-        if (this._externalSessionReloadTimer) {
-            window.clearTimeout(this._externalSessionReloadTimer);
+        if (!this._syncWatcher) {
+            this._syncWatcher = new syncWatcher.SyncWatcher({
+                onReload: function () {
+                    return self.reloadExternalSessionStorageIfChanged({ mergeLocal: false });
+                },
+                registerDomEvent: typeof this.registerDomEvent === 'function'
+                    ? function (target, event, handler) { self.registerDomEvent(target, event, handler); }
+                    : undefined,
+            });
         }
+        return this._syncWatcher;
+    };
 
-        this._externalSessionReloadTimer = window.setTimeout(function () {
-            self._externalSessionReloadTimer = null;
-            self.reloadExternalSessionStorageIfChanged({ mergeLocal: false });
-        }, EXTERNAL_SESSION_RELOAD_DEBOUNCE_MS);
+    WorkspacePlusPlus.prototype.scheduleExternalSessionStorageReload = function (debounceMs) {
+        this.getSyncWatcher().scheduleReload(debounceMs);
     };
 
     WorkspacePlusPlus.prototype.registerSessionStorageListeners = function () {
-        var self = this;
-        if (this._sessionStorageListenersRegistered) return;
-        this._sessionStorageListenersRegistered = true;
-        this._startupSessionStorageTimers = [];
-
-        if (typeof this.registerDomEvent === 'function' && typeof window !== 'undefined') {
-            this.registerDomEvent(window, 'focus', function () {
-                self.scheduleExternalSessionStorageReload();
-            });
-        }
+        this.getSyncWatcher().registerListeners();
     };
 
     WorkspacePlusPlus.prototype.onExternalSettingsChange = function () {
@@ -210,32 +205,13 @@ function attachSessionSyncMethods(WorkspacePlusPlus) {
     };
 
     WorkspacePlusPlus.prototype.scheduleStartupSessionStorageChecks = function () {
-        var self = this;
-        if (!this._startupSessionStorageTimers) this._startupSessionStorageTimers = [];
-
-        for (var i = 0; i < STARTUP_SESSION_RECHECK_DELAYS.length; i++) {
-            (function (delayMs) {
-                var timer = window.setTimeout(function () {
-                    var idx = self._startupSessionStorageTimers.indexOf(timer);
-                    if (idx !== -1) self._startupSessionStorageTimers.splice(idx, 1);
-                    self.reloadExternalSessionStorageIfChanged({ mergeLocal: false });
-                }, delayMs);
-                self._startupSessionStorageTimers.push(timer);
-            })(STARTUP_SESSION_RECHECK_DELAYS[i]);
-        }
+        this.getSyncWatcher().scheduleStartupChecks();
     };
 
     WorkspacePlusPlus.prototype.clearSessionStorageSyncTimers = function () {
-        if (this._externalSessionReloadTimer) {
-            window.clearTimeout(this._externalSessionReloadTimer);
-            this._externalSessionReloadTimer = null;
+        if (this._syncWatcher) {
+            this._syncWatcher.clearTimers();
         }
-
-        var timers = this._startupSessionStorageTimers || [];
-        for (var i = 0; i < timers.length; i++) {
-            window.clearTimeout(timers[i]);
-        }
-        this._startupSessionStorageTimers = [];
     };
 }
 
