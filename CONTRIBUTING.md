@@ -33,6 +33,11 @@ Build the plugin:
 npm run build
 ```
 
+`main.js` is the bundled output and is not tracked in git -- a fresh clone
+has to run `npm run build` (or `npm run dev` to watch) before Obsidian can
+load the plugin. Release builds are produced by CI and attached to the
+GitHub release.
+
 ## Pull Requests
 
 Keep changes focused and include tests when changing session switching, persistence, or settings behavior. Run `npm test` and `npm run build` before submitting.
