@@ -1,6 +1,6 @@
 'use strict';
 
-var layoutUtils = require('../../layout-utils');
+var layoutUtils = require('../../layout-utils.ts');
 
 function attachLayoutRestoreMethods(WorkspacePlusPlus) {
     WorkspacePlusPlus.prototype.isSidebarRestoreEnabled = function () {

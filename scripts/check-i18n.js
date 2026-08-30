@@ -3,12 +3,8 @@
 
 const fs = require('fs');
 const path = require('path');
-const vm = require('vm');
 
 const repoRoot = path.resolve(__dirname, '..');
-const i18nPath = fs.existsSync(path.join(repoRoot, 'src', 'i18n.ts'))
-    ? path.join(repoRoot, 'src', 'i18n.ts')
-    : path.join(repoRoot, 'src', 'i18n.js');
 const srcRoot = path.join(repoRoot, 'src');
 
 async function loadI18nData() {

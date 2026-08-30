@@ -3,7 +3,7 @@
 var obsidian = require('obsidian');
 var i18n = require('./i18n.ts');
 var modals = require('./modals');
-var navigationUtils = require('./navigation-utils');
+var navigationUtils = require('./navigation-utils.ts');
 var utils = require('./utils.ts');
 
 function hasBlockingModal() {

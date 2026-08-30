@@ -3,7 +3,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-const layoutUtils = require('../src/layout-utils');
+const layoutUtils = require('../src/layout-utils.ts');
 
 test('layout utils compare exact serialized layouts', function () {
     assert.equal(layoutUtils.layoutsEqual({ a: 1 }, { a: 1 }), true);

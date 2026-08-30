@@ -3,7 +3,7 @@
 var obsidian = require('obsidian');
 var i18n = require('../../i18n.ts');
 var utils = require('../../utils.ts');
-var layoutUtils = require('../../layout-utils');
+var layoutUtils = require('../../layout-utils.ts');
 var modals = require('../../modals');
 
 function attachSessionCrudMethods(WorkspacePlusPlus) {

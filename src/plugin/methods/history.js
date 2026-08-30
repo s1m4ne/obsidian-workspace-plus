@@ -2,7 +2,7 @@
 
 var obsidian = require('obsidian');
 var i18n = require('../../i18n.ts');
-var layoutUtils = require('../../layout-utils');
+var layoutUtils = require('../../layout-utils.ts');
 
 var HOUR = 3600000;
 var DAY = 86400000;

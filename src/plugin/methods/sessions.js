@@ -1,6 +1,6 @@
 'use strict';
 
-var layoutUtils = require('../../layout-utils');
+var layoutUtils = require('../../layout-utils.ts');
 
 function attachSessionMethods(WorkspacePlusPlus) {
     // --- Session order ---

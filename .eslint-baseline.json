@@ -1,7 +1,7 @@
 {
-    "total": 115,
+    "total": 111,
     "rules": {
-        "@typescript-eslint/no-unused-vars": 13,
+        "@typescript-eslint/no-unused-vars": 9,
         "no-redeclare": 1,
         "no-regex-spaces": 1,
         "obsidianmd/hardcoded-config-path": 21,
