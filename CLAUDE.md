@@ -41,6 +41,7 @@ npm run check        # the gate: typecheck, lint ratchet, imports, tests, covera
 npm run dev          # esbuild watch; hot reload picks it up
 npm run build        # production bundle
 npm run progress     # migration status
+npm run coverage:floors   # which modules are ready to migrate
 npm run check:i18n   # locale key completeness across 21 locales
 ```
 

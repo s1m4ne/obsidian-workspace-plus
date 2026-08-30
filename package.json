@@ -16,7 +16,8 @@
         "coverage": "node scripts/coverage-ratchet.js",
         "check:imports": "node scripts/check-import-extensions.js",
         "progress": "node scripts/progress.js",
-        "snapshot:i18n": "node scripts/snapshot-i18n.js"
+        "snapshot:i18n": "node scripts/snapshot-i18n.js",
+        "coverage:floors": "node scripts/coverage-ratchet.js --floors"
     },
     "devDependencies": {
         "@types/jsdom": "^30.0.0",

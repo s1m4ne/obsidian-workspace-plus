@@ -54,7 +54,7 @@ function parse(output) {
  * Phase 3 moves files and a path-keyed floor would silently stop applying the
  * moment its module was renamed - exactly when it matters most.
  */
-function checkFloors(files) {
+function checkFloors(files, only) {
     if (!fs.existsSync(FLOORS_PATH)) return [];
     const floors = JSON.parse(fs.readFileSync(FLOORS_PATH, 'utf8')).floors;
 
@@ -65,6 +65,7 @@ function checkFloors(files) {
 
     const below = [];
     for (const [name, floor] of Object.entries(floors)) {
+        if (only && name !== only && name !== only.replace(/\.ts$/, '.js')) continue;
         const entry = byName[name] || byName[name.replace(/\.js$/, '.ts')];
         if (!entry) {
             below.push({ file: name, actual: 'absent', floor });
@@ -75,9 +76,41 @@ function checkFloors(files) {
     return below;
 }
 
+function reportFloors(below, target) {
+    if (below.length === 0) {
+        console.log(target ? `${target} clears its coverage floor.` : 'All modules clear their coverage floors.');
+        return;
+    }
+    console.error('Below the coverage floor:');
+    for (const item of below) {
+        console.error(`  ${item.file.padEnd(34)} ${String(item.actual).padStart(6)}%  floor ${item.floor}%`);
+    }
+    console.error('\nRaise it with lock coverage before migrating the module. See issue #111.');
+    process.exit(1);
+}
+
 function main() {
     const args = process.argv.slice(2);
     const { all, files } = parse(runCoverage());
+
+    // Floors gate one module at the moment it is migrated, not every commit -
+    // requiring all of them up front would mean writing every lock before
+    // touching any code. Project-wide coverage is a weighted average, so it
+    // cannot stand in for them: i18n.js alone holds roughly 1,300 functions
+    // across its 21 locales, and that file reaching 100% masked sixteen modules
+    // standing still at the end of Phase 2.
+    const floorArg = args.indexOf('--floor');
+    if (floorArg !== -1) {
+        const target = args[floorArg + 1];
+        if (!target) {
+            console.error('Usage: node scripts/coverage-ratchet.js --floor <module.js>');
+            process.exit(1);
+        }
+        return reportFloors(checkFloors(files, target), target);
+    }
+    if (args.includes('--floors')) {
+        return reportFloors(checkFloors(files), null);
+    }
 
     if (!all) {
         console.error('Could not read a coverage report from the test run.');
@@ -100,20 +133,7 @@ function main() {
         process.exit(1);
     }
 
-    // Project-wide function coverage is a weighted average, so one large file
-    // improving can hide every other file standing still - i18n.js alone holds
-    // roughly 1,300 functions across its 21 locales. The per-module floors are
-    // what decide whether a module is safe to refactor, so they are checked
-    // separately.
-    const below = checkFloors(files);
-    if (below.length > 0) {
-        console.error('Modules below their coverage floor:');
-        for (const item of below) {
-            console.error(`  ${item.file.padEnd(34)} ${String(item.actual).padStart(6)}%  floor ${item.floor}%`);
-        }
-        console.error('\nA module may not be migrated until it clears its floor. See issue #111.');
-        process.exit(1);
-    }
+
 
     const baseline = JSON.parse(fs.readFileSync(BASELINE_PATH, 'utf8')).all;
     // A little slack: coverage shifts by fractions when unrelated files move.

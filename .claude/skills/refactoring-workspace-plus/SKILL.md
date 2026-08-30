@@ -43,12 +43,16 @@ Copy this checklist into your response and tick it off:
 
 ```
 - [ ] 1. Identify the single module for this commit
-- [ ] 2. Read the module and its existing tests
-- [ ] 3. Migrate: .js -> .ts, prototype attachment -> class
-- [ ] 4. Wire the class into the plugin; keep old call sites working
-- [ ] 5. Update tests to the new surface (NOT Behavior Lock tests)
-- [ ] 6. Run the gate (below) - all four must pass
-- [ ] 7. Commit with a message explaining WHY, not just what
+- [ ] 2. Check its coverage floor:
+       `node scripts/coverage-ratchet.js --floor <module>.js`
+       If it is below, that is this commit's first job - raise it with lock
+       coverage before restructuring anything
+- [ ] 3. Read the module and its existing tests
+- [ ] 4. Migrate: .js -> .ts, prototype attachment -> class
+- [ ] 5. Wire the class into the plugin; keep old call sites working
+- [ ] 6. Update tests to the new surface (NOT Behavior Lock tests)
+- [ ] 7. Run the gate (below) - all of it must pass
+- [ ] 8. Commit with a message explaining WHY, not just what
 ```
 
 ### The gate
@@ -56,10 +60,17 @@ Copy this checklist into your response and tick it off:
 Run all four. Do not commit until every one passes.
 
 ```bash
-npm test              # all tests, Behavior Lock included
-npm run lint          # violation count must not increase
-npx tsc --noEmit      # type check
-npm run build         # bundle succeeds
+npm run check         # typecheck, lint ratchet, imports, tests, coverage, build
+```
+
+`npm run check` holds the project-wide coverage ratchet. The per-module floor is
+separate, checked for the one module a commit touches, because the project figure
+is a weighted average that hides individual modules - at the end of Phase 2,
+`i18n.js` reaching 100% masked sixteen modules below their floors.
+
+```bash
+node scripts/coverage-ratchet.js --floor groups.js   # before migrating groups
+npm run coverage:floors                              # the whole picture
 ```
 
 If a gate fails: fix it and run the gate again from the top. Do not proceed with a failing gate, and do not disable a rule to make it pass without asking.

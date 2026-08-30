@@ -100,6 +100,26 @@ assert.equal(plugin._overlayRenderer.itemCache.length, 4);
 
 A lock test that has to change when the code is restructured was written wrong. Assert on what a user could observe: what is on screen, what is stored, what is returned.
 
+## Proving a lock is not vacuous
+
+A characterization test that asserts nothing passes forever. Every suite is shown
+to catch a change before it counts: break the behaviour it covers, confirm the
+lock fails, revert, confirm it passes.
+
+This is not a formality. Two of the Phase 2 suites passed their mutation:
+
+- Dropping `sessionGroups` from `SESSION_KEYS` stopped group membership from ever
+  being written - silent data loss - and all 186 tests passed. The round-trip
+  lock compared the written JSON byte for byte, which proves formatting survives
+  and says nothing about whether the right keys were there to format.
+- Changing one English string passed the i18n lock, whose eight tests proved the
+  shape held - key counts, types, plural forms, platform branches - and never
+  recorded what a key resolves to.
+
+Both are now locked. The lesson generalises: **a lock that only checks structure
+will pass a change of content.** Ask what a plausible mistake in this area would
+look like, then check that the lock would see it.
+
 ## When a lock test fails
 
 1. Assume the refactor is wrong, not the test.
