@@ -72,9 +72,8 @@ test('HistoryService: container reference reactivity (P1)', () => {
         versionHistorySnapshotInterval: 10,
     });
 
-    const service = new HistoryService(() => ({
-        data: currentData,
-    }));
+    const { host: template } = createMockHost();
+    const service = new HistoryService(() => Object.assign({}, template, { data: currentData }));
 
     assert.equal(service.getVersionHistorySnapshotInterval(), 10);
 

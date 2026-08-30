@@ -1,6 +1,6 @@
 import { Notice } from 'obsidian';
 import { L } from '../i18n.ts';
-import { cloneLayout, layoutsEqualStructural } from '../layout-utils.ts';
+import { cloneLayout } from '../layout-utils.ts';
 import type { PluginData, SessionItem, SessionHistoryEntry } from '../storage/default-data.ts';
 import type { SettingsState } from './settings-state.ts';
 import type { SessionStore } from './session-store.ts';
@@ -15,13 +15,13 @@ export interface HistoryServiceHost {
     data: PluginData;
     settingsState?: SettingsState;
     sessionStore?: SessionStore;
-    getActiveSession?: () => SessionItem | null;
-    getCurrentWorkspaceLayout?: () => unknown;
-    applyWorkspaceLayout?: (layout: unknown) => Promise<boolean>;
-    layoutsEqualStructural?: (a: unknown, b: unknown) => boolean;
+    getActiveSession: () => SessionItem | null;
+    getCurrentWorkspaceLayout: () => unknown;
+    applyWorkspaceLayout: (layout: unknown) => Promise<boolean>;
+    layoutsEqualStructural: (a: unknown, b: unknown) => boolean;
+    persistData: () => Promise<boolean>;
+    isAutoSaveOnSwitchEnabled: () => boolean;
     updateStatusBar?: () => void;
-    persistData?: () => Promise<boolean>;
-    isAutoSaveOnSwitchEnabled?: () => boolean;
 }
 
 export const HOUR = 3600000;
@@ -198,10 +198,7 @@ export class HistoryService {
     // --- History operations ---
 
     private checkLayoutsEqualStructural(a: unknown, b: unknown): boolean {
-        if (typeof this.host.layoutsEqualStructural === 'function') {
-            return this.host.layoutsEqualStructural(a, b);
-        }
-        return layoutsEqualStructural(a, b);
+        return this.host.layoutsEqualStructural(a, b);
     }
 
     pushLayoutToHistory(session: SessionItem): void {
@@ -242,21 +239,17 @@ export class HistoryService {
         session.modified = Date.now();
 
         const isActive = session.id === this.data.activeSessionId;
-        if (isActive && session.layout && typeof this.host.applyWorkspaceLayout === 'function') {
+        if (isActive && session.layout) {
             await this.host.applyWorkspaceLayout(session.layout);
         }
 
         this.host.updateStatusBar?.();
-        if (typeof this.host.persistData === 'function') {
-            await this.host.persistData();
-        }
+        await this.host.persistData();
         return true;
     }
 
     async quickRestoreLatestHistory(): Promise<boolean> {
-        const session = this.host.sessionStore?.getActiveSession()
-            ?? (typeof this.host.getActiveSession === 'function' ? this.host.getActiveSession() : null)
-            ?? (this.data.activeSessionId ? this.sessions[this.data.activeSessionId] : null);
+        const session = this.host.getActiveSession();
 
         const history = session?.history as HistoryEntry[] | undefined;
         if (!session || !history || history.length === 0) {
@@ -264,11 +257,26 @@ export class HistoryService {
             return false;
         }
 
-        const ok = await this.restoreFromHistoryEntry(session.id, 0);
-        if (ok) {
-            new Notice(formatString(L.historyQuickRestored, session.name));
+        const latest = history[0];
+        if (!latest || !latest.layout) {
+            new Notice(formatString(L.historyNoEntries));
+            return false;
         }
-        return ok;
+
+        const confirmRestore = this.host.settingsState
+            ? this.host.settingsState.versionHistoryConfirmRestore
+            : (this.data.versionHistoryConfirmRestore !== false);
+
+        if (confirmRestore) {
+            const currentLayout = this.host.getCurrentWorkspaceLayout();
+            const same = currentLayout && this.checkLayoutsEqualStructural(latest.layout, currentLayout);
+            if (same) {
+                new Notice(formatString(L.historyAlreadyLatest));
+                return false;
+            }
+        }
+
+        return this.restoreFromHistoryEntry(session.id, 0);
     }
 
     clearVersionHistoryEntries(): boolean {
@@ -292,9 +300,7 @@ export class HistoryService {
     startHistorySnapshotTimer(): void {
         this.stopHistorySnapshotTimer();
         if (!this.isVersionHistoryEnabled()) return;
-        const autoSaveEnabled = typeof this.host.isAutoSaveOnSwitchEnabled === 'function'
-            ? this.host.isAutoSaveOnSwitchEnabled()
-            : (this.data.autoSaveOnSwitch !== false);
+        const autoSaveEnabled = this.host.isAutoSaveOnSwitchEnabled();
         if (!autoSaveEnabled) return;
 
         const intervalMs = this.getVersionHistorySnapshotInterval() * 60000;
@@ -304,28 +310,22 @@ export class HistoryService {
             : setInterval;
 
         this.historySnapshotTimer = setTimer(() => {
-            const currentAutoSave = typeof this.host.isAutoSaveOnSwitchEnabled === 'function'
-                ? this.host.isAutoSaveOnSwitchEnabled()
-                : (this.data.autoSaveOnSwitch !== false);
+            const currentAutoSave = this.host.isAutoSaveOnSwitchEnabled();
             if (!this.isVersionHistoryEnabled() || !currentAutoSave) {
                 this.stopHistorySnapshotTimer();
                 return;
             }
 
-            const session = this.host.sessionStore?.getActiveSession()
-                ?? (typeof this.host.getActiveSession === 'function' ? this.host.getActiveSession() : null)
-                ?? (this.data.activeSessionId ? this.sessions[this.data.activeSessionId] : null);
+            const session = this.host.getActiveSession();
             if (!session) return;
 
-            const currentLayout = typeof this.host.getCurrentWorkspaceLayout === 'function'
-                ? this.host.getCurrentWorkspaceLayout()
-                : null;
+            const currentLayout = this.host.getCurrentWorkspaceLayout();
             if (!currentLayout || this.checkLayoutsEqualStructural(session.layout, currentLayout)) return;
 
             this.pushLayoutToHistory(session);
             session.layout = currentLayout;
             session.modified = Date.now();
-            void this.host.persistData?.();
+            void this.host.persistData();
         }, intervalMs);
     }
 
