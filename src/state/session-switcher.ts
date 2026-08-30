@@ -42,18 +42,18 @@ export interface SessionSwitcherHost {
     sessionStore?: SessionStore;
     historyService?: HistoryService;
     sessionSaver?: SessionSaver;
-    getOrderedSessions?: (viewGroupId?: string | null) => SessionItem[];
-    findSessionIndex?: (sessions: SessionItem[], sessionId: string | null | undefined) => number;
-    getActiveSession?: () => SessionItem | null;
-    getCurrentWorkspaceLayout?: () => unknown;
-    applyWorkspaceLayout?: (layout: unknown, options?: LayoutRestoreOptions) => Promise<boolean>;
-    persistData?: () => Promise<boolean>;
+    getOrderedSessions: (viewGroupId?: string | null) => SessionItem[];
+    findSessionIndex: (sessions: SessionItem[], sessionId: string | null | undefined) => number;
+    getActiveSession: () => SessionItem | null;
+    getCurrentWorkspaceLayout: () => unknown;
+    applyWorkspaceLayout: (layout: unknown, options?: LayoutRestoreOptions) => Promise<boolean>;
+    persistData: () => Promise<boolean>;
+    pushLayoutToHistory: (session: SessionItem) => void;
+    saveActiveSession: (options?: { silent?: boolean; touchModified?: boolean }) => Promise<boolean>;
+    isActiveSessionDirty: () => boolean;
+    isWarnOnUnsavedSwitchEnabled: () => boolean;
+    isAutoSaveOnSwitchEnabled: () => boolean;
     updateStatusBar?: () => void;
-    pushLayoutToHistory?: (session: SessionItem) => void;
-    saveActiveSession?: (options?: { silent?: boolean; touchModified?: boolean }) => Promise<boolean>;
-    isActiveSessionDirty?: () => boolean;
-    isWarnOnUnsavedSwitchEnabled?: () => boolean;
-    isAutoSaveOnSwitchEnabled?: () => boolean;
     showSwitchPreviewOverlay?: (ordered: SessionItem[], index: number, viewGroupId?: string | null) => void;
     showSwitchFeedbackOverlay?: (ordered: SessionItem[], index: number, viewGroupId?: string | null, overlayOptions?: unknown) => void;
     showSessionSwitchNotice?: (sessionName: string, options?: { durationMs?: number }) => Notice | undefined;
@@ -334,14 +334,7 @@ export class SessionSwitcher {
     buildLayoutForRestore(layout: unknown): unknown {
         if (!layout || typeof layout !== 'object') return layout;
         if (this.data?.restoreSidebars === false) {
-            let currentLayout: unknown = {};
-            if (this.host.sessionStore) {
-                currentLayout = this.host.sessionStore.getCurrentWorkspaceLayout();
-            } else if (typeof this.host.getCurrentWorkspaceLayout === 'function') {
-                currentLayout = this.host.getCurrentWorkspaceLayout();
-            } else if (this.host.app?.workspace) {
-                currentLayout = this.host.app.workspace.getLayout();
-            }
+            const currentLayout = this.host.getCurrentWorkspaceLayout();
             return mergeMainLayoutIntoCurrent(layout, currentLayout);
         }
         return layout;
@@ -354,11 +347,7 @@ export class SessionSwitcher {
         const targetLayout = this.buildLayoutForRestore(layout);
 
         try {
-            if (typeof this.host.applyWorkspaceLayout === 'function') {
-                await this.host.applyWorkspaceLayout(targetLayout, opts);
-            } else if (this.host.app?.workspace) {
-                await this.host.app.workspace.changeLayout(targetLayout as Parameters<App['workspace']['changeLayout']>[0]);
-            }
+            await this.host.applyWorkspaceLayout(targetLayout, opts);
             return true;
         } catch (e) {
             if (opts.catchErrors) return false;
@@ -442,125 +431,47 @@ export class SessionSwitcher {
     }
 
     private getOrderedSessions(viewGroupId?: string | null): SessionItem[] {
-        if (typeof this.host.getOrderedSessions === 'function') {
-            return this.host.getOrderedSessions(viewGroupId);
-        }
-        if (this.host.sessionStore) {
-            if (viewGroupId === null || viewGroupId === '__all__') {
-                return this.host.sessionStore.getOrderedSessionsUnfiltered();
-            }
-            if (typeof viewGroupId === 'string') {
-                return this.host.sessionStore.getOrderedSessionsForGroup(viewGroupId);
-            }
-            return this.host.sessionStore.getOrderedSessions();
-        }
-        return [];
+        return this.host.getOrderedSessions(viewGroupId);
     }
 
     private findSessionIndex(sessions: SessionItem[], sessionId: string | null | undefined): number {
-        if (typeof this.host.findSessionIndex === 'function') {
-            return this.host.findSessionIndex(sessions, sessionId);
-        }
-        if (this.host.sessionStore) {
-            return this.host.sessionStore.findSessionIndex(sessions, sessionId);
-        }
-        if (!sessionId) return -1;
-        for (let i = 0; i < sessions.length; i++) {
-            if (sessions[i]?.id === sessionId) return i;
-        }
-        return -1;
+        return this.host.findSessionIndex(sessions, sessionId);
     }
 
     private getActiveSession(): SessionItem | null {
-        if (typeof this.host.getActiveSession === 'function') {
-            return this.host.getActiveSession();
-        }
-        if (this.host.sessionStore) {
-            return this.host.sessionStore.getActiveSession();
-        }
-        const activeId = this.data?.activeSessionId;
-        return (activeId && this.sessions[activeId]) ? this.sessions[activeId] || null : null;
+        return this.host.getActiveSession();
     }
 
     private isAutoSaveOnSwitchEnabled(): boolean {
-        if (this.host.sessionSaver) {
-            return this.host.sessionSaver.isAutoSaveOnSwitchEnabled();
-        }
-        if (this.host.settingsState) {
-            return Boolean(this.host.settingsState.autoSaveOnSwitch);
-        }
-        if (typeof this.host.isAutoSaveOnSwitchEnabled === 'function') {
-            return this.host.isAutoSaveOnSwitchEnabled();
-        }
-        return this.data?.autoSaveOnSwitch !== false;
+        return this.host.isAutoSaveOnSwitchEnabled();
     }
 
     private isWarnOnUnsavedSwitchEnabled(): boolean {
-        if (this.host.sessionSaver) {
-            return this.host.sessionSaver.isWarnOnUnsavedSwitchEnabled();
-        }
-        if (this.host.settingsState) {
-            return Boolean(this.host.settingsState.warnOnUnsavedSwitch);
-        }
-        if (typeof this.host.isWarnOnUnsavedSwitchEnabled === 'function') {
-            return this.host.isWarnOnUnsavedSwitchEnabled();
-        }
-        return this.data?.warnOnUnsavedSwitch !== false;
+        return this.host.isWarnOnUnsavedSwitchEnabled();
     }
 
     private isActiveSessionDirty(): boolean {
-        if (this.host.sessionSaver) {
-            return this.host.sessionSaver.isActiveSessionDirty();
-        }
-        if (typeof this.host.isActiveSessionDirty === 'function') {
-            return this.host.isActiveSessionDirty();
-        }
-        return false;
+        return this.host.isActiveSessionDirty();
     }
 
     private captureActiveSessionLayoutIfAutoSave(): void {
-        if (this.host.sessionSaver) {
-            this.host.sessionSaver.captureActiveSessionLayoutIfAutoSave();
-            return;
-        }
         const current = this.getActiveSession();
         if (!current || !this.isAutoSaveOnSwitchEnabled()) return;
         this.pushLayoutToHistory(current);
-        let currentLayout: unknown = {};
-        if (this.host.sessionStore) {
-            currentLayout = this.host.sessionStore.getCurrentWorkspaceLayout();
-        } else if (typeof this.host.getCurrentWorkspaceLayout === 'function') {
-            currentLayout = this.host.getCurrentWorkspaceLayout();
-        } else if (this.host.app?.workspace) {
-            currentLayout = this.host.app.workspace.getLayout();
-        }
-        current.layout = currentLayout;
+        current.layout = this.host.getCurrentWorkspaceLayout();
         current.modified = Date.now();
     }
 
     private pushLayoutToHistory(session: SessionItem): void {
-        if (this.host.historyService) {
-            this.host.historyService.pushLayoutToHistory(session);
-        } else if (typeof this.host.pushLayoutToHistory === 'function') {
-            this.host.pushLayoutToHistory(session);
-        }
+        this.host.pushLayoutToHistory(session);
     }
 
     private saveActiveSession(options?: { silent?: boolean; touchModified?: boolean }): Promise<boolean> {
-        if (this.host.sessionSaver) {
-            return this.host.sessionSaver.saveActiveSession(options);
-        }
-        if (typeof this.host.saveActiveSession === 'function') {
-            return this.host.saveActiveSession(options);
-        }
-        return Promise.resolve(true);
+        return this.host.saveActiveSession(options);
     }
 
     private persistData(): Promise<boolean> {
-        if (typeof this.host.persistData === 'function') {
-            return this.host.persistData();
-        }
-        return Promise.resolve(true);
+        return this.host.persistData();
     }
 
     getRelativeSwitchContext(offset: number, options?: SessionSwitchOptions): RelativeSwitchContext {
@@ -854,15 +765,7 @@ export class SessionSwitcher {
         const performSwitch = (skipCurrentSave: boolean): Promise<boolean> => {
             if (current && !skipCurrentSave) {
                 this.pushLayoutToHistory(current);
-                let currentLayout: unknown = {};
-                if (this.host.sessionStore) {
-                    currentLayout = this.host.sessionStore.getCurrentWorkspaceLayout();
-                } else if (typeof this.host.getCurrentWorkspaceLayout === 'function') {
-                    currentLayout = this.host.getCurrentWorkspaceLayout();
-                } else if (this.host.app?.workspace) {
-                    currentLayout = this.host.app.workspace.getLayout();
-                }
-                current.layout = currentLayout;
+                current.layout = this.host.getCurrentWorkspaceLayout();
                 current.modified = Date.now();
             }
 
@@ -878,9 +781,7 @@ export class SessionSwitcher {
 
             return applyLayout.then(async () => {
                 this.host.updateStatusBar?.();
-                if (typeof this.host.persistData === 'function') {
-                    await this.host.persistData();
-                }
+                await this.host.persistData();
 
                 if (opts.switchNoticeMode === 'replace') {
                     const noticeOpts = opts.switchNoticeDurationMs !== undefined

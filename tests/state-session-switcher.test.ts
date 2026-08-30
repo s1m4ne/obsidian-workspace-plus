@@ -61,6 +61,13 @@ function createMockHost(initialData?: Partial<PluginData>): {
             events.savedActive += 1;
             return true;
         },
+        applyWorkspaceLayout: async (layout: unknown) => {
+            events.appliedLayouts.push(layout);
+            return true;
+        },
+        isActiveSessionDirty: () => false,
+        isWarnOnUnsavedSwitchEnabled: () => Boolean(host.data.warnOnUnsavedSwitch),
+        isAutoSaveOnSwitchEnabled: () => host.data.autoSaveOnSwitch !== false,
         app: {
             workspace: {
                 changeLayout: async (layout: unknown) => {
