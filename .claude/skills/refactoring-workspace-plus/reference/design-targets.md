@@ -47,6 +47,7 @@ Each item lists where it is fixed.
 | P10 | `get*` (63) and `find*` (3) do not signal their contract | Each commit |
 | P11 | `app.hotkeyManager` absent from the published types — private API | platform/obsidian-internals |
 | P12–P14 | Accessibility (`aria-label` 0), popout support (`activeDocument` 0), LICENSE year | Phase 4 |
+| P15 | `exports.L` is a mutable module-level export captured at load time by several modules. CommonJS copies the value, so a stale `L` survives a language change; ESM `import` is a live binding and would start updating. **The migration itself changes behaviour here** | i18n — lock the language-switch path first |
 
 ## What is healthy and must not be touched
 
@@ -60,11 +61,13 @@ Staged, because it is the largest change. Additive and reversible first; the des
 
 | Stage | Action | Gate before proceeding |
 |---|---|---|
-| Expand | The store holds a **reference to the existing object** and exposes methods. Every current reader keeps working — it is the same object | Locks pass, no reader touched |
+| Expand | The store holds a reference to the **container** (`plugin.data`) and reads its slice on every access. Every current reader keeps working — it is the same object | Locks pass, no reader touched |
 | Migrate | Each module's own commit replaces its direct reads with store methods | The `grep -c` count for that key falls |
 | Contract | Swap internals (`Record` → `Map`), delete the accessor | `grep -rc "\.data\.groups" src` returns **0** — measured, never assumed |
 
 The on-disk shape never changes: `toJSON()` emits the same JSON, and the persisted-data lock proves it.
+
+**Read through the container, never hold a child reference.** These properties are reassigned rather than mutated in 24 places: `session-sync.js:226-230` replaces all five when another device's data arrives, `session-crud.js:175-180` resets them, `groups.js:92,109` replaces `groupOrder`. A store holding `data.groups` directly would keep pointing at the old object and silently stop seeing incoming sessions — breaking the sync feature from #105. Ownership only inverts at Contract.
 
 ## Where to be bold
 
@@ -73,6 +76,14 @@ The on-disk shape never changes: `toJSON()` emits the same JSON, and the persist
 | Names, file splits, function extraction | Async ordering — the switch queue from #107 |
 | State encapsulation | Event registration timing |
 | Collapsing duplicate methods | The startup settle window |
+| | Module-level mutable exports becoming live bindings (P15) |
+
+## Ordering constraints
+
+Two orderings are forced by the code, not by preference:
+
+- **GroupManager before SessionStore.** `sessions.js:40-58` filters sessions by group — `getOrderedSessionsForGroup` reads `isGroupFeatureEnabled()` and `data.sessionGroups`, `getOrderedSessions` reads `data.activeGroupId`. Session ordering depends on group state, not the reverse.
+- **Shared components before every consumer.** `session-manager-modal.js` holds both `renderSessionItem` and `setupDragAndDrop`; migrating it first would mean rewriting the same 1,097-line file twice. Extract the shared modules while their callers are still JavaScript — esbuild and `node --test` both resolve `.ts` from CommonJS callers.
 
 The right column is behaviour the locks observe only indirectly, so restructuring it without a direct test is how a silent regression gets in.
 
