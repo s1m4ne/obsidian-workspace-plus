@@ -98,9 +98,8 @@ test('GroupManager: container reference reactivity on reassignment (P1)', () => 
         groupOrder: ['__all__', 'g1'],
     });
 
-    const manager = new GroupManager(() => ({
-        data: currentData,
-    }));
+    const { host: template } = createMockHost();
+    const manager = new GroupManager(() => Object.assign({}, template, { data: currentData }));
 
     assert.equal(manager.getOrderedGroups().length, 1);
     assert.equal(manager.getOrderedGroups()[0]?.name, 'First');

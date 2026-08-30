@@ -7,14 +7,14 @@ import type { SettingsState } from './settings-state.ts';
 export interface GroupManagerHost {
     data: PluginData;
     settingsState?: SettingsState;
-    persistData?: () => Promise<boolean>;
+    persistData: () => Promise<boolean>;
+    switchSession: (sessionId: string) => Promise<boolean>;
+    getOrderedSessionsUnfiltered: () => SessionItem[];
+    getOrderedSessionsForGroup: (groupId: string | null) => SessionItem[];
     updateStatusBar?: () => void;
     syncSessionCommands?: () => void;
     hideSwitchOverlay?: () => void;
     hideSearchOverlay?: () => void;
-    switchSession?: (sessionId: string) => Promise<boolean>;
-    getOrderedSessionsUnfiltered?: () => SessionItem[];
-    getOrderedSessionsForGroup?: (groupId: string | null) => SessionItem[];
 }
 
 export interface GroupSelectionResult {
@@ -97,10 +97,7 @@ export class GroupManager {
 
     private persistIfNeeded(options?: GroupPersistOption): Promise<boolean> {
         if (options?.persist === false) return Promise.resolve(true);
-        if (typeof this.host.persistData === 'function') {
-            return this.host.persistData();
-        }
-        return Promise.resolve(true);
+        return this.host.persistData();
     }
 
     isGroupFeatureEnabled(): boolean {
@@ -263,7 +260,7 @@ export class GroupManager {
         }
 
         const sessionGroups = this.sessionGroups;
-        const allSessions = this.host.getOrderedSessionsUnfiltered?.() || [];
+        const allSessions = this.host.getOrderedSessionsUnfiltered();
         const targetSessions = allSessions.filter((s) => {
             const groups = sessionGroups[s.id];
             return groups && groups.includes(nextGroupId);
@@ -278,12 +275,8 @@ export class GroupManager {
             return commitGroup();
         }
 
-        if (typeof this.host.switchSession === 'function') {
-            const switched = await this.host.switchSession(targetSessions[0]!.id);
-            if (!switched) return false;
-            return commitGroup();
-        }
-
+        const switched = await this.host.switchSession(targetSessions[0]!.id);
+        if (!switched) return false;
         return commitGroup();
     }
 
@@ -322,12 +315,12 @@ export class GroupManager {
                 switched: false,
                 targetGroupId: null,
                 resolvedGroupId: null,
-                sessions: this.host.getOrderedSessionsUnfiltered?.() || [],
+                sessions: this.host.getOrderedSessionsUnfiltered(),
             };
         }
 
         const targetGroupId = groupId || null;
-        const targetSessions = this.host.getOrderedSessionsForGroup?.(targetGroupId) || [];
+        const targetSessions = this.host.getOrderedSessionsForGroup(targetGroupId);
 
         const switched = await this.setActiveGroup(targetGroupId);
         let resolvedGroupId: string | null;
@@ -343,7 +336,7 @@ export class GroupManager {
             switched,
             targetGroupId,
             resolvedGroupId,
-            sessions: this.host.getOrderedSessionsForGroup?.(resolvedGroupId) || [],
+            sessions: this.host.getOrderedSessionsForGroup(resolvedGroupId),
         };
     }
 
