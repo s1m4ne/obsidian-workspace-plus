@@ -36,6 +36,14 @@ function attachSessionSwitchingMethods(WorkspacePlusPlus) {
         return notice;
     };
 
+    // Where relative navigation counts from. While a switch is still applying
+    // its layout, data.activeSessionId lags behind the session the user has
+    // already asked for, so stepping from it makes every press during the
+    // switch resolve to the same target and collapse into a single step.
+    WorkspacePlusPlus.prototype.getRelativeSwitchBaseId = function () {
+        return this.pendingSwitchTargetId || this.data.activeSessionId;
+    };
+
     WorkspacePlusPlus.prototype.getRelativeSwitchContext = function (offset) {
         var ordered = this.getOrderedSessions();
         if (ordered.length === 0) {
@@ -46,8 +54,20 @@ function attachSessionSwitchingMethods(WorkspacePlusPlus) {
                 isEmpty: true,
             };
         }
-        var currentIndex = this.findActiveSessionIndex(ordered);
-        if (currentIndex === -1) return null;
+
+        var currentIndex = this.findSessionIndex(ordered, this.getRelativeSwitchBaseId());
+        if (currentIndex === -1) {
+            // The active session is not in the current view - it was removed
+            // from the active group, moved elsewhere, or the view is showing a
+            // different group. Enter the list from the near edge rather than
+            // going inert.
+            return {
+                ordered: ordered,
+                currentIndex: -1,
+                targetIndex: offset > 0 ? 0 : ordered.length - 1,
+                isEmpty: false,
+            };
+        }
 
         return {
             ordered: ordered,
@@ -73,7 +93,7 @@ function attachSessionSwitchingMethods(WorkspacePlusPlus) {
             return Promise.resolve(false);
         }
 
-        if (ordered[index].id === this.data.activeSessionId) {
+        if (ordered[index].id === this.getRelativeSwitchBaseId()) {
             if (options.noticeMode === 'replace') {
                 this.showSessionSwitchNotice(ordered[index].name, {
                     durationMs: options.switchNoticeDurationMs,
@@ -188,11 +208,22 @@ function attachSessionSwitchingMethods(WorkspacePlusPlus) {
             .then(function () {
                 self.isSwitchingSession = false;
                 self.switchLockAt = 0;
-                if (!self.pendingSwitchRequest) return;
+                if (!self.pendingSwitchRequest) {
+                    self.pendingSwitchTargetId = null;
+                    return;
+                }
                 var next = self.pendingSwitchRequest;
                 self.pendingSwitchRequest = null;
                 self.runSwitchRequest(next);
             });
+    };
+
+    // A confirm dialog or the switch overlay means the user is mid-interaction,
+    // so a switch that looks stuck is probably just waiting on them.
+    WorkspacePlusPlus.prototype.hasBlockingSwitchUi = function () {
+        if (typeof document === 'undefined') return false;
+        return !!document.querySelector('.wpp-confirm-buttons')
+            || !!document.querySelector('.wpp-switch-overlay');
     };
 
     WorkspacePlusPlus.prototype.switchSession = function (targetId, options) {
@@ -212,11 +243,11 @@ function attachSessionSwitchingMethods(WorkspacePlusPlus) {
         if (this.isSwitchingSession) {
             var lockAt = this.switchLockAt || 0;
             var elapsed = lockAt ? (Date.now() - lockAt) : Number.MAX_SAFE_INTEGER;
-            var hasBlockingUi = !!document.querySelector('.wpp-confirm-buttons')
-                || !!document.querySelector('.wpp-switch-overlay');
+            var hasBlockingUi = this.hasBlockingSwitchUi();
             if (!hasBlockingUi && elapsed > 5000) {
                 this.isSwitchingSession = false;
                 this.switchLockAt = 0;
+                this.pendingSwitchTargetId = null;
                 if (this.pendingSwitchRequest) {
                     this.pendingSwitchRequest.resolve(false);
                     this.pendingSwitchRequest = null;
@@ -229,6 +260,10 @@ function attachSessionSwitchingMethods(WorkspacePlusPlus) {
             return Promise.resolve(false);
         }
 
+        // Remember where the user has asked to end up, so relative navigation
+        // keeps stepping forward while this switch is still applying.
+        this.pendingSwitchTargetId = targetId;
+
         return new Promise(function (resolve) {
             var request = {
                 targetId: targetId,
@@ -237,6 +272,8 @@ function attachSessionSwitchingMethods(WorkspacePlusPlus) {
             };
 
             if (self.isSwitchingSession) {
+                // Superseding the queued request is intentional: its target was
+                // an intermediate stop, and the new one already accounts for it.
                 if (self.pendingSwitchRequest) {
                     self.pendingSwitchRequest.resolve(false);
                 }
