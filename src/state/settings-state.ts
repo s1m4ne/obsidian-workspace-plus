@@ -60,6 +60,10 @@ export class SettingsState {
         return this.data.warnOnUnsavedSwitch ?? DEFAULT_DATA.warnOnUnsavedSwitch;
     }
 
+    get autoSaveOnSwitch(): boolean {
+        return this.data.autoSaveOnSwitch ?? DEFAULT_DATA.autoSaveOnSwitch;
+    }
+
     get highlightUnsavedSessionChanges(): boolean {
         return this.data.highlightUnsavedSessionChanges ?? DEFAULT_DATA.highlightUnsavedSessionChanges;
     }

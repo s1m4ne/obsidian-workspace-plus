@@ -4,36 +4,11 @@ require('./lock/harness/index.ts').installObsidianStub();
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const Module = require('module');
 
 const i18n = require('../src/i18n.ts');
-
 i18n.resolveLocale('en');
 
-function loadSessionSwitchingMethods() {
-    const obsidianStub = {
-        Modal: class {},
-        Notice: class {
-            constructor(_message) {}
-            hide() {}
-        },
-        setIcon: function () {},
-        setTooltip: function () {},
-    };
-    const originalLoad = Module._load;
-    Module._load = function (request, parent, isMain) {
-        if (request === 'obsidian') return obsidianStub;
-        return originalLoad(request, parent, isMain);
-    };
-
-    try {
-        return require('../src/plugin/methods/session-switching');
-    } finally {
-        Module._load = originalLoad;
-    }
-}
-
-const attachSessionSwitchingMethods = loadSessionSwitchingMethods();
+const attachSessionSwitchingMethods = require('../src/plugin/methods/session-switching');
 const attachSessionMethods = require('../src/plugin/methods/sessions');
 
 // A plugin whose layout application is deliberately slow, so a switch is still
@@ -181,4 +156,65 @@ test('a stale switch lock releases the remembered target', async () => {
 
     assert.equal(plugin.pendingSwitchTargetId, 'd');
     await plugin.releaseLayouts();
+});
+
+test('session-switching prototype methods: notices and direct switches', async () => {
+    const plugin = createPlugin();
+
+    const notice = plugin.showSessionSwitchNotice('Test', { durationMs: 50 });
+    assert.ok(notice);
+    plugin.clearSessionSwitchNotice();
+
+    assert.equal(plugin.hasBlockingSwitchUi(), false);
+    assert.equal(plugin.getRelativeSwitchBaseId(), 'a');
+
+    const ordered = plugin.getOrderedSessions();
+    const p1 = plugin.switchSessionAtOrderedIndex(ordered, 1, { silent: true });
+    await plugin.releaseLayouts();
+    await p1;
+
+    const p2 = plugin.switchToIndex(2);
+    await plugin.releaseLayouts();
+    await p2;
+    assert.equal(plugin.data.activeSessionId, 'c');
+
+    const p3 = plugin.switchSessionByIdFromCommand('d');
+    await plugin.releaseLayouts();
+    await p3;
+    assert.equal(plugin.data.activeSessionId, 'd');
+
+    const p4 = plugin.switchRelativeDirect(-1, { silent: true });
+    await plugin.releaseLayouts();
+    await p4;
+    assert.equal(plugin.data.activeSessionId, 'c');
+
+    const p5 = plugin.switchRelativeFromStatusBar(1);
+    await plugin.releaseLayouts();
+    await p5;
+    assert.equal(plugin.data.activeSessionId, 'd');
+
+    const p6 = plugin.switchRelativeFromScroll(-1);
+    await plugin.releaseLayouts();
+    await p6;
+    assert.equal(plugin.data.activeSessionId, 'c');
+
+    const p7 = plugin.switchRelative(1);
+    await plugin.releaseLayouts();
+    await p7;
+    assert.equal(plugin.data.activeSessionId, 'd');
+
+    const p8 = plugin.switchRelativeImmediate(-1, { showOverlay: false });
+    await plugin.releaseLayouts();
+    await p8;
+    assert.equal(plugin.data.activeSessionId, 'c');
+
+    const p9 = plugin.performSessionSwitch('a');
+    await plugin.releaseLayouts();
+    await p9;
+    assert.equal(plugin.data.activeSessionId, 'a');
+
+    const p10 = plugin.switchSession('b', { silent: true });
+    await plugin.releaseLayouts();
+    await p10;
+    assert.equal(plugin.data.activeSessionId, 'b');
 });

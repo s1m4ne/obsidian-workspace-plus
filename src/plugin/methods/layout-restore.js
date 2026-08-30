@@ -1,38 +1,24 @@
 'use strict';
 
-var layoutUtils = require('../../layout-utils.ts');
+var attachSessionSwitcherGetter = require('./session-switcher-getter');
 
 function attachLayoutRestoreMethods(WorkspacePlusPlus) {
+    attachSessionSwitcherGetter(WorkspacePlusPlus);
+
     WorkspacePlusPlus.prototype.isSidebarRestoreEnabled = function () {
-        return this.data.restoreSidebars !== false;
+        return this.getSessionSwitcher().isSidebarRestoreEnabled();
     };
 
     WorkspacePlusPlus.prototype.getWorkspaceRestoreScope = function () {
-        return this.isSidebarRestoreEnabled() ? 'full' : 'main-only';
+        return this.getSessionSwitcher().getWorkspaceRestoreScope();
     };
 
     WorkspacePlusPlus.prototype.buildLayoutForRestore = function (layout) {
-        if (!layout) return layout;
-        if (this.isSidebarRestoreEnabled()) {
-            return layoutUtils.cloneLayout(layout);
-        }
-
-        var currentLayout = null;
-        try {
-            currentLayout = this.getCurrentWorkspaceLayout();
-        } catch (e) {
-            currentLayout = null;
-        }
-        return layoutUtils.mergeMainLayoutIntoCurrent(layout, currentLayout);
+        return this.getSessionSwitcher().buildLayoutForRestore(layout);
     };
 
     WorkspacePlusPlus.prototype.applyWorkspaceLayout = function (layout, options) {
-        options = options || {};
-        if (!layout) return Promise.resolve();
-        var nextLayout = this.buildLayoutForRestore(layout);
-        var apply = Promise.resolve(this.app.workspace.changeLayout(nextLayout));
-        if (options.catchErrors === false) return apply;
-        return apply.catch(function () {});
+        return this.getSessionSwitcher().applyWorkspaceLayout(layout, options);
     };
 }
 
