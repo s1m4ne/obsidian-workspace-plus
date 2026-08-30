@@ -15,7 +15,8 @@
         "lint:ratchet": "node scripts/lint-ratchet.js",
         "coverage": "node scripts/coverage-ratchet.js",
         "check:imports": "node scripts/check-import-extensions.js",
-        "progress": "node scripts/progress.js"
+        "progress": "node scripts/progress.js",
+        "snapshot:i18n": "node scripts/snapshot-i18n.js"
     },
     "devDependencies": {
         "@types/jsdom": "^30.0.0",

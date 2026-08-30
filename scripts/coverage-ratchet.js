@@ -15,6 +15,7 @@ const fs = require('fs');
 const path = require('path');
 
 const BASELINE_PATH = path.join(__dirname, '..', '.coverage-baseline.json');
+const FLOORS_PATH = path.join(__dirname, '..', '.coverage-floors.json');
 
 // Node prints the summary table to stdout; these pull the totals out of it.
 const FILE_ROW = /^[^\S\n]*(?:ℹ\s*)?(?<file>[^|\s][^|]*?)\s*\|\s*(?<line>[\d.]+)\s*\|\s*(?<branch>[\d.]+)\s*\|\s*(?<func>[\d.]+)\s*\|/;
@@ -48,6 +49,32 @@ function parse(output) {
     return { all, files };
 }
 
+/**
+ * Per-module floors from the plan. A module is checked by basename, because
+ * Phase 3 moves files and a path-keyed floor would silently stop applying the
+ * moment its module was renamed - exactly when it matters most.
+ */
+function checkFloors(files) {
+    if (!fs.existsSync(FLOORS_PATH)) return [];
+    const floors = JSON.parse(fs.readFileSync(FLOORS_PATH, 'utf8')).floors;
+
+    const byName = {};
+    for (const [file, entry] of Object.entries(files)) {
+        byName[path.basename(file)] = entry;
+    }
+
+    const below = [];
+    for (const [name, floor] of Object.entries(floors)) {
+        const entry = byName[name] || byName[name.replace(/\.js$/, '.ts')];
+        if (!entry) {
+            below.push({ file: name, actual: 'absent', floor });
+            continue;
+        }
+        if (entry.func < floor) below.push({ file: name, actual: entry.func, floor });
+    }
+    return below;
+}
+
 function main() {
     const args = process.argv.slice(2);
     const { all, files } = parse(runCoverage());
@@ -70,6 +97,21 @@ function main() {
 
     if (!fs.existsSync(BASELINE_PATH)) {
         console.error('No .coverage-baseline.json. Run: node scripts/coverage-ratchet.js --update');
+        process.exit(1);
+    }
+
+    // Project-wide function coverage is a weighted average, so one large file
+    // improving can hide every other file standing still - i18n.js alone holds
+    // roughly 1,300 functions across its 21 locales. The per-module floors are
+    // what decide whether a module is safe to refactor, so they are checked
+    // separately.
+    const below = checkFloors(files);
+    if (below.length > 0) {
+        console.error('Modules below their coverage floor:');
+        for (const item of below) {
+            console.error(`  ${item.file.padEnd(34)} ${String(item.actual).padStart(6)}%  floor ${item.floor}%`);
+        }
+        console.error('\nA module may not be migrated until it clears its floor. See issue #111.');
         process.exit(1);
     }
 
