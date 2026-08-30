@@ -1,0 +1,8 @@
+{
+    "total": 15,
+    "files": {
+        "src/state/session-saver.ts": 5,
+        "src/state/session-store.ts": 1,
+        "src/state/session-switcher.ts": 9
+    }
+}

@@ -37,7 +37,7 @@ before writing it.
 ## Commands
 
 ```bash
-npm run check        # the gate: typecheck, lint ratchet, imports, tests, coverage, build
+npm run check        # the gate: typecheck, lint, dual dispatch, imports, tests, coverage, build
 npm run dev          # esbuild watch; hot reload picks it up
 npm run build        # production bundle
 npm run progress     # migration status
@@ -45,7 +45,7 @@ npm run coverage:floors   # which modules are ready to migrate
 npm run check:i18n   # locale key completeness across 21 locales
 ```
 
-`npm run check` must pass before every commit. It is six gates, and the two
+`npm run check` must pass before every commit. It is seven gates, and the three
 ratchets deserve explanation:
 
 - **Lint** compares per-rule counts against `.eslint-baseline.json`. There are
@@ -54,8 +54,18 @@ ratchets deserve explanation:
 - **Coverage** compares project-wide function coverage against
   `.coverage-baseline.json`. It starts at 22% and has to climb.
 
-When a commit legitimately improves either figure, re-record it in that same
-commit: `node scripts/lint-ratchet.js --update`, `node scripts/coverage-ratchet.js --update`.
+- **Dual dispatch** counts `typeof this.host.X === 'function'` across
+  `src/state/` and `src/storage/`. A class that keeps its own fallback for a
+  hook the adapter always supplies has two implementations, and the one in the
+  class runs neither in production nor in the tests. Fifteen sites are recorded
+  because the adapter returns `undefined` there unless a test overrides the
+  plugin method - those fallbacks are the live path. The question for any new
+  site is only: does the adapter always supply this hook?
+
+When a commit legitimately improves any of the three, re-record it in that same
+commit: `node scripts/lint-ratchet.js --update`,
+`node scripts/coverage-ratchet.js --update`,
+`node scripts/dual-dispatch-ratchet.js --update`.
 
 ## Things that will surprise you
 
