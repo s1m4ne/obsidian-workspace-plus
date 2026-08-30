@@ -16,7 +16,8 @@ export interface StatusBarActions {
 }
 
 export interface SessionHistoryEntry {
-    timestamp: number;
+    timestamp?: number;
+    savedAt?: number;
     layout: unknown;
     note?: string;
 }

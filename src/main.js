@@ -35,6 +35,7 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
             self.settingsState = self.getSettingsState();
             self.groupManager = self.getGroupManager();
             self.sessionStore = self.getSessionStore();
+            self.historyService = self.getHistoryService();
 
             // Migrate legacy settings into statusBarActions
             if (!self.data.statusBarActions) {
