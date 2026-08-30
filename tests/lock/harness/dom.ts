@@ -146,6 +146,9 @@ export function setupDom(): DomHarness {
     install('MouseEvent', window.MouseEvent);
     install('KeyboardEvent', window.KeyboardEvent);
 
+    // jsdom does not implement scrollIntoView; provide a no-op stub for UI components
+    window.Element.prototype.scrollIntoView = (): void => {};
+
     return {
         window,
         document: window.document,
