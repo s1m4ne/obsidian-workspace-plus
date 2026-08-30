@@ -62,6 +62,30 @@ npm run build         # bundle succeeds
 
 If a gate fails: fix it and run the gate again from the top. Do not proceed with a failing gate, and do not disable a rule to make it pass without asking.
 
+## Phase exit — do not start the next phase until this passes
+
+A phase is finished when it has been reviewed, not when its commits exist.
+
+```
+- [ ] 1. review-suite:ln-12-delivery-reviewer over the phase's commit range
+- [ ] 2. /code-review over the same range
+- [ ] 3. /simplify over the same range
+- [ ] 4. node scripts/progress.js - does the state match what the plan said
+- [ ] 5. Findings addressed, or written into the PR with the reason they were not
+```
+
+**Phase 2 additionally requires proving each lock works.** A characterization
+test that asserts nothing passes forever and proves nothing. For every lock
+suite: deliberately break the behaviour it covers, confirm the lock fails,
+revert, confirm it passes. Record the result in the PR. A lock that cannot be
+made to fail is deleted or rewritten.
+
+## Reporting progress
+
+Cite `node scripts/progress.js` output, never prose. If the commit sequence
+diverges from the plan, write the divergence and its reason into issue #111 —
+amend the plan, do not quietly abandon it.
+
 ## Migration order
 
 Leaf-first. Later modules depend on earlier ones, so do not reorder without reason.
