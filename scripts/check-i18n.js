@@ -67,6 +67,7 @@ function walkSourceFiles(dir, out) {
     }
 }
 
+// Keys reached as `L.foo`. These are the ones that must exist in `en`.
 function collectUsedI18nKeys(sourceDir) {
     const files = [];
     walkSourceFiles(sourceDir, files);
@@ -88,6 +89,34 @@ function collectUsedI18nKeys(sourceDir) {
     }
 
     return { used, refMap };
+}
+
+// Keys reached as `L[someVariable]`, where the name is held in a string
+// literal - the status bar slot map in settings.js and the `labelKey` fields
+// in statusbar-actions.js both work this way. Without this the unused-key
+// warning is mostly noise, which is how real dead keys stay hidden in it.
+function collectQuotedNames(sourceDir) {
+    const files = [];
+    walkSourceFiles(sourceDir, files);
+
+    const quoted = new Set();
+    const refMap = {};
+    const re = /['"]([A-Za-z][A-Za-z0-9_]*)['"]/g;
+
+    for (let i = 0; i < files.length; i++) {
+        const rel = path.relative(repoRoot, files[i]);
+        if (rel === path.join('src', 'i18n.js')) continue;
+        const text = fs.readFileSync(files[i], 'utf8');
+        let m;
+        while ((m = re.exec(text))) {
+            const name = m[1];
+            quoted.add(name);
+            if (!refMap[name]) refMap[name] = [];
+            if (refMap[name].length < 3) refMap[name].push(rel);
+        }
+    }
+
+    return { quoted, refMap };
 }
 
 function formatList(list, prefix) {
@@ -112,6 +141,7 @@ function main() {
 
     const enKeys = new Set(Object.keys(merged.en || {}));
     const { used, refMap } = collectUsedI18nKeys(srcRoot);
+    const { quoted, refMap: quotedRefMap } = collectQuotedNames(srcRoot);
 
     // Locale registry consistency
     const optionLocales = Object.keys(langOptions).sort();
@@ -164,10 +194,17 @@ function main() {
 
     // Defined in en but unused in code
     const unusedInCode = [];
+    const indirectOnly = [];
     enKeys.forEach(function (k) {
-        if (!used.has(k)) unusedInCode.push(k);
+        if (used.has(k)) return;
+        if (quoted.has(k)) {
+            indirectOnly.push(k);
+            return;
+        }
+        unusedInCode.push(k);
     });
     unusedInCode.sort();
+    indirectOnly.sort();
     if (unusedInCode.length > 0) {
         warnings.push('Unused i18n keys in en (' + unusedInCode.length + '):\n' + formatList(unusedInCode, '  - '));
     }
@@ -199,6 +236,7 @@ function main() {
         console.log('Locales:', locales.join(', '));
         console.log('Keys in en:', enKeys.size);
         console.log('Keys referenced in code:', used.size);
+        console.log('Keys referenced indirectly:', indirectOnly.length);
     }
 
     if (warnings.length > 0) {
