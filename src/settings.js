@@ -2,6 +2,7 @@
 
 var obsidian = require('obsidian');
 var i18n = require('./i18n.ts');
+var obsidianInternals = require('./platform/obsidian-internals.ts');
 
 function formatByteSize(bytes) {
     if (typeof bytes !== 'number' || !isFinite(bytes) || bytes < 0) return '—';
@@ -95,13 +96,10 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                 .addButton(function (btn) {
                     btn.setButtonText(L.settingsHotkeysBtn);
                     btn.onClick(function () {
-                        self.app.setting.openTabById('hotkeys');
-                        var sc = self.app.setting.activeTab.searchComponent;
                         var pluginName = (self.plugin.manifest && self.plugin.manifest.name)
                             ? self.plugin.manifest.name
                             : 'Workspace++';
-                        sc.setValue(pluginName);
-                        sc.inputEl.dispatchEvent(new Event('input'));
+                        obsidianInternals.openHotkeysSetting(self.app, pluginName);
                     });
                 });
 

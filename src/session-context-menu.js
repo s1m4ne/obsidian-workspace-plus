@@ -2,6 +2,7 @@
 
 var obsidian = require('obsidian');
 var i18n = require('./i18n.ts');
+var obsidianInternals = require('./platform/obsidian-internals.ts');
 
 /**
  * Open a context menu for a session item.
@@ -178,8 +179,7 @@ function openSessionContextMenu(options) {
             mi.setIcon('mouse-pointer-click');
             mi.onClick(function () {
                 if (plugin.settingTab) plugin.settingTab.activeTab = 'general';
-                app.setting.open();
-                app.setting.openTabById(plugin.manifest.id);
+                obsidianInternals.openSettingTab(app, plugin.manifest.id);
             });
         });
     }

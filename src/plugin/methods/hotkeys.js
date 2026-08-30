@@ -1,6 +1,7 @@
 'use strict';
 
 var utils = require('../../utils.ts');
+var obsidianInternals = require('../../platform/obsidian-internals.ts');
 
 function attachHotkeyMethods(WorkspacePlusPlus) {
     // --- Hotkey helpers ---
@@ -32,18 +33,9 @@ function attachHotkeyMethods(WorkspacePlusPlus) {
     WorkspacePlusPlus.prototype.getCommandHotkey = function (cmdId, index) {
         var idx = index || 0;
         var fullId = this.manifest.id + ':' + cmdId;
-        try {
-            var mgr = this.app.hotkeyManager;
-            if (!mgr) return '';
-            var hotkeys = mgr.getHotkeys ? mgr.getHotkeys(fullId) : null;
-            if (!hotkeys || hotkeys.length === 0) {
-                hotkeys = mgr.getDefaultHotkeys ? mgr.getDefaultHotkeys(fullId) : null;
-            }
-            if (!hotkeys || hotkeys.length <= idx) return '';
-            return this.formatHotkey(hotkeys[idx]);
-        } catch (e) {
-            return '';
-        }
+        var hotkeys = obsidianInternals.getCommandHotkeys(this.app, fullId);
+        if (!hotkeys || hotkeys.length <= idx) return '';
+        return this.formatHotkey(hotkeys[idx]);
     };
 }
 

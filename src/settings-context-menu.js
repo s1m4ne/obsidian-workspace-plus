@@ -2,6 +2,7 @@
 
 var obsidian = require('obsidian');
 var i18n = require('./i18n.ts');
+var obsidianInternals = require('./platform/obsidian-internals.ts');
 
 /**
  * Open a settings context menu on empty area of Session Manager / Quick Switcher.
@@ -152,14 +153,10 @@ function openSettingsContextMenu(options) {
         mi.setTitle(L.settingsHotkeysBtn);
         mi.setIcon('keyboard');
         mi.onClick(function () {
-            app.setting.open();
-            app.setting.openTabById('hotkeys');
-            var sc = app.setting.activeTab.searchComponent;
             var pluginName = (plugin.manifest && plugin.manifest.name)
                 ? plugin.manifest.name
                 : 'Workspace++';
-            sc.setValue(pluginName);
-            sc.inputEl.dispatchEvent(new Event('input'));
+            obsidianInternals.openHotkeysSetting(app, pluginName);
         });
     });
 
@@ -168,8 +165,7 @@ function openSettingsContextMenu(options) {
         mi.setIcon('mouse-pointer-click');
         mi.onClick(function () {
             if (plugin.settingTab) plugin.settingTab.activeTab = 'general';
-            app.setting.open();
-            app.setting.openTabById(plugin.manifest.id);
+            obsidianInternals.openSettingTab(app, plugin.manifest.id);
         });
     });
 
@@ -177,8 +173,7 @@ function openSettingsContextMenu(options) {
         mi.setTitle(L.contextOpenSettings);
         mi.setIcon('settings');
         mi.onClick(function () {
-            app.setting.open();
-            app.setting.openTabById(plugin.manifest.id);
+            obsidianInternals.openSettingTab(app, plugin.manifest.id);
         });
     });
 

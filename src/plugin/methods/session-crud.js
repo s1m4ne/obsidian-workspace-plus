@@ -2,6 +2,7 @@
 
 var obsidian = require('obsidian');
 var i18n = require('../../i18n.ts');
+var obsidianInternals = require('../../platform/obsidian-internals.ts');
 var utils = require('../../utils.ts');
 var layoutUtils = require('../../layout-utils.ts');
 var modals = require('../../modals');
