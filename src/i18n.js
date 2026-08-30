@@ -7580,8 +7580,12 @@ var LANG_ORDER = [
 exports.LANG_OPTIONS = LANG_OPTIONS;
 exports.LANG_ORDER = LANG_ORDER;
 
+function navigatorLanguage() {
+    return (typeof navigator !== 'undefined' && navigator.language) || '';
+}
+
 exports.resolveLocale = function (override) {
-    var lang = override && override !== 'auto' ? override : (navigator.language || '');
+    var lang = override && override !== 'auto' ? override : navigatorLanguage();
     var key = lang.slice(0, 2);
     if (key === 'zh') {
         key = /TW|HK|Hant/i.test(lang) ? 'zh-TW' : 'zh';
