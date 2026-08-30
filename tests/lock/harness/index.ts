@@ -19,6 +19,7 @@ import { registry, resetRegistry, runCommand } from './obsidian-module.ts';
 import type { Registry } from './obsidian-module.ts';
 
 export * from './obsidian-stub.ts';
+export * from './vault.ts';
 export type { DomHarness } from './dom.ts';
 export type { Registry } from './obsidian-module.ts';
 
