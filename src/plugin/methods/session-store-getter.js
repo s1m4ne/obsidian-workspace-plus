@@ -22,12 +22,6 @@ function attachSessionStoreGetter(WorkspacePlusPlus) {
                     }
                     return {};
                 },
-                createSessionRecord: function (id, name, layout, options) {
-                    if (self.createSessionRecord && self.createSessionRecord !== WorkspacePlusPlus.prototype.createSessionRecord) {
-                        return self.createSessionRecord(id, name, layout, options);
-                    }
-                    return undefined;
-                },
                 createSessionValidated: function (name, options) {
                     if (self.createSessionValidated && self.createSessionValidated !== WorkspacePlusPlus.prototype.createSessionValidated) {
                         return self.createSessionValidated(name, options);

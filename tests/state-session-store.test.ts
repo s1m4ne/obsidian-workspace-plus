@@ -66,6 +66,10 @@ function createMockHost(initialData?: Partial<PluginData>): {
             return true;
         },
         getWorkspaceRestoreScope: () => 'full',
+        getCurrentWorkspaceLayout: () => ({ val: 0 }),
+        moveSessionToGroupExclusive: async () => true,
+        resolveGroupSelection: async (groupId: string | null) => ({ resolvedGroupId: groupId }),
+        attachSessionToActiveGroup: () => {},
     };
 
     return { host, events };
@@ -78,9 +82,8 @@ test('SessionStore: container reference reactivity on reassignment (P1)', () => 
         sessionOrder: ['s1'],
     });
 
-    const store = new SessionStore(() => ({
-        data: currentData,
-    }));
+    const { host: template } = createMockHost();
+    const store = new SessionStore(() => Object.assign({}, template, { data: currentData }));
 
     assert.equal(store.getActiveSession()?.name, 'First');
 

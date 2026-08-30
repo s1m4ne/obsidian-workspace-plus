@@ -12,18 +12,18 @@ export interface SessionStoreHost {
     manifestId?: string;
     groupManager?: GroupManager;
     settingsState?: SettingsState;
-    getCurrentWorkspaceLayout?: () => unknown;
+    getCurrentWorkspaceLayout: () => unknown;
     createSessionValidated?: (name: string, options?: SessionPersistOption) => Promise<SessionValidationResult>;
-    moveSessionToGroupExclusive?: (sessionId: string, groupId: string) => Promise<boolean>;
-    resolveGroupSelection?: (groupId: string | null) => Promise<{ resolvedGroupId: string | null }>;
-    attachSessionToActiveGroup?: (sessionId: string) => void;
-    persistData?: () => Promise<boolean>;
+    moveSessionToGroupExclusive: (sessionId: string, groupId: string) => Promise<boolean>;
+    resolveGroupSelection: (groupId: string | null) => Promise<{ resolvedGroupId: string | null }>;
+    attachSessionToActiveGroup: (sessionId: string) => void;
+    persistData: () => Promise<boolean>;
     updateStatusBar?: () => void;
     syncSessionCommands?: () => void;
     hideSwitchOverlay?: () => void;
     captureActiveSessionLayoutIfAutoSave?: () => void;
-    applyWorkspaceLayout?: (layout: unknown) => Promise<boolean>;
-    getWorkspaceRestoreScope?: () => string;
+    applyWorkspaceLayout: (layout: unknown) => Promise<boolean>;
+    getWorkspaceRestoreScope: () => string;
     openRenameModal?: (currentName: string, onRename: (newName: string) => void) => void;
     openConfirmModal?: (message: string, onConfirm: () => void, options?: { hint?: string; onHintClick?: () => void }) => void;
 }
@@ -86,10 +86,7 @@ export class SessionStore {
 
     private persistIfNeeded(options?: SessionPersistOption): Promise<boolean> {
         if (options?.persist === false) return Promise.resolve(true);
-        if (typeof this.host.persistData === 'function') {
-            return this.host.persistData();
-        }
-        return Promise.resolve(true);
+        return this.host.persistData();
     }
 
     // --- Query & Lookup (P10) ---
@@ -318,11 +315,7 @@ export class SessionStore {
         this.sessions[session.id] = session;
         this.sessionOrder.push(session.id);
         this.data.activeSessionId = session.id;
-        if (typeof this.host.attachSessionToActiveGroup === 'function') {
-            this.host.attachSessionToActiveGroup(session.id);
-        } else {
-            this.host.groupManager?.attachSessionToActiveGroup(session.id);
-        }
+        this.host.attachSessionToActiveGroup(session.id);
     }
 
     async createSession(name: string): Promise<boolean> {
@@ -399,18 +392,9 @@ export class SessionStore {
 
         const createdSessionId = result.sessionId;
         if (targetGroupId && targetGroupId !== beforeActiveGroupId && createdSessionId) {
-            if (typeof this.host.moveSessionToGroupExclusive === 'function') {
-                await this.host.moveSessionToGroupExclusive(createdSessionId, targetGroupId);
-            } else if (this.host.groupManager) {
-                await this.host.groupManager.moveSessionToGroupExclusive(createdSessionId, targetGroupId);
-            }
-            if (typeof this.host.resolveGroupSelection === 'function') {
-                const selection = await this.host.resolveGroupSelection(targetGroupId);
-                result.viewGroupId = selection.resolvedGroupId || null;
-            } else if (this.host.groupManager) {
-                const selection = await this.host.groupManager.resolveGroupSelection(targetGroupId);
-                result.viewGroupId = selection.resolvedGroupId || null;
-            }
+            await this.host.moveSessionToGroupExclusive(createdSessionId, targetGroupId);
+            const selection = await this.host.resolveGroupSelection(targetGroupId);
+            result.viewGroupId = selection.resolvedGroupId || null;
             return result;
         }
 
@@ -475,7 +459,7 @@ export class SessionStore {
 
         if (wasActive && nextActiveId) {
             const nextSession = this.sessions[nextActiveId];
-            if (nextSession && nextSession.layout && typeof this.host.applyWorkspaceLayout === 'function') {
+            if (nextSession && nextSession.layout) {
                 await this.host.applyWorkspaceLayout(nextSession.layout);
             }
         }
@@ -616,14 +600,7 @@ export class SessionStore {
     // --- Layout & Workspace helpers ---
 
     getCurrentWorkspaceLayout(): unknown {
-        if (typeof this.host.getCurrentWorkspaceLayout === 'function') {
-            return this.host.getCurrentWorkspaceLayout();
-        }
-        const ws = this.host.app?.workspace as unknown as { getLayout?: () => unknown } | undefined;
-        if (ws && typeof ws.getLayout === 'function') {
-            return ws.getLayout();
-        }
-        return {};
+        return this.host.getCurrentWorkspaceLayout();
     }
 
     serializeLayout(layout: unknown): string {
@@ -635,9 +612,7 @@ export class SessionStore {
     }
 
     layoutsEqualStructural(a: unknown, b: unknown): boolean {
-        const restoreScope = typeof this.host.getWorkspaceRestoreScope === 'function'
-            ? this.host.getWorkspaceRestoreScope()
-            : 'full';
+        const restoreScope = this.host.getWorkspaceRestoreScope();
         return layoutsEqualStructural(a, b, { restoreScope });
     }
 }
