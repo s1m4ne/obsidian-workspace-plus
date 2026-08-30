@@ -170,6 +170,33 @@ test('SessionManagerModal renders session items and controls in DOM', async () =
         const items = modalEl.querySelectorAll('.wpp-session-item');
         assert.equal(items.length, 3, 'Must render 3 session items');
 
+        // What each row is made of, not just how many there are. Counting rows
+        // passes while the controls inside them disappear: removing the delete
+        // button's action key was invisible to every other assertion here.
+        const first = items[0];
+        assert.ok(first, 'first row must exist');
+        assert.ok(first.querySelector('.wpp-session-name'), 'row must carry a name element');
+
+        // Every row carries these three.
+        for (const row of Array.from(items)) {
+            for (const action of ['load', 'rename', 'delete']) {
+                assert.ok(
+                    row.querySelector(`[data-action-key="${action}"]`),
+                    `every row needs a ${action} control`,
+                );
+            }
+        }
+
+        // save-inline is conditional: the active row only, and only while
+        // auto-save on switch is off. That condition is the behaviour worth
+        // locking, not the button's presence.
+        const withSaveInline = Array.from(items)
+            .filter((row) => row.querySelector('[data-action-key="save-inline"]'));
+        // The active row is marked by its badge, not by a class on the row.
+        const activeRows = Array.from(items).filter((row) => row.querySelector('.wpp-active-badge'));
+        assert.equal(withSaveInline.length, 1, 'exactly the active row offers save-inline');
+        assert.equal(withSaveInline[0], activeRows[0], 'save-inline belongs to the active row');
+
         modal.close();
     } finally {
         h.restore();
