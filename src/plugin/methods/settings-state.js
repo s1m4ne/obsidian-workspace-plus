@@ -1,151 +1,117 @@
 'use strict';
 
-var i18n = require('../../i18n.ts');
-var DEFAULT_DATA = require('../default-data');
-
-function persistIfNeeded(plugin, options) {
-    options = options || {};
-    if (options.persist === false) return Promise.resolve(true);
-    return plugin.persistData();
-}
-
-function numberOrFallback(value, fallback) {
-    var parsed = Number(value);
-    return parsed || fallback;
-}
+var settingsState = require('../../state/settings-state.ts');
 
 function attachSettingsStateMethods(WorkspacePlusPlus) {
+    WorkspacePlusPlus.prototype.getSettingsState = function () {
+        var self = this;
+        if (!this._settingsState) {
+            this._settingsState = new settingsState.SettingsState({
+                get data() { return self.data; },
+                persistData: function () { return self.persistData(); },
+                updateStatusBar: function () { self.updateStatusBar(); },
+                syncSessionCommands: function () { self.syncSessionCommands(); },
+                startHistorySnapshotTimer: function () { self.startHistorySnapshotTimer(); },
+                stopHistorySnapshotTimer: function () { self.stopHistorySnapshotTimer(); },
+            });
+        }
+        return this._settingsState;
+    };
+
     WorkspacePlusPlus.prototype.setLanguageSetting = function (value, options) {
-        this.data.language = value || 'auto';
-        i18n.resolveLocale(this.data.language);
-        return persistIfNeeded(this, options);
+        return this.getSettingsState().setLanguageSetting(value, options);
     };
 
     WorkspacePlusPlus.prototype.setStatusBarAction = function (slotKey, actionId, options) {
-        if (!this.data.statusBarActions) {
-            this.data.statusBarActions = Object.assign({}, DEFAULT_DATA.statusBarActions);
-        }
-        this.data.statusBarActions[slotKey] = actionId;
-        return persistIfNeeded(this, options);
+        return this.getSettingsState().setStatusBarAction(slotKey, actionId, options);
     };
 
     WorkspacePlusPlus.prototype.setWarnOnUnsavedSwitch = function (enabled, options) {
-        this.data.warnOnUnsavedSwitch = !!enabled;
-        return persistIfNeeded(this, options);
+        return this.getSettingsState().setWarnOnUnsavedSwitch(enabled, options);
     };
 
     WorkspacePlusPlus.prototype.setUnsavedStatusBarHighlight = function (enabled, options) {
-        this.data.highlightUnsavedSessionChanges = !!enabled;
-        this.updateStatusBar();
-        return persistIfNeeded(this, options);
+        return this.getSettingsState().setUnsavedStatusBarHighlight(enabled, options);
     };
 
     WorkspacePlusPlus.prototype.setConfirmQuickActions = function (enabled, options) {
-        this.data.confirmQuickActions = !!enabled;
-        return persistIfNeeded(this, options);
+        return this.getSettingsState().setConfirmQuickActions(enabled, options);
     };
 
     WorkspacePlusPlus.prototype.setRestoreSidebars = function (enabled, options) {
-        this.data.restoreSidebars = !!enabled;
-        return persistIfNeeded(this, options);
+        return this.getSettingsState().setRestoreSidebars(enabled, options);
     };
 
     WorkspacePlusPlus.prototype.setStatusBarModScrollSwitch = function (enabled, options) {
-        this.data.statusBarModScrollSwitch = !!enabled;
-        return persistIfNeeded(this, options);
+        return this.getSettingsState().setStatusBarModScrollSwitch(enabled, options);
     };
 
     WorkspacePlusPlus.prototype.setStatusBarScrollPreset = function (value, options) {
-        this.data.statusBarScrollPreset = value || 'trackpad';
-        return persistIfNeeded(this, options);
+        return this.getSettingsState().setStatusBarScrollPreset(value, options);
     };
 
     WorkspacePlusPlus.prototype.setStatusBarScrollModifierMode = function (value, options) {
-        this.data.statusBarScrollModifierMode = value || 'none';
-        return persistIfNeeded(this, options);
+        return this.getSettingsState().setStatusBarScrollModifierMode(value, options);
     };
 
     WorkspacePlusPlus.prototype.setStatusBarScrollThreshold = function (value, options) {
-        this.data.statusBarScrollThreshold = numberOrFallback(value, 30);
-        return persistIfNeeded(this, options);
+        return this.getSettingsState().setStatusBarScrollThreshold(value, options);
     };
 
     WorkspacePlusPlus.prototype.setStatusBarScrollCooldownMs = function (value, options) {
-        this.data.statusBarScrollCooldownMs = numberOrFallback(value, 500);
-        return persistIfNeeded(this, options);
+        return this.getSettingsState().setStatusBarScrollCooldownMs(value, options);
     };
 
     WorkspacePlusPlus.prototype.setStatusBarScrollResetMs = function (value, options) {
-        this.data.statusBarScrollResetMs = numberOrFallback(value, 250);
-        return persistIfNeeded(this, options);
+        return this.getSettingsState().setStatusBarScrollResetMs(value, options);
     };
 
     WorkspacePlusPlus.prototype.setStatusBarScrollInvert = function (enabled, options) {
-        this.data.statusBarScrollInvert = !!enabled;
-        return persistIfNeeded(this, options);
+        return this.getSettingsState().setStatusBarScrollInvert(enabled, options);
     };
 
     WorkspacePlusPlus.prototype.setShowActiveSwitchCommand = function (enabled, options) {
-        this.data.showActiveSwitchCommand = !!enabled;
-        return persistIfNeeded(this, options);
+        return this.getSettingsState().setShowActiveSwitchCommand(enabled, options);
     };
 
     WorkspacePlusPlus.prototype.setNumberedSwitchCommands = function (enabled, options) {
-        this.data.numberedSwitchCommands = !!enabled;
-        this.syncSessionCommands();
-        return persistIfNeeded(this, options);
+        return this.getSettingsState().setNumberedSwitchCommands(enabled, options);
     };
 
     WorkspacePlusPlus.prototype.setSwitchPreviewEnabled = function (enabled, options) {
-        this.data.previewNext = !!enabled;
-        this.data.previewPrevious = !!enabled;
-        return persistIfNeeded(this, options);
+        return this.getSettingsState().setSwitchPreviewEnabled(enabled, options);
     };
 
     WorkspacePlusPlus.prototype.setPreviewNext = function (enabled, options) {
-        this.data.previewNext = !!enabled;
-        return persistIfNeeded(this, options);
+        return this.getSettingsState().setPreviewNext(enabled, options);
     };
 
     WorkspacePlusPlus.prototype.setPreviewPrevious = function (enabled, options) {
-        this.data.previewPrevious = !!enabled;
-        return persistIfNeeded(this, options);
+        return this.getSettingsState().setPreviewPrevious(enabled, options);
     };
 
     WorkspacePlusPlus.prototype.setShowFilterInput = function (enabled, options) {
-        this.data.showFilterInput = !!enabled;
-        return persistIfNeeded(this, options);
+        return this.getSettingsState().setShowFilterInput(enabled, options);
     };
 
     WorkspacePlusPlus.prototype.setOverlayDefaultFocus = function (value, options) {
-        this.data.overlayDefaultFocus = value || 'current-session';
-        return persistIfNeeded(this, options);
+        return this.getSettingsState().setOverlayDefaultFocus(value, options);
     };
 
     WorkspacePlusPlus.prototype.setConfirmDeleteByHotkey = function (enabled, options) {
-        this.data.confirmDeleteByHotkey = !!enabled;
-        return persistIfNeeded(this, options);
+        return this.getSettingsState().setConfirmDeleteByHotkey(enabled, options);
     };
 
     WorkspacePlusPlus.prototype.setVersionHistoryEnabled = function (enabled, options) {
-        this.data.versionHistoryEnabled = !!enabled;
-        if (this.data.versionHistoryEnabled) {
-            this.startHistorySnapshotTimer();
-        } else {
-            this.stopHistorySnapshotTimer();
-        }
-        return persistIfNeeded(this, options);
+        return this.getSettingsState().setVersionHistoryEnabled(enabled, options);
     };
 
     WorkspacePlusPlus.prototype.setVersionHistorySnapshotInterval = function (value, options) {
-        this.data.versionHistorySnapshotInterval = parseInt(value, 10);
-        this.startHistorySnapshotTimer();
-        return persistIfNeeded(this, options);
+        return this.getSettingsState().setVersionHistorySnapshotInterval(value, options);
     };
 
     WorkspacePlusPlus.prototype.setVersionHistoryConfirmRestore = function (enabled, options) {
-        this.data.versionHistoryConfirmRestore = !!enabled;
-        return persistIfNeeded(this, options);
+        return this.getSettingsState().setVersionHistoryConfirmRestore(enabled, options);
     };
 }
 

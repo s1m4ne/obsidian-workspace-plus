@@ -101,3 +101,73 @@ test('settings state starts and stops version history timer with the setting', a
     assert.equal(plugin.historyStarts, 2);
     assert.equal(plugin.persistCalls, 3);
 });
+
+test('settings state covers all remaining setters and fallback logic', async function () {
+    const plugin = createPlugin();
+
+    await plugin.setLanguageSetting('ja');
+    assert.equal(plugin.data.language, 'ja');
+    await plugin.setLanguageSetting('');
+    assert.equal(plugin.data.language, 'auto');
+
+    await plugin.setConfirmQuickActions(true);
+    assert.equal(plugin.data.confirmQuickActions, true);
+
+    await plugin.setStatusBarModScrollSwitch(true);
+    assert.equal(plugin.data.statusBarModScrollSwitch, true);
+
+    await plugin.setStatusBarScrollPreset('mouse');
+    assert.equal(plugin.data.statusBarScrollPreset, 'mouse');
+    await plugin.setStatusBarScrollPreset('');
+    assert.equal(plugin.data.statusBarScrollPreset, 'trackpad');
+
+    await plugin.setStatusBarScrollModifierMode('ctrl');
+    assert.equal(plugin.data.statusBarScrollModifierMode, 'ctrl');
+    await plugin.setStatusBarScrollModifierMode('');
+    assert.equal(plugin.data.statusBarScrollModifierMode, 'none');
+
+    await plugin.setStatusBarScrollThreshold('50');
+    assert.equal(plugin.data.statusBarScrollThreshold, 50);
+    await plugin.setStatusBarScrollThreshold('invalid');
+    assert.equal(plugin.data.statusBarScrollThreshold, 30);
+
+    await plugin.setStatusBarScrollCooldownMs('600');
+    assert.equal(plugin.data.statusBarScrollCooldownMs, 600);
+    await plugin.setStatusBarScrollCooldownMs('invalid');
+    assert.equal(plugin.data.statusBarScrollCooldownMs, 500);
+
+    await plugin.setStatusBarScrollResetMs('300');
+    assert.equal(plugin.data.statusBarScrollResetMs, 300);
+    await plugin.setStatusBarScrollResetMs('invalid');
+    assert.equal(plugin.data.statusBarScrollResetMs, 250);
+
+    await plugin.setStatusBarScrollInvert(true);
+    assert.equal(plugin.data.statusBarScrollInvert, true);
+
+    await plugin.setShowActiveSwitchCommand(true);
+    assert.equal(plugin.data.showActiveSwitchCommand, true);
+
+    await plugin.setSwitchPreviewEnabled(true);
+    assert.equal(plugin.data.previewNext, true);
+    assert.equal(plugin.data.previewPrevious, true);
+
+    await plugin.setPreviewNext(false);
+    assert.equal(plugin.data.previewNext, false);
+
+    await plugin.setPreviewPrevious(false);
+    assert.equal(plugin.data.previewPrevious, false);
+
+    await plugin.setShowFilterInput(true);
+    assert.equal(plugin.data.showFilterInput, true);
+
+    await plugin.setOverlayDefaultFocus('search');
+    assert.equal(plugin.data.overlayDefaultFocus, 'search');
+    await plugin.setOverlayDefaultFocus('');
+    assert.equal(plugin.data.overlayDefaultFocus, 'current-session');
+
+    await plugin.setConfirmDeleteByHotkey(true);
+    assert.equal(plugin.data.confirmDeleteByHotkey, true);
+
+    await plugin.setVersionHistoryConfirmRestore(true);
+    assert.equal(plugin.data.versionHistoryConfirmRestore, true);
+});
