@@ -88,6 +88,14 @@ Cite `node scripts/progress.js` output, never prose. If the commit sequence
 diverges from the plan, write the divergence and its reason into issue #111 —
 amend the plan, do not quietly abandon it.
 
+## Before writing a commit
+
+Read [reference/commit-specs.md](reference/commit-specs.md) for the commit you
+are about to write. It records what is peculiar about the code that commit
+touches — the six merge loops inside `i18n.js`, the mutation in `resolveLocale`,
+which coverage floors are lowered and why — the things that cost an afternoon
+when found while writing instead of before.
+
 ## Migration order
 
 **The order lives in issue #111 and only there.** It changed three times under

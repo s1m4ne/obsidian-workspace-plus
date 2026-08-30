@@ -30,6 +30,10 @@ Two sibling skills own the details: `writing-typescript` for how to write the
 code, `obsidian` for the plugin guidelines. Load them before writing `.ts` or
 touching UI, events, storage or styles.
 
+`refactoring-workspace-plus/reference/commit-specs.md` carries what is peculiar
+about the code each near-term commit touches. Read the entry for your commit
+before writing it.
+
 ## Commands
 
 ```bash
