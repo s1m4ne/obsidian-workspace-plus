@@ -15,7 +15,7 @@
 import { registerHooks } from 'node:module';
 import { setupDom } from './dom.ts';
 import type { DomHarness } from './dom.ts';
-import { registry, resetRegistry } from './obsidian-module.ts';
+import { registry, resetRegistry, runCommand } from './obsidian-module.ts';
 import type { Registry } from './obsidian-module.ts';
 
 export * from './obsidian-stub.ts';
@@ -44,6 +44,10 @@ function installHooksOnce(): void {
 export interface Harness {
     readonly dom: DomHarness;
     readonly obsidian: Registry;
+    /** Trigger a registered command the way a hotkey would. Locks use this
+     *  rather than calling a plugin method, which would not survive the
+     *  migration. */
+    runCommand(id: string): unknown;
     restore(): void;
 }
 
@@ -55,6 +59,7 @@ export function setupHarness(): Harness {
     return {
         dom,
         obsidian: registry,
+        runCommand,
         restore(): void {
             dom.restore();
         },

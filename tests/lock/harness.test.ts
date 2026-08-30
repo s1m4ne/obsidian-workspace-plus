@@ -6,7 +6,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { setupHarness } from './harness/index.ts';
-import { Menu, Modal, Notice, Setting, setIcon, setTooltip } from './harness/obsidian-module.ts';
+import { Menu, Modal, Notice, Plugin, Setting, setIcon, setTooltip } from './harness/obsidian-module.ts';
 
 function withHarness(fn: (h: ReturnType<typeof setupHarness>) => void): void {
     const harness = setupHarness();
@@ -232,5 +232,34 @@ test('setIcon and setTooltip are observable on the element', () => {
         assert.equal(h.obsidian.icons.get(el), 'x');
         assert.equal(el.getAttribute('data-icon'), 'x');
         assert.equal(el.getAttribute('data-tooltip'), 'Close');
+    });
+});
+
+test('registered commands can be triggered the way a hotkey would', () => {
+    withHarness((h) => {
+        const calls: string[] = [];
+        const plugin = new Plugin({}, {});
+
+        plugin.addCommand({ id: 'next-session', name: 'Next session', callback: () => { calls.push('next'); } });
+        plugin.addCommand({
+            id: 'version-history',
+            name: 'Version history',
+            checkCallback: (checking: boolean) => {
+                if (checking) return false;          // unavailable right now
+                calls.push('history');
+                return true;
+            },
+        });
+
+        assert.deepEqual([...h.obsidian.commands.keys()], ['next-session', 'version-history']);
+
+        h.runCommand('next-session');
+        assert.deepEqual(calls, ['next']);
+
+        // A checkCallback that reports unavailable must not run.
+        h.runCommand('version-history');
+        assert.deepEqual(calls, ['next']);
+
+        assert.throws(() => h.runCommand('no-such-command'), /No command registered/);
     });
 });

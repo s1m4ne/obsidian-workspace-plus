@@ -108,14 +108,16 @@ starting. The final `main.ts` commit deletes the shims and updates
 
 Target structure and class responsibilities: [reference/architecture.md](reference/architecture.md).
 
-## Code conventions
+## Which skill, when
 
-Two sibling skills own the rules; this skill does not repeat them.
-
-- **`writing-typescript`** — how to write the code: the runtime constraints of Node's type stripping (no `enum`, no `namespace`, no parameter properties, no decorators; `import type` and `.ts` extensions are mandatory), naming, typing, class composition, error handling.
-- **`obsidian`** — the official plugin rules: `registerDomEvent`, `createEl`, `Platform`, `activeDocument`, accessibility, CSS.
-
-Consult both before writing code in a migration commit.
+| Skill | Load it |
+|---|---|
+| `writing-typescript` | Before writing any `.ts`. Type stripping rejects `enum`, `namespace`, parameter properties and decorators at run time, and requires `import type` plus `.ts` extensions — hard errors, not style |
+| `obsidian` | Before touching UI, events, storage or styles. `reference/memory-management.md` for `registerDomEvent` and popout windows, `css-styling.md` for inline-style conversions, `accessibility.md` for the Phase 4 sweep |
+| `superpowers:verification-before-completion` | Before claiming a gate passed. Evidence in the same message, or do not make the claim |
+| `superpowers:systematic-debugging` | When a lock fails and the cause is not obvious — before proposing a fix |
+| `review-suite:ln-12-delivery-reviewer`, `/code-review`, `/simplify` | At each phase exit, and after any commit that grew beyond its plan |
+| `review-suite:ln-11-plan-reviewer` | Only when the plan is materially amended |
 
 ## Stop and ask when
 

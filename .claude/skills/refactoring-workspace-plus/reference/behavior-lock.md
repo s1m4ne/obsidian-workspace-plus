@@ -52,7 +52,23 @@ Two constraints keep a lock stable across the migration. Both come from failures
 
 The right column is what the compliance work changes deliberately: inline styles become CSS classes, ARIA labels get added, `document` becomes `activeDocument`. A lock snapshotting raw `outerHTML` fails on all of it and forces the edit this document forbids.
 
-**2. Never call an internal plugin method.**
+**2. Trigger commands, do not call methods.**
+
+The harness records `addCommand` registrations and exposes `runCommand(id)`, so a
+lock exercises a hotkey path the way a user does:
+
+```ts
+h.runCommand('next-session');
+h.runCommand('next-session');
+h.runCommand('next-session');   // three presses must advance three sessions
+```
+
+This is how the #107 regression is protected. Its fix is currently held only by
+`tests/session-switching.test.js`, which calls `plugin.switchRelativeFromCommand`
+directly — an ordinary test, editable, and due to be rewritten in the same commit
+that restructures the switcher. A lock cannot be edited, so that is where it belongs.
+
+**3. Never call an internal plugin method.**
 
 Observe through seams the migration preserves: rendered DOM, persisted files, recording stubs (`Notice`, `Setting`, `Menu`). A lock calling `plugin.switchRelativeFromCommand(1)` dies the moment that becomes `plugin.switcher.switchRelative(1)` and the shims are removed in the final commit.
 
