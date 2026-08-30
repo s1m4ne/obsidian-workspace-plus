@@ -17,60 +17,24 @@ var splitSessionHistory = sessionData.splitSessionHistory;
 var mergeSessionHistory = sessionData.mergeSessionHistory;
 var hasInlineSessionHistory = sessionData.hasInlineSessionHistory;
 
-var STORAGE_DIR = '.workspace-plus-plus';
-var SESSION_STORAGE_VAULT = 'vault-folder';
-var SESSION_STORAGE_PLUGIN = 'plugin-folder';
-var SESSIONS_FILE_NAME = 'sessions.json';
-var PLUGIN_DATA_FILE_NAME = 'data.json';
-var SESSIONS_BACKUP_FILE_NAME = 'sessions.backup.json';
-var HISTORY_FILE_NAME = 'history.json';
-var HISTORY_FORMAT_VERSION = 1;
-// Settings used to be splittable into a vault-local file. That is gone; these
-// paths exist only to migrate anyone still carrying the old file.
-var LEGACY_LOCAL_SETTINGS_FILE = STORAGE_DIR + '/settings.local.json';
-var LEGACY_LOCAL_SETTINGS_BACKUP = STORAGE_DIR + '/settings.local.json.migrated';
-var EXPORT_DIR_NAME = 'exports';
-var BACKUPS_DIR_NAME = 'backups';
+var storagePaths = require('../../storage/paths.ts');
+var defaultData = require('../../storage/default-data.ts');
 
+var STORAGE_DIR = storagePaths.STORAGE_DIR;
+var SESSION_STORAGE_VAULT = storagePaths.SESSION_STORAGE_VAULT;
+var SESSION_STORAGE_PLUGIN = storagePaths.SESSION_STORAGE_PLUGIN;
+var SESSIONS_FILE_NAME = storagePaths.SESSIONS_FILE_NAME;
+var PLUGIN_DATA_FILE_NAME = storagePaths.PLUGIN_DATA_FILE_NAME;
+var SESSIONS_BACKUP_FILE_NAME = storagePaths.SESSIONS_BACKUP_FILE_NAME;
+var HISTORY_FILE_NAME = storagePaths.HISTORY_FILE_NAME;
+var HISTORY_FORMAT_VERSION = storagePaths.HISTORY_FORMAT_VERSION;
+var LEGACY_LOCAL_SETTINGS_FILE = storagePaths.LEGACY_LOCAL_SETTINGS_FILE;
+var LEGACY_LOCAL_SETTINGS_BACKUP = storagePaths.LEGACY_LOCAL_SETTINGS_BACKUP;
+var EXPORT_DIR_NAME = storagePaths.EXPORT_DIR_NAME;
+var BACKUPS_DIR_NAME = storagePaths.BACKUPS_DIR_NAME;
+var normalizeSessionStorageLocation = storagePaths.normalizeSessionStorageLocation;
 
-var SETTINGS_KEYS = [
-    'language',
-    'previewNext',
-    'previewPrevious',
-    'confirmDeleteByHotkey',
-    'autoSaveOnSwitch',
-    'warnOnUnsavedSwitch',
-    'restoreSidebars',
-    'highlightUnsavedSessionChanges',
-    'statusBarQuickSwitcher',
-    'statusBarModScrollSwitch',
-    'groupFeatureEnabled',
-    'overlayDefaultFocus',
-    'searchOverlayPosition',
-    'searchOverlaySize',
-    'versionHistoryEnabled',
-    'versionHistorySnapshotInterval',
-    'versionHistoryCtrlRmbRestore',
-    'versionHistoryConfirmRestore',
-    'statusBarScrollPreset',
-    'statusBarScrollModifierMode',
-    'statusBarScrollThreshold',
-    'statusBarScrollCooldownMs',
-    'statusBarScrollResetMs',
-    'statusBarScrollInvert',
-    'statusBarActions',
-    'confirmQuickActions',
-    'showFilterInput',
-    'showActiveSwitchCommand',
-    'numberedSwitchCommands',
-];
-
-
-function normalizeSessionStorageLocation(value) {
-    if (value === SESSION_STORAGE_PLUGIN) return SESSION_STORAGE_PLUGIN;
-    if (value === SESSION_STORAGE_VAULT) return SESSION_STORAGE_VAULT;
-    return null;
-}
+var SETTINGS_KEYS = defaultData.SETTINGS_KEYS;
 
 
 
