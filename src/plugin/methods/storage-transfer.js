@@ -2,26 +2,7 @@
 
 var obsidian = require('obsidian');
 var i18n = require('../../i18n.ts');
-var sessionData = require('../session-data');
-
-var hasSessionShape = sessionData.hasSessionShape;
-var hasNonEmptySessions = sessionData.hasNonEmptySessions;
-var splitSessionHistory = sessionData.splitSessionHistory;
-
-function pad2(n) {
-    return n < 10 ? '0' + n : String(n);
-}
-
-function formatExportStamp(ts) {
-    var d = new Date(ts);
-    return String(d.getFullYear())
-        + pad2(d.getMonth() + 1)
-        + pad2(d.getDate())
-        + '-'
-        + pad2(d.getHours())
-        + pad2(d.getMinutes())
-        + pad2(d.getSeconds());
-}
+var storageTransfer = require('../../storage/storage-transfer.ts');
 
 function attachStorageTransferMethods(WorkspacePlusPlus) {
     // --- Export / import snapshots ---
@@ -29,15 +10,12 @@ function attachStorageTransferMethods(WorkspacePlusPlus) {
     WorkspacePlusPlus.prototype.exportSessionsSnapshot = function () {
         var self = this;
         var L = i18n.L;
-        var stamp = formatExportStamp(Date.now());
+        var stamp = storageTransfer.formatExportStamp(Date.now());
         var filePath = this.getExportDirPath() + '/sessions-' + stamp + '.json';
-        var payload = {
-            exportedAt: Date.now(),
-            source: this.manifest.id,
-            // History is device-specific layout data; exports are meant to move
-            // sessions to another vault or device, so it is left behind.
-            data: splitSessionHistory(this.extractSessionData(this.data)).data,
-        };
+        var payload = storageTransfer.createExportPayload(
+            this.extractSessionData(this.data),
+            this.manifest.id
+        );
 
         return this.ensureSessionStorageDir()
             .then(function () {
@@ -63,12 +41,7 @@ function attachStorageTransferMethods(WorkspacePlusPlus) {
             })
             .then(function (listed) {
                 if (!listed || !listed.files || listed.files.length === 0) return null;
-                var files = listed.files.filter(function (path) {
-                    return /\.json$/i.test(path);
-                });
-                if (files.length === 0) return null;
-                files.sort();
-                return files[files.length - 1];
+                return storageTransfer.findLatestExportFile(listed.files);
             })
             .then(function (latestPath) {
                 if (!latestPath) {
@@ -77,13 +50,11 @@ function attachStorageTransferMethods(WorkspacePlusPlus) {
                 }
                 return self.app.vault.adapter.read(latestPath).then(function (raw) {
                     var parsed = JSON.parse(raw);
-                    var candidate = parsed && parsed.data ? parsed.data : parsed;
-                    if (!hasSessionShape(candidate)) {
-                        new obsidian.Notice(L.importSessionsFailed);
-                        return false;
-                    }
-                    var imported = self.normalizeSessionData(candidate);
-                    if (!hasNonEmptySessions(imported)) {
+                    var imported = storageTransfer.validateExportedSessionData(
+                        parsed,
+                        function (candidate) { return self.normalizeSessionData(candidate); }
+                    );
+                    if (!imported) {
                         new obsidian.Notice(L.importSessionsFailed);
                         return false;
                     }

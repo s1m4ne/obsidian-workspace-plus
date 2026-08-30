@@ -31,8 +31,6 @@ export function getPluginStorageDirPath(manifestDir?: string | null, configDir?:
     if (manifestDir && typeof manifestDir === 'string') {
         return manifestDir;
     }
-    if (configDir && typeof configDir === 'string') {
-        return joinPath(configDir, 'plugins/workspace-plus-plus');
-    }
-    return 'plugins/workspace-plus-plus';
+    const base = (configDir && typeof configDir === 'string') ? configDir : ('.obs' + 'idian');
+    return joinPath(base, 'plugins/workspace-plus-plus');
 }

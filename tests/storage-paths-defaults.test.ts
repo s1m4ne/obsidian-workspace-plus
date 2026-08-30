@@ -49,7 +49,7 @@ test('storage paths: normalizeSessionStorageLocation accepts only valid location
 test('storage paths: getPluginStorageDirPath respects manifest dir and custom config dir', () => {
     assert.equal(getPluginStorageDirPath('custom/dir', '.custom-config'), 'custom/dir');
     assert.equal(getPluginStorageDirPath(null, '.my-config'), '.my-config/plugins/workspace-plus-plus');
-    assert.equal(getPluginStorageDirPath(null, null), 'plugins/workspace-plus-plus');
+    assert.equal(getPluginStorageDirPath(null, null), '.obsidian/plugins/workspace-plus-plus');
 });
 
 test('storage default-data: DEFAULT_DATA has all expected default keys', () => {

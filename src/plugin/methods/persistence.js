@@ -61,7 +61,11 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
     };
 
     WorkspacePlusPlus.prototype.getPluginStorageDirPath = function () {
-        return (this.manifest && this.manifest.dir) || '.obsidian/plugins/workspace-plus-plus';
+        var configDir = (this.app && this.app.vault && typeof this.app.vault.configDir === 'string')
+            ? this.app.vault.configDir
+            : null;
+        var manifestDir = (this.manifest && this.manifest.dir) || null;
+        return storagePaths.getPluginStorageDirPath(manifestDir, configDir);
     };
 
     WorkspacePlusPlus.prototype.getDefaultSessionStorageLocation = function () {
