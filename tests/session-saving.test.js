@@ -4,35 +4,14 @@ require('./lock/harness/index.ts').installObsidianStub();
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const Module = require('module');
+const { setupHarness } = require('./lock/harness/index.ts');
+
+const harness = setupHarness();
 
 const i18n = require('../src/i18n.ts');
-
 i18n.resolveLocale('en');
 
-function loadSessionSavingMethods() {
-    const obsidianStub = {
-        Modal: class {},
-        Notice: class {
-            constructor(_message) {}
-        },
-        setIcon: function () {},
-        setTooltip: function () {},
-    };
-    const originalLoad = Module._load;
-    Module._load = function (request, parent, isMain) {
-        if (request === 'obsidian') return obsidianStub;
-        return originalLoad(request, parent, isMain);
-    };
-
-    try {
-        return require('../src/plugin/methods/session-saving');
-    } finally {
-        Module._load = originalLoad;
-    }
-}
-
-const attachSessionSavingMethods = loadSessionSavingMethods();
+const attachSessionSavingMethods = require('../src/plugin/methods/session-saving');
 const attachLayoutRestoreMethods = require('../src/plugin/methods/layout-restore');
 
 function createPlugin(initialData) {
@@ -126,6 +105,10 @@ test('session saving toggles auto-save side effects together', async function ()
     assert.equal(plugin.historyStarts, 1);
     assert.equal(plugin.statusBarUpdates, 2);
     assert.equal(plugin.persistCalls, 2);
+
+    const toggledOff = await plugin.toggleAutoSaveOnSwitch();
+    assert.equal(toggledOff, false);
+    assert.equal(plugin.isAutoSaveOnSwitchEnabled(), false);
 });
 
 test('session saving captures active layout only when auto-save is enabled', function () {
@@ -161,6 +144,22 @@ test('session saving saves active session and reports whether layout changed', a
     assert.deepEqual(plugin.historyPushes, ['a', 'a']);
     assert.equal(plugin.statusBarUpdates, 2);
     assert.equal(plugin.persistCalls, 2);
+
+    // Save with no active session
+    plugin.data.activeSessionId = 'nonexistent';
+    const noSessionSaved = await plugin.saveActiveSession({ silent: true });
+    assert.equal(noSessionSaved, false);
+});
+
+test('session saving overwrites a specified session with current layout', async function () {
+    const plugin = createPlugin();
+
+    const overwritten = await plugin.overwriteSessionWithCurrentLayout('b', { silent: true });
+    assert.equal(overwritten, true);
+    assert.deepEqual(plugin.data.sessions.b.layout, { layout: 'current' });
+
+    const nonExistent = await plugin.overwriteSessionWithCurrentLayout('missing', { silent: true });
+    assert.equal(nonExistent, false);
 });
 
 test('session saving saves current layout as a new named session', async function () {
@@ -182,6 +181,9 @@ test('session saving saves current layout as a new named session', async functio
     assert.deepEqual(created.layout, { layout: 'current' });
     assert.equal(plugin.data.activeSessionId, result.sessionId);
     assert.equal(plugin.persistCalls, 1);
+
+    const emptyResult = await plugin.saveCurrentLayoutAsSessionName('   ', { silent: true });
+    assert.equal(emptyResult.saved, false);
 });
 
 test('session saving overwrites an existing named session from current layout', async function () {
@@ -269,4 +271,18 @@ test('session saving reloads current session layout without persisting', async f
     assert.equal(reloaded, true);
     assert.deepEqual(plugin.changeLayoutCalls, [{ layout: 'target' }]);
     assert.equal(plugin.persistCalls, 0);
+
+    plugin.data.activeSessionId = 'missing';
+    const noSessionReload = await plugin.reloadCurrentSessionWithoutSaving({ silent: true });
+    assert.equal(noSessionReload, false);
+});
+
+test('session saving confirms overwrite modal flow', function () {
+    const plugin = createPlugin();
+
+    const missing = plugin.confirmOverwriteSessionWithCurrentLayout('missing', { silent: true });
+    assert.equal(missing, false);
+
+    const opened = plugin.confirmOverwriteSessionWithCurrentLayout('b', { silent: true });
+    assert.equal(opened, true);
 });
