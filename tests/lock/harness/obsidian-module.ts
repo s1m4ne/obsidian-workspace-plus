@@ -16,6 +16,9 @@ export interface RegisteredCommand {
     readonly checkCallback?: (checking: boolean) => boolean | void;
 }
 
+/** Values a test can characterise against, matching what a real browser reports. */
+export const PLATFORM = { mac: 'MacIntel', windows: 'Win32', linux: 'Linux x86_64' } as const;
+
 export interface Registry {
     log: CallLog;
     settings: SettingStub[];
@@ -25,6 +28,11 @@ export interface Registry {
     /** Commands the plugin registered, so a lock can trigger one the way a
      *  hotkey would instead of reaching for an internal method. */
     commands: Map<string, RegisteredCommand>;
+    /** The single source for what platform the code under test believes it is
+     *  on. Both the stubbed `Platform` and the jsdom `navigator.platform` read
+     *  it, so the two can never disagree - and it never depends on the host OS,
+     *  which would make a lock pass on a laptop and fail in CI. */
+    platform: string;
     document: Document | null;
 }
 
@@ -35,6 +43,7 @@ export const registry: Registry = {
     notices: [],
     icons: new Map(),
     commands: new Map(),
+    platform: PLATFORM.mac,
     document: null,
 };
 
@@ -45,7 +54,13 @@ export function resetRegistry(document: Document): void {
     registry.notices = [];
     registry.icons = new Map();
     registry.commands = new Map();
+    registry.platform = PLATFORM.mac;
     registry.document = document;
+}
+
+/** Choose the platform this test characterises. */
+export function setPlatform(platform: string): void {
+    registry.platform = platform;
 }
 
 /**
@@ -175,16 +190,16 @@ export class PluginSettingTab {
 export class FuzzySuggestModal {}
 
 /**
- * Derived from the jsdom navigator rather than hardcoded.
+ * Reads `registry.platform`, the same value the jsdom `navigator.platform`
+ * reports.
  *
- * The code under test asks two different questions about the same fact: the
- * i18n tables branch on `navigator.platform.indexOf('Mac')`, and the migration
- * moves them to `Platform.isMacOS`. If the stub answered one way and the
- * navigator the other, a lock recorded before the move would fail after it -
- * with no legal fix, since locks may not be edited.
+ * The code under test asks the same question two ways: the i18n tables branch
+ * on `navigator.platform.indexOf('Mac')`, and the migration moves them to
+ * `Platform.isMacOS`. If those disagreed, a lock recorded before the move would
+ * fail after it - with no legal fix, since locks may not be edited.
  *
- * Reading both from one source keeps the answers consistent across the change.
- * `setPlatform()` lets a test choose which platform it is characterising.
+ * It is a fixed default rather than the host's real platform, so a lock records
+ * the same thing on a laptop and in CI.
  */
 export const Platform = {
     isDesktop: true,
@@ -193,22 +208,11 @@ export const Platform = {
     isMobileApp: false,
     isIosApp: false,
     isAndroidApp: false,
-    get isMacOS(): boolean {
-        return currentNavigatorPlatform().indexOf('Mac') !== -1;
-    },
-    get isWin(): boolean {
-        return currentNavigatorPlatform().indexOf('Win') !== -1;
-    },
-    get isLinux(): boolean {
-        return currentNavigatorPlatform().indexOf('Linux') !== -1;
-    },
+    get isMacOS(): boolean { return registry.platform.indexOf('Mac') !== -1; },
+    get isWin(): boolean { return registry.platform.indexOf('Win') !== -1; },
+    get isLinux(): boolean { return registry.platform.indexOf('Linux') !== -1; },
 };
 
-function currentNavigatorPlatform(): string {
-    const nav: { platform?: string } | undefined =
-        typeof navigator === 'undefined' ? undefined : navigator;
-    return nav && typeof nav.platform === 'string' ? nav.platform : '';
-}
 
 export function setIcon(el: HTMLElement, icon: string): void {
     registry.icons.set(el, icon);

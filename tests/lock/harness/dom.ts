@@ -9,6 +9,7 @@
 // this; the modals and settings tab do.
 
 import { JSDOM } from 'jsdom';
+import { registry, setPlatform } from './obsidian-module.ts';
 
 export interface DomElementInfo {
     readonly cls?: string | string[];
@@ -101,17 +102,13 @@ export interface DomHarness {
     readonly document: Document;
     /** Fresh element to render into, already attached to the body. */
     container(): HTMLElement;
-    /**
-     * Sets what `navigator.platform` reports, which is the single source both
-     * the i18n tables and the stubbed `Platform` read from. jsdom reports an
-     * empty string by default, which is neither Mac nor Windows.
-     */
+    /** Choose the platform this test characterises; both `navigator.platform`
+     *  and the stubbed `Platform` follow it. */
     setPlatform(platform: string): void;
     restore(): void;
 }
 
-/** Values a lock can characterise against, matching what a real browser reports. */
-export const PLATFORM = { mac: 'MacIntel', windows: 'Win32', linux: 'Linux x86_64' } as const;
+export { PLATFORM } from './obsidian-module.ts';
 
 /**
  * Installs a jsdom document as the ambient DOM, including Obsidian's
@@ -133,8 +130,10 @@ export function setupDom(): DomHarness {
 
     install('window', window);
     install('document', window.document);
+    // navigator.platform reads the registry, so the value the code under test
+    // sees and the value the stubbed Platform reports cannot drift apart.
     Object.defineProperty(window.navigator, 'platform', {
-        value: PLATFORM.mac,
+        get: () => registry.platform,
         configurable: true,
     });
     install('navigator', window.navigator);
@@ -155,12 +154,7 @@ export function setupDom(): DomHarness {
             window.document.body.appendChild(el);
             return el;
         },
-        setPlatform(platform: string): void {
-            Object.defineProperty(window.navigator, 'platform', {
-                value: platform,
-                configurable: true,
-            });
-        },
+        setPlatform,
         restore(): void {
             for (const [key, descriptor] of saved) {
                 if (descriptor === undefined) delete scope[key];
