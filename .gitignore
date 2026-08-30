@@ -12,7 +12,8 @@ sessions.backup.json
 history.json
 backups/
 exports/
-.claude/
+.claude/*
+!.claude/skills/
 .workspace-plus-plus/
 .hotreload
 memo.md
