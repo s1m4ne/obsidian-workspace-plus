@@ -57,7 +57,25 @@ import { paths } from './paths';      // ❌ cannot resolve
 import { paths } from './paths.js';   // ❌ cannot resolve
 ```
 
-`tsconfig.json` enforces both: `verbatimModuleSyntax: true` and `allowImportingTsExtensions: true`. esbuild resolves `.ts` specifiers without complaint.
+`tsconfig.json` enforces the first: `verbatimModuleSyntax: true`. It does **not**
+enforce the second — `moduleResolution: "bundler"` accepts an extensionless
+relative import that type-checks cleanly and then fails at run time with
+`ERR_MODULE_NOT_FOUND`. A check in `npm run check` covers the gap.
+
+**3. During the migration, export by name only.** A `.js` caller doing
+`require('./thing.ts')` receives `{ default, __esModule }`, so `new require(...)()`
+fails with "is not a constructor". `export =` is unavailable under
+`erasableSyntaxOnly`. Named exports work from both sides.
+
+```ts
+export class SessionStore { }        // ✅ require('./session-store.ts').SessionStore
+export default class SessionStore { }  // ❌ breaks every .js caller
+```
+
+**4. A `.js` caller must name the extension too.** `require('./paths')` resolves
+only to `paths.js`; once the file is `paths.ts` the caller needs
+`require('./paths.ts')`. Every migration commit updates the remaining JavaScript
+callers accordingly. esbuild resolves both forms, but Node's runtime does not.
 
 ## Types
 

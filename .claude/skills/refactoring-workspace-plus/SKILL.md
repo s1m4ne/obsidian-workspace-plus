@@ -90,23 +90,20 @@ amend the plan, do not quietly abandon it.
 
 ## Migration order
 
-Leaf-first. Later modules depend on earlier ones, so do not reorder without reason.
+**The order lives in issue #111 and only there.** It changed three times under
+review — SettingsState moved ahead of GroupManager, GroupManager ahead of
+SessionStore, the shared UI components ahead of the session manager modal — and a
+second copy here would go stale and be believed.
 
-```
-utils -> layout-utils -> navigation-utils -> i18n -> storage/paths
--> storage/json-file-store -> storage/migrations -> storage/session-storage
--> storage/sync-watcher -> SessionStore -> GroupManager -> HistoryService
--> SessionSwitcher -> SessionSaver -> FrontmatterLinker -> StatusBarController
--> CommandRegistry -> Modals -> shared/session-drag -> shared/group-tabs
--> SwitchOverlay -> SearchOverlay -> SettingsTab -> main.ts
-```
+Run `gh issue view 111` at the start of a session and follow the order it gives.
+Three constraints in it are forced by the code, not by preference:
 
-A module may not be migrated until the lock suite executes 80% of its functions
-(60% for `overlays.js`). Check with `--experimental-test-coverage` before
-starting. The final `main.ts` commit deletes the shims and updates
-`esbuild.config.mjs`, whose entry point is still `src/main.js`.
+- `SettingsState` before `GroupManager` — `groups.js:9` reads a default
+- `GroupManager` before `SessionStore` — `sessions.js:40-58` filters by group
+- shared UI components before `SessionManagerModal` — otherwise 1,097 lines are rewritten twice
 
-Target structure and class responsibilities: [reference/architecture.md](reference/architecture.md).
+A module may not be migrated until the lock suite executes 80% of its functions.
+Three exemptions, each with a stated reason, are listed in the issue.
 
 ## Which skill, when
 
@@ -136,6 +133,9 @@ DOM behaviour cannot be proven by tests alone. Ask the user to exercise the plug
 - **Modals** migrated
 - **Overlays** migrated — Cmd+Shift+Enter cycling, drag reorder, group tabs, search
 - **Final commit**
+
+The full list of checkpoints is in issue #111; there are seven, and the issue is
+the source of truth for where they fall.
 
 Do not claim the refactor is verified before the user has confirmed these.
 
