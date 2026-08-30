@@ -101,8 +101,17 @@ export interface DomHarness {
     readonly document: Document;
     /** Fresh element to render into, already attached to the body. */
     container(): HTMLElement;
+    /**
+     * Sets what `navigator.platform` reports, which is the single source both
+     * the i18n tables and the stubbed `Platform` read from. jsdom reports an
+     * empty string by default, which is neither Mac nor Windows.
+     */
+    setPlatform(platform: string): void;
     restore(): void;
 }
+
+/** Values a lock can characterise against, matching what a real browser reports. */
+export const PLATFORM = { mac: 'MacIntel', windows: 'Win32', linux: 'Linux x86_64' } as const;
 
 /**
  * Installs a jsdom document as the ambient DOM, including Obsidian's
@@ -124,6 +133,10 @@ export function setupDom(): DomHarness {
 
     install('window', window);
     install('document', window.document);
+    Object.defineProperty(window.navigator, 'platform', {
+        value: PLATFORM.mac,
+        configurable: true,
+    });
     install('navigator', window.navigator);
     install('activeDocument', window.document);
     install('activeWindow', window);
@@ -141,6 +154,12 @@ export function setupDom(): DomHarness {
             const el = window.document.createElement('div');
             window.document.body.appendChild(el);
             return el;
+        },
+        setPlatform(platform: string): void {
+            Object.defineProperty(window.navigator, 'platform', {
+                value: platform,
+                configurable: true,
+            });
         },
         restore(): void {
             for (const [key, descriptor] of saved) {

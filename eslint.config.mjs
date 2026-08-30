@@ -72,6 +72,11 @@ export default defineConfig([
             // node:test's test() returns a promise by design; the runner awaits
             // it, and callers are not meant to.
             "@typescript-eslint/no-floating-promises": "off",
+
+            // The harness reads navigator.platform because the code under test
+            // reads it. Characterising a deprecated API is the point; the
+            // production uses are counted in the baseline and fixed in Phase 3.
+            "@typescript-eslint/no-deprecated": "off",
         },
     },
 ]);

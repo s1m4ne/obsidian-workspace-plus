@@ -6,7 +6,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { setupHarness } from './harness/index.ts';
-import { Menu, Modal, Notice, Plugin, Setting, setIcon, setTooltip } from './harness/obsidian-module.ts';
+import { PLATFORM } from './harness/dom.ts';
+import { Menu, Modal, Notice, Platform, Plugin, Setting, setIcon, setTooltip } from './harness/obsidian-module.ts';
 
 function withHarness(fn: (h: ReturnType<typeof setupHarness>) => void): void {
     const harness = setupHarness();
@@ -262,4 +263,45 @@ test('registered commands can be triggered the way a hotkey would', () => {
 
         assert.throws(() => h.runCommand('no-such-command'), /No command registered/);
     });
+});
+
+test('Platform and navigator.platform answer the same question', () => {
+    withHarness((h) => {
+        // The i18n tables branch on navigator.platform; the migration moves them
+        // to Platform.isMacOS. A lock recorded before the move must still pass
+        // after it, which only holds if both read from one source.
+        const nav = h.dom.window.navigator;
+
+        assert.equal(nav.platform, PLATFORM.mac);
+        assert.equal(nav.platform.indexOf('Mac') !== -1, Platform.isMacOS);
+        assert.equal(Platform.isMacOS, true);
+
+        h.dom.setPlatform(PLATFORM.windows);
+        assert.equal(nav.platform.indexOf('Mac') !== -1, Platform.isMacOS);
+        assert.equal(Platform.isMacOS, false);
+        assert.equal(Platform.isWin, true);
+
+        h.dom.setPlatform(PLATFORM.linux);
+        assert.equal(Platform.isMacOS, false);
+        assert.equal(Platform.isLinux, true);
+    });
+});
+
+test('the i18n tables see the platform the harness reports', async () => {
+    const harness = setupHarness();
+    try {
+        harness.dom.setPlatform(PLATFORM.mac);
+        const i18n: { resolveLocale(l: string): Record<string, unknown> } = await import('../../src/i18n.js');
+        const onMac = i18n.resolveLocale('en');
+        const macLabel = (onMac.statusBarSlotModClick as () => string)();
+
+        harness.dom.setPlatform(PLATFORM.windows);
+        const winLabel = (onMac.statusBarSlotModClick as () => string)();
+
+        assert.match(macLabel, /\u2318/);          // Cmd
+        assert.match(winLabel, /Ctrl/);
+        assert.notEqual(macLabel, winLabel);
+    } finally {
+        harness.restore();
+    }
 });

@@ -174,7 +174,41 @@ export class PluginSettingTab {
 
 export class FuzzySuggestModal {}
 
-export const Platform = { isDesktop: true, isDesktopApp: true, isMacOS: true, isMobile: false };
+/**
+ * Derived from the jsdom navigator rather than hardcoded.
+ *
+ * The code under test asks two different questions about the same fact: the
+ * i18n tables branch on `navigator.platform.indexOf('Mac')`, and the migration
+ * moves them to `Platform.isMacOS`. If the stub answered one way and the
+ * navigator the other, a lock recorded before the move would fail after it -
+ * with no legal fix, since locks may not be edited.
+ *
+ * Reading both from one source keeps the answers consistent across the change.
+ * `setPlatform()` lets a test choose which platform it is characterising.
+ */
+export const Platform = {
+    isDesktop: true,
+    isDesktopApp: true,
+    isMobile: false,
+    isMobileApp: false,
+    isIosApp: false,
+    isAndroidApp: false,
+    get isMacOS(): boolean {
+        return currentNavigatorPlatform().indexOf('Mac') !== -1;
+    },
+    get isWin(): boolean {
+        return currentNavigatorPlatform().indexOf('Win') !== -1;
+    },
+    get isLinux(): boolean {
+        return currentNavigatorPlatform().indexOf('Linux') !== -1;
+    },
+};
+
+function currentNavigatorPlatform(): string {
+    const nav: { platform?: string } | undefined =
+        typeof navigator === 'undefined' ? undefined : navigator;
+    return nav && typeof nav.platform === 'string' ? nav.platform : '';
+}
 
 export function setIcon(el: HTMLElement, icon: string): void {
     registry.icons.set(el, icon);
