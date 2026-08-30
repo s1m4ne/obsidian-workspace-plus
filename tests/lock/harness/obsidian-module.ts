@@ -104,48 +104,74 @@ function ownerDocument(): Document {
     return registry.document;
 }
 
-export class Modal {
+export interface Modal {
     readonly app: unknown;
     readonly containerEl: HTMLElement;
     readonly modalEl: HTMLElement;
     readonly titleEl: HTMLElement;
     readonly contentEl: HTMLElement;
-    readonly scope = { register: (): void => {} };
-    isOpen = false;
+    readonly scope: { register: () => void };
+    isOpen: boolean;
+    onOpen(): void;
+    onClose(): void;
+    open(): void;
+    close(): void;
+    setTitle(title: string): this;
+}
 
-    constructor(app: unknown) {
-        this.app = app;
-        const doc = ownerDocument();
-        this.containerEl = doc.createElement('div');
-        this.containerEl.classList.add('modal-container');
-        this.modalEl = doc.createElement('div');
-        this.titleEl = doc.createElement('div');
-        this.contentEl = doc.createElement('div');
-        this.modalEl.append(this.titleEl, this.contentEl);
-        this.containerEl.appendChild(this.modalEl);
-    }
+export interface ModalConstructor {
+    new (app: unknown): Modal;
+    prototype: Modal;
+}
 
-    // Subclasses override these, exactly as they do with Obsidian's Modal.
-    onOpen(): void {}
-    onClose(): void {}
+interface ModalInternal extends Modal {
+    app: unknown;
+    containerEl: HTMLElement;
+    modalEl: HTMLElement;
+    titleEl: HTMLElement;
+    contentEl: HTMLElement;
+    scope: { register: () => void };
+}
 
-    open(): void {
+const ModalProto: Record<string, unknown> = {
+    onOpen(this: Modal): void {},
+    onClose(this: Modal): void {},
+    open(this: Modal): void {
         ownerDocument().body.appendChild(this.containerEl);
         this.isOpen = true;
         this.onOpen();
-    }
-
-    close(): void {
+    },
+    close(this: Modal): void {
         this.isOpen = false;
         this.onClose();
         this.containerEl.remove();
-    }
-
-    setTitle(title: string): this {
+    },
+    setTitle(this: Modal, title: string): Modal {
         this.titleEl.textContent = title;
         return this;
-    }
+    },
+};
+
+function ModalConstructorFn(this: unknown, app: unknown): Modal {
+    const isInstance = this instanceof ModalConstructorFn;
+    const self = (isInstance ? this : Object.create(ModalProto)) as ModalInternal;
+    self.app = app;
+    const doc = ownerDocument();
+    self.containerEl = doc.createElement('div');
+    self.containerEl.classList.add('modal-container');
+    self.modalEl = doc.createElement('div');
+    self.titleEl = doc.createElement('div');
+    self.contentEl = doc.createElement('div');
+    self.modalEl.append(self.titleEl, self.contentEl);
+    self.containerEl.appendChild(self.modalEl);
+    self.scope = { register: (): void => {} };
+    self.isOpen = false;
+    return self;
 }
+
+ModalConstructorFn.prototype = ModalProto;
+
+export const Modal: ModalConstructor = ModalConstructorFn as unknown as ModalConstructor;
 
 export class Plugin {
     readonly app: unknown;
@@ -175,19 +201,46 @@ export class Plugin {
     saveData(): Promise<void> { return Promise.resolve(); }
 }
 
-export class PluginSettingTab {
+export interface PluginSettingTab {
     readonly app: unknown;
     readonly plugin: unknown;
     readonly containerEl: HTMLElement;
-
-    constructor(app: unknown, plugin: unknown) {
-        this.app = app;
-        this.plugin = plugin;
-        this.containerEl = ownerDocument().createElement('div');
-    }
 }
 
-export class FuzzySuggestModal {}
+export interface PluginSettingTabConstructor {
+    new (app: unknown, plugin: unknown): PluginSettingTab;
+    prototype: PluginSettingTab;
+}
+
+interface PluginSettingTabInternal extends PluginSettingTab {
+    app: unknown;
+    plugin: unknown;
+    containerEl: HTMLElement;
+}
+
+function PluginSettingTabConstructorFn(this: unknown, app: unknown, plugin: unknown): PluginSettingTab {
+    const isInstance = this instanceof PluginSettingTabConstructorFn;
+    const self = (isInstance ? this : Object.create(PluginSettingTabConstructorFn.prototype as object)) as PluginSettingTabInternal;
+    self.app = app;
+    self.plugin = plugin;
+    self.containerEl = ownerDocument().createElement('div');
+    return self;
+}
+
+export const PluginSettingTab = PluginSettingTabConstructorFn as unknown as PluginSettingTabConstructor;
+
+export type FuzzySuggestModal = Modal;
+export interface FuzzySuggestModalConstructor {
+    new (app: unknown): FuzzySuggestModal;
+    prototype: FuzzySuggestModal;
+}
+
+function FuzzySuggestModalConstructorFn(this: unknown, app: unknown): FuzzySuggestModal {
+    return ModalConstructorFn.call(this, app);
+}
+FuzzySuggestModalConstructorFn.prototype = ModalProto;
+
+export const FuzzySuggestModal = FuzzySuggestModalConstructorFn as unknown as FuzzySuggestModalConstructor;
 
 /**
  * Reads `registry.platform`, the same value the jsdom `navigator.platform`
