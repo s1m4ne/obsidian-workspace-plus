@@ -160,3 +160,35 @@ test('session crud creates an empty session by detaching root leaves', async fun
     assert.deepEqual(plugin.data.sessions[plugin.data.activeSessionId].layout, { layout: 'current' });
     assert.equal(plugin.persistCalls, 1);
 });
+
+test('session crud: deleteSession, deleteAllInactiveSessions, ensureDefaultSession, and getNextSessionName', async function () {
+    const plugin = createPlugin({
+        sessions: {
+            a: { id: 'a', name: 'A', layout: { layout: 'a' } },
+            b: { id: 'b', name: 'B', layout: { layout: 'b' } },
+            c: { id: 'c', name: 'New session 1', layout: { layout: 'c' } },
+        },
+        sessionOrder: ['a', 'b', 'c'],
+        activeSessionId: 'a',
+    });
+
+    // getNextSessionName skips existing names
+    const nextName = plugin.getNextSessionName();
+    assert.equal(nextName, 'New session 2');
+
+    // deleteSession
+    const deleted = await plugin.deleteSession('b');
+    assert.equal(deleted, true);
+    assert.equal(plugin.data.sessions.b, undefined);
+    assert.deepEqual(plugin.data.sessionOrder, ['a', 'c']);
+
+    // deleteAllInactiveSessions
+    const count = await plugin.deleteAllInactiveSessions();
+    assert.equal(count, 1);
+    assert.equal(plugin.data.sessions.c, undefined);
+    assert.equal(Object.keys(plugin.data.sessions).length, 1);
+
+    // ensureDefaultSession
+    plugin.ensureDefaultSession();
+    assert.equal(Object.keys(plugin.data.sessions).length, 2);
+});

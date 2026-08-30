@@ -3,90 +3,88 @@
 var obsidian = require('obsidian');
 var i18n = require('../../i18n.ts');
 var obsidianInternals = require('../../platform/obsidian-internals.ts');
-var utils = require('../../utils.ts');
-var layoutUtils = require('../../layout-utils.ts');
 var modals = require('../../modals');
+var sessionStore = require('../../state/session-store.ts');
+
+function attachSessionStoreGetter(WorkspacePlusPlus) {
+    if (WorkspacePlusPlus.prototype.getSessionStore) return;
+    WorkspacePlusPlus.prototype.getSessionStore = function () {
+        var self = this;
+        if (!this._sessionStore) {
+            this._sessionStore = new sessionStore.SessionStore({
+                get data() { return self.data; },
+                get app() { return self.app; },
+                get manifestId() { return self.manifest ? self.manifest.id : undefined; },
+                get groupManager() { return typeof self.getGroupManager === 'function' ? self.getGroupManager() : undefined; },
+                get settingsState() { return typeof self.getSettingsState === 'function' ? self.getSettingsState() : undefined; },
+                getCurrentWorkspaceLayout: function () {
+                    if (self.getCurrentWorkspaceLayout && self.getCurrentWorkspaceLayout !== WorkspacePlusPlus.prototype.getCurrentWorkspaceLayout) {
+                        return self.getCurrentWorkspaceLayout();
+                    }
+                    if (self.app && self.app.workspace && typeof self.app.workspace.getLayout === 'function') {
+                        return self.app.workspace.getLayout();
+                    }
+                    return {};
+                },
+                createSessionValidated: function (name, options) {
+                    if (self.createSessionValidated && self.createSessionValidated !== WorkspacePlusPlus.prototype.createSessionValidated) {
+                        return self.createSessionValidated(name, options);
+                    }
+                    return self.getSessionStore().createSessionValidated(name, options);
+                },
+                moveSessionToGroupExclusive: function (sid, gid) {
+                    return typeof self.moveSessionToGroupExclusive === 'function'
+                        ? self.moveSessionToGroupExclusive(sid, gid)
+                        : Promise.resolve(false);
+                },
+                resolveGroupSelection: function (gid) {
+                    return typeof self.resolveGroupSelection === 'function'
+                        ? self.resolveGroupSelection(gid)
+                        : Promise.resolve({ resolvedGroupId: gid });
+                },
+                attachSessionToActiveGroup: function (sid) {
+                    if (typeof self.attachSessionToActiveGroup === 'function') {
+                        self.attachSessionToActiveGroup(sid);
+                    }
+                },
+                persistData: function () { return self.persistData(); },
+                updateStatusBar: function () { self.updateStatusBar(); },
+                syncSessionCommands: function () { self.syncSessionCommands(); },
+                hideSwitchOverlay: function () { self.hideSwitchOverlay(); },
+                captureActiveSessionLayoutIfAutoSave: function () { self.captureActiveSessionLayoutIfAutoSave(); },
+                applyWorkspaceLayout: function (layout) { return self.applyWorkspaceLayout(layout); },
+                getWorkspaceRestoreScope: function () { return typeof self.getWorkspaceRestoreScope === 'function' ? self.getWorkspaceRestoreScope() : 'full'; },
+            });
+        }
+        return this._sessionStore;
+    };
+}
 
 function attachSessionCrudMethods(WorkspacePlusPlus) {
+    attachSessionStoreGetter(WorkspacePlusPlus);
+
     WorkspacePlusPlus.prototype.getDefaultSessionName = function () {
-        return i18n.L.defaultSessionName;
+        return this.getSessionStore().getDefaultSessionName();
     };
 
     WorkspacePlusPlus.prototype.getAutoSessionName = function (n) {
-        return i18n.L.sessionAutoName(n);
+        return this.getSessionStore().getAutoSessionName(n);
     };
 
     WorkspacePlusPlus.prototype.insertSessionAndActivate = function (session) {
-        this.data.sessions[session.id] = session;
-        this.data.sessionOrder.push(session.id);
-        this.data.activeSessionId = session.id;
-        this.attachSessionToActiveGroup(session.id);
+        return this.getSessionStore().insertSessionAndActivate(session);
     };
 
     WorkspacePlusPlus.prototype.createSessionRecord = function (id, name, layout, options) {
-        options = options || {};
-        var record = {
-            id: id,
-            name: name,
-            modified: typeof options.modified === 'number' ? options.modified : Date.now(),
-            layout: layout,
-        };
-        if (options.isDefault) {
-            record.isDefault = true;
-        }
-        return record;
+        return this.getSessionStore().createSessionRecord(id, name, layout, options);
     };
 
     WorkspacePlusPlus.prototype.createSession = function (name) {
-        var id = utils.generateId();
-        var layout = this.getCurrentWorkspaceLayout();
-
-        this.insertSessionAndActivate(this.createSessionRecord(id, name, layout));
-
-        this.updateStatusBar();
-        this.syncSessionCommands();
-        return this.persistData();
+        return this.getSessionStore().createSession(name);
     };
 
     WorkspacePlusPlus.prototype.deleteSession = function (sessionId) {
-        var session = this.data.sessions[sessionId];
-        if (!session || Object.keys(this.data.sessions).length <= 1) return Promise.resolve(false);
-
-        var wasActive = this.data.activeSessionId === sessionId;
-        var nextActiveId = null;
-
-        delete this.data.sessions[sessionId];
-        var orderIdx = this.data.sessionOrder.indexOf(sessionId);
-        if (orderIdx !== -1) this.data.sessionOrder.splice(orderIdx, 1);
-
-        // Clean up group membership
-        if (this.data.sessionGroups && this.data.sessionGroups[sessionId]) {
-            delete this.data.sessionGroups[sessionId];
-        }
-        if (wasActive) {
-            // Keep same index position; if it was the last, move to index - 1
-            var fallbackIdx = Math.min(orderIdx, this.data.sessionOrder.length - 1);
-            var remaining = this.data.sessionOrder[fallbackIdx] || Object.keys(this.data.sessions)[0];
-            nextActiveId = remaining || null;
-            this.data.activeSessionId = nextActiveId;
-        }
-
-        var applyNextLayout = Promise.resolve();
-        if (wasActive && nextActiveId) {
-            var nextSession = this.data.sessions[nextActiveId];
-            applyNextLayout = nextSession && nextSession.layout
-                ? this.applyWorkspaceLayout(nextSession.layout)
-                : Promise.resolve();
-        }
-
-        this.updateStatusBar();
-        this.syncSessionCommands();
-        var self = this;
-        return applyNextLayout
-            .then(function () {
-                return self.persistData();
-            })
-            .then(function () { return true; });
+        return this.getSessionStore().deleteSession(sessionId);
     };
 
     WorkspacePlusPlus.prototype.renameCurrentSession = function () {
@@ -139,142 +137,31 @@ function attachSessionCrudMethods(WorkspacePlusPlus) {
     };
 
     WorkspacePlusPlus.prototype.deleteAllInactiveSessions = function () {
-        var self = this;
-        var activeId = this.data.activeSessionId;
-        var ids = Object.keys(this.data.sessions || {}).filter(function (id) {
-            return id !== activeId;
-        });
-
-        var promises = ids.map(function (id) {
-            return self.deleteSession(id);
-        });
-        return Promise.all(promises).then(function (results) {
-            var deletedCount = 0;
-            for (var i = 0; i < results.length; i++) {
-                if (results[i]) deletedCount++;
-            }
-            return deletedCount;
-        });
+        return this.getSessionStore().deleteAllInactiveSessions();
     };
 
     WorkspacePlusPlus.prototype.getNextSessionName = function () {
-        var sessions = this.data.sessions;
-        var existing = {};
-        var keys = Object.keys(sessions);
-        for (var i = 0; i < keys.length; i++) {
-            existing[sessions[keys[i]].name] = true;
-        }
-        var n = 1;
-        while (existing[this.getAutoSessionName(n)]) { n++; }
-        return this.getAutoSessionName(n);
+        return this.getSessionStore().getNextSessionName();
     };
 
     WorkspacePlusPlus.prototype.resetSessionsToDefault = function () {
-        var id = utils.generateId();
-        this.hideSwitchOverlay();
-        this.data.sessions = {};
-        this.data.sessionOrder = [];
-        this.data.activeSessionId = null;
-        this.data.groups = {};
-        this.data.groupOrder = [];
-        this.data.sessionGroups = {};
-        this.data.activeGroupId = null;
-        this.data.sessions[id] = this.createSessionRecord(
-            id,
-            this.getDefaultSessionName(),
-            this.getCurrentWorkspaceLayout(),
-            { isDefault: true }
-        );
-        this.data.sessionOrder.push(id);
-        this.data.activeSessionId = id;
-        this.updateStatusBar();
-        this.syncSessionCommands();
-        return this.persistData();
+        return this.getSessionStore().resetSessionsToDefault();
     };
 
     WorkspacePlusPlus.prototype.createEmptySession = function () {
-        var L = i18n.L;
-        var name = this.getNextSessionName();
-        this.captureActiveSessionLayoutIfAutoSave();
-
-        var id = utils.generateId();
-        var session = this.createSessionRecord(id, name, null);
-        this.insertSessionAndActivate(session);
-
-        // Close only main area leaves (keep sidebars intact)
-        var leaves = [];
-        this.app.workspace.iterateRootLeaves(function (leaf) { leaves.push(leaf); });
-        for (var i = 0; i < leaves.length; i++) { leaves[i].detach(); }
-
-        // Capture the empty state
-        session.layout = this.getCurrentWorkspaceLayout();
-
-        this.updateStatusBar();
-        this.syncSessionCommands();
-        new obsidian.Notice(L.created(name));
-        return this.persistData();
+        return this.getSessionStore().createEmptySession();
     };
 
     WorkspacePlusPlus.prototype.duplicateCurrentSession = function () {
-        var L = i18n.L;
-        var name = this.getNextSessionName();
-        this.captureActiveSessionLayoutIfAutoSave();
-
-        var id = utils.generateId();
-        this.insertSessionAndActivate(this.createSessionRecord(id, name, this.getCurrentWorkspaceLayout()));
-
-        this.updateStatusBar();
-        this.syncSessionCommands();
-        new obsidian.Notice(L.duplicated(name));
-        return this.persistData();
+        return this.getSessionStore().duplicateCurrentSession();
     };
 
-    /**
-     * Duplicate an arbitrary session by its ID (does NOT switch to the copy).
-     */
     WorkspacePlusPlus.prototype.duplicateSession = function (sessionId) {
-        var L = i18n.L;
-        var source = this.data.sessions[sessionId];
-        if (!source) return Promise.resolve();
-
-        var name = this.getNextSessionName();
-        var newId = utils.generateId();
-        this.data.sessions[newId] = this.createSessionRecord(
-            newId,
-            name,
-            layoutUtils.cloneLayout(source.layout)
-        );
-        this.data.sessionOrder.push(newId);
-
-        // Copy group memberships
-        var groups = (this.data.sessionGroups || {})[sessionId];
-        if (groups && groups.length > 0) {
-            if (!this.data.sessionGroups) this.data.sessionGroups = {};
-            this.data.sessionGroups[newId] = groups.slice();
-        }
-
-        this.syncSessionCommands();
-        new obsidian.Notice(L.duplicated(name));
-        return this.persistData();
+        return this.getSessionStore().duplicateSession(sessionId);
     };
 
     WorkspacePlusPlus.prototype.ensureDefaultSession = function () {
-        var hasDefault = Object.values(this.data.sessions)
-            .some(function (s) { return s.isDefault; });
-        if (hasDefault) return;
-
-        var id = utils.generateId();
-        this.data.sessions[id] = this.createSessionRecord(
-            id,
-            this.getDefaultSessionName(),
-            this.getCurrentWorkspaceLayout(),
-            { isDefault: true }
-        );
-        this.data.sessionOrder.unshift(id);
-        this.data.activeSessionId = id;
-        this.updateStatusBar();
-        this.syncSessionCommands();
-        this.persistData();
+        return this.getSessionStore().ensureDefaultSession();
     };
 }
 
