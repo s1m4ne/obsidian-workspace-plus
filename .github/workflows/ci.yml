@@ -13,14 +13,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Node 24 runs the TypeScript test suite directly through native type
+      # stripping, so tests need no transpile step.
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24"
           cache: "npm"
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Type check
+        run: npm run typecheck
+
+      # The refactor drives a known set of violations to zero over many
+      # commits, so the gate is that the count never rises.
+      - name: Lint (ratchet)
+        run: npm run lint:ratchet
 
       - name: Run tests
         run: npm test

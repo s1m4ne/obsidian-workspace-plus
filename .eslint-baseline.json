@@ -1,0 +1,12 @@
+{
+    "total": 255,
+    "rules": {
+        "@typescript-eslint/no-unused-vars": 11,
+        "no-redeclare": 1,
+        "no-regex-spaces": 1,
+        "obsidianmd/hardcoded-config-path": 21,
+        "obsidianmd/no-static-styles-assignment": 50,
+        "obsidianmd/platform": 142,
+        "obsidianmd/prefer-window-timers": 29
+    }
+}

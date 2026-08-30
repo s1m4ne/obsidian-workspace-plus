@@ -1,0 +1,33 @@
+{
+    "compilerOptions": {
+        "target": "ES2018",
+        "module": "ESNext",
+        "moduleResolution": "bundler",
+        "lib": ["DOM", "DOM.Iterable", "ES2018"],
+        "types": ["node"],
+
+        // Node strips types rather than compiling them, so anything that would
+        // emit runtime code is a hard error at run time. erasableSyntaxOnly
+        // turns that into a compile error instead: no enum, namespace,
+        // parameter properties or decorators.
+        "erasableSyntaxOnly": true,
+        "verbatimModuleSyntax": true,
+        "allowImportingTsExtensions": true,
+        "isolatedModules": true,
+
+        "strict": true,
+        "noUncheckedIndexedAccess": true,
+        "exactOptionalPropertyTypes": true,
+        "noImplicitOverride": true,
+        "noFallthroughCasesInSwitch": true,
+
+        // src/ is migrating module by module; the remaining .js has to keep
+        // resolving, but is not type-checked.
+        "allowJs": true,
+        "checkJs": false,
+
+        "noEmit": true,
+        "skipLibCheck": true
+    },
+    "include": ["src/**/*", "tests/**/*", "scripts/**/*"]
+}

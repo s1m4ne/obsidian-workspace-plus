@@ -7,10 +7,20 @@
         "dev": "node esbuild.config.mjs",
         "build": "node esbuild.config.mjs production",
         "check:i18n": "node scripts/check-i18n.js",
-        "test": "node --test tests/*.test.js"
+        "test": "node --test \"tests/**/*.test.{js,ts}\"",
+        "lint": "eslint src scripts tests",
+        "lint:fix": "eslint src scripts tests --fix",
+        "typecheck": "tsc --noEmit",
+        "check": "npm run typecheck && npm run lint:ratchet && npm test && npm run build",
+        "lint:ratchet": "node scripts/lint-ratchet.js"
     },
     "devDependencies": {
+        "@types/node": "^26.4.0",
         "esbuild": "^0.24.0",
-        "obsidian": "latest"
+        "eslint": "^9.39.5",
+        "eslint-plugin-obsidianmd": "^0.4.2",
+        "obsidian": "^1.12.3",
+        "typescript": "~5.9",
+        "typescript-eslint": "^8.68.0"
     }
 }
