@@ -283,3 +283,16 @@ export function normalizePath(path: string): string {
 export function debounce<T extends unknown[]>(fn: (...args: T) => unknown): (...args: T) => unknown {
     return (...args: T): unknown => fn(...args);
 }
+
+export class TAbstractFile {
+    path = '';
+    name = '';
+    vault: unknown = null;
+    parent: unknown = null;
+}
+
+export class TFile extends TAbstractFile {
+    stat: unknown = null;
+    basename = '';
+    extension = '';
+}

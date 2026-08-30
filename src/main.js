@@ -38,6 +38,7 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
             self.historyService = self.getHistoryService();
             self.sessionSwitcher = self.getSessionSwitcher();
             self.sessionSaver = self.getSessionSaver();
+            self.frontmatterLinker = self.getFrontmatterLinker();
 
             // Migrate legacy settings into statusBarActions
             if (!self.data.statusBarActions) {
