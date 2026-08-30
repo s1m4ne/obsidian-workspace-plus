@@ -1,6 +1,7 @@
 {
-    "total": 104,
+    "total": 106,
     "rules": {
+        "@typescript-eslint/no-unnecessary-type-assertion": 2,
         "@typescript-eslint/no-unused-vars": 8,
         "no-redeclare": 1,
         "no-regex-spaces": 1,
