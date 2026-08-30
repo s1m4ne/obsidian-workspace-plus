@@ -19,6 +19,7 @@ var hasInlineSessionHistory = sessionData.hasInlineSessionHistory;
 
 var storagePaths = require('../../storage/paths.ts');
 var defaultData = require('../../storage/default-data.ts');
+var jsonFileStore = require('../../storage/json-file-store.ts');
 
 var STORAGE_DIR = storagePaths.STORAGE_DIR;
 var SESSION_STORAGE_VAULT = storagePaths.SESSION_STORAGE_VAULT;
@@ -338,64 +339,39 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
     };
 
 
+    WorkspacePlusPlus.prototype.getJsonStore = function () {
+        if (!this._jsonStore) {
+            this._jsonStore = new jsonFileStore.JsonFileStore(this.app.vault.adapter);
+        }
+        return this._jsonStore;
+    };
+
+    WorkspacePlusPlus.prototype.ensureDir = function (path) {
+        return this.getJsonStore().ensureDir(path);
+    };
+
     WorkspacePlusPlus.prototype.ensureSessionStorageDir = function () {
         return this.ensureDir(this.getSessionStorageDirPath());
     };
 
     WorkspacePlusPlus.prototype.getFileMtime = function (path) {
-        return this.app.vault.adapter.stat(path)
-            .then(function (stat) {
-                if (!stat || typeof stat.mtime !== 'number') return 0;
-                return stat.mtime;
-            })
-            .catch(function () {
-                return 0;
-            });
+        return this.getJsonStore().getFileMtime(path);
     };
 
     WorkspacePlusPlus.prototype.readJsonIfExists = function (path) {
-        var self = this;
-        return this.app.vault.adapter.exists(path).then(function (exists) {
-            if (!exists) {
-                return { exists: false, data: null, error: null };
-            }
-            return self.app.vault.adapter.read(path)
-                .then(function (raw) {
-                    try {
-                        return { exists: true, data: JSON.parse(raw), error: null };
-                    } catch (e) {
-                        return { exists: true, data: null, error: e };
-                    }
-                })
-                .catch(function (e) {
-                    return { exists: true, data: null, error: e };
-                });
-        });
+        return this.getJsonStore().readJsonIfExists(path);
     };
 
     WorkspacePlusPlus.prototype.writeJson = function (path, data, pretty) {
-        var json = pretty ? JSON.stringify(data, null, 2) : JSON.stringify(data);
-        return this.app.vault.adapter.write(path, json);
+        return this.getJsonStore().writeJson(path, data, pretty);
     };
 
     WorkspacePlusPlus.prototype.renameIfExists = function (fromPath, toPath) {
-        var self = this;
-        return this.app.vault.adapter.exists(fromPath).then(function (exists) {
-            if (!exists) return;
-            return self.app.vault.adapter.rename(fromPath, toPath).catch(function () {
-                return;
-            });
-        });
+        return this.getJsonStore().renameIfExists(fromPath, toPath);
     };
 
     WorkspacePlusPlus.prototype.removeIfExists = function (path) {
-        var self = this;
-        return this.app.vault.adapter.exists(path).then(function (exists) {
-            if (!exists) return;
-            return self.app.vault.adapter.remove(path).catch(function () {
-                return;
-            });
-        });
+        return this.getJsonStore().removeIfExists(path);
     };
 
     WorkspacePlusPlus.prototype.resolveSessionStorageLocation = function (settingsData) {
