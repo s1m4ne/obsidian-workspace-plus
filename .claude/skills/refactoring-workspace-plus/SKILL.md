@@ -35,7 +35,7 @@ Never state that something passes, builds, or is complete without having run the
 
 Each commit migrates one module and leaves the repo fully working. Never leave a commit in a broken intermediate state — the strangler pattern exists so old and new can coexist.
 
-A migration commit converts the module to TypeScript, turns it into a class, **and fixes the Obsidian guideline violations that conversion makes visible** — all three, in one commit. They cannot be separated: making a file `.ts` is what lets the 33 type-aware lint rules see it, so its violation count rises at that moment. Verified on `src/utils.js`: 255 → 257 from the conversion alone. Deferring the fixes means the ratchet blocks every commit and every file is edited twice.
+A migration commit converts the module to TypeScript, turns it into a class, **improves its design**, and **fixes the Obsidian guideline violations that conversion makes visible** — all four, in one commit. It is not a mechanical port; see [reference/design-targets.md](reference/design-targets.md) for what to change and, just as importantly, what to leave alone. They cannot be separated: making a file `.ts` is what lets the 33 type-aware lint rules see it, so its violation count rises at that moment. Verified on `src/utils.js`: 255 → 257 from the conversion alone. Deferring the fixes means the ratchet blocks every commit and every file is edited twice.
 
 ## Per-commit workflow
 
