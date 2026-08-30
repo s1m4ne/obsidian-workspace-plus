@@ -72,6 +72,16 @@ function attachStorageTransferMethods(WorkspacePlusPlus) {
                     self.updateStatusBar();
                     self.syncSessionCommands();
                     return self.persistData().then(function () {
+                        // Apply the imported layout to the workspace. Without
+                        // this the screen keeps showing the pre-import layout
+                        // while the data holds the imported one, and the first
+                        // session switch writes the screen back over the import
+                        // - auto-save on switch captures the current layout
+                        // before leaving. The imported active session would be
+                        // silently lost by the very action a user takes to see
+                        // whether the import worked.
+                        return self.reloadCurrentSessionWithoutSaving({ silent: true });
+                    }).then(function () {
                         new obsidian.Notice(L.importSessionsDone(latestPath), 7000);
                         return true;
                     });
