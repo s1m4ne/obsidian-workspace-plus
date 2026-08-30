@@ -2,7 +2,7 @@
 
 var obsidian = require('obsidian');
 var i18n = require('../../i18n');
-var utils = require('../../utils');
+var utils = require('../../utils.ts');
 var layoutUtils = require('../../layout-utils');
 var modals = require('../../modals');
 

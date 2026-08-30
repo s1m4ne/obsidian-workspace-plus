@@ -1,5 +1,7 @@
 'use strict';
 
+require('./lock/harness/index.ts').installObsidianStub();
+
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const Module = require('module');
@@ -22,7 +24,7 @@ function loadStatusBarController(calls) {
 
     const originalLoad = Module._load;
     Module._load = function (request, parent, isMain) {
-        if (request === './utils') return utilsStub;
+        if (request === './utils' || request === './utils.ts') return utilsStub;
         if (request === './statusbar-actions') return statusBarActionsStub;
         return originalLoad(request, parent, isMain);
     };

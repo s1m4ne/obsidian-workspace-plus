@@ -2,7 +2,7 @@
 
 var obsidian = require('obsidian');
 var i18n = require('../../i18n');
-var utils = require('../../utils');
+var utils = require('../../utils.ts');
 
 function attachGroupMethods(WorkspacePlusPlus) {
     WorkspacePlusPlus.prototype.isGroupFeatureEnabled = function () {

@@ -1,6 +1,6 @@
 'use strict';
 
-var utils = require('../../utils');
+var utils = require('../../utils.ts');
 
 function attachHotkeyMethods(WorkspacePlusPlus) {
     // --- Hotkey helpers ---
