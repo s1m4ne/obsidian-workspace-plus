@@ -1,7 +1,6 @@
 import { Notice, type App } from 'obsidian';
 import { L } from '../i18n.ts';
 import { generateId } from '../utils.ts';
-import { layoutsEqualStructural } from '../layout-utils.ts';
 import type { PluginData, SessionItem } from '../storage/default-data.ts';
 import type { SettingsState } from './settings-state.ts';
 import type { SessionStore } from './session-store.ts';
@@ -30,22 +29,32 @@ export interface SessionSaverHost {
     sessionStore?: SessionStore;
     groupManager?: GroupManager;
     historyService?: HistoryService;
-    getActiveSession?: () => SessionItem | null;
-    getCurrentWorkspaceLayout?: () => unknown;
-    layoutsEqualStructural?: (a: unknown, b: unknown) => boolean;
-    getDefaultSessionName?: () => string;
-    pushLayoutToHistory?: (session: SessionItem) => void;
+    getActiveSession: () => SessionItem | null;
+    getCurrentWorkspaceLayout: () => unknown;
+    layoutsEqualStructural: (a: unknown, b: unknown) => boolean;
+    getDefaultSessionName: () => string;
+    pushLayoutToHistory: (session: SessionItem) => void;
+    persistData: () => Promise<boolean>;
+    createSessionRecord: (id: string, name: string, layout: unknown, options?: { modified?: number }) => SessionItem;
+    insertSessionAndActivate: (session: SessionItem) => void;
+    getOrderedSessionsUnfiltered: () => SessionItem[];
+    getOrderedGroupTabIds: () => string[];
+    isGroupFeatureEnabled: () => boolean;
+    applyWorkspaceLayout: (layout: unknown) => Promise<boolean>;
+    saveActiveSession?: (options?: { silent?: boolean; touchModified?: boolean }) => Promise<boolean> | undefined;
+    overwriteSessionWithCurrentLayout?: (sessionId: string, options?: { silent?: boolean; touchModified?: boolean }) => Promise<boolean> | undefined;
     updateStatusBar?: () => void;
     syncSessionCommands?: () => void;
-    persistData?: () => Promise<boolean>;
-    createSessionRecord?: (id: string, name: string, layout: unknown, options?: { modified?: number }) => SessionItem;
-    insertSessionAndActivate?: (session: SessionItem) => void;
     startHistorySnapshotTimer?: () => void;
     stopHistorySnapshotTimer?: () => void;
-    applyWorkspaceLayout?: (layout: unknown) => Promise<boolean>;
-    getOrderedSessionsUnfiltered?: () => SessionItem[];
-    getOrderedGroupTabIds?: () => string[];
-    isGroupFeatureEnabled?: () => boolean;
+    openConfirmModal?: (
+        message: string,
+        onConfirm: () => void,
+        options?: {
+            confirmText?: string;
+            confirmClass?: string;
+        }
+    ) => void;
     openRenameModal?: (
         placeholder: string,
         onRename: (newName: string) => void,
@@ -58,17 +67,9 @@ export interface SessionSaverHost {
             onSkip?: () => void;
         }
     ) => void;
-    openConfirmModal?: (
-        message: string,
-        onConfirm: () => void,
-        options?: {
-            confirmText?: string;
-            confirmClass?: string;
-        }
-    ) => void;
-    saveActiveSession?: (options?: { silent?: boolean; touchModified?: boolean }) => Promise<boolean> | undefined;
-    overwriteSessionWithCurrentLayout?: (sessionId: string, options?: { silent?: boolean; touchModified?: boolean }) => Promise<boolean> | undefined;
 }
+
+export const SESSION_NAME_MAX_LENGTH = 100;
 
 function formatString(fnOrStr: unknown, ...args: Array<string | number>): string {
     if (typeof fnOrStr === 'function') {
@@ -91,13 +92,7 @@ export function findSessionByName(data: PluginData | null | undefined, name: str
 }
 
 export function isGroupFeatureEnabled(host: SessionSaverHost): boolean {
-    if (typeof host.isGroupFeatureEnabled === 'function') {
-        return host.isGroupFeatureEnabled();
-    }
-    if (host.settingsState) {
-        return Boolean(host.settingsState.groupFeatureEnabled);
-    }
-    return !host.data || host.data.groupFeatureEnabled !== false;
+    return host.isGroupFeatureEnabled();
 }
 
 export function chooseSessionGroupForView(host: SessionSaverHost, sessionId: string): string | null | undefined {
@@ -112,14 +107,7 @@ export function chooseSessionGroupForView(host: SessionSaverHost, sessionId: str
     if (validGroupIds.length === 0) return null;
     if (data.activeGroupId && validGroupIds.includes(data.activeGroupId)) return data.activeGroupId;
 
-    let ordered: string[] = [];
-    if (typeof host.getOrderedGroupTabIds === 'function') {
-        ordered = host.getOrderedGroupTabIds();
-    } else if (host.groupManager) {
-        ordered = host.groupManager.getOrderedGroupTabIds();
-    } else if (Array.isArray(data.groupOrder)) {
-        ordered = data.groupOrder;
-    }
+    const ordered = host.getOrderedGroupTabIds();
 
     for (let i = 0; i < ordered.length; i++) {
         const id = ordered[i];
@@ -178,105 +166,39 @@ export class SessionSaver {
     }
 
     private checkLayoutsEqual(a: unknown, b: unknown): boolean {
-        if (typeof this.host.layoutsEqualStructural === 'function') {
-            return this.host.layoutsEqualStructural(a, b);
-        }
-        if (this.host.sessionStore) {
-            return this.host.sessionStore.layoutsEqualStructural(a, b);
-        }
-        const restoreScope = this.data?.restoreSidebars === false ? 'main-only' : 'full';
-        return layoutsEqualStructural(a, b, { restoreScope });
+        return this.host.layoutsEqualStructural(a, b);
     }
 
     private getActiveSession(): SessionItem | null {
-        if (typeof this.host.getActiveSession === 'function') {
-            return this.host.getActiveSession();
-        }
-        if (this.host.sessionStore) {
-            return this.host.sessionStore.getActiveSession();
-        }
-        const activeId = this.data?.activeSessionId;
-        return (activeId && this.sessions[activeId]) ? this.sessions[activeId] || null : null;
+        return this.host.getActiveSession();
     }
 
     private getCurrentWorkspaceLayout(): unknown {
-        if (typeof this.host.getCurrentWorkspaceLayout === 'function') {
-            return this.host.getCurrentWorkspaceLayout();
-        }
-        if (this.host.sessionStore) {
-            return this.host.sessionStore.getCurrentWorkspaceLayout();
-        }
-        return this.host.app?.workspace.getLayout() || {};
+        return this.host.getCurrentWorkspaceLayout();
     }
 
     private getDefaultSessionName(): string {
-        if (typeof this.host.getDefaultSessionName === 'function') {
-            return this.host.getDefaultSessionName();
-        }
-        if (this.host.sessionStore) {
-            return this.host.sessionStore.getDefaultSessionName();
-        }
-        return formatString(L.defaultSessionName, 1);
+        return this.host.getDefaultSessionName();
     }
 
     private pushLayoutToHistory(session: SessionItem): void {
-        if (typeof this.host.pushLayoutToHistory === 'function') {
-            this.host.pushLayoutToHistory(session);
-        } else if (this.host.historyService) {
-            this.host.historyService.pushLayoutToHistory(session);
-        }
+        this.host.pushLayoutToHistory(session);
     }
 
     private persistData(): Promise<boolean> {
-        if (typeof this.host.persistData === 'function') {
-            return this.host.persistData();
-        }
-        return Promise.resolve(true);
+        return this.host.persistData();
     }
 
     private createSessionRecord(id: string, name: string, layout: unknown, options?: { modified?: number }): SessionItem {
-        if (typeof this.host.createSessionRecord === 'function') {
-            return this.host.createSessionRecord(id, name, layout, options);
-        }
-        if (this.host.sessionStore) {
-            return this.host.sessionStore.createSessionRecord(id, name, layout, options);
-        }
-        return {
-            id,
-            name,
-            layout,
-            modified: options?.modified ?? Date.now(),
-        };
+        return this.host.createSessionRecord(id, name, layout, options);
     }
 
     private insertSessionAndActivate(session: SessionItem): void {
-        if (typeof this.host.insertSessionAndActivate === 'function') {
-            this.host.insertSessionAndActivate(session);
-            return;
-        }
-        if (this.host.sessionStore) {
-            this.host.sessionStore.insertSessionAndActivate(session);
-            return;
-        }
-        if (this.data) {
-            if (!this.data.sessions) this.data.sessions = {};
-            this.data.sessions[session.id] = session;
-            if (!Array.isArray(this.data.sessionOrder)) this.data.sessionOrder = [];
-            this.data.sessionOrder.push(session.id);
-            this.data.activeSessionId = session.id;
-        }
+        this.host.insertSessionAndActivate(session);
     }
 
     private getOrderedSessionsUnfiltered(): SessionItem[] {
-        if (typeof this.host.getOrderedSessionsUnfiltered === 'function') {
-            return this.host.getOrderedSessionsUnfiltered();
-        }
-        if (this.host.sessionStore) {
-            return this.host.sessionStore.getOrderedSessionsUnfiltered();
-        }
-        const order = this.data?.sessionOrder || [];
-        const sessions = this.sessions;
-        return order.map((id) => sessions[id]).filter((s): s is SessionItem => Boolean(s));
+        return this.host.getOrderedSessionsUnfiltered();
     }
 
     isActiveSessionDirty(): boolean {
@@ -531,11 +453,7 @@ export class SessionSaver {
 
         let applyLayout: Promise<unknown> = Promise.resolve(true);
         if (session.layout) {
-            if (typeof this.host.applyWorkspaceLayout === 'function') {
-                applyLayout = this.host.applyWorkspaceLayout(session.layout);
-            } else if (this.host.app?.workspace) {
-                applyLayout = this.host.app.workspace.changeLayout(session.layout);
-            }
+            applyLayout = this.host.applyWorkspaceLayout(session.layout);
         }
 
         const name = session.name;

@@ -83,6 +83,19 @@ function createMockHost(initialData?: Partial<PluginData>): {
             host.data.sessions.s1!,
             host.data.sessions.s2!,
         ],
+        createSessionRecord: (id, name, layout, options) => ({
+            id,
+            name,
+            layout,
+            modified: options?.modified ?? Date.now(),
+        }),
+        insertSessionAndActivate: (session) => {
+            host.data.sessions[session.id] = session;
+            host.data.sessionOrder.push(session.id);
+            host.data.activeSessionId = session.id;
+        },
+        getOrderedGroupTabIds: () => ['__all__'],
+        isGroupFeatureEnabled: () => Boolean(host.data.groupFeatureEnabled),
         app: {
             workspace: {
                 changeLayout: async (layout: unknown) => {
