@@ -1,10 +1,11 @@
 import { Notice, type App } from 'obsidian';
 import { L } from '../i18n.ts';
-import { cloneLayout, mergeMainLayoutIntoCurrent } from '../layout-utils.ts';
+import { mergeMainLayoutIntoCurrent } from '../layout-utils.ts';
 import type { PluginData, SessionItem } from '../storage/default-data.ts';
 import type { SettingsState } from './settings-state.ts';
 import type { SessionStore } from './session-store.ts';
 import type { HistoryService } from './history-service.ts';
+import type { SessionSaver } from './session-saver.ts';
 
 export interface RelativeSwitchContext {
     ordered: SessionItem[];
@@ -40,7 +41,8 @@ export interface SessionSwitcherHost {
     settingsState?: SettingsState;
     sessionStore?: SessionStore;
     historyService?: HistoryService;
-    getOrderedSessions?: () => SessionItem[];
+    sessionSaver?: SessionSaver;
+    getOrderedSessions?: (viewGroupId?: string | null) => SessionItem[];
     findSessionIndex?: (sessions: SessionItem[], sessionId: string | null | undefined) => number;
     getActiveSession?: () => SessionItem | null;
     getCurrentWorkspaceLayout?: () => unknown;
@@ -66,7 +68,6 @@ export interface SessionSwitcherHost {
     scheduleStartupFlush?: () => Promise<boolean> | undefined;
     flushOnStartup?: () => Promise<boolean> | undefined;
     getStartupSettleRemainingMs?: () => number | undefined;
-    syncLegacyProperties?: (props: Record<string, unknown>) => void;
 }
 
 export const STARTUP_SETTLE_MS = 1200;
@@ -135,20 +136,65 @@ export class SessionSwitcher {
         return this.data.sessions;
     }
 
-    private syncLegacyProps(): void {
-        if (typeof this.host.syncLegacyProperties === 'function') {
-            this.host.syncLegacyProperties({
-                isSwitchingSession: this.isSwitchingSession,
-                switchLockAt: this.switchLockAt,
-                pendingSwitchTargetId: this.pendingSwitchTargetId,
-                pendingSwitchRequest: this.pendingSwitchRequest,
-                startupSettleStartedAt: this.startupSettleStartedAt,
-                startupSettleUntil: this.startupSettleUntil,
-                startupSettleTimer: this.startupSettleTimer,
-                startupFlushTimer: this.startupFlushTimer,
-                sessionSwitchNotice: this.sessionSwitchNotice,
-            });
+    get isSwitching(): boolean {
+        return this.isSwitchingSession;
+    }
+
+    get lockAt(): number {
+        return this.switchLockAt;
+    }
+
+    get pendingTargetId(): string | null {
+        return this.pendingSwitchTargetId;
+    }
+
+    get pendingRequest(): SwitchRequest | null {
+        return this.pendingSwitchRequest;
+    }
+
+    get switchNotice(): Notice | null {
+        return this.sessionSwitchNotice;
+    }
+
+    get settleStartedAt(): number {
+        return this.startupSettleStartedAt;
+    }
+
+    get settleUntil(): number {
+        return this.startupSettleUntil;
+    }
+
+    get settleTimer(): ReturnType<typeof setTimeout> | null {
+        return this.startupSettleTimer;
+    }
+
+    get flushTimer(): ReturnType<typeof setTimeout> | null {
+        return this.startupFlushTimer;
+    }
+
+    cleanup(): void {
+        const doClearTimeout = getClearTimeout();
+        if (this.startupSettleTimer) {
+            doClearTimeout(this.startupSettleTimer);
+            this.startupSettleTimer = null;
         }
+        if (this.startupFlushTimer) {
+            doClearTimeout(this.startupFlushTimer);
+            this.startupFlushTimer = null;
+        }
+        if (this.sessionSwitchNotice) {
+            this.sessionSwitchNotice.hide();
+            this.sessionSwitchNotice = null;
+        }
+        if (this.pendingSwitchRequest) {
+            this.pendingSwitchRequest.resolve(false);
+            this.pendingSwitchRequest = null;
+        }
+        this.pendingSwitchTargetId = null;
+        this.isSwitchingSession = false;
+        this.switchLockAt = 0;
+        this.startupSettleStartedAt = 0;
+        this.startupSettleUntil = 0;
     }
 
     // --- Startup settle window ---
@@ -166,7 +212,6 @@ export class SessionSwitcher {
         if (nextDeadline <= Date.now()) {
             this.startupSettleStartedAt = 0;
             this.startupSettleUntil = 0;
-            this.syncLegacyProps();
             return 0;
         }
 
@@ -175,18 +220,15 @@ export class SessionSwitcher {
             this.startupSettleStartedAt = 0;
             this.startupSettleUntil = 0;
             this.startupSettleTimer = null;
-            this.syncLegacyProps();
-        }, nextDeadline - Date.now());
-        this.syncLegacyProps();
+        }, Math.max(0, nextDeadline - Date.now()));
         return this.startupSettleUntil;
     }
 
     startStartupSettleWindow(durationMs?: number): number {
-        const startedAt = Date.now();
         const duration = typeof durationMs === 'number' && durationMs > 0
             ? durationMs
             : STARTUP_SETTLE_MS;
-
+        const startedAt = Date.now();
         this.startupSettleStartedAt = startedAt;
         return this.setStartupSettleDeadline(startedAt + duration);
     }
@@ -200,28 +242,31 @@ export class SessionSwitcher {
         return remaining > 0 ? remaining : 0;
     }
 
-    isStartupSettling(): boolean {
+    isStartupSettleActive(): boolean {
         return this.getStartupSettleRemainingMs() > 0;
     }
 
+    isStartupSettling(): boolean {
+        return this.isStartupSettleActive();
+    }
+
     noteStartupLayoutChange(): void {
-        if (!this.isStartupSettling()) return;
+        if (!this.isStartupSettleActive()) return;
 
         const startedAt = this.startupSettleStartedAt || Date.now();
         const maxDeadline = startedAt + STARTUP_SETTLE_MAX_MS;
-        const nextDeadline = Math.min(maxDeadline, Date.now() + STARTUP_LAYOUT_CHANGE_SETTLE_MS);
+        const nextDeadline = Math.min(Date.now() + STARTUP_LAYOUT_CHANGE_SETTLE_MS, maxDeadline);
 
         if (nextDeadline <= (this.startupSettleUntil || 0)) return;
         this.setStartupSettleDeadline(nextDeadline);
-        const hostFlush = typeof this.host.scheduleStartupFlush === 'function'
-            ? this.host.scheduleStartupFlush()
-            : undefined;
-        if (hostFlush === undefined) {
-            void this.scheduleStartupFlush();
-        }
     }
 
     scheduleStartupFlush(): Promise<boolean> {
+        if (typeof this.host.scheduleStartupFlush === 'function') {
+            const res = this.host.scheduleStartupFlush();
+            if (res !== undefined) return res;
+        }
+
         const doClearTimeout = getClearTimeout();
         const doSetTimeout = getSetTimeout();
 
@@ -230,147 +275,186 @@ export class SessionSwitcher {
             this.startupFlushTimer = null;
         }
 
-        if (!this.isAutoSaveOnSwitchEnabled()) return Promise.resolve(false);
-
-        const delayMs = this.getStartupSettleRemainingMs();
-        if (delayMs <= 0) {
+        const remaining = this.getStartupSettleRemainingMs();
+        if (remaining <= 0) {
             return this.flushOnStartup();
         }
 
         return new Promise<boolean>((resolve) => {
             this.startupFlushTimer = doSetTimeout(() => {
                 this.startupFlushTimer = null;
-                this.syncLegacyProps();
-                resolve(this.flushOnStartup());
-            }, delayMs);
-            this.syncLegacyProps();
+                const hostFlush = typeof this.host.flushOnStartup === 'function'
+                    ? this.host.flushOnStartup()
+                    : undefined;
+                const flushPromise = hostFlush !== undefined
+                    ? hostFlush
+                    : this.flushOnStartup();
+                Promise.resolve(flushPromise).then(resolve).catch(() => resolve(false));
+            }, remaining + 20);
         });
     }
 
-    flushOnStartup(): Promise<boolean> {
-        if (!this.isAutoSaveOnSwitchEnabled()) return Promise.resolve(false);
+    async flushOnStartup(): Promise<boolean> {
         if (typeof this.host.flushOnStartup === 'function') {
             const res = this.host.flushOnStartup();
-            if (res !== undefined) return Promise.resolve(res);
-        }
-
-        const session = this.getActiveSession();
-        if (!session) return Promise.resolve(false);
-
-        if (typeof this.host.pushLayoutToHistory === 'function') {
-            this.host.pushLayoutToHistory(session);
-        } else {
-            this.host.historyService?.pushLayoutToHistory(session);
-        }
-
-        session.layout = this.getCurrentWorkspaceLayout();
-        session.modified = Date.now();
-        if (typeof this.host.persistData === 'function') {
-            return this.host.persistData();
-        }
-        return Promise.resolve(true);
-    }
-
-    // --- Layout restore ---
-
-    isSidebarRestoreEnabled(): boolean {
-        if (this.host.settingsState) {
-            return Boolean(this.host.settingsState.restoreSidebars);
-        }
-        return this.data?.restoreSidebars !== false;
-    }
-
-    getWorkspaceRestoreScope(): string {
-        return this.isSidebarRestoreEnabled() ? 'full' : 'main-only';
-    }
-
-    buildLayoutForRestore(layout: unknown): unknown {
-        if (!layout) return layout;
-        if (this.isSidebarRestoreEnabled()) {
-            return cloneLayout(layout);
-        }
-
-        let currentLayout: unknown = null;
-        try {
-            currentLayout = this.getCurrentWorkspaceLayout();
-        } catch {
-            currentLayout = null;
-        }
-        return mergeMainLayoutIntoCurrent(layout, currentLayout);
-    }
-
-    async applyWorkspaceLayout(layout: unknown, options?: LayoutRestoreOptions): Promise<boolean> {
-        if (!layout) return false;
-        const nextLayout = this.buildLayoutForRestore(layout);
-        if (typeof this.host.applyWorkspaceLayout === 'function') {
-            const res = this.host.applyWorkspaceLayout(nextLayout, options);
             if (res !== undefined) return res;
         }
-        const ws = this.host.app?.workspace as unknown as { changeLayout?: (l: unknown) => Promise<boolean> } | undefined;
-        if (ws && typeof ws.changeLayout === 'function') {
-            try {
-                return await ws.changeLayout(nextLayout);
-            } catch (err) {
-                if (options?.catchErrors === false) throw err;
-                return false;
-            }
+
+        const doClearTimeout = getClearTimeout();
+        if (this.startupFlushTimer) {
+            doClearTimeout(this.startupFlushTimer);
+            this.startupFlushTimer = null;
         }
+        if (this.startupSettleTimer) {
+            doClearTimeout(this.startupSettleTimer);
+            this.startupSettleTimer = null;
+        }
+        this.startupSettleStartedAt = 0;
+        this.startupSettleUntil = 0;
+
+        if (this.isAutoSaveOnSwitchEnabled()) {
+            this.captureActiveSessionLayoutIfAutoSave();
+        }
+
+        this.host.updateStatusBar?.();
+        await this.persistData();
         return true;
     }
 
-    // --- Notices & Switch UI ---
+    // --- Layout Restore ---
+
+    isSidebarRestoreEnabled(): boolean {
+        return this.data?.restoreSidebars !== false;
+    }
+
+    getWorkspaceRestoreScope(): 'full' | 'main-only' {
+        return this.data?.restoreSidebars === false ? 'main-only' : 'full';
+    }
+
+    buildLayoutForRestore(layout: unknown): unknown {
+        if (!layout || typeof layout !== 'object') return layout;
+        if (this.data?.restoreSidebars === false) {
+            let currentLayout: unknown = {};
+            if (this.host.sessionStore) {
+                currentLayout = this.host.sessionStore.getCurrentWorkspaceLayout();
+            } else if (typeof this.host.getCurrentWorkspaceLayout === 'function') {
+                currentLayout = this.host.getCurrentWorkspaceLayout();
+            } else if (this.host.app?.workspace) {
+                currentLayout = this.host.app.workspace.getLayout();
+            }
+            return mergeMainLayoutIntoCurrent(layout, currentLayout);
+        }
+        return layout;
+    }
+
+    async applyWorkspaceLayout(layout: unknown, options?: LayoutRestoreOptions): Promise<boolean> {
+        const opts = options || {};
+        if (!layout || typeof layout !== 'object') return false;
+
+        const targetLayout = this.buildLayoutForRestore(layout);
+
+        try {
+            if (typeof this.host.applyWorkspaceLayout === 'function') {
+                await this.host.applyWorkspaceLayout(targetLayout, opts);
+            } else if (this.host.app?.workspace) {
+                await this.host.app.workspace.changeLayout(targetLayout as Parameters<App['workspace']['changeLayout']>[0]);
+            }
+            return true;
+        } catch (e) {
+            if (opts.catchErrors) return false;
+            throw e;
+        }
+    }
+
+    async applySessionLayout(session: SessionItem | null | undefined, options?: LayoutRestoreOptions): Promise<boolean> {
+        if (!session || !session.layout) return false;
+        return this.applyWorkspaceLayout(session.layout, options);
+    }
+
+    async applySessionDataFromStorage(incomingData: PluginData | null | undefined): Promise<boolean> {
+        if (!incomingData || typeof incomingData !== 'object') return false;
+        const activeId = incomingData.activeSessionId;
+        const activeSession = activeId && incomingData.sessions ? incomingData.sessions[activeId] : null;
+        if (activeSession && activeSession.layout) {
+            return this.applyWorkspaceLayout(activeSession.layout, { catchErrors: true });
+        }
+        return false;
+    }
+
+    // --- Notices & Overlays ---
 
     clearSessionSwitchNotice(): void {
         if (!this.sessionSwitchNotice) return;
         this.sessionSwitchNotice.hide();
         this.sessionSwitchNotice = null;
-        this.syncLegacyProps();
     }
 
-    showSessionSwitchNotice(sessionName: string, options?: { durationMs?: number }): Notice | undefined {
+    showSessionSwitchNotice(sessionName: string, options?: { durationMs?: number }): Notice | null {
         if (typeof this.host.showSessionSwitchNotice === 'function') {
             const res = this.host.showSessionSwitchNotice(sessionName, options);
             if (res !== undefined) return res;
         }
-        const durationMs = typeof options?.durationMs === 'number'
-            ? options.durationMs
-            : SESSION_SWITCH_NOTICE_DURATION_MS;
 
+        const mode = this.host.settingsState
+            ? this.host.settingsState.sessionSwitchNoticeMode
+            : (this.data?.sessionSwitchNoticeMode || 'always');
+
+        if (mode === 'never') return null;
+
+        const duration = options?.durationMs ?? SESSION_SWITCH_NOTICE_DURATION_MS;
         this.clearSessionSwitchNotice();
-        const notice = new Notice(formatString(L.loaded, sessionName), durationMs);
-        this.sessionSwitchNotice = notice;
-        this.syncLegacyProps();
 
-        if (durationMs > 0) {
-            const doSetTimeout = getSetTimeout();
+        const message = formatString(L.switchedTo, sessionName);
+        const notice = new Notice(message, duration);
+        this.sessionSwitchNotice = notice;
+
+        const doSetTimeout = getSetTimeout();
+        if (duration > 0) {
             doSetTimeout(() => {
                 if (this.sessionSwitchNotice === notice) {
                     this.sessionSwitchNotice = null;
-                    this.syncLegacyProps();
                 }
-            }, durationMs + 50);
+            }, duration);
         }
-
         return notice;
     }
 
     hasBlockingSwitchUi(): boolean {
-        if (typeof document === 'undefined') return false;
-        return !!document.querySelector('.wpp-confirm-buttons')
-            || !!document.querySelector('.wpp-switch-overlay');
+        const switchOverlayEl = this.host.switchOverlayEl as HTMLElement | null | undefined;
+        const isSwitchOverlayVisible = Boolean(
+            switchOverlayEl && switchOverlayEl.classList.contains('is-visible')
+        );
+        let hasModal = false;
+        if (typeof document !== 'undefined') {
+            hasModal = Boolean(document.querySelector('.modal-container'));
+        }
+        return isSwitchOverlayVisible || hasModal;
     }
 
-    // --- Relative navigation ---
+    // --- Target Resolution & Switch Execution ---
 
-    getRelativeSwitchBaseId(): string | null {
+    getEffectiveActiveSessionId(): string | null {
         return this.pendingSwitchTargetId || (this.data ? this.data.activeSessionId : null);
     }
 
-    private getOrderedSessions(): SessionItem[] {
+    getRelativeSwitchBaseId(): string | null {
+        return this.getEffectiveActiveSessionId();
+    }
+
+    private getOrderedSessions(viewGroupId?: string | null): SessionItem[] {
         if (typeof this.host.getOrderedSessions === 'function') {
-            return this.host.getOrderedSessions();
+            return this.host.getOrderedSessions(viewGroupId);
         }
-        return this.host.sessionStore?.getOrderedSessions() || [];
+        if (this.host.sessionStore) {
+            if (viewGroupId === null || viewGroupId === '__all__') {
+                return this.host.sessionStore.getOrderedSessionsUnfiltered();
+            }
+            if (typeof viewGroupId === 'string') {
+                return this.host.sessionStore.getOrderedSessionsForGroup(viewGroupId);
+            }
+            return this.host.sessionStore.getOrderedSessions();
+        }
+        return [];
     }
 
     private findSessionIndex(sessions: SessionItem[], sessionId: string | null | undefined): number {
@@ -380,7 +464,7 @@ export class SessionSwitcher {
         if (this.host.sessionStore) {
             return this.host.sessionStore.findSessionIndex(sessions, sessionId);
         }
-        if (!sessions || sessions.length === 0 || !sessionId) return -1;
+        if (!sessionId) return -1;
         for (let i = 0; i < sessions.length; i++) {
             if (sessions[i]?.id === sessionId) return i;
         }
@@ -395,143 +479,157 @@ export class SessionSwitcher {
             return this.host.sessionStore.getActiveSession();
         }
         const activeId = this.data?.activeSessionId;
-        const sessions = this.sessions;
-        return (activeId && sessions[activeId]) ? sessions[activeId] || null : null;
-    }
-
-    private getCurrentWorkspaceLayout(): unknown {
-        if (typeof this.host.getCurrentWorkspaceLayout === 'function') {
-            return this.host.getCurrentWorkspaceLayout();
-        }
-        if (this.host.sessionStore) {
-            return this.host.sessionStore.getCurrentWorkspaceLayout();
-        }
-        return this.host.app?.workspace.getLayout() || {};
+        return (activeId && this.sessions[activeId]) ? this.sessions[activeId] || null : null;
     }
 
     private isAutoSaveOnSwitchEnabled(): boolean {
-        if (typeof this.host.isAutoSaveOnSwitchEnabled === 'function') {
-            return this.host.isAutoSaveOnSwitchEnabled();
+        if (this.host.sessionSaver) {
+            return this.host.sessionSaver.isAutoSaveOnSwitchEnabled();
         }
         if (this.host.settingsState) {
             return Boolean(this.host.settingsState.autoSaveOnSwitch);
+        }
+        if (typeof this.host.isAutoSaveOnSwitchEnabled === 'function') {
+            return this.host.isAutoSaveOnSwitchEnabled();
         }
         return this.data?.autoSaveOnSwitch !== false;
     }
 
     private isWarnOnUnsavedSwitchEnabled(): boolean {
-        if (typeof this.host.isWarnOnUnsavedSwitchEnabled === 'function') {
-            return this.host.isWarnOnUnsavedSwitchEnabled();
+        if (this.host.sessionSaver) {
+            return this.host.sessionSaver.isWarnOnUnsavedSwitchEnabled();
         }
         if (this.host.settingsState) {
             return Boolean(this.host.settingsState.warnOnUnsavedSwitch);
+        }
+        if (typeof this.host.isWarnOnUnsavedSwitchEnabled === 'function') {
+            return this.host.isWarnOnUnsavedSwitchEnabled();
         }
         return this.data?.warnOnUnsavedSwitch !== false;
     }
 
     private isActiveSessionDirty(): boolean {
+        if (this.host.sessionSaver) {
+            return this.host.sessionSaver.isActiveSessionDirty();
+        }
         if (typeof this.host.isActiveSessionDirty === 'function') {
             return this.host.isActiveSessionDirty();
         }
         return false;
     }
 
-    getRelativeSwitchContext(offset: number): RelativeSwitchContext {
-        const ordered = this.getOrderedSessions();
+    private captureActiveSessionLayoutIfAutoSave(): void {
+        if (this.host.sessionSaver) {
+            this.host.sessionSaver.captureActiveSessionLayoutIfAutoSave();
+            return;
+        }
+        const current = this.getActiveSession();
+        if (!current || !this.isAutoSaveOnSwitchEnabled()) return;
+        this.pushLayoutToHistory(current);
+        let currentLayout: unknown = {};
+        if (this.host.sessionStore) {
+            currentLayout = this.host.sessionStore.getCurrentWorkspaceLayout();
+        } else if (typeof this.host.getCurrentWorkspaceLayout === 'function') {
+            currentLayout = this.host.getCurrentWorkspaceLayout();
+        } else if (this.host.app?.workspace) {
+            currentLayout = this.host.app.workspace.getLayout();
+        }
+        current.layout = currentLayout;
+        current.modified = Date.now();
+    }
+
+    private pushLayoutToHistory(session: SessionItem): void {
+        if (this.host.historyService) {
+            this.host.historyService.pushLayoutToHistory(session);
+        } else if (typeof this.host.pushLayoutToHistory === 'function') {
+            this.host.pushLayoutToHistory(session);
+        }
+    }
+
+    private saveActiveSession(options?: { silent?: boolean; touchModified?: boolean }): Promise<boolean> {
+        if (this.host.sessionSaver) {
+            return this.host.sessionSaver.saveActiveSession(options);
+        }
+        if (typeof this.host.saveActiveSession === 'function') {
+            return this.host.saveActiveSession(options);
+        }
+        return Promise.resolve(true);
+    }
+
+    private persistData(): Promise<boolean> {
+        if (typeof this.host.persistData === 'function') {
+            return this.host.persistData();
+        }
+        return Promise.resolve(true);
+    }
+
+    getRelativeSwitchContext(offset: number, options?: SessionSwitchOptions): RelativeSwitchContext {
+        const opts = options || {};
+        const ordered = this.getOrderedSessions(opts.viewGroupId);
         if (ordered.length === 0) {
             return {
-                ordered,
+                ordered: [],
                 currentIndex: -1,
-                targetIndex: 0,
+                targetIndex: -1,
                 isEmpty: true,
             };
         }
 
-        const currentIndex = this.findSessionIndex(ordered, this.getRelativeSwitchBaseId());
+        const effectiveActiveId = this.getEffectiveActiveSessionId();
+        const currentIndex = this.findSessionIndex(ordered, effectiveActiveId);
+        const count = ordered.length;
+        let targetIndex: number;
+
         if (currentIndex === -1) {
-            return {
-                ordered,
-                currentIndex: -1,
-                targetIndex: offset > 0 ? 0 : ordered.length - 1,
-                isEmpty: false,
-            };
+            targetIndex = offset > 0 ? 0 : count - 1;
+        } else {
+            const normalizedOffset = ((offset % count) + count) % count;
+            targetIndex = (currentIndex + normalizedOffset) % count;
         }
 
         return {
             ordered,
             currentIndex,
-            targetIndex: (currentIndex + offset + ordered.length) % ordered.length,
+            targetIndex,
             isEmpty: false,
         };
     }
 
-    switchSessionAtOrderedIndex(ordered: SessionItem[], index: number, options?: SessionSwitchOptions): Promise<boolean> {
-        const opts = options || {};
-        if (!ordered || index < 0 || index >= ordered.length) {
-            return Promise.resolve(false);
+    getRelativeSwitchTarget(offset: number, options?: SessionSwitchOptions): RelativeSwitchContext {
+        return this.getRelativeSwitchContext(offset, options);
+    }
+
+    switchSessionAtOrderedIndex(ordered: SessionItem[] | number, indexOrOptions?: number | SessionSwitchOptions, options?: SessionSwitchOptions): Promise<boolean> {
+        if (typeof ordered === 'number') {
+            const index = ordered;
+            const opts = indexOrOptions as SessionSwitchOptions | undefined;
+            return this.switchToIndex(index, opts);
         }
+
+        const sessions = ordered;
+        const index = typeof indexOrOptions === 'number' ? indexOrOptions : 0;
+        const opts = options || {};
+
+        if (index < 0 || index >= sessions.length) return Promise.resolve(false);
+        const target = sessions[index];
+        if (!target) return Promise.resolve(false);
 
         if (opts.overlayMode === 'preview') {
-            this.host.showSwitchPreviewOverlay?.(ordered, index, opts.viewGroupId);
+            this.host.showSwitchPreviewOverlay?.(sessions, index, opts.viewGroupId);
         } else if (opts.overlayMode === 'feedback') {
-            this.host.showSwitchFeedbackOverlay?.(ordered, index, opts.viewGroupId, opts.overlayOptions);
-        }
-
-        const target = ordered[index];
-        if (!target) {
-            return Promise.resolve(false);
-        }
-
-        if (target.id === this.getRelativeSwitchBaseId()) {
-            if (opts.switchNoticeMode === 'replace') {
-                const noticeOpts = opts.switchNoticeDurationMs !== undefined
-                    ? { durationMs: opts.switchNoticeDurationMs }
-                    : undefined;
-                this.showSessionSwitchNotice(target.name, noticeOpts);
-            }
-            return Promise.resolve(false);
-        }
-
-        const switchOpts: SessionSwitchOptions = {
-            silent: opts.silent !== false,
-        };
-        if (opts.switchNoticeMode !== undefined) {
-            switchOpts.switchNoticeMode = opts.switchNoticeMode;
-        }
-        if (opts.switchNoticeDurationMs !== undefined) {
-            switchOpts.switchNoticeDurationMs = opts.switchNoticeDurationMs;
+            this.host.showSwitchFeedbackOverlay?.(sessions, index, opts.viewGroupId, opts.overlayOptions);
         }
 
         if (typeof this.host.switchSession === 'function') {
-            const res = this.host.switchSession(target.id, switchOpts);
+            const res = this.host.switchSession(target.id, opts);
             if (res !== undefined) return res;
         }
-
-        return this.switchSession(target.id, switchOpts);
-    }
-
-    switchToIndex(index: number): Promise<boolean> {
-        const ordered = this.getOrderedSessions();
-        return this.switchSessionAtOrderedIndex(ordered, index, {
-            overlayMode: 'feedback',
-            silent: true,
-        });
-    }
-
-    switchSessionByIdFromCommand(sessionId: string): Promise<boolean> {
-        const ordered = this.getOrderedSessions();
-        const index = this.findSessionIndex(ordered, sessionId);
-        return this.switchSessionAtOrderedIndex(ordered, index, {
-            overlayMode: 'feedback',
-            silent: true,
-        });
+        return this.switchSession(target.id, opts);
     }
 
     switchRelativeDirect(offset: number, options?: SessionSwitchOptions): Promise<boolean> {
         const opts = options || {};
-        const context = this.getRelativeSwitchContext(offset);
-        if (!context) return Promise.resolve(false);
-
+        const context = this.getRelativeSwitchContext(offset, opts);
         if (context.isEmpty) {
             if (opts.overlayMode === 'preview') {
                 this.host.showSwitchPreviewOverlay?.(context.ordered, 0, opts.viewGroupId);
@@ -552,7 +650,9 @@ export class SessionSwitcher {
             return Promise.resolve(false);
         }
 
-        const previewEnabled = offset > 0 ? (this.data && this.data.previewNext) : (this.data && this.data.previewPrevious);
+        const previewEnabled = offset > 0
+            ? (this.host.settingsState ? this.host.settingsState.previewNext : (this.data && this.data.previewNext))
+            : (this.host.settingsState ? this.host.settingsState.previewPrevious : (this.data && this.data.previewPrevious));
         const hasOverlay = Boolean(this.host.switchOverlayEl);
         if (previewEnabled && !hasOverlay) {
             this.host.showSwitchPreviewOverlay?.(context.ordered, context.currentIndex);
@@ -581,6 +681,38 @@ export class SessionSwitcher {
         });
     }
 
+    switchRelativeFromWheel(offset: number, options?: SessionSwitchOptions): Promise<boolean> {
+        return this.switchRelativeDirect(offset, options || {
+            overlayMode: 'none',
+            switchNoticeMode: 'replace',
+            silent: true,
+        });
+    }
+
+    switchRelativeFromQuickSwitcher(offset: number, options?: SessionSwitchOptions): Promise<boolean> {
+        return this.switchRelativeDirect(offset, options || {
+            overlayMode: 'none',
+            switchNoticeMode: 'replace',
+            silent: true,
+        });
+    }
+
+    switchRelativeFromSidebar(offset: number, options?: SessionSwitchOptions): Promise<boolean> {
+        return this.switchRelativeDirect(offset, options || {
+            overlayMode: 'none',
+            switchNoticeMode: 'replace',
+            silent: true,
+        });
+    }
+
+    switchRelativeFromNotice(offset: number, options?: SessionSwitchOptions): Promise<boolean> {
+        return this.switchRelativeDirect(offset, options || {
+            overlayMode: 'none',
+            switchNoticeMode: 'replace',
+            silent: true,
+        });
+    }
+
     switchRelative(offset: number): Promise<boolean> {
         return this.switchRelativeFromCommand(offset);
     }
@@ -596,12 +728,29 @@ export class SessionSwitcher {
         return this.switchRelativeDirect(offset, opts);
     }
 
+    switchSessionByIdFromCommand(sessionId: string, options?: SessionSwitchOptions): Promise<boolean> {
+        const ordered = this.getOrderedSessions();
+        const index = this.findSessionIndex(ordered, sessionId);
+        return this.switchSessionAtOrderedIndex(ordered, index, options || {
+            overlayMode: 'feedback',
+            silent: true,
+        });
+    }
+
+    switchToIndex(index: number, options?: SessionSwitchOptions): Promise<boolean> {
+        const opts = options || {};
+        const ordered = this.getOrderedSessions(opts.viewGroupId);
+        if (index < 0 || index >= ordered.length) return Promise.resolve(false);
+        const session = ordered[index];
+        if (!session) return Promise.resolve(false);
+        return this.switchSession(session.id, opts);
+    }
+
     // --- Switch Session execution & queue ---
 
     private runSwitchRequest(request: SwitchRequest): void {
         this.isSwitchingSession = true;
         this.switchLockAt = Date.now();
-        this.syncLegacyProps();
 
         const hostRunner = typeof this.host.performSessionSwitch === 'function'
             ? this.host.performSessionSwitch(request.targetId, request.options || {})
@@ -623,12 +772,10 @@ export class SessionSwitcher {
                 this.switchLockAt = 0;
                 if (!this.pendingSwitchRequest) {
                     this.pendingSwitchTargetId = null;
-                    this.syncLegacyProps();
                     return;
                 }
                 const next = this.pendingSwitchRequest;
                 this.pendingSwitchRequest = null;
-                this.syncLegacyProps();
                 this.runSwitchRequest(next);
             });
     }
@@ -663,7 +810,6 @@ export class SessionSwitcher {
                     this.pendingSwitchRequest.resolve(false);
                     this.pendingSwitchRequest = null;
                 }
-                this.syncLegacyProps();
             }
         }
 
@@ -673,7 +819,6 @@ export class SessionSwitcher {
         }
 
         this.pendingSwitchTargetId = targetId;
-        this.syncLegacyProps();
 
         return new Promise<boolean>((resolve) => {
             const request: SwitchRequest = {
@@ -689,7 +834,6 @@ export class SessionSwitcher {
                     this.pendingSwitchRequest.resolve(false);
                 }
                 this.pendingSwitchRequest = request;
-                this.syncLegacyProps();
                 return;
             }
 
@@ -709,12 +853,16 @@ export class SessionSwitcher {
 
         const performSwitch = (skipCurrentSave: boolean): Promise<boolean> => {
             if (current && !skipCurrentSave) {
-                if (typeof this.host.pushLayoutToHistory === 'function') {
-                    this.host.pushLayoutToHistory(current);
-                } else {
-                    this.host.historyService?.pushLayoutToHistory(current);
+                this.pushLayoutToHistory(current);
+                let currentLayout: unknown = {};
+                if (this.host.sessionStore) {
+                    currentLayout = this.host.sessionStore.getCurrentWorkspaceLayout();
+                } else if (typeof this.host.getCurrentWorkspaceLayout === 'function') {
+                    currentLayout = this.host.getCurrentWorkspaceLayout();
+                } else if (this.host.app?.workspace) {
+                    currentLayout = this.host.app.workspace.getLayout();
                 }
-                current.layout = this.getCurrentWorkspaceLayout();
+                current.layout = currentLayout;
                 current.modified = Date.now();
             }
 
@@ -757,9 +905,7 @@ export class SessionSwitcher {
                     this.host.openUnsavedSwitchModal(
                         formatString(L.confirmUnsavedSwitch, target.name),
                         () => {
-                            const savePromise = typeof this.host.saveActiveSession === 'function'
-                                ? this.host.saveActiveSession({ silent: true, touchModified: true })
-                                : Promise.resolve(true);
+                            const savePromise = this.saveActiveSession({ silent: true, touchModified: true });
                             savePromise
                                 .then(() => performSwitch(true))
                                 .then((ok) => resolve(ok))

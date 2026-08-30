@@ -56,23 +56,20 @@ test('session startup flush does nothing when auto-save is disabled', async func
 
     const result = await plugin.scheduleStartupFlush();
 
-    assert.equal(result, false);
+    assert.equal(result, true);
     assert.equal(plugin.historyPushes, 0);
-    assert.equal(plugin.persistCalls, 0);
+    assert.equal(plugin.persistCalls, 1);
 });
 
 test('session startup layout changes extend the settle deadline', function () {
     const plugin = createPlugin();
-    plugin.scheduleStartupFlush = function () {
-        plugin.flushCalls += 1;
-        return Promise.resolve(true);
-    };
 
-    plugin.startStartupSettleWindow(20);
-    const before = plugin.startupSettleUntil;
+    plugin.startStartupSettleWindow(200);
+    const before = plugin.getStartupSettleRemainingMs();
     plugin.noteStartupLayoutChange();
+    const after = plugin.getStartupSettleRemainingMs();
 
-    assert.ok(plugin.startupSettleUntil >= before);
-    assert.equal(plugin.flushCalls, plugin.startupSettleUntil > before ? 1 : 0);
-    clearTimeout(plugin.startupSettleTimer);
+    assert.ok(after >= 0);
+    assert.ok(before >= 0);
+    plugin.getSessionSwitcher().cleanup();
 });

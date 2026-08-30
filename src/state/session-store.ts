@@ -383,12 +383,14 @@ export class SessionStore {
         const targetGroupId = groupsEnabled ? (viewedGroupId || null) : null;
         const beforeActiveGroupId = groupsEnabled ? (this.data.activeGroupId || null) : null;
 
-        const createFn = (typeof this.host.createSessionValidated === 'function')
-            ? this.host.createSessionValidated
-            : (n: string, o?: SessionPersistOption) => this.createSessionValidated(n, o);
-
-        const result = await createFn(name, options);
-        if (!result || !result.created) return result;
+        let result: SessionValidationResult | undefined;
+        if (typeof this.host.createSessionValidated === 'function') {
+            result = await this.host.createSessionValidated(name, options);
+        }
+        if (!result) {
+            result = await this.createSessionValidated(name, options);
+        }
+        if (!result || !result.created) return result || { created: false, reason: 'failed', name };
 
         if (!groupsEnabled) {
             result.viewGroupId = null;

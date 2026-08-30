@@ -97,7 +97,7 @@ function handleStatusBarWheel(plugin, evt, now) {
     evt.stopPropagation();
 
     now = typeof now === 'number' ? now : Date.now();
-    if (plugin.isSwitchingSession) return false;
+    if (typeof plugin.getSessionSwitcher === 'function' && plugin.getSessionSwitcher().isSwitching) return false;
     if (now - plugin.statusBarScrollSwitchAt < cfg.cooldownMs) return false;
 
     if (now - plugin.statusBarScrollEventAt > cfg.resetMs) {

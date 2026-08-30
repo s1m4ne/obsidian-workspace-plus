@@ -52,18 +52,6 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
             self.data.statusBarActions = Object.assign({}, DEFAULT_DATA.statusBarActions, self.data.statusBarActions || {});
 
             self.normalizeGroupFeatureState();
-            self.isSwitchingSession = false;
-            self.pendingSwitchRequest = null;
-            self.pendingSwitchTargetId = null;
-            self.switchLockAt = 0;
-            self.startupSettleStartedAt = 0;
-            self.startupSettleUntil = 0;
-            self.startupSettleTimer = null;
-            self.startupFlushTimer = null;
-            self.statusBarScrollDelta = 0;
-            self.statusBarScrollEventAt = 0;
-            self.statusBarScrollSwitchAt = 0;
-            self.sessionSwitchNotice = null;
             self.syncSessionOrder();
             self.registerSessionStorageListeners();
             i18n.resolveLocale(self.data.language);
@@ -88,7 +76,7 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
                 self.updateStatusBar();
             }));
             self.registerEvent(self.app.workspace.on('active-leaf-change', function () {
-                if (self.isSwitchingSession) return;
+                if (typeof self.getSessionSwitcher === 'function' && self.getSessionSwitcher().isSwitching) return;
                 setTimeout(function () {
                     self.updateStatusBar();
                 }, 0);
@@ -113,23 +101,13 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
         this.hideSwitchOverlay();
         this.hideSearchOverlay();
         this.clearSessionSwitchNotice();
-        this.pendingSwitchRequest = null;
-        this.pendingSwitchTargetId = null;
-        this.isSwitchingSession = false;
+        if (typeof this.getSessionSwitcher === 'function') {
+            this.getSessionSwitcher().cleanup();
+        }
         this.statusBarScrollDelta = 0;
         this.statusBarScrollEventAt = 0;
         this.statusBarScrollSwitchAt = 0;
-        this.startupSettleStartedAt = 0;
-        if (this.startupSettleTimer) {
-            clearTimeout(this.startupSettleTimer);
-            this.startupSettleTimer = null;
-        }
-        if (this.startupFlushTimer) {
-            clearTimeout(this.startupFlushTimer);
-            this.startupFlushTimer = null;
-        }
         this.clearSessionStorageSyncTimers();
-        this.startupSettleUntil = 0;
         return this.flushPendingPersistence();
     };
 

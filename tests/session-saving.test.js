@@ -5,8 +5,7 @@ require('./lock/harness/index.ts').installObsidianStub();
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { setupHarness } = require('./lock/harness/index.ts');
-
-const harness = setupHarness();
+setupHarness();
 
 const i18n = require('../src/i18n.ts');
 i18n.resolveLocale('en');

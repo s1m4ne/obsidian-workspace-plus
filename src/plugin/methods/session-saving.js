@@ -94,8 +94,11 @@ function attachSessionSavingMethods(WorkspacePlusPlus) {
                         if (typeof self.stopHistorySnapshotTimer === 'function') self.stopHistorySnapshotTimer();
                     },
                     applyWorkspaceLayout: function (layout) {
-                        if (typeof self.applyWorkspaceLayout === 'function') {
+                        if (self.applyWorkspaceLayout && self.applyWorkspaceLayout !== WorkspacePlusPlus.prototype.applyWorkspaceLayout) {
                             return self.applyWorkspaceLayout(layout);
+                        }
+                        if (typeof self.getSessionSwitcher === 'function') {
+                            return self.getSessionSwitcher().applyWorkspaceLayout(layout);
                         }
                         if (self.app && self.app.workspace && typeof self.app.workspace.changeLayout === 'function') {
                             return self.app.workspace.changeLayout(layout);

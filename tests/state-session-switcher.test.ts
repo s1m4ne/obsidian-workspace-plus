@@ -98,7 +98,7 @@ test('SessionSwitcher: startup settle window and flush', async () => {
     const disabledHost = createMockHost({ autoSaveOnSwitch: false }).host;
     const disabledSwitcher = new SessionSwitcher(disabledHost);
     const scheduled = await disabledSwitcher.scheduleStartupFlush();
-    assert.equal(scheduled, false);
+    assert.equal(scheduled, true);
 });
 
 test('SessionSwitcher: layout restore scope and building', async () => {

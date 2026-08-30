@@ -251,7 +251,7 @@ module.exports = function attachFrontmatterMethods(WorkspacePlusPlus) {
 
         this.registerEvent(this.app.workspace.on('file-open', function (file) {
             // Guard: don't trigger during session switch or startup settle
-            if (self.isSwitchingSession) return;
+            if (typeof self.getSessionSwitcher === 'function' && self.getSessionSwitcher().isSwitching) return;
             if (self.getStartupSettleRemainingMs() > 0) return;
 
             if (!file) {

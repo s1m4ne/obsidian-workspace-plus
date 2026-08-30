@@ -2,61 +2,7 @@
 
 var obsidian = require('obsidian');
 var i18n = require('../../i18n.ts');
-var sessionStore = require('../../state/session-store.ts');
-
-function attachSessionStoreGetter(WorkspacePlusPlus) {
-    if (WorkspacePlusPlus.prototype.getSessionStore) return;
-    WorkspacePlusPlus.prototype.getSessionStore = function () {
-        var self = this;
-        if (!this._sessionStore) {
-            this._sessionStore = new sessionStore.SessionStore({
-                get data() { return self.data; },
-                get app() { return self.app; },
-                get manifestId() { return self.manifest ? self.manifest.id : undefined; },
-                get groupManager() { return typeof self.getGroupManager === 'function' ? self.getGroupManager() : undefined; },
-                get settingsState() { return typeof self.getSettingsState === 'function' ? self.getSettingsState() : undefined; },
-                getCurrentWorkspaceLayout: function () {
-                    if (self.getCurrentWorkspaceLayout && self.getCurrentWorkspaceLayout !== WorkspacePlusPlus.prototype.getCurrentWorkspaceLayout) {
-                        return self.getCurrentWorkspaceLayout();
-                    }
-                    if (self.app && self.app.workspace && typeof self.app.workspace.getLayout === 'function') {
-                        return self.app.workspace.getLayout();
-                    }
-                    return {};
-                },
-                createSessionValidated: function (name, options) {
-                    if (self.createSessionValidated && self.createSessionValidated !== WorkspacePlusPlus.prototype.createSessionValidated) {
-                        return self.createSessionValidated(name, options);
-                    }
-                    return self.getSessionStore().createSessionValidated(name, options);
-                },
-                moveSessionToGroupExclusive: function (sid, gid) {
-                    return typeof self.moveSessionToGroupExclusive === 'function'
-                        ? self.moveSessionToGroupExclusive(sid, gid)
-                        : Promise.resolve(false);
-                },
-                resolveGroupSelection: function (gid) {
-                    return typeof self.resolveGroupSelection === 'function'
-                        ? self.resolveGroupSelection(gid)
-                        : Promise.resolve({ resolvedGroupId: gid });
-                },
-                attachSessionToActiveGroup: function (sid) {
-                    if (typeof self.attachSessionToActiveGroup === 'function') {
-                        self.attachSessionToActiveGroup(sid);
-                    }
-                },
-                persistData: function () { return self.persistData(); },
-                updateStatusBar: function () { self.updateStatusBar(); },
-                syncSessionCommands: function () { self.syncSessionCommands(); },
-                hideSwitchOverlay: function () { self.hideSwitchOverlay(); },
-                captureActiveSessionLayoutIfAutoSave: function () { self.captureActiveSessionLayoutIfAutoSave(); },
-                applyWorkspaceLayout: function (layout) { return self.applyWorkspaceLayout(layout); },
-                getWorkspaceRestoreScope: function () { return typeof self.getWorkspaceRestoreScope === 'function' ? self.getWorkspaceRestoreScope() : 'full'; },
-            });
-        }
-        return this._sessionStore;
-    };
-}
+var attachSessionStoreGetter = require('./session-store-getter');
 
 function attachSessionValidationMethods(WorkspacePlusPlus) {
     attachSessionStoreGetter(WorkspacePlusPlus);

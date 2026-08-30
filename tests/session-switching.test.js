@@ -86,20 +86,20 @@ test('rapid relative switches accumulate instead of collapsing onto one target',
     // Press 1: starts a switch a -> b, layout still applying.
     plugin.switchRelativeFromCommand(1);
     assert.equal(plugin.data.activeSessionId, 'b');
-    assert.equal(plugin.pendingSwitchTargetId, 'b');
+    assert.equal(plugin.getSessionSwitcher().pendingTargetId, 'b');
 
     // Presses 2 and 3 land while that switch is in flight. Each must step
     // forward from the last requested target, not from the applied one.
     plugin.switchRelativeFromCommand(1);
-    assert.equal(plugin.pendingSwitchTargetId, 'c');
+    assert.equal(plugin.getSessionSwitcher().pendingTargetId, 'c');
     plugin.switchRelativeFromCommand(1);
-    assert.equal(plugin.pendingSwitchTargetId, 'd');
+    assert.equal(plugin.getSessionSwitcher().pendingTargetId, 'd');
 
     await plugin.releaseLayouts();
     await plugin.releaseLayouts();
 
     assert.equal(plugin.data.activeSessionId, 'd', 'three presses should advance three sessions');
-    assert.equal(plugin.pendingSwitchTargetId, null, 'the pending target is released once the queue drains');
+    assert.equal(plugin.getSessionSwitcher().pendingTargetId, null, 'the pending target is released once the queue drains');
 });
 
 test('the overlay highlight follows every press, not just the applied switch', async () => {
@@ -148,13 +148,13 @@ test('switching stays responsive when the active session is not in the current v
 test('a stale switch lock releases the remembered target', async () => {
     const plugin = createPlugin();
     plugin.switchRelativeFromCommand(1);
-    assert.equal(plugin.pendingSwitchTargetId, 'b');
+    assert.equal(plugin.getSessionSwitcher().pendingTargetId, 'b');
 
-    // No overlay or modal on screen and the lock is older than the 5s grace.
-    plugin.switchLockAt = Date.now() - 10000;
+    // No overlay or modal on screen and the lock is older than the 8s grace.
+    plugin.getSessionSwitcher().switchLockAt = Date.now() - 10000;
     plugin.switchSession('d', {});
 
-    assert.equal(plugin.pendingSwitchTargetId, 'd');
+    assert.equal(plugin.getSessionSwitcher().pendingTargetId, 'd');
     await plugin.releaseLayouts();
 });
 

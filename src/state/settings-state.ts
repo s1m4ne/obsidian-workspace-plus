@@ -60,6 +60,11 @@ export class SettingsState {
         return this.data.warnOnUnsavedSwitch ?? DEFAULT_DATA.warnOnUnsavedSwitch;
     }
 
+    get sessionSwitchNoticeMode(): string {
+        const val = this.data.sessionSwitchNoticeMode;
+        return typeof val === 'string' ? val : 'always';
+    }
+
     get autoSaveOnSwitch(): boolean {
         return this.data.autoSaveOnSwitch ?? DEFAULT_DATA.autoSaveOnSwitch;
     }

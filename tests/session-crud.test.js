@@ -4,41 +4,21 @@ require('./lock/harness/index.ts').installObsidianStub();
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const Module = require('module');
+const { setupHarness } = require('./lock/harness/index.ts');
+setupHarness();
 
 const i18n = require('../src/i18n.ts');
-
 i18n.resolveLocale('en');
 
-function loadSessionCrudMethods() {
-    const obsidianStub = {
-        Modal: class {},
-        Notice: class {
-            constructor(_message) {}
-        },
-        setIcon: function () {},
-        setTooltip: function () {},
-    };
-    const originalLoad = Module._load;
-    Module._load = function (request, parent, isMain) {
-        if (request === 'obsidian') return obsidianStub;
-        return originalLoad(request, parent, isMain);
-    };
-
-    try {
-        return require('../src/plugin/methods/session-crud');
-    } finally {
-        Module._load = originalLoad;
-    }
-}
-
-const attachSessionCrudMethods = loadSessionCrudMethods();
+const attachSessionCrudMethods = require('../src/plugin/methods/session-crud');
 const attachLayoutRestoreMethods = require('../src/plugin/methods/layout-restore');
+const attachSessionValidationMethods = require('../src/plugin/methods/sessions-validation');
 
 function createPlugin(initialData) {
     function PluginMock() {}
     attachLayoutRestoreMethods(PluginMock);
     attachSessionCrudMethods(PluginMock);
+    attachSessionValidationMethods(PluginMock);
     const plugin = new PluginMock();
     plugin.data = Object.assign({
         activeSessionId: 'a',
@@ -48,15 +28,22 @@ function createPlugin(initialData) {
         },
         sessionOrder: ['a', 'b'],
         sessionGroups: {},
-        groups: {},
-        groupOrder: [],
+        groups: {
+            g1: { id: 'g1', name: 'Work' },
+        },
+        groupOrder: ['__all__', 'g1'],
         activeGroupId: null,
+        confirmDeleteByHotkey: false,
     }, initialData || {});
+    plugin.manifest = { id: 'obsidian-workspace-plus' };
     plugin.persistCalls = 0;
     plugin.statusBarUpdates = 0;
     plugin.commandSyncs = 0;
     plugin.attachedSessions = [];
     plugin.detachedLeaves = 0;
+    plugin.getActiveSession = function () {
+        return (plugin.data.sessions && plugin.data.activeSessionId) ? plugin.data.sessions[plugin.data.activeSessionId] || null : null;
+    };
     plugin.getCurrentWorkspaceLayout = function () {
         return { layout: 'current' };
     };
@@ -89,7 +76,8 @@ function createPlugin(initialData) {
     return plugin;
 }
 
-test('session crud creates and activates a new session', async function () {
+// 落ちる条件: 新規作成セッションのアクティベーションまたはリスト登録が抜けた場合に落ちる
+test('createSession: creates a new session record and activates it as current', async function () {
     const plugin = createPlugin();
 
     await plugin.createSession('New');
@@ -103,10 +91,11 @@ test('session crud creates and activates a new session', async function () {
     assert.equal(plugin.persistCalls, 1);
 });
 
-test('session crud duplicates an arbitrary session without switching', async function () {
+// 落ちる条件: 指定IDのセッションのレイアウトディープコピーやグループ紐付けの継承が壊れた場合に落ちる
+test('duplicateSession: creates an exact cloned session preserving group memberships without switching active', async function () {
     const plugin = createPlugin({
         sessionGroups: {
-            b: ['g1', 'g2'],
+            b: ['g1'],
         },
     });
 
@@ -118,12 +107,25 @@ test('session crud duplicates an arbitrary session without switching', async fun
     assert.notEqual(newId, 'b');
     assert.deepEqual(plugin.data.sessions[newId].layout, { layout: 'b' });
     assert.notEqual(plugin.data.sessions[newId].layout, plugin.data.sessions.b.layout);
-    assert.deepEqual(plugin.data.sessionGroups[newId], ['g1', 'g2']);
+    assert.deepEqual(plugin.data.sessionGroups[newId], ['g1']);
     assert.equal(plugin.commandSyncs, 1);
     assert.equal(plugin.persistCalls, 1);
 });
 
-test('session crud resets sessions and group state to default', async function () {
+// 落ちる条件: duplicateCurrentSession が自動採番名で現在のアクティブセッションを複製できない場合に落ちる
+test('duplicateCurrentSession: duplicates the currently active session with next generated name', async function () {
+    const plugin = createPlugin();
+
+    const duplicated = await plugin.duplicateCurrentSession();
+
+    assert.ok(duplicated);
+    assert.equal(plugin.data.sessionOrder.length, 3);
+    const newId = plugin.data.sessionOrder[2];
+    assert.equal(plugin.data.sessions[newId].name, 'New session 1');
+});
+
+// 落ちる条件: resetSessionsToDefault がグループ状態やセッション順序の全初期化を怠った場合に落ちる
+test('resetSessionsToDefault: wipes all sessions and group mappings and restores a single default session', async function () {
     const plugin = createPlugin({
         sessionGroups: {
             a: ['g1'],
@@ -150,7 +152,8 @@ test('session crud resets sessions and group state to default', async function (
     assert.equal(plugin.persistCalls, 1);
 });
 
-test('session crud creates an empty session by detaching root leaves', async function () {
+// 落ちる条件: createEmptySession で root leaves のデタッチ処理が呼ばれなかった場合に落ちる
+test('createEmptySession: detaches root leaves and creates a clean empty session', async function () {
     const plugin = createPlugin();
 
     await plugin.createEmptySession();
@@ -161,6 +164,71 @@ test('session crud creates an empty session by detaching root leaves', async fun
     assert.equal(plugin.persistCalls, 1);
 });
 
+// 落ちる条件: 最後の1つのセッションを削除しようとした時の保護ガードが外れた場合に落ちる
+test('deleteCurrentSession: prevents deleting the last remaining session in the vault', function () {
+    const plugin = createPlugin({
+        sessions: {
+            a: { id: 'a', name: 'Only Session', layout: {} },
+        },
+        sessionOrder: ['a'],
+        activeSessionId: 'a',
+    });
+
+    plugin.deleteCurrentSession();
+
+    assert.equal(Object.keys(plugin.data.sessions).length, 1);
+    assert.equal(plugin.data.sessions.a.name, 'Only Session');
+});
+
+// 落ちる条件: deleteCurrentSession が複数セッション存在時に正常に削除とアクティブ切り替えを行えない場合に落ちる
+test('deleteCurrentSession: deletes active session when multiple sessions exist', async function () {
+    const plugin = createPlugin();
+
+    await plugin.deleteCurrentSession();
+
+    assert.equal(plugin.data.sessions.a, undefined);
+    assert.equal(plugin.data.activeSessionId, 'b');
+    assert.deepEqual(plugin.data.sessionOrder, ['b']);
+
+    // Missing active session case
+    plugin.data.activeSessionId = 'missing';
+    plugin.deleteCurrentSession();
+});
+
+// 落ちる条件: renameCurrentSession がアクティブセッションの名称変更モーダルを開けない場合に落ちる
+test('renameCurrentSession: opens rename modal for active session', function () {
+    const plugin = createPlugin();
+
+    plugin.renameCurrentSession();
+
+    // With missing active session
+    plugin.data.activeSessionId = 'missing';
+    plugin.renameCurrentSession();
+});
+
+// 落ちる条件: デフォルト名フォーマット関数 (getDefaultSessionName / getAutoSessionName) の文字列生成が壊れた場合に落ちる
+test('session naming helpers: generate expected default and auto session names', function () {
+    const plugin = createPlugin();
+
+    assert.equal(plugin.getDefaultSessionName(), 'default');
+    assert.equal(plugin.getAutoSessionName(3), 'New session 3');
+});
+
+// 落ちる条件: createSessionRecord が引数の modified や layout を欠落させた場合に落ちる
+test('createSessionRecord: constructs a normalized session record object with timestamps', function () {
+    const plugin = createPlugin();
+
+    const record = plugin.createSessionRecord('rec-1', 'Rec Name', { type: 'root' }, { modified: 12345 });
+
+    assert.deepEqual(record, {
+        id: 'rec-1',
+        name: 'Rec Name',
+        layout: { type: 'root' },
+        modified: 12345,
+    });
+});
+
+// 落ちる条件: deleteSession, deleteAllInactiveSessions, ensureDefaultSession, getNextSessionName の基本操作が壊れた場合に落ちる
 test('session crud: deleteSession, deleteAllInactiveSessions, ensureDefaultSession, and getNextSessionName', async function () {
     const plugin = createPlugin({
         sessions: {

@@ -14,40 +14,48 @@ function attachSessionSwitcherGetter(WorkspacePlusPlus) {
                 get settingsState() { return typeof self.getSettingsState === 'function' ? self.getSettingsState() : undefined; },
                 get sessionStore() { return typeof self.getSessionStore === 'function' ? self.getSessionStore() : undefined; },
                 get historyService() { return typeof self.getHistoryService === 'function' ? self.getHistoryService() : undefined; },
-                getOrderedSessions: function () {
-                    if (typeof self.getOrderedSessions === 'function') {
-                        return self.getOrderedSessions();
+                get sessionSaver() { return typeof self.getSessionSaver === 'function' ? self.getSessionSaver() : undefined; },
+                getOrderedSessions: function (viewGroupId) {
+                    if (self.getOrderedSessions && self.getOrderedSessions !== WorkspacePlusPlus.prototype.getOrderedSessions) {
+                        return self.getOrderedSessions(viewGroupId);
                     }
                     if (typeof self.getSessionStore === 'function') {
-                        return self.getSessionStore().getOrderedSessions();
+                        var store = self.getSessionStore();
+                        if (viewGroupId === null || viewGroupId === '__all__') {
+                            return store.getOrderedSessionsUnfiltered();
+                        }
+                        if (typeof viewGroupId === 'string') {
+                            return store.getOrderedSessionsForGroup(viewGroupId);
+                        }
+                        return store.getOrderedSessions();
                     }
                     return [];
                 },
                 findSessionIndex: function (sessions, sessionId) {
-                    if (typeof self.findSessionIndex === 'function') {
+                    if (self.findSessionIndex && self.findSessionIndex !== WorkspacePlusPlus.prototype.findSessionIndex) {
                         return self.findSessionIndex(sessions, sessionId);
                     }
                     if (typeof self.getSessionStore === 'function') {
                         return self.getSessionStore().findSessionIndex(sessions, sessionId);
                     }
+                    if (!sessionId || !sessions) return -1;
+                    for (var i = 0; i < sessions.length; i++) {
+                        if (sessions[i] && sessions[i].id === sessionId) return i;
+                    }
                     return -1;
                 },
                 getActiveSession: function () {
-                    if (typeof self.getActiveSession === 'function') {
+                    if (self.getActiveSession && self.getActiveSession !== WorkspacePlusPlus.prototype.getActiveSession) {
                         return self.getActiveSession();
                     }
-                    if (typeof self.getSessionStore === 'function') {
-                        return self.getSessionStore().getActiveSession();
-                    }
-                    return null;
+                    if (typeof self.getSessionStore === 'function') return self.getSessionStore().getActiveSession();
+                    return (self.data && self.data.sessions && self.data.activeSessionId) ? self.data.sessions[self.data.activeSessionId] || null : null;
                 },
                 getCurrentWorkspaceLayout: function () {
                     if (self.getCurrentWorkspaceLayout && self.getCurrentWorkspaceLayout !== WorkspacePlusPlus.prototype.getCurrentWorkspaceLayout) {
                         return self.getCurrentWorkspaceLayout();
                     }
-                    if (typeof self.getSessionStore === 'function') {
-                        return self.getSessionStore().getCurrentWorkspaceLayout();
-                    }
+                    if (typeof self.getSessionStore === 'function') return self.getSessionStore().getCurrentWorkspaceLayout();
                     if (self.app && self.app.workspace && typeof self.app.workspace.getLayout === 'function') {
                         return self.app.workspace.getLayout();
                     }
@@ -62,87 +70,92 @@ function attachSessionSwitcherGetter(WorkspacePlusPlus) {
                     }
                     return Promise.resolve(true);
                 },
-                persistData: function () {
-                    return typeof self.persistData === 'function'
-                        ? self.persistData()
-                        : Promise.resolve(true);
-                },
-                updateStatusBar: function () {
-                    if (typeof self.updateStatusBar === 'function') self.updateStatusBar();
-                },
                 pushLayoutToHistory: function (session) {
-                    if (typeof self.pushLayoutToHistory === 'function') {
+                    if (self.pushLayoutToHistory && self.pushLayoutToHistory !== WorkspacePlusPlus.prototype.pushLayoutToHistory) {
                         self.pushLayoutToHistory(session);
                     } else if (typeof self.getHistoryService === 'function') {
                         self.getHistoryService().pushLayoutToHistory(session);
                     }
                 },
                 saveActiveSession: function (options) {
-                    return typeof self.saveActiveSession === 'function'
-                        ? self.saveActiveSession(options)
-                        : Promise.resolve(true);
+                    if (self.saveActiveSession && self.saveActiveSession !== WorkspacePlusPlus.prototype.saveActiveSession) {
+                        return self.saveActiveSession(options);
+                    }
+                    if (typeof self.getSessionSaver === 'function') return self.getSessionSaver().saveActiveSession(options);
+                    return Promise.resolve(true);
                 },
                 isActiveSessionDirty: function () {
-                    return typeof self.isActiveSessionDirty === 'function'
-                        ? self.isActiveSessionDirty()
-                        : false;
-                },
-                isWarnOnUnsavedSwitchEnabled: function () {
-                    return typeof self.isWarnOnUnsavedSwitchEnabled === 'function'
-                        ? self.isWarnOnUnsavedSwitchEnabled()
-                        : (self.data ? self.data.warnOnUnsavedSwitch !== false : true);
+                    if (self.isActiveSessionDirty && self.isActiveSessionDirty !== WorkspacePlusPlus.prototype.isActiveSessionDirty) {
+                        return self.isActiveSessionDirty();
+                    }
+                    if (typeof self.getSessionSaver === 'function') return self.getSessionSaver().isActiveSessionDirty();
+                    return false;
                 },
                 isAutoSaveOnSwitchEnabled: function () {
-                    return typeof self.isAutoSaveOnSwitchEnabled === 'function'
-                        ? self.isAutoSaveOnSwitchEnabled()
-                        : (self.data ? self.data.autoSaveOnSwitch !== false : true);
+                    if (self.isAutoSaveOnSwitchEnabled && self.isAutoSaveOnSwitchEnabled !== WorkspacePlusPlus.prototype.isAutoSaveOnSwitchEnabled) {
+                        return self.isAutoSaveOnSwitchEnabled();
+                    }
+                    if (typeof self.getSessionSaver === 'function') return self.getSessionSaver().isAutoSaveOnSwitchEnabled();
+                    return self.data ? self.data.autoSaveOnSwitch !== false : true;
+                },
+                isWarnOnUnsavedSwitchEnabled: function () {
+                    if (self.isWarnOnUnsavedSwitchEnabled && self.isWarnOnUnsavedSwitchEnabled !== WorkspacePlusPlus.prototype.isWarnOnUnsavedSwitchEnabled) {
+                        return self.isWarnOnUnsavedSwitchEnabled();
+                    }
+                    if (typeof self.getSessionSaver === 'function') return self.getSessionSaver().isWarnOnUnsavedSwitchEnabled();
+                    return self.data ? self.data.warnOnUnsavedSwitch !== false : true;
+                },
+                persistData: function () {
+                    return typeof self.persistData === 'function' ? self.persistData() : Promise.resolve(true);
+                },
+                updateStatusBar: function () {
+                    if (typeof self.updateStatusBar === 'function') self.updateStatusBar();
                 },
                 showSwitchPreviewOverlay: function (ordered, index, viewGroupId) {
-                    if (typeof self.showSwitchPreviewOverlay === 'function') {
-                        self.showSwitchPreviewOverlay(ordered, index, viewGroupId);
-                    }
+                    if (typeof self.showSwitchPreviewOverlay === 'function') self.showSwitchPreviewOverlay(ordered, index, viewGroupId);
                 },
                 showSwitchFeedbackOverlay: function (ordered, index, viewGroupId, overlayOptions) {
-                    if (typeof self.showSwitchFeedbackOverlay === 'function') {
-                        self.showSwitchFeedbackOverlay(ordered, index, viewGroupId, overlayOptions);
-                    }
+                    if (typeof self.showSwitchFeedbackOverlay === 'function') self.showSwitchFeedbackOverlay(ordered, index, viewGroupId, overlayOptions);
                 },
                 showSessionSwitchNotice: function (sessionName, options) {
-                    if (typeof self.showSessionSwitchNotice === 'function' && self.showSessionSwitchNotice !== WorkspacePlusPlus.prototype.showSessionSwitchNotice) {
+                    if (self.showSessionSwitchNotice && self.showSessionSwitchNotice !== WorkspacePlusPlus.prototype.showSessionSwitchNotice) {
                         return self.showSessionSwitchNotice(sessionName, options);
                     }
+                    return undefined;
                 },
-                openUnsavedSwitchModal: function (msg, onSave, onSwitch, onCancel) {
-                    var UnsavedSwitchModal = require('../../modals/unsaved-switch-modal');
-                    new UnsavedSwitchModal(self.app, msg, onSave, onSwitch, onCancel).open();
-                },
-                switchSession: function (targetId, options) {
+                switchSession: function (sessionId, options) {
                     if (self.switchSession && self.switchSession !== WorkspacePlusPlus.prototype.switchSession) {
-                        return self.switchSession(targetId, options);
+                        return self.switchSession(sessionId, options);
                     }
+                    return undefined;
                 },
-                performSessionSwitch: function (targetId, options) {
+                performSessionSwitch: function (sessionId, options) {
                     if (self.performSessionSwitch && self.performSessionSwitch !== WorkspacePlusPlus.prototype.performSessionSwitch) {
-                        return self.performSessionSwitch(targetId, options);
+                        return self.performSessionSwitch(sessionId, options);
                     }
+                    return undefined;
                 },
                 scheduleStartupFlush: function () {
                     if (self.scheduleStartupFlush && self.scheduleStartupFlush !== WorkspacePlusPlus.prototype.scheduleStartupFlush) {
                         return self.scheduleStartupFlush();
                     }
+                    return undefined;
                 },
                 flushOnStartup: function () {
                     if (self.flushOnStartup && self.flushOnStartup !== WorkspacePlusPlus.prototype.flushOnStartup) {
                         return self.flushOnStartup();
                     }
+                    return undefined;
                 },
                 getStartupSettleRemainingMs: function () {
                     if (self.getStartupSettleRemainingMs && self.getStartupSettleRemainingMs !== WorkspacePlusPlus.prototype.getStartupSettleRemainingMs) {
                         return self.getStartupSettleRemainingMs();
                     }
+                    return undefined;
                 },
-                syncLegacyProperties: function (props) {
-                    Object.assign(self, props);
+                openUnsavedSwitchModal: function (msg, onSave, onSwitch, onCancel) {
+                    var UnsavedSwitchModal = require('../../modals/unsaved-switch-modal');
+                    new UnsavedSwitchModal(self.app, msg, onSave, onSwitch, onCancel).open();
                 },
             });
         }
