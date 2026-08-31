@@ -325,17 +325,21 @@ function main() {
         return reportFloors(checkFloors(files), null);
     }
 
+    // --json answers a question about the current state; it is not a gate, and
+    // it has to keep working while a gate is red. It used to sit behind
+    // checkMeasured, which made it useless for the one job it was wanted for -
+    // finding out *which* files had dropped out of the report.
+    if (args.includes('--json')) {
+        console.log(JSON.stringify({ all, files }, null, 4));
+        return;
+    }
+
     if (!all) {
         console.error('Could not read a coverage report from the test run.');
         process.exit(1);
     }
 
     checkMeasured(files);
-
-    if (args.includes('--json')) {
-        console.log(JSON.stringify({ all, files }, null, 4));
-        return;
-    }
 
     if (args.includes('--update')) {
         fs.writeFileSync(BASELINE_PATH, JSON.stringify({ all }, null, 4) + '\n');
