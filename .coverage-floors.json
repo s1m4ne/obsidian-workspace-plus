@@ -1,16 +1,9 @@
 {
-    "_comment": "Function-coverage floors from issue #111. A module may not be migrated in Phase 3 until it clears its floor - the lock suite has to have executed the code before it is restructured. Keyed by basename, so a floor keeps applying after Phase 3 moves the file; when a migration renames the file, the key moves with the logic, or the floor silently starts measuring the delegating shim left behind. See issue #111.",
+    "_comment": "Function-coverage floors from issue #111. A module may not be migrated in Phase 3 until it clears its floor - the lock suite has to have executed the code before it is restructured. Keyed by basename, so a floor keeps applying after Phase 3 moves the file; when a migration renames the file, the key moves with the logic, or the floor silently starts measuring the delegating shim left behind. See issue #111. A key moves to the file the logic moved to, in the commit where the old file stops being the thing under test. session-switching.js, session-crud.js, sessions-validation.js and overlays.js still name adapters because their logic has not finished moving; see issue #111.",
     "floors": {
         "i18n.js": 80,
-        "session-sync.js": 80,
-        "session-data.js": 80,
-        "sessions.js": 80,
-        "groups.js": 80,
         "session-crud.js": 80,
         "session-switching.js": 80,
-        "settings-state.js": 80,
-        "history.js": 80,
-        "storage-backup.js": 80,
         "sessions-validation.js": 80,
         "session-context-actions.js": 80,
         "session-list-actions.js": 80,
@@ -21,6 +14,13 @@
         "session-context-menu-items.ts": 80,
         "settings-context-menu-items.ts": 80,
         "settings-tab.ts": 80,
-        "session-saver.ts": 80
+        "session-saver.ts": 80,
+        "group-store.ts": 80,
+        "history-service.ts": 80,
+        "session-data.ts": 80,
+        "sync-watcher.ts": 80,
+        "session-store.ts": 80,
+        "settings-state.ts": 80,
+        "storage-backup.ts": 80
     }
 }
