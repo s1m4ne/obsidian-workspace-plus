@@ -192,7 +192,8 @@ export class SwitchOverlay {
         if (realGroups.length > 0) {
             const switchGroupText = typeof L.switchGroup === 'string' ? L.switchGroup : '';
             const keyTabText = typeof L.keyTab === 'string' ? L.keyTab : 'Tab';
-            footerRow.createDiv({ text: `${keyTabText}  ${switchGroupText}` });
+            // Both keys do the same thing, and neither is a translated word.
+            footerRow.createDiv({ text: `${keyTabText} / G  ${switchGroupText}` });
         }
 
         const nextKey = this.host.getCommandHotkey('next-session');
@@ -316,8 +317,18 @@ export class SwitchOverlay {
             }
             safetyCheck();
 
-            // Tab cycles groups (only when groups exist)
-            if (e.key === 'Tab' && this.overlayEl && !isModPressed(e)) {
+            // Tab or G cycles groups, Shift for the other direction.
+            //
+            // The guard here used to be `!isModPressed(e)`, which can never be
+            // true: this overlay exists only while Mod+Shift is held, so every
+            // keypress it sees carries Mod. The hint in the footer advertised a
+            // key that had never once fired.
+            //
+            // G is offered alongside Tab because Mod+Shift+Tab is spoken for -
+            // by the window manager on macOS and by Obsidian's own tab
+            // switching - and Tab cannot be given up while people rely on it.
+            const cyclesGroup = e.key === 'Tab' || e.key === 'g' || e.key === 'G';
+            if (cyclesGroup && this.overlayEl) {
                 if (!this.host.isGroupFeatureEnabled() || this.host.getOrderedGroups().length === 0) return;
                 e.preventDefault();
                 e.stopImmediatePropagation();

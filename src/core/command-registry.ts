@@ -402,7 +402,14 @@ export class CommandRegistry {
         host.addCommand({
             id: 'next-group',
             name: String(L.cmdNextGroup || ''),
-            hotkeys: [{ modifiers: ['Mod', 'Shift'], key: 'Tab' }],
+            // Two bindings for one command. Mod+Shift+Tab is contended - the
+            // window manager takes it on macOS, and Obsidian uses it for its own
+            // tabs - so G is offered as the one that reliably arrives. Tab stays
+            // because people already use it.
+            hotkeys: [
+                { modifiers: ['Mod', 'Shift'], key: 'Tab' },
+                { modifiers: ['Mod', 'Shift'], key: 'G' },
+            ],
             callback: () => {
                 switchGroupAndShowOverlay(1);
             },

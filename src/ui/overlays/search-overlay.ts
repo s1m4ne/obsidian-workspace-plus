@@ -151,7 +151,11 @@ function handleSearchOverlayEnterKey(event: KeyboardEvent, activeEl: Element | n
 }
 
 function handleSearchOverlayDeleteKey(event: KeyboardEvent, activeEl: Element | null, options: SearchOverlayKeyboardOptions): boolean {
-    if (activeEl === options.searchInput && options.searchInput.value.length > 0) return false;
+    // Delete belongs to whatever holds the caret. In the filter box it edits the
+    // filter - including when the box is empty, where it does nothing at all.
+    // The test used to be `value.length > 0`, so an empty box fell through and
+    // Delete removed a session instead, from a field the person was typing in.
+    if (activeEl === options.searchInput) return false;
     if (activeEl === options.saveInput || activeEl === options.saveBtn) return false;
     event.preventDefault();
 
@@ -174,7 +178,14 @@ function handleSearchOverlayDeleteKey(event: KeyboardEvent, activeEl: Element | 
     };
 
     if (options.plugin.data.confirmDeleteByHotkey !== false) {
-        new ConfirmModal(options.plugin.app, localizedCall(L.confirmDeleteActive, session.name), doDelete).open();
+        // Only say "active session" when it is one. The message was fixed at the
+        // active wording, so deleting any other row claimed the wrong thing
+        // about it.
+        const isActive = session.id === options.plugin.data.activeSessionId;
+        const message = isActive
+            ? localizedCall(L.confirmDeleteActive, session.name)
+            : localizedCall(L.confirmDelete, session.name);
+        new ConfirmModal(options.plugin.app, message, doDelete).open();
     } else {
         doDelete();
     }

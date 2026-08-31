@@ -681,3 +681,137 @@ test('opening and closing the search overlay leaves no listeners behind (P7)', (
 
     assert.equal(outstanding, 0, 'every listener added over three cycles was removed');
 });
+
+// The overlay's group hint used to name a key that could never fire: the guard
+// asked for Mod not to be held, and the overlay only exists while Mod is held.
+
+test('Tab cycles groups while the modifiers are held', async () => {
+    const plugin = createTestPlugin();
+    let askedFor: string | null | undefined = 'unset';
+    plugin.getRelativeGroupId = (): string => 'g1';
+    plugin.resolveGroupSelection = async (gid: string | null) => {
+        askedFor = gid;
+        return { sessions: [{ id: 's1', name: 'Session 1' }], resolvedGroupId: gid };
+    };
+
+    plugin.showSwitchOverlay([{ id: 's1', name: 'Session 1' }], 0, undefined, { mode: 'preview' });
+    harness.dom.document.dispatchEvent(
+        // Mod is held, because that is the only state this overlay is ever in.
+        new harness.dom.window.KeyboardEvent('keydown', { key: 'Tab', metaKey: true, shiftKey: true })
+    );
+    await new Promise((resolve) => setTimeout(resolve, 10));
+
+    assert.equal(askedFor, 'g1', 'Tab must reach the group cycling');
+    plugin.hideSwitchOverlay();
+});
+
+test('G cycles groups too, for when Mod+Shift+Tab is taken', async () => {
+    const plugin = createTestPlugin();
+    let askedFor: string | null | undefined = 'unset';
+    plugin.getRelativeGroupId = (): string => 'g1';
+    plugin.resolveGroupSelection = async (gid: string | null) => {
+        askedFor = gid;
+        return { sessions: [{ id: 's1', name: 'Session 1' }], resolvedGroupId: gid };
+    };
+
+    plugin.showSwitchOverlay([{ id: 's1', name: 'Session 1' }], 0, undefined, { mode: 'preview' });
+    harness.dom.document.dispatchEvent(
+        new harness.dom.window.KeyboardEvent('keydown', { key: 'g', metaKey: true, shiftKey: true })
+    );
+    await new Promise((resolve) => setTimeout(resolve, 10));
+
+    assert.equal(askedFor, 'g1', 'G must reach the same place Tab does');
+    plugin.hideSwitchOverlay();
+});
+
+test('the footer names both keys, so it stops advertising a dead one', () => {
+    const plugin = createTestPlugin();
+    plugin.showSwitchOverlay([{ id: 's1', name: 'Session 1' }], 0, undefined, { mode: 'preview' });
+
+    const footer = plugin.switchOverlayEl?.querySelector('.wpp-switch-footer');
+    assert.ok(footer?.textContent?.includes('Tab / G'), 'the hint offers Tab and G');
+    plugin.hideSwitchOverlay();
+});
+
+// Delete used to escape the filter box whenever the box was empty, and remove a
+// session from under a person who was typing.
+
+function clearModals(): void {
+    // The overlay's key handler bails while any modal is on screen, and earlier
+    // tests leave theirs in this document. Without clearing them these tests
+    // pass because nothing ran at all.
+    for (const el of harness.dom.document.querySelectorAll('.modal-container')) el.remove();
+}
+
+test('Delete in the empty filter box does not delete a session', () => {
+    const plugin = createTestPlugin();
+    plugin.data.showFilterInput = true;
+    clearModals();
+    plugin.openSearchOverlay();
+    const input = plugin.searchOverlayEl?.querySelector('.wpp-search-input') as HTMLInputElement;
+    assert.ok(input);
+    input.focus();
+    assert.equal(input.value, '', 'the box is empty, which is where this went wrong');
+
+    // Counted rather than looked for: earlier tests leave modals in this
+    // document, so only the change across the keypress means anything.
+    const before = harness.dom.document.querySelectorAll('.modal-container').length;
+    harness.dom.document.dispatchEvent(
+        new harness.dom.window.KeyboardEvent('keydown', { key: 'Delete', bubbles: true })
+    );
+
+    assert.equal(
+        harness.dom.document.querySelectorAll('.modal-container').length,
+        before,
+        'no delete confirmation may appear while the caret is in the filter',
+    );
+    plugin.hideSearchOverlay();
+});
+
+test('Delete on a session row still deletes, and names the right session', () => {
+    const plugin = createTestPlugin();
+    plugin.data.showFilterInput = true;
+    clearModals();
+    plugin.openSearchOverlay();
+
+    // Focus on the overlay itself rather than the filter, which is where it
+    // lands after an arrow key. The rows are not focusable; the selection is
+    // tracked by the overlay, and Delete acts on it. This is the case Delete
+    // exists for.
+    (plugin.searchOverlayEl as HTMLElement).focus();
+    const before = harness.dom.document.querySelectorAll('.modal-container').length;
+    harness.dom.document.dispatchEvent(
+        new harness.dom.window.KeyboardEvent('keydown', { key: 'Delete', bubbles: true })
+    );
+
+    const modals = harness.dom.document.querySelectorAll('.modal-container');
+    assert.equal(modals.length, before + 1, 'the confirmation appears');
+    // s1 is the active session in the fixture, so the wording says so.
+    assert.ok(
+        modals[modals.length - 1]?.textContent?.includes('Session 1'),
+        'and it names the session being deleted',
+    );
+    plugin.hideSearchOverlay();
+});
+
+test('deleting a session that is not the active one does not call it active', () => {
+    const plugin = createTestPlugin();
+    plugin.data.showFilterInput = true;
+    // The selection follows the active session, so point the active one
+    // elsewhere: the row Delete acts on is then not active, and a message fixed
+    // at the active wording would say something untrue about it.
+    plugin.data.activeSessionId = 'nowhere';
+    clearModals();
+    plugin.openSearchOverlay();
+
+    (plugin.searchOverlayEl as HTMLElement).focus();
+    harness.dom.document.dispatchEvent(
+        new harness.dom.window.KeyboardEvent('keydown', { key: 'Delete', bubbles: true })
+    );
+
+    const modals = harness.dom.document.querySelectorAll('.modal-container');
+    const text = modals[modals.length - 1]?.textContent ?? '';
+    assert.ok(text.includes('Session 1'), 'it names the session');
+    assert.ok(!text.includes('active session'), 'and does not claim it is the active one');
+    plugin.hideSearchOverlay();
+});
