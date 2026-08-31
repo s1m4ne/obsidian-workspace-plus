@@ -1,0 +1,304 @@
+'use strict';
+
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const { setupHarness } = require('./lock/harness/index.ts');
+
+const harness = setupHarness();
+const { L, resolveLocale } = require('../src/i18n.ts');
+const { openSessionContextMenu } = require('../src/session-context-menu.js');
+const { openSettingsContextMenu } = require('../src/settings-context-menu.js');
+
+resolveLocale('en');
+
+function resetHarness() {
+    harness.obsidian.menus.length = 0;
+    harness.obsidian.notices.length = 0;
+    harness.obsidian.log.clear();
+}
+
+function menu() {
+    const created = harness.obsidian.menus[0];
+    assert.ok(created, 'a Menu must be created');
+    return created;
+}
+
+function wasChecked(created, title) {
+    const index = created.items.findIndex((item) => item.title === title);
+    assert.notEqual(index, -1, `missing menu item: ${title}`);
+    return harness.obsidian.log.entries().some((entry) => (
+        entry.target === `Menu.item[${index}]`
+        && entry.method === 'setChecked'
+        && entry.args[0] === true
+    ));
+}
+
+function createPlugin(overrides = {}) {
+    const { data: dataOverrides = {}, ...pluginOverrides } = overrides;
+    const calls = [];
+    const data = {
+        sessions: {
+            active: { id: 'active', name: 'Active', layout: {} },
+            other: { id: 'other', name: 'Other', layout: {} },
+        },
+        sessionGroups: { active: ['g1'] },
+        groups: { g1: { id: 'g1', name: 'Focus' } },
+        autoSaveOnSwitch: false,
+        warnOnUnsavedSwitch: false,
+        confirmQuickActions: false,
+        confirmDeleteByHotkey: true,
+        versionHistoryEnabled: false,
+        groupFeatureEnabled: false,
+        showFilterInput: false,
+    };
+    const plugin = {
+        app: {
+            setting: {
+                activeTab: undefined,
+                open() { calls.push('openSettings'); },
+                openTabById(tabId) { calls.push(['openTab', tabId]); },
+            },
+        },
+        data,
+        manifest: { id: 'workspace-plus-plus', name: 'Workspace++' },
+        isAutoSaveOnSwitchEnabled() { return this.data.autoSaveOnSwitch; },
+        isWarnOnUnsavedSwitchEnabled() { return this.data.warnOnUnsavedSwitch; },
+        isVersionHistoryEnabled() { return this.data.versionHistoryEnabled; },
+        isGroupFeatureEnabled() { return this.data.groupFeatureEnabled; },
+        getOrderedGroups() { return [this.data.groups.g1]; },
+        setAutoSaveOnSwitch(enabled) {
+            calls.push(['autoSave', enabled]);
+            this.data.autoSaveOnSwitch = enabled;
+            return Promise.resolve();
+        },
+        setWarnOnUnsavedSwitch(enabled) {
+            calls.push(['warnUnsaved', enabled]);
+            this.data.warnOnUnsavedSwitch = enabled;
+            return Promise.resolve();
+        },
+        setConfirmQuickActions(enabled) {
+            calls.push(['confirmQuick', enabled]);
+            this.data.confirmQuickActions = enabled;
+            return Promise.resolve();
+        },
+        setConfirmDeleteByHotkey(enabled) {
+            calls.push(['confirmDelete', enabled]);
+            this.data.confirmDeleteByHotkey = enabled;
+            return Promise.resolve();
+        },
+        setVersionHistoryEnabled(enabled) {
+            calls.push(['versionHistory', enabled]);
+            this.data.versionHistoryEnabled = enabled;
+            return Promise.resolve();
+        },
+        setGroupFeatureEnabled(enabled) {
+            calls.push(['groups', enabled]);
+            this.data.groupFeatureEnabled = enabled;
+            return Promise.resolve();
+        },
+        setShowFilterInput(enabled) {
+            calls.push(['filter', enabled]);
+            this.data.showFilterInput = enabled;
+            return Promise.resolve();
+        },
+        extractSessionData() {
+            calls.push('extractSessionData');
+            return { sessions: this.data.sessions };
+        },
+        prepareRotationBackupData(sessionData) {
+            calls.push(['prepareRotationBackupData', sessionData]);
+            return { backup: true };
+        },
+        ensureDir(path) { calls.push(['ensureDir', path]); return Promise.resolve(); },
+        getBackupsDirPath() { return 'backups'; },
+        copyFileIfExists(from, to) { calls.push(['copy', from, to]); return Promise.resolve(); },
+        getRotationBackupPath(number) { return `backup-${number}`; },
+        writeJson(path, contents) { calls.push(['writeJson', path, contents]); return Promise.resolve(); },
+        _lastRotationBackupAt: 0,
+    };
+
+    Object.assign(data, dataOverrides);
+    Object.assign(plugin, pluginOverrides);
+    return { plugin, calls };
+}
+
+function openSessionMenu(plugin, options = {}) {
+    openSessionContextMenu({
+        plugin,
+        app: plugin.app,
+        session: plugin.data.sessions.active,
+        event: { type: 'contextmenu' },
+        ...options,
+    });
+    return menu();
+}
+
+function openSettingsMenu(plugin, options = {}) {
+    openSettingsContextMenu({ plugin, app: plugin.app, event: { type: 'contextmenu' }, ...options });
+    return menu();
+}
+
+test('session menu shows manual save actions only for the active session with auto-save off', () => {
+    resetHarness();
+    const { plugin } = createPlugin({ data: { autoSaveOnSwitch: false } });
+    const manual = openSessionMenu(plugin, { isActive: true, showSaveAs: true });
+    assert.ok(manual.item(L.contextSaveSession));
+    assert.ok(manual.item(L.contextReloadSession));
+    assert.ok(manual.item(L.cmdSaveAs));
+
+    plugin.data.autoSaveOnSwitch = true;
+    // Reopen after changing the setting: no other fixture setting controls this group.
+    resetHarness();
+    const autoSave = openSessionMenu(plugin, { isActive: true, showSaveAs: true });
+    assert.equal(autoSave.item(L.contextSaveSession), undefined);
+    assert.equal(autoSave.item(L.contextReloadSession), undefined);
+    assert.equal(autoSave.item(L.cmdSaveAs), undefined);
+});
+
+test('session menu gates switch, history, and group actions in both directions', () => {
+    resetHarness();
+    const { plugin } = createPlugin({ data: { versionHistoryEnabled: false } });
+    const excluded = openSessionMenu(plugin, { isActive: true, showSwitch: true });
+    assert.equal(excluded.item(L.contextSwitchSession), undefined);
+    assert.equal(excluded.item(L.contextVersionHistory), undefined);
+    assert.equal(excluded.item(L.groupRemoveFromGroup), undefined);
+    assert.equal(excluded.item(L.groupMoveToGroup), undefined);
+
+    resetHarness();
+    plugin.data.versionHistoryEnabled = true;
+    const included = openSessionMenu(plugin, {
+        isActive: false,
+        showSwitch: true,
+        showRemoveFromGroup: true,
+        showMoveToGroup: true,
+    });
+    assert.ok(included.item(L.contextSwitchSession));
+    assert.ok(included.item(L.contextVersionHistory));
+    assert.ok(included.item(L.groupRemoveFromGroup));
+    assert.ok(included.item(L.groupMoveToGroup));
+    assert.ok(included.item(L.groupMoveToGroup)?.submenu?.item('Focus'));
+});
+
+test('session menu dispatches the displayed callbacks, including a selected group', () => {
+    resetHarness();
+    const { plugin } = createPlugin({ data: { versionHistoryEnabled: true } });
+    const calls = [];
+    const created = openSessionMenu(plugin, {
+        isActive: false,
+        showSwitch: true,
+        showMoveToGroup: true,
+        onSwitch() { calls.push('switch'); },
+        onVersionHistory() { calls.push('history'); },
+        onMoveToGroup(groupId) { calls.push(['move', groupId]); },
+    });
+    created.item(L.contextSwitchSession).trigger();
+    created.item(L.contextVersionHistory).trigger();
+    created.item(L.groupMoveToGroup).submenu.item('Focus').trigger();
+    assert.deepEqual(calls, ['switch', 'history', ['move', 'g1']]);
+});
+
+test('settings menu checks every toggle according to the current setting', () => {
+    resetHarness();
+    const { plugin: enabled } = createPlugin({ data: {
+        autoSaveOnSwitch: true,
+        confirmDeleteByHotkey: true,
+        versionHistoryEnabled: true,
+        groupFeatureEnabled: true,
+        showFilterInput: true,
+    } });
+    const enabledMenu = openSettingsMenu(enabled);
+    for (const title of [
+        L.settingsAutoSaveOnSwitch,
+        L.settingsConfirmDelete,
+        L.settingsVersionHistoryEnabled,
+        L.contextToggleGroups,
+        L.settingsShowFilterInput,
+    ]) assert.equal(wasChecked(enabledMenu, title), true, `${title} is checked when enabled`);
+    assert.equal(enabledMenu.item(L.settingsWarnUnsavedSwitch), undefined);
+    assert.equal(enabledMenu.item(L.settingsConfirmQuickActions), undefined);
+
+    resetHarness();
+    const { plugin: disabled } = createPlugin({ data: {
+        autoSaveOnSwitch: false,
+        warnOnUnsavedSwitch: false,
+        confirmQuickActions: false,
+        confirmDeleteByHotkey: false,
+        versionHistoryEnabled: false,
+        groupFeatureEnabled: false,
+        showFilterInput: false,
+    } });
+    const disabledMenu = openSettingsMenu(disabled);
+    for (const title of [
+        L.settingsAutoSaveOnSwitch,
+        L.settingsWarnUnsavedSwitch,
+        L.settingsConfirmQuickActions,
+        L.settingsConfirmDelete,
+        L.settingsVersionHistoryEnabled,
+        L.contextToggleGroups,
+        L.settingsShowFilterInput,
+    ]) assert.equal(wasChecked(disabledMenu, title), false, `${title} is not checked when disabled`);
+});
+
+test('settings menu hides manual-save toggles and reset action unless their conditions allow them', () => {
+    resetHarness();
+    const { plugin } = createPlugin({ data: { autoSaveOnSwitch: true } });
+    const automatic = openSettingsMenu(plugin);
+    assert.equal(automatic.item(L.settingsWarnUnsavedSwitch), undefined);
+    assert.equal(automatic.item(L.settingsConfirmQuickActions), undefined);
+    assert.equal(automatic.item(L.contextResetOverlayPosition), undefined);
+
+    resetHarness();
+    plugin.data.autoSaveOnSwitch = false;
+    const manual = openSettingsMenu(plugin, { showResetOverlay: true });
+    assert.ok(manual.item(L.settingsWarnUnsavedSwitch));
+    assert.ok(manual.item(L.settingsConfirmQuickActions));
+    assert.ok(manual.item(L.contextResetOverlayPosition));
+});
+
+test('settings menu invokes each toggle, refresh callback, reset callback, and backup sequence', async () => {
+    resetHarness();
+    const { plugin, calls } = createPlugin({ data: {
+        autoSaveOnSwitch: false,
+        warnOnUnsavedSwitch: false,
+        confirmQuickActions: false,
+        confirmDeleteByHotkey: false,
+        versionHistoryEnabled: false,
+        groupFeatureEnabled: false,
+        showFilterInput: false,
+    } });
+    let changed = 0;
+    let reset = 0;
+    const created = openSettingsMenu(plugin, {
+        showResetOverlay: true,
+        onChanged() { changed += 1; },
+        onResetOverlay() { reset += 1; },
+    });
+
+    for (const title of [
+        L.settingsAutoSaveOnSwitch,
+        L.settingsWarnUnsavedSwitch,
+        L.settingsConfirmQuickActions,
+        L.settingsConfirmDelete,
+        L.settingsVersionHistoryEnabled,
+        L.contextToggleGroups,
+        L.settingsShowFilterInput,
+    ]) await created.item(title).trigger();
+    created.item(L.contextResetOverlayPosition).trigger();
+    created.item(L.rotationBackupCreate).trigger();
+    await new Promise((resolve) => setImmediate(resolve));
+
+    assert.deepEqual(calls.slice(0, 7), [
+        ['autoSave', true],
+        ['warnUnsaved', true],
+        ['confirmQuick', true],
+        ['confirmDelete', true],
+        ['versionHistory', true],
+        ['groups', true],
+        ['filter', true],
+    ]);
+    assert.equal(changed, 7);
+    assert.equal(reset, 1);
+    assert.ok(calls.some((call) => Array.isArray(call) && call[0] === 'writeJson'));
+});
+
+test.after(() => harness.restore());
