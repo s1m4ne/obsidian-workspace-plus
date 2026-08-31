@@ -106,7 +106,7 @@ function load(h) {
 test('danger reset builder confirms before running, cancels safely, and suppresses double execution', async () => {
     const h = setupHarness();
     try {
-        const { addDangerResetSetting } = require('../src/settings-ui');
+        const { addDangerResetSetting } = require('../src/settings-ui.ts');
         let runs = 0;
         let resolveRun;
         const run = () => { runs += 1; return new Promise((resolve) => { resolveRun = resolve; }); };
@@ -133,7 +133,7 @@ test('danger reset builder confirms before running, cancels safely, and suppress
 test('danger reset builder reports failure only after a confirmed callback rejects', async () => {
     const h = setupHarness();
     try {
-        const { addDangerResetSetting } = require('../src/settings-ui');
+        const { addDangerResetSetting } = require('../src/settings-ui.ts');
         addDangerResetSetting(h.dom.document.body, {}, () => {}, {
             name: 'Erase', desc: 'irreversible', buttonText: 'Erase', confirmMessage: 'Confirm',
             run: () => Promise.reject(new Error('failed')), successNotice: 'done', failureNotice: 'failed',
@@ -212,6 +212,35 @@ test('advanced export, import confirmation, rotation backup and restore use thei
         for (const name of ['export', 'import', 'extract', 'prepare', 'ensureDir', 'writeJson', 'restore']) {
             assert.ok(calls.some((entry) => entry[0] === name), `missing ${name}`);
         }
+    } finally { h.restore(); }
+});
+
+test('a manual backup shifts the generations oldest-first so none is overwritten early', async () => {
+    const h = setupHarness();
+    try {
+        const { WorkspacePlusPlusSettingTab, L } = load(h);
+        const { plugin, calls } = createPlugin();
+        const tab = new WorkspacePlusPlusSettingTab(plugin.app, plugin);
+        tab.activeTab = 'sessions'; tab.display();
+        await Promise.resolve();
+
+        buttonFor(h, L.rotationBackupCreate).trigger();
+        await new Promise((resolve) => setTimeout(resolve, 10));
+
+        // 2 is copied to 3 before 1 is copied to 2. Reverse the two and
+        // generation 2 is overwritten before it has been carried forward, so the
+        // oldest backup a user has is the one that disappears.
+        const copies = calls.filter((entry) => entry[0] === 'copy').map((entry) => entry.slice(1));
+        assert.deepEqual(copies, [
+            ['backup-2', 'backup-3'],
+            ['backup-1', 'backup-2'],
+        ]);
+
+        // And only then is the newest written into slot 1.
+        const writeIndex = calls.findIndex((entry) => entry[0] === 'writeJson');
+        const lastCopyIndex = calls.map((entry) => entry[0]).lastIndexOf('copy');
+        assert.ok(writeIndex > lastCopyIndex, 'slot 1 is written after it has been copied away');
+        assert.deepEqual(calls[writeIndex].slice(1, 2), ['backup-1']);
     } finally { h.restore(); }
 });
 

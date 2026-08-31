@@ -1,10 +1,13 @@
 {
-    "total": 45,
+    "total": 63,
     "rules": {
+        "@typescript-eslint/no-deprecated": 18,
         "@typescript-eslint/no-unnecessary-type-assertion": 2,
-        "@typescript-eslint/no-unused-vars": 4,
+        "@typescript-eslint/no-unused-vars": 2,
         "obsidianmd/hardcoded-config-path": 20,
         "obsidianmd/no-static-styles-assignment": 13,
-        "obsidianmd/prefer-window-timers": 6
+        "obsidianmd/prefer-window-timers": 6,
+        "obsidianmd/settings-tab/no-manual-html-headings": 1,
+        "obsidianmd/settings-tab/prefer-setting-definitions": 1
     }
 }
