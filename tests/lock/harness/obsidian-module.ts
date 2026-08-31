@@ -173,33 +173,72 @@ ModalConstructorFn.prototype = ModalProto;
 
 export const Modal: ModalConstructor = ModalConstructorFn as unknown as ModalConstructor;
 
-export class Plugin {
+// Written as a function rather than a class on purpose. src/main.js subclasses
+// this the ES5 way - `_super.call(this, app, manifest)` - and a real class
+// throws "Class constructor Plugin cannot be invoked without 'new'" there. That
+// is why nothing in the suite had ever run onload or onunload, and why a throw
+// inside onunload that lost unsaved work went unnoticed. Obsidian's own Plugin
+// is callable this way; the class was the stub being less faithful, not more.
+
+export interface Plugin {
     readonly app: unknown;
     readonly manifest: unknown;
+    addCommand(command: RegisteredCommand): RegisteredCommand;
+    removeCommand(id: string): void;
+    addRibbonIcon(): HTMLElement;
+    addStatusBarItem(): HTMLElement;
+    addSettingTab(): void;
+    registerEvent(): void;
+    registerDomEvent(el: { addEventListener(t: string, h: EventListener): void }, type: string, handler: EventListener): void;
+    registerInterval(id: number): number;
+    register(): void;
+    loadData(): Promise<unknown>;
+    saveData(): Promise<void>;
+}
 
-    constructor(app: unknown, manifest: unknown) {
-        this.app = app;
-        this.manifest = manifest;
-    }
+export interface PluginConstructor {
+    new (app: unknown, manifest: unknown): Plugin;
+    prototype: Plugin;
+}
 
-    addCommand(command: RegisteredCommand): RegisteredCommand {
+const PluginProto: Record<string, unknown> = {
+    addCommand(this: Plugin, command: RegisteredCommand): RegisteredCommand {
         registry.commands.set(command.id, command);
         registry.log.record('Plugin', 'addCommand', command.id);
         return command;
-    }
-
-    addRibbonIcon(): HTMLElement { return ownerDocument().createElement('div'); }
-    addStatusBarItem(): HTMLElement { return ownerDocument().createElement('div'); }
-    addSettingTab(): void {}
-    registerEvent(): void {}
-    registerDomEvent(el: { addEventListener(t: string, h: EventListener): void }, type: string, handler: EventListener): void {
+    },
+    removeCommand(id: string): void {
+        registry.commands.delete(id);
+        registry.log.record('Plugin', 'removeCommand', id);
+    },
+    addRibbonIcon(): HTMLElement { return ownerDocument().createElement('div'); },
+    addStatusBarItem(): HTMLElement { return ownerDocument().createElement('div'); },
+    addSettingTab(): void {},
+    registerEvent(): void {},
+    registerDomEvent(
+        el: { addEventListener(t: string, h: EventListener): void },
+        type: string,
+        handler: EventListener
+    ): void {
         el.addEventListener(type, handler);
-    }
-    registerInterval(id: number): number { return id; }
-    register(): void {}
-    loadData(): Promise<unknown> { return Promise.resolve({}); }
-    saveData(): Promise<void> { return Promise.resolve(); }
+    },
+    registerInterval(id: number): number { return id; },
+    register(): void {},
+    loadData(): Promise<unknown> { return Promise.resolve({}); },
+    saveData(): Promise<void> { return Promise.resolve(); },
+};
+
+function PluginConstructorFn(this: unknown, app: unknown, manifest: unknown): Plugin {
+    const isInstance = this instanceof PluginConstructorFn;
+    const self = (isInstance ? this : Object.create(PluginProto)) as Record<string, unknown>;
+    self['app'] = app;
+    self['manifest'] = manifest;
+    return self as unknown as Plugin;
 }
+
+PluginConstructorFn.prototype = PluginProto;
+
+export const Plugin: PluginConstructor = PluginConstructorFn as unknown as PluginConstructor;
 
 export interface PluginSettingTab {
     readonly app: unknown;
