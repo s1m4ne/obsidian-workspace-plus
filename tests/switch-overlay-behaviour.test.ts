@@ -475,6 +475,8 @@ test('with groups switched off no group strip appears, and the overlay anchors t
 
     plugin.openSearchOverlay(anchor);
     assert.ok(plugin.searchOverlayEl);
+    assert.equal(plugin.searchOverlayEl.style.left, '525px');
+    assert.equal(plugin.searchOverlayEl.style.bottom, '36px');
     plugin.hideSearchOverlay();
 
     // Switch overlay with empty sessions and group feature disabled

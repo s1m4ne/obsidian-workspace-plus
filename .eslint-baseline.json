@@ -1,11 +1,17 @@
 {
-    "total": 73,
+    "total": 228,
     "rules": {
+        "@typescript-eslint/no-floating-promises": 9,
         "@typescript-eslint/no-unnecessary-type-assertion": 2,
+        "@typescript-eslint/no-unsafe-assignment": 1,
+        "@typescript-eslint/no-unsafe-call": 1,
+        "@typescript-eslint/no-unsafe-return": 1,
         "@typescript-eslint/no-unused-vars": 5,
         "no-regex-spaces": 1,
+        "no-var": 117,
         "obsidianmd/hardcoded-config-path": 20,
         "obsidianmd/no-static-styles-assignment": 39,
+        "obsidianmd/prefer-create-el": 26,
         "obsidianmd/prefer-window-timers": 6
     }
 }
