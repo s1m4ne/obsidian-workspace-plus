@@ -209,4 +209,13 @@ Do not claim the refactor is verified before the user has confirmed these.
 
 ## Out of scope
 
-Features, UI changes, and bug fixes. Also: the declarative settings API (`getSettingDefinitions` is absent from the published `obsidian` types, currently 1.12.3), and removing default hotkeys (kept deliberately — `Cmd+Shift+Enter` is core UX).
+Features, UI changes, and bug fixes. Also removing default hotkeys, kept
+deliberately — `Cmd+Shift+Enter` is core UX.
+
+The declarative settings API is **in** scope and was not always: this note used
+to exclude it because `getSettingDefinitions` was absent from the published
+types at 1.12.3. The installed `obsidian` is 1.13.1 and declares it, so the plan
+in issue #111 uses it for the settings commit. `minAppVersion` stays at 1.11.0,
+which is why `display()` remains as the fallback rather than being deleted —
+Obsidian skips `display()` only once `getSettingDefinitions()` returns a
+non-empty array.
