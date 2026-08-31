@@ -88,6 +88,94 @@ function readData(plugin) {
     return JSON.parse(plugin.files[DATA_PATH]);
 }
 
+test('normalizing damaged session payload drops stale references without losing valid sessions', function () {
+    const plugin = createPlugin();
+
+    const normalized = plugin.normalizeSessionData({
+        activeSessionId: 'missing',
+        sessions: {
+            b: { id: 'b', name: 'B', modified: 2, layout: {} },
+            a: { id: 'a', name: 'A', modified: 1, layout: {} },
+        },
+        sessionOrder: ['b', 'missing', 'b'],
+        groups: { g1: { id: 'g1', name: 'One' } },
+        groupOrder: ['__all__', 'missing-group', 'g1', 'g1'],
+        sessionGroups: { b: ['g1', 'missing-group'], missing: ['g1'] },
+        activeGroupId: 'missing-group',
+    });
+
+    assert.deepEqual(normalized.sessionOrder, ['b', 'a'], 'valid sessions keep their order and unlisted sessions remain reachable');
+    assert.equal(normalized.activeSessionId, 'b', 'a deleted active id falls back to the first valid session');
+    assert.deepEqual(normalized.groupOrder, ['__all__', 'g1']);
+    assert.deepEqual(normalized.sessionGroups, { b: ['g1'] }, 'dangling session and group references never reach disk again');
+    assert.equal(normalized.activeGroupId, null);
+});
+
+test('session storage diagnostics report the actual synchronized file size', async function () {
+    const plugin = createPlugin();
+    await plugin.persistDataImmediate();
+    plugin.app.vault.adapter.stat = (path) => Promise.resolve(
+        path === DATA_PATH ? { mtime: 1000, size: 12345 } : null
+    );
+
+    assert.equal(await plugin.getSessionStorageSize(), 12345);
+    plugin.app.vault.adapter.stat = () => Promise.resolve(null);
+    assert.equal(await plugin.getSessionStorageSize(), null, 'a missing stat must not invent a size');
+});
+
+test('resetting settings restores defaults and persists the restored settings with sessions intact', async function () {
+    const plugin = createPlugin({
+        data: { language: 'ja', autoSaveOnSwitch: false, showFilterInput: true },
+    });
+    await plugin.persistDataImmediate();
+
+    await plugin.resetSettingsToDefault();
+
+    const stored = readData(plugin);
+    assert.equal(plugin.data.language, 'auto');
+    assert.equal(plugin.data.autoSaveOnSwitch, true);
+    assert.equal(plugin.data.showFilterInput, false);
+    assert.equal(stored.sessions.a.name, 'A', 'resetting settings must not erase the session payload');
+});
+
+test('flushing persistence waits for an already queued disk write', async function () {
+    const plugin = createPlugin();
+    let finishWrite;
+    plugin.persistDataImmediate = () => new Promise((resolve) => { finishWrite = resolve; });
+
+    void plugin.persistData();
+    let flushed = false;
+    const flush = plugin.flushPendingPersistence().then(() => { flushed = true; });
+    await new Promise((resolve) => setImmediate(resolve));
+    assert.equal(flushed, false, 'unload must not finish before the queued write does');
+    finishWrite();
+    await flush;
+    assert.equal(flushed, true);
+});
+
+test('plugin-folder storage follows a vault custom config directory', function () {
+    const plugin = createPlugin();
+    // manifest.dir is what Obsidian normally supplies and it wins outright, so
+    // the vault's configDir only decides the path when the manifest has not
+    // said where the plugin lives. Leaving manifest.dir set here would test
+    // nothing: the assertion below would read '.obsidian' whatever configDir
+    // held. This is why P14 mattered - the path used to be the literal
+    // '.obsidian' with no way for a renamed config folder to be honoured.
+    plugin.manifest = { id: 'workspace-plus-plus' };
+    plugin.app.vault.configDir = '.custom-obsidian';
+
+    assert.equal(plugin.getPluginStorageDirPath(), '.custom-obsidian/plugins/workspace-plus-plus');
+    assert.equal(plugin.getSessionsPath(), '.custom-obsidian/plugins/workspace-plus-plus/data.json');
+});
+
+test('manifest.dir decides the path when Obsidian supplies it', function () {
+    const plugin = createPlugin();
+    // The other half: a configDir that disagrees must not move the files.
+    plugin.app.vault.configDir = '.custom-obsidian';
+
+    assert.equal(plugin.getPluginStorageDirPath(), PLUGIN_DIR);
+});
+
 test('plugin-folder mode stores sessions and settings together in data.json', async function () {
     const plugin = createPlugin();
 
