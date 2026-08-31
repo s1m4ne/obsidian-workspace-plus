@@ -219,7 +219,12 @@ export class SwitchOverlay {
         // Measure max size using ALL sessions (unfiltered) before showing
         const allSessions = this.host.getOrderedSessionsUnfiltered();
         if (allSessions.length > ordered.length) {
-            const measure = document.body.createDiv({ cls: 'wpp-measure-overlay' });
+            // Carries the overlay's own class as well. Measuring inside a bare
+            // div loses the flex layout and the padding, so the width came back
+            // as the full viewport and got baked into min-width - the overlay
+            // stretched edge to edge in any group but "All", which is the only
+            // case that reaches this branch.
+            const measure = document.body.createDiv({ cls: 'wpp-switch-overlay wpp-measure-overlay' });
             // Clone count + group tabs
             for (let ci = 0; ci < overlay.childNodes.length; ci++) {
                 const child = overlay.childNodes[ci];

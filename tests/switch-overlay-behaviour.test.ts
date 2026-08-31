@@ -276,9 +276,39 @@ test('the overlay is sized against every session so it does not resize while cyc
     const ordered = [
         { id: 's1', name: 'Session 1' },
     ];
-    // allSessions will return 3 sessions from plugin.getOrderedSessionsUnfiltered()
-    plugin.showSwitchOverlay(ordered, 0, 'g1', { mode: 'preview' });
+
+    // Viewing one group out of three is what reaches the measuring branch:
+    // getOrderedSessionsUnfiltered() answers with all three sessions.
+    //
+    // The element it measures in has to carry the overlay's own class. Measured
+    // inside a bare div it loses the flex layout and the padding, comes back as
+    // wide as the viewport, and that width is written into min-width - the
+    // overlay stretched edge to edge in every group but "All". jsdom does no
+    // layout, so the width itself cannot be asserted here; the class list can,
+    // and it is the thing that was missing.
+    const measured: string[] = [];
+    const body = harness.dom.document.body as unknown as {
+        createDiv(opts?: { cls?: string }): HTMLElement;
+    };
+    const realCreateDiv = body.createDiv.bind(body);
+    body.createDiv = (opts?: { cls?: string }): HTMLElement => {
+        if (opts?.cls) measured.push(opts.cls);
+        return realCreateDiv(opts);
+    };
+
+    try {
+        plugin.showSwitchOverlay(ordered, 0, 'g1', { mode: 'preview' });
+    } finally {
+        body.createDiv = realCreateDiv;
+    }
+
     assert.ok(plugin.switchOverlayEl);
+    const measureClasses = measured.find((cls) => cls.includes('wpp-measure-overlay'));
+    assert.ok(measureClasses, 'the measuring element must be created');
+    assert.ok(
+        measureClasses.includes('wpp-switch-overlay'),
+        'and must be laid out like the overlay it is measuring for',
+    );
     plugin.hideSwitchOverlay();
 });
 
