@@ -1,11 +1,11 @@
 'use strict';
 
-var obsidian = require('obsidian');
-var i18n = require('../../i18n.ts');
 var attachSessionStoreGetter = require('./session-store-getter');
+var attachGroupMethods = require('./groups');
 
 function attachSessionValidationMethods(WorkspacePlusPlus) {
     attachSessionStoreGetter(WorkspacePlusPlus);
+    attachGroupMethods(WorkspacePlusPlus);
 
     WorkspacePlusPlus.prototype.isSessionNameTaken = function (name, excludeSessionId) {
         return this.getSessionStore().isSessionNameTaken(name, excludeSessionId);
@@ -28,50 +28,11 @@ function attachSessionValidationMethods(WorkspacePlusPlus) {
     };
 
     WorkspacePlusPlus.prototype.createGroupValidated = function (name, options) {
-        var L = i18n.L;
-        options = options || {};
-        var normalized = typeof name === 'string' ? name.trim() : '';
-
-        if (!normalized) {
-            if (options.notify !== false) {
-                new obsidian.Notice(L.groupEmptyName);
-            }
-            return Promise.resolve(false);
-        }
-        if (this.isGroupNameTaken(normalized)) {
-            if (options.notify !== false) {
-                new obsidian.Notice(L.groupDuplicateName);
-            }
-            return Promise.resolve(false);
-        }
-
-        return this.createGroup(normalized);
+        return this.getGroupStore().createGroupValidated(name, options);
     };
 
     WorkspacePlusPlus.prototype.renameGroupValidated = function (groupId, newName, options) {
-        var L = i18n.L;
-        options = options || {};
-        var groups = this.data.groups || {};
-        var group = groups[groupId];
-        if (!group) return Promise.resolve(false);
-
-        var normalized = typeof newName === 'string' ? newName.trim() : '';
-        if (!normalized) {
-            if (options.notify !== false) {
-                new obsidian.Notice(L.groupEmptyName);
-            }
-            return Promise.resolve(false);
-        }
-        if (normalized === group.name) return Promise.resolve(false);
-
-        if (this.isGroupNameTaken(normalized, groupId)) {
-            if (options.notify !== false) {
-                new obsidian.Notice(L.groupDuplicateName);
-            }
-            return Promise.resolve(false);
-        }
-
-        return this.renameGroup(groupId, normalized);
+        return this.getGroupStore().renameGroupValidated(groupId, newName, options);
     };
 }
 

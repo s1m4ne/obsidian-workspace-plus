@@ -12,21 +12,12 @@
 // obsidian.Modal when they load, and a static import would pull them in while
 // the test harness is still linking, before the obsidian stub exists.
 
-var SessionManagerModal = require('../../modals/session-manager-modal.js');
+var sessionManagerModal = require('../../modals/session-manager-modal-class.ts');
 var HistoryModal = require('../../modals/history-modal.ts').HistoryModal;
 
 function attachModalOpenerMethods(WorkspacePlusPlus) {
     WorkspacePlusPlus.prototype.openSessionManagerModal = function (focusName) {
-        var modal = new SessionManagerModal(this.app, this);
-        modal.open();
-        if (!focusName) return modal;
-        // create-session lands the caret in the name field. The delay is the
-        // one the pre-migration code used; the modal fills its content in
-        // onOpen, so the input does not exist yet when open() returns.
-        window.setTimeout(function () {
-            if (modal.nameInput) modal.nameInput.focus();
-        }, 100);
-        return modal;
+        return sessionManagerModal.openSessionManagerModal(this.app, this, focusName);
     };
 
     WorkspacePlusPlus.prototype.openHistoryModal = function (session) {

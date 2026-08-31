@@ -98,13 +98,11 @@ function attachHistoryMethods(WorkspacePlusPlus) {
     };
 
     WorkspacePlusPlus.prototype.startHistorySnapshotTimer = function () {
-        this.getHistoryService().startHistorySnapshotTimer();
-        this._historySnapshotTimer = this.getHistoryService().getSnapshotTimer();
+        return this.getHistoryService().startHistorySnapshotTimer();
     };
 
     WorkspacePlusPlus.prototype.stopHistorySnapshotTimer = function () {
-        this.getHistoryService().stopHistorySnapshotTimer();
-        this._historySnapshotTimer = null;
+        return this.getHistoryService().stopHistorySnapshotTimer();
     };
 }
 

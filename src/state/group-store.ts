@@ -239,6 +239,60 @@ export class GroupStore {
         return true;
     }
 
+    isGroupNameTaken(name: string, excludeGroupId?: string): boolean {
+        const groups = this.groups;
+        const keys = Object.keys(groups);
+        for (let i = 0; i < keys.length; i++) {
+            const id = keys[i];
+            if (!id || (excludeGroupId && id === excludeGroupId)) continue;
+            if (groups[id]?.name === name) return true;
+        }
+        return false;
+    }
+
+    async createGroupValidated(name: string, options?: { notify?: boolean }): Promise<string | false> {
+        const normalized = typeof name === 'string' ? name.trim() : '';
+
+        if (!normalized) {
+            if (options?.notify !== false) {
+                new Notice(formatString(L.groupEmptyName));
+            }
+            return false;
+        }
+        if (this.isGroupNameTaken(normalized)) {
+            if (options?.notify !== false) {
+                new Notice(formatString(L.groupDuplicateName));
+            }
+            return false;
+        }
+
+        return this.createGroup(normalized);
+    }
+
+    async renameGroupValidated(groupId: string, newName: string, options?: { notify?: boolean }): Promise<boolean> {
+        const groups = this.groups;
+        const group = groups[groupId];
+        if (!group) return false;
+
+        const normalized = typeof newName === 'string' ? newName.trim() : '';
+        if (!normalized) {
+            if (options?.notify !== false) {
+                new Notice(formatString(L.groupEmptyName));
+            }
+            return false;
+        }
+        if (normalized === group.name) return false;
+
+        if (this.isGroupNameTaken(normalized, groupId)) {
+            if (options?.notify !== false) {
+                new Notice(formatString(L.groupDuplicateName));
+            }
+            return false;
+        }
+
+        return this.renameGroup(groupId, normalized);
+    }
+
     async setActiveGroup(groupId: string | null): Promise<boolean> {
         if (!this.isGroupFeatureEnabled()) return false;
         const nextGroupId = groupId || null;

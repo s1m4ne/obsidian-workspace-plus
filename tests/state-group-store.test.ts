@@ -132,12 +132,12 @@ test('GroupStore: CRUD, active group, and session membership', async () => {
     // Create group
     const newGid = await manager.createGroup('Group 3');
     assert.ok(host.data.groups[newGid]);
-    assert.equal(host.data.groups[newGid]!.name, 'Group 3');
+    assert.equal(host.data.groups[newGid]?.name, 'Group 3');
     assert.equal(events.persists, 1);
 
     // Rename group
     await manager.renameGroup(newGid, 'Group 3 Renamed');
-    assert.equal(host.data.groups[newGid]!.name, 'Group 3 Renamed');
+    assert.equal(host.data.groups[newGid]?.name, 'Group 3 Renamed');
 
     // Add session to group
     await manager.addSessionToGroup('s1', newGid);
@@ -162,6 +162,54 @@ test('GroupStore: CRUD, active group, and session membership', async () => {
     assert.equal(host.data.activeGroupId, null);
     assert.equal(events.switchOverlayHides, 1);
     assert.equal(events.searchOverlayHides, 1);
+});
+
+test('GroupStore: validated creation and rename with notices and duplicate guards', async () => {
+    const { host } = createMockHost();
+    const manager = new GroupStore(host);
+
+    // Empty name with default notify creates a Notice
+    const initialNotices = harness.obsidian.notices.length;
+    const emptyResult = await manager.createGroupValidated('   ');
+    assert.equal(emptyResult, false);
+    assert.equal(harness.obsidian.notices.length, initialNotices + 1);
+
+    // Empty name with notify: false suppresses Notice
+    const noticeCountBefore = harness.obsidian.notices.length;
+    const emptyNoNotice = await manager.createGroupValidated('   ', { notify: false });
+    assert.equal(emptyNoNotice, false);
+    assert.equal(harness.obsidian.notices.length, noticeCountBefore);
+
+    // Duplicate name rejected
+    const dupResult = await manager.createGroupValidated('Group 1');
+    assert.equal(dupResult, false);
+    assert.equal(harness.obsidian.notices.length, noticeCountBefore + 1);
+
+    // Valid creation
+    const createdId = await manager.createGroupValidated('Group 3', { notify: false });
+    assert.ok(typeof createdId === 'string' && createdId.length > 0);
+    assert.equal(host.data.groups[createdId]?.name, 'Group 3');
+
+    // Rename: missing group
+    const missingGroupRename = await manager.renameGroupValidated('nonexistent', 'New Name');
+    assert.equal(missingGroupRename, false);
+
+    // Rename: empty name rejected
+    const emptyRename = await manager.renameGroupValidated(createdId, '   ');
+    assert.equal(emptyRename, false);
+
+    // Rename: same name returns false without notice
+    const sameRename = await manager.renameGroupValidated(createdId, 'Group 3');
+    assert.equal(sameRename, false);
+
+    // Rename: duplicate name rejected
+    const dupRename = await manager.renameGroupValidated(createdId, 'Group 1');
+    assert.equal(dupRename, false);
+
+    // Rename: valid
+    const validRename = await manager.renameGroupValidated(createdId, 'Group 3 Renamed', { notify: false });
+    assert.equal(validRename, true);
+    assert.equal(host.data.groups[createdId]?.name, 'Group 3 Renamed');
 
     harness.restore();
 });

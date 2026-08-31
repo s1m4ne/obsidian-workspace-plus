@@ -134,7 +134,8 @@ test('sessions-validation: group creation and rename validation', async function
 
     // Group create valid
     const newG = await plugin.createGroupValidated('Group 2', { notify: false });
-    assert.equal(newG, 'grp-Group 2');
+    assert.ok(typeof newG === 'string');
+    assert.equal(plugin.data.groups[newG]?.name, 'Group 2');
 
     // Group rename valid
     const renamed = await plugin.renameGroupValidated('g1', 'Group 1 Renamed', { notify: false });

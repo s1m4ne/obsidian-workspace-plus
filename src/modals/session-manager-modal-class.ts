@@ -111,7 +111,7 @@ function visibleElements(root: ParentNode, selector: string): HTMLElement[] {
 export class SessionManagerModal extends Modal {
     private readonly plugin: SessionManagerModalHost;
 
-    private nameInput!: HTMLInputElement;
+    nameInput!: HTMLInputElement;
     private saveBtn!: HTMLButtonElement;
     private filterInput: HTMLInputElement | null = null;
     private groupTabsRow!: HTMLElement;
@@ -980,3 +980,23 @@ export class SessionManagerModal extends Modal {
         this.contentEl.empty();
     }
 }
+
+export function openSessionManagerModal(
+    app: App,
+    plugin: SessionManagerModalHost,
+    focusName?: boolean
+): SessionManagerModal {
+    const modal = new SessionManagerModal(app, plugin);
+    modal.open();
+    if (!focusName) return modal;
+    // create-session lands the caret in the name field. The delay is the
+    // one the pre-migration code used; the modal fills its content in
+    // onOpen, so the input does not exist yet when open() returns.
+    if (typeof window !== 'undefined') {
+        window.setTimeout(() => {
+            if (modal.nameInput) modal.nameInput.focus();
+        }, 100);
+    }
+    return modal;
+}
+
