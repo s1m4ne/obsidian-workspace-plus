@@ -12,41 +12,245 @@
 
 const { execFileSync } = require('child_process');
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
+const { fileURLToPath } = require('url');
 
-const BASELINE_PATH = path.join(__dirname, '..', '.coverage-baseline.json');
-const FLOORS_PATH = path.join(__dirname, '..', '.coverage-floors.json');
+const ROOT = path.join(__dirname, '..');
+const BASELINE_PATH = path.join(ROOT, '.coverage-baseline.json');
+const FLOORS_PATH = path.join(ROOT, '.coverage-floors.json');
 
-// Node prints the summary table to stdout; these pull the totals out of it.
-const FILE_ROW = /^[^\S\n]*(?:ℹ\s*)?(?<file>[^|\s][^|]*?)\s*\|\s*(?<line>[\d.]+)\s*\|\s*(?<branch>[\d.]+)\s*\|\s*(?<func>[\d.]+)\s*\|/;
+// The figures are computed from V8's own coverage dump rather than from the
+// table `--experimental-test-coverage` prints.
+//
+// That table omits a .ts module reached only through require(), which is exactly
+// the shape every migrated module has while a .js caller still loads it. Three
+// of them - search-overlay.ts, persistence-service.ts,
+// session-manager-modal-class.ts, about 2,400 lines - had dropped out of the
+// report without any gate noticing, and because they left the denominator too,
+// the recorded percentage went *up* each time one disappeared. Adding an import
+// does not fix it: require() and import() are separate module records to V8, so
+// the imported copy reports zero.
+//
+// The cause is in the dump: a .ts loaded through require() is recorded under a
+// bare filesystem path, while everything else gets a file:// URL, and the
+// renderer keeps only the URLs. The data was there all along, so this reads it
+// directly and accepts both spellings.
 
 function runCoverage() {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'wpp-cov-'));
     try {
-        return execFileSync(
-            process.execPath,
-            ['--test', '--experimental-test-coverage', 'tests/**/*.test.{js,ts}'],
-            { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, cwd: path.join(__dirname, '..') },
-        );
-    } catch (error) {
-        // A failing test still produces the report; a missing report does not.
-        if (typeof error.stdout === 'string' && error.stdout.includes('coverage')) return error.stdout;
-        throw error;
+        try {
+            execFileSync(
+                process.execPath,
+                ['--test', 'tests/**/*.test.{js,ts}'],
+                {
+                    encoding: 'utf8',
+                    maxBuffer: 64 * 1024 * 1024,
+                    cwd: ROOT,
+                    env: Object.assign({}, process.env, { NODE_V8_COVERAGE: dir }),
+                },
+            );
+        } catch (error) {
+            // A failing test still leaves a usable dump behind; report the
+            // failure rather than a coverage number computed from a red run.
+            if (!fs.existsSync(dir) || fs.readdirSync(dir).length === 0) throw error;
+            console.error('Tests failed during the coverage run; fix them before trusting these figures.');
+        }
+        return collect(dir);
+    } finally {
+        fs.rmSync(dir, { recursive: true, force: true });
     }
 }
 
-function parse(output) {
-    const files = {};
-    let all = null;
-    for (const line of output.split('\n')) {
-        const m = FILE_ROW.exec(line);
-        if (!m || !m.groups) continue;
-        const name = m.groups.file.trim();
-        if (name === 'file' || name.startsWith('-')) continue;
-        const entry = { line: Number(m.groups.line), func: Number(m.groups.func) };
-        if (name === 'all files') all = entry;
-        else if (name.endsWith('.js') || name.endsWith('.ts')) files[name] = entry;
+/** A script's url is a file:// URL, except for a .ts reached through require(), which is a bare path. */
+function toPath(url) {
+    if (typeof url !== 'string' || url === '') return null;
+    if (url.startsWith('file:')) {
+        try {
+            return fileURLToPath(url);
+        } catch {
+            return null;
+        }
     }
-    return { all, files };
+    return path.isAbsolute(url) ? url : null;
+}
+
+/** Files the report covers: this repository's own source, excluding the tests themselves. */
+function isMeasured(file) {
+    if (!file.startsWith(ROOT + path.sep)) return false;
+    const rel = path.relative(ROOT, file);
+    if (rel.split(path.sep).includes('node_modules')) return false;
+    if (/\.test\.[jt]s$/.test(rel)) return false;
+    return /\.[jt]s$/.test(rel);
+}
+
+const UNKNOWN = 0;
+const COVERED = 1;
+const UNCOVERED = 2;
+
+/**
+ * V8 reports nested ranges: a function's own span first, then the blocks inside
+ * it that ran a different number of times. Applying them outermost-first lets
+ * each inner range overwrite its parent, which is what makes an untaken branch
+ * inside a called function show as uncovered.
+ *
+ * This has to be done per process before merging. A worker that merely loaded
+ * the module contributes an outer range with a count, and if that were applied
+ * over another worker's state it would paint over the untaken branches that
+ * worker actually recorded - which read as 100% of every line.
+ */
+function applyRanges(state, ranges) {
+    const ordered = ranges.slice().sort((a, b) => (
+        a.startOffset - b.startOffset || b.endOffset - a.endOffset
+    ));
+    for (const range of ordered) {
+        const value = range.count > 0 ? COVERED : UNCOVERED;
+        const end = Math.min(range.endOffset, state.length);
+        for (let i = range.startOffset; i < end; i++) state[i] = value;
+    }
+}
+
+/** Covered in any process means executed. */
+function mergeState(target, source) {
+    for (let i = 0; i < target.length; i++) {
+        if (source[i] === UNKNOWN) continue;
+        if (source[i] === COVERED || target[i] === UNKNOWN) target[i] = source[i];
+    }
+}
+
+function collect(dir) {
+    const sources = new Map();
+    const functions = new Map();
+
+    for (const name of fs.readdirSync(dir)) {
+        if (!name.endsWith('.json')) continue;
+        let dump;
+        try {
+            dump = JSON.parse(fs.readFileSync(path.join(dir, name), 'utf8'));
+        } catch {
+            // A worker killed mid-write leaves a truncated file; the others still count.
+            continue;
+        }
+        for (const script of dump.result || []) {
+            const file = toPath(script.url);
+            if (!file || !isMeasured(file)) continue;
+
+            if (!sources.has(file)) {
+                let text;
+                try {
+                    text = fs.readFileSync(file, 'utf8');
+                } catch {
+                    continue;
+                }
+                sources.set(file, { text, state: new Uint8Array(text.length) });
+            }
+            const entry = sources.get(file);
+
+            if (!functions.has(file)) functions.set(file, new Map());
+            const seen = functions.get(file);
+
+            const local = new Uint8Array(entry.text.length);
+            for (const fn of script.functions || []) {
+                const own = fn.ranges && fn.ranges[0];
+                if (!own) continue;
+                const key = `${own.startOffset}-${own.endOffset}`;
+                seen.set(key, (seen.get(key) || false) || own.count > 0);
+                applyRanges(local, fn.ranges);
+            }
+            mergeState(entry.state, local);
+        }
+    }
+
+    const files = {};
+    let funcTotal = 0;
+    let funcHit = 0;
+    let lineTotal = 0;
+    let lineHit = 0;
+
+    for (const [file, { text, state }] of sources) {
+        const seen = functions.get(file) || new Map();
+        let fnTotal = 0;
+        let fnHit = 0;
+        for (const covered of seen.values()) {
+            fnTotal += 1;
+            if (covered) fnHit += 1;
+        }
+
+        // A line counts only when it holds code V8 tracked: blank lines, and
+        // lines outside every range, are neither covered nor uncovered.
+        let lTotal = 0;
+        let lHit = 0;
+        let lineState = UNKNOWN;
+        for (let i = 0; i <= text.length; i++) {
+            const ch = i < text.length ? text[i] : '\n';
+            if (ch === '\n') {
+                if (lineState !== UNKNOWN) {
+                    lTotal += 1;
+                    if (lineState === COVERED) lHit += 1;
+                }
+                lineState = UNKNOWN;
+                continue;
+            }
+            if (ch === ' ' || ch === '\t' || ch === '\r') continue;
+            if (state[i] === COVERED) lineState = COVERED;
+            else if (state[i] === UNCOVERED && lineState !== COVERED) lineState = UNCOVERED;
+        }
+
+        funcTotal += fnTotal;
+        funcHit += fnHit;
+        lineTotal += lTotal;
+        lineHit += lHit;
+
+        files[path.relative(ROOT, file)] = {
+            line: percent(lHit, lTotal),
+            func: percent(fnHit, fnTotal),
+        };
+    }
+
+    return {
+        all: { line: percent(lineHit, lineTotal), func: percent(funcHit, funcTotal) },
+        files,
+    };
+}
+
+/**
+ * Every file under src/ has to appear in the report. Zero is the only acceptable
+ * count, like the reachability gate - this is the check that was missing when
+ * three migrated modules dropped out of the measurement and the recorded
+ * percentage rose because they had left the denominator.
+ *
+ * A file absent here is not being measured by anything: not the ratchet, not its
+ * floor. If a module legitimately cannot be loaded by any test, it needs a
+ * reason and a removal condition recorded in this list, not silence.
+ */
+const UNMEASURED_ALLOWED = new Map();
+
+function listSourceFiles(dir, found) {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+        if (entry.name === 'node_modules') continue;
+        const full = path.join(dir, entry.name);
+        if (entry.isDirectory()) listSourceFiles(full, found);
+        else if (/\.[jt]s$/.test(entry.name)) found.push(path.relative(ROOT, full));
+    }
+    return found;
+}
+
+function checkMeasured(files) {
+    const absent = listSourceFiles(path.join(ROOT, 'src'), [])
+        .filter((file) => !(file in files) && !UNMEASURED_ALLOWED.has(file));
+    if (absent.length === 0) return;
+
+    console.error(`${absent.length} file(s) under src/ are absent from the coverage report:`);
+    for (const file of absent) console.error(`  ${file}`);
+    console.error('\nNothing measures them - not this ratchet, not their floor. Either give a test');
+    console.error('a path that loads the module, or record a reason in UNMEASURED_ALLOWED.');
+    process.exit(1);
+}
+
+function percent(hit, total) {
+    if (total === 0) return 100;
+    return Math.round((hit / total) * 10000) / 100;
 }
 
 /**
@@ -100,7 +304,7 @@ function reportFloors(below, target) {
 
 function main() {
     const args = process.argv.slice(2);
-    const { all, files } = parse(runCoverage());
+    const { all, files } = runCoverage();
 
     // Floors gate one module at the moment it is migrated, not every commit -
     // requiring all of them up front would mean writing every lock before
@@ -125,6 +329,8 @@ function main() {
         console.error('Could not read a coverage report from the test run.');
         process.exit(1);
     }
+
+    checkMeasured(files);
 
     if (args.includes('--json')) {
         console.log(JSON.stringify({ all, files }, null, 4));

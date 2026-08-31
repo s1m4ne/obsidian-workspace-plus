@@ -79,7 +79,15 @@ and none of the others could see it.
   255 known violations; the gate fails only when a count *rises*. Failing on the
   existing set would block every commit until the last one.
 - **Coverage** compares project-wide function coverage against
-  `.coverage-baseline.json`. It starts at 22% and has to climb.
+  `.coverage-baseline.json`. It starts at 22% and has to climb. The figures come
+  from V8's own dump (`NODE_V8_COVERAGE`), not from the table
+  `--experimental-test-coverage` prints: that table drops a `.ts` module reached
+  only through `require()`, which is the shape every migrated module has while a
+  `.js` caller still loads it. Three of them, about 2,400 lines, had fallen out
+  of the report unnoticed — and because they left the denominator too, the
+  recorded percentage *rose* each time one vanished. The same run now also fails
+  if any file under `src/` is absent from the report at all; nothing else
+  measures such a file, neither the ratchet nor its floor.
 
 - **Dual dispatch** counts `typeof this.host.X === 'function'` across
   `src/state/` and `src/storage/`. A class that keeps its own fallback for a
