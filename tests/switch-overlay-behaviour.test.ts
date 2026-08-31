@@ -815,3 +815,96 @@ test('deleting a session that is not the active one does not call it active', ()
     assert.ok(!text.includes('active session'), 'and does not claim it is the active one');
     plugin.hideSearchOverlay();
 });
+
+// Resizing used to change the width and then try to repair the position. Two
+// things went wrong that no clamping afterwards could fix, and both are here.
+
+// jsdom does no layout, so getBoundingClientRect answers zero for everything
+// and the geometry has nothing to work from. The overlay is given a real
+// starting box, which is what a browser would have reported.
+function placeOverlay(el: HTMLElement, box: { left: number; top: number; width: number; height: number }): void {
+    el.getBoundingClientRect = (): DOMRect => ({
+        left: box.left,
+        top: box.top,
+        right: box.left + box.width,
+        bottom: box.top + box.height,
+        width: box.width,
+        height: box.height,
+        x: box.left,
+        y: box.top,
+        toJSON: () => ({}),
+    });
+}
+
+function dragHandle(
+    plugin: TestPlugin,
+    selector: string,
+    to: { x: number; y: number },
+): { left: number; bottom: number; width: number; height: number } {
+    const el = plugin.searchOverlayEl as HTMLElement;
+    placeOverlay(el, { left: 400, top: 300, width: 300, height: 200 });
+    const handle = el.querySelector(selector) as HTMLElement;
+    assert.ok(handle, `${selector} must exist`);
+    const win = harness.dom.window;
+    handle.dispatchEvent(new win.MouseEvent('mousedown', { bubbles: true, button: 0, clientX: 500, clientY: 400 }));
+    harness.dom.document.dispatchEvent(
+        new win.MouseEvent('mousemove', { bubbles: true, clientX: to.x, clientY: to.y })
+    );
+    const read = (prop: string): number => parseFloat(el.style.getPropertyValue(prop) || '0');
+    const result = {
+        left: read('left'),
+        bottom: read('bottom'),
+        width: read('width'),
+        height: read('height'),
+    };
+    harness.dom.document.dispatchEvent(new win.MouseEvent('mouseup', { bubbles: true }));
+    return result;
+}
+
+test('dragging the left edge past the window edge stops, instead of pushing the right edge out', () => {
+    const plugin = createTestPlugin();
+    clearModals();
+    plugin.openSearchOverlay();
+
+    // Far past the left of the window. The left edge has to stop at the margin,
+    // and the right edge has to stay where it started: it is not being dragged.
+    // The old code pinned `left` and let the width keep growing, which pushed
+    // the right edge off the far side.
+    const startRight = 400 + 300;
+    const box = dragHandle(plugin, '.wpp-resize-left', { x: -4000, y: 400 });
+
+    assert.ok(box.left >= 8, `left edge stays inside the window, got ${box.left}`);
+    assert.equal(
+        box.left + box.width,
+        startRight,
+        'the right edge is not being dragged and must not move',
+    );
+    plugin.hideSearchOverlay();
+});
+
+test('dragging a top corner past the top of the window stops, instead of leaving the box too tall', () => {
+    const plugin = createTestPlugin();
+    clearModals();
+    plugin.openSearchOverlay();
+
+    // Corners were the case that escaped: the top edge went off the top of the
+    // window and the height stayed oversized.
+    const box = dragHandle(plugin, '.wpp-resize-tl', { x: 500, y: -4000 });
+
+    const top = harness.dom.window.innerHeight - box.bottom - box.height;
+    assert.ok(top >= 8, `top edge stays inside the window, got ${top}`);
+    plugin.hideSearchOverlay();
+});
+
+test('dragging the left edge inward stops at the minimum width', () => {
+    const plugin = createTestPlugin();
+    clearModals();
+    plugin.openSearchOverlay();
+
+    // Inward, far past where the box would collapse. The dragged edge has to
+    // stop at the minimum rather than crossing the edge it is approaching.
+    const box = dragHandle(plugin, '.wpp-resize-left', { x: 4000, y: 400 });
+
+    assert.ok(box.width >= 220, `width holds at the minimum, got ${box.width}`);
+    plugin.hideSearchOverlay();
+});

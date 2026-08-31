@@ -1052,58 +1052,63 @@ export class SearchOverlay {
             const startX = e.clientX;
             const startY = e.clientY;
             const startRect = overlay.getBoundingClientRect();
-            const startWidth = startRect.width;
-            const startHeight = startRect.height;
-            const startLeft = startRect.left;
-            const startBottom = window.innerHeight - startRect.bottom;
+            // Resizing is expressed as moving edges, not as changing a width and
+            // then repairing the position. The old code did the latter and got
+            // two things wrong that no amount of clamping afterwards could fix.
+            //
+            // Dragging the left edge left grew the width and moved `left` to
+            // match. When `left` hit the margin it was pinned there - but the
+            // width kept growing, so the right edge marched off the far side of
+            // the window. The same on the right edge, mirrored.
+            //
+            // Dragging a top corner grew the height with `bottom` fixed, which
+            // pushes the top edge up. The clamp then moved `bottom` to bring the
+            // top back inside, and when `bottom` reached the margin it stopped,
+            // leaving the height too large and the top off-screen.
+            //
+            // Each moved edge is now clamped on its own: into the window, and
+            // against the opposite edge so the box never crosses the minimum.
+            // The edge that is not being dragged never moves.
+            const startEdges = {
+                left: startRect.left,
+                right: startRect.right,
+                top: startRect.top,
+                bottom: startRect.bottom,
+            };
+
+            const movesLeft = dir === 'tl' || dir === 'bl' || edge === 'left';
+            const movesRight = dir === 'tr' || dir === 'br' || edge === 'right';
+            const movesTop = dir === 'tl' || dir === 'tr' || edge === 'top';
+            const movesBottom = dir === 'bl' || dir === 'br' || edge === 'bottom';
+
+            // Order matters. The minimum size is a preference; staying inside the
+            // window is not. In a window too narrow to hold MIN_WIDTH the box
+            // gets smaller rather than hanging off the edge, so the window bound
+            // is applied last and wins.
+            const holdEdge = (value: number, minimumBound: number, windowLow: number, windowHigh: number): number =>
+                Math.min(Math.max(minimumBound, windowLow), windowHigh);
 
             function onMove(ev: MouseEvent): void {
                 const dx = ev.clientX - startX;
                 const dy = ev.clientY - startY;
-                let newWidth = startWidth;
-                let newHeight = startHeight;
-                let newLeft = startLeft;
-                let newBottom = startBottom;
 
-                // Horizontal
-                const moveRight = dir === 'tr' || dir === 'br' || edge === 'right';
-                const moveLeft  = dir === 'tl' || dir === 'bl' || edge === 'left';
-                if (moveRight) {
-                    newWidth = Math.max(MIN_WIDTH, startWidth + dx);
-                } else if (moveLeft) {
-                    newWidth = Math.max(MIN_WIDTH, startWidth - dx);
-                    newLeft = startLeft + (startWidth - newWidth);
-                }
+                let { left, right, top, bottom } = startEdges;
+                if (movesLeft) left = startEdges.left + dx;
+                if (movesRight) right = startEdges.right + dx;
+                if (movesTop) top = startEdges.top + dy;
+                if (movesBottom) bottom = startEdges.bottom + dy;
 
-                // Vertical
-                const moveTop    = dir === 'tl' || dir === 'tr' || edge === 'top';
-                const moveBottom = dir === 'bl' || dir === 'br' || edge === 'bottom';
-                if (moveTop) {
-                    newHeight = Math.max(MIN_HEIGHT, startHeight - dy);
-                } else if (moveBottom) {
-                    newHeight = Math.max(MIN_HEIGHT, startHeight + dy);
-                    newBottom = startBottom - (newHeight - startHeight);
-                    if (newBottom < margin) {
-                        newHeight = startHeight + startBottom - margin;
-                        newBottom = margin;
-                    }
-                }
+                const maxRight = window.innerWidth - margin;
+                const maxBottom = window.innerHeight - margin;
+                if (movesLeft) left = holdEdge(left, Math.min(left, right - MIN_WIDTH), margin, maxRight);
+                if (movesRight) right = holdEdge(right, Math.max(right, left + MIN_WIDTH), margin, maxRight);
+                if (movesTop) top = holdEdge(top, Math.min(top, bottom - MIN_HEIGHT), margin, maxBottom);
+                if (movesBottom) bottom = holdEdge(bottom, Math.max(bottom, top + MIN_HEIGHT), margin, maxBottom);
 
-                // Enforce minimum sizes
-                newWidth = Math.max(MIN_WIDTH, newWidth);
-                newHeight = Math.max(MIN_HEIGHT, newHeight);
-
-                // Clamp to viewport — ensure all edges stay within margin
-                if (newLeft < margin) newLeft = margin;
-                if (newLeft + newWidth > window.innerWidth - margin) {
-                    newLeft = window.innerWidth - margin - newWidth;
-                    if (newLeft < margin) newLeft = margin;
-                }
-                if (newBottom < margin) newBottom = margin;
-                if (window.innerHeight - newBottom - newHeight < margin) {
-                    newBottom = window.innerHeight - newHeight - margin;
-                    if (newBottom < margin) newBottom = margin;
-                }
+                const newWidth = right - left;
+                const newHeight = bottom - top;
+                const newLeft = left;
+                const newBottom = window.innerHeight - bottom;
 
                 overlay.style.width = newWidth + 'px';
                 overlay.style.height = newHeight + 'px';

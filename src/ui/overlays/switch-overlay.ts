@@ -1,6 +1,6 @@
 import { L } from '../../i18n.ts';
 import { deriveSessionPresentation } from '../shared/session-presenter.ts';
-import { isModPressed, isModShiftPressed } from '../../utils.ts';
+import { isModShiftPressed } from '../../utils.ts';
 import type { SessionItem } from '../../storage/default-data.ts';
 
 export interface SwitchOverlayHost {
