@@ -29,10 +29,6 @@ function attachSessionMethods(WorkspacePlusPlus) {
         return this.getSessionStore().getActiveSessionIndex(sessions);
     };
 
-    WorkspacePlusPlus.prototype.getFilteredSessions = function (options) {
-        return this.getSessionStore().getFilteredSessions(options);
-    };
-
     WorkspacePlusPlus.prototype.getOrderedSessions = function () {
         return this.getSessionStore().getOrderedSessions();
     };
@@ -43,14 +39,6 @@ function attachSessionMethods(WorkspacePlusPlus) {
 
     WorkspacePlusPlus.prototype.getOrderedSessionsForGroup = function (groupId) {
         return this.getSessionStore().getOrderedSessionsForGroup(groupId);
-    };
-
-    WorkspacePlusPlus.prototype.getOrderedSessionsForActiveGroup = function () {
-        return this.getSessionStore().getOrderedSessionsForActiveGroup();
-    };
-
-    WorkspacePlusPlus.prototype.getOrderedSessionsForTargetGroup = function (targetGroupId) {
-        return this.getSessionStore().getOrderedSessionsForTargetGroup(targetGroupId);
     };
 
     WorkspacePlusPlus.prototype.mergeVisibleSessionOrder = function (visibleOrder) {

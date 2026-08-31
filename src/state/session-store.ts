@@ -334,6 +334,9 @@ export class SessionStore {
         const rawName = typeof name === 'string' ? name : '';
         let finalName = rawName.trim();
         if (!finalName) {
+            // An empty box means "name it for me"; a box holding only spaces
+            // means the user typed something they did not intend, so it is
+            // rejected rather than silently auto-named.
             if (rawName.length > 0) {
                 if (options?.notify !== false) {
                     new Notice(formatString(L.emptyName));
@@ -391,6 +394,8 @@ export class SessionStore {
         }
 
         const createdSessionId = result.sessionId;
+        // Creating from a group the user is only viewing moves the session in
+        // exclusively, so it does not also stay in the group that is active.
         if (targetGroupId && targetGroupId !== beforeActiveGroupId && createdSessionId) {
             await this.host.moveSessionToGroupExclusive(createdSessionId, targetGroupId);
             const selection = await this.host.resolveGroupSelection(targetGroupId);
@@ -451,6 +456,8 @@ export class SessionStore {
         }
 
         if (wasActive) {
+            // Stay at the same position in the list so the selection does not
+            // jump; deleting the last entry falls back one place instead.
             const fallbackIdx = Math.min(orderIdx, this.sessionOrder.length - 1);
             const remaining = this.sessionOrder[fallbackIdx] || Object.keys(this.sessions)[0];
             nextActiveId = remaining || null;

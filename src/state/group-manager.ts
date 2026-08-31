@@ -265,7 +265,8 @@ export class GroupManager {
             const groups = sessionGroups[s.id];
             return groups && groups.includes(nextGroupId);
         });
-        if (targetSessions.length === 0) {
+        const firstInGroup = targetSessions[0];
+        if (!firstInGroup) {
             return false;
         }
 
@@ -275,7 +276,7 @@ export class GroupManager {
             return commitGroup();
         }
 
-        const switched = await this.host.switchSession(targetSessions[0]!.id);
+        const switched = await this.host.switchSession(firstInGroup.id);
         if (!switched) return false;
         return commitGroup();
     }

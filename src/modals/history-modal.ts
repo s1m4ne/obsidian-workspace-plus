@@ -144,12 +144,14 @@ export class HistoryModal extends Modal {
                 label = d.toLocaleDateString();
             }
 
-            if (!groups[label]) {
-                groups[label] = { label, entries: [], indices: [] };
+            let group = groups[label];
+            if (!group) {
+                group = { label, entries: [], indices: [] };
+                groups[label] = group;
                 groupOrder.push(label);
             }
-            groups[label]!.entries.push(entry);
-            groups[label]!.indices.push(i);
+            group.entries.push(entry);
+            group.indices.push(i);
         }
 
         return groupOrder.map((k) => groups[k]!);

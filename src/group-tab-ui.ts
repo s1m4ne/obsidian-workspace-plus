@@ -185,8 +185,8 @@ export function attachGroupTabDrag(
 
             const tabs = tabsContainerEl.querySelectorAll<HTMLElement>('.wpp-group-tab');
             const newOrder: string[] = [];
-            for (let ti = 0; ti < tabs.length; ti++) {
-                const gid = tabs[ti]!.dataset['groupId'];
+            for (const tab of tabs) {
+                const gid = tab.dataset['groupId'];
                 if (gid) {
                     newOrder.push(gid);
                 }
