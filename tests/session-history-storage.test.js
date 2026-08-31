@@ -3,6 +3,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { loadPluginMethods } = require('./helpers');
+const { setupHarness } = require('./lock/harness/index.ts');
 
 
 const methods = loadPluginMethods(['persistence', 'session-sync', 'storage-transfer']);
@@ -213,15 +214,22 @@ test('history.json wins over stale inline history', async function () {
 });
 
 test('exported snapshots leave version history behind', async function () {
-    const plugin = createPlugin();
-    plugin.ensureDir = () => Promise.resolve();
+    const harness = setupHarness();
+    try {
+        const plugin = createPlugin();
+        plugin.ensureDir = () => Promise.resolve();
 
-    await plugin.exportSessionsSnapshot();
+        const countBefore = harness.obsidian.notices.length;
+        await plugin.exportSessionsSnapshot();
 
-    const exportPath = plugin.writes.find((p) => p.includes('/exports/'));
-    assert.ok(exportPath, 'an export file should be written');
-    const payload = JSON.parse(plugin.files[exportPath]);
-    assert.equal(payload.data.sessions.a.history, undefined);
+        const exportPath = plugin.writes.find((p) => p.includes('/exports/'));
+        assert.ok(exportPath, 'an export file should be written');
+        const payload = JSON.parse(plugin.files[exportPath]);
+        assert.equal(payload.data.sessions.a.history, undefined);
+        assert.equal(harness.obsidian.notices.length, countBefore + 1);
+    } finally {
+        harness.restore();
+    }
 });
 
 test('reset cleanup targets the history file', function () {

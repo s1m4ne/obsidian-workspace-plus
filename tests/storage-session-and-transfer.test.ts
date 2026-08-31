@@ -6,13 +6,9 @@ installObsidianStub();
 
 import { JsonFileStore, type StorageAdapter } from '../src/storage/json-file-store.ts';
 import { SessionStorage } from '../src/storage/session-storage.ts';
-import {
-    pad2,
-    formatExportStamp,
-    createExportPayload,
-    findLatestExportFile,
-    validateExportedSessionData,
-} from '../src/storage/storage-transfer.ts';
+import type { PluginData } from '../src/storage/default-data.ts';
+import type { SessionDataPayload } from '../src/storage/storage-backup.ts';
+import type { StorageExportHost, StorageImportHost } from '../src/storage/storage-transfer.ts';
 
 class MemoryStorageAdapter implements StorageAdapter {
     public files: Map<string, string> = new Map();
@@ -124,7 +120,15 @@ test('storage backup functions: prepare data and rotate backups', async () => {
     assert.ok(info.length >= 1);
 });
 
-test('storage transfer functions: formatting, payload creation and latest file search', () => {
+test('storage transfer functions: formatting, payload creation and latest file search', async () => {
+    const {
+        pad2,
+        formatExportStamp,
+        createExportPayload,
+        findLatestExportFile,
+        validateExportedSessionData,
+    } = await import('../src/storage/storage-transfer.ts');
+
     assert.equal(pad2(5), '05');
     assert.equal(pad2(12), '12');
 
@@ -144,4 +148,79 @@ test('storage transfer functions: formatting, payload creation and latest file s
 
     const invalid = validateExportedSessionData({ activeSessionId: 'a', sessions: {} }, (d) => d);
     assert.equal(invalid, null);
+});
+
+test('storage transfer: exportSessionsSnapshot and importSessionsFromLatestExport host functions', async () => {
+    const { exportSessionsSnapshot, importSessionsFromLatestExport } = await import('../src/storage/storage-transfer.ts');
+
+    const writtenFiles: Record<string, string> = {};
+    const testData = {
+        activeSessionId: 's1',
+        sessions: { s1: { id: 's1', name: 'S1', layout: {} } },
+        sessionOrder: ['s1'],
+        groups: {},
+        groupOrder: [],
+        sessionGroups: {},
+        activeGroupId: null,
+    } as unknown as PluginData;
+
+    const exportHost: StorageExportHost = {
+        data: testData,
+        manifest: { id: 'test-plugin' },
+        getExportDirPath: () => 'exports',
+        extractSessionData: (d: PluginData) => d,
+        ensureSessionStorageDir: async () => {},
+        ensureDir: async () => {},
+        writeJson: async (path: string, payload: unknown) => {
+            writtenFiles[path] = JSON.stringify(payload);
+        },
+    };
+
+    const filePath = await exportSessionsSnapshot(exportHost);
+    assert.ok(filePath.startsWith('exports/sessions-'));
+    assert.ok(writtenFiles[filePath]);
+
+    // Test import with no dir
+    let listCalled = false;
+    const noDirHost: StorageImportHost = {
+        app: {
+            vault: {
+                adapter: {
+                    exists: async () => false,
+                    list: async () => {
+                        listCalled = true;
+                        return { files: [] };
+                    },
+                    read: async () => '',
+                },
+            },
+        },
+        data: testData,
+        getExportDirPath: () => 'exports',
+        normalizeSessionData: (d: unknown) => d as SessionDataPayload,
+        syncSessionOrder: () => {},
+        updateStatusBar: () => {},
+        syncSessionCommands: () => {},
+        persistData: async () => {},
+        reloadCurrentSessionWithoutSaving: async () => {},
+    };
+    const noDirResult = await importSessionsFromLatestExport(noDirHost);
+    assert.equal(noDirResult, false);
+    assert.equal(listCalled, false);
+
+    // Test import with empty files
+    const emptyFilesHost = {
+        ...noDirHost,
+        app: {
+            vault: {
+                adapter: {
+                    exists: async () => true,
+                    list: async () => ({ files: [] }),
+                    read: async () => '',
+                },
+            },
+        },
+    };
+    const emptyResult = await importSessionsFromLatestExport(emptyFilesHost);
+    assert.equal(emptyResult, false);
 });

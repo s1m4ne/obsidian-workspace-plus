@@ -20,6 +20,7 @@
         "sync-watcher.ts": 80,
         "session-store.ts": 80,
         "settings-state.ts": 80,
-        "storage-backup.ts": 80
+        "storage-backup.ts": 80,
+        "storage-transfer.ts": 80
     }
 }

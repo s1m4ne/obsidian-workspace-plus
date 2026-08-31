@@ -127,6 +127,11 @@ test('a failed import leaves the workspace untouched', async () => {
         const imported = await plugin.importSessionsFromLatestExport();
         assert.equal(imported, false);
         assert.deepEqual(plugin.appliedLayouts, [], 'nothing is applied when the import is rejected');
+
+        // Corrupted JSON syntax error handling
+        app.vault.adapter.read = (): Promise<string> => Promise.resolve('{ invalid json syntax');
+        const importedCorrupted = await plugin.importSessionsFromLatestExport();
+        assert.equal(importedCorrupted, false);
     } finally {
         harness.restore();
     }
