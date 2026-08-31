@@ -21,6 +21,7 @@
         "session-store.ts": 80,
         "settings-state.ts": 80,
         "storage-backup.ts": 80,
-        "storage-transfer.ts": 80
+        "storage-transfer.ts": 80,
+        "session-sync.ts": 80
     }
 }

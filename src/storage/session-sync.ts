@@ -1,5 +1,8 @@
-import { SESSION_FILE_MTIME_EPSILON_MS } from './sync-watcher.ts';
-import type { SessionItem } from './default-data.ts';
+import { SyncWatcher, SESSION_FILE_MTIME_EPSILON_MS } from './sync-watcher.ts';
+import type { PluginData, SessionGroup, SessionItem } from './default-data.ts';
+import type { SessionDataPayload } from './storage-backup.ts';
+import type { ReadJsonResult } from './json-file-store.ts';
+import { getPersistStamp, hasSessionShape } from './session-data.ts';
 import { cloneJson } from '../clone-json.ts';
 
 // Re-exported so the .js callers that still require this module keep working.
@@ -150,3 +153,264 @@ export function mergeExternalSessionDataForWrite(
         activeGroupId: (local.activeGroupId as string | undefined) || (external.activeGroupId as string | undefined),
     });
 }
+
+export function getComparableSessionData(
+    normalizeSessionData: (data: unknown) => SessionDataPayload,
+    data: unknown
+): {
+    sessions: Record<string, SessionItem>;
+    sessionOrder: string[];
+    groups: Record<string, SessionGroup>;
+    groupOrder: string[];
+    sessionGroups: Record<string, string[]>;
+} {
+    const normalized = normalizeSessionData(data || {});
+    return {
+        sessions: normalized.sessions || {},
+        sessionOrder: normalized.sessionOrder || [],
+        groups: normalized.groups || {},
+        groupOrder: normalized.groupOrder || [],
+        sessionGroups: normalized.sessionGroups || {},
+    };
+}
+
+export function getComparableSessionDataJson(
+    normalizeSessionData: (data: unknown) => SessionDataPayload,
+    data: unknown
+): string {
+    return JSON.stringify(getComparableSessionData(normalizeSessionData, data));
+}
+
+export interface SessionStorageStateHost {
+    _sessionStorageStamp?: number;
+    _sessionStorageMtime?: number;
+    _sessionStorageComparableData?: unknown;
+    _sessionStorageDataJson?: string;
+    normalizeSessionData(data: unknown): SessionDataPayload;
+}
+
+export function recordSessionStorageState(
+    host: SessionStorageStateHost,
+    stamp: number,
+    mtime: number,
+    data?: unknown
+): void {
+    host._sessionStorageStamp = typeof stamp === 'number' && Number.isFinite(stamp) ? stamp : 0;
+    host._sessionStorageMtime = typeof mtime === 'number' && Number.isFinite(mtime) ? mtime : 0;
+
+    if (data) {
+        const comparable = getComparableSessionData((d) => host.normalizeSessionData(d), data);
+        host._sessionStorageComparableData = cloneJson(comparable);
+        host._sessionStorageDataJson = JSON.stringify(comparable);
+    }
+}
+
+export interface RecordSessionDataStoredHost extends SessionStorageStateHost {
+    getSessionsPath(): string;
+    getFileMtime(path: string): Promise<number>;
+}
+
+export async function recordSessionDataStored(
+    host: RecordSessionDataStoredHost,
+    sessionData: unknown
+): Promise<boolean> {
+    const stamp = getPersistStamp(sessionData);
+    recordSessionStorageState(host, stamp, Date.now(), sessionData);
+
+    try {
+        const mtime = await host.getFileMtime(host.getSessionsPath());
+        recordSessionStorageState(host, stamp, mtime || host._sessionStorageMtime || 0, sessionData);
+        return true;
+    } catch {
+        return true;
+    }
+}
+
+export interface SessionStorageInfo {
+    exists: boolean;
+    valid: boolean;
+    data: unknown;
+    stamp: number;
+    mtime: number;
+    path: string;
+    plugin: unknown;
+}
+
+export interface GetSessionStorageInfoHost {
+    getSessionsPath(): string;
+    readJsonIfExists(path: string): Promise<ReadJsonResult>;
+    getFileMtime(path: string): Promise<number>;
+}
+
+export async function getSessionStorageInfo(
+    host: GetSessionStorageInfoHost
+): Promise<SessionStorageInfo> {
+    const path = host.getSessionsPath();
+    const [res, mtimeRaw] = await Promise.all([
+        host.readJsonIfExists(path),
+        host.getFileMtime(path),
+    ]);
+    const mtime = mtimeRaw || 0;
+    const valid = !!(res.exists && !res.error && hasSessionShape(res.data));
+    return {
+        exists: !!res.exists,
+        valid: valid,
+        data: valid ? res.data : null,
+        stamp: valid ? getPersistStamp(res.data) : 0,
+        mtime: mtime,
+        path: path,
+        plugin: host,
+    };
+}
+
+export function hasLocalSessionChangesSinceStorage(
+    host: SessionStorageStateHost & { data: PluginData }
+): boolean {
+    if (!host._sessionStorageDataJson) return false;
+    return getComparableSessionDataJson((d) => host.normalizeSessionData(d), host.data || {}) !== host._sessionStorageDataJson;
+}
+
+export interface ApplySessionDataHost {
+    data: PluginData;
+    normalizeSessionData(data: unknown): SessionDataPayload;
+    extractSessionData(data: unknown): Record<string, unknown>;
+    syncSessionOrder(): void;
+    normalizeGroupFeatureState(): void;
+    updateStatusBar(): void;
+    syncSessionCommands(): void;
+    notifySessionsChanged(): void;
+    _sessionStorageComparableData?: unknown;
+}
+
+export function applySessionDataFromStorage(
+    host: ApplySessionDataHost,
+    sessionData: unknown,
+    options?: { mergeLocal?: boolean }
+): boolean {
+    const opts = options || {};
+    if (!sessionData) return false;
+
+    const localActiveSessionId = host.data && host.data.activeSessionId;
+    const localActiveGroupId = host.data && host.data.activeGroupId;
+    const next = opts.mergeLocal
+        ? (mergeExternalSessionDataForWrite(
+            host.extractSessionData(host.data || {}),
+            sessionData as Record<string, unknown>,
+            host._sessionStorageComparableData as Record<string, unknown> | null | undefined,
+            (d) => host.normalizeSessionData(d) as Record<string, unknown>
+        ) as SessionDataPayload)
+        : host.normalizeSessionData(sessionData);
+
+    host.data.sessions = next.sessions || {};
+    host.data.sessionOrder = next.sessionOrder || [];
+    host.data.groups = next.groups || {};
+    host.data.groupOrder = next.groupOrder || [];
+    host.data.sessionGroups = next.sessionGroups || {};
+
+    if (localActiveSessionId && host.data.sessions[localActiveSessionId]) {
+        host.data.activeSessionId = localActiveSessionId;
+    } else if (next.activeSessionId && host.data.sessions[next.activeSessionId]) {
+        host.data.activeSessionId = next.activeSessionId;
+    } else {
+        host.data.activeSessionId = host.data.sessionOrder[0] || Object.keys(host.data.sessions)[0] || null;
+    }
+
+    if (localActiveGroupId && host.data.groups[localActiveGroupId]) {
+        host.data.activeGroupId = localActiveGroupId;
+    } else if (next.activeGroupId && host.data.groups[next.activeGroupId]) {
+        host.data.activeGroupId = next.activeGroupId;
+    } else {
+        host.data.activeGroupId = null;
+    }
+
+    host.syncSessionOrder();
+    host.normalizeGroupFeatureState();
+    host.updateStatusBar();
+    host.syncSessionCommands();
+    host.notifySessionsChanged();
+    return true;
+}
+
+export interface ReloadExternalSessionHost extends ApplySessionDataHost, SessionStorageStateHost, GetSessionStorageInfoHost {
+    loadSessionDataFromStorage(): Promise<unknown>;
+}
+
+export async function reloadExternalSessionStorageIfChanged(
+    host: ReloadExternalSessionHost,
+    options?: { force?: boolean; mergeLocal?: boolean }
+): Promise<boolean> {
+    const opts = options || {};
+    try {
+        const info = await getSessionStorageInfo(host);
+        const currentStamp = host._sessionStorageStamp || 0;
+        const currentMtime = host._sessionStorageMtime || 0;
+        if (!opts.force && !isSessionStorageInfoNewer(info, currentStamp, currentMtime)) {
+            return false;
+        }
+
+        const mergeLocal = !!opts.mergeLocal && hasLocalSessionChangesSinceStorage(host);
+        const previousComparable = host._sessionStorageComparableData
+            ? cloneJson(host._sessionStorageComparableData)
+            : null;
+        const previousComparableJson = host._sessionStorageDataJson || '';
+
+        const sessionData = await host.loadSessionDataFromStorage();
+        if (!sessionData) return false;
+
+        const externalComparable = host._sessionStorageComparableData
+            ? cloneJson(host._sessionStorageComparableData)
+            : null;
+        const externalComparableJson = host._sessionStorageDataJson || '';
+
+        if (mergeLocal && previousComparable) {
+            host._sessionStorageComparableData = previousComparable;
+            host._sessionStorageDataJson = previousComparableJson;
+        }
+
+        const applied = applySessionDataFromStorage(host, sessionData, { mergeLocal });
+
+        if (mergeLocal && externalComparable) {
+            host._sessionStorageComparableData = externalComparable;
+            host._sessionStorageDataJson = externalComparableJson;
+        }
+
+        return applied;
+    } catch {
+        return false;
+    }
+}
+
+export interface SyncWatcherHost {
+    _syncWatcher?: SyncWatcher;
+    reloadExternalSessionStorageIfChanged(options?: { mergeLocal?: boolean; force?: boolean }): Promise<boolean>;
+    registerDomEvent?(target: unknown, event: string, handler: (e: unknown) => void): void;
+    data?: PluginData;
+}
+
+export function getSyncWatcher(host: SyncWatcherHost): SyncWatcher {
+    if (!host._syncWatcher) {
+        host._syncWatcher = new SyncWatcher({
+            onReload: () => host.reloadExternalSessionStorageIfChanged({ mergeLocal: false }),
+            registerDomEvent: typeof host.registerDomEvent === 'function'
+                ? (target, event, handler) => host.registerDomEvent!(target, event, handler)
+                : undefined,
+        });
+    }
+    return host._syncWatcher;
+}
+
+export function onExternalSettingsChange(host: SyncWatcherHost & { scheduleExternalSessionStorageReload?(debounceMs?: number): void }): void {
+    if (!host.data) return;
+    if (typeof host.scheduleExternalSessionStorageReload === 'function') {
+        host.scheduleExternalSessionStorageReload();
+    } else {
+        getSyncWatcher(host).scheduleReload();
+    }
+}
+
+export function clearSessionStorageSyncTimers(host: { _syncWatcher?: SyncWatcher }): void {
+    if (host._syncWatcher) {
+        host._syncWatcher.clearTimers();
+    }
+}
+

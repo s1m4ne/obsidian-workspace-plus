@@ -105,3 +105,121 @@ test('session sync pure helpers: isSessionStorageInfoNewer stamp and mtime check
     // Equal stamp, within epsilon
     assert.equal(isSessionStorageInfoNewer({ valid: true, stamp: 100, mtime: 110 }, 100, 100), false);
 });
+
+test('session sync host functions: state recording, info check, and sync watcher lifecycle', async () => {
+    const {
+        getComparableSessionData,
+        getComparableSessionDataJson,
+        recordSessionStorageState,
+        recordSessionDataStored,
+        getSessionStorageInfo,
+        hasLocalSessionChangesSinceStorage,
+        applySessionDataFromStorage,
+        reloadExternalSessionStorageIfChanged,
+        getSyncWatcher,
+        onExternalSettingsChange,
+        clearSessionStorageSyncTimers,
+    } = await import('../src/storage/session-sync.ts');
+
+    const normalize = (d: unknown) => (d || {}) as import('../src/storage/storage-backup.ts').SessionDataPayload;
+
+    const comp = getComparableSessionData(normalize, { sessions: { s1: {} } });
+    assert.ok(comp.sessions.s1);
+
+    const compJson = getComparableSessionDataJson(normalize, { sessions: { s1: {} } });
+    assert.ok(typeof compJson === 'string');
+
+    const stateHost: import('../src/storage/session-sync.ts').SessionStorageStateHost & { data: import('../src/storage/default-data.ts').PluginData } = {
+        normalizeSessionData: normalize,
+        data: {
+            activeSessionId: 's1',
+            sessions: { s1: { id: 's1', name: 'S1', layout: {} } },
+            sessionOrder: ['s1'],
+            groups: {},
+            groupOrder: [],
+            sessionGroups: {},
+            activeGroupId: null,
+        } as unknown as import('../src/storage/default-data.ts').PluginData,
+    };
+
+    recordSessionStorageState(stateHost, 123, 456, stateHost.data);
+    assert.equal(stateHost._sessionStorageStamp, 123);
+    assert.equal(stateHost._sessionStorageMtime, 456);
+    assert.equal(hasLocalSessionChangesSinceStorage(stateHost), false);
+
+    stateHost.data.sessionOrder = ['s1', 's2'];
+    assert.equal(hasLocalSessionChangesSinceStorage(stateHost), true);
+
+    const recordHost: import('../src/storage/session-sync.ts').RecordSessionDataStoredHost = {
+        ...stateHost,
+        getSessionsPath: () => 'sessions.json',
+        getFileMtime: async () => 789,
+    };
+    const storedOk = await recordSessionDataStored(recordHost, { _wppSavedAt: 999 });
+    assert.equal(storedOk, true);
+    assert.equal(recordHost._sessionStorageStamp, 999);
+    assert.equal(recordHost._sessionStorageMtime, 789);
+
+    const infoHost: import('../src/storage/session-sync.ts').GetSessionStorageInfoHost = {
+        getSessionsPath: () => 'sessions.json',
+        readJsonIfExists: async () => ({ exists: true, data: { sessions: { s1: {} } }, error: null }),
+        getFileMtime: async () => 1000,
+    };
+    const info = await getSessionStorageInfo(infoHost);
+    assert.equal(info.exists, true);
+    assert.equal(info.valid, true);
+
+    let changedNotified = false;
+    const applyHost: import('../src/storage/session-sync.ts').ApplySessionDataHost = {
+        data: {
+            activeSessionId: 's1',
+            sessions: { s1: { id: 's1', name: 'S1', layout: {} } },
+            sessionOrder: ['s1'],
+            groups: {},
+            groupOrder: [],
+            sessionGroups: {},
+            activeGroupId: null,
+        } as unknown as import('../src/storage/default-data.ts').PluginData,
+        normalizeSessionData: normalize,
+        extractSessionData: (d) => d as Record<string, unknown>,
+        syncSessionOrder: () => {},
+        normalizeGroupFeatureState: () => {},
+        updateStatusBar: () => {},
+        syncSessionCommands: () => {},
+        notifySessionsChanged: () => {
+            changedNotified = true;
+        },
+    };
+
+    const applyResult = applySessionDataFromStorage(applyHost, { sessions: { s2: { id: 's2', name: 'S2', layout: {} } } });
+    assert.equal(applyResult, true);
+    assert.equal(changedNotified, true);
+
+    const reloadHost: import('../src/storage/session-sync.ts').ReloadExternalSessionHost = {
+        ...applyHost,
+        ...infoHost,
+        _sessionStorageStamp: 50,
+        _sessionStorageMtime: 50,
+        loadSessionDataFromStorage: async () => ({ sessions: { s3: { id: 's3', name: 'S3', layout: {} } } }),
+    };
+    const reloadResult = await reloadExternalSessionStorageIfChanged(reloadHost, { force: true });
+    assert.equal(reloadResult, true);
+
+    const watcherHost: import('../src/storage/session-sync.ts').SyncWatcherHost = {
+        reloadExternalSessionStorageIfChanged: async () => true,
+        data: applyHost.data,
+    };
+    const watcher = getSyncWatcher(watcherHost);
+    assert.ok(watcher);
+
+    let scheduledReload = false;
+    onExternalSettingsChange({
+        ...watcherHost,
+        scheduleExternalSessionStorageReload: () => {
+            scheduledReload = true;
+        },
+    });
+    assert.equal(scheduledReload, true);
+
+    clearSessionStorageSyncTimers(watcherHost);
+});

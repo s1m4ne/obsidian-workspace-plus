@@ -89,6 +89,9 @@ test('session sync applies external data without changing the local active sessi
     assert.equal(plugin.statusBarUpdates, 1);
     assert.equal(plugin.commandSyncs, 1);
     assert.equal(plugin.overlayRefreshes, 1);
+
+    assert.equal(plugin.applySessionDataFromStorage(null), false);
+    assert.equal(plugin.applySessionDataFromStorage(undefined), false);
 });
 
 test('session sync falls back when the local active session was deleted externally', function () {
