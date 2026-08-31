@@ -33,9 +33,7 @@ function attachSessionSyncMethods(WorkspacePlusPlus) {
     };
 
     WorkspacePlusPlus.prototype.isSessionStorageInfoNewer = function (info) {
-        var currentStamp = this._sessionStorageStamp || 0;
-        var currentMtime = this._sessionStorageMtime || 0;
-        return sessionSync.isSessionStorageInfoNewer(info, currentStamp, currentMtime);
+        return sessionSync.isSessionStorageInfoNewerForHost(this, info);
     };
 
     WorkspacePlusPlus.prototype.hasLocalSessionChangesSinceStorage = function () {
@@ -43,14 +41,7 @@ function attachSessionSyncMethods(WorkspacePlusPlus) {
     };
 
     WorkspacePlusPlus.prototype.mergeExternalSessionDataForWrite = function (externalData) {
-        var self = this;
-        var local = this.extractSessionData(this.data || {});
-        return sessionSync.mergeExternalSessionDataForWrite(
-            local,
-            externalData,
-            this._sessionStorageComparableData,
-            function (d) { return self.normalizeSessionData(d); }
-        );
+        return sessionSync.mergeExternalSessionDataForHost(this, externalData);
     };
 
     WorkspacePlusPlus.prototype.applySessionDataFromStorage = function (sessionData, options) {

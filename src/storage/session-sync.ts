@@ -205,6 +205,46 @@ export function recordSessionStorageState(
     }
 }
 
+/**
+ * The same comparison, reading the two numbers off the host rather than taking
+ * them as arguments. The caller almost always has a host and not a pair of
+ * timestamps, and getting the order of those two arguments wrong is silent.
+ */
+export function isSessionStorageInfoNewerForHost(
+    host: SessionStorageStateHost,
+    info: { valid?: boolean; stamp?: number; mtime?: number } | null | undefined
+): boolean {
+    return isSessionStorageInfoNewer(info, host._sessionStorageStamp || 0, host._sessionStorageMtime || 0);
+}
+
+export interface MergeExternalSessionDataHost {
+    data: Record<string, unknown>;
+    /** The snapshot taken at the last read, which is the merge's baseline. */
+    _sessionStorageComparableData?: unknown;
+    extractSessionData(data: unknown): Record<string, unknown>;
+    // Declared here rather than inherited from SessionStorageStateHost, whose
+    // narrower SessionDataPayload return type is not the shape the merge works
+    // in. Casting the callback would have hidden that.
+    normalizeSessionData(data: unknown): Record<string, unknown>;
+}
+
+/**
+ * Merge what another device wrote into what this one holds, using the snapshot
+ * recorded at our last read as the baseline. Without that baseline a field this
+ * device never touched is indistinguishable from one it deliberately cleared.
+ */
+export function mergeExternalSessionDataForHost(
+    host: MergeExternalSessionDataHost,
+    externalData: Record<string, unknown>
+): Record<string, unknown> {
+    return mergeExternalSessionDataForWrite(
+        host.extractSessionData(host.data || {}),
+        externalData,
+        host._sessionStorageComparableData as Record<string, unknown> | null | undefined,
+        (d) => host.normalizeSessionData(d),
+    );
+}
+
 export interface RecordSessionDataStoredHost extends SessionStorageStateHost {
     getSessionsPath(): string;
     getFileMtime(path: string): Promise<number>;

@@ -92,6 +92,35 @@ test('session sync pure helpers: mergeObjectWithLocalDeletes and mergeExternalSe
     assert.ok('ext' in (writeMerge.sessions as Record<string, unknown>));
 });
 
+test('session sync: the host wrapper reads its own stamp and mtime, in that order', async () => {
+    const { isSessionStorageInfoNewerForHost } = await import('../src/storage/session-sync.ts');
+    const host = {
+        _sessionStorageStamp: 200,
+        _sessionStorageMtime: 100,
+        normalizeSessionData: (d: unknown) => d as Record<string, unknown>,
+    };
+
+    // Older stamp than the host's: not newer. Passing 0 for the host's stamp
+    // instead would make this true, which is how an unread wrapper looks.
+    assert.equal(isSessionStorageInfoNewerForHost(host, { valid: true, stamp: 150 }), false);
+    assert.equal(isSessionStorageInfoNewerForHost(host, { valid: true, stamp: 250 }), true);
+
+    // The two numbers are deliberately different and deliberately crossed: with
+    // the arguments swapped, a file whose stamp equals the host's mtime would
+    // read as newer. Getting that order wrong is otherwise silent, and it
+    // decides whether another device's edit is taken or discarded.
+    assert.equal(
+        isSessionStorageInfoNewerForHost(host, { valid: true, stamp: 100 }),
+        false,
+        'a stamp matching the host mtime is not newer than the host stamp',
+    );
+    assert.equal(
+        isSessionStorageInfoNewerForHost(host, { valid: true, stamp: 200, mtime: 100 }),
+        false,
+        'equal stamps fall through to mtime, which is not ahead either',
+    );
+});
+
 test('session sync pure helpers: isSessionStorageInfoNewer stamp and mtime checks', () => {
     assert.equal(isSessionStorageInfoNewer(null, 100, 100), false);
     assert.equal(isSessionStorageInfoNewer({ valid: false }, 100, 100), false);
