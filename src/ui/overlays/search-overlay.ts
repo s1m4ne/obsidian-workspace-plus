@@ -92,7 +92,7 @@ export class SearchOverlay {
     }
 
     filterSessionsByQuery(sessions: SessionItem[], query: string): SessionItem[] {
-        var q = (query || '').trim().toLowerCase();
+        const q = (query || '').trim().toLowerCase();
         if (!q) return sessions.slice();
         return sessions.filter(function (s) {
             return (s.name || '').toLowerCase().indexOf(q) !== -1;
@@ -101,20 +101,20 @@ export class SearchOverlay {
 
     open(anchorEl?: HTMLElement | null): void {
         const strings = L;
-        var self = this.host;
-        var overlayGroupId = self.isGroupFeatureEnabled()
+        const self = this.host;
+        let overlayGroupId = self.isGroupFeatureEnabled()
             ? (self.data.activeGroupId || null)
             : null;
         self.searchOverlayViewGroupId = overlayGroupId;
-        var ordered = self.getOrderedSessionsForGroup(overlayGroupId);
-        var focusTarget = self.data.overlayDefaultFocus || 'current-session';
+        let ordered = self.getOrderedSessionsForGroup(overlayGroupId);
+        const focusTarget = self.data.overlayDefaultFocus || 'current-session';
 
         self.hideSwitchOverlay();
         self.hideSearchOverlay();
 
-        var filtered = ordered.slice();
-        var selectedIndex = 0;
-        var keyboardNav = false;
+        let filtered = ordered.slice();
+        let selectedIndex = 0;
+        let keyboardNav = false;
 
         function syncSelectedIndexToActive(options?: { preserveWhenMissing?: boolean }): void {
             selectedIndex = searchOverlayKeys.syncSearchOverlaySelectedIndex(self, filtered, selectedIndex, options || {});
@@ -127,7 +127,7 @@ export class SearchOverlay {
                 self.searchOverlayViewGroupId = null;
                 return null;
             }
-            var groups = self.data.groups || {};
+            const groups = self.data.groups || {};
             if (overlayGroupId && !groups[overlayGroupId]) {
                 overlayGroupId = self.data.activeGroupId || null;
             }
@@ -145,37 +145,37 @@ export class SearchOverlay {
             });
         }
 
-        var overlay = document.createElement('div');
+        const overlay = document.createElement('div');
         overlay.className = 'wpp-switch-overlay wpp-search-overlay';
         overlay.tabIndex = -1;
 
         // Resize handles at four corners
-        var corners = ['tl', 'tr', 'bl', 'br'];
-        for (var ci = 0; ci < corners.length; ci++) {
-            var corner = document.createElement('div');
+        const corners = ['tl', 'tr', 'bl', 'br'];
+        for (let ci = 0; ci < corners.length; ci++) {
+            const corner = document.createElement('div');
             corner.className = 'wpp-resize-corner wpp-resize-' + corners[ci];
             corner.dataset.corner = corners[ci];
             overlay.appendChild(corner);
         }
 
         // Resize handles at four edges
-        var edges = ['top', 'right', 'bottom', 'left'];
-        for (var ei = 0; ei < edges.length; ei++) {
-            var edgeEl = document.createElement('div');
+        const edges = ['top', 'right', 'bottom', 'left'];
+        for (let ei = 0; ei < edges.length; ei++) {
+            const edgeEl = document.createElement('div');
             edgeEl.className = 'wpp-resize-edge wpp-resize-' + edges[ei];
             edgeEl.dataset.edge = edges[ei];
             overlay.appendChild(edgeEl);
         }
 
         // Header row: count + close button
-        var headerRow = document.createElement('div');
+        const headerRow = document.createElement('div');
         headerRow.className = 'wpp-search-header';
 
-        var countSpan = document.createElement('div');
+        const countSpan = document.createElement('div');
         countSpan.className = 'wpp-switch-count';
         headerRow.appendChild(countSpan);
 
-        var closeBtn = document.createElement('div');
+        const closeBtn = document.createElement('div');
         closeBtn.className = 'wpp-search-close';
         setIcon(closeBtn, 'x');
         closeBtn.addEventListener('click', function (e) {
@@ -187,23 +187,23 @@ export class SearchOverlay {
         overlay.appendChild(headerRow);
 
         // Save section (same as main modal)
-        var saveRow = document.createElement('div');
+        const saveRow = document.createElement('div');
         saveRow.className = 'wpp-save-container';
-        var saveInput = document.createElement('input');
+        const saveInput = document.createElement('input');
         saveInput.type = 'text';
         saveInput.className = 'wpp-save-input';
         saveInput.placeholder = localizedString(strings.savePlaceholder);
         saveRow.appendChild(saveInput);
-        var saveBtn = document.createElement('button');
+        const saveBtn = document.createElement('button');
         saveBtn.className = 'wpp-save-btn';
         saveBtn.textContent = localizedString(strings.save);
         saveRow.appendChild(saveBtn);
 
         function onOverlaySave() {
-            var selectedGroupId = getOverlayGroupId();
+            const selectedGroupId = getOverlayGroupId();
             self.createSessionForViewedGroup(saveInput.value, selectedGroupId).then(function (result) {
                 if (!result || !result.created) return;
-                var createdName = result.name;
+                const createdName = result.name;
                 overlayGroupId = result.viewGroupId || null;
                 self.searchOverlayViewGroupId = overlayGroupId;
                 saveInput.value = '';
@@ -226,9 +226,9 @@ export class SearchOverlay {
         overlay.appendChild(saveRow);
 
         // Search / filter section
-        var searchRow = document.createElement('div');
+        const searchRow = document.createElement('div');
         searchRow.className = 'wpp-search-row';
-        var searchInput = document.createElement('input');
+        const searchInput = document.createElement('input');
         searchInput.type = 'text';
         searchInput.className = 'wpp-search-input';
         searchInput.placeholder = localizedString(strings.searchOverlayPlaceholder);
@@ -240,7 +240,7 @@ export class SearchOverlay {
         overlay.appendChild(searchRow);
 
         // Group tabs row
-        var groupTabsRow = document.createElement('div');
+        const groupTabsRow = document.createElement('div');
         groupTabsRow.className = 'wpp-group-tabs';
 
         function stripSaveHint(text: string): string {
@@ -249,21 +249,21 @@ export class SearchOverlay {
 
         function renderGroupTabs() {
             while (groupTabsRow.firstChild) groupTabsRow.removeChild(groupTabsRow.firstChild);
-            var autoSave = self.isAutoSaveOnSwitchEnabled();
+            const autoSave = self.isAutoSaveOnSwitchEnabled();
             if (!self.isGroupFeatureEnabled()) {
                 groupTabsRow.style.display = 'none';
                 footerRow.textContent = autoSave ? stripSaveHint(localizedString(strings.searchOverlayHelp)) : localizedString(strings.searchOverlayHelp);
                 return;
             }
-            var groups = self.data.groups || {};
-            var realGroups = self.getOrderedGroups();
+            const groups = self.data.groups || {};
+            const realGroups = self.getOrderedGroups();
             groupTabsRow.style.display = '';
-            var helpText = realGroups.length > 0
+            const helpText = realGroups.length > 0
                 ? (localizedString(strings.searchOverlayHelpWithGroups) || localizedString(strings.searchOverlayHelp))
                 : localizedString(strings.searchOverlayHelp);
             footerRow.textContent = autoSave ? stripSaveHint(helpText) : helpText;
 
-            var groupOrder = self.getOrderedGroupTabIds();
+            const groupOrder = self.getOrderedGroupTabIds();
             groupTabUi.renderGroupTabs({
                 app: self.app,
                 plugin: self,
@@ -306,16 +306,18 @@ export class SearchOverlay {
 
         overlay.appendChild(groupTabsRow);
 
-        var list = document.createElement('div');
+        const list = document.createElement('div');
         list.className = 'wpp-switch-list wpp-search-list';
         overlay.appendChild(list);
 
-        var emptyEl = document.createElement('div');
+        const emptyEl = document.createElement('div');
         emptyEl.className = 'wpp-search-empty';
         emptyEl.textContent = localizedString(strings.noFilteredSessions);
         overlay.appendChild(emptyEl);
 
-        var footerRow = document.createElement('div');
+        // Referenced by renderGroupTabs above, which only ever runs from a
+        // callback - so it resolves after this line, and let is enough.
+        const footerRow = document.createElement('div');
         footerRow.className = 'wpp-switch-footer';
         overlay.appendChild(footerRow);
 
@@ -347,7 +349,7 @@ export class SearchOverlay {
             }
 
             if (selectedIndex < 0 || selectedIndex >= filtered.length) {
-                var activeIdx = self.findActiveSessionIndex(filtered);
+                const activeIdx = self.findActiveSessionIndex(filtered);
                 selectedIndex = activeIdx !== -1 ? activeIdx : 0;
             }
 
@@ -355,26 +357,26 @@ export class SearchOverlay {
             emptyEl.style.display = 'none';
             countSpan.textContent = (selectedIndex + 1) + ' / ' + filtered.length;
 
-            for (var i = 0; i < filtered.length; i++) {
-                var session = filtered[i];
+            for (let i = 0; i < filtered.length; i++) {
+                const session = filtered[i];
                 if (!session) continue;
-                var presentation = deriveSessionPresentation(session, {
+                const presentation = deriveSessionPresentation(session, {
                     activeSessionId: self.data.activeSessionId,
                 });
-                var isActive = presentation.isActive;
-                var item = document.createElement('div');
+                const isActive = presentation.isActive;
+                const item = document.createElement('div');
                 item.className = 'wpp-switch-item';
                 if (i === selectedIndex) item.classList.add('wpp-kb-selected');
                 item.dataset.sessionId = presentation.id;
 
                 // Info column (name + modified time)
-                var infoCol = document.createElement('div');
+                const infoCol = document.createElement('div');
                 infoCol.className = 'wpp-qs-info-col';
 
-                var nameRow = document.createElement('div');
+                const nameRow = document.createElement('div');
                 nameRow.className = 'wpp-qs-name-row';
 
-                var name = document.createElement('div');
+                const name = document.createElement('div');
                 name.className = 'wpp-switch-name';
                 name.textContent = presentation.name;
                 nameRow.appendChild(name);
@@ -382,7 +384,7 @@ export class SearchOverlay {
                 infoCol.appendChild(nameRow);
 
                 // Modified timestamp
-                var modifiedEl = document.createElement('div');
+                const modifiedEl = document.createElement('div');
                 modifiedEl.className = 'wpp-qs-modified';
                 modifiedEl.textContent = presentation.modifiedText;
                 infoCol.appendChild(modifiedEl);
@@ -390,19 +392,19 @@ export class SearchOverlay {
                 item.appendChild(infoCol);
 
                 if (isActive) {
-                    var badge = document.createElement('span');
+                    const badge = document.createElement('span');
                     badge.className = 'wpp-active-badge';
                     badge.textContent = localizedString(strings.active);
                     item.appendChild(badge);
                 }
 
                 // Action icons (save?, rename & delete)
-                var actions = document.createElement('div');
+                const actions = document.createElement('div');
                 actions.className = 'wpp-qs-actions';
 
                 // Save & reload icons (only for active session when auto-save is disabled)
-                var saveIcon = null;
-                var reloadIcon = null;
+                let saveIcon = null;
+                let reloadIcon = null;
                 if (isActive && !self.isAutoSaveOnSwitchEnabled()) {
                     saveIcon = document.createElement('div');
                     saveIcon.className = 'wpp-qs-action-btn';
@@ -417,13 +419,13 @@ export class SearchOverlay {
                     actions.appendChild(reloadIcon);
                 }
 
-                var renameIcon = document.createElement('div');
+                const renameIcon = document.createElement('div');
                 renameIcon.className = 'wpp-qs-action-btn';
                 setIcon(renameIcon, 'pencil');
                 setTooltip(renameIcon, localizedString(strings.rename), { delay: 250 });
                 actions.appendChild(renameIcon);
 
-                var deleteIcon = document.createElement('div');
+                const deleteIcon = document.createElement('div');
                 deleteIcon.className = 'wpp-qs-action-btn';
                 setIcon(deleteIcon, 'trash-2');
                 setTooltip(deleteIcon, localizedString(strings.delete), { delay: 250 });
@@ -452,7 +454,7 @@ export class SearchOverlay {
                     // Right-click context menu
                     itemEl.addEventListener('contextmenu', function (e) {
                         e.preventDefault();
-                        var selectedGroupId = getOverlayGroupId();
+                        const selectedGroupId = getOverlayGroupId();
                         sessionContextActions.openSessionContextMenu({
                             plugin: self,
                             app: self.app,
@@ -477,7 +479,7 @@ export class SearchOverlay {
                     if (_saveIcon) {
                         _saveIcon.addEventListener('click', function (e) {
                             e.stopPropagation();
-                            var doSave = function () {
+                            const doSave = function () {
                                 self.saveActiveSession().then(function () {
                                     refreshOrderedSessions();
                                 });
@@ -494,7 +496,7 @@ export class SearchOverlay {
                     if (_reloadIcon) {
                         _reloadIcon.addEventListener('click', function (e) {
                             e.stopPropagation();
-                            var doReload = function () {
+                            const doReload = function () {
                                 self.reloadCurrentSessionWithoutSaving();
                             };
                             if (self.data.confirmQuickActions) {
@@ -538,7 +540,7 @@ export class SearchOverlay {
             }
 
             // Scroll selected (active) item into view
-            var selectedItem = list.querySelector('.wpp-kb-selected');
+            const selectedItem = list.querySelector('.wpp-kb-selected');
             if (selectedItem) {
                 selectedItem.scrollIntoView({ block: 'nearest' });
             }
@@ -553,8 +555,8 @@ export class SearchOverlay {
                 ignoreSelector: '.wpp-qs-action-btn',
                 groupTabsContainer: groupTabsRow,
                 onDropOnGroup: function (sessionId, groupId) {
-                    var sessionName = (self.data.sessions[sessionId] || {}).name || '';
-                    var groupName = (self.data.groups[groupId] || {}).name || '';
+                    const sessionName = (self.data.sessions[sessionId] || {}).name || '';
+                    const groupName = (self.data.groups[groupId] || {}).name || '';
                     return self.moveSessionToGroupExclusive(sessionId, groupId).then(function () {
                         new Notice(localizedCall(L.groupAddedSession, sessionName, groupName));
                         renderGroupTabs();
@@ -562,10 +564,10 @@ export class SearchOverlay {
                     });
                 },
                 onDropOnAllGroup: function (sessionId) {
-                    var currentGroupId = getOverlayGroupId();
+                    const currentGroupId = getOverlayGroupId();
                     if (currentGroupId) {
-                        var rmSessionName = (self.data.sessions[sessionId] || {}).name || '';
-                        var rmGroupName = (self.data.groups[currentGroupId] || {}).name || '';
+                        const rmSessionName = (self.data.sessions[sessionId] || {}).name || '';
+                        const rmGroupName = (self.data.groups[currentGroupId] || {}).name || '';
                         return self.removeSessionFromGroup(sessionId, currentGroupId).then(function () {
                             new Notice(localizedCall(L.groupRemovedSession, rmSessionName, rmGroupName));
                             renderGroupTabs();
@@ -584,15 +586,15 @@ export class SearchOverlay {
         }
 
         function updateSelection() {
-            var items = list.querySelectorAll('.wpp-switch-item');
-            for (var si = 0; si < items.length; si++) {
-                var item = items[si];
+            const items = list.querySelectorAll('.wpp-switch-item');
+            for (let si = 0; si < items.length; si++) {
+                const item = items[si];
                 if (item) item.classList.toggle('wpp-kb-selected', si === selectedIndex);
             }
             if (filtered.length > 0) {
                 countSpan.textContent = (selectedIndex + 1) + ' / ' + filtered.length;
             }
-            var selectedItem = items[selectedIndex];
+            const selectedItem = items[selectedIndex];
             if (keyboardNav && selectedItem) {
                 selectedItem.scrollIntoView({ block: 'nearest' });
             }
@@ -638,11 +640,11 @@ export class SearchOverlay {
 
         function switchSelected(opts: { shiftKey?: boolean } = {}): void {
             if (selectedIndex < 0 || selectedIndex >= filtered.length) return;
-            var target = filtered[selectedIndex];
+            const target = filtered[selectedIndex];
             if (!target) return;
             if (target.id === self.data.activeSessionId) {
                 if (opts.shiftKey) {
-                    var doSave = function () {
+                    const doSave = function () {
                         self.saveActiveSession().then(function () {
                             refreshOrderedSessions();
                         });
@@ -653,7 +655,7 @@ export class SearchOverlay {
                         doSave();
                     }
                 } else {
-                    var doReload = function () {
+                    const doReload = function () {
                         self.reloadCurrentSessionWithoutSaving();
                     };
                     if (self.data.confirmQuickActions) {
@@ -719,22 +721,22 @@ export class SearchOverlay {
         renderList();
 
         // Position overlay relative to anchor (status bar button)
-        var margin = 8;
+        const margin = 8;
 
-        var STATUS_BAR_FALLBACK_HEIGHT = 28;
-        var MIN_VISIBLE_HEIGHT = 20;
+        const STATUS_BAR_FALLBACK_HEIGHT = 28;
+        const MIN_VISIBLE_HEIGHT = 20;
 
         function cacheStatusBarMetrics() {
-            var aEl = anchorEl || self.statusBarEl;
-            var statusBar = aEl ? aEl.closest('.status-bar') : document.querySelector('.status-bar');
+            const aEl = anchorEl || self.statusBarEl;
+            const statusBar = aEl ? aEl.closest('.status-bar') : document.querySelector('.status-bar');
             if (statusBar) {
-                var h = statusBar.getBoundingClientRect().height;
+                const h = statusBar.getBoundingClientRect().height;
                 if (h >= MIN_VISIBLE_HEIGHT) {
                     self._cachedBarHeight = h;
                 }
             }
             if (aEl) {
-                var aRect = aEl.getBoundingClientRect();
+                const aRect = aEl.getBoundingClientRect();
                 if (aRect.width > 0 && aRect.height > 0) {
                     self._cachedAnchorCenterX = aRect.left + aRect.width / 2;
                 }
@@ -745,16 +747,16 @@ export class SearchOverlay {
         cacheStatusBarMetrics();
 
         function positionToAnchor() {
-            var oRect = overlay.getBoundingClientRect();
-            var barHeight = self._cachedBarHeight || STATUS_BAR_FALLBACK_HEIGHT;
+            const oRect = overlay.getBoundingClientRect();
+            const barHeight = self._cachedBarHeight || STATUS_BAR_FALLBACK_HEIGHT;
 
             // Horizontal: use cached anchor center, or viewport center
-            var centerX = self._cachedAnchorCenterX || window.innerWidth / 2;
-            var lp = centerX - oRect.width / 2;
+            const centerX = self._cachedAnchorCenterX || window.innerWidth / 2;
+            let lp = centerX - oRect.width / 2;
             lp = Math.max(margin, Math.min(lp, window.innerWidth - oRect.width - margin));
 
             // Vertical: always position above status bar area
-            var bp = barHeight + margin;
+            let bp = barHeight + margin;
             if (bp + oRect.height > window.innerHeight - margin) {
                 bp = margin;
             }
@@ -766,9 +768,9 @@ export class SearchOverlay {
         }
 
         // Apply saved size
-        var savedSize = self.data.searchOverlaySize;
-        var MIN_WIDTH = 220;
-        var MIN_HEIGHT = 140;
+        const savedSize = self.data.searchOverlaySize;
+        const MIN_WIDTH = 220;
+        const MIN_HEIGHT = 140;
 
         if (savedSize && savedSize.width != null && savedSize.height != null) {
             overlay.style.width = Math.max(MIN_WIDTH, savedSize.width) + 'px';
@@ -787,12 +789,12 @@ export class SearchOverlay {
         }
 
         // Position: saved position > anchor-based > CSS default
-        var savedPos = self.data.searchOverlayPosition;
+        const savedPos = self.data.searchOverlayPosition;
 
         if (savedPos && savedPos.left != null && savedPos.bottom != null) {
-            var overlayRect = overlay.getBoundingClientRect();
-            var sl = Math.max(margin, Math.min(savedPos.left, window.innerWidth - overlayRect.width - margin));
-            var sb = Math.max(margin, Math.min(savedPos.bottom, window.innerHeight - overlayRect.height - margin));
+            const overlayRect = overlay.getBoundingClientRect();
+            const sl = Math.max(margin, Math.min(savedPos.left, window.innerWidth - overlayRect.width - margin));
+            const sb = Math.max(margin, Math.min(savedPos.bottom, window.innerHeight - overlayRect.height - margin));
             overlay.style.right = 'auto';
             overlay.style.top = 'auto';
             overlay.style.left = sl + 'px';
@@ -844,34 +846,34 @@ export class SearchOverlay {
 
         // Resize via corner and edge handles
         overlay.addEventListener('mousedown', function (e) {
-            var cornerEl = closest(e.target, '.wpp-resize-corner');
-            var edgeEl = !cornerEl ? closest(e.target, '.wpp-resize-edge') : null;
+            const cornerEl = closest(e.target, '.wpp-resize-corner');
+            const edgeEl = !cornerEl ? closest(e.target, '.wpp-resize-edge') : null;
             if (!cornerEl && !edgeEl) return;
             if (e.button !== 0) return;
             e.preventDefault();
             e.stopPropagation();
 
-            var dir = cornerEl ? cornerEl.dataset.corner : null;
-            var edge = edgeEl ? edgeEl.dataset.edge : null;
-            var startX = e.clientX;
-            var startY = e.clientY;
-            var startRect = overlay.getBoundingClientRect();
-            var startWidth = startRect.width;
-            var startHeight = startRect.height;
-            var startLeft = startRect.left;
-            var startBottom = window.innerHeight - startRect.bottom;
+            const dir = cornerEl ? cornerEl.dataset.corner : null;
+            const edge = edgeEl ? edgeEl.dataset.edge : null;
+            const startX = e.clientX;
+            const startY = e.clientY;
+            const startRect = overlay.getBoundingClientRect();
+            const startWidth = startRect.width;
+            const startHeight = startRect.height;
+            const startLeft = startRect.left;
+            const startBottom = window.innerHeight - startRect.bottom;
 
             function onMove(ev: MouseEvent): void {
-                var dx = ev.clientX - startX;
-                var dy = ev.clientY - startY;
-                var newWidth = startWidth;
-                var newHeight = startHeight;
-                var newLeft = startLeft;
-                var newBottom = startBottom;
+                const dx = ev.clientX - startX;
+                const dy = ev.clientY - startY;
+                let newWidth = startWidth;
+                let newHeight = startHeight;
+                let newLeft = startLeft;
+                let newBottom = startBottom;
 
                 // Horizontal
-                var moveRight = dir === 'tr' || dir === 'br' || edge === 'right';
-                var moveLeft  = dir === 'tl' || dir === 'bl' || edge === 'left';
+                const moveRight = dir === 'tr' || dir === 'br' || edge === 'right';
+                const moveLeft  = dir === 'tl' || dir === 'bl' || edge === 'left';
                 if (moveRight) {
                     newWidth = Math.max(MIN_WIDTH, startWidth + dx);
                 } else if (moveLeft) {
@@ -880,8 +882,8 @@ export class SearchOverlay {
                 }
 
                 // Vertical
-                var moveTop    = dir === 'tl' || dir === 'tr' || edge === 'top';
-                var moveBottom = dir === 'bl' || dir === 'br' || edge === 'bottom';
+                const moveTop    = dir === 'tl' || dir === 'tr' || edge === 'top';
+                const moveBottom = dir === 'bl' || dir === 'br' || edge === 'bottom';
                 if (moveTop) {
                     newHeight = Math.max(MIN_HEIGHT, startHeight - dy);
                 } else if (moveBottom) {
@@ -924,7 +926,7 @@ export class SearchOverlay {
                 document.removeEventListener('mousemove', onMove);
                 document.removeEventListener('mouseup', onUp);
 
-                var finalRect = overlay.getBoundingClientRect();
+                const finalRect = overlay.getBoundingClientRect();
                 self.data.searchOverlaySize = {
                     width: finalRect.width,
                     height: finalRect.height,
@@ -956,17 +958,17 @@ export class SearchOverlay {
             e.preventDefault();
             overlay.classList.add('wpp-dragging');
 
-            var rect = overlay.getBoundingClientRect();
-            var offsetX = e.clientX - rect.left;
-            var offsetY = e.clientY - rect.top;
+            const rect = overlay.getBoundingClientRect();
+            const offsetX = e.clientX - rect.left;
+            const offsetY = e.clientY - rect.top;
 
             function onMove(ev: MouseEvent): void {
-                var newLeft = ev.clientX - offsetX;
-                var newTop = ev.clientY - offsetY;
-                var oRect = overlay.getBoundingClientRect();
+                let newLeft = ev.clientX - offsetX;
+                let newTop = ev.clientY - offsetY;
+                const oRect = overlay.getBoundingClientRect();
                 newLeft = Math.max(margin, Math.min(newLeft, window.innerWidth - oRect.width - margin));
                 newTop = Math.max(margin, Math.min(newTop, window.innerHeight - oRect.height - margin));
-                var newBottom = window.innerHeight - newTop - oRect.height;
+                const newBottom = window.innerHeight - newTop - oRect.height;
                 overlay.style.right = 'auto';
                 overlay.style.top = 'auto';
                 overlay.style.left = newLeft + 'px';
@@ -979,7 +981,7 @@ export class SearchOverlay {
                 overlay.classList.remove('wpp-dragging');
 
                 // Save position (bottom-based for stable positioning on resize)
-                var finalRect = overlay.getBoundingClientRect();
+                const finalRect = overlay.getBoundingClientRect();
                 self.data.searchOverlayPosition = {
                     left: finalRect.left,
                     bottom: window.innerHeight - finalRect.bottom,
@@ -992,7 +994,7 @@ export class SearchOverlay {
         });
 
         if (focusTarget !== 'session-create') {
-            var guardHandler = function (e: FocusEvent): void {
+            const guardHandler = function (e: FocusEvent): void {
                 if (e.target === saveInput) {
                     e.preventDefault();
                     e.stopImmediatePropagation();

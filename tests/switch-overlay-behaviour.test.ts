@@ -564,3 +564,51 @@ test('an overlay whose keyup never arrives is dismissed by the safety timer', as
     assert.equal(longestDelay, 5000, 'the fallback is armed, at a delay a person would wait out');
     plugin.hideSwitchOverlay();
 });
+
+// Three behaviours in the moved search overlay that nothing was holding. All
+// three were verified by mutation: zeroing the status-bar fallback height,
+// raising the minimum width past any saved size, and renaming the dblclick
+// event all left the whole suite passing.
+
+test('a saved size smaller than the minimum is opened at the minimum', () => {
+    const plugin = createTestPlugin();
+    // What a person gets after dragging the overlay down to nothing and
+    // reopening it: too small to use, and no way back except the reset.
+    plugin.data.searchOverlaySize = { width: 10, height: 10 };
+
+    plugin.openSearchOverlay();
+
+    const el = plugin.searchOverlayEl;
+    assert.ok(el);
+    assert.equal(el.style.width, '220px', 'width is floored');
+    assert.equal(el.style.height, '140px', 'height is floored');
+    plugin.hideSearchOverlay();
+});
+
+test('double-clicking the background forgets the saved position and size', () => {
+    const plugin = createTestPlugin();
+    plugin.data.searchOverlayPosition = { left: 10, bottom: 10 };
+    plugin.data.searchOverlaySize = { width: 500, height: 400 };
+
+    plugin.openSearchOverlay();
+    const el = plugin.searchOverlayEl;
+    assert.ok(el);
+    el.dispatchEvent(new harness.dom.window.MouseEvent('dblclick', { bubbles: true }));
+
+    assert.equal(plugin.data.searchOverlayPosition, null, 'the saved position is cleared');
+    assert.equal(plugin.data.searchOverlaySize, null, 'and so is the saved size');
+    plugin.hideSearchOverlay();
+});
+
+test('the overlay clears the status bar even when its height cannot be read', () => {
+    const plugin = createTestPlugin();
+    // jsdom reports every element as zero-sized, which is also what happens in
+    // Obsidian when the status bar is hidden. The fallback height is what keeps
+    // the overlay from sitting on top of it.
+    plugin.openSearchOverlay();
+
+    const el = plugin.searchOverlayEl;
+    assert.ok(el);
+    assert.equal(el.style.bottom, '36px', 'bottom = fallback bar height 28 + margin 8');
+    plugin.hideSearchOverlay();
+});
