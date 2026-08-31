@@ -170,6 +170,16 @@ export class StatusBarController {
         return this._scrollEventAt;
     }
 
+    // onunload clears these. The plugin exposes them as getter-only accessors,
+    // so assigning to them from outside throws under strict mode - which is what
+    // main.js was doing, taking flushPendingPersistence() down with it and
+    // losing whatever had not been written yet.
+    resetScrollState(): void {
+        this._scrollDelta = 0;
+        this._scrollEventAt = 0;
+        this._scrollSwitchAt = 0;
+    }
+
     get scrollDelta(): number {
         return this._scrollDelta;
     }

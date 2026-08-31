@@ -252,17 +252,4 @@ export function getActionLabel(lTable: typeof L, actionId: string): string {
 
 export const ACTION_IDS: readonly string[] = ACTIONS.map((action) => action.id);
 
-export const SLOT_KEYS: readonly string[] = [
-    'click',
-    'altClick',
-    'modClick',
-    'shiftClick',
-    'middleClick',
-    'altMiddleClick',
-    'modMiddleClick',
-    'shiftMiddleClick',
-    'rightClick',
-    'altRightClick',
-    'modRightClick',
-    'shiftRightClick',
-];
+export { STATUS_BAR_SLOT_KEYS as SLOT_KEYS } from './storage/default-data.ts';

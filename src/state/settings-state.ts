@@ -1,4 +1,4 @@
-import { DEFAULT_DATA, type PluginData, type StatusBarActions } from '../storage/default-data.ts';
+import { DEFAULT_DATA, type PluginData, type StatusBarActions, type StatusBarSlotKey } from '../storage/default-data.ts';
 import { resolveLocale } from '../i18n.ts';
 
 export interface SettingsStateHost {
@@ -158,11 +158,11 @@ export class SettingsState {
         return this.persistIfNeeded(options);
     }
 
-    async setStatusBarAction(slotKey: string, actionId: string, options?: SetOption): Promise<boolean> {
+    async setStatusBarAction(slotKey: StatusBarSlotKey, actionId: string, options?: SetOption): Promise<boolean> {
         if (!this.data.statusBarActions) {
             this.data.statusBarActions = Object.assign({}, DEFAULT_DATA.statusBarActions);
         }
-        (this.data.statusBarActions as unknown as Record<string, string>)[slotKey] = actionId;
+        this.data.statusBarActions[slotKey] = actionId;
         return this.persistIfNeeded(options);
     }
 

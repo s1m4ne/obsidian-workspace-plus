@@ -1,19 +1,26 @@
 import type { SessionStorageLocation } from './paths.ts';
 
-export interface StatusBarActions {
-    click: string;
-    altClick: string;
-    modClick: string;
-    shiftClick: string;
-    middleClick: string;
-    altMiddleClick: string;
-    modMiddleClick: string;
-    shiftMiddleClick: string;
-    rightClick: string;
-    altRightClick: string;
-    modRightClick: string;
-    shiftRightClick: string;
-}
+// The twelve configurable click slots, in the order the settings tab shows
+// them. Both the type and the runtime list come from here so a slot cannot be
+// added to one and forgotten in the other.
+export const STATUS_BAR_SLOT_KEYS = [
+    'click',
+    'altClick',
+    'modClick',
+    'shiftClick',
+    'middleClick',
+    'altMiddleClick',
+    'modMiddleClick',
+    'shiftMiddleClick',
+    'rightClick',
+    'altRightClick',
+    'modRightClick',
+    'shiftRightClick',
+] as const;
+
+export type StatusBarSlotKey = typeof STATUS_BAR_SLOT_KEYS[number];
+
+export type StatusBarActions = Record<StatusBarSlotKey, string>;
 
 export interface SessionHistoryEntry {
     timestamp?: number;

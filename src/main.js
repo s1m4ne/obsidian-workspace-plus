@@ -106,9 +106,7 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
         if (typeof this.getSessionSwitcher === 'function') {
             this.getSessionSwitcher().cleanup();
         }
-        this.statusBarScrollDelta = 0;
-        this.statusBarScrollEventAt = 0;
-        this.statusBarScrollSwitchAt = 0;
+        this.getStatusBarController().resetScrollState();
         this.clearSessionStorageSyncTimers();
         return this.flushPendingPersistence();
     };
