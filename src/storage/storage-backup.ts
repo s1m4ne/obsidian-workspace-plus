@@ -1,6 +1,15 @@
-import { Platform } from 'obsidian';
+import { Notice, Platform } from 'obsidian';
+import { L } from '../i18n.ts';
 import { getPersistStamp, hasSessionShape, hasNonEmptySessions } from './session-data.ts';
 import type { JsonFileStore, ReadJsonResult } from './json-file-store.ts';
+import type { PluginData, SessionGroup, SessionItem } from './default-data.ts';
+
+function formatString(fnOrStr: unknown, ...args: Array<string | number>): string {
+    if (typeof fnOrStr === 'function') {
+        return (fnOrStr as (...args: Array<string | number>) => string)(...args);
+    }
+    return typeof fnOrStr === 'string' ? fnOrStr : '';
+}
 
 export const BACKUP_ROTATION_INTERVAL = 3600000; // 1 hour
 
@@ -151,3 +160,126 @@ export async function readAndValidateRotationBackup(
         return null;
     }
 }
+
+export async function copyFileIfExists(
+    adapter: { exists(path: string): Promise<boolean>; read(path: string): Promise<string>; write(path: string, data: string): Promise<void> },
+    srcPath: string,
+    dstPath: string
+): Promise<void> {
+    const exists = await adapter.exists(srcPath);
+    if (!exists) return;
+    const raw = await adapter.read(srcPath);
+    await adapter.write(dstPath, raw);
+}
+
+export interface RotationBackupTimestampHost {
+    readJsonIfExists: ReadJsonFn;
+    getRotationBackupPath(generation: number): string;
+    _lastRotationBackupAt?: number;
+}
+
+export async function initRotationBackupTimestampForHost(host: RotationBackupTimestampHost): Promise<void> {
+    const stamp = await initRotationBackupTimestamp(
+        (p: string) => host.readJsonIfExists(p),
+        host.getRotationBackupPath(1)
+    );
+    host._lastRotationBackupAt = stamp;
+}
+
+export interface RotateBackupHost extends RotationBackupTimestampHost {
+    getJsonStore(): JsonFileStore;
+    getBackupsDirPath(): string;
+}
+
+export async function rotateBackupIfNeededForHost(
+    host: RotateBackupHost,
+    sessionData: unknown
+): Promise<void> {
+    const lastBackupAt = host._lastRotationBackupAt || 0;
+    const newStamp = await rotateBackupIfNeeded(
+        host.getJsonStore(),
+        host.getBackupsDirPath(),
+        (gen: number) => host.getRotationBackupPath(gen),
+        lastBackupAt,
+        sessionData
+    );
+    host._lastRotationBackupAt = newStamp;
+}
+
+export async function getRotationBackupInfoForHost(host: {
+    readJsonIfExists: ReadJsonFn;
+    getRotationBackupPath(generation: number): string;
+}): Promise<RotationBackupInfo[]> {
+    return getRotationBackupInfo(
+        (p: string) => host.readJsonIfExists(p),
+        (gen: number) => host.getRotationBackupPath(gen)
+    );
+}
+
+export interface SessionDataPayload {
+    activeSessionId?: string | null;
+    sessions?: Record<string, SessionItem>;
+    sessionOrder?: string[];
+    groups?: Record<string, SessionGroup>;
+    groupOrder?: string[];
+    sessionGroups?: Record<string, string[]>;
+    activeGroupId?: string | null;
+    _wppSavedAt?: number;
+}
+
+export interface StorageRestoreHost {
+    data: PluginData;
+    readJsonIfExists: ReadJsonFn;
+    getRotationBackupPath(generation: number): string;
+    normalizeSessionData(data: unknown): SessionDataPayload;
+    normalizeGroupTabOrder?(order: string[]): string[];
+    syncSessionOrder(): void;
+    updateStatusBar(): void;
+    syncSessionCommands(): void;
+    persistData(): Promise<unknown>;
+    getActiveSession(): SessionItem | undefined;
+    applyWorkspaceLayout(layout: unknown, options?: { catchErrors?: boolean }): Promise<unknown>;
+}
+
+export async function restoreFromRotationBackup(
+    host: StorageRestoreHost,
+    generation: number
+): Promise<boolean> {
+    try {
+        const imported = (await readAndValidateRotationBackup(
+            (p: string) => host.readJsonIfExists(p),
+            host.getRotationBackupPath(generation),
+            (d: unknown) => host.normalizeSessionData(d)
+        )) as SessionDataPayload | null;
+
+        if (!imported) {
+            new Notice(formatString(L.rotationBackupRestoreFailed));
+            return false;
+        }
+
+        host.data.activeSessionId = imported.activeSessionId ?? null;
+        host.data.sessions = imported.sessions || {};
+        host.data.sessionOrder = imported.sessionOrder || [];
+        host.data.groups = imported.groups || {};
+        host.data.groupOrder = typeof host.normalizeGroupTabOrder === 'function'
+            ? host.normalizeGroupTabOrder(imported.groupOrder || [])
+            : (imported.groupOrder || []);
+        host.data.sessionGroups = imported.sessionGroups || {};
+        host.data.activeGroupId = imported.activeGroupId || null;
+        host.syncSessionOrder();
+        host.updateStatusBar();
+        host.syncSessionCommands();
+
+        await host.persistData();
+        const active = host.getActiveSession();
+        if (active && active.layout) {
+            await host.applyWorkspaceLayout(active.layout, { catchErrors: false });
+        }
+        new Notice(formatString(L.rotationBackupRestored));
+        return true;
+    } catch {
+        new Notice(formatString(L.rotationBackupRestoreFailed));
+        return false;
+    }
+}
+

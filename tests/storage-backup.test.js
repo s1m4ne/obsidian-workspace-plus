@@ -150,24 +150,39 @@ test('storage backup: getRotationBackupInfo returns metadata for all existing ge
 });
 
 test('storage backup: restoreFromRotationBackup restores valid backup and handles corrupted backup', async () => {
-    const { plugin, files } = createPlugin();
-    const p1 = plugin.getRotationBackupPath(1);
-    files.set(p1, JSON.stringify({
-        activeSessionId: 's1',
-        sessions: { s1: { id: 's1', name: 'Restored', layout: { root: {} } } },
-        sessionOrder: ['s1'],
-    }));
+    const harness = setupHarness();
+    try {
+        const { plugin, files } = createPlugin();
+        const p1 = plugin.getRotationBackupPath(1);
+        files.set(p1, JSON.stringify({
+            activeSessionId: 's1',
+            sessions: { s1: { id: 's1', name: 'Restored', layout: { root: {} } } },
+            sessionOrder: ['s1'],
+        }));
 
-    const ok = await plugin.restoreFromRotationBackup(1);
-    assert.equal(ok, true);
-    assert.equal(plugin.data.sessions.s1.name, 'Restored');
+        const countBefore = harness.obsidian.notices.length;
+        const ok = await plugin.restoreFromRotationBackup(1);
+        assert.equal(ok, true);
+        assert.equal(plugin.data.sessions.s1.name, 'Restored');
+        assert.equal(harness.obsidian.notices.length, countBefore + 1);
 
-    const { plugin: plugin2, files: files2 } = createPlugin();
-    const p2 = plugin2.getRotationBackupPath(2);
-    files2.set(p2, '{ invalid json');
+        const { plugin: plugin2, files: files2 } = createPlugin();
+        const p2 = plugin2.getRotationBackupPath(2);
+        files2.set(p2, '{ invalid json');
 
-    const failed = await plugin2.restoreFromRotationBackup(2);
-    assert.equal(failed, false);
+        const failed = await plugin2.restoreFromRotationBackup(2);
+        assert.equal(failed, false);
+
+        const { plugin: plugin3, files: files3 } = createPlugin();
+        const p3 = plugin3.getRotationBackupPath(3);
+        files3.set(p3, JSON.stringify({ notASessionData: 123 }));
+
+        const failedShape = await plugin3.restoreFromRotationBackup(3);
+        assert.equal(failedShape, false);
+        assert.equal(plugin3.data.sessions.s1.name, 'S1');
+    } finally {
+        harness.restore();
+    }
 });
 
 test('storage backup: getBackupPlatformLabel checks platform flags', () => {
