@@ -39,6 +39,7 @@ interface TestPlugin {
     searchOverlayEl: HTMLElement | null;
     openSearchOverlay(anchorEl?: HTMLElement): void;
     hideSearchOverlay(): void;
+    notifySessionsChanged(): void;
     showSwitchPreviewOverlay(ordered: unknown[], index: number, viewGroupId?: string): void;
     showSwitchFeedbackOverlay(ordered: unknown[], index: number, viewGroupId?: string, options?: unknown): void;
     showSwitchOverlay(ordered: unknown[], activeIndex: number, viewGroupId?: string, options?: unknown): void;
@@ -611,4 +612,36 @@ test('the overlay clears the status bar even when its height cannot be read', ()
     assert.ok(el);
     assert.equal(el.style.bottom, '36px', 'bottom = fallback bar height 28 + margin 8');
     plugin.hideSearchOverlay();
+});
+
+test('a session created while the search overlay is open appears in it (#118)', () => {
+    const plugin = createTestPlugin();
+    plugin.openSearchOverlay();
+
+    const names = (): string[] =>
+        Array.from(plugin.searchOverlayEl?.querySelectorAll('.wpp-switch-name') ?? [])
+            .map((n) => n.textContent ?? '');
+    const before = names().length;
+
+    // What Cmd+Shift+M does from under the open overlay: the set changes, and
+    // the store says so. Nothing about the command names the overlay.
+    plugin.data.sessions['s9'] = { id: 's9', name: 'Nine' };
+    plugin.data.sessionOrder.push('s9');
+    plugin.notifySessionsChanged();
+
+    assert.equal(names().length, before + 1, 'the overlay must redraw itself');
+    assert.ok(names().includes('Nine'));
+    plugin.hideSearchOverlay();
+});
+
+test('a closed search overlay stops listening', () => {
+    const plugin = createTestPlugin();
+    plugin.openSearchOverlay();
+    plugin.hideSearchOverlay();
+
+    plugin.data.sessions['s8'] = { id: 's8', name: 'Eight' };
+    plugin.data.sessionOrder.push('s8');
+    plugin.notifySessionsChanged();
+
+    assert.equal(plugin.searchOverlayEl, null, 'a notification must not bring it back');
 });

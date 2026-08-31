@@ -1,5 +1,10 @@
 'use strict';
 
+// Announcing a session change needs the sessions methods, and the Behavior Lock
+// suites attach this module on its own. A dependency that is sometimes missing
+// is what let a duplicated default survive once already, so this module puts
+// what it needs in place rather than guarding the call.
+var attachSessionMethods = require('./sessions');
 var sessionData = require('../session-data');
 var sessionSync = require('../../storage/session-sync.ts');
 var syncWatcher = require('../../storage/sync-watcher.ts');
@@ -10,6 +15,8 @@ var isSessionDataShape = sessionData.hasSessionShape;
 var cloneJson = sessionSync.cloneJson;
 
 function attachSessionSyncMethods(WorkspacePlusPlus) {
+    attachSessionMethods(WorkspacePlusPlus);
+
     WorkspacePlusPlus.prototype.getComparableSessionData = function (data) {
         var normalized = this.normalizeSessionData(data || {});
         return {
@@ -129,9 +136,10 @@ function attachSessionSyncMethods(WorkspacePlusPlus) {
         this.normalizeGroupFeatureState();
         this.updateStatusBar();
         this.syncSessionCommands();
-        if (typeof this._refreshOverlaySessions === 'function') {
-            this._refreshOverlaySessions();
-        }
+        // Another device's data has replaced the slice, so anything showing the
+        // list is out of date. Announced through the store, the way commands do
+        // it, rather than by calling a function the overlay hung on the plugin.
+        this.notifySessionsChanged();
         return true;
     };
 

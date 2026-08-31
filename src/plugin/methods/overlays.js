@@ -21,7 +21,6 @@ function attachOverlayMethods(WorkspacePlusPlus) {
 
     // Session sync invokes this legacy hook until commit 27 replaces the
     // reverse dependency with a subscription.
-    WorkspacePlusPlus.prototype._refreshOverlaySessions = null;
 
     WorkspacePlusPlus.prototype.getSwitchOverlay = function () {
         if (!this._switchOverlay) {
@@ -117,6 +116,9 @@ function attachOverlayMethods(WorkspacePlusPlus) {
     };
 
     WorkspacePlusPlus.prototype.hideSearchOverlay = function () {
+        if (this._searchOverlay) {
+            this._searchOverlay.releaseSessionSubscription();
+        }
         if (this.searchOverlayEl) {
             this.searchOverlayEl.remove();
             this.searchOverlayEl = null;
@@ -135,7 +137,6 @@ function attachOverlayMethods(WorkspacePlusPlus) {
         }
         this.searchOverlayInputHandler = null;
         this.searchOverlayInputEl = null;
-        this._refreshOverlaySessions = null;
     };
 }
 

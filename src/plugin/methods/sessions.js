@@ -31,6 +31,10 @@ function attachSessionMethods(WorkspacePlusPlus) {
 
     // Subscribe to changes in the session set. The overlays use this to redraw
     // themselves while they are on screen; see issue #118.
+    WorkspacePlusPlus.prototype.notifySessionsChanged = function () {
+        return this.getSessionStore().notifySessionsChanged();
+    };
+
     WorkspacePlusPlus.prototype.onSessionsChanged = function (listener) {
         return this.getSessionStore().onSessionsChanged(listener);
     };

@@ -60,7 +60,7 @@ export interface SearchOverlayHost extends GroupTabPluginHost {
     searchOverlayInputHandler?: (() => void) | null;
     searchOverlayKeyHandler?: ((event: KeyboardEvent) => void) | null;
     searchOverlayClickOutsideHandler?: ((event: MouseEvent) => void) | null;
-    _refreshOverlaySessions?: (() => void) | null;
+    onSessionsChanged(listener: () => void): () => void;
     _cachedBarHeight?: number;
     _cachedAnchorCenterX?: number;
     isGroupFeatureEnabled(): boolean;
@@ -86,6 +86,14 @@ export interface SearchOverlayHost extends GroupTabPluginHost {
 
 export class SearchOverlay {
     private readonly host: SearchOverlayHost;
+    private unsubscribeSessions: (() => void) | null = null;
+
+    // Called when the overlay closes, so nothing is left listening.
+    releaseSessionSubscription(): void {
+        if (!this.unsubscribeSessions) return;
+        this.unsubscribeSessions();
+        this.unsubscribeSessions = null;
+    }
 
     constructor(host: SearchOverlayHost) {
         this.host = host;
@@ -324,7 +332,17 @@ export class SearchOverlay {
         // Initial render of group tabs (also sets footer text)
         renderGroupTabs();
 
-        self._refreshOverlaySessions = refreshOrderedSessions;
+        // Subscribed only while the overlay is up, so a session created or
+        // deleted under it appears at once - by a command, by another device's
+        // sync, or by its own rows (issue #118). It used to be reached the other
+        // way round: the overlay wrote refreshOrderedSessions onto the plugin
+        // and session-sync.js called it back, a dependency pointing from
+        // storage into the UI.
+        this.releaseSessionSubscription();
+        this.unsubscribeSessions = self.onSessionsChanged(() => {
+            refreshOrderedSessions();
+        });
+
         function refreshOrderedSessions() {
             ordered = self.getOrderedSessionsForGroup(getOverlayGroupId());
             filtered = self.filterSessionsByQuery(ordered, searchInput.value);

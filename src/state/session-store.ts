@@ -313,6 +313,13 @@ export class SessionStore {
         };
     }
 
+    // For code that replaces the session data behind the store's back - the sync
+    // watcher takes another device's file and assigns the whole slice - and so
+    // has to say so itself.
+    notifySessionsChanged(): void {
+        this.announceSessionsChanged();
+    }
+
     private announceSessionsChanged(): void {
         for (const listener of [...this.sessionListeners]) {
             listener();

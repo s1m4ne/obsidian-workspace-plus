@@ -50,7 +50,7 @@ function createPlugin(initialData) {
     plugin.syncSessionCommands = function () {
         plugin.commandSyncs += 1;
     };
-    plugin._refreshOverlaySessions = function () {
+    plugin.notifySessionsChanged = function () {
         plugin.overlayRefreshes += 1;
     };
     plugin.syncSessionOrder = function () {
@@ -406,7 +406,7 @@ test('session sync: listeners and timer management', async function () {
 test('session sync: overlay refresh and local changes tracking', async function () {
     const plugin = createPlugin();
     let refreshed = false;
-    plugin._refreshOverlaySessions = function () {
+    plugin.notifySessionsChanged = function () {
         refreshed = true;
     };
 
