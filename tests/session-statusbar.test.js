@@ -1,57 +1,36 @@
 'use strict';
 
-require('./lock/harness/index.ts').installObsidianStub();
+const harness = require('./lock/harness/index.ts').setupHarness();
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const Module = require('module');
 
 const i18n = require('../src/i18n.ts');
 
 i18n.resolveLocale('en');
 
-function loadSessionStatusBarMethods() {
-    const obsidianStub = {
-        setIcon: function (el, iconName) {
-            el.icon = iconName;
-        },
-    };
-    const originalLoad = Module._load;
-    Module._load = function (request, parent, isMain) {
-        if (request === 'obsidian') return obsidianStub;
-        return originalLoad(request, parent, isMain);
-    };
-
-    try {
-        return require('../src/plugin/methods/session-statusbar');
-    } finally {
-        Module._load = originalLoad;
-    }
-}
-
-const attachSessionStatusBarMethods = loadSessionStatusBarMethods();
+const attachSessionStatusBarMethods = require('../src/plugin/methods/session-statusbar.js');
 
 function createStatusBarEl() {
-    return {
-        classes: [],
-        children: [],
-        addClass: function (cls) {
-            if (this.classes.indexOf(cls) === -1) this.classes.push(cls);
+    const el = harness.dom.document.createElement('div');
+    el.addClass('wpp-status-bar');
+    // Reads that the assertions used to make against a hand-rolled object, now
+    // derived from the element itself.
+    Object.defineProperty(el, 'classes', {
+        get() {
+            return Array.from(this.classList).filter((c) => c !== 'wpp-status-bar');
         },
-        removeClass: function (cls) {
-            this.classes = this.classes.filter(function (item) {
-                return item !== cls;
-            });
+    });
+    Object.defineProperty(el, 'children', {
+        get() {
+            return Array.from(this.querySelectorAll('span')).map((child) => ({
+                cls: child.className,
+                text: child.textContent,
+                icon: child.getAttribute('data-icon'),
+            }));
         },
-        empty: function () {
-            this.children = [];
-        },
-        createSpan: function (attrs) {
-            var child = Object.assign({}, attrs || {});
-            this.children.push(child);
-            return child;
-        },
-    };
+    });
+    return el;
 }
 
 function createPlugin(options) {
@@ -84,7 +63,7 @@ test('session status bar renders icon and session name', function () {
     assert.equal(plugin.statusBarEl.children[0].icon, 'panels-top-left');
     assert.deepEqual(plugin.statusBarEl.children.map(function (child) {
         return child.text;
-    }), [undefined, 'Session One']);
+    }), ['', 'Session One']);
 });
 
 test('session status bar renders active group before session name', function () {
@@ -105,7 +84,7 @@ test('session status bar renders active group before session name', function () 
     ]);
     assert.deepEqual(plugin.statusBarEl.children.map(function (child) {
         return child.text;
-    }), [undefined, 'Group One', ' / ', 'Session One']);
+    }), ['', 'Group One', ' / ', 'Session One']);
 });
 
 test('session status bar toggles unsaved highlight class', function () {

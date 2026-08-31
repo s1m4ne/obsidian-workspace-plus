@@ -17,6 +17,7 @@ export class RenameModal extends Modal {
     private buttons: HTMLButtonElement[] = [];
     private focusedButtonIndex: number = -1;
     private renameKeyHandler: ((e: KeyboardEvent) => void) | null = null;
+    private keyHandlerDoc: Document = document;
 
     constructor(
         app: App,
@@ -146,8 +147,10 @@ export class RenameModal extends Modal {
             }
         };
 
-        const targetDoc = this.containerEl.ownerDocument || document;
-        targetDoc.addEventListener('keydown', this.renameKeyHandler, true);
+        // Held rather than recomputed at close: removeEventListener has to target
+        // the same document the listener went onto.
+        this.keyHandlerDoc = this.containerEl.ownerDocument || document;
+        this.keyHandlerDoc.addEventListener('keydown', this.renameKeyHandler, true);
 
         window.setTimeout(() => {
             input.focus();
@@ -162,8 +165,7 @@ export class RenameModal extends Modal {
 
     override onClose(): void {
         if (this.renameKeyHandler) {
-            const targetDoc = this.containerEl.ownerDocument || document;
-            targetDoc.removeEventListener('keydown', this.renameKeyHandler, true);
+            this.keyHandlerDoc.removeEventListener('keydown', this.renameKeyHandler, true);
             this.renameKeyHandler = null;
         }
         this.contentEl.empty();

@@ -12,7 +12,7 @@ const {
 } = await import('../src/statusbar-actions.ts');
 const { L } = await import('../src/i18n.ts');
 
-test('statusbar-actions: ACTION_IDS and SLOT_KEYS contain expected constants', () => {
+test('every click slot and action a user can configure is offered', () => {
     assert.ok(ACTION_IDS.length >= 17);
     assert.ok(SLOT_KEYS.length >= 12);
     assert.ok(SLOT_KEYS.includes('click'));
@@ -23,7 +23,7 @@ test('statusbar-actions: ACTION_IDS and SLOT_KEYS contain expected constants', (
     assert.ok(SLOT_KEYS.includes('rightClick'));
 });
 
-test('statusbar-actions: getActionLabel resolves labels for valid and fallback actions', () => {
+test('an unknown action falls back to the label for none', () => {
     assert.ok(getActionLabel(L, 'quickSwitcher'));
     assert.ok(getActionLabel(L, 'saveSession'));
     assert.ok(getActionLabel(L, 'none'));
@@ -53,7 +53,7 @@ const menuPluginStubs = {
     setWarnOnUnsavedSwitch: () => false,
 };
 
-test('statusbar-actions: executes all actions on host', async () => {
+test('each configurable action performs its own effect and no other', async () => {
     const calls: string[] = [];
 
     const mockPlugin: import('../src/statusbar-actions.ts').StatusBarActionPluginHost = {

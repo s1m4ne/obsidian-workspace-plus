@@ -67,7 +67,7 @@ function createMockPlugin() {
     return { plugin, calls };
 }
 
-test('group-tab-ui: openCreateGroupPrompt', async () => {
+test('creating a group from the prompt adds it and reports a duplicate name', async () => {
     const { plugin, calls } = createMockPlugin();
     let createdCalled = false;
 
@@ -83,7 +83,7 @@ test('group-tab-ui: openCreateGroupPrompt', async () => {
     assert.equal(createdCalled, true);
 });
 
-test('group-tab-ui: renderGroupTabs with drag, clicks, context menu and default add button', () => {
+test('the tab strip renders one tab per group, marks the active one, and offers add', () => {
     const { plugin } = createMockPlugin();
     const containerEl = document.createElement('div');
     let selectedGroup: string | null = 'not_called';
@@ -130,7 +130,7 @@ test('group-tab-ui: renderGroupTabs with drag, clicks, context menu and default 
     assert.equal(groupsChanged, false);
 });
 
-test('group-tab-ui: attachGroupTabDrag mouse interactions and sibling insertion', () => {
+test('dragging a tab past a sibling reorders the strip', () => {
     const containerEl = document.createElement('div');
     const tab1 = document.createElement('div');
     tab1.className = 'wpp-group-tab';
@@ -169,7 +169,7 @@ test('group-tab-ui: attachGroupTabDrag mouse interactions and sibling insertion'
     assert.ok(committedOrder.length > 0);
 });
 
-test('group-tab-ui: openAllGroupsTabContextMenu and openGroupTabContextMenu actions', async () => {
+test('the tab context menus offer rename, delete and clearing group membership', async () => {
     const { plugin, calls } = createMockPlugin();
     let resetView = false;
     let groupsChanged = false;

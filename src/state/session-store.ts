@@ -10,7 +10,7 @@ export interface SessionStoreHost {
     data: PluginData;
     app?: App;
     manifestId?: string;
-    groupStore?: GroupStore;
+    groupStore: GroupStore;
     settingsState?: SettingsState;
     getCurrentWorkspaceLayout: () => unknown;
     createSessionValidated?: (name: string, options?: SessionPersistOption) => Promise<SessionValidationResult>;
@@ -171,9 +171,7 @@ export class SessionStore {
 
     getOrderedSessionsForGroup(groupId: string | null): SessionItem[] {
         const all = this.getOrderedSessionsUnfiltered();
-        const groupsEnabled = this.host.groupStore
-            ? this.host.groupStore.isGroupFeatureEnabled()
-            : (this.data.groupFeatureEnabled !== false);
+        const groupsEnabled = this.host.groupStore.isGroupFeatureEnabled();
         if (!groupsEnabled) {
             return all;
         }
@@ -187,9 +185,7 @@ export class SessionStore {
     }
 
     getOrderedSessions(): SessionItem[] {
-        const groupsEnabled = this.host.groupStore
-            ? this.host.groupStore.isGroupFeatureEnabled()
-            : (this.data.groupFeatureEnabled !== false);
+        const groupsEnabled = this.host.groupStore.isGroupFeatureEnabled();
         if (!groupsEnabled) {
             return this.getOrderedSessionsUnfiltered();
         }
@@ -373,9 +369,7 @@ export class SessionStore {
     }
 
     async createSessionForViewedGroup(name: string, viewedGroupId: string | null, options?: SessionPersistOption): Promise<SessionValidationResult> {
-        const groupsEnabled = this.host.groupStore
-            ? this.host.groupStore.isGroupFeatureEnabled()
-            : (this.data.groupFeatureEnabled !== false);
+        const groupsEnabled = this.host.groupStore.isGroupFeatureEnabled();
         const targetGroupId = groupsEnabled ? (viewedGroupId || null) : null;
         const beforeActiveGroupId = groupsEnabled ? (this.data.activeGroupId || null) : null;
 

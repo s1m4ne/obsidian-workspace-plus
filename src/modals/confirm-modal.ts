@@ -10,6 +10,7 @@ export interface ConfirmModalOptions {
 
 export class ConfirmModal extends Modal {
     private readonly message: string;
+    private keyHandlerDoc: Document = document;
     private readonly onConfirm: () => void;
     private readonly options: ConfirmModalOptions;
     private buttons: HTMLButtonElement[] = [];
@@ -89,8 +90,10 @@ export class ConfirmModal extends Modal {
             }
         };
 
-        const targetDoc = this.containerEl.ownerDocument || document;
-        targetDoc.addEventListener('keydown', this.confirmKeyHandler, true);
+        // Held rather than recomputed at close: removeEventListener has to target
+        // the same document the listener went onto.
+        this.keyHandlerDoc = this.containerEl.ownerDocument || document;
+        this.keyHandlerDoc.addEventListener('keydown', this.confirmKeyHandler, true);
     }
 
     private updateButtonFocus(): void {
@@ -101,8 +104,7 @@ export class ConfirmModal extends Modal {
 
     override onClose(): void {
         if (this.confirmKeyHandler) {
-            const targetDoc = this.containerEl.ownerDocument || document;
-            targetDoc.removeEventListener('keydown', this.confirmKeyHandler, true);
+            this.keyHandlerDoc.removeEventListener('keydown', this.confirmKeyHandler, true);
             this.confirmKeyHandler = null;
         }
         this.contentEl.empty();

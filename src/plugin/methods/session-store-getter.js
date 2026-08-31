@@ -1,8 +1,13 @@
 'use strict';
 
+var attachGroupMethods = require('./groups');
+var attachSettingsStateMethods = require('./settings-state');
 var sessionStore = require('../../state/session-store.ts');
 
 function attachSessionStoreGetter(WorkspacePlusPlus) {
+    attachGroupMethods(WorkspacePlusPlus);
+    attachSettingsStateMethods(WorkspacePlusPlus);
+
     if (WorkspacePlusPlus.prototype.getSessionStore) return;
     WorkspacePlusPlus.prototype.getSessionStore = function () {
         var self = this;

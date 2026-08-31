@@ -16,10 +16,9 @@ var splitSessionHistory = sessionData.splitSessionHistory;
 var storagePaths = require('../../storage/paths.ts');
 var defaultData = require('../../storage/default-data.ts');
 var jsonFileStore = require('../../storage/json-file-store.ts');
+var migrations = require('../../storage/migrations.ts');
 var sessionStorageModule = require('../../storage/session-storage.ts');
 
-var LEGACY_LOCAL_SETTINGS_FILE = storagePaths.LEGACY_LOCAL_SETTINGS_FILE;
-var LEGACY_LOCAL_SETTINGS_BACKUP = storagePaths.LEGACY_LOCAL_SETTINGS_BACKUP;
 var normalizeSessionStorageLocation = storagePaths.normalizeSessionStorageLocation;
 
 var SETTINGS_KEYS = defaultData.SETTINGS_KEYS;
@@ -421,37 +420,15 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
     // values in data.json; the file is renamed rather than deleted.
     WorkspacePlusPlus.prototype.migrateLegacyLocalSettings = function () {
         var self = this;
-
-        return this.readJsonIfExists(LEGACY_LOCAL_SETTINGS_FILE)
-            .then(function (res) {
-                if (!res.exists) return false;
-                if (res.error || !res.data || typeof res.data !== 'object') {
-                    // Leave an unreadable file in place rather than discarding
-                    // settings we cannot merge.
-                    return false;
-                }
-
-                self.globalSettings = Object.assign(
-                    {},
-                    self.getDefaultSettingsData(),
-                    self.globalSettings || {},
-                    pickKeys(res.data, SETTINGS_KEYS)
-                );
-
-                return self.persistGlobalSettings()
-                    .then(function () {
-                        return self.renameIfExists(
-                            LEGACY_LOCAL_SETTINGS_FILE,
-                            LEGACY_LOCAL_SETTINGS_BACKUP
-                        );
-                    })
-                    .then(function () {
-                        return true;
-                    });
-            })
-            .catch(function () {
-                return false;
-            });
+        return migrations.migrateLegacyLocalSettings(
+            this.getJsonStore(),
+            this.globalSettings || {},
+            function (merged) {
+                self.globalSettings = merged;
+                return self.persistGlobalSettings();
+            },
+            this.getDefaultSettingsData()
+        );
     };
 
     WorkspacePlusPlus.prototype.applyDefaultSettings = function () {
@@ -729,17 +706,17 @@ function attachPersistenceMethods(WorkspacePlusPlus) {
 
     WorkspacePlusPlus.prototype.migrateLegacySessions = function (sessionData) {
         var self = this;
-        var normalized = this.normalizeSessionData(sessionData);
-        return this.ensureSessionStorageDir()
-            .then(function () {
+        return migrations.migrateLegacySessions(
+            this.getJsonStore(),
+            this.getSessionStorageDirPath(),
+            function (normalized) {
                 return self.writeSessionStore(normalized);
-            })
-            .then(function () {
-                return true;
-            })
-            .catch(function () {
-                return false;
-            });
+            },
+            sessionData,
+            function (data) {
+                return self.normalizeSessionData(data);
+            }
+        );
     };
 
     WorkspacePlusPlus.prototype.loadWithBackup = function () {

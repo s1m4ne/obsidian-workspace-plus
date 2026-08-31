@@ -22,6 +22,16 @@ function createMockHost(initialData?: Partial<PluginData>): {
     };
 
     const host: HistoryServiceHost = {
+        // Reads the same data object the real SettingsState reads, so a test that
+        // flips a setting sees the effect instead of a frozen answer.
+        settingsState: {
+            get groupFeatureEnabled(): boolean {
+                return (host.data as Record<string, unknown>)['groupFeatureEnabled'] !== false;
+            },
+            get versionHistoryConfirmRestore(): boolean {
+                return (host.data as Record<string, unknown>)['versionHistoryConfirmRestore'] !== false;
+            },
+        } as unknown as import('../src/state/settings-state.ts').SettingsState,
         data: Object.assign({}, DEFAULT_DATA, {
             versionHistoryEnabled: true,
             versionHistorySnapshotInterval: 5,

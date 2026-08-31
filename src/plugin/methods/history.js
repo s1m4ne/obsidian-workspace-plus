@@ -1,9 +1,12 @@
 'use strict';
 
+var attachSettingsStateMethods = require('./settings-state');
 var historyService = require('../../state/history-service.ts');
 var layoutUtils = require('../../layout-utils.ts');
 
 function attachHistoryStoreGetter(WorkspacePlusPlus) {
+    attachSettingsStateMethods(WorkspacePlusPlus);
+
     if (WorkspacePlusPlus.prototype.getHistoryService) return;
     WorkspacePlusPlus.prototype.getHistoryService = function () {
         var self = this;

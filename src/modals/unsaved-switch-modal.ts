@@ -3,6 +3,7 @@ import { L } from '../i18n.ts';
 
 export class UnsavedSwitchModal extends Modal {
     private readonly message: string;
+    private keyHandlerDoc: Document = document;
     private readonly onSaveAndSwitch: () => void;
     private readonly onSwitchWithoutSaving: () => void;
     private readonly onCancel: () => void;
@@ -94,8 +95,10 @@ export class UnsavedSwitchModal extends Modal {
             }
         };
 
-        const targetDoc = this.containerEl.ownerDocument || document;
-        targetDoc.addEventListener('keydown', this.keyHandler, true);
+        // Held rather than recomputed at close: removeEventListener has to target
+        // the same document the listener went onto.
+        this.keyHandlerDoc = this.containerEl.ownerDocument || document;
+        this.keyHandlerDoc.addEventListener('keydown', this.keyHandler, true);
     }
 
     private updateButtonFocus(): void {
@@ -106,8 +109,7 @@ export class UnsavedSwitchModal extends Modal {
 
     override onClose(): void {
         if (this.keyHandler) {
-            const targetDoc = this.containerEl.ownerDocument || document;
-            targetDoc.removeEventListener('keydown', this.keyHandler, true);
+            this.keyHandlerDoc.removeEventListener('keydown', this.keyHandler, true);
             this.keyHandler = null;
         }
         if (!this.didResolve) {

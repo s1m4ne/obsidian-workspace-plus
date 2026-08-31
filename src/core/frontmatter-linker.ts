@@ -14,7 +14,7 @@ export interface FrontmatterLinkerHost {
     saveCurrentLayoutAsSessionName: (name: string, options?: { silent?: boolean }) => Promise<unknown>;
     switchSession: (sessionId: string) => Promise<boolean>;
     setActiveGroup?: (groupId: string) => Promise<boolean>;
-    isGroupFeatureEnabled?: () => boolean;
+    isGroupFeatureEnabled: () => boolean;
     getStartupSettleRemainingMs?: () => number;
     isSessionSwitcherActive?: () => boolean;
     handleFrontmatterTriggers?: (file: TFile) => void;
@@ -170,9 +170,7 @@ export class FrontmatterLinker {
             return;
         }
 
-        const isGroupEnabled = typeof this.host.isGroupFeatureEnabled === 'function'
-            ? this.host.isGroupFeatureEnabled()
-            : (this.data.groupFeatureEnabled !== false);
+        const isGroupEnabled = this.host.isGroupFeatureEnabled();
 
         if (parsed.groupId && isGroupEnabled && !alreadyOnGroup && typeof this.host.setActiveGroup === 'function') {
             void this.host.setActiveGroup(parsed.groupId).then(() => {

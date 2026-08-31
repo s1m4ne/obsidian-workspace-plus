@@ -269,10 +269,7 @@ export const Platform = {
 
 export function setIcon(el: HTMLElement, icon: string): void {
     registry.icons.set(el, icon);
-    (el as unknown as { icon?: string }).icon = icon;
-    if (typeof el.setAttribute === 'function') {
-        el.setAttribute('data-icon', icon);
-    }
+    el.setAttribute('data-icon', icon);
 }
 
 export function setTooltip(el: HTMLElement, tooltip: string): void {

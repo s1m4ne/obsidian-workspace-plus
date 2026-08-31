@@ -1,8 +1,15 @@
 'use strict';
 
+// GroupStore requires SettingsState rather than treating it as optional, so this
+// adapter attaches the settings methods itself. Tests build plugins from module
+// subsets, and a dependency that is sometimes undefined is what let a duplicated
+// default survive in the branch that covered for it.
+var attachSettingsStateMethods = require('./settings-state');
 var groupStore = require('../../state/group-store.ts');
 
 function attachGroupMethods(WorkspacePlusPlus) {
+    attachSettingsStateMethods(WorkspacePlusPlus);
+
     WorkspacePlusPlus.prototype.getGroupStore = function () {
         var self = this;
         if (!this._groupStore) {

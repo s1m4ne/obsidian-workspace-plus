@@ -13,7 +13,7 @@ export interface HistoryEntry extends SessionHistoryEntry {
 
 export interface HistoryServiceHost {
     data: PluginData;
-    settingsState?: SettingsState;
+    settingsState: SettingsState;
     sessionStore?: SessionStore;
     getActiveSession: () => SessionItem | null;
     getCurrentWorkspaceLayout: () => unknown;
@@ -83,7 +83,7 @@ export class HistoryService {
     }
 
     isVersionHistoryConfirmRestoreEnabled(): boolean {
-        return this.data.versionHistoryConfirmRestore !== false;
+        return this.host.settingsState.versionHistoryConfirmRestore;
     }
 
     // --- Layout parsing ---
@@ -263,9 +263,7 @@ export class HistoryService {
             return false;
         }
 
-        const confirmRestore = this.host.settingsState
-            ? this.host.settingsState.versionHistoryConfirmRestore
-            : (this.data.versionHistoryConfirmRestore !== false);
+        const confirmRestore = this.host.settingsState.versionHistoryConfirmRestore;
 
         if (confirmRestore) {
             const currentLayout = this.host.getCurrentWorkspaceLayout();

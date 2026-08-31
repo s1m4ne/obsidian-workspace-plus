@@ -11,6 +11,8 @@ export async function migrateLegacyLocalSettings(
 ): Promise<boolean> {
     try {
         const res = await store.readJsonIfExists<Record<string, unknown>>(LEGACY_LOCAL_SETTINGS_FILE);
+        // An unreadable file is left in place rather than discarded: settings we
+        // cannot merge are still the user's settings.
         if (!res.exists || res.error || !res.data || typeof res.data !== 'object') {
             return false;
         }

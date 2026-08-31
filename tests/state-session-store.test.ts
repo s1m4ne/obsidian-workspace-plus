@@ -28,6 +28,9 @@ function createMockHost(initialData?: Partial<PluginData>): {
     };
 
     const host: SessionStoreHost = {
+        groupStore: {
+            isGroupFeatureEnabled: () => true,
+        } as unknown as import('../src/state/group-store.ts').GroupStore,
         data: Object.assign({}, DEFAULT_DATA, {
             activeSessionId: 's1',
             sessions: {

@@ -6,7 +6,7 @@ import type { SettingsState } from './settings-state.ts';
 
 export interface GroupStoreHost {
     data: PluginData;
-    settingsState?: SettingsState;
+    settingsState: SettingsState;
     persistData: () => Promise<boolean>;
     switchSession: (sessionId: string) => Promise<boolean>;
     getOrderedSessionsUnfiltered: () => SessionItem[];
@@ -101,10 +101,7 @@ export class GroupStore {
     }
 
     isGroupFeatureEnabled(): boolean {
-        if (this.host.settingsState) {
-            return this.host.settingsState.groupFeatureEnabled;
-        }
-        return this.data.groupFeatureEnabled !== false;
+        return this.host.settingsState.groupFeatureEnabled;
     }
 
     normalizeGroupFeatureState(): void {
