@@ -48,10 +48,7 @@ function createOverlay(): { overlay: Overlay; sessions: Session[]; announce: () 
         getOrderedSessionsUnfiltered: (): Session[] => sessions,
         getOrderedSessionsForGroup: (): Session[] => sessions,
         getCommandHotkey: (): string => '',
-        activeSessionIndexOrFirst: (list: Session[]): number => {
-            const i = list.findIndex((s) => s.id === host.data.activeSessionId);
-            return i === -1 ? 0 : i;
-        },
+        findActiveSessionIndex: (list: Session[]): number => list.findIndex((s) => s.id === host.data.activeSessionId),
         resolveGroupSelection: async (): Promise<{ sessions: Session[]; resolvedGroupId: string | null }> => ({
             sessions,
             resolvedGroupId: null,

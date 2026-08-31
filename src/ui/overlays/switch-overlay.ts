@@ -15,7 +15,7 @@ export interface SwitchOverlayHost {
     getOrderedGroupTabIds(): string[];
     getOrderedSessionsUnfiltered(): SessionItem[];
     getCommandHotkey(cmd: string, slot?: number): string;
-    activeSessionIndexOrFirst(sessions: SessionItem[]): number;
+    findActiveSessionIndex(sessions: SessionItem[]): number;
     resolveGroupSelection(groupId: string | null): Promise<{ sessions: SessionItem[]; resolvedGroupId: string | null }>;
     switchSession(sessionId: string, options?: { silent?: boolean }): Promise<boolean>;
     getRelativeGroupId(currentGroupId: string | null, delta: number): string | null | undefined;
@@ -94,7 +94,7 @@ export class SwitchOverlay {
 
         const reopenOverlayForGroup = (result: { sessions: SessionItem[]; resolvedGroupId: string | null }): void => {
             const newOrdered = result.sessions;
-            const newActiveIndex = this.host.activeSessionIndexOrFirst(newOrdered);
+            const newActiveIndex = this.host.findActiveSessionIndex(newOrdered);
             this.show(newOrdered, newActiveIndex, result.resolvedGroupId, opts);
         };
 
@@ -124,9 +124,9 @@ export class SwitchOverlay {
         const overlay = document.body.createDiv({ cls: 'wpp-switch-overlay' });
 
         // Count
-        const countText = ordered.length > 0
+        const countText = activeIndex >= 0
             ? `${activeIndex + 1} / ${ordered.length}`
-            : '0 / 0';
+            : `– / ${ordered.length}`;
         overlay.createDiv({ cls: 'wpp-switch-count', text: countText });
 
         // Group tabs (only when groups exist)
@@ -321,7 +321,7 @@ export class SwitchOverlay {
 
                 void this.host.resolveGroupSelection(nextGroupId).then((result) => {
                     const newOrdered = result.sessions;
-                    const newActiveIndex = this.host.activeSessionIndexOrFirst(newOrdered);
+                    const newActiveIndex = this.host.findActiveSessionIndex(newOrdered);
                     this.show(newOrdered, newActiveIndex, result.resolvedGroupId);
                 });
             }
@@ -343,7 +343,7 @@ export class SwitchOverlay {
     refreshSessions(): void {
         if (!this.overlayEl) return;
         const ordered = this.host.getOrderedSessionsForGroup(this.viewGroupId);
-        const activeIndex = this.host.activeSessionIndexOrFirst(ordered);
+        const activeIndex = this.host.findActiveSessionIndex(ordered);
         this.show(ordered, activeIndex, this.viewGroupId, { mode: 'preview', keepShownAt: true });
     }
 

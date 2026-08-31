@@ -50,7 +50,7 @@ interface TestPlugin {
     getOrderedSessionsUnfiltered(): unknown[];
     getCommandHotkey(cmd: string, slot?: number): string;
     isGroupFeatureEnabled(): boolean;
-    activeSessionIndexOrFirst(sessions: unknown[]): number;
+    findActiveSessionIndex(sessions: unknown[]): number;
     resolveGroupSelection(groupId: string | null): Promise<{ sessions: unknown[]; resolvedGroupId: string | null }>;
     switchSession(sessionId: string, options?: unknown): Promise<boolean>;
     getRelativeGroupId(currentGroupId: string | null, delta: number): string | null;
@@ -163,6 +163,23 @@ test('the overlay lists every session in the group with its position and hotkeys
     // Click on active session hides overlay
     items[0]?.dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
     assert.equal(plugin.switchOverlayEl, null);
+});
+
+test('the overlay shows no active position when the active session is outside its list', () => {
+    const plugin = createTestPlugin();
+    plugin.data.activeSessionId = 'orphan-session';
+    const ordered = [
+        { id: 's1', name: 'Session 1' },
+        { id: 's2', name: 'Session 2' },
+        { id: 's3', name: 'Session 3' },
+    ];
+
+    plugin.showSwitchOverlay(ordered, plugin.findActiveSessionIndex(ordered), 'g1', { mode: 'preview' });
+    const overlay = plugin.switchOverlayEl;
+    assert.ok(overlay);
+    assert.equal(overlay.querySelector('.wpp-switch-count')?.textContent, '– / 3');
+    assert.equal(overlay.querySelectorAll('.wpp-switch-item.is-active').length, 0);
+    plugin.hideSwitchOverlay();
 });
 
 test('clicking a session in the overlay switches to it', async () => {

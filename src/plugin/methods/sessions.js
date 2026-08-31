@@ -17,16 +17,8 @@ function attachSessionMethods(WorkspacePlusPlus) {
         return this.getSessionStore().findSessionIndex(sessions, sessionId);
     };
 
-    WorkspacePlusPlus.prototype.sessionIndexOrFirst = function (sessions, sessionId) {
-        return this.getSessionStore().sessionIndexOrFirst(sessions, sessionId);
-    };
-
     WorkspacePlusPlus.prototype.findActiveSessionIndex = function (sessions) {
         return this.getSessionStore().findActiveSessionIndex(sessions);
-    };
-
-    WorkspacePlusPlus.prototype.activeSessionIndexOrFirst = function (sessions) {
-        return this.getSessionStore().activeSessionIndexOrFirst(sessions);
     };
 
     WorkspacePlusPlus.prototype.getOrderedSessions = function () {

@@ -104,11 +104,12 @@ test('sessions: index and active session queries (P9 & P10)', function () {
 
     assert.equal(plugin.findSessionIndex(list, 's1'), 0);
     assert.equal(plugin.findSessionIndex(list, 'nonexistent'), -1);
-    assert.equal(plugin.sessionIndexOrFirst(list, 'nonexistent'), 0);
 
     assert.equal(plugin.findActiveSessionIndex(list), 0);
-    assert.equal(plugin.activeSessionIndexOrFirst(list), 0);
+    plugin.data.activeSessionId = 'nonexistent';
+    assert.equal(plugin.findActiveSessionIndex(list), -1);
 
+    plugin.data.activeSessionId = 's1';
     assert.equal(plugin.getActiveSession().name, 'Work');
     plugin.data.activeSessionId = null;
     assert.equal(plugin.getActiveSession(), null);

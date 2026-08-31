@@ -119,26 +119,8 @@ export class SessionStore {
         return -1;
     }
 
-    // Answers with the first session when the one asked for is not in the list.
-    // The name says so because the honest answer, -1, is what `findSessionIndex`
-    // is for - and callers had no way to tell the two apart.
-    //
-    // P9 in issue #111 wants the substitution gone. It is user-visible: the
-    // overlay would read "0 / 3" instead of "1 / 3" and highlight no row, in the
-    // case the switch-overlay lock exercises with an active session outside the
-    // group being viewed. That needs the maintainer's decision, so the shape is
-    // named here rather than changed.
-    sessionIndexOrFirst(sessions: SessionItem[], sessionId: string | null | undefined): number {
-        const idx = this.findSessionIndex(sessions, sessionId);
-        return idx === -1 ? 0 : idx;
-    }
-
     findActiveSessionIndex(sessions: SessionItem[]): number {
         return this.findSessionIndex(sessions, this.data.activeSessionId);
-    }
-
-    activeSessionIndexOrFirst(sessions: SessionItem[]): number {
-        return this.sessionIndexOrFirst(sessions, this.data.activeSessionId);
     }
 
     // --- Ordering ---

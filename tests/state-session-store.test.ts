@@ -106,14 +106,14 @@ test('SessionStore: P9 and P10 contracts for lookup and indexing', () => {
 
     const list = store.getOrderedSessionsUnfiltered();
 
-    // P9: findSessionIndex returns -1 for nonexistent
+    // P9: an absent session stays absent instead of becoming the first entry.
     assert.equal(store.findSessionIndex(list, 'nonexistent'), -1);
     assert.equal(store.findSessionIndex(list, 's1'), 0);
-    assert.equal(store.sessionIndexOrFirst(list, 'nonexistent'), 0);
 
     // Active session index queries
     assert.equal(store.findActiveSessionIndex(list), 0);
-    assert.equal(store.activeSessionIndexOrFirst(list), 0);
+    host.data.activeSessionId = 'nonexistent';
+    assert.equal(store.findActiveSessionIndex(list), -1);
 
     // P10: findSession vs getSession
     assert.equal(store.findSession('s1')?.name, 'Session 1');
