@@ -37,7 +37,8 @@ before writing it.
 ## Commands
 
 ```bash
-npm run check        # the gate: typecheck, lint, dual dispatch, hooks, imports, tests, coverage, build
+npm run check        # the gate: typecheck, lint, dual dispatch, hooks,
+                     # delegation, reachability, imports, tests, coverage, build
 npm run dev          # esbuild watch; hot reload picks it up
 npm run build        # production bundle
 npm run progress     # migration status
@@ -45,8 +46,9 @@ npm run coverage:floors   # which modules are ready to migrate
 npm run check:i18n   # locale key completeness across 21 locales
 ```
 
-`npm run check` must pass before every commit. It is eight gates, and three of
-them deserve explanation:
+`npm run check` must pass before every commit. It is ten gates. Three are
+ratchets; four exist because this migration produced the same failure five times
+and none of the others could see it.
 
 - **Lint** compares per-rule counts against `.eslint-baseline.json`. There are
   255 known violations; the gate fails only when a count *rises*. Failing on the
@@ -61,6 +63,18 @@ them deserve explanation:
   because the adapter returns `undefined` there unless a test overrides the
   plugin method - those fallbacks are the live path. The question for any new
   site is only: does the adapter always supply this hook?
+
+- **Reachability** asks the bundler whether every file under `src/` is reachable
+  from `src/main.js`. Twice a module was extracted, tested and reported complete
+  while nothing imported it - 1,235 lines the first time, 77 the second - and the
+  code it replaced kept working, so every other gate stayed green. Zero
+  unreachable files; a file that must stay out needs a reason and a removal
+  condition in the script.
+
+- **Delegation** resolves every `this.getX().y()` in `src` against the methods
+  class X defines. Three shims pointed at methods nobody wrote; the file is
+  JavaScript so the type checker never looked, and nothing called them so the
+  tests never ran them.
 
 - **Unwired hooks** is not a ratchet - zero is the only acceptable count.
   `plugin.openHistoryModal?.(session)` reads like a call, but if nothing defines

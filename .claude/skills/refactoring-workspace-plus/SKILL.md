@@ -37,6 +37,53 @@ Each commit migrates one module and leaves the repo fully working. Never leave a
 
 A migration commit converts the module to TypeScript, turns it into a class, **improves its design**, and **fixes the Obsidian guideline violations that conversion makes visible** — all four, in one commit. It is not a mechanical port; see [reference/design-targets.md](reference/design-targets.md) for what to change and, just as importantly, what to leave alone. They cannot be separated: making a file `.ts` is what lets the 33 type-aware lint rules see it, so its violation count rises at that moment. Verified on `src/utils.js`: 255 → 257 from the conversion alone. Deferring the fixes means the ratchet blocks every commit and every file is edited twice.
 
+
+## The failure this migration keeps producing
+
+Five times now, code has been written, tested, reported complete, and never
+run. Every time, all gates were green.
+
+| What | Size | Found by |
+|---|---|---|
+| `SessionStorage` / `SyncWatcher` never instantiated | 1,235 lines | hand `grep 'new X('` |
+| Class-side fallbacks for hooks the adapter always supplies | 50 sites | mutation testing |
+| `openHistoryModal?.()` and three siblings defined nowhere | 4 dead features | the maintainer using the plugin |
+| Shims delegating to methods no class had | 3 methods | delegation cross-check |
+| `storage/migrations.ts` extracted, never imported | 77 lines | bundler reachability |
+
+**One mechanism produces all five.** The strangler pattern keeps the old code
+working while the new code appears beside it. That is its safety property — and
+it means nothing fails when only the old path runs. Every gate asked *does the
+plugin still work?*, and the old path guarantees the answer is yes. None asked
+*is the new code the one that runs?*
+
+Note also who found them: three of the five needed a person to go looking, and
+one needed the maintainer to click something in Obsidian. Passing tests were
+never going to surface any of them.
+
+### What this costs you if you forget it
+
+The four gates below exist because each of these was found *after* the commit
+that introduced it, and each cost a review round. They are cheap; re-deriving
+them from a bug report is not.
+
+### The measurement that predicts it
+
+Every one of the five arrived in a commit with a large positive net line count
+in `src/` (+200 to +579). Every commit that fixed one was net negative.
+
+    git show --numstat --format= <sha> -- src | awk '{a+=$1;d+=$2} END{print a-d}'
+
+A migration commit replaces code, so it deletes as it adds. A strongly positive
+net means the old implementation is still there — which is exactly the condition
+that hides an unwired replacement. It is a signal, not a verdict: state the
+reason when a commit is legitimately additive.
+
+### Per-commit, the question to answer
+
+Not "do the tests pass?" but **"what breaks if I delete the new code?"** If the
+answer is *nothing*, it was never wired, whatever its own tests say.
+
 ## Per-commit workflow
 
 Copy this checklist into your response and tick it off:
