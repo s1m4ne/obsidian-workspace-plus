@@ -170,6 +170,100 @@ test('SessionStore: validation and name generation', () => {
     assert.ok(store.getNextSessionName());
 });
 
+test('SessionStore: current-session commands preserve confirmation and modal paths', async () => {
+    const { host, events } = createMockHost({ confirmDeleteByHotkey: true });
+    const store = new SessionStore(host);
+    let rename: ((name: string) => void) | undefined;
+    let confirm: (() => void) | undefined;
+    let settingsOpened = 0;
+
+    host.openRenameModal = (currentName, onRename) => {
+        assert.equal(currentName, 'Session 1');
+        rename = onRename;
+    };
+    host.openConfirmModal = (message, onConfirm, options) => {
+        assert.equal(message, '"Renamed" is the active session. Delete anyway?');
+        confirm = onConfirm;
+        options?.onHintClick?.();
+    };
+    host.openPluginSettings = () => {
+        settingsOpened += 1;
+    };
+
+    store.renameCurrentSession();
+    rename?.('Renamed');
+    await Promise.resolve();
+    assert.equal(store.getActiveSession()?.name, 'Renamed');
+
+    store.deleteCurrentSession();
+    assert.ok(confirm);
+    assert.ok(store.findSession('s1'));
+    assert.equal(settingsOpened, 1);
+    confirm?.();
+    await Promise.resolve();
+    await Promise.resolve();
+    assert.equal(store.findSession('s1'), null);
+    assert.equal(events.appliedLayouts.length, 1);
+
+    const { host: immediateHost } = createMockHost({ confirmDeleteByHotkey: false });
+    const immediateStore = new SessionStore(immediateHost);
+    let openedConfirmation = false;
+    immediateHost.openConfirmModal = () => {
+        openedConfirmation = true;
+    };
+    immediateStore.deleteCurrentSession();
+    await Promise.resolve();
+    await Promise.resolve();
+    assert.equal(openedConfirmation, false);
+    assert.equal(immediateStore.findSession('s1'), null);
+});
+
+test('SessionStore: the last remaining session cannot be deleted by the command', async () => {
+    const { host } = createMockHost({
+        sessions: { only: { id: 'only', name: 'Only', layout: {}, modified: 1 } },
+        sessionOrder: ['only'],
+        activeSessionId: 'only',
+    });
+    const store = new SessionStore(host);
+    let confirmationOpened = false;
+    host.openConfirmModal = () => { confirmationOpened = true; };
+    harness.obsidian.notices.length = 0;
+
+    store.deleteCurrentSession();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    // There has to be a session left. This is the hotkey and command entry
+    // point, and it carries its own guard - session-list-actions has a separate
+    // one for the row buttons, so covering that one proves nothing here.
+    assert.ok(store.findSession('only'), 'the session is still there');
+    assert.equal(confirmationOpened, false, 'and it never even asked');
+    assert.match(
+        harness.obsidian.notices[harness.obsidian.notices.length - 1]?.message ?? '',
+        /cannot|last/i,
+        'the user is told why nothing happened',
+    );
+});
+
+test('SessionStore: a delete the store refuses is not announced as done', async () => {
+    const { host } = createMockHost({ confirmDeleteByHotkey: false });
+    const store = new SessionStore(host);
+    // The delete is attempted and declines, which is what the success notice
+    // has to be told apart from.
+    store.deleteSession = (): Promise<boolean> => Promise.resolve(false);
+    harness.obsidian.notices.length = 0;
+
+    store.deleteCurrentSession();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    assert.deepEqual(
+        harness.obsidian.notices.map((notice) => notice.message),
+        [],
+        'nothing is reported when nothing was deleted',
+    );
+});
+
 test('SessionStore: CRUD operations, duplicate, reset, and default session', async () => {
     const { host, events } = createMockHost();
     const store = new SessionStore(host);

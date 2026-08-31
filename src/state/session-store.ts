@@ -26,6 +26,7 @@ export interface SessionStoreHost {
     getWorkspaceRestoreScope: () => string;
     openRenameModal?: (currentName: string, onRename: (newName: string) => void) => void;
     openConfirmModal?: (message: string, onConfirm: () => void, options?: { hint?: string; onHintClick?: () => void }) => void;
+    openPluginSettings?: () => void;
 }
 
 export interface SessionValidationResult {
@@ -453,6 +454,51 @@ export class SessionStore {
             new Notice(formatString(L.renamed, oldName, normalized));
         }
         return true;
+    }
+
+    renameCurrentSession(): void {
+        const session = this.getActiveSession();
+        if (!session) {
+            new Notice(formatString(L.noSession));
+            return;
+        }
+
+        this.host.openRenameModal?.(session.name, (newName) => {
+            void this.renameSessionById(session.id, newName);
+        });
+    }
+
+    deleteCurrentSession(): void {
+        const session = this.getActiveSession();
+        if (!session) {
+            new Notice(formatString(L.noSession));
+            return;
+        }
+        if (Object.keys(this.data.sessions).length <= 1) {
+            new Notice(formatString(L.cannotDeleteLast));
+            return;
+        }
+
+        const doDelete = (): Promise<void> => this.deleteSession(session.id).then((deleted) => {
+            if (!deleted) return;
+            new Notice(formatString(L.deleted, session.name));
+        });
+
+        // This setting has historically treated a missing value as disabled.
+        // Keep that distinction rather than using a default-data fallback here.
+        if (!this.data.confirmDeleteByHotkey) {
+            void doDelete();
+            return;
+        }
+
+        this.host.openConfirmModal?.(formatString(L.confirmDeleteActive, session.name), () => {
+            void doDelete();
+        }, {
+            hint: formatString(L.confirmDeleteSettingsHint),
+            onHintClick: () => {
+                this.host.openPluginSettings?.();
+            },
+        });
     }
 
     async deleteSession(sessionId: string): Promise<boolean> {

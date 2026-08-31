@@ -3,6 +3,10 @@
 var attachGroupMethods = require('./groups');
 var attachSettingsStateMethods = require('./settings-state');
 var sessionStore = require('../../state/session-store.ts');
+var i18n = require('../../i18n.ts');
+var obsidianInternals = require('../../platform/obsidian-internals.ts');
+var ConfirmModal = require('../../modals/confirm-modal.ts').ConfirmModal;
+var RenameModal = require('../../modals/rename-modal.ts').RenameModal;
 
 function attachSessionStoreGetter(WorkspacePlusPlus) {
     attachGroupMethods(WorkspacePlusPlus);
@@ -67,6 +71,18 @@ function attachSessionStoreGetter(WorkspacePlusPlus) {
                 },
                 getWorkspaceRestoreScope: function () {
                     return typeof self.getWorkspaceRestoreScope === 'function' ? self.getWorkspaceRestoreScope() : 'full';
+                },
+                openRenameModal: function (currentName, onRename) {
+                    var emptyNotice = i18n.L.emptyName;
+                    new RenameModal(self.app, currentName, onRename, {
+                        emptyNotice: typeof emptyNotice === 'string' ? emptyNotice : '',
+                    }).open();
+                },
+                openConfirmModal: function (message, onConfirm, options) {
+                    new ConfirmModal(self.app, message, onConfirm, options).open();
+                },
+                openPluginSettings: function () {
+                    obsidianInternals.openSettingTab(self.app, self.manifest.id);
                 },
             });
         }
