@@ -197,6 +197,81 @@ test('session menu dispatches the displayed callbacks, including a selected grou
     assert.deepEqual(calls, ['switch', 'history', ['move', 'g1']]);
 });
 
+test('every session menu entry runs its own action when chosen', () => {
+    resetHarness();
+    // Auto-save off and the row active, which is what puts the save group on the
+    // menu at all.
+    const { plugin } = createPlugin({ data: { autoSaveOnSwitch: false } });
+    const calls = [];
+    const created = openSessionMenu(plugin, {
+        isActive: true,
+        showSaveAs: true,
+        showRemoveFromGroup: true,
+        onSave() { calls.push('save'); },
+        onReload() { calls.push('reload'); },
+        onSaveAs() { calls.push('saveAs'); },
+        onRename() { calls.push('rename'); },
+        onDuplicate() { calls.push('duplicate'); },
+        onRemoveFromGroup() { calls.push('removeFromGroup'); },
+        onDelete() { calls.push('delete'); },
+    });
+
+    // Each entry is chosen once, in menu order. The previous test only proved
+    // that entries appear; nothing had ever pressed these seven.
+    created.item(L.contextSaveSession).trigger();
+    created.item(L.contextReloadSession).trigger();
+    created.item(L.cmdSaveAs).trigger();
+    created.item(L.contextRenameSession).trigger();
+    created.item(L.contextDuplicateSession).trigger();
+    created.item(L.groupRemoveFromGroup).trigger();
+    created.item(L.contextDeleteSession).trigger();
+
+    assert.deepEqual(calls, [
+        'save', 'reload', 'saveAs', 'rename', 'duplicate', 'removeFromGroup', 'delete',
+    ], 'each entry reaches its own callback, and no other');
+});
+
+test('overwriting an inactive session with the current layout is offered only when it can be done', () => {
+    resetHarness();
+    const { plugin } = createPlugin({ data: { autoSaveOnSwitch: false } });
+    const calls = [];
+
+    // The entry exists for a session that is not the active one, while
+    // switching does not save by itself, and only if the caller can handle it.
+    const created = openSessionMenu(plugin, {
+        isActive: false,
+        onOverwriteWithCurrentLayout() { calls.push('overwrite'); },
+    });
+    created.item(L.contextSaveCurrentLayoutToThisSession).trigger();
+    assert.deepEqual(calls, ['overwrite']);
+
+    // Without a handler there is nothing to offer.
+    resetHarness();
+    const withoutHandler = openSessionMenu(plugin, { isActive: false });
+    assert.equal(withoutHandler.item(L.contextSaveCurrentLayoutToThisSession), undefined);
+
+    // And not on the active session, which has its own Save entry instead.
+    resetHarness();
+    const onActive = openSessionMenu(plugin, {
+        isActive: true,
+        onOverwriteWithCurrentLayout() { calls.push('overwrite'); },
+    });
+    assert.equal(onActive.item(L.contextSaveCurrentLayoutToThisSession), undefined);
+});
+
+test('customize clicks opens the plugin settings on the General tab', () => {
+    resetHarness();
+    const { plugin } = createPlugin();
+    plugin.settingTab = { activeTab: 'advanced' };
+    const created = openSessionMenu(plugin, { showCustomizeClicks: true });
+
+    created.item(L.contextCustomizeClicks).trigger();
+
+    // The entry is on the status bar menu, where the useful landing place is
+    // the tab holding the click actions - not wherever the user last was.
+    assert.equal(plugin.settingTab.activeTab, 'general');
+});
+
 test('settings menu checks every toggle according to the current setting', () => {
     resetHarness();
     const { plugin: enabled } = createPlugin({ data: {
