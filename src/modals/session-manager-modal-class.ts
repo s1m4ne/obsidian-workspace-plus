@@ -7,18 +7,20 @@ import * as navigationUtils from '../navigation-utils.ts';
 import * as utils from '../utils.ts';
 import { deriveSessionPresentation } from '../ui/shared/session-presenter.ts';
 import * as sessionDrag from '../ui/shared/session-drag.ts';
-import * as sessionContextActions from '../session-context-actions.js';
+import * as sessionContextActions from '../session-context-actions.ts';
 import * as settingsContextMenu from '../settings-context-menu.js';
-import * as sessionListActions from '../session-list-actions.js';
+import * as sessionListActions from '../session-list-actions.ts';
 import type { SessionGroup, SessionItem } from '../storage/default-data.ts';
+import type { HistoryModalPluginHost } from './history-modal.ts';
 
-export interface SessionManagerModalHost extends GroupTabPluginHost {
+export interface SessionManagerModalHost extends GroupTabPluginHost, HistoryModalPluginHost {
     app: App;
     data: {
         activeSessionId: string | null;
         activeGroupId: string | null;
         groups: Record<string, SessionGroup>;
         sessions: Record<string, SessionItem>;
+        confirmDeleteByHotkey: boolean;
         showFilterInput: boolean;
         overlayDefaultFocus: string;
         [key: string]: unknown;
@@ -32,6 +34,11 @@ export interface SessionManagerModalHost extends GroupTabPluginHost {
     findActiveSessionIndex(sessions: SessionItem[]): number;
     isAutoSaveOnSwitchEnabled(): boolean;
     saveActiveSession(): Promise<unknown>;
+    saveAsSession(): Promise<unknown>;
+    reloadCurrentSessionWithoutSaving(): unknown;
+    confirmOverwriteSessionWithCurrentLayout(sessionId: string, options: { onSaved: () => void }): unknown;
+    renameSessionById(sessionId: string, name: string): Promise<boolean>;
+    duplicateSession(sessionId: string): Promise<unknown>;
     createSessionForViewedGroup(
         name: string,
         groupId: string | null

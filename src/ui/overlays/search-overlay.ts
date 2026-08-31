@@ -6,11 +6,12 @@ import type { GroupTabPluginHost } from '../../group-tab-ui.ts';
 import * as navigationUtils from '../../navigation-utils.ts';
 import { deriveSessionPresentation } from '../shared/session-presenter.ts';
 import * as sessionDrag from '../shared/session-drag.ts';
-import * as sessionContextActions from '../../session-context-actions.js';
+import * as sessionContextActions from '../../session-context-actions.ts';
 import * as settingsContextMenu from '../../settings-context-menu.js';
-import * as sessionListActions from '../../session-list-actions.js';
+import * as sessionListActions from '../../session-list-actions.ts';
 import * as utils from '../../utils.ts';
 import type { SessionGroup, SessionItem } from '../../storage/default-data.ts';
+import type { HistoryModalPluginHost } from '../../modals/history-modal.ts';
 
 export interface SearchOverlayPosition {
     left: number;
@@ -234,7 +235,7 @@ function handleSearchOverlaySlashKey(event: KeyboardEvent, options: SearchOverla
     navigationUtils.focusTextInputSelect(options.searchInput);
 }
 
-export interface SearchOverlayHost extends GroupTabPluginHost {
+export interface SearchOverlayHost extends GroupTabPluginHost, HistoryModalPluginHost {
     app: App;
     data: {
         activeSessionId: string | null;
@@ -246,6 +247,7 @@ export interface SearchOverlayHost extends GroupTabPluginHost {
         searchOverlayPosition: SearchOverlayPosition | null;
         searchOverlaySize: SearchOverlaySize | null;
         confirmQuickActions: boolean;
+        confirmDeleteByHotkey: boolean;
         [key: string]: unknown;
     };
     statusBarEl?: HTMLElement | null;
@@ -274,6 +276,10 @@ export interface SearchOverlayHost extends GroupTabPluginHost {
     removeSessionFromGroup(sessionId: string, groupId: string): Promise<unknown>;
     setSessionOrderFromVisible(order: string[]): void;
     saveActiveSession(): Promise<unknown>;
+    saveAsSession(): Promise<unknown>;
+    confirmOverwriteSessionWithCurrentLayout(sessionId: string, options: { onSaved: () => void }): unknown;
+    renameSessionById(sessionId: string, name: string): Promise<boolean>;
+    duplicateSession(sessionId: string): Promise<unknown>;
     reloadCurrentSessionWithoutSaving(): void;
     switchSession(sessionId: string, options: { silent: boolean }): Promise<boolean>;
     deleteSession(sessionId: string): Promise<boolean>;
@@ -726,7 +732,7 @@ export class SearchOverlay {
                     // Delete
                     overlayEventOwner.registerDomEvent(deleteIcon, 'click', function (e) {
                         e.stopPropagation();
-                        sessionListActions.deleteSessionWithPrompt({
+                        void sessionListActions.deleteSessionWithPrompt({
                             app: self.app,
                             plugin: self,
                             session: sess,

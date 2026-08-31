@@ -1,11 +1,13 @@
 import { Notice, type App } from 'obsidian';
 import { L } from './i18n.ts';
 import type { PluginData, SessionItem } from './storage/default-data.ts';
-import { openSessionContextMenu } from './session-context-actions.js';
+import { openSessionContextMenu } from './session-context-actions.ts';
 import { openSettingsContextMenu } from './settings-context-menu.js';
+import type { HistoryModalPluginHost } from './modals/history-modal.ts';
+import type { SessionGroup } from './storage/default-data.ts';
 
 
-export interface StatusBarActionPluginHost {
+export interface StatusBarActionPluginHost extends HistoryModalPluginHost {
     // Required: see command-registry.ts.
     openSessionManagerModal(): void;
     openHistoryModal(session: SessionItem): void;
@@ -15,7 +17,7 @@ export interface StatusBarActionPluginHost {
     statusBarEl?: HTMLElement | null;
     getActiveSession(): SessionItem | null;
     isGroupFeatureEnabled(): boolean;
-    getOrderedGroups(): readonly unknown[];
+    getOrderedGroups(): readonly SessionGroup[];
     isVersionHistoryEnabled(): boolean;
     isVersionHistoryConfirmRestoreEnabled(): boolean;
     updateStatusBar(): void;
@@ -27,6 +29,12 @@ export interface StatusBarActionPluginHost {
     reloadCurrentSessionWithoutSaving(): Promise<unknown>;
     renameCurrentSession(): void;
     duplicateCurrentSession(): Promise<unknown>;
+    renameSessionById(sessionId: string, name: string): Promise<boolean>;
+    duplicateSession(sessionId: string): Promise<unknown>;
+    confirmOverwriteSessionWithCurrentLayout(sessionId: string, options: { onSaved: () => void }): unknown;
+    deleteSession(sessionId: string): Promise<boolean>;
+    moveSessionToGroupExclusive(sessionId: string, groupId: string): Promise<unknown>;
+    removeSessionFromGroup(sessionId: string, groupId: string): Promise<unknown>;
     switchRelativeFromStatusBar(offset: number): Promise<boolean>;
     createEmptySession(): Promise<unknown>;
     toggleAutoSaveOnSwitch(options?: { notify?: boolean }): Promise<unknown>;

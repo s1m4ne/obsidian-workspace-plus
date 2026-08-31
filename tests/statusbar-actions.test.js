@@ -51,7 +51,7 @@ function loadStatusBarActions() {
         if (request === 'obsidian') return obsidianStub;
         if (request === './i18n' || request === './i18n.ts') return i18nStub;
         if (request === './modals') return modalsStub;
-        if (request === './session-context-actions') return sessionContextActionsStub;
+        if (request === './session-context-actions' || request === './session-context-actions.ts') return sessionContextActionsStub;
         if (request === './settings-context-menu') return settingsContextMenuStub;
         return originalLoad(request, parent, isMain);
     };
