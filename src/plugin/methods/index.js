@@ -1,6 +1,5 @@
 'use strict';
 
-var attachHotkeyMethods = require('./hotkeys');
 var attachOverlayMethods = require('./overlays');
 var attachPersistenceMethods = require('./persistence');
 var attachStorageBackupMethods = require('./storage-backup');
@@ -22,7 +21,6 @@ var attachSettingsStateMethods = require('./settings-state');
 var attachModalOpenerMethods = require('./modal-openers');
 
 function attachPluginMethods(WorkspacePlusPlus) {
-    attachHotkeyMethods(WorkspacePlusPlus);
     attachOverlayMethods(WorkspacePlusPlus);
     attachPersistenceMethods(WorkspacePlusPlus);
     attachStorageBackupMethods(WorkspacePlusPlus);

@@ -6,7 +6,9 @@ import {
     Notice,
 } from 'obsidian';
 import { L } from '../i18n.ts';
+import * as obsidianInternals from '../platform/obsidian-internals.ts';
 import type { PluginData, SessionItem } from '../storage/default-data.ts';
+import { isMacPlatform } from '../utils.ts';
 
 
 export interface CommandRegistryHost {
@@ -16,6 +18,7 @@ export interface CommandRegistryHost {
     openHistoryModal(session: SessionItem): void;
     data: PluginData;
     app: App;
+    manifest: { id: string };
     addCommand(command: Command): Command;
     removeCommand(id: string): void;
     getOrderedSessions(): SessionItem[];
@@ -114,6 +117,31 @@ export class CommandRegistry {
 
     get dynamicSessionCommandIds(): readonly string[] {
         return this._dynamicSessionCommandIds;
+    }
+
+    formatHotkey(hotkey: Hotkey): string {
+        const isMac = isMacPlatform();
+        const parts: string[] = [];
+        for (const modifier of hotkey.modifiers ?? []) {
+            if (modifier === 'Mod') parts.push(isMac ? '⌘' : 'Ctrl');
+            else if (modifier === 'Alt') parts.push(isMac ? '⌥' : 'Alt');
+            else if (modifier === 'Shift') parts.push(isMac ? '⇧' : 'Shift');
+            else if (modifier === 'Ctrl') parts.push(isMac ? '⌃' : 'Ctrl');
+        }
+        const keyMap: Record<string, string> = {
+            ArrowLeft: '←', ArrowRight: '→', ArrowUp: '↑', ArrowDown: '↓', ',': '<', '.': '>',
+        };
+        const key = keyMap[hotkey.key] ?? hotkey.key;
+        if (isMac) return parts.join('') + key;
+        parts.push(key);
+        return parts.join('+');
+    }
+
+    /** The hotkey Obsidian has registered for one of this plugin's commands, formatted. */
+    getCommandHotkey(commandId: string, index = 0): string {
+        const hotkeys = obsidianInternals.getCommandHotkeys(this.host.app, `${this.host.manifest.id}:${commandId}`);
+        const hotkey = hotkeys?.[index];
+        return hotkey ? this.formatHotkey(hotkey) : '';
     }
 
     openSaveCurrentLayoutToSessionModal(): void {

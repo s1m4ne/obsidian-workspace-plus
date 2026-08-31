@@ -22,6 +22,7 @@ function createMockHost() {
     };
 
     const host: import('../src/core/command-registry.ts').CommandRegistryHost = {
+        manifest: { id: 'workspace-plus-plus' },
         data: {
             ...DEFAULT_DATA,
             numberedSwitchCommands: true,
