@@ -2,7 +2,7 @@
 
 var obsidian = require('obsidian');
 var i18n = require('./i18n.ts');
-var modals = require('./modals');
+var ConfirmModal = require('./modals/confirm-modal.ts').ConfirmModal;
 var navigationUtils = require('./navigation-utils.ts');
 var utils = require('./utils.ts');
 
@@ -131,7 +131,7 @@ function handleSearchOverlayDeleteKey(e, activeEl, options) {
     };
 
     if (options.plugin.data.confirmDeleteByHotkey !== false) {
-        new modals.ConfirmModal(options.plugin.app, i18n.L.confirmDeleteActive(sess.name), doDelete).open();
+        new ConfirmModal(options.plugin.app, i18n.L.confirmDeleteActive(sess.name), doDelete).open();
     } else {
         doDelete();
     }

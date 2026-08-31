@@ -2,8 +2,8 @@
 
 var obsidian = require('obsidian');
 var i18n = require('./i18n.ts');
-var ConfirmModal = require('./modals/confirm-modal');
-var RenameModal = require('./modals/rename-modal');
+var ConfirmModal = require('./modals/confirm-modal.ts').ConfirmModal;
+var RenameModal = require('./modals/rename-modal.ts').RenameModal;
 
 function resolveApp(options) {
     if (options.app) return options.app;

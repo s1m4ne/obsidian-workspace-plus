@@ -2,8 +2,8 @@
 
 var obsidian = require('obsidian');
 var i18n = require('../i18n.ts');
-var ConfirmModal = require('./confirm-modal');
-var formatRelativeTime = require('./format-relative-time');
+var ConfirmModal = require('./confirm-modal.ts').ConfirmModal;
+var formatRelativeTime = require('./format-relative-time.ts').formatRelativeTime;
 var groupTabUi = require('../group-tab-ui');
 var navigationUtils = require('../navigation-utils.ts');
 var utils = require('../utils.ts');

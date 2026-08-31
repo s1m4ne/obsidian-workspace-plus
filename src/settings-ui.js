@@ -2,7 +2,7 @@
 
 var obsidian = require('obsidian');
 var i18n = require('./i18n.ts');
-var modals = require('./modals');
+var ConfirmModal = require('./modals/confirm-modal.ts').ConfirmModal;
 
 // ============================================================
 // Group Sessions Modal — checkbox list to toggle session membership
@@ -136,7 +136,7 @@ function addDangerResetSetting(parentEl, app, display, options) {
                 if (options.confirmHint) {
                     confirmOptions.hint = options.confirmHint;
                 }
-                new modals.ConfirmModal(app, options.confirmMessage, function () {
+                new ConfirmModal(app, options.confirmMessage, function () {
                     isRunning = true;
                     btn.setDisabled(true);
                     return options.run()

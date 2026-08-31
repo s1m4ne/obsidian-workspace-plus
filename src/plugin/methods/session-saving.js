@@ -130,11 +130,11 @@ function attachSessionSavingMethods(WorkspacePlusPlus) {
                         return !self.data || self.data.groupFeatureEnabled !== false;
                     },
                     openRenameModal: function (placeholder, onRename, options) {
-                        var RenameModal = require('../../modals').RenameModal;
+                        var RenameModal = require('../../modals/rename-modal.ts').RenameModal;
                         new RenameModal(self.app, placeholder, onRename, options).open();
                     },
                     openConfirmModal: function (message, onConfirm, options) {
-                        var ConfirmModal = require('../../modals').ConfirmModal;
+                        var ConfirmModal = require('../../modals/confirm-modal.ts').ConfirmModal;
                         new ConfirmModal(self.app, message, onConfirm, options).open();
                     },
                     saveActiveSession: function (options) {

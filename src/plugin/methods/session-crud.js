@@ -3,7 +3,8 @@
 var obsidian = require('obsidian');
 var i18n = require('../../i18n.ts');
 var obsidianInternals = require('../../platform/obsidian-internals.ts');
-var modals = require('../../modals');
+var ConfirmModal = require('../../modals/confirm-modal.ts').ConfirmModal;
+var RenameModal = require('../../modals/rename-modal.ts').RenameModal;
 var attachSessionStoreGetter = require('./session-store-getter');
 
 function attachSessionCrudMethods(WorkspacePlusPlus) {
@@ -42,7 +43,7 @@ function attachSessionCrudMethods(WorkspacePlusPlus) {
             return;
         }
 
-        new modals.RenameModal(this.app, session.name, function (newName) {
+        new RenameModal(this.app, session.name, function (newName) {
             self.renameSessionById(session.id, newName);
         }, {
             emptyNotice: L.emptyName,
@@ -74,7 +75,7 @@ function attachSessionCrudMethods(WorkspacePlusPlus) {
             return;
         }
 
-        new modals.ConfirmModal(this.app, L.confirmDeleteActive(session.name), doDelete, {
+        new ConfirmModal(this.app, L.confirmDeleteActive(session.name), doDelete, {
             hint: L.confirmDeleteSettingsHint,
             onHintClick: function () {
                 obsidianInternals.openSettingTab(self.app, self.manifest.id);

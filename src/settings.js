@@ -11,8 +11,9 @@ function formatByteSize(bytes) {
     if (kb < 1024) return kb.toFixed(1) + ' KB';
     return (kb / 1024).toFixed(1) + ' MB';
 }
-var modals = require('./modals');
-var formatRelativeTime = require('./modals/format-relative-time');
+var ConfirmModal = require('./modals/confirm-modal.ts').ConfirmModal;
+var RenameModal = require('./modals/rename-modal.ts').RenameModal;
+var formatRelativeTime = require('./modals/format-relative-time.ts').formatRelativeTime;
 var statusBarActions = require('./statusbar-actions.ts');
 var settingsUi = require('./settings-ui');
 
@@ -531,7 +532,7 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                             .addButton(function (btn) {
                                 btn.setButtonText(L.rotationBackupRestore);
                                 btn.onClick(function () {
-                                    new modals.ConfirmModal(self.app,
+                                    new ConfirmModal(self.app,
                                         L.rotationBackupRestoreConfirm(absoluteTime, backup.sessionCount),
                                         function () {
                                             return self.plugin.restoreFromRotationBackup(backup.generation)
@@ -606,7 +607,7 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                             btn.setIcon('pencil');
                             btn.setTooltip(L.rename);
                             btn.onClick(function () {
-                                new modals.RenameModal(self.app, group.name, function (newName) {
+                                new RenameModal(self.app, group.name, function (newName) {
                                     self.plugin.renameGroupValidated(group.id, newName).then(function (renamed) {
                                         if (!renamed) return;
                                         self.display();
@@ -622,7 +623,7 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                             btn.setIcon('trash-2');
                             btn.setTooltip(L.settingsGroupDelete);
                             btn.onClick(function () {
-                                new modals.ConfirmModal(self.app, L.settingsGroupDeleteConfirm(group.name), function () {
+                                new ConfirmModal(self.app, L.settingsGroupDeleteConfirm(group.name), function () {
                                     self.plugin.deleteGroup(group.id).then(function () {
                                         self.display();
                                     });
@@ -679,7 +680,7 @@ var WorkspacePlusPlusSettingTab = /** @class */ (function (_super) {
                 .addButton(function (btn) {
                     btn.setButtonText(L.settingsImportSessionsBtn);
                     btn.onClick(function () {
-                        new modals.ConfirmModal(self.app, L.confirmImportSessions, function () {
+                        new ConfirmModal(self.app, L.confirmImportSessions, function () {
                             return self.plugin.importSessionsFromLatestExport().catch(function () {
                                 new obsidian.Notice(L.importSessionsFailed);
                             });

@@ -70,7 +70,7 @@ function loadSessionContextActions(hooks) {
     Module._load = function (request, parent, isMain) {
         if (request === 'obsidian') return obsidianStub;
         if (request === './i18n' || request === './i18n.ts') return i18nStub;
-        if (request === './modals/history-modal') return HistoryModalStub;
+        if (request === './modals/history-modal' || request === './modals/history-modal.ts') return { HistoryModal: HistoryModalStub };
         if (request === './session-context-menu') return sessionContextMenuStub;
         if (request === './session-list-actions') return sessionListActionsStub;
         return originalLoad(request, parent, isMain);

@@ -2,7 +2,7 @@
 
 var obsidian = require('obsidian');
 var i18n = require('./i18n.ts');
-var modals = require('./modals');
+var SessionManagerModal = require('./modals/session-manager-modal.js');
 var settings = require('./settings');
 var DEFAULT_DATA = require('./plugin/default-data');
 var attachPluginMethods = require('./plugin/methods');
@@ -60,7 +60,7 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
 
             // Ribbon icon (left sidebar)
             self.addRibbonIcon('panels-top-left', L.ribbonTooltip, function () {
-                new modals.SessionManagerModal(self.app, self).open();
+                new SessionManagerModal(self.app, self).open();
             });
 
             statusBarController.setupStatusBar(self);

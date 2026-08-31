@@ -2,7 +2,7 @@
 
 var obsidian = require('obsidian');
 var i18n = require('./i18n.ts');
-var HistoryModal = require('./modals/history-modal');
+var HistoryModal = require('./modals/history-modal.ts').HistoryModal;
 var sessionContextMenu = require('./session-context-menu');
 var sessionListActions = require('./session-list-actions');
 

@@ -154,7 +154,7 @@ function attachSessionSwitcherGetter(WorkspacePlusPlus) {
                     return undefined;
                 },
                 openUnsavedSwitchModal: function (msg, onSave, onSwitch, onCancel) {
-                    var UnsavedSwitchModal = require('../../modals/unsaved-switch-modal');
+                    var UnsavedSwitchModal = require('../../modals/unsaved-switch-modal.ts').UnsavedSwitchModal;
                     new UnsavedSwitchModal(self.app, msg, onSave, onSwitch, onCancel).open();
                 },
             });

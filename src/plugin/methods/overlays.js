@@ -2,8 +2,8 @@
 
 var obsidian = require('obsidian');
 var i18n = require('../../i18n.ts');
-var modals = require('../../modals');
-var formatRelativeTime = require('../../modals/format-relative-time');
+var ConfirmModal = require('../../modals/confirm-modal.ts').ConfirmModal;
+var formatRelativeTime = require('../../modals/format-relative-time.ts').formatRelativeTime;
 var groupTabUi = require('../../group-tab-ui');
 var navigationUtils = require('../../navigation-utils.ts');
 var utils = require('../../utils.ts');
@@ -403,7 +403,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                                 });
                             };
                             if (self.data.confirmQuickActions) {
-                                new modals.ConfirmModal(self.app, L.confirmSaveSession(sess.name), doSave, { confirmText: L.saveInline, confirmClass: 'mod-cta' }).open();
+                                new ConfirmModal(self.app, L.confirmSaveSession(sess.name), doSave, { confirmText: L.saveInline, confirmClass: 'mod-cta' }).open();
                             } else {
                                 doSave();
                             }
@@ -418,7 +418,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                                 self.reloadCurrentSessionWithoutSaving();
                             };
                             if (self.data.confirmQuickActions) {
-                                new modals.ConfirmModal(self.app, L.confirmReloadSession(sess.name), doReload, { confirmText: L.load, confirmClass: 'mod-cta' }).open();
+                                new ConfirmModal(self.app, L.confirmReloadSession(sess.name), doReload, { confirmText: L.load, confirmClass: 'mod-cta' }).open();
                             } else {
                                 doReload();
                             }
@@ -671,7 +671,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                         });
                     };
                     if (self.data.confirmQuickActions) {
-                        new modals.ConfirmModal(self.app, L.confirmSaveSession(target.name), doSave, { confirmText: L.saveInline, confirmClass: 'mod-cta' }).open();
+                        new ConfirmModal(self.app, L.confirmSaveSession(target.name), doSave, { confirmText: L.saveInline, confirmClass: 'mod-cta' }).open();
                     } else {
                         doSave();
                     }
@@ -680,7 +680,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                         self.reloadCurrentSessionWithoutSaving();
                     };
                     if (self.data.confirmQuickActions) {
-                        new modals.ConfirmModal(self.app, L.confirmReloadSession(target.name), doReload, { confirmText: L.load, confirmClass: 'mod-cta' }).open();
+                        new ConfirmModal(self.app, L.confirmReloadSession(target.name), doReload, { confirmText: L.load, confirmClass: 'mod-cta' }).open();
                     } else {
                         doReload();
                     }
