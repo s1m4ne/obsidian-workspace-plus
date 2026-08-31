@@ -146,6 +146,9 @@ body.wpp-session-list-dragging * {
 }
 
 .wpp-drag-clone {
+    position: fixed;
+    z-index: 10000;
+    pointer-events: none;
     opacity: 0.85;
     box-shadow: var(--shadow-l);
     background: var(--background-primary);

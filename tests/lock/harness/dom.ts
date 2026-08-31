@@ -95,6 +95,14 @@ function patchElementPrototype(window: Window & typeof globalThis): void {
     proto.hide = function (this: HTMLElement): void {
         this.style.display = 'none';
     };
+    proto.setCssProps = function (this: HTMLElement, props: Record<string, string>): void {
+        for (const [k, v] of Object.entries(props)) {
+            this.style.setProperty(k, v);
+        }
+    };
+    proto.setCssStyles = function (this: HTMLElement, styles: Partial<CSSStyleDeclaration>): void {
+        Object.assign(this.style, styles);
+    };
 }
 
 export interface DomHarness {
