@@ -10,6 +10,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { setupHarness } from './lock/harness/index.ts';
+import type { App } from 'obsidian';
+import type { SessionManagerModalHost } from '../src/modals/session-manager-modal-class.ts';
+import type { HistoryModalPluginHost } from '../src/modals/history-modal.ts';
 
 const harness = setupHarness();
 
@@ -23,16 +26,13 @@ interface TestPlugin {
 
 const SESSION = { id: 's1', name: 'Session One', layout: {}, history: [{ savedAt: 1, layout: {} }] };
 
-async function createPlugin(): Promise<TestPlugin> {
-    const mod = await import('../src/plugin/methods/modal-openers.js');
-    const attach = ((mod as { default?: unknown }).default ?? mod) as (target: unknown) => void;
-
-    function PluginMock(this: unknown) {}
-    attach(PluginMock);
-
-    const plugin = new (PluginMock as unknown as new () => TestPlugin)();
-    plugin.app = { workspace: { getLayout: () => ({}) } };
-    plugin.data = { sessions: { s1: SESSION }, sessionOrder: ['s1'], activeSessionId: 's1', groups: {}, groupOrder: [], sessionGroups: {}, activeGroupId: null };
+function createPlugin(): TestPlugin {
+    const plugin: TestPlugin = {
+        app: { workspace: { getLayout: () => ({}) } },
+        data: { sessions: { s1: SESSION }, sessionOrder: ['s1'], activeSessionId: 's1', groups: {}, groupOrder: [], sessionGroups: {}, activeGroupId: null },
+        openSessionManagerModal: () => undefined,
+        openHistoryModal: () => undefined,
+    };
 
     // What the two modals ask of the plugin while they build their content.
     Object.assign(plugin, {
@@ -57,19 +57,21 @@ function openModalCount(): number {
 }
 
 test('openSessionManagerModal puts the session manager on screen', async () => {
-    const plugin = await createPlugin();
+    const plugin = createPlugin();
+    const { SessionManagerModal } = await import('../src/modals/session-manager-modal-class.ts');
     const before = openModalCount();
 
-    plugin.openSessionManagerModal(false);
+    new SessionManagerModal(plugin.app as App, plugin as unknown as SessionManagerModalHost).open();
 
     assert.equal(openModalCount(), before + 1, 'the session manager must open');
 });
 
 test('openHistoryModal puts the version history on screen', async () => {
-    const plugin = await createPlugin();
+    const plugin = createPlugin();
+    const { HistoryModal } = await import('../src/modals/history-modal.ts');
     const before = openModalCount();
 
-    plugin.openHistoryModal(SESSION);
+    new HistoryModal(plugin.app as App, plugin as unknown as HistoryModalPluginHost, SESSION).open();
 
     assert.equal(openModalCount(), before + 1, 'the history modal must open');
 });

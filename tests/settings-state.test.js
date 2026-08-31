@@ -5,169 +5,157 @@ require('./lock/harness/index.ts').installObsidianStub();
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-const attachSettingsStateMethods = require('../src/plugin/methods/settings-state');
+const { SettingsState } = require('../src/state/settings-state.ts');
 
-function createPlugin(initialData) {
-    function PluginMock() {}
-    attachSettingsStateMethods(PluginMock);
-    const plugin = new PluginMock();
-    plugin.data = Object.assign({
+function createState(initialData) {
+    const data = Object.assign({
         statusBarActions: null,
         numberedSwitchCommands: true,
         versionHistoryEnabled: true,
     }, initialData || {});
-    plugin.persistCalls = 0;
-    plugin.statusBarUpdates = 0;
-    plugin.commandSyncs = 0;
-    plugin.historyStarts = 0;
-    plugin.historyStops = 0;
-    plugin.persistData = function () {
-        plugin.persistCalls += 1;
+    const events = { persistCalls: 0, statusBarUpdates: 0, commandSyncs: 0, historyStarts: 0, historyStops: 0 };
+    const state = new SettingsState({
+        data,
+        persistData: function () {
+        events.persistCalls += 1;
         return Promise.resolve(true);
-    };
-    plugin.updateStatusBar = function () {
-        plugin.statusBarUpdates += 1;
-    };
-    plugin.syncSessionCommands = function () {
-        plugin.commandSyncs += 1;
-    };
-    plugin.startHistorySnapshotTimer = function () {
-        plugin.historyStarts += 1;
-    };
-    plugin.stopHistorySnapshotTimer = function () {
-        plugin.historyStops += 1;
-    };
-    return plugin;
+        },
+        updateStatusBar: function () { events.statusBarUpdates += 1; },
+        syncSessionCommands: function () { events.commandSyncs += 1; },
+        startHistorySnapshotTimer: function () { events.historyStarts += 1; },
+        stopHistorySnapshotTimer: function () { events.historyStops += 1; },
+    });
+    return { state, data, events };
 }
 
 test('settings state initializes status bar actions before setting a slot', async function () {
-    const plugin = createPlugin({ statusBarActions: null });
+    const { state, data, events } = createState({ statusBarActions: null });
 
-    await plugin.setStatusBarAction('click', 'sessionManager');
+    await state.setStatusBarAction('click', 'sessionManager');
 
-    assert.equal(plugin.data.statusBarActions.click, 'sessionManager');
-    assert.equal(plugin.data.statusBarActions.rightClick, 'sessionMenu');
-    assert.equal(plugin.persistCalls, 1);
+    assert.equal(data.statusBarActions.click, 'sessionManager');
+    assert.equal(data.statusBarActions.rightClick, 'sessionMenu');
+    assert.equal(events.persistCalls, 1);
 });
 
 test('settings state can skip persistence for batch callers', async function () {
-    const plugin = createPlugin();
+    const { state, data, events } = createState();
 
-    await plugin.setWarnOnUnsavedSwitch(false, { persist: false });
+    await state.setWarnOnUnsavedSwitch(false, { persist: false });
 
-    assert.equal(plugin.data.warnOnUnsavedSwitch, false);
-    assert.equal(plugin.persistCalls, 0);
+    assert.equal(data.warnOnUnsavedSwitch, false);
+    assert.equal(events.persistCalls, 0);
 });
 
 test('settings state keeps status bar highlight side effects together', async function () {
-    const plugin = createPlugin();
+    const { state, data, events } = createState();
 
-    await plugin.setUnsavedStatusBarHighlight(false);
+    await state.setUnsavedStatusBarHighlight(false);
 
-    assert.equal(plugin.data.highlightUnsavedSessionChanges, false);
-    assert.equal(plugin.statusBarUpdates, 1);
-    assert.equal(plugin.persistCalls, 1);
+    assert.equal(data.highlightUnsavedSessionChanges, false);
+    assert.equal(events.statusBarUpdates, 1);
+    assert.equal(events.persistCalls, 1);
 });
 
 test('settings state syncs commands when numbered command setting changes', async function () {
-    const plugin = createPlugin();
+    const { state, data, events } = createState();
 
-    await plugin.setNumberedSwitchCommands(false);
+    await state.setNumberedSwitchCommands(false);
 
-    assert.equal(plugin.data.numberedSwitchCommands, false);
-    assert.equal(plugin.commandSyncs, 1);
-    assert.equal(plugin.persistCalls, 1);
+    assert.equal(data.numberedSwitchCommands, false);
+    assert.equal(events.commandSyncs, 1);
+    assert.equal(events.persistCalls, 1);
 });
 
 test('settings state stores sidebar restore preference', async function () {
-    const plugin = createPlugin({ restoreSidebars: true });
+    const { state, data, events } = createState({ restoreSidebars: true });
 
-    await plugin.setRestoreSidebars(false);
+    await state.setRestoreSidebars(false);
 
-    assert.equal(plugin.data.restoreSidebars, false);
-    assert.equal(plugin.persistCalls, 1);
+    assert.equal(data.restoreSidebars, false);
+    assert.equal(events.persistCalls, 1);
 });
 
 test('settings state starts and stops version history timer with the setting', async function () {
-    const plugin = createPlugin();
+    const { state, data, events } = createState();
 
-    await plugin.setVersionHistoryEnabled(false);
-    await plugin.setVersionHistoryEnabled(true);
-    await plugin.setVersionHistorySnapshotInterval('10');
+    await state.setVersionHistoryEnabled(false);
+    await state.setVersionHistoryEnabled(true);
+    await state.setVersionHistorySnapshotInterval('10');
 
-    assert.equal(plugin.data.versionHistoryEnabled, true);
-    assert.equal(plugin.data.versionHistorySnapshotInterval, 10);
-    assert.equal(plugin.historyStops, 1);
-    assert.equal(plugin.historyStarts, 2);
-    assert.equal(plugin.persistCalls, 3);
+    assert.equal(data.versionHistoryEnabled, true);
+    assert.equal(data.versionHistorySnapshotInterval, 10);
+    assert.equal(events.historyStops, 1);
+    assert.equal(events.historyStarts, 2);
+    assert.equal(events.persistCalls, 3);
 });
 
 test('settings state covers all remaining setters and fallback logic', async function () {
-    const plugin = createPlugin();
+    const { state, data } = createState();
 
-    await plugin.setLanguageSetting('ja');
-    assert.equal(plugin.data.language, 'ja');
-    await plugin.setLanguageSetting('');
-    assert.equal(plugin.data.language, 'auto');
+    await state.setLanguageSetting('ja');
+    assert.equal(data.language, 'ja');
+    await state.setLanguageSetting('');
+    assert.equal(data.language, 'auto');
 
-    await plugin.setConfirmQuickActions(true);
-    assert.equal(plugin.data.confirmQuickActions, true);
+    await state.setConfirmQuickActions(true);
+    assert.equal(data.confirmQuickActions, true);
 
-    await plugin.setStatusBarModScrollSwitch(true);
-    assert.equal(plugin.data.statusBarModScrollSwitch, true);
+    await state.setStatusBarModScrollSwitch(true);
+    assert.equal(data.statusBarModScrollSwitch, true);
 
-    await plugin.setStatusBarScrollPreset('mouse');
-    assert.equal(plugin.data.statusBarScrollPreset, 'mouse');
-    await plugin.setStatusBarScrollPreset('');
-    assert.equal(plugin.data.statusBarScrollPreset, 'trackpad');
+    await state.setStatusBarScrollPreset('mouse');
+    assert.equal(data.statusBarScrollPreset, 'mouse');
+    await state.setStatusBarScrollPreset('');
+    assert.equal(data.statusBarScrollPreset, 'trackpad');
 
-    await plugin.setStatusBarScrollModifierMode('ctrl');
-    assert.equal(plugin.data.statusBarScrollModifierMode, 'ctrl');
-    await plugin.setStatusBarScrollModifierMode('');
-    assert.equal(plugin.data.statusBarScrollModifierMode, 'none');
+    await state.setStatusBarScrollModifierMode('ctrl');
+    assert.equal(data.statusBarScrollModifierMode, 'ctrl');
+    await state.setStatusBarScrollModifierMode('');
+    assert.equal(data.statusBarScrollModifierMode, 'none');
 
-    await plugin.setStatusBarScrollThreshold('50');
-    assert.equal(plugin.data.statusBarScrollThreshold, 50);
-    await plugin.setStatusBarScrollThreshold('invalid');
-    assert.equal(plugin.data.statusBarScrollThreshold, 30);
+    await state.setStatusBarScrollThreshold('50');
+    assert.equal(data.statusBarScrollThreshold, 50);
+    await state.setStatusBarScrollThreshold('invalid');
+    assert.equal(data.statusBarScrollThreshold, 30);
 
-    await plugin.setStatusBarScrollCooldownMs('600');
-    assert.equal(plugin.data.statusBarScrollCooldownMs, 600);
-    await plugin.setStatusBarScrollCooldownMs('invalid');
-    assert.equal(plugin.data.statusBarScrollCooldownMs, 500);
+    await state.setStatusBarScrollCooldownMs('600');
+    assert.equal(data.statusBarScrollCooldownMs, 600);
+    await state.setStatusBarScrollCooldownMs('invalid');
+    assert.equal(data.statusBarScrollCooldownMs, 500);
 
-    await plugin.setStatusBarScrollResetMs('300');
-    assert.equal(plugin.data.statusBarScrollResetMs, 300);
-    await plugin.setStatusBarScrollResetMs('invalid');
-    assert.equal(plugin.data.statusBarScrollResetMs, 250);
+    await state.setStatusBarScrollResetMs('300');
+    assert.equal(data.statusBarScrollResetMs, 300);
+    await state.setStatusBarScrollResetMs('invalid');
+    assert.equal(data.statusBarScrollResetMs, 250);
 
-    await plugin.setStatusBarScrollInvert(true);
-    assert.equal(plugin.data.statusBarScrollInvert, true);
+    await state.setStatusBarScrollInvert(true);
+    assert.equal(data.statusBarScrollInvert, true);
 
-    await plugin.setShowActiveSwitchCommand(true);
-    assert.equal(plugin.data.showActiveSwitchCommand, true);
+    await state.setShowActiveSwitchCommand(true);
+    assert.equal(data.showActiveSwitchCommand, true);
 
-    await plugin.setSwitchPreviewEnabled(true);
-    assert.equal(plugin.data.previewNext, true);
-    assert.equal(plugin.data.previewPrevious, true);
+    await state.setSwitchPreviewEnabled(true);
+    assert.equal(data.previewNext, true);
+    assert.equal(data.previewPrevious, true);
 
-    await plugin.setPreviewNext(false);
-    assert.equal(plugin.data.previewNext, false);
+    await state.setPreviewNext(false);
+    assert.equal(data.previewNext, false);
 
-    await plugin.setPreviewPrevious(false);
-    assert.equal(plugin.data.previewPrevious, false);
+    await state.setPreviewPrevious(false);
+    assert.equal(data.previewPrevious, false);
 
-    await plugin.setShowFilterInput(true);
-    assert.equal(plugin.data.showFilterInput, true);
+    await state.setShowFilterInput(true);
+    assert.equal(data.showFilterInput, true);
 
-    await plugin.setOverlayDefaultFocus('search');
-    assert.equal(plugin.data.overlayDefaultFocus, 'search');
-    await plugin.setOverlayDefaultFocus('');
-    assert.equal(plugin.data.overlayDefaultFocus, 'current-session');
+    await state.setOverlayDefaultFocus('search');
+    assert.equal(data.overlayDefaultFocus, 'search');
+    await state.setOverlayDefaultFocus('');
+    assert.equal(data.overlayDefaultFocus, 'current-session');
 
-    await plugin.setConfirmDeleteByHotkey(true);
-    assert.equal(plugin.data.confirmDeleteByHotkey, true);
+    await state.setConfirmDeleteByHotkey(true);
+    assert.equal(data.confirmDeleteByHotkey, true);
 
-    await plugin.setVersionHistoryConfirmRestore(true);
-    assert.equal(plugin.data.versionHistoryConfirmRestore, true);
+    await state.setVersionHistoryConfirmRestore(true);
+    assert.equal(data.versionHistoryConfirmRestore, true);
 });

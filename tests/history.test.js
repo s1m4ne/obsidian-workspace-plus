@@ -5,17 +5,10 @@ require('./lock/harness/index.ts').installObsidianStub();
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-const attachHistoryMethods = require('../src/plugin/methods/history');
-const attachLayoutRestoreMethods = require('../src/plugin/methods/layout-restore');
-const attachSessionMethods = require('../src/plugin/methods/sessions');
+const { HistoryService } = require('../src/state/history-service.ts');
 
-function createPlugin(initialData) {
-    function PluginMock() {}
-    attachSessionMethods(PluginMock);
-    attachLayoutRestoreMethods(PluginMock);
-    attachHistoryMethods(PluginMock);
-    const plugin = new PluginMock();
-    plugin.data = Object.assign({
+function createService(initialData) {
+    const data = Object.assign({
         versionHistoryEnabled: true,
         versionHistorySnapshotInterval: 5,
         versionHistoryConfirmRestore: true,
@@ -37,41 +30,47 @@ function createPlugin(initialData) {
             },
         },
     }, initialData || {});
-    plugin.persists = 0;
-    plugin.statusBarUpdates = 0;
-    plugin.persistData = function () {
-        plugin.persists += 1;
-        return Promise.resolve(true);
-    };
-    plugin.updateStatusBar = function () {
-        plugin.statusBarUpdates += 1;
-    };
-    plugin.app = {
-        workspace: {
-            getLayout: function () { return { type: 'leaf', main: { type: 'leaf' } }; },
-            changeLayout: function () { return Promise.resolve(true); },
+    const events = { persists: 0, statusBarUpdates: 0, timer: null };
+    const getActiveSession = () => data.activeSessionId ? data.sessions[data.activeSessionId] : null;
+    const service = new HistoryService({
+        data,
+        settingsState: {
+            get versionHistoryEnabled() { return data.versionHistoryEnabled !== false; },
+            get versionHistorySnapshotInterval() { return data.versionHistorySnapshotInterval || 5; },
+            get versionHistoryConfirmRestore() { return data.versionHistoryConfirmRestore !== false; },
         },
-    };
-    return plugin;
+        sessionStore: { getSession: (id) => data.sessions[id], getActiveSession },
+        getActiveSession,
+        getCurrentWorkspaceLayout: () => ({ type: 'leaf', main: { type: 'leaf' } }),
+        applyWorkspaceLayout: () => Promise.resolve(true),
+        layoutsEqualStructural: (left, right) => JSON.stringify(left) === JSON.stringify(right),
+        isAutoSaveOnSwitchEnabled: () => data.autoSaveOnSwitch !== false,
+        persistData: () => {
+        events.persists += 1;
+        return Promise.resolve(true);
+        },
+        updateStatusBar: () => { events.statusBarUpdates += 1; },
+    });
+    return { service, data, events };
 }
 
 test('history: settings accessors and layout parsing', function () {
-    const plugin = createPlugin();
+    const { service, data } = createService();
 
-    assert.equal(plugin.isVersionHistoryEnabled(), true);
-    assert.equal(plugin.getVersionHistorySnapshotInterval(), 5);
-    assert.equal(plugin.isVersionHistoryConfirmRestoreEnabled(), true);
+    assert.equal(service.isVersionHistoryEnabled(), true);
+    assert.equal(service.getVersionHistorySnapshotInterval(), 5);
+    assert.equal(service.isVersionHistoryConfirmRestoreEnabled(), true);
 
-    const layout = plugin.data.sessions.s1.layout;
-    const paths = plugin.extractFilePathsFromLayout(layout);
+    const layout = data.sessions.s1.layout;
+    const paths = service.extractFilePathsFromLayout(layout);
     assert.deepEqual(paths, ['Note 1.md', 'Note 2.md']);
 
-    const panes = plugin.countPanesInLayout(layout);
+    const panes = service.countPanesInLayout(layout);
     assert.equal(panes, 1);
 });
 
 test('history: compactHistory tiers and limits', function () {
-    const plugin = createPlugin();
+    const { service } = createService();
     const now = Date.now();
     const HOUR = 3600000;
     const DAY = 86400000;
@@ -87,42 +86,42 @@ test('history: compactHistory tiers and limits', function () {
         { layout: { id: 8 }, savedAt: now - (40 * DAY) }, // >30 days dropped
     ];
 
-    const compacted = plugin.compactHistory(entries);
+    const compacted = service.compactHistory(entries);
     assert.ok(compacted.length >= 4);
     assert.ok(!compacted.some(e => e.layout.id === 8));
 });
 
 test('history: pushLayoutToHistory and quickRestoreLatestHistory', async function () {
-    const plugin = createPlugin();
-    const session = plugin.data.sessions.s1;
+    const { service, data } = createService();
+    const session = data.sessions.s1;
 
-    plugin.pushLayoutToHistory(session);
+    service.pushLayoutToHistory(session);
     assert.equal(session.history.length, 1);
 
     // Duplicate structural push is skipped
-    plugin.pushLayoutToHistory(session);
+    service.pushLayoutToHistory(session);
     assert.equal(session.history.length, 1);
 
     // Restore from history
-    const restored = await plugin.restoreFromHistoryEntry('s1', 0);
+    const restored = await service.restoreFromHistoryEntry('s1', 0);
     assert.equal(restored, true);
 
     // Quick restore
-    const quickRestored = await plugin.quickRestoreLatestHistory();
+    const quickRestored = await service.quickRestoreLatestHistory();
     assert.equal(quickRestored, true);
 
     // Clear entries
-    const changed = plugin.clearVersionHistoryEntries();
+    const changed = service.clearVersionHistoryEntries();
     assert.equal(changed, true);
     assert.equal(session.history, undefined);
 });
 
 test('history: timer start and stop', function () {
-    const plugin = createPlugin();
+    const { service } = createService();
 
-    plugin.startHistorySnapshotTimer();
-    assert.ok(plugin._historySnapshotTimer);
+    service.startHistorySnapshotTimer();
+    assert.ok(service.getSnapshotTimer());
 
-    plugin.stopHistorySnapshotTimer();
-    assert.equal(plugin._historySnapshotTimer, null);
+    service.stopHistorySnapshotTimer();
+    assert.equal(service.getSnapshotTimer(), null);
 });

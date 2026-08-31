@@ -9,8 +9,7 @@ const i18n = require('../src/i18n.ts');
 
 i18n.resolveLocale('en');
 
-const attachSessionStatusBarMethods = require('../src/plugin/methods/session-statusbar.js');
-const attachSessionMethods = require('../src/plugin/methods/sessions.js');
+const { StatusBarController } = require('../src/statusbar-controller.ts');
 
 function createStatusBarEl() {
     const el = harness.dom.document.createElement('div');
@@ -34,13 +33,9 @@ function createStatusBarEl() {
     return el;
 }
 
-function createPlugin(options) {
+function createController(options) {
     options = options || {};
-    function PluginMock() {}
-    attachSessionMethods(PluginMock);
-    attachSessionStatusBarMethods(PluginMock);
-    const plugin = new PluginMock();
-    plugin.data = {
+    const data = {
         activeSessionId: options.session ? 's1' : null,
         sessions: options.session ? { s1: options.session } : {},
         sessionOrder: options.session ? ['s1'] : [],
@@ -50,37 +45,43 @@ function createPlugin(options) {
         groupOrder: options.group ? ['__all__', 'g1'] : ['__all__'],
         sessionGroups: {},
     };
-    plugin.statusBarEl = options.statusBarEl === false ? null : createStatusBarEl();
-    plugin.shouldShowUnsavedStatusBarHighlight = function () {
-        return !!options.unsaved;
-    };
-    return plugin;
+    const statusBarEl = options.statusBarEl === false ? null : createStatusBarEl();
+    const controller = new StatusBarController({
+        data,
+        statusBarEl,
+        addStatusBarItem: createStatusBarEl,
+        getActiveSession: () => data.activeSessionId ? data.sessions[data.activeSessionId] : null,
+        getActiveGroup: () => data.activeGroupId ? data.groups[data.activeGroupId] : null,
+        shouldShowUnsavedStatusBarHighlight: () => !!options.unsaved,
+        switchRelativeFromScroll: async () => true,
+    });
+    return { controller, statusBarEl };
 }
 
 test('session status bar renders icon and session name', function () {
-    const plugin = createPlugin({
+    const { controller, statusBarEl } = createController({
         session: { id: 's1', name: 'Session One' },
     });
 
-    plugin.updateStatusBar();
+    controller.updateStatusBar();
 
-    assert.deepEqual(plugin.statusBarEl.classes, []);
-    assert.equal(plugin.statusBarEl.children[0].cls, 'wpp-status-icon');
-    assert.equal(plugin.statusBarEl.children[0].icon, 'panels-top-left');
-    assert.deepEqual(plugin.statusBarEl.children.map(function (child) {
+    assert.deepEqual(statusBarEl.classes, []);
+    assert.equal(statusBarEl.children[0].cls, 'wpp-status-icon');
+    assert.equal(statusBarEl.children[0].icon, 'panels-top-left');
+    assert.deepEqual(statusBarEl.children.map(function (child) {
         return child.text;
     }), ['', 'Session One']);
 });
 
 test('session status bar renders active group before session name', function () {
-    const plugin = createPlugin({
+    const { controller, statusBarEl } = createController({
         session: { id: 's1', name: 'Session One' },
         group: { id: 'g1', name: 'Group One' },
     });
 
-    plugin.updateStatusBar();
+    controller.updateStatusBar();
 
-    assert.deepEqual(plugin.statusBarEl.children.map(function (child) {
+    assert.deepEqual(statusBarEl.children.map(function (child) {
         return child.cls;
     }), [
         'wpp-status-icon',
@@ -88,29 +89,29 @@ test('session status bar renders active group before session name', function () 
         'wpp-status-separator',
         'wpp-status-name',
     ]);
-    assert.deepEqual(plugin.statusBarEl.children.map(function (child) {
+    assert.deepEqual(statusBarEl.children.map(function (child) {
         return child.text;
     }), ['', 'Group One', ' / ', 'Session One']);
 });
 
 test('session status bar toggles unsaved highlight class', function () {
-    const plugin = createPlugin({
+    const { controller, statusBarEl } = createController({
         session: { id: 's1', name: 'Session One' },
         unsaved: true,
     });
 
-    plugin.updateStatusBar();
+    controller.updateStatusBar();
 
-    assert.deepEqual(plugin.statusBarEl.classes, ['wpp-status-bar-unsaved']);
+    assert.deepEqual(statusBarEl.classes, ['wpp-status-bar-unsaved']);
 });
 
 test('session status bar safely skips rendering before element exists', function () {
-    const plugin = createPlugin({
+    const { controller } = createController({
         statusBarEl: false,
         session: { id: 's1', name: 'Session One' },
     });
 
     assert.doesNotThrow(function () {
-        plugin.updateStatusBar();
+        controller.updateStatusBar();
     });
 });

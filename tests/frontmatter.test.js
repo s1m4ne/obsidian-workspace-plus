@@ -4,50 +4,14 @@ require('./lock/harness/index.ts').installObsidianStub();
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const Module = require('module');
+const { FrontmatterLinker } = require('../src/core/frontmatter-linker.ts');
 
-const i18n = require('../src/i18n.ts');
-
-i18n.resolveLocale('en');
-
-function loadFrontmatterMethods(notices) {
-    const obsidianStub = {
-        Notice: class {
-            constructor(message) {
-                notices.push(message);
-            }
-        },
-    };
-    const originalLoad = Module._load;
-    Module._load = function (request, parent, isMain) {
-        if (request === 'obsidian') return obsidianStub;
-        return originalLoad(request, parent, isMain);
-    };
-
-    try {
-        const modulePath = require.resolve('../src/plugin/methods/frontmatter');
-        delete require.cache[modulePath];
-        return require(modulePath);
-    } finally {
-        Module._load = originalLoad;
-    }
-}
-
-function createPlugin(options) {
+function createLinker(options) {
     options = options || {};
-    const notices = [];
-    const attachFrontmatterMethods = loadFrontmatterMethods(notices);
-
-    function PluginMock() {}
-    attachFrontmatterMethods(PluginMock);
-    const plugin = new PluginMock();
-
-    plugin.notices = notices;
-    plugin.isSwitchingSession = false;
-    plugin.registerEvent = function (ref) {
-        plugin.registeredEvent = ref;
-    };
-    plugin.app = Object.assign({
+    const host = {
+        data: { sessions: {}, groups: {}, activeSessionId: null, activeGroupId: null },
+        registeredEvent: null,
+        app: Object.assign({
         workspace: {},
         metadataCache: {
             getFileCache: function () {
@@ -55,9 +19,13 @@ function createPlugin(options) {
             },
         },
         fileManager: {},
-    }, options.app || {});
-
-    return plugin;
+        }, options.app || {}),
+        saveCurrentLayoutAsSessionName: options.saveCurrentLayoutAsSessionName || (() => Promise.resolve(false)),
+        switchSession: () => Promise.resolve(false),
+        isGroupFeatureEnabled: () => true,
+        registerEvent: function (ref) { host.registeredEvent = ref; },
+    };
+    return { linker: new FrontmatterLinker(host), host };
 }
 
 test('frontmatter listener uses file-open instead of active leaf changes', function () {
@@ -65,7 +33,7 @@ test('frontmatter listener uses file-open instead of active leaf changes', funct
     let eventCallback = null;
     let handledFile = null;
     const file = { path: 'Project.md', basename: 'Project', extension: 'md' };
-    const plugin = createPlugin({
+    const { linker, host } = createLinker({
         app: {
             workspace: {
                 on: function (name, callback) {
@@ -76,15 +44,15 @@ test('frontmatter listener uses file-open instead of active leaf changes', funct
             },
         },
     });
-    plugin.getFrontmatterLinker().handleFrontmatterTriggers = function (incomingFile) {
+    host.handleFrontmatterTriggers = function (incomingFile) {
         handledFile = incomingFile;
     };
 
-    plugin.registerFrontmatterListeners();
+    linker.registerFrontmatterListeners();
     eventCallback(file);
 
     assert.equal(eventName, 'file-open');
-    assert.equal(plugin.registeredEvent.name, 'file-open');
+    assert.equal(host.registeredEvent.name, 'file-open');
     assert.equal(handledFile, file);
 });
 
@@ -92,7 +60,7 @@ test('frontmatter listener skips files that are already loaded in the active lea
     let eventCallback = null;
     let handledCount = 0;
     const file = { path: 'Project.md', basename: 'Project', extension: 'md' };
-    const plugin = createPlugin({
+    const { linker, host } = createLinker({
         app: {
             workspace: {
                 activeLeaf: { id: 'leaf-a' },
@@ -106,11 +74,11 @@ test('frontmatter listener skips files that are already loaded in the active lea
             },
         },
     });
-    plugin.getFrontmatterLinker().handleFrontmatterTriggers = function () {
+    host.handleFrontmatterTriggers = function () {
         handledCount += 1;
     };
 
-    plugin.registerFrontmatterListeners();
+    linker.registerFrontmatterListeners();
     eventCallback(file);
     eventCallback(file);
 
@@ -122,7 +90,7 @@ test('frontmatter listener handles a new file loaded into the active leaf once',
     let handledCount = 0;
     const existingFile = { path: 'Existing.md', basename: 'Existing', extension: 'md' };
     const newFile = { path: 'New.md', basename: 'New', extension: 'md' };
-    const plugin = createPlugin({
+    const { linker, host } = createLinker({
         app: {
             workspace: {
                 activeLeaf: { id: 'leaf-a' },
@@ -136,11 +104,11 @@ test('frontmatter listener handles a new file loaded into the active leaf once',
             },
         },
     });
-    plugin.getFrontmatterLinker().handleFrontmatterTriggers = function () {
+    host.handleFrontmatterTriggers = function () {
         handledCount += 1;
     };
 
-    plugin.registerFrontmatterListeners();
+    linker.registerFrontmatterListeners();
     eventCallback(newFile);
     eventCallback(newFile);
 
@@ -151,7 +119,7 @@ test('frontmatter listener treats a file as newly loaded after active leaf close
     let eventCallback = null;
     let handledCount = 0;
     const file = { path: 'Project.md', basename: 'Project', extension: 'md' };
-    const plugin = createPlugin({
+    const { linker, host } = createLinker({
         app: {
             workspace: {
                 activeLeaf: { id: 'leaf-a' },
@@ -165,11 +133,11 @@ test('frontmatter listener treats a file as newly loaded after active leaf close
             },
         },
     });
-    plugin.getFrontmatterLinker().handleFrontmatterTriggers = function () {
+    host.handleFrontmatterTriggers = function () {
         handledCount += 1;
     };
 
-    plugin.registerFrontmatterListeners();
+    linker.registerFrontmatterListeners();
     eventCallback(file);
     eventCallback(null);
     eventCallback(file);
@@ -182,7 +150,7 @@ test('save current note name as session writes workspace-session frontmatter', a
     let processedFile = null;
     let processedFrontmatter = null;
     let savedSessionName = null;
-    const plugin = createPlugin({
+    const { linker } = createLinker({
         app: {
             workspace: {
                 getActiveFile: function () {
@@ -199,13 +167,13 @@ test('save current note name as session writes workspace-session frontmatter', a
                 },
             },
         },
+        saveCurrentLayoutAsSessionName: function (name) {
+            savedSessionName = name;
+            return Promise.resolve({ saved: true, name });
+        },
     });
-    plugin.saveCurrentLayoutAsSessionName = function (name) {
-        savedSessionName = name;
-        return Promise.resolve({ saved: true, name });
-    };
 
-    const result = await plugin.saveCurrentNoteNameAsSession({ silent: true });
+    const result = await linker.saveCurrentNoteNameAsSession({ silent: true });
 
     assert.equal(result.saved, true);
     assert.equal(processedFile, file);
@@ -215,7 +183,7 @@ test('save current note name as session writes workspace-session frontmatter', a
 
 test('save current note name as session requires an active Markdown note', async function () {
     let called = false;
-    const plugin = createPlugin({
+    const { linker } = createLinker({
         app: {
             workspace: {
                 getActiveFile: function () {
@@ -223,13 +191,13 @@ test('save current note name as session requires an active Markdown note', async
                 },
             },
         },
+        saveCurrentLayoutAsSessionName: function () {
+            called = true;
+            return Promise.resolve({ saved: true });
+        },
     });
-    plugin.saveCurrentLayoutAsSessionName = function () {
-        called = true;
-        return Promise.resolve({ saved: true });
-    };
 
-    const result = await plugin.saveCurrentNoteNameAsSession({ silent: true });
+    const result = await linker.saveCurrentNoteNameAsSession({ silent: true });
 
     assert.equal(result, false);
     assert.equal(called, false);

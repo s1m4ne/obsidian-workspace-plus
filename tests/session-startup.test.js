@@ -5,71 +5,66 @@ require('./lock/harness/index.ts').installObsidianStub();
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-const attachSessionStartupMethods = require('../src/plugin/methods/session-startup');
-const attachSessionMethods = require('../src/plugin/methods/sessions');
-const attachHistoryMethods = require('../src/plugin/methods/history');
+const { SessionSwitcher } = require('../src/state/session-switcher.ts');
 
-function createPlugin(initialData) {
-    function PluginMock() {}
-    attachSessionMethods(PluginMock);
-    attachHistoryMethods(PluginMock);
-    attachSessionStartupMethods(PluginMock);
-    const plugin = new PluginMock();
-    plugin.data = Object.assign({
+function createSwitcher(initialData) {
+    const data = Object.assign({
         activeSessionId: 'a',
         autoSaveOnSwitch: true,
         sessions: {
             a: { id: 'a', name: 'A', layout: { layout: 'old' }, modified: 1 },
         },
     }, initialData || {});
-    plugin.historyPushes = 0;
-    plugin.persistCalls = 0;
-    plugin.flushCalls = 0;
-    plugin.persistData = function () {
-        plugin.persistCalls += 1;
+    const events = { historyPushes: 0, persistCalls: 0 };
+    const switcher = new SessionSwitcher({
+        data,
+        getOrderedSessions: () => Object.values(data.sessions),
+        findSessionIndex: (sessions, id) => sessions.findIndex((session) => session.id === id),
+        getActiveSession: () => data.sessions[data.activeSessionId],
+        getCurrentWorkspaceLayout: () => ({ layout: 'current' }),
+        applyWorkspaceLayout: async () => true,
+        persistData: function () {
+        events.persistCalls += 1;
         return Promise.resolve(true);
-    };
-    plugin.app = {
-        workspace: {
-            getLayout: function () { return { layout: 'current' }; },
         },
-    };
-    plugin.getHistoryService().pushLayoutToHistory = function () {
-        plugin.historyPushes += 1;
-    };
-    return plugin;
+        pushLayoutToHistory: () => { events.historyPushes += 1; },
+        saveActiveSession: async () => true, isActiveSessionDirty: () => false,
+        isWarnOnUnsavedSwitchEnabled: () => false,
+        isAutoSaveOnSwitchEnabled: () => data.autoSaveOnSwitch !== false,
+    });
+    return { switcher, data, events };
 }
 
 test('session startup flush captures the active layout when auto-save is enabled', async function () {
-    const plugin = createPlugin();
+    const { switcher, data, events } = createSwitcher();
 
-    await plugin.flushOnStartup();
+    await switcher.flushOnStartup();
 
-    assert.equal(plugin.historyPushes, 1);
-    assert.deepEqual(plugin.data.sessions.a.layout, { layout: 'current' });
-    assert.notEqual(plugin.data.sessions.a.modified, 1);
-    assert.equal(plugin.persistCalls, 1);
+    assert.equal(events.historyPushes, 1);
+    assert.deepEqual(data.sessions.a.layout, { layout: 'current' });
+    assert.notEqual(data.sessions.a.modified, 1);
+    assert.equal(events.persistCalls, 1);
 });
 
 test('session startup flush does nothing when auto-save is disabled', async function () {
-    const plugin = createPlugin({ autoSaveOnSwitch: false });
+    const { switcher, events } = createSwitcher({ autoSaveOnSwitch: false });
 
-    const result = await plugin.scheduleStartupFlush();
+    const result = await switcher.scheduleStartupFlush();
 
     assert.equal(result, true);
-    assert.equal(plugin.historyPushes, 0);
-    assert.equal(plugin.persistCalls, 1);
+    assert.equal(events.historyPushes, 0);
+    assert.equal(events.persistCalls, 1);
 });
 
 test('session startup layout changes extend the settle deadline', function () {
-    const plugin = createPlugin();
+    const { switcher } = createSwitcher();
 
-    plugin.startStartupSettleWindow(200);
-    const before = plugin.getStartupSettleRemainingMs();
-    plugin.noteStartupLayoutChange();
-    const after = plugin.getStartupSettleRemainingMs();
+    switcher.startStartupSettleWindow(200);
+    const before = switcher.getStartupSettleRemainingMs();
+    switcher.noteStartupLayoutChange();
+    const after = switcher.getStartupSettleRemainingMs();
 
     assert.ok(after >= 0);
     assert.ok(before >= 0);
-    plugin.getSessionSwitcher().cleanup();
+    switcher.cleanup();
 });

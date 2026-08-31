@@ -9,43 +9,33 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { setupHarness } from './lock/harness/index.ts';
+import { DEFAULT_DATA } from '../src/storage/default-data.ts';
+import type { StatusBarControllerHost } from '../src/statusbar-controller.ts';
 
 const harness = setupHarness();
 
-interface TestPlugin {
-    statusBarScrollDelta: number;
-    getStatusBarController(): { resetScrollState(): void; scrollDelta: number };
-    [key: string]: unknown;
-}
-
-async function createPlugin(): Promise<TestPlugin> {
-    const modules = await Promise.all([
-        import('../src/plugin/methods/session-statusbar.js'),
-        import('../src/plugin/methods/settings-state.js'),
-    ]);
-    function PluginMock(this: unknown) {}
-    for (const mod of modules) {
-        const attach = ((mod as { default?: unknown }).default ?? mod) as (target: unknown) => void;
-        attach(PluginMock);
-    }
-    const plugin = new (PluginMock as unknown as new () => TestPlugin)();
-    plugin['data'] = { statusBarActions: {}, sessions: {}, sessionOrder: [] };
-    plugin['app'] = { workspace: {} };
-    plugin['addStatusBarItem'] = (): HTMLElement => harness.dom.document.createElement('div');
-    plugin['persistData'] = async (): Promise<boolean> => true;
-    plugin['updateStatusBar'] = (): void => {};
-    return plugin;
+async function createController(): Promise<import('../src/statusbar-controller.ts').StatusBarController> {
+    const { StatusBarController } = await import('../src/statusbar-controller.ts');
+    const host = {
+        data: Object.assign({}, DEFAULT_DATA, { sessions: {}, sessionOrder: [], groups: {}, groupOrder: [], sessionGroups: {}, activeSessionId: null, activeGroupId: null }),
+        addStatusBarItem: (): HTMLElement => harness.dom.document.createElement('div'),
+        getActiveSession: () => null,
+        getActiveGroup: () => null,
+        shouldShowUnsavedStatusBarHighlight: () => false,
+        switchRelativeFromScroll: async () => true,
+    };
+    return new StatusBarController(host as unknown as StatusBarControllerHost);
 }
 
 test('the scroll counters are cleared through the controller, not by assignment', async () => {
-    const plugin = await createPlugin();
+    const controller = await createController();
 
     // What onunload does. Assigning to plugin.statusBarScrollDelta instead would
     // throw here, because the prototype exposes it as a getter only.
     assert.doesNotThrow(() => {
-        plugin.getStatusBarController().resetScrollState();
+        controller.resetScrollState();
     });
-    assert.equal(plugin.statusBarScrollDelta, 0);
+    assert.equal(controller.scrollDelta, 0);
 });
 
 test('assigning to the mirrored counter still throws, so nobody reintroduces it', () => {

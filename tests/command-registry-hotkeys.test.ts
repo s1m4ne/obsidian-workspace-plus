@@ -1,4 +1,4 @@
-// formatHotkey and getCommandHotkey moved out of plugin/methods/hotkeys.js into
+// formatHotkey and getCommandHotkey are owned by the command registry.
 // CommandRegistry, which already owns the command ids they depend on.
 //
 // Nothing tested either one before the move: inverting the Mac branch, dropping
