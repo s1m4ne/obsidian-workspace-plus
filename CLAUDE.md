@@ -37,7 +37,7 @@ before writing it.
 ## Commands
 
 ```bash
-npm run check        # the gate: typecheck, lint, dual dispatch, imports, tests, coverage, build
+npm run check        # the gate: typecheck, lint, dual dispatch, hooks, imports, tests, coverage, build
 npm run dev          # esbuild watch; hot reload picks it up
 npm run build        # production bundle
 npm run progress     # migration status
@@ -45,8 +45,8 @@ npm run coverage:floors   # which modules are ready to migrate
 npm run check:i18n   # locale key completeness across 21 locales
 ```
 
-`npm run check` must pass before every commit. It is seven gates, and the three
-ratchets deserve explanation:
+`npm run check` must pass before every commit. It is eight gates, and three of
+them deserve explanation:
 
 - **Lint** compares per-rule counts against `.eslint-baseline.json`. There are
   255 known violations; the gate fails only when a count *rises*. Failing on the
@@ -61,6 +61,15 @@ ratchets deserve explanation:
   because the adapter returns `undefined` there unless a test overrides the
   plugin method - those fallbacks are the live path. The question for any new
   site is only: does the adapter always supply this hook?
+
+- **Unwired hooks** is not a ratchet - zero is the only acceptable count.
+  `plugin.openHistoryModal?.(session)` reads like a call, but if nothing defines
+  the method it does nothing, and neither the type checker nor the tests object.
+  Four user-facing paths shipped dead that way. The check flags an optional call
+  or `typeof` guard whose name is declared on one of this repo's own `*Host`
+  interfaces and defined nowhere; names that come from `obsidian.d.ts` are
+  Obsidian's to define, and `platform/obsidian-internals.ts` is exempt because
+  guarding undocumented API is its whole purpose.
 
 When a commit legitimately improves any of the three, re-record it in that same
 commit: `node scripts/lint-ratchet.js --update`,
