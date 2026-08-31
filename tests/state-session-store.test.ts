@@ -109,11 +109,11 @@ test('SessionStore: P9 and P10 contracts for lookup and indexing', () => {
     // P9: findSessionIndex returns -1 for nonexistent
     assert.equal(store.findSessionIndex(list, 'nonexistent'), -1);
     assert.equal(store.findSessionIndex(list, 's1'), 0);
-    assert.equal(store.getSessionIndex(list, 'nonexistent'), 0);
+    assert.equal(store.sessionIndexOrFirst(list, 'nonexistent'), 0);
 
     // Active session index queries
     assert.equal(store.findActiveSessionIndex(list), 0);
-    assert.equal(store.getActiveSessionIndex(list), 0);
+    assert.equal(store.activeSessionIndexOrFirst(list), 0);
 
     // P10: findSession vs getSession
     assert.equal(store.findSession('s1')?.name, 'Session 1');

@@ -17,16 +17,16 @@ function attachSessionMethods(WorkspacePlusPlus) {
         return this.getSessionStore().findSessionIndex(sessions, sessionId);
     };
 
-    WorkspacePlusPlus.prototype.getSessionIndex = function (sessions, sessionId) {
-        return this.getSessionStore().getSessionIndex(sessions, sessionId);
+    WorkspacePlusPlus.prototype.sessionIndexOrFirst = function (sessions, sessionId) {
+        return this.getSessionStore().sessionIndexOrFirst(sessions, sessionId);
     };
 
     WorkspacePlusPlus.prototype.findActiveSessionIndex = function (sessions) {
         return this.getSessionStore().findActiveSessionIndex(sessions);
     };
 
-    WorkspacePlusPlus.prototype.getActiveSessionIndex = function (sessions) {
-        return this.getSessionStore().getActiveSessionIndex(sessions);
+    WorkspacePlusPlus.prototype.activeSessionIndexOrFirst = function (sessions) {
+        return this.getSessionStore().activeSessionIndexOrFirst(sessions);
     };
 
     WorkspacePlusPlus.prototype.getOrderedSessions = function () {
@@ -35,6 +35,12 @@ function attachSessionMethods(WorkspacePlusPlus) {
 
     WorkspacePlusPlus.prototype.getOrderedSessionsUnfiltered = function () {
         return this.getSessionStore().getOrderedSessionsUnfiltered();
+    };
+
+    // Subscribe to changes in the session set. The overlays use this to redraw
+    // themselves while they are on screen; see issue #118.
+    WorkspacePlusPlus.prototype.onSessionsChanged = function (listener) {
+        return this.getSessionStore().onSessionsChanged(listener);
     };
 
     WorkspacePlusPlus.prototype.getOrderedSessionsForGroup = function (groupId) {

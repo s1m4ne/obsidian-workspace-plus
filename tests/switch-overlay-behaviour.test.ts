@@ -50,7 +50,7 @@ interface TestPlugin {
     getOrderedSessionsUnfiltered(): unknown[];
     getCommandHotkey(cmd: string, slot?: number): string;
     isGroupFeatureEnabled(): boolean;
-    getActiveSessionIndex(sessions: unknown[]): number;
+    activeSessionIndexOrFirst(sessions: unknown[]): number;
     resolveGroupSelection(groupId: string | null): Promise<{ sessions: unknown[]; resolvedGroupId: string | null }>;
     switchSession(sessionId: string, options?: unknown): Promise<boolean>;
     getRelativeGroupId(currentGroupId: string | null, delta: number): string | null;
@@ -106,7 +106,7 @@ function createTestPlugin(): TestPlugin {
     return plugin;
 }
 
-test('overlays: filterSessionsByQuery filters matching session names case-insensitively', () => {
+test('searching matches session names regardless of case', () => {
     const plugin = createTestPlugin();
     const sessions = [
         { id: '1', name: 'Main Note' },
@@ -121,7 +121,7 @@ test('overlays: filterSessionsByQuery filters matching session names case-insens
     assert.equal(all.length, 3);
 });
 
-test('overlays: showSwitchFeedbackOverlay renders, auto-dismisses on timeout and blur', async () => {
+test('the feedback overlay dismisses itself on its timer and when the window loses focus', async () => {
     const plugin = createTestPlugin();
     const ordered = [
         { id: 's1', name: 'Session 1' },
@@ -138,7 +138,7 @@ test('overlays: showSwitchFeedbackOverlay renders, auto-dismisses on timeout and
     assert.equal(document.querySelector('.wpp-switch-overlay'), null);
 });
 
-test('overlays: showSwitchOverlay renders items, groups, count, and footer hotkeys', async () => {
+test('the overlay lists every session in the group with its position and hotkeys', async () => {
     const plugin = createTestPlugin();
     const ordered = [
         { id: 's1', name: 'Session 1' },
@@ -165,7 +165,7 @@ test('overlays: showSwitchOverlay renders items, groups, count, and footer hotke
     assert.equal(plugin.switchOverlayEl, null);
 });
 
-test('overlays: showSwitchOverlay click inactive session switches session', async () => {
+test('clicking a session in the overlay switches to it', async () => {
     const plugin = createTestPlugin();
     let switchedTo: string | null = null;
     plugin.switchSession = async (id: string) => {
@@ -188,7 +188,7 @@ test('overlays: showSwitchOverlay click inactive session switches session', asyn
     assert.equal(plugin.switchOverlayEl, null);
 });
 
-test('overlays: showSwitchOverlay group tab click resolves and reopens for group', async () => {
+test('clicking a group tab shows the sessions in that group', async () => {
     const plugin = createTestPlugin();
     let resolvedGroup: string | null = null;
     plugin.resolveGroupSelection = async (gid: string | null) => {
@@ -220,7 +220,7 @@ test('overlays: showSwitchOverlay group tab click resolves and reopens for group
     plugin.hideSwitchOverlay();
 });
 
-test('overlays: keyboard events (Tab group cycling and keyup dismissal)', async () => {
+test('Tab cycles groups, and releasing the modifiers dismisses the overlay', async () => {
     const plugin = createTestPlugin();
     plugin.getRelativeGroupId = () => 'g1';
     let resolvedGroup: string | null = null;
@@ -254,7 +254,7 @@ test('overlays: keyboard events (Tab group cycling and keyup dismissal)', async 
     assert.equal(plugin.switchOverlayEl, null);
 });
 
-test('overlays: measurement mode when allSessions.length > ordered.length', () => {
+test('the overlay is sized against every session so it does not resize while cycling', () => {
     const plugin = createTestPlugin();
     const ordered = [
         { id: 's1', name: 'Session 1' },
@@ -265,7 +265,7 @@ test('overlays: measurement mode when allSessions.length > ordered.length', () =
     plugin.hideSwitchOverlay();
 });
 
-test('overlays: openSearchOverlay handles save button and close button', async () => {
+test('the search overlay saves the current layout and closes', async () => {
     const plugin = createTestPlugin();
     plugin.persistData = async () => {};
     let createdWithName: string | null = null;
@@ -293,7 +293,7 @@ test('overlays: openSearchOverlay handles save button and close button', async (
     plugin.hideSearchOverlay();
 });
 
-test('overlays: openSearchOverlay handles search input, item actions, contextmenu, mouseenter', async () => {
+test('the search overlay filters as you type and offers per-row actions', async () => {
     const plugin = createTestPlugin();
     plugin.persistData = async () => {};
     plugin.saveActiveSession = async () => {};
@@ -393,7 +393,7 @@ test('overlays: openSearchOverlay handles search input, item actions, contextmen
     assert.equal(plugin.searchOverlayEl, null);
 });
 
-test('overlays: group feature disabled branches and anchor positioning', () => {
+test('with groups switched off no group strip appears, and the overlay anchors to the status bar', () => {
     const plugin = createTestPlugin();
     plugin.data.groupFeatureEnabled = false;
 
@@ -438,7 +438,7 @@ test('overlays: group feature disabled branches and anchor positioning', () => {
     statusBar.remove();
 });
 
-test('overlays: property shims and cleanupOverlayListeners wrapper', () => {
+test('the plugin overlay properties read through to the controller', () => {
     const plugin = createTestPlugin();
     plugin.switchOverlayEl = null;
     assert.equal(plugin.switchOverlayEl, null);
@@ -464,3 +464,54 @@ test('overlays: property shims and cleanupOverlayListeners wrapper', () => {
 
 test.after(() => harness.restore());
 
+
+// Two guarantees about timing that nothing was holding. Both were verified by
+// mutation: removing the 300 ms floor, and stretching the 5 s fallback, left
+// every test in the suite passing.
+
+test('releasing the modifiers immediately still leaves the overlay up for 300ms', async () => {
+    const plugin = createTestPlugin();
+    const ordered = [
+        { id: 's1', name: 'Session 1' },
+        { id: 's2', name: 'Session 2' },
+    ];
+
+    plugin.showSwitchOverlay(ordered, 0, undefined, { mode: 'preview' });
+    assert.ok(plugin.switchOverlayEl, 'the overlay opens');
+
+    // A fast tap: the keys come up almost immediately. Hiding on the spot makes
+    // the overlay flash, so it has to stay for the rest of the 300 ms.
+    harness.dom.document.dispatchEvent(
+        new harness.dom.window.KeyboardEvent('keyup', { key: 'Meta', metaKey: false, shiftKey: false })
+    );
+
+    assert.ok(plugin.switchOverlayEl, 'and does not vanish the instant the keys come up');
+
+    await new Promise((resolve) => setTimeout(resolve, 350));
+    assert.equal(plugin.switchOverlayEl, null, 'but it is gone once the floor has passed');
+});
+
+test('an overlay whose keyup never arrives is dismissed by the safety timer', async () => {
+    const plugin = createTestPlugin();
+    const ordered = [{ id: 's1', name: 'Session 1' }];
+
+    // The keyup can be lost - the window can take focus mid-hold, or the OS can
+    // swallow it. Without the fallback the overlay stays on screen with no way
+    // to dismiss it short of reloading.
+    const win = harness.dom.window;
+    const realSetTimeout = win.setTimeout.bind(win);
+    let longestDelay = -1;
+    win.setTimeout = ((fn: () => void, ms: number) => {
+        if (ms > longestDelay) longestDelay = ms;
+        return realSetTimeout(fn, ms);
+    }) as typeof win.setTimeout;
+
+    try {
+        plugin.showSwitchOverlay(ordered, 0, undefined, { mode: 'preview' });
+    } finally {
+        win.setTimeout = realSetTimeout;
+    }
+
+    assert.equal(longestDelay, 5000, 'the fallback is armed, at a delay a person would wait out');
+    plugin.hideSwitchOverlay();
+});

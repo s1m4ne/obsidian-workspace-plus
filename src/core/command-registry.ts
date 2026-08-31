@@ -41,7 +41,7 @@ export interface CommandRegistryHost {
     importSessionsFromLatestExport(): Promise<void>;
     isGroupFeatureEnabled(): boolean;
     getOrderedSessionsForGroup(groupId: string | null): SessionItem[];
-    getActiveSessionIndex(sessions: SessionItem[]): number;
+    activeSessionIndexOrFirst(sessions: SessionItem[]): number;
     showSwitchOverlay(sessions: SessionItem[], activeIndex: number, groupId: string | null): void;
     getRelativeGroupId(currentGroupId: string | null, step: number): string | undefined;
     resolveGroupSelection(groupId: string): Promise<{ resolvedGroupId: string }>;
@@ -363,7 +363,7 @@ export class CommandRegistry {
 
         const showSwitchOverlayForGroup = (groupId: string | null) => {
             const ordered = host.getOrderedSessionsForGroup(groupId || null);
-            const activeIndex = host.getActiveSessionIndex(ordered);
+            const activeIndex = host.activeSessionIndexOrFirst(ordered);
             host.showSwitchOverlay(ordered, activeIndex, groupId || null);
         };
 

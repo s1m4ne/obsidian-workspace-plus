@@ -77,7 +77,7 @@ function createMockHost() {
         importSessionsFromLatestExport: async () => { calls.push('importSnapshot'); },
         isGroupFeatureEnabled: () => true,
         getOrderedSessionsForGroup() { return this.getOrderedSessions(); },
-        getActiveSessionIndex() { return 0; },
+        activeSessionIndexOrFirst() { return 0; },
         showSwitchOverlay() { calls.push('showSwitchOverlay'); },
         getRelativeGroupId(_current: string | null, step: number) { return step > 0 ? 'g1' : undefined; },
         resolveGroupSelection: async (gid: string) => ({ resolvedGroupId: gid }),

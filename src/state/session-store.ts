@@ -56,6 +56,7 @@ function formatString(fnOrStr: unknown, ...args: Array<string | number>): string
 }
 
 export class SessionStore {
+    private readonly sessionListeners = new Set<() => void>();
     private readonly hostProvider: () => SessionStoreHost;
 
     constructor(hostOrProvider: SessionStoreHost | (() => SessionStoreHost)) {
@@ -118,7 +119,16 @@ export class SessionStore {
         return -1;
     }
 
-    getSessionIndex(sessions: SessionItem[], sessionId: string | null | undefined): number {
+    // Answers with the first session when the one asked for is not in the list.
+    // The name says so because the honest answer, -1, is what `findSessionIndex`
+    // is for - and callers had no way to tell the two apart.
+    //
+    // P9 in issue #111 wants the substitution gone. It is user-visible: the
+    // overlay would read "0 / 3" instead of "1 / 3" and highlight no row, in the
+    // case the switch-overlay lock exercises with an active session outside the
+    // group being viewed. That needs the maintainer's decision, so the shape is
+    // named here rather than changed.
+    sessionIndexOrFirst(sessions: SessionItem[], sessionId: string | null | undefined): number {
         const idx = this.findSessionIndex(sessions, sessionId);
         return idx === -1 ? 0 : idx;
     }
@@ -127,8 +137,8 @@ export class SessionStore {
         return this.findSessionIndex(sessions, this.data.activeSessionId);
     }
 
-    getActiveSessionIndex(sessions: SessionItem[]): number {
-        return this.getSessionIndex(sessions, this.data.activeSessionId);
+    activeSessionIndexOrFirst(sessions: SessionItem[]): number {
+        return this.sessionIndexOrFirst(sessions, this.data.activeSessionId);
     }
 
     // --- Ordering ---
@@ -235,6 +245,7 @@ export class SessionStore {
         this.data.sessionOrder = merged;
         if (options?.syncCommands !== false) {
             this.host.syncSessionCommands?.();
+        this.announceSessionsChanged();
         }
         if (options?.persist === false) return changed;
         if (!changed) return false;
@@ -307,6 +318,25 @@ export class SessionStore {
         return record;
     }
 
+    // Anything showing the session list needs to know when the set changes -
+    // the held-open switch overlay above all, since a person can create or
+    // delete a session under it without ever letting go of the modifiers
+    // (issue #118). Publishing once here beats asking each of the seven
+    // commands that can change the set to remember to refresh, which is a
+    // responsibility the eighth command would forget.
+    onSessionsChanged(listener: () => void): () => void {
+        this.sessionListeners.add(listener);
+        return () => {
+            this.sessionListeners.delete(listener);
+        };
+    }
+
+    private announceSessionsChanged(): void {
+        for (const listener of [...this.sessionListeners]) {
+            listener();
+        }
+    }
+
     insertSessionAndActivate(session: SessionItem): void {
         this.sessions[session.id] = session;
         this.sessionOrder.push(session.id);
@@ -322,6 +352,7 @@ export class SessionStore {
 
         this.host.updateStatusBar?.();
         this.host.syncSessionCommands?.();
+        this.announceSessionsChanged();
         await this.persistIfNeeded();
         return true;
     }
@@ -426,6 +457,7 @@ export class SessionStore {
         session.modified = Date.now();
         this.host.updateStatusBar?.();
         this.host.syncSessionCommands?.();
+        this.announceSessionsChanged();
 
         await this.persistIfNeeded();
         if (options?.notify !== false) {
@@ -467,6 +499,7 @@ export class SessionStore {
 
         this.host.updateStatusBar?.();
         this.host.syncSessionCommands?.();
+        this.announceSessionsChanged();
         await this.persistIfNeeded();
         return true;
     }
@@ -507,6 +540,7 @@ export class SessionStore {
 
         this.host.updateStatusBar?.();
         this.host.syncSessionCommands?.();
+        this.announceSessionsChanged();
         await this.persistIfNeeded();
         return true;
     }
@@ -536,6 +570,7 @@ export class SessionStore {
 
         this.host.updateStatusBar?.();
         this.host.syncSessionCommands?.();
+        this.announceSessionsChanged();
         new Notice(formatString(L.created, name));
         await this.persistIfNeeded();
         return true;
@@ -550,6 +585,7 @@ export class SessionStore {
 
         this.host.updateStatusBar?.();
         this.host.syncSessionCommands?.();
+        this.announceSessionsChanged();
         new Notice(formatString(L.duplicated, name));
         await this.persistIfNeeded();
         return true;
@@ -575,6 +611,7 @@ export class SessionStore {
         }
 
         this.host.syncSessionCommands?.();
+        this.announceSessionsChanged();
         new Notice(formatString(L.duplicated, name));
         await this.persistIfNeeded();
         return true;
@@ -595,6 +632,7 @@ export class SessionStore {
         this.data.activeSessionId = id;
         this.host.updateStatusBar?.();
         this.host.syncSessionCommands?.();
+        this.announceSessionsChanged();
         void this.persistIfNeeded();
     }
 

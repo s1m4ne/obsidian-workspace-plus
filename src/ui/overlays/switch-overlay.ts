@@ -15,10 +15,12 @@ export interface SwitchOverlayHost {
     getOrderedGroupTabIds(): string[];
     getOrderedSessionsUnfiltered(): SessionItem[];
     getCommandHotkey(cmd: string, slot?: number): string;
-    getActiveSessionIndex(sessions: SessionItem[]): number;
+    activeSessionIndexOrFirst(sessions: SessionItem[]): number;
     resolveGroupSelection(groupId: string | null): Promise<{ sessions: SessionItem[]; resolvedGroupId: string | null }>;
     switchSession(sessionId: string, options?: { silent?: boolean }): Promise<boolean>;
     getRelativeGroupId(currentGroupId: string | null, delta: number): string | null | undefined;
+    getOrderedSessionsForGroup(groupId: string | null): SessionItem[];
+    onSessionsChanged(listener: () => void): () => void;
     clearSessionSwitchNotice?: (() => void) | undefined;
     hideSearchOverlay?: (() => void) | undefined;
 }
@@ -26,12 +28,18 @@ export interface SwitchOverlayHost {
 export interface SwitchOverlayOptions {
     mode?: 'preview' | 'feedback' | undefined;
     durationMs?: number | undefined;
+    // Set when re-rendering an overlay that is already up, so the 300 ms
+    // minimum-visibility floor is measured from when the person actually saw it
+    // rather than restarting on every redraw.
+    keepShownAt?: boolean | undefined;
 }
 
 export class SwitchOverlay {
     private host: SwitchOverlayHost;
     overlayEl: HTMLElement | null = null;
     viewGroupId: string | null = null;
+    private unsubscribeSessions: (() => void) | null = null;
+    private shownAt = 0;
     timer: number | null = null;
     keyUpHandler: ((e: KeyboardEvent) => void) | null = null;
     keyDownHandler: ((e: KeyboardEvent) => void) | null = null;
@@ -86,7 +94,7 @@ export class SwitchOverlay {
 
         const reopenOverlayForGroup = (result: { sessions: SessionItem[]; resolvedGroupId: string | null }): void => {
             const newOrdered = result.sessions;
-            const newActiveIndex = this.host.getActiveSessionIndex(newOrdered);
+            const newActiveIndex = this.host.activeSessionIndexOrFirst(newOrdered);
             this.show(newOrdered, newActiveIndex, result.resolvedGroupId, opts);
         };
 
@@ -239,6 +247,14 @@ export class SwitchOverlay {
 
         this.overlayEl = overlay;
 
+        // Listen only while visible, so there is nothing to leak and no work
+        // done when the overlay is closed.
+        if (!this.unsubscribeSessions) {
+            this.unsubscribeSessions = this.host.onSessionsChanged(() => {
+                this.refreshSessions();
+            });
+        }
+
         if (overlayMode === 'feedback') {
             this.blurHandler = (): void => {
                 this.hide();
@@ -252,7 +268,10 @@ export class SwitchOverlay {
         }
 
         // Dismiss when modifier keys are released
-        const showTime = Date.now();
+        if (!opts.keepShownAt || this.shownAt === 0) {
+            this.shownAt = Date.now();
+        }
+        const showTime = this.shownAt;
 
         this.keyUpHandler = (e: KeyboardEvent): void => {
             if (!isModShiftPressed(e)) {
@@ -302,7 +321,7 @@ export class SwitchOverlay {
 
                 void this.host.resolveGroupSelection(nextGroupId).then((result) => {
                     const newOrdered = result.sessions;
-                    const newActiveIndex = this.host.getActiveSessionIndex(newOrdered);
+                    const newActiveIndex = this.host.activeSessionIndexOrFirst(newOrdered);
                     this.show(newOrdered, newActiveIndex, result.resolvedGroupId);
                 });
             }
@@ -312,12 +331,33 @@ export class SwitchOverlay {
         safetyCheck();
     }
 
+    // Redraw an overlay that is already on screen because the session set
+    // changed under it (issue #118). A person can hold the modifiers down and
+    // create or delete a session without ever letting go, and until now the
+    // overlay went on showing the list it was opened with.
+    //
+    // This reuses show(), which is the path Tab cycling and group-tab clicks
+    // already take mid-hold, rather than a second rendering route that would
+    // drift from it. What it does not reuse is the visibility clock: keepShownAt
+    // keeps the 300 ms floor measured from when the overlay appeared.
+    refreshSessions(): void {
+        if (!this.overlayEl) return;
+        const ordered = this.host.getOrderedSessionsForGroup(this.viewGroupId);
+        const activeIndex = this.host.activeSessionIndexOrFirst(ordered);
+        this.show(ordered, activeIndex, this.viewGroupId, { mode: 'preview', keepShownAt: true });
+    }
+
     hide(): void {
         if (this.overlayEl) {
             this.overlayEl.remove();
             this.overlayEl = null;
         }
         this.viewGroupId = null;
+        this.shownAt = 0;
+        if (this.unsubscribeSessions) {
+            this.unsubscribeSessions();
+            this.unsubscribeSessions = null;
+        }
         this.cleanupListeners();
     }
 
