@@ -7,7 +7,7 @@ directory. `src/` is ES5-style CommonJS JavaScript, bundled by esbuild into
 ## Right now, this repository is mid-migration
 
 Issue #111 is rewriting `src/` as TypeScript with owned state and real classes.
-It runs to 34 commits on one branch, and the constraint is that **observable
+It runs to 37 commits on one branch, and the constraint is that **observable
 behaviour must not change** apart from four named exceptions in Phase 4 and one
 authorized during Phase 3 (both recorded in the issue).
 
