@@ -1,42 +1,41 @@
 'use strict';
 
-var obsidian = require('obsidian');
-var i18n = require('../../i18n.ts');
+var statusBarController = require('../../statusbar-controller.ts');
 
 function attachSessionStatusBarMethods(WorkspacePlusPlus) {
+    if (!WorkspacePlusPlus.prototype.getStatusBarController) {
+        WorkspacePlusPlus.prototype.getStatusBarController = function () {
+            if (!this._statusBarController) {
+                this._statusBarController = new statusBarController.StatusBarController(this);
+            }
+            return this._statusBarController;
+        };
+    }
+
     WorkspacePlusPlus.prototype.updateStatusBar = function () {
-        var L = i18n.L;
-        var session = this.getActiveSession();
-        if (!this.statusBarEl) return;
-        var showUnsavedHighlight = this.shouldShowUnsavedStatusBarHighlight();
-
-        this.statusBarEl.removeClass('wpp-status-bar-unsaved');
-        if (showUnsavedHighlight) {
-            this.statusBarEl.addClass('wpp-status-bar-unsaved');
-        }
-
-        this.statusBarEl.empty();
-        var icon = this.statusBarEl.createSpan({ cls: 'wpp-status-icon' });
-        obsidian.setIcon(icon, 'panels-top-left');
-
-        // Show group name if a group is active
-        var activeGroup = this.getActiveGroup();
-        if (activeGroup) {
-            this.statusBarEl.createSpan({
-                text: activeGroup.name,
-                cls: 'wpp-status-group',
-            });
-            this.statusBarEl.createSpan({
-                text: ' / ',
-                cls: 'wpp-status-separator',
-            });
-        }
-
-        this.statusBarEl.createSpan({
-            text: session ? session.name : L.noSession,
-            cls: 'wpp-status-name',
-        });
+        return this.getStatusBarController().updateStatusBar();
     };
+
+    Object.defineProperty(WorkspacePlusPlus.prototype, 'statusBarScrollDelta', {
+        get: function () {
+            return this.getStatusBarController() ? this.getStatusBarController().scrollDelta : 0;
+        },
+        configurable: true,
+    });
+
+    Object.defineProperty(WorkspacePlusPlus.prototype, 'statusBarScrollEventAt', {
+        get: function () {
+            return this.getStatusBarController() ? this.getStatusBarController().scrollEventAt : 0;
+        },
+        configurable: true,
+    });
+
+    Object.defineProperty(WorkspacePlusPlus.prototype, 'statusBarScrollSwitchAt', {
+        get: function () {
+            return this.getStatusBarController() ? this.getStatusBarController().scrollSwitchAt : 0;
+        },
+        configurable: true,
+    });
 }
 
 module.exports = attachSessionStatusBarMethods;

@@ -13,7 +13,7 @@ function formatByteSize(bytes) {
 }
 var modals = require('./modals');
 var formatRelativeTime = require('./modals/format-relative-time');
-var statusBarActions = require('./statusbar-actions');
+var statusBarActions = require('./statusbar-actions.ts');
 var settingsUi = require('./settings-ui');
 
 var GroupSessionsModal = settingsUi.GroupSessionsModal;

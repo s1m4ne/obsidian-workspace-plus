@@ -25,12 +25,12 @@ function loadStatusBarController(calls) {
     const originalLoad = Module._load;
     Module._load = function (request, parent, isMain) {
         if (request === './utils' || request === './utils.ts') return utilsStub;
-        if (request === './statusbar-actions') return statusBarActionsStub;
+        if (request === './statusbar-actions' || request === './statusbar-actions.ts') return statusBarActionsStub;
         return originalLoad(request, parent, isMain);
     };
 
     try {
-        const modulePath = require.resolve('../src/statusbar-controller');
+        const modulePath = require.resolve('../src/statusbar-controller.ts');
         delete require.cache[modulePath];
         return require(modulePath);
     } finally {
@@ -102,9 +102,9 @@ test('status bar controller resolves modified click slots', function () {
 
     assert.equal(controller.getClickSlot(createEvent()), 'click');
     assert.equal(controller.getClickSlot(createEvent({ shiftKey: true })), 'shiftClick');
-    assert.equal(controller.getClickSlot(createEvent({ ctrlKey: true })), 'modClick');
+    assert.equal(controller.getClickSlot(createEvent({ ctrlKey: true, metaKey: true })), 'modClick');
     assert.equal(controller.getClickSlot(createEvent({ altKey: true, ctrlKey: true })), 'altClick');
-    assert.equal(controller.getMiddleClickSlot(createEvent({ ctrlKey: true })), 'modMiddleClick');
+    assert.equal(controller.getMiddleClickSlot(createEvent({ ctrlKey: true, metaKey: true })), 'modMiddleClick');
     assert.equal(controller.getRightClickSlot(createEvent({ altKey: true })), 'altRightClick');
 });
 
@@ -167,6 +167,9 @@ test('status bar controller setup wires basic click handling', function () {
         },
         updateStatusBar: function () {
             calls.push(['update']);
+        },
+        openSearchOverlay: function () {
+            calls.push(['action', 'quickSwitcher', 'click']);
         },
     };
 

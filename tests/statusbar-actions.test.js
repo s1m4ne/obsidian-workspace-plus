@@ -57,7 +57,7 @@ function loadStatusBarActions() {
     };
 
     try {
-        const modulePath = require.resolve('../src/statusbar-actions');
+        const modulePath = require.resolve('../src/statusbar-actions.ts');
         delete require.cache[modulePath];
         return require(modulePath);
     } finally {

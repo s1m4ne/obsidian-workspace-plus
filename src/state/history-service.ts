@@ -271,7 +271,7 @@ export class HistoryService {
             const currentLayout = this.host.getCurrentWorkspaceLayout();
             const same = currentLayout && this.checkLayoutsEqualStructural(latest.layout, currentLayout);
             if (same) {
-                new Notice(formatString(L.historyAlreadyLatest));
+                new Notice(formatString(L.historyQuickRestored, session.name));
                 return false;
             }
         }

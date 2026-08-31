@@ -393,7 +393,7 @@ export class SessionSwitcher {
         const duration = options?.durationMs ?? SESSION_SWITCH_NOTICE_DURATION_MS;
         this.clearSessionSwitchNotice();
 
-        const message = formatString(L.switchedTo, sessionName);
+        const message = formatString(L.loaded, sessionName);
         const notice = new Notice(message, duration);
         this.sessionSwitchNotice = notice;
 

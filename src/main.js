@@ -7,7 +7,7 @@ var settings = require('./settings');
 var DEFAULT_DATA = require('./plugin/default-data');
 var registerCommands = require('./plugin/register-commands');
 var attachPluginMethods = require('./plugin/methods');
-var statusBarController = require('./statusbar-controller');
+var statusBarController = require('./statusbar-controller.ts');
 
 i18n.resolveLocale();
 
@@ -39,6 +39,7 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
             self.sessionSwitcher = self.getSessionSwitcher();
             self.sessionSaver = self.getSessionSaver();
             self.frontmatterLinker = self.getFrontmatterLinker();
+            self.statusBarController = self.getStatusBarController();
 
             // Migrate legacy settings into statusBarActions
             if (!self.data.statusBarActions) {
