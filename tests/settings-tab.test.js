@@ -1,0 +1,245 @@
+'use strict';
+
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const { setupHarness } = require('./lock/harness/index.ts');
+
+function componentFor(h, name, kind) {
+    const setting = h.obsidian.settings.find((entry) => entry.nameEl.textContent === name);
+    assert.ok(setting, `missing setting: ${name}`);
+    const component = setting.components.find((entry) => entry.constructor.name === kind);
+    assert.ok(component, `missing ${kind} for ${name}`);
+    return component;
+}
+
+function buttonFor(h, name) {
+    return componentFor(h, name, 'ButtonStub');
+}
+
+function toggleFor(h, name) {
+    return componentFor(h, name, 'ToggleStub');
+}
+
+function confirmOrCancel(h, index) {
+    const buttons = h.dom.document.querySelectorAll('.modal-container button');
+    assert.equal(buttons.length, 2, 'confirmation modal has cancel and confirm controls');
+    buttons[index].click();
+}
+
+function createPlugin(overrides = {}) {
+    const calls = [];
+    const data = {
+        language: 'en', statusBarActions: {}, autoSaveOnSwitch: false,
+        warnOnUnsavedSwitch: false, confirmQuickActions: false,
+        statusBarModScrollSwitch: true, statusBarScrollPreset: 'custom',
+        statusBarScrollModifierMode: 'none', statusBarScrollThreshold: 30,
+        statusBarScrollCooldownMs: 500, statusBarScrollResetMs: 250,
+        statusBarScrollInvert: false, showActiveSwitchCommand: false,
+        numberedSwitchCommands: false, previewNext: false, previewPrevious: false,
+        showFilterInput: false, overlayDefaultFocus: 'current-session',
+        confirmDeleteByHotkey: true, versionHistoryEnabled: true,
+        versionHistoryConfirmRestore: false,
+        ...overrides.data,
+    };
+    const promiseCall = (name, update) => (...args) => {
+        calls.push([name, ...args]);
+        if (update) update(...args);
+        return Promise.resolve(true);
+    };
+    const plugin = {
+        data,
+        manifest: { name: 'Workspace++' },
+        app: { setting: { activeTab: null, openTabById() {} } },
+        isAutoSaveOnSwitchEnabled() { return data.autoSaveOnSwitch; },
+        isWarnOnUnsavedSwitchEnabled() { return data.warnOnUnsavedSwitch; },
+        isUnsavedStatusBarHighlightEnabled() { return false; },
+        isSidebarRestoreEnabled() { return false; },
+        isVersionHistoryEnabled() { return data.versionHistoryEnabled; },
+        isVersionHistoryConfirmRestoreEnabled() { return data.versionHistoryConfirmRestore; },
+        isGroupFeatureEnabled() { return false; },
+        getVersionHistorySnapshotInterval() { return 5; },
+        getRotationBackupInfo() { return Promise.resolve([{ generation: 1, savedAt: 0, sessionCount: 1 }]); },
+        getOrderedGroups() { return []; },
+        getGroupSessionIds() { return []; },
+        getSessionsPath() { return 'sessions.json'; },
+        getSessionStorageLocation() { return data.storageLocation || 'plugin-folder'; },
+        getStorageDiagnosticsInfo() { return { updatedAt: 0, sessionsPath: 's', sessionsBackupPath: 'b', historyPath: 'h', sessionCount: 1, syncedByObsidianSync: false }; },
+        getSessionStorageSize() { return Promise.resolve(100); },
+        extractSessionData() { calls.push(['extract']); return {}; },
+        prepareRotationBackupData(value) { calls.push(['prepare', value]); return value; },
+        ensureDir: promiseCall('ensureDir'), getBackupsDirPath() { return 'backups'; },
+        copyFileIfExists: promiseCall('copy'), getRotationBackupPath(number) { return `backup-${number}`; },
+        writeJson: promiseCall('writeJson'),
+        exportSessionsSnapshot: promiseCall('export'),
+        importSessionsFromLatestExport: promiseCall('import'),
+        restoreFromRotationBackup: promiseCall('restore'),
+        setLanguageSetting: promiseCall('language', (value) => { data.language = value; }),
+        setStatusBarAction: promiseCall('statusAction'),
+        setAutoSaveOnSwitch: promiseCall('autoSave', (value) => { data.autoSaveOnSwitch = value; }),
+        setWarnOnUnsavedSwitch: promiseCall('warn'), setUnsavedStatusBarHighlight: promiseCall('highlight'),
+        setConfirmQuickActions: promiseCall('confirmQuick'), setRestoreSidebars: promiseCall('restoreSidebars'),
+        setStatusBarModScrollSwitch: promiseCall('modScroll'), setStatusBarScrollPreset: promiseCall('preset'),
+        setStatusBarScrollModifierMode: promiseCall('modifier'), setStatusBarScrollThreshold: promiseCall('threshold'),
+        setStatusBarScrollCooldownMs: promiseCall('cooldown'), setStatusBarScrollResetMs: promiseCall('resetWindow'),
+        setStatusBarScrollInvert: promiseCall('invert'), setShowActiveSwitchCommand: promiseCall('activeCommand'),
+        setNumberedSwitchCommands: promiseCall('numbered'), setSwitchPreviewEnabled: promiseCall('preview'),
+        setPreviewNext: promiseCall('previewNext'), setPreviewPrevious: promiseCall('previewPrevious'),
+        setShowFilterInput: promiseCall('filter'), setOverlayDefaultFocus: promiseCall('focus'),
+        setConfirmDeleteByHotkey: promiseCall('confirmDelete'), setVersionHistoryEnabled: promiseCall('history'),
+        setVersionHistorySnapshotInterval: promiseCall('interval'), setVersionHistoryConfirmRestore: promiseCall('confirmRestore'),
+        setSessionStorageLocation: promiseCall('storage', (value) => { data.storageLocation = value; }),
+        resetSettingsToDefault: promiseCall('resetSettings'), resetSessionsToDefault: promiseCall('resetSessions'),
+        clearBackupsAndVersionHistory: promiseCall('clearBackups'),
+        resetSessionsAndSettingsToDefault: promiseCall('resetEverything'),
+        ...overrides.plugin,
+    };
+    return { plugin, calls };
+}
+
+function load(h) {
+    const { resolveLocale, L } = require('../src/i18n.ts');
+    resolveLocale('en');
+    const { WorkspacePlusPlusSettingTab } = require('../src/settings.js');
+    return { WorkspacePlusPlusSettingTab, L };
+}
+
+test('danger reset builder confirms before running, cancels safely, and suppresses double execution', async () => {
+    const h = setupHarness();
+    try {
+        const { addDangerResetSetting } = require('../src/settings-ui');
+        let runs = 0;
+        let resolveRun;
+        const run = () => { runs += 1; return new Promise((resolve) => { resolveRun = resolve; }); };
+        addDangerResetSetting(h.dom.document.body, {}, () => {}, {
+            name: 'Erase', desc: 'irreversible', buttonText: 'Erase', confirmMessage: 'Confirm',
+            run, successNotice: 'done', failureNotice: 'failed',
+        });
+        h.obsidian.settings[0].components[0].trigger();
+        assert.equal(runs, 0, 'opening a confirmation must not execute the destructive callback');
+        confirmOrCancel(h, 0);
+        assert.equal(runs, 0, 'cancelling must not execute the destructive callback');
+        h.obsidian.settings[0].components[0].trigger();
+        confirmOrCancel(h, 1);
+        h.obsidian.settings[0].components[0].trigger();
+        assert.equal(runs, 1, 'isRunning prevents a second confirmed operation');
+        assert.equal(h.dom.document.querySelectorAll('.modal-container').length, 0,
+            'isRunning prevents a second confirmation while the first operation is pending');
+        resolveRun();
+        await Promise.resolve(); await Promise.resolve();
+        assert.deepEqual(h.obsidian.notices.map((notice) => notice.message), ['done']);
+    } finally { h.restore(); }
+});
+
+test('danger reset builder reports failure only after a confirmed callback rejects', async () => {
+    const h = setupHarness();
+    try {
+        const { addDangerResetSetting } = require('../src/settings-ui');
+        addDangerResetSetting(h.dom.document.body, {}, () => {}, {
+            name: 'Erase', desc: 'irreversible', buttonText: 'Erase', confirmMessage: 'Confirm',
+            run: () => Promise.reject(new Error('failed')), successNotice: 'done', failureNotice: 'failed',
+        });
+        h.obsidian.settings[0].components[0].trigger();
+        confirmOrCancel(h, 1);
+        await Promise.resolve(); await Promise.resolve();
+        assert.deepEqual(h.obsidian.notices.map((notice) => notice.message), ['failed']);
+    } finally { h.restore(); }
+});
+
+test('all settings tabs render and their selected controls dispatch to their dedicated setters', async () => {
+    const h = setupHarness();
+    try {
+        const { WorkspacePlusPlusSettingTab, L } = load(h);
+        const { plugin, calls } = createPlugin();
+        const tab = new WorkspacePlusPlusSettingTab(plugin.app, plugin);
+        for (const name of ['general', 'sessions', 'groups', 'advanced']) {
+            tab.activeTab = name;
+            tab.display();
+        }
+        assert.equal(tab.containerEl.querySelectorAll('.wpp-settings-tab').length, 4);
+        tab.activeTab = 'sessions'; tab.display();
+        await toggleFor(h, L.settingsAutoSaveOnSwitch).trigger(true);
+        await componentFor(h, L.settingsStatusBarScrollPreset, 'DropdownStub').trigger('trackpad');
+        tab.activeTab = 'advanced'; tab.display();
+        await toggleFor(h, L.settingsVaultOnlySessions).trigger(true);
+        assert.deepEqual(calls.filter((entry) => ['autoSave', 'preset', 'storage'].includes(entry[0])), [
+            ['autoSave', true], ['preset', 'trackpad'], ['storage', 'vault-folder'],
+        ]);
+    } finally { h.restore(); }
+});
+
+test('storage-location toggle dispatches both directions and each reset button retains its distinct target', async () => {
+    const h = setupHarness();
+    try {
+        const { WorkspacePlusPlusSettingTab, L } = load(h);
+        const { plugin, calls } = createPlugin();
+        const tab = new WorkspacePlusPlusSettingTab(plugin.app, plugin);
+        tab.activeTab = 'advanced'; tab.display();
+        await toggleFor(h, L.settingsVaultOnlySessions).trigger(true);
+        await toggleFor(h, L.settingsVaultOnlySessions).trigger(false);
+        for (const label of [
+            L.settingsResetSettings, L.settingsResetSessions,
+            L.settingsResetBackupsAndHistory, L.settingsResetSessionsAndSettings,
+        ]) {
+            buttonFor(h, label).trigger();
+            confirmOrCancel(h, 1);
+            await Promise.resolve(); await Promise.resolve();
+        }
+        assert.deepEqual(calls.filter((entry) => entry[0] === 'storage'), [
+            ['storage', 'vault-folder'], ['storage', 'plugin-folder'],
+        ]);
+        assert.deepEqual(calls.filter((entry) => (entry.length === 1 && entry[0].startsWith('reset')) || entry[0] === 'clearBackups').map((entry) => entry[0]), [
+            'resetSettings', 'resetSessions', 'clearBackups', 'resetEverything',
+        ]);
+    } finally { h.restore(); }
+});
+
+test('advanced export, import confirmation, rotation backup and restore use their success paths', async () => {
+    const h = setupHarness();
+    try {
+        const { WorkspacePlusPlusSettingTab, L } = load(h);
+        const { plugin, calls } = createPlugin();
+        const tab = new WorkspacePlusPlusSettingTab(plugin.app, plugin);
+        tab.activeTab = 'advanced'; tab.display();
+        buttonFor(h, L.settingsExportSessions).trigger();
+        buttonFor(h, L.settingsImportSessions).trigger(); confirmOrCancel(h, 1);
+        tab.activeTab = 'sessions'; tab.display();
+        await Promise.resolve();
+        const allButtons = h.obsidian.settings.flatMap((setting) => setting.components)
+            .filter((component) => component.constructor.name === 'ButtonStub');
+        allButtons.at(-1).trigger(); confirmOrCancel(h, 1);
+        buttonFor(h, L.rotationBackupCreate).trigger();
+        await new Promise((resolve) => setTimeout(resolve, 10));
+        for (const name of ['export', 'import', 'extract', 'prepare', 'ensureDir', 'writeJson', 'restore']) {
+            assert.ok(calls.some((entry) => entry[0] === name), `missing ${name}`);
+        }
+    } finally { h.restore(); }
+});
+
+test('settings controls exercise both session layouts and the enabled group layout', async () => {
+    const h = setupHarness();
+    try {
+        const { WorkspacePlusPlusSettingTab } = load(h);
+        const { plugin } = createPlugin({ plugin: {
+            isGroupFeatureEnabled() { return true; },
+            getOrderedGroups() { return [{ id: 'g1', name: 'Focus' }]; },
+            createGroupValidated() { return Promise.resolve(false); },
+            renameGroupValidated() { return Promise.resolve(false); },
+            deleteGroup() { return Promise.resolve(); },
+        } });
+        const tab = new WorkspacePlusPlusSettingTab(plugin.app, plugin);
+        for (const autoSaveOnSwitch of [false, true]) {
+            plugin.data.autoSaveOnSwitch = autoSaveOnSwitch;
+            tab.activeTab = 'sessions';
+            tab.display();
+            const controls = h.obsidian.settings.flatMap((setting) => setting.components)
+                .filter((component) => component.constructor.name === 'ToggleStub' || component.constructor.name === 'DropdownStub');
+            for (const control of controls) {
+                if (control.constructor.name === 'ToggleStub') await control.trigger(!control.value);
+                else await control.trigger(control.options.keys().next().value);
+            }
+        }
+        tab.activeTab = 'groups';
+        tab.display();
+        assert.ok(h.obsidian.settings.some((setting) => setting.nameEl.textContent === 'Focus'));
+    } finally { h.restore(); }
+});
