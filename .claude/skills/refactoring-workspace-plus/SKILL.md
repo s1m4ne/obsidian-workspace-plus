@@ -40,7 +40,7 @@ A migration commit converts the module to TypeScript, turns it into a class, **i
 
 ## The failure this migration keeps producing
 
-Five times now, code has been written, tested, reported complete, and never
+Seven times now, code has been written, tested, reported complete, and not
 run. Every time, all gates were green.
 
 | What | Size | Found by |
@@ -50,14 +50,16 @@ run. Every time, all gates were green.
 | `openHistoryModal?.()` and three siblings defined nowhere | 4 dead features | the maintainer using the plugin |
 | Shims delegating to methods no class had | 3 methods | delegation cross-check |
 | `storage/migrations.ts` extracted, never imported | 77 lines | bundler reachability |
+| `data.X !== false` re-derived beside the owner that centralised it | 7 sites | design-target recount |
+| `onunload` assigning to a getter-only accessor, losing unsaved work | 3 lines | asking why two casts were still there |
 
-**One mechanism produces all five.** The strangler pattern keeps the old code
+**One mechanism produces all seven.** The strangler pattern keeps the old code
 working while the new code appears beside it. That is its safety property — and
 it means nothing fails when only the old path runs. Every gate asked *does the
 plugin still work?*, and the old path guarantees the answer is yes. None asked
 *is the new code the one that runs?*
 
-Note also who found them: three of the five needed a person to go looking, and
+Note also who found them: three of the seven needed a person to go looking, and
 one needed the maintainer to click something in Obsidian. Passing tests were
 never going to surface any of them.
 
@@ -69,7 +71,7 @@ them from a bug report is not.
 
 ### The measurement that predicts it
 
-Every one of the five arrived in a commit with a large positive net line count
+Every one of the seven arrived in a commit with a large positive net line count
 in `src/` (+200 to +579). Every commit that fixed one was net negative.
 
     git show --numstat --format= <sha> -- src | awk '{a+=$1;d+=$2} END{print a-d}'

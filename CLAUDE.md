@@ -37,8 +37,8 @@ before writing it.
 ## Commands
 
 ```bash
-npm run check        # the gate: typecheck, lint, dual dispatch, hooks,
-                     # delegation, reachability, imports, tests, coverage, build
+npm run check        # the gate: typecheck, lint, dual dispatch, hooks, delegation,
+                     # reachability, readonly, imports, tests, coverage, build
 npm run dev          # esbuild watch; hot reload picks it up
 npm run build        # production bundle
 npm run progress     # migration status
@@ -46,8 +46,8 @@ npm run coverage:floors   # which modules are ready to migrate
 npm run check:i18n   # locale key completeness across 21 locales
 ```
 
-`npm run check` must pass before every commit. It is ten gates. Three are
-ratchets; four exist because this migration produced the same failure five times
+`npm run check` must pass before every commit. It is eleven gates. Three are
+ratchets; five exist because this migration produced the same failure seven times
 and none of the others could see it.
 
 - **Lint** compares per-rule counts against `.eslint-baseline.json`. There are
@@ -75,6 +75,11 @@ and none of the others could see it.
   class X defines. Three shims pointed at methods nobody wrote; the file is
   JavaScript so the type checker never looked, and nothing called them so the
   tests never ran them.
+
+- **Read-only writes** finds prototype accessors with a getter and no setter,
+  then any assignment to one. `onunload` was assigning to three, which throws in
+  the strict bundle: it never reached `flushPendingPersistence()`, so unsaved
+  work was lost on every disable and reload. P2 keeps creating these accessors.
 
 - **Unwired hooks** is not a ratchet - zero is the only acceptable count.
   `plugin.openHistoryModal?.(session)` reads like a call, but if nothing defines
