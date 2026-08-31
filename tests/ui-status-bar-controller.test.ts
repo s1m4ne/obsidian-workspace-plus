@@ -33,6 +33,28 @@ function createWheelEvt(deltaY: number, deltaX = 0): WheelEvent {
     } as unknown as WheelEvent;
 }
 
+// Right-clicking the status bar builds the real session menu, so the host has
+// to answer what that menu asks.
+const menuPluginStubs = {
+    confirmOverwriteSessionWithCurrentLayout: () => false,
+    duplicateSession: () => false,
+    isAutoSaveOnSwitchEnabled: () => false,
+    isVersionHistoryEnabled: () => false,
+    isWarnOnUnsavedSwitchEnabled: () => false,
+    moveSessionToGroupExclusive: () => false,
+    reloadCurrentSessionWithoutSaving: () => false,
+    removeSessionFromGroup: () => false,
+    saveActiveSession: () => false,
+    saveAsSession: () => false,
+    setAutoSaveOnSwitch: () => false,
+    setConfirmDeleteByHotkey: () => false,
+    setConfirmQuickActions: () => false,
+    setGroupFeatureEnabled: () => false,
+    setShowFilterInput: () => false,
+    setVersionHistoryEnabled: () => false,
+    setWarnOnUnsavedSwitch: () => false,
+};
+
 test('StatusBarController: preset configs and normalization', () => {
     assert.deepEqual(getStatusBarScrollConfig({ statusBarScrollPreset: 'notchedWheel' }), STATUS_BAR_SCROLL_PRESETS.notchedWheel);
     assert.deepEqual(getStatusBarScrollConfig({ statusBarScrollPreset: 'freeSpinWheel' }), STATUS_BAR_SCROLL_PRESETS.freeSpinWheel);
@@ -107,6 +129,9 @@ test('StatusBarController: resolves slots and actions', () => {
 test('StatusBarController: wheel accumulation and threshold switching', async () => {
     const switchedDirections: number[] = [];
     const host: import('../src/statusbar-controller.ts').StatusBarControllerHost = {
+        ...menuPluginStubs,
+        openSessionManagerModal() {},
+        openHistoryModal() {},
         data: {
             ...DEFAULT_DATA,
             statusBarModScrollSwitch: true,
@@ -242,6 +267,9 @@ test('StatusBarController: setup and update DOM rendering', () => {
     let activeGroup: { id: string; name: string } | null = { id: 'g1', name: 'Main' };
 
     const host: import('../src/statusbar-controller.ts').StatusBarControllerHost = {
+        ...menuPluginStubs,
+        openSessionManagerModal() {},
+        openHistoryModal() {},
         data: DEFAULT_DATA,
         app: {} as import('obsidian').App,
         addStatusBarItem: () => el,

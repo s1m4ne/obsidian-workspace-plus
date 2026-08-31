@@ -84,7 +84,7 @@ function createMockHost() {
         exitGroup() { calls.push('exitGroup'); },
         switchGroupRelative(step: number) { calls.push(`switchGroupRelative:${step}`); },
         switchSessionByIdFromCommand: async (id: string) => { calls.push(`switchById:${id}`); return true; },
-        openSessionManagerModal(focus?: boolean) { calls.push(`openSessionManager:${focus}`); },
+        openSessionManagerModal(focusName: boolean) { calls.push(`openSessionManager:${focusName}`); },
         openHistoryModal(session: import('../src/storage/default-data.ts').SessionItem) { calls.push(`openHistory:${session.name}`); },
         openConfirmModal(msg: string, onConfirm: () => void) { calls.push(`openConfirm:${msg}`); onConfirm(); },
     };

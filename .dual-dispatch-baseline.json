@@ -1,8 +1,10 @@
 {
-    "total": 15,
+    "total": 24,
     "files": {
+        "src/statusbar-controller.ts": 5,
         "src/state/session-saver.ts": 5,
         "src/state/session-store.ts": 1,
-        "src/state/session-switcher.ts": 9
+        "src/state/session-switcher.ts": 9,
+        "src/core/frontmatter-linker.ts": 4
     }
 }

@@ -31,10 +31,17 @@ const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
 const BASELINE_PATH = path.join(ROOT, '.dual-dispatch-baseline.json');
-const SCAN_DIRS = ['src/state', 'src/storage'];
+// Every directory holding migrated classes. The first version scanned only
+// state and storage, and the UI layer walked straight past it: three optional
+// hooks - openHistoryModal, openSessionContextMenu, openSettingsContextMenu -
+// were called with `?.` and never defined, so right-clicking the status bar and
+// the version-history command silently did nothing in Obsidian while all 325
+// tests passed. A gate that covers part of the codebase covers none of it.
+const SCAN_DIRS = ['src', 'src/state', 'src/storage', 'src/core', 'src/ui', 'src/modals', 'src/platform'];
 // Quote style is not fixed by the linter, so accept either - a gate that a
 // change of quotes can slip past is not a gate.
 const PATTERN = /typeof this\.host\.[A-Za-z_$][\w$]* === ['"]function['"]/g;
+
 
 function scan() {
     const counts = {};

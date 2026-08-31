@@ -43,6 +43,11 @@ function main() {
                 // but not for Node, so it is flagged the same way.
                 if (specifier.endsWith('.ts')) continue;
                 if (specifier.endsWith('.css') || specifier.endsWith('.json')) continue;
+                // A specifier ending in .js that names a real .js file is
+                // already resolvable. Only an extensionless one, or one whose
+                // target has since become TypeScript, is a problem.
+                if (specifier.endsWith('.js')
+                    && fs.existsSync(path.resolve(path.dirname(file), specifier))) continue;
 
                 const target = path.resolve(path.dirname(file), specifier);
                 const isTs = fs.existsSync(target + '.ts') || fs.existsSync(path.join(target, 'index.ts'));

@@ -8,7 +8,12 @@ import {
 import { L } from '../i18n.ts';
 import type { PluginData, SessionItem } from '../storage/default-data.ts';
 
+
 export interface CommandRegistryHost {
+    // Required, not optional: an unwired modal opener must fail to compile, not
+    // fail silently at run time the way `openHistoryModal?.()` did.
+    openSessionManagerModal(focusName: boolean): void;
+    openHistoryModal(session: SessionItem): void;
     data: PluginData;
     app: App;
     addCommand(command: Command): Command;
@@ -49,8 +54,6 @@ export interface CommandRegistryHost {
     searchOverlayEl?: HTMLElement | null;
     searchOverlayViewGroupId?: string | null;
 
-    openSessionManagerModal?(focusName?: boolean): void;
-    openHistoryModal?(session: SessionItem): void;
     openConfirmModal?(
         message: string,
         onConfirm: () => void,
@@ -161,15 +164,11 @@ export class CommandRegistry {
         };
 
         addSimpleCommand('manage-sessions', String(L.cmdManage || ''), () => {
-            if (typeof host.openSessionManagerModal === 'function') {
-                host.openSessionManagerModal(false);
-            }
+            host.openSessionManagerModal(false);
         });
 
         addSimpleCommand('create-session', String(L.cmdCreate || ''), () => {
-            if (typeof host.openSessionManagerModal === 'function') {
-                host.openSessionManagerModal(true);
-            }
+            host.openSessionManagerModal(true);
         });
 
         addSimpleCommand(
@@ -325,9 +324,7 @@ export class CommandRegistry {
                 if (!host.isVersionHistoryEnabled()) return false;
                 const session = host.getActiveSession();
                 if (!session) return false;
-                if (!checking && typeof host.openHistoryModal === 'function') {
-                    host.openHistoryModal(session);
-                }
+                if (!checking) host.openHistoryModal(session);
                 return true;
             },
         });

@@ -284,6 +284,8 @@ export class MenuItemStub {
     clickHandler: Handler<MouseEvent | undefined> | null = null;
     title = '';
     icon = '';
+    // A submenu is a menu in its own right, so its items stay observable.
+    submenu: MenuStub | null = null;
 
     private readonly log: CallLog;
     private readonly tag: string;
@@ -314,6 +316,11 @@ export class MenuItemStub {
     setChecked(checked: boolean): this {
         this.log.record(this.tag, 'setChecked', checked);
         return this;
+    }
+    setSubmenu(): MenuStub {
+        this.log.record(this.tag, 'setSubmenu');
+        if (!this.submenu) this.submenu = new MenuStub(this.log);
+        return this.submenu;
     }
     onClick(handler: Handler<MouseEvent | undefined>): this {
         this.clickHandler = handler;

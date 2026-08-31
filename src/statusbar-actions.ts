@@ -1,8 +1,14 @@
 import { Notice, type App } from 'obsidian';
 import { L } from './i18n.ts';
 import type { PluginData, SessionItem } from './storage/default-data.ts';
+import { openSessionContextMenu } from './session-context-actions.js';
+import { openSettingsContextMenu } from './settings-context-menu.js';
+
 
 export interface StatusBarActionPluginHost {
+    // Required: see command-registry.ts.
+    openSessionManagerModal(): void;
+    openHistoryModal(session: SessionItem): void;
     app: App;
     data: PluginData;
     searchOverlayEl?: HTMLElement | null;
@@ -25,15 +31,11 @@ export interface StatusBarActionPluginHost {
     createEmptySession(): Promise<unknown>;
     toggleAutoSaveOnSwitch(options?: { notify?: boolean }): Promise<unknown>;
     quickRestoreLatestHistory(): void;
-    openSessionManagerModal?(): void;
-    openHistoryModal?(session: SessionItem): void;
     openConfirmModal?(
         message: string,
         onConfirm: () => void,
         options: { confirmText: string; confirmClass: string }
     ): void;
-    openSessionContextMenu?(opts: unknown): void;
-    openSettingsContextMenu?(opts: unknown): void;
     [key: string]: unknown;
 }
 
@@ -67,7 +69,7 @@ export const ACTIONS: readonly StatusBarAction[] = [
         id: 'sessionManager',
         labelKey: 'statusBarActionSessionManager',
         run(plugin) {
-            plugin.openSessionManagerModal?.();
+            plugin.openSessionManagerModal();
         },
     },
     {
@@ -146,7 +148,7 @@ export const ACTIONS: readonly StatusBarAction[] = [
         run(plugin) {
             const session = plugin.getActiveSession();
             if (session) {
-                plugin.openHistoryModal?.(session);
+                plugin.openHistoryModal(session);
             }
         },
     },
@@ -186,12 +188,12 @@ export const ACTIONS: readonly StatusBarAction[] = [
         run(plugin, event) {
             const sess = plugin.getActiveSession();
             if (!sess) return;
-            plugin.openSessionContextMenu?.({
+            openSessionContextMenu({
                 plugin,
                 app: plugin.app,
                 session: sess,
                 isActive: true,
-                event,
+                event: event as MouseEvent,
                 showSaveAs: true,
                 showSwitch: false,
                 showRemoveFromGroup: false,
@@ -209,10 +211,10 @@ export const ACTIONS: readonly StatusBarAction[] = [
         id: 'settingsMenu',
         labelKey: 'statusBarActionSettingsMenu',
         run(plugin, event) {
-            plugin.openSettingsContextMenu?.({
+            openSettingsContextMenu({
                 plugin,
                 app: plugin.app,
-                event,
+                event: event as MouseEvent,
                 onChanged() {
                     plugin.updateStatusBar();
                 },

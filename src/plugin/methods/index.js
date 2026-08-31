@@ -19,6 +19,7 @@ var attachSessionCommandMethods = require('./session-commands');
 var attachHistoryMethods = require('./history');
 var attachFrontmatterMethods = require('./frontmatter');
 var attachSettingsStateMethods = require('./settings-state');
+var attachModalOpenerMethods = require('./modal-openers');
 
 function attachPluginMethods(WorkspacePlusPlus) {
     attachHotkeyMethods(WorkspacePlusPlus);
@@ -40,6 +41,7 @@ function attachPluginMethods(WorkspacePlusPlus) {
     attachHistoryMethods(WorkspacePlusPlus);
     attachFrontmatterMethods(WorkspacePlusPlus);
     attachSettingsStateMethods(WorkspacePlusPlus);
+    attachModalOpenerMethods(WorkspacePlusPlus);
 }
 
 module.exports = attachPluginMethods;

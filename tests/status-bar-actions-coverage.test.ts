@@ -30,10 +30,34 @@ test('statusbar-actions: getActionLabel resolves labels for valid and fallback a
     assert.equal(getActionLabel(L, 'unknownActionId'), getActionLabel(L, 'none'));
 });
 
+// The menu actions call straight into the real context-menu modules, so the
+// host has to answer everything they ask. A thinner mock would only prove
+// that a stand-in was called.
+const menuPluginStubs = {
+    confirmOverwriteSessionWithCurrentLayout: () => false,
+    duplicateSession: () => false,
+    isAutoSaveOnSwitchEnabled: () => false,
+    isVersionHistoryEnabled: () => false,
+    isWarnOnUnsavedSwitchEnabled: () => false,
+    moveSessionToGroupExclusive: () => false,
+    reloadCurrentSessionWithoutSaving: () => false,
+    removeSessionFromGroup: () => false,
+    saveActiveSession: () => false,
+    saveAsSession: () => false,
+    setAutoSaveOnSwitch: () => false,
+    setConfirmDeleteByHotkey: () => false,
+    setConfirmQuickActions: () => false,
+    setGroupFeatureEnabled: () => false,
+    setShowFilterInput: () => false,
+    setVersionHistoryEnabled: () => false,
+    setWarnOnUnsavedSwitch: () => false,
+};
+
 test('statusbar-actions: executes all actions on host', async () => {
     const calls: string[] = [];
 
     const mockPlugin: import('../src/statusbar-actions.ts').StatusBarActionPluginHost = {
+        ...menuPluginStubs,
         app: {} as import('obsidian').App,
         data: {
             ...DEFAULT_DATA,
@@ -115,21 +139,11 @@ test('statusbar-actions: executes all actions on host', async () => {
         openSessionManagerModal() {
             calls.push('openSessionManagerModal');
         },
-        openHistoryModal(session) {
-            calls.push(`openHistoryModal:${session.name}`);
-        },
         openConfirmModal(msg, onConfirm) {
             calls.push(`openConfirmModal:${msg}`);
             onConfirm();
         },
-        openSessionContextMenu(opts) {
-            calls.push('openSessionContextMenu');
-            (opts as { onSessionsChanged?: () => void })?.onSessionsChanged?.();
-        },
-        openSettingsContextMenu(opts) {
-            calls.push('openSettingsContextMenu');
-            (opts as { onChanged?: () => void })?.onChanged?.();
-        },
+        openHistoryModal(session: import('../src/storage/default-data.ts').SessionItem) { calls.push(`openHistoryModal:${session.name}`); },
     };
 
     // quickSwitcher (open)
@@ -185,7 +199,8 @@ test('statusbar-actions: executes all actions on host', async () => {
     await executeStatusBarAction(mockPlugin, 'toggleAutoSaveOnSwitch');
     assert.equal(calls[calls.length - 1], 'toggleAutoSave:true');
 
-    // versionHistory
+    // versionHistory - the action asks the plugin to open the modal. The plugin
+    // side is proved separately in modal-openers-wiring.test.ts.
     executeStatusBarAction(mockPlugin, 'versionHistory');
     assert.equal(calls[calls.length - 1], 'openHistoryModal:Test Session');
 
@@ -198,14 +213,21 @@ test('statusbar-actions: executes all actions on host', async () => {
     executeStatusBarAction(mockPlugin, 'restoreLatestHistory');
     assert.equal(calls[calls.length - 1], 'quickRestoreLatestHistory');
 
-    // sessionMenu
-    executeStatusBarAction(mockPlugin, 'sessionMenu');
-    assert.ok(calls.includes('openSessionContextMenu'));
-    assert.ok(calls.includes('updateStatusBar'));
+    // sessionMenu - a real Menu is built and shown at the pointer.
+    const menusBefore = harness.obsidian.menus.length;
+    executeStatusBarAction(mockPlugin, 'sessionMenu', new harness.dom.window.MouseEvent('contextmenu'));
+    assert.ok(
+        harness.obsidian.menus.length > menusBefore,
+        'right-clicking the status bar must open the session menu',
+    );
 
     // settingsMenu
-    executeStatusBarAction(mockPlugin, 'settingsMenu');
-    assert.ok(calls.includes('openSettingsContextMenu'));
+    const beforeSettings = harness.obsidian.menus.length;
+    executeStatusBarAction(mockPlugin, 'settingsMenu', new harness.dom.window.MouseEvent('contextmenu'));
+    assert.ok(
+        harness.obsidian.menus.length > beforeSettings,
+        'the settings menu must open',
+    );
 
     // none or invalid
     executeStatusBarAction(mockPlugin, 'none');
