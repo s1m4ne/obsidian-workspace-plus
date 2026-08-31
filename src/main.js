@@ -5,7 +5,6 @@ var i18n = require('./i18n.ts');
 var modals = require('./modals');
 var settings = require('./settings');
 var DEFAULT_DATA = require('./plugin/default-data');
-var registerCommands = require('./plugin/register-commands');
 var attachPluginMethods = require('./plugin/methods');
 var statusBarController = require('./statusbar-controller.ts');
 
@@ -67,7 +66,8 @@ var WorkspacePlusPlus = /** @class */ (function (_super) {
             statusBarController.setupStatusBar(self);
 
             // Commands
-            registerCommands(self);
+            self.commandRegistry = self.getCommandRegistry();
+            self.commandRegistry.registerCommands();
 
             // Settings tab
             self.settingTab = new settings.WorkspacePlusPlusSettingTab(self.app, self);
