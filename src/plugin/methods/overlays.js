@@ -7,6 +7,7 @@ var groupTabUi = require('../../group-tab-ui.ts');
 var navigationUtils = require('../../navigation-utils.ts');
 var utils = require('../../utils.ts');
 var sessionPresenter = require('../../ui/shared/session-presenter.ts');
+var sessionDrag = require('../../ui/shared/session-drag.ts');
 var searchOverlayKeys = require('../../search-overlay-key-handler');
 var sessionContextActions = require('../../session-context-actions');
 var settingsContextMenu = require('../../settings-context-menu');
@@ -469,145 +470,40 @@ function attachOverlayMethods(WorkspacePlusPlus) {
 
         // --- Drag to reorder ---
         function setupDrag(dragItem) {
-            dragItem.addEventListener('mousedown', function (e) {
-                if (e.button !== 0) return;
-                if (e.target.closest('.wpp-qs-action-btn')) return;
-
-                var startX = e.clientX;
-                var startY = e.clientY;
-                var dragStarted = false;
-                var cloneEl = null;
-
-                function startDragOp(ev) {
-                    dragStarted = true;
-                    var rect = dragItem.getBoundingClientRect();
-                    var offsetX = startX - rect.left;
-                    var offsetY = startY - rect.top;
-
-                    cloneEl = dragItem.cloneNode(true);
-                    cloneEl.classList.add('wpp-drag-clone');
-                    cloneEl.style.position = 'fixed';
-                    cloneEl.style.width = rect.width + 'px';
-                    cloneEl.style.top = (ev.clientY - offsetY) + 'px';
-                    cloneEl.style.left = (ev.clientX - offsetX) + 'px';
-                    cloneEl.style.zIndex = '9999';
-                    cloneEl.style.pointerEvents = 'none';
-                    document.body.appendChild(cloneEl);
-
-                    dragItem.classList.add('is-dragging');
-                    cloneEl._offsetX = offsetX;
-                    cloneEl._offsetY = offsetY;
-                }
-
-                function updateOverlayGroupDropTarget(ev) {
-                    var tabs = groupTabsRow.querySelectorAll('.wpp-group-tab');
-                    var hoveredTab = null;
-                    for (var t = 0; t < tabs.length; t++) {
-                        var tr = tabs[t].getBoundingClientRect();
-                        if (ev.clientX >= tr.left && ev.clientX <= tr.right &&
-                            ev.clientY >= tr.top && ev.clientY <= tr.bottom) {
-                            hoveredTab = tabs[t];
-                            break;
-                        }
-                    }
-                    for (var t2 = 0; t2 < tabs.length; t2++) {
-                        tabs[t2].classList.toggle('wpp-group-drop-target', tabs[t2] === hoveredTab);
-                    }
-                    return hoveredTab;
-                }
-
-                function clearOverlayGroupDropTargets() {
-                    var tabs = groupTabsRow.querySelectorAll('.wpp-group-tab');
-                    for (var t = 0; t < tabs.length; t++) {
-                        tabs[t].classList.remove('wpp-group-drop-target');
-                    }
-                }
-
-                function onMouseMove(ev) {
-                    if (!dragStarted) {
-                        var dx = ev.clientX - startX;
-                        var dy = ev.clientY - startY;
-                        if (Math.abs(dx) + Math.abs(dy) < 5) return;
-                        startDragOp(ev);
-                    }
-                    cloneEl.style.top = (ev.clientY - cloneEl._offsetY) + 'px';
-                    cloneEl.style.left = (ev.clientX - cloneEl._offsetX) + 'px';
-
-                    // Check if hovering over a group tab
-                    var hoverTab = updateOverlayGroupDropTarget(ev);
-                    if (hoverTab) return; // Don't reorder while over group tabs
-
-                    var siblings = list.querySelectorAll('.wpp-switch-item');
-                    var placed = false;
-                    for (var si = 0; si < siblings.length; si++) {
-                        var el = siblings[si];
-                        if (el === dragItem) continue;
-                        var r = el.getBoundingClientRect();
-                        if (ev.clientY < r.top + r.height / 2) {
-                            list.insertBefore(dragItem, el);
-                            placed = true;
-                            break;
-                        }
-                    }
-                    if (!placed) list.appendChild(dragItem);
-                }
-
-                function onMouseUp(ev) {
-                    document.removeEventListener('mousemove', onMouseMove);
-                    document.removeEventListener('mouseup', onMouseUp);
-                    if (!dragStarted) return;
-
-                    cloneEl.remove();
-                    dragItem.classList.remove('is-dragging');
-
-                    // Check if dropped on a group tab
-                    var dropTab = updateOverlayGroupDropTarget(ev);
-                    clearOverlayGroupDropTargets();
-
-                    if (dropTab && dropTab.dataset.groupId && dropTab.dataset.groupId !== '__all__') {
-                        var sessionId = dragItem.dataset.sessionId;
-                        var groupId = dropTab.dataset.groupId;
-                        var sessionName = (self.data.sessions[sessionId] || {}).name || '';
-                        var groupName = (self.data.groups[groupId] || {}).name || '';
-                        self.moveSessionToGroupExclusive(sessionId, groupId).then(function () {
-                            new obsidian.Notice(i18n.L.groupAddedSession(sessionName, groupName));
+            sessionDrag.attachSessionDrag({
+                itemEl: dragItem,
+                listEl: list,
+                itemSelector: '.wpp-switch-item',
+                ignoreSelector: '.wpp-qs-action-btn',
+                groupTabsContainer: groupTabsRow,
+                onDropOnGroup: function (sessionId, groupId) {
+                    var sessionName = (self.data.sessions[sessionId] || {}).name || '';
+                    var groupName = (self.data.groups[groupId] || {}).name || '';
+                    return self.moveSessionToGroupExclusive(sessionId, groupId).then(function () {
+                        new obsidian.Notice(i18n.L.groupAddedSession(sessionName, groupName));
+                        renderGroupTabs();
+                        refreshOrderedSessions();
+                    });
+                },
+                onDropOnAllGroup: function (sessionId) {
+                    var currentGroupId = getOverlayGroupId();
+                    if (currentGroupId) {
+                        var rmSessionName = (self.data.sessions[sessionId] || {}).name || '';
+                        var rmGroupName = (self.data.groups[currentGroupId] || {}).name || '';
+                        return self.removeSessionFromGroup(sessionId, currentGroupId).then(function () {
+                            new obsidian.Notice(i18n.L.groupRemovedSession(rmSessionName, rmGroupName));
                             renderGroupTabs();
                             refreshOrderedSessions();
                         });
-                        return;
-                    } else {
-                        var currentGroupId = getOverlayGroupId();
-                        if (dropTab && dropTab.dataset.groupId === '__all__' && currentGroupId) {
-                        // Drop on "All" tab while viewing a group → remove from group
-                            var rmSessionId = dragItem.dataset.sessionId;
-                            var rmGroupId = currentGroupId;
-                            var rmSessionName = (self.data.sessions[rmSessionId] || {}).name || '';
-                            var rmGroupName = (self.data.groups[rmGroupId] || {}).name || '';
-                            self.removeSessionFromGroup(rmSessionId, rmGroupId).then(function () {
-                                new obsidian.Notice(i18n.L.groupRemovedSession(rmSessionName, rmGroupName));
-                                renderGroupTabs();
-                                refreshOrderedSessions();
-                            });
-                            return;
-                        }
                     }
-
-                    // Persist new order
-                    var newVisibleOrder = [];
-                    var items = list.querySelectorAll('.wpp-switch-item');
-                    for (var ni = 0; ni < items.length; ni++) {
-                        newVisibleOrder.push(items[ni].dataset.sessionId);
-                    }
+                },
+                onReorder: function (newVisibleOrder) {
                     self.setSessionOrderFromVisible(newVisibleOrder);
-
                     dragItem.classList.add('wpp-just-moved');
                     setTimeout(function () {
                         dragItem.classList.remove('wpp-just-moved');
                     }, 600);
-                }
-
-                document.addEventListener('mousemove', onMouseMove);
-                document.addEventListener('mouseup', onMouseUp);
+                },
             });
         }
 

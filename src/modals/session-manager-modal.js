@@ -7,6 +7,7 @@ var groupTabUi = require('../group-tab-ui.ts');
 var navigationUtils = require('../navigation-utils.ts');
 var utils = require('../utils.ts');
 var sessionPresenter = require('../ui/shared/session-presenter.ts');
+var sessionDrag = require('../ui/shared/session-drag.ts');
 var sessionContextActions = require('../session-context-actions');
 var settingsContextMenu = require('../settings-context-menu');
 var sessionListActions = require('../session-list-actions');
@@ -741,147 +742,36 @@ var SessionManagerModal = /** @class */ (function (_super) {
         if ((this.filterQuery || '').trim()) return;
 
         this.listEl.querySelectorAll('.wpp-session-item').forEach(function (item) {
-            item.addEventListener('mousedown', function (e) {
-                if (e.button !== 0) return;
-                if (e.target.closest('button, input, .wpp-icon-btn')) return;
-                if (utils.isModPressed(e)) return;
-
-                var startX = e.clientX;
-                var startY = e.clientY;
-                var dragStarted = false;
-                var draggedEl = item;
-                var cloneEl = null;
-
-                function startDrag(ev) {
-                    dragStarted = true;
-                    document.body.classList.add('wpp-session-list-dragging');
-                    var rect = item.getBoundingClientRect();
-                    var offsetX = startX - rect.left;
-                    var offsetY = startY - rect.top;
-
-                    cloneEl = item.cloneNode(true);
-                    cloneEl.classList.add('wpp-drag-clone');
-                    cloneEl.style.position = 'fixed';
-                    cloneEl.style.width = rect.width + 'px';
-                    cloneEl.style.top = (ev.clientY - offsetY) + 'px';
-                    cloneEl.style.left = (ev.clientX - offsetX) + 'px';
-                    cloneEl.style.zIndex = '10000';
-                    cloneEl.style.pointerEvents = 'none';
-                    document.body.appendChild(cloneEl);
-
-                    item.classList.add('is-dragging');
-
-                    // Store offset for move handler
-                    cloneEl._offsetX = offsetX;
-                    cloneEl._offsetY = offsetY;
-                }
-
-                function updateGroupDropTarget(ev) {
-                    var tabs = self.groupTabsRow.querySelectorAll('.wpp-group-tab');
-                    var hoveredTab = null;
-                    for (var t = 0; t < tabs.length; t++) {
-                        var tr = tabs[t].getBoundingClientRect();
-                        if (ev.clientX >= tr.left && ev.clientX <= tr.right &&
-                            ev.clientY >= tr.top && ev.clientY <= tr.bottom) {
-                            hoveredTab = tabs[t];
-                            break;
-                        }
-                    }
-                    for (var t2 = 0; t2 < tabs.length; t2++) {
-                        tabs[t2].classList.toggle('wpp-group-drop-target', tabs[t2] === hoveredTab);
-                    }
-                    return hoveredTab;
-                }
-
-                function clearGroupDropTargets() {
-                    var tabs = self.groupTabsRow.querySelectorAll('.wpp-group-tab');
-                    for (var t = 0; t < tabs.length; t++) {
-                        tabs[t].classList.remove('wpp-group-drop-target');
-                    }
-                }
-
-                function onMouseMove(ev) {
-                    if (!dragStarted) {
-                        var dx = ev.clientX - startX;
-                        var dy = ev.clientY - startY;
-                        if (Math.abs(dx) + Math.abs(dy) < 5) return;
-                        startDrag(ev);
-                    }
-
-                    cloneEl.style.top = (ev.clientY - cloneEl._offsetY) + 'px';
-                    cloneEl.style.left = (ev.clientX - cloneEl._offsetX) + 'px';
-
-                    // Check if hovering over a group tab
-                    var hoverTab = updateGroupDropTarget(ev);
-                    if (hoverTab) return; // Don't reorder while over group tabs
-
-                    var siblings = self.listEl.querySelectorAll('.wpp-session-item');
-                    var placed = false;
-                    for (var i = 0; i < siblings.length; i++) {
-                        var el = siblings[i];
-                        if (el === draggedEl) continue;
-                        var r = el.getBoundingClientRect();
-                        if (ev.clientY < r.top + r.height / 2) {
-                            self.listEl.insertBefore(draggedEl, el);
-                            placed = true;
-                            break;
-                        }
-                    }
-                    if (!placed) {
-                        self.listEl.appendChild(draggedEl);
-                    }
-                }
-
-                function onMouseUp(ev) {
-                    document.removeEventListener('mousemove', onMouseMove);
-                    document.removeEventListener('mouseup', onMouseUp);
-                    document.body.classList.remove('wpp-session-list-dragging');
-
-                    if (!dragStarted) return;
-
-                    cloneEl.remove();
-                    draggedEl.classList.remove('is-dragging');
-
-                    // Check if dropped on a group tab
-                    var dropTab = updateGroupDropTarget(ev);
-                    clearGroupDropTargets();
-
-                    if (dropTab && dropTab.dataset.groupId && dropTab.dataset.groupId !== '__all__') {
-                        var sessionId = draggedEl.dataset.sessionId;
-                        var groupId = dropTab.dataset.groupId;
-                        var sessionName = (self.plugin.data.sessions[sessionId] || {}).name || '';
-                        var groupName = (self.plugin.data.groups[groupId] || {}).name || '';
-                        self.plugin.moveSessionToGroupExclusive(sessionId, groupId).then(function () {
-                            new obsidian.Notice(i18n.L.groupAddedSession(sessionName, groupName));
+            sessionDrag.attachSessionDrag({
+                itemEl: item,
+                listEl: self.listEl,
+                itemSelector: '.wpp-session-item',
+                groupTabsContainer: self.groupTabsRow,
+                bodyDraggingClass: 'wpp-session-list-dragging',
+                onDropOnGroup: function (sessionId, groupId) {
+                    var sessionName = (self.plugin.data.sessions[sessionId] || {}).name || '';
+                    var groupName = (self.plugin.data.groups[groupId] || {}).name || '';
+                    return self.plugin.moveSessionToGroupExclusive(sessionId, groupId).then(function () {
+                        new obsidian.Notice(i18n.L.groupAddedSession(sessionName, groupName));
+                        self.renderGroupTabs();
+                        self.renderList();
+                    });
+                },
+                onDropOnAllGroup: function (sessionId) {
+                    var currentGroupId = self.getModalGroupId();
+                    if (currentGroupId) {
+                        var rmSessionName = (self.plugin.data.sessions[sessionId] || {}).name || '';
+                        var rmGroupName = (self.plugin.data.groups[currentGroupId] || {}).name || '';
+                        return self.plugin.removeSessionFromGroup(sessionId, currentGroupId).then(function () {
+                            new obsidian.Notice(i18n.L.groupRemovedSession(rmSessionName, rmGroupName));
                             self.renderGroupTabs();
                             self.renderList();
                         });
-                        return;
-                    } else {
-                        var currentGroupId = self.getModalGroupId();
-                        if (dropTab && dropTab.dataset.groupId === '__all__' && currentGroupId) {
-                        // Drop on "All" tab while viewing a group → remove from group
-                            var rmSessionId = draggedEl.dataset.sessionId;
-                            var rmGroupId = currentGroupId;
-                            var rmSessionName = (self.plugin.data.sessions[rmSessionId] || {}).name || '';
-                            var rmGroupName = (self.plugin.data.groups[rmGroupId] || {}).name || '';
-                            self.plugin.removeSessionFromGroup(rmSessionId, rmGroupId).then(function () {
-                                new obsidian.Notice(i18n.L.groupRemovedSession(rmSessionName, rmGroupName));
-                                self.renderGroupTabs();
-                                self.renderList();
-                            });
-                            return;
-                        }
                     }
-
-                    // Read order from DOM
-                    var newVisibleOrder = [];
-                    var items = self.listEl.querySelectorAll('.wpp-session-item');
-                    items.forEach(function (el) {
-                        newVisibleOrder.push(el.dataset.sessionId);
-                    });
-
+                },
+                onReorder: function (newVisibleOrder) {
                     // Update index labels in-place
+                    var items = self.listEl.querySelectorAll('.wpp-session-item');
                     items.forEach(function (el, i) {
                         var indexEl = el.querySelector('.wpp-session-index');
                         if (indexEl) {
@@ -891,17 +781,13 @@ var SessionManagerModal = /** @class */ (function (_super) {
                     });
 
                     // Highlight moved item
-                    draggedEl.classList.add('wpp-just-moved');
-                    var movedRef = draggedEl;
+                    item.classList.add('wpp-just-moved');
                     setTimeout(function () {
-                        movedRef.classList.remove('wpp-just-moved');
+                        item.classList.remove('wpp-just-moved');
                     }, 600);
 
                     self.plugin.setSessionOrderFromVisible(newVisibleOrder, { syncCommands: false });
-                }
-
-                document.addEventListener('mousemove', onMouseMove);
-                document.addEventListener('mouseup', onMouseUp);
+                },
             });
         });
     };
