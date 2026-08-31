@@ -63,6 +63,15 @@ function checkFloors(files, only) {
         byName[path.basename(file)] = entry;
     }
 
+    // A name that is not in the floors file has no floor to clear, and saying
+    // it "clears" is worse than saying nothing: the report for one commit
+    // claimed a floor pass for a module that had just been deleted.
+    if (only && !(only in floors) && !(only.replace(/\.ts$/, '.js') in floors)) {
+        console.error(`No coverage floor is recorded for ${only}.`);
+        console.error('Check the name against .coverage-floors.json, or drop the --floor argument.');
+        process.exit(1);
+    }
+
     const below = [];
     for (const [name, floor] of Object.entries(floors)) {
         if (only && name !== only && name !== only.replace(/\.ts$/, '.js')) continue;

@@ -116,27 +116,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
     };
 
     WorkspacePlusPlus.prototype.hideSearchOverlay = function () {
-        if (this._searchOverlay) {
-            this._searchOverlay.releaseSessionSubscription();
-        }
-        if (this.searchOverlayEl) {
-            this.searchOverlayEl.remove();
-            this.searchOverlayEl = null;
-        }
-        this.searchOverlayViewGroupId = null;
-        if (this.searchOverlayInputHandler && this.searchOverlayInputEl) {
-            this.searchOverlayInputEl.removeEventListener('input', this.searchOverlayInputHandler);
-        }
-        if (this.searchOverlayKeyHandler) {
-            document.removeEventListener('keydown', this.searchOverlayKeyHandler, true);
-            this.searchOverlayKeyHandler = null;
-        }
-        if (this.searchOverlayClickOutsideHandler) {
-            document.removeEventListener('mousedown', this.searchOverlayClickOutsideHandler, true);
-            this.searchOverlayClickOutsideHandler = null;
-        }
-        this.searchOverlayInputHandler = null;
-        this.searchOverlayInputEl = null;
+        if (this._searchOverlay) return this._searchOverlay.hide();
     };
 }
 

@@ -1,4 +1,4 @@
-import { Notice, setIcon, setTooltip, type App } from 'obsidian';
+import { Component, Notice, setIcon, setTooltip, type App } from 'obsidian';
 import { L } from '../../i18n.ts';
 import { ConfirmModal } from '../../modals/confirm-modal.ts';
 import * as groupTabUi from '../../group-tab-ui.ts';
@@ -6,10 +6,10 @@ import type { GroupTabPluginHost } from '../../group-tab-ui.ts';
 import * as navigationUtils from '../../navigation-utils.ts';
 import { deriveSessionPresentation } from '../shared/session-presenter.ts';
 import * as sessionDrag from '../shared/session-drag.ts';
-import * as searchOverlayKeys from '../../search-overlay-key-handler.js';
 import * as sessionContextActions from '../../session-context-actions.js';
 import * as settingsContextMenu from '../../settings-context-menu.js';
 import * as sessionListActions from '../../session-list-actions.js';
+import * as utils from '../../utils.ts';
 import type { SessionGroup, SessionItem } from '../../storage/default-data.ts';
 
 export interface SearchOverlayPosition {
@@ -27,7 +27,8 @@ function localizedString(value: unknown): string {
 }
 
 function localizedCall(value: unknown, ...args: (string | number)[]): string {
-    return typeof value === 'function' ? value(...args) : '';
+    if (typeof value !== 'function') return '';
+    return (value as (...callArgs: (string | number)[]) => string)(...args);
 }
 
 function closest(target: EventTarget | null, selector: string): HTMLElement | null {
@@ -37,6 +38,189 @@ function closest(target: EventTarget | null, selector: string): HTMLElement | nu
 
 function containsTarget(container: HTMLElement, target: EventTarget | null): boolean {
     return target instanceof Node && container.contains(target);
+}
+
+interface SearchOverlayKeyboardOptions {
+    plugin: SearchOverlayHost;
+    saveInput: HTMLInputElement;
+    saveBtn: HTMLButtonElement;
+    searchInput: HTMLInputElement;
+    getOverlayGroupId(): string | null;
+    applyOverlayGroupSelection(groupId: string | null): Promise<boolean>;
+    switchSelected(options: { shiftKey?: boolean }): void;
+    refreshOrderedSessions(): void;
+    updateSelection(): void;
+    focusSaveInput(): void;
+    focusSearchInput(): void;
+    focusFirstResult(): void;
+    focusLastResult(): void;
+    hasSearchInput(): boolean;
+    getFiltered(): SessionItem[];
+    getSelectedIndex(): number;
+    setSelectedIndex(value: number): void;
+    setKeyboardNav(value: boolean): void;
+}
+
+function hasBlockingModal(): boolean {
+    return !!document.querySelector('.modal-container');
+}
+
+function syncSearchOverlaySelectedIndex(
+    plugin: SearchOverlayHost,
+    filtered: SessionItem[],
+    currentIndex: number,
+    options: { preserveWhenMissing?: boolean } = {},
+): number {
+    if (filtered.length === 0) return -1;
+
+    const activeIdx = plugin.findActiveSessionIndex(filtered);
+    if (activeIdx !== -1) return activeIdx;
+
+    if (options.preserveWhenMissing) {
+        if (currentIndex >= filtered.length) return filtered.length - 1;
+        return currentIndex < 0 ? 0 : currentIndex;
+    }
+
+    return 0;
+}
+
+function handleSearchOverlayHorizontalKey(event: KeyboardEvent, activeEl: Element | null, options: SearchOverlayKeyboardOptions): boolean {
+    if (activeEl === options.saveInput && event.key === 'ArrowRight') {
+        if (navigationUtils.isTextInputCursorAtEnd(options.saveInput)) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            options.saveBtn.focus();
+        }
+        return true;
+    }
+    if (activeEl === options.saveBtn && event.key === 'ArrowLeft') {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        options.focusSaveInput();
+        return true;
+    }
+    return false;
+}
+
+function handleSearchOverlayVerticalKey(event: KeyboardEvent, activeEl: Element | null, options: SearchOverlayKeyboardOptions): boolean {
+    if (activeEl === options.searchInput) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        if (event.key === 'ArrowDown') options.focusFirstResult();
+        else options.focusSaveInput();
+        return true;
+    }
+    if (activeEl === options.saveInput || activeEl === options.saveBtn) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        if (event.key === 'ArrowDown') {
+            if (options.hasSearchInput()) options.focusSearchInput();
+            else options.focusFirstResult();
+        } else {
+            options.focusLastResult();
+        }
+        return true;
+    }
+
+    const filtered = options.getFiltered();
+    event.preventDefault();
+    if (filtered.length === 0) return true;
+    options.setKeyboardNav(true);
+    const direction = event.key === 'ArrowUp' ? -1 : 1;
+    const nextIndex = options.getSelectedIndex() + direction;
+    if (nextIndex < 0) {
+        if (options.hasSearchInput()) options.focusSearchInput();
+        else options.focusSaveInput();
+        return true;
+    }
+    if (nextIndex >= filtered.length) {
+        options.focusSaveInput();
+        return true;
+    }
+    options.setSelectedIndex(nextIndex);
+    options.updateSelection();
+    return true;
+}
+
+function handleSearchOverlayEnterKey(event: KeyboardEvent, activeEl: Element | null, options: SearchOverlayKeyboardOptions): boolean {
+    if (activeEl === options.saveInput || activeEl === options.saveBtn) return false;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    options.switchSelected({ shiftKey: event.shiftKey });
+    return true;
+}
+
+function handleSearchOverlayDeleteKey(event: KeyboardEvent, activeEl: Element | null, options: SearchOverlayKeyboardOptions): boolean {
+    if (activeEl === options.searchInput && options.searchInput.value.length > 0) return false;
+    if (activeEl === options.saveInput || activeEl === options.saveBtn) return false;
+    event.preventDefault();
+
+    const filtered = options.getFiltered();
+    const selectedIndex = options.getSelectedIndex();
+    if (selectedIndex < 0 || selectedIndex >= filtered.length) return true;
+    const session = filtered[selectedIndex];
+    if (!session) return true;
+    if (Object.keys(options.plugin.data.sessions).length <= 1) {
+        new Notice(localizedString(L.cannotDeleteLast));
+        return true;
+    }
+
+    const doDelete = (): void => {
+        void options.plugin.deleteSession(session.id).then((deleted) => {
+            if (!deleted) return;
+            new Notice(localizedCall(L.deleted, session.name));
+            options.refreshOrderedSessions();
+        });
+    };
+
+    if (options.plugin.data.confirmDeleteByHotkey !== false) {
+        new ConfirmModal(options.plugin.app, localizedCall(L.confirmDeleteActive, session.name), doDelete).open();
+    } else {
+        doDelete();
+    }
+    return true;
+}
+
+function createSearchOverlayKeyHandler(options: SearchOverlayKeyboardOptions): (event: KeyboardEvent) => void {
+    return (event): void => {
+        const plugin = options.plugin;
+        if (!plugin.searchOverlayEl || hasBlockingModal()) return;
+        const activeEl = document.activeElement;
+
+        // Let global command hotkeys (e.g. Mod+Shift+Enter/Tab) flow through.
+        if (utils.isModPressed(event)) return;
+
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            plugin.hideSearchOverlay();
+            return;
+        }
+
+        if (event.key === 'Tab') {
+            if (activeEl === options.saveInput || activeEl === options.saveBtn) return;
+            if (!plugin.isGroupFeatureEnabled() || plugin.getOrderedGroups().length === 0) return;
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            const nextGroupId = plugin.getRelativeGroupId(options.getOverlayGroupId(), event.shiftKey ? -1 : 1);
+            if (nextGroupId === undefined) return;
+            void options.applyOverlayGroupSelection(nextGroupId);
+            return;
+        }
+
+        if ((event.key === 'ArrowLeft' || event.key === 'ArrowRight') && handleSearchOverlayHorizontalKey(event, activeEl, options)) return;
+        if ((event.key === 'ArrowDown' || event.key === 'ArrowUp') && handleSearchOverlayVerticalKey(event, activeEl, options)) return;
+        if (event.key === 'Enter' && !event.isComposing && handleSearchOverlayEnterKey(event, activeEl, options)) return;
+        if ((event.key === 'Delete' || event.key === 'Backspace') && handleSearchOverlayDeleteKey(event, activeEl, options)) return;
+        if (event.key === '/' && activeEl !== options.searchInput && activeEl !== options.saveInput && activeEl !== options.saveBtn) {
+            handleSearchOverlaySlashKey(event, options);
+        }
+    };
+}
+
+function handleSearchOverlaySlashKey(event: KeyboardEvent, options: SearchOverlayKeyboardOptions): void {
+    event.preventDefault();
+    navigationUtils.focusTextInputSelect(options.searchInput);
 }
 
 export interface SearchOverlayHost extends GroupTabPluginHost {
@@ -81,18 +265,57 @@ export interface SearchOverlayHost extends GroupTabPluginHost {
     saveActiveSession(): Promise<unknown>;
     reloadCurrentSessionWithoutSaving(): void;
     switchSession(sessionId: string, options: { silent: boolean }): Promise<boolean>;
+    deleteSession(sessionId: string): Promise<boolean>;
+    getRelativeGroupId(groupId: string | null, direction: number): string | null | undefined;
     persistData(): Promise<unknown>;
 }
 
 export class SearchOverlay {
     private readonly host: SearchOverlayHost;
     private unsubscribeSessions: (() => void) | null = null;
+    private overlayEventOwner: Component | null = null;
+    private focusGuardEventOwner: Component | null = null;
+    private readonly interactionEventOwners = new Set<Component>();
 
     // Called when the overlay closes, so nothing is left listening.
     releaseSessionSubscription(): void {
         if (!this.unsubscribeSessions) return;
         this.unsubscribeSessions();
         this.unsubscribeSessions = null;
+    }
+
+    private releaseDomEventOwners(): void {
+        this.overlayEventOwner?.unload();
+        this.overlayEventOwner = null;
+        this.focusGuardEventOwner?.unload();
+        this.focusGuardEventOwner = null;
+        for (const owner of this.interactionEventOwners) owner.unload();
+        this.interactionEventOwners.clear();
+    }
+
+    private createInteractionEventOwner(): Component {
+        const owner = new Component();
+        owner.load();
+        this.interactionEventOwners.add(owner);
+        return owner;
+    }
+
+    private releaseInteractionEventOwner(owner: Component): void {
+        owner.unload();
+        this.interactionEventOwners.delete(owner);
+    }
+
+    hide(): void {
+        this.releaseSessionSubscription();
+        this.releaseDomEventOwners();
+        const self = this.host;
+        self.searchOverlayEl?.remove();
+        self.searchOverlayEl = null;
+        self.searchOverlayViewGroupId = null;
+        self.searchOverlayInputHandler = null;
+        self.searchOverlayKeyHandler = null;
+        self.searchOverlayClickOutsideHandler = null;
+        self.searchOverlayInputEl = null;
     }
 
     constructor(host: SearchOverlayHost) {
@@ -110,6 +333,8 @@ export class SearchOverlay {
     open(anchorEl?: HTMLElement | null): void {
         const strings = L;
         const self = this.host;
+        const createInteractionEventOwner = (): Component => this.createInteractionEventOwner();
+        const releaseInteractionEventOwner = (owner: Component): void => this.releaseInteractionEventOwner(owner);
         let overlayGroupId = self.isGroupFeatureEnabled()
             ? (self.data.activeGroupId || null)
             : null;
@@ -120,12 +345,17 @@ export class SearchOverlay {
         self.hideSwitchOverlay();
         self.hideSearchOverlay();
 
+        const overlayDocument = document;
+        const overlayEventOwner = new Component();
+        overlayEventOwner.load();
+        this.overlayEventOwner = overlayEventOwner;
+
         let filtered = ordered.slice();
         let selectedIndex = 0;
         let keyboardNav = false;
 
         function syncSelectedIndexToActive(options?: { preserveWhenMissing?: boolean }): void {
-            selectedIndex = searchOverlayKeys.syncSearchOverlaySelectedIndex(self, filtered, selectedIndex, options || {});
+            selectedIndex = syncSearchOverlaySelectedIndex(self, filtered, selectedIndex, options);
         }
         syncSelectedIndexToActive();
 
@@ -153,63 +383,46 @@ export class SearchOverlay {
             });
         }
 
-        const overlay = document.createElement('div');
-        overlay.className = 'wpp-switch-overlay wpp-search-overlay';
+        const overlay = overlayDocument.body.createDiv({ cls: 'wpp-switch-overlay wpp-search-overlay' });
         overlay.tabIndex = -1;
 
         // Resize handles at four corners
         const corners = ['tl', 'tr', 'bl', 'br'];
         for (let ci = 0; ci < corners.length; ci++) {
-            const corner = document.createElement('div');
-            corner.className = 'wpp-resize-corner wpp-resize-' + corners[ci];
+            const corner = overlay.createDiv({ cls: 'wpp-resize-corner wpp-resize-' + corners[ci] });
             corner.dataset.corner = corners[ci];
-            overlay.appendChild(corner);
         }
 
         // Resize handles at four edges
         const edges = ['top', 'right', 'bottom', 'left'];
         for (let ei = 0; ei < edges.length; ei++) {
-            const edgeEl = document.createElement('div');
-            edgeEl.className = 'wpp-resize-edge wpp-resize-' + edges[ei];
+            const edgeEl = overlay.createDiv({ cls: 'wpp-resize-edge wpp-resize-' + edges[ei] });
             edgeEl.dataset.edge = edges[ei];
-            overlay.appendChild(edgeEl);
         }
 
         // Header row: count + close button
-        const headerRow = document.createElement('div');
-        headerRow.className = 'wpp-search-header';
+        const headerRow = overlay.createDiv({ cls: 'wpp-search-header' });
 
-        const countSpan = document.createElement('div');
-        countSpan.className = 'wpp-switch-count';
-        headerRow.appendChild(countSpan);
+        const countSpan = headerRow.createDiv({ cls: 'wpp-switch-count' });
 
-        const closeBtn = document.createElement('div');
-        closeBtn.className = 'wpp-search-close';
+        const closeBtn = headerRow.createDiv({ cls: 'wpp-search-close' });
         setIcon(closeBtn, 'x');
-        closeBtn.addEventListener('click', function (e) {
+        overlayEventOwner.registerDomEvent(closeBtn, 'click', function (e) {
             e.stopPropagation();
             self.hideSearchOverlay();
         });
-        headerRow.appendChild(closeBtn);
-
-        overlay.appendChild(headerRow);
 
         // Save section (same as main modal)
-        const saveRow = document.createElement('div');
-        saveRow.className = 'wpp-save-container';
-        const saveInput = document.createElement('input');
-        saveInput.type = 'text';
-        saveInput.className = 'wpp-save-input';
-        saveInput.placeholder = localizedString(strings.savePlaceholder);
-        saveRow.appendChild(saveInput);
-        const saveBtn = document.createElement('button');
-        saveBtn.className = 'wpp-save-btn';
-        saveBtn.textContent = localizedString(strings.save);
-        saveRow.appendChild(saveBtn);
+        const saveRow = overlay.createDiv({ cls: 'wpp-save-container' });
+        const saveInput = saveRow.createEl('input', {
+            cls: 'wpp-save-input',
+            attr: { type: 'text', placeholder: localizedString(strings.savePlaceholder) },
+        });
+        const saveBtn = saveRow.createEl('button', { cls: 'wpp-save-btn', text: localizedString(strings.save) });
 
         function onOverlaySave() {
             const selectedGroupId = getOverlayGroupId();
-            self.createSessionForViewedGroup(saveInput.value, selectedGroupId).then(function (result) {
+            void self.createSessionForViewedGroup(saveInput.value, selectedGroupId).then(function (result) {
                 if (!result || !result.created) return;
                 const createdName = result.name;
                 overlayGroupId = result.viewGroupId || null;
@@ -221,51 +434,46 @@ export class SearchOverlay {
             });
         }
 
-        saveBtn.addEventListener('click', function (e) {
+        overlayEventOwner.registerDomEvent(saveBtn, 'click', function (e) {
             e.stopPropagation();
             onOverlaySave();
         });
-        saveInput.addEventListener('keydown', function (e) {
+        overlayEventOwner.registerDomEvent(saveInput, 'keydown', function (e) {
             if (e.key === 'Enter' && !e.isComposing) {
                 e.stopPropagation();
                 onOverlaySave();
             }
         });
-        overlay.appendChild(saveRow);
 
         // Search / filter section
-        const searchRow = document.createElement('div');
-        searchRow.className = 'wpp-search-row';
-        const searchInput = document.createElement('input');
-        searchInput.type = 'text';
-        searchInput.className = 'wpp-search-input';
-        searchInput.placeholder = localizedString(strings.searchOverlayPlaceholder);
-        searchRow.appendChild(searchInput);
+        const searchRow = overlay.createDiv({ cls: 'wpp-search-row' });
+        const searchInput = searchRow.createEl('input', {
+            cls: 'wpp-search-input',
+            attr: { type: 'text', placeholder: localizedString(strings.searchOverlayPlaceholder) },
+        });
         self.searchOverlayInputEl = searchInput;
         if (!self.data.showFilterInput) {
-            searchRow.style.display = 'none';
+            searchRow.classList.add('is-hidden');
         }
-        overlay.appendChild(searchRow);
 
         // Group tabs row
-        const groupTabsRow = document.createElement('div');
-        groupTabsRow.className = 'wpp-group-tabs';
+        const groupTabsRow = overlay.createDiv({ cls: 'wpp-group-tabs' });
 
         function stripSaveHint(text: string): string {
-            return text.replace(/  \/  ⇧.+?  \/  /, '  /  ');
+            return text.replace(/ {2}\/ {2}⇧.+? {2}\/ {2}/, '  /  ');
         }
 
         function renderGroupTabs() {
             while (groupTabsRow.firstChild) groupTabsRow.removeChild(groupTabsRow.firstChild);
             const autoSave = self.isAutoSaveOnSwitchEnabled();
             if (!self.isGroupFeatureEnabled()) {
-                groupTabsRow.style.display = 'none';
+                groupTabsRow.classList.add('is-hidden');
                 footerRow.textContent = autoSave ? stripSaveHint(localizedString(strings.searchOverlayHelp)) : localizedString(strings.searchOverlayHelp);
                 return;
             }
             const groups = self.data.groups || {};
             const realGroups = self.getOrderedGroups();
-            groupTabsRow.style.display = '';
+            groupTabsRow.classList.remove('is-hidden');
             const helpText = realGroups.length > 0
                 ? (localizedString(strings.searchOverlayHelpWithGroups) || localizedString(strings.searchOverlayHelp))
                 : localizedString(strings.searchOverlayHelp);
@@ -281,7 +489,7 @@ export class SearchOverlay {
                 selectedGroupId: getOverlayGroupId(),
                 stopPropagationOnMouseDown: true,
                 onSelectGroup: function (groupId) {
-                    applyOverlayGroupSelection(groupId);
+                    void applyOverlayGroupSelection(groupId);
                 },
                 onResetViewGroup: function () {
                     overlayGroupId = null;
@@ -312,22 +520,14 @@ export class SearchOverlay {
             });
         }
 
-        overlay.appendChild(groupTabsRow);
+        const list = overlay.createDiv({ cls: 'wpp-switch-list wpp-search-list' });
 
-        const list = document.createElement('div');
-        list.className = 'wpp-switch-list wpp-search-list';
-        overlay.appendChild(list);
-
-        const emptyEl = document.createElement('div');
-        emptyEl.className = 'wpp-search-empty';
+        const emptyEl = overlay.createDiv({ cls: 'wpp-search-empty' });
         emptyEl.textContent = localizedString(strings.noFilteredSessions);
-        overlay.appendChild(emptyEl);
 
         // Referenced by renderGroupTabs above, which only ever runs from a
         // callback - so it resolves after this line, and let is enough.
-        const footerRow = document.createElement('div');
-        footerRow.className = 'wpp-switch-footer';
-        overlay.appendChild(footerRow);
+        const footerRow = overlay.createDiv({ cls: 'wpp-switch-footer' });
 
         // Initial render of group tabs (also sets footer text)
         renderGroupTabs();
@@ -361,8 +561,8 @@ export class SearchOverlay {
                 } else {
                     emptyEl.textContent = localizedString(strings.noFilteredSessions);
                 }
-                list.style.display = 'none';
-                emptyEl.style.display = 'flex';
+                list.classList.add('is-hidden');
+                emptyEl.classList.add('is-visible');
                 return;
             }
 
@@ -371,8 +571,8 @@ export class SearchOverlay {
                 selectedIndex = activeIdx !== -1 ? activeIdx : 0;
             }
 
-            list.style.display = '';
-            emptyEl.style.display = 'none';
+            list.classList.remove('is-hidden');
+            emptyEl.classList.remove('is-visible');
             countSpan.textContent = (selectedIndex + 1) + ' / ' + filtered.length;
 
             for (let i = 0; i < filtered.length; i++) {
@@ -382,78 +582,52 @@ export class SearchOverlay {
                     activeSessionId: self.data.activeSessionId,
                 });
                 const isActive = presentation.isActive;
-                const item = document.createElement('div');
-                item.className = 'wpp-switch-item';
+                const item = list.createDiv({ cls: 'wpp-switch-item' });
                 if (i === selectedIndex) item.classList.add('wpp-kb-selected');
                 item.dataset.sessionId = presentation.id;
 
                 // Info column (name + modified time)
-                const infoCol = document.createElement('div');
-                infoCol.className = 'wpp-qs-info-col';
+                const infoCol = item.createDiv({ cls: 'wpp-qs-info-col' });
 
-                const nameRow = document.createElement('div');
-                nameRow.className = 'wpp-qs-name-row';
+                const nameRow = infoCol.createDiv({ cls: 'wpp-qs-name-row' });
 
-                const name = document.createElement('div');
-                name.className = 'wpp-switch-name';
+                const name = nameRow.createDiv({ cls: 'wpp-switch-name' });
                 name.textContent = presentation.name;
-                nameRow.appendChild(name);
-
-                infoCol.appendChild(nameRow);
 
                 // Modified timestamp
-                const modifiedEl = document.createElement('div');
-                modifiedEl.className = 'wpp-qs-modified';
+                const modifiedEl = infoCol.createDiv({ cls: 'wpp-qs-modified' });
                 modifiedEl.textContent = presentation.modifiedText;
-                infoCol.appendChild(modifiedEl);
-
-                item.appendChild(infoCol);
 
                 if (isActive) {
-                    const badge = document.createElement('span');
-                    badge.className = 'wpp-active-badge';
+                    const badge = item.createSpan({ cls: 'wpp-active-badge' });
                     badge.textContent = localizedString(strings.active);
-                    item.appendChild(badge);
                 }
 
                 // Action icons (save?, rename & delete)
-                const actions = document.createElement('div');
-                actions.className = 'wpp-qs-actions';
+                const actions = item.createDiv({ cls: 'wpp-qs-actions' });
 
                 // Save & reload icons (only for active session when auto-save is disabled)
                 let saveIcon = null;
                 let reloadIcon = null;
                 if (isActive && !self.isAutoSaveOnSwitchEnabled()) {
-                    saveIcon = document.createElement('div');
-                    saveIcon.className = 'wpp-qs-action-btn';
+                    saveIcon = actions.createDiv({ cls: 'wpp-qs-action-btn' });
                     setIcon(saveIcon, 'save');
                     setTooltip(saveIcon, localizedString(strings.saveInline), { delay: 250 });
-                    actions.appendChild(saveIcon);
-
-                    reloadIcon = document.createElement('div');
-                    reloadIcon.className = 'wpp-qs-action-btn';
+                    reloadIcon = actions.createDiv({ cls: 'wpp-qs-action-btn' });
                     setIcon(reloadIcon, 'rotate-ccw');
                     setTooltip(reloadIcon, localizedString(strings.contextReloadSession), { delay: 250 });
-                    actions.appendChild(reloadIcon);
                 }
 
-                const renameIcon = document.createElement('div');
-                renameIcon.className = 'wpp-qs-action-btn';
+                const renameIcon = actions.createDiv({ cls: 'wpp-qs-action-btn' });
                 setIcon(renameIcon, 'pencil');
                 setTooltip(renameIcon, localizedString(strings.rename), { delay: 250 });
-                actions.appendChild(renameIcon);
-
-                const deleteIcon = document.createElement('div');
-                deleteIcon.className = 'wpp-qs-action-btn';
+                const deleteIcon = actions.createDiv({ cls: 'wpp-qs-action-btn' });
                 setIcon(deleteIcon, 'trash-2');
                 setTooltip(deleteIcon, localizedString(strings.delete), { delay: 250 });
-                actions.appendChild(deleteIcon);
-
-                item.appendChild(actions);
 
                 (function (idx, sess, itemEl, _saveIcon, _reloadIcon, _isActive) {
                     // Click on item to switch
-                    itemEl.addEventListener('click', function (e) {
+                    overlayEventOwner.registerDomEvent(itemEl, 'click', function (e) {
                         if (closest(e.target, '.wpp-qs-action-btn')) return;
                         selectedIndex = idx;
                         switchSelected();
@@ -463,14 +637,14 @@ export class SearchOverlay {
                     setupDrag(itemEl);
 
                     // Mouse hover updates selection (when not in keyboard mode)
-                    itemEl.addEventListener('mouseenter', function () {
+                    overlayEventOwner.registerDomEvent(itemEl, 'mouseenter', function () {
                         if (keyboardNav) return;
                         selectedIndex = idx;
                         updateSelection();
                     });
 
                     // Right-click context menu
-                    itemEl.addEventListener('contextmenu', function (e) {
+                    overlayEventOwner.registerDomEvent(itemEl, 'contextmenu', function (e) {
                         e.preventDefault();
                         const selectedGroupId = getOverlayGroupId();
                         sessionContextActions.openSessionContextMenu({
@@ -495,10 +669,10 @@ export class SearchOverlay {
 
                     // Save
                     if (_saveIcon) {
-                        _saveIcon.addEventListener('click', function (e) {
+                        overlayEventOwner.registerDomEvent(_saveIcon, 'click', function (e) {
                             e.stopPropagation();
                             const doSave = function () {
-                                self.saveActiveSession().then(function () {
+                                void self.saveActiveSession().then(function () {
                                     refreshOrderedSessions();
                                 });
                             };
@@ -512,7 +686,7 @@ export class SearchOverlay {
 
                     // Reload
                     if (_reloadIcon) {
-                        _reloadIcon.addEventListener('click', function (e) {
+                        overlayEventOwner.registerDomEvent(_reloadIcon, 'click', function (e) {
                             e.stopPropagation();
                             const doReload = function () {
                                 self.reloadCurrentSessionWithoutSaving();
@@ -526,7 +700,7 @@ export class SearchOverlay {
                     }
 
                     // Rename
-                    renameIcon.addEventListener('click', function (e) {
+                    overlayEventOwner.registerDomEvent(renameIcon, 'click', function (e) {
                         e.stopPropagation();
                         sessionListActions.renameSessionWithPrompt({
                             app: self.app,
@@ -539,7 +713,7 @@ export class SearchOverlay {
                     });
 
                     // Delete
-                    deleteIcon.addEventListener('click', function (e) {
+                    overlayEventOwner.registerDomEvent(deleteIcon, 'click', function (e) {
                         e.stopPropagation();
                         sessionListActions.deleteSessionWithPrompt({
                             app: self.app,
@@ -554,7 +728,6 @@ export class SearchOverlay {
                     });
                 })(i, session, item, saveIcon, reloadIcon, isActive);
 
-                list.appendChild(item);
             }
 
             // Scroll selected (active) item into view
@@ -650,7 +823,7 @@ export class SearchOverlay {
         }
 
         // Exit keyboard mode when mouse moves over the list
-        list.addEventListener('mousemove', function () {
+        overlayEventOwner.registerDomEvent(list, 'mousemove', function () {
             if (keyboardNav) {
                 setKeyboardNavState(false);
             }
@@ -663,7 +836,7 @@ export class SearchOverlay {
             if (target.id === self.data.activeSessionId) {
                 if (opts.shiftKey) {
                     const doSave = function () {
-                        self.saveActiveSession().then(function () {
+                        void self.saveActiveSession().then(function () {
                             refreshOrderedSessions();
                         });
                     };
@@ -685,7 +858,7 @@ export class SearchOverlay {
                 self.hideSearchOverlay();
                 return;
             }
-            self.switchSession(target.id, { silent: true }).then(function (switched) {
+            void self.switchSession(target.id, { silent: true }).then(function (switched) {
                 if (switched) self.hideSearchOverlay();
             });
         }
@@ -696,9 +869,8 @@ export class SearchOverlay {
             renderList();
         }
 
-        self.searchOverlayKeyHandler = searchOverlayKeys.createSearchOverlayKeyHandler({
+        self.searchOverlayKeyHandler = createSearchOverlayKeyHandler({
             plugin: self,
-            overlay: overlay,
             saveInput: saveInput,
             saveBtn: saveBtn,
             searchInput: searchInput,
@@ -721,7 +893,7 @@ export class SearchOverlay {
         self.searchOverlayClickOutsideHandler = function (e) {
             if (!self.searchOverlayEl) return;
             // Don't close if a modal (rename/confirm) is open
-            if (searchOverlayKeys.hasBlockingModal()) return;
+            if (hasBlockingModal()) return;
             // Let status bar handle its own toggle
             if (self.statusBarEl && containsTarget(self.statusBarEl, e.target)) return;
             if (!containsTarget(self.searchOverlayEl, e.target)) {
@@ -729,11 +901,10 @@ export class SearchOverlay {
             }
         };
 
-        searchInput.addEventListener('input', self.searchOverlayInputHandler);
-        document.addEventListener('keydown', self.searchOverlayKeyHandler, true);
-        document.addEventListener('mousedown', self.searchOverlayClickOutsideHandler, true);
+        overlayEventOwner.registerDomEvent(searchInput, 'input', self.searchOverlayInputHandler);
+        overlayEventOwner.registerDomEvent(overlayDocument, 'keydown', self.searchOverlayKeyHandler, true);
+        overlayEventOwner.registerDomEvent(overlayDocument, 'mousedown', self.searchOverlayClickOutsideHandler, true);
 
-        document.body.appendChild(overlay);
         self.searchOverlayEl = overlay;
         setKeyboardNavState(focusTarget === 'current-session');
         renderList();
@@ -779,8 +950,7 @@ export class SearchOverlay {
                 bp = margin;
             }
 
-            overlay.style.right = 'auto';
-            overlay.style.top = 'auto';
+            overlay.classList.add('is-positioned');
             overlay.style.left = lp + 'px';
             overlay.style.bottom = bp + 'px';
         }
@@ -793,17 +963,13 @@ export class SearchOverlay {
         if (savedSize && savedSize.width != null && savedSize.height != null) {
             overlay.style.width = Math.max(MIN_WIDTH, savedSize.width) + 'px';
             overlay.style.height = Math.max(MIN_HEIGHT, savedSize.height) + 'px';
-            overlay.style.minWidth = '0';
-            overlay.style.maxWidth = 'none';
-            list.style.maxHeight = 'none';
+            overlay.classList.add('is-resized');
         }
 
         function resetSize() {
-            overlay.style.width = '';
-            overlay.style.height = '';
-            overlay.style.minWidth = '';
-            overlay.style.maxWidth = '';
-            list.style.maxHeight = '';
+            overlay.style.removeProperty('width');
+            overlay.style.removeProperty('height');
+            overlay.classList.remove('is-resized');
         }
 
         // Position: saved position > anchor-based > CSS default
@@ -813,8 +979,7 @@ export class SearchOverlay {
             const overlayRect = overlay.getBoundingClientRect();
             const sl = Math.max(margin, Math.min(savedPos.left, window.innerWidth - overlayRect.width - margin));
             const sb = Math.max(margin, Math.min(savedPos.bottom, window.innerHeight - overlayRect.height - margin));
-            overlay.style.right = 'auto';
-            overlay.style.top = 'auto';
+            overlay.classList.add('is-positioned');
             overlay.style.left = sl + 'px';
             overlay.style.bottom = sb + 'px';
         } else {
@@ -822,7 +987,7 @@ export class SearchOverlay {
         }
 
         // Double-click on empty area to reset position and size
-        overlay.addEventListener('dblclick', function (e) {
+        overlayEventOwner.registerDomEvent(overlay, 'dblclick', function (e) {
             if (closest(e.target, '.wpp-search-close')) return;
             if (closest(e.target, '.wpp-switch-item')) return;
             if (closest(e.target, '.wpp-search-input')) return;
@@ -831,11 +996,11 @@ export class SearchOverlay {
             positionToAnchor();
             self.data.searchOverlayPosition = null;
             self.data.searchOverlaySize = null;
-            self.persistData();
+            void self.persistData();
         });
 
         // Right-click on empty area → settings context menu
-        overlay.addEventListener('contextmenu', function (e) {
+        overlayEventOwner.registerDomEvent(overlay, 'contextmenu', function (e) {
             if (closest(e.target, '.wpp-switch-item')) return;
             if (closest(e.target, '.wpp-search-input')) return;
             if (closest(e.target, '.wpp-search-close')) return;
@@ -852,10 +1017,10 @@ export class SearchOverlay {
                     positionToAnchor();
                     self.data.searchOverlayPosition = null;
                     self.data.searchOverlaySize = null;
-                    self.persistData();
+                    void self.persistData();
                 },
                 onChanged: function () {
-                    searchRow.style.display = self.data.showFilterInput ? '' : 'none';
+                    searchRow.classList.toggle('is-hidden', !self.data.showFilterInput);
                     renderGroupTabs();
                     refreshOrderedSessions();
                 },
@@ -863,7 +1028,7 @@ export class SearchOverlay {
         });
 
         // Resize via corner and edge handles
-        overlay.addEventListener('mousedown', function (e) {
+        overlayEventOwner.registerDomEvent(overlay, 'mousedown', function (e) {
             const cornerEl = closest(e.target, '.wpp-resize-corner');
             const edgeEl = !cornerEl ? closest(e.target, '.wpp-resize-edge') : null;
             if (!cornerEl && !edgeEl) return;
@@ -931,18 +1096,14 @@ export class SearchOverlay {
 
                 overlay.style.width = newWidth + 'px';
                 overlay.style.height = newHeight + 'px';
-                overlay.style.minWidth = '0';
-                overlay.style.maxWidth = 'none';
+                overlay.classList.add('is-resized');
                 overlay.style.left = newLeft + 'px';
                 overlay.style.bottom = newBottom + 'px';
-                overlay.style.right = 'auto';
-                overlay.style.top = 'auto';
-                list.style.maxHeight = 'none';
+                overlay.classList.add('is-positioned');
             }
 
             function onUp() {
-                document.removeEventListener('mousemove', onMove);
-                document.removeEventListener('mouseup', onUp);
+                releaseInteractionEventOwner(resizeEventOwner);
 
                 const finalRect = overlay.getBoundingClientRect();
                 self.data.searchOverlaySize = {
@@ -953,15 +1114,16 @@ export class SearchOverlay {
                     left: finalRect.left,
                     bottom: window.innerHeight - finalRect.bottom,
                 };
-                self.persistData();
+                void self.persistData();
             }
 
-            document.addEventListener('mousemove', onMove);
-            document.addEventListener('mouseup', onUp);
+            const resizeEventOwner = createInteractionEventOwner();
+            resizeEventOwner.registerDomEvent(overlayDocument, 'mousemove', onMove);
+            resizeEventOwner.registerDomEvent(overlayDocument, 'mouseup', onUp);
         });
 
         // Drag to reposition overlay via any empty area
-        overlay.addEventListener('mousedown', function (e) {
+        overlayEventOwner.registerDomEvent(overlay, 'mousedown', function (e) {
             if (closest(e.target, '.wpp-search-close')) return;
             if (closest(e.target, '.wpp-switch-item')) return;
             if (closest(e.target, '.wpp-search-input')) return;
@@ -987,15 +1149,13 @@ export class SearchOverlay {
                 newLeft = Math.max(margin, Math.min(newLeft, window.innerWidth - oRect.width - margin));
                 newTop = Math.max(margin, Math.min(newTop, window.innerHeight - oRect.height - margin));
                 const newBottom = window.innerHeight - newTop - oRect.height;
-                overlay.style.right = 'auto';
-                overlay.style.top = 'auto';
                 overlay.style.left = newLeft + 'px';
                 overlay.style.bottom = newBottom + 'px';
+                overlay.classList.add('is-positioned');
             }
 
             function onUp() {
-                document.removeEventListener('mousemove', onMove);
-                document.removeEventListener('mouseup', onUp);
+                releaseInteractionEventOwner(dragEventOwner);
                 overlay.classList.remove('wpp-dragging');
 
                 // Save position (bottom-based for stable positioning on resize)
@@ -1004,11 +1164,12 @@ export class SearchOverlay {
                     left: finalRect.left,
                     bottom: window.innerHeight - finalRect.bottom,
                 };
-                self.persistData();
+                void self.persistData();
             }
 
-            document.addEventListener('mousemove', onMove);
-            document.addEventListener('mouseup', onUp);
+            const dragEventOwner = createInteractionEventOwner();
+            dragEventOwner.registerDomEvent(overlayDocument, 'mousemove', onMove);
+            dragEventOwner.registerDomEvent(overlayDocument, 'mouseup', onUp);
         });
 
         if (focusTarget !== 'session-create') {
@@ -1023,9 +1184,15 @@ export class SearchOverlay {
                     }
                 }
             };
-            overlay.addEventListener('focusin', guardHandler, true);
-            setTimeout(function () {
-                overlay.removeEventListener('focusin', guardHandler, true);
+            const focusGuardEventOwner = new Component();
+            focusGuardEventOwner.load();
+            this.focusGuardEventOwner = focusGuardEventOwner;
+            focusGuardEventOwner.registerDomEvent(overlay, 'focusin', guardHandler, true);
+            setTimeout(() => {
+                if (this.focusGuardEventOwner === focusGuardEventOwner) {
+                    focusGuardEventOwner.unload();
+                    this.focusGuardEventOwner = null;
+                }
             }, 300);
         }
 

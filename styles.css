@@ -415,6 +415,20 @@ body.wpp-session-list-dragging * {
     cursor: grabbing;
 }
 
+.wpp-search-overlay.is-positioned {
+    right: auto;
+    top: auto;
+}
+
+.wpp-search-overlay.is-resized {
+    min-width: 0;
+    max-width: none;
+}
+
+.wpp-search-overlay.is-resized .wpp-search-list {
+    max-height: none;
+}
+
 .wpp-search-overlay .wpp-search-input,
 .wpp-search-overlay .wpp-save-input,
 .wpp-search-overlay .wpp-save-btn,
@@ -470,6 +484,12 @@ body.wpp-session-list-dragging * {
 
 .wpp-search-row {
     width: 100%;
+}
+
+.wpp-search-row.is-hidden,
+.wpp-group-tabs.is-hidden,
+.wpp-search-list.is-hidden {
+    display: none;
 }
 
 .wpp-search-input {
@@ -634,6 +654,10 @@ body.wpp-session-list-dragging * {
     flex: 1;
     align-items: center;
     justify-content: center;
+}
+
+.wpp-search-empty.is-visible {
+    display: flex;
 }
 
 /* Group tabs */
@@ -948,4 +972,3 @@ body.wpp-session-list-dragging * {
     visibility: hidden !important;
     pointer-events: none !important;
 }
-

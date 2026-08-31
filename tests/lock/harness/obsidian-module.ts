@@ -173,6 +173,31 @@ ModalConstructorFn.prototype = ModalProto;
 
 export const Modal: ModalConstructor = ModalConstructorFn as unknown as ModalConstructor;
 
+/**
+ * Minimal lifecycle owner for production code that registers DOM listeners.
+ * It deliberately models only the observable Component contract used by the
+ * locks: listeners are detached when the owner unloads.
+ */
+export class Component {
+    private readonly cleanup: Array<() => void> = [];
+
+    load(): void {}
+
+    unload(): void {
+        while (this.cleanup.length > 0) this.cleanup.pop()?.();
+    }
+
+    registerDomEvent(
+        el: { addEventListener(type: string, handler: EventListener, options?: boolean | AddEventListenerOptions): void; removeEventListener(type: string, handler: EventListener, options?: boolean | EventListenerOptions): void },
+        type: string,
+        handler: EventListener,
+        options?: boolean | AddEventListenerOptions,
+    ): void {
+        el.addEventListener(type, handler, options);
+        this.cleanup.push(() => el.removeEventListener(type, handler, options));
+    }
+}
+
 // Written as a function rather than a class on purpose. src/main.js subclasses
 // this the ES5 way - `_super.call(this, app, manifest)` - and a real class
 // throws "Class constructor Plugin cannot be invoked without 'new'" there. That

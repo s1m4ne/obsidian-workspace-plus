@@ -40,6 +40,7 @@ interface TestPlugin {
     openSearchOverlay(anchorEl?: HTMLElement): void;
     hideSearchOverlay(): void;
     notifySessionsChanged(): void;
+    persistData(): Promise<void>;
     showSwitchPreviewOverlay(ordered: unknown[], index: number, viewGroupId?: string): void;
     showSwitchFeedbackOverlay(ordered: unknown[], index: number, viewGroupId?: string, options?: unknown): void;
     showSwitchOverlay(ordered: unknown[], activeIndex: number, viewGroupId?: string, options?: unknown): void;
@@ -103,6 +104,7 @@ function createTestPlugin(): TestPlugin {
     plugin.updateStatusBar = (): void => {};
     plugin.setGroupTabOrder = (): void => {};
     plugin.setSessionOrderFromVisible = (): void => {};
+    plugin.persistData = async (): Promise<void> => {};
 
     return plugin;
 }
@@ -644,4 +646,38 @@ test('a closed search overlay stops listening', () => {
     plugin.notifySessionsChanged();
 
     assert.equal(plugin.searchOverlayEl, null, 'a notification must not bring it back');
+});
+
+test('opening and closing the search overlay leaves no listeners behind (P7)', () => {
+    // The point of moving 23 manual addEventListener calls onto
+    // Component.registerDomEvent: closing has to detach every one of them.
+    // Counting the document's own registrations is the only way to see it -
+    // a leak here is invisible until Obsidian has been open for a day.
+    const doc = harness.dom.document;
+    let outstanding = 0;
+    const realAdd = doc.addEventListener.bind(doc);
+    const realRemove = doc.removeEventListener.bind(doc);
+    type Listen = (t: string, h: EventListener, o?: unknown) => void;
+    (doc as unknown as { addEventListener: Listen }).addEventListener = (t, h, o): void => {
+        outstanding += 1;
+        realAdd(t, h, o as boolean);
+    };
+    (doc as unknown as { removeEventListener: Listen }).removeEventListener = (t, h, o): void => {
+        outstanding -= 1;
+        realRemove(t, h, o as boolean);
+    };
+
+    try {
+        const plugin = createTestPlugin();
+        for (let cycle = 0; cycle < 3; cycle++) {
+            plugin.openSearchOverlay();
+            plugin.hideSearchOverlay();
+        }
+    } finally {
+        const raw = doc as unknown as Record<string, unknown>;
+        raw['addEventListener'] = realAdd;
+        raw['removeEventListener'] = realRemove;
+    }
+
+    assert.equal(outstanding, 0, 'every listener added over three cycles was removed');
 });
