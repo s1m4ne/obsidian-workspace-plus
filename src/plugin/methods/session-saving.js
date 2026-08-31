@@ -12,7 +12,7 @@ function attachSessionSavingMethods(WorkspacePlusPlus) {
                     get app() { return self.app; },
                     get settingsState() { return typeof self.getSettingsState === 'function' ? self.getSettingsState() : undefined; },
                     get sessionStore() { return typeof self.getSessionStore === 'function' ? self.getSessionStore() : undefined; },
-                    get groupManager() { return typeof self.getGroupManager === 'function' ? self.getGroupManager() : undefined; },
+                    get groupStore() { return typeof self.getGroupStore === 'function' ? self.getGroupStore() : undefined; },
                     get historyService() { return typeof self.getHistoryService === 'function' ? self.getHistoryService() : undefined; },
                     getActiveSession: function () {
                         if (typeof self.getActiveSession === 'function') {
@@ -118,8 +118,8 @@ function attachSessionSavingMethods(WorkspacePlusPlus) {
                         if (typeof self.getOrderedGroupTabIds === 'function') {
                             return self.getOrderedGroupTabIds();
                         }
-                        if (typeof self.getGroupManager === 'function') {
-                            return self.getGroupManager().getOrderedGroupTabIds();
+                        if (typeof self.getGroupStore === 'function') {
+                            return self.getGroupStore().getOrderedGroupTabIds();
                         }
                         return [];
                     },

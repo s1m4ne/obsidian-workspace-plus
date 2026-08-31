@@ -1,12 +1,12 @@
 'use strict';
 
-var groupManager = require('../../state/group-manager.ts');
+var groupStore = require('../../state/group-store.ts');
 
 function attachGroupMethods(WorkspacePlusPlus) {
-    WorkspacePlusPlus.prototype.getGroupManager = function () {
+    WorkspacePlusPlus.prototype.getGroupStore = function () {
         var self = this;
-        if (!this._groupManager) {
-            this._groupManager = new groupManager.GroupManager({
+        if (!this._groupStore) {
+            this._groupStore = new groupStore.GroupStore({
                 get data() { return self.data; },
                 get settingsState() { return typeof self.getSettingsState === 'function' ? self.getSettingsState() : undefined; },
                 persistData: function () { return self.persistData(); },
@@ -19,103 +19,103 @@ function attachGroupMethods(WorkspacePlusPlus) {
                 getOrderedSessionsForGroup: function (gid) { return self.getOrderedSessionsForGroup(gid); },
             });
         }
-        return this._groupManager;
+        return this._groupStore;
     };
 
     WorkspacePlusPlus.prototype.isGroupFeatureEnabled = function () {
-        return this.getGroupManager().isGroupFeatureEnabled();
+        return this.getGroupStore().isGroupFeatureEnabled();
     };
 
     WorkspacePlusPlus.prototype.normalizeGroupFeatureState = function () {
-        return this.getGroupManager().normalizeGroupFeatureState();
+        return this.getGroupStore().normalizeGroupFeatureState();
     };
 
     WorkspacePlusPlus.prototype.setGroupFeatureEnabled = function (enabled) {
-        return this.getGroupManager().setGroupFeatureEnabled(enabled);
+        return this.getGroupStore().setGroupFeatureEnabled(enabled);
     };
 
     WorkspacePlusPlus.prototype.attachSessionToActiveGroup = function (sessionId) {
-        return this.getGroupManager().attachSessionToActiveGroup(sessionId);
+        return this.getGroupStore().attachSessionToActiveGroup(sessionId);
     };
 
     WorkspacePlusPlus.prototype.getOrderedGroups = function () {
-        return this.getGroupManager().getOrderedGroups();
+        return this.getGroupStore().getOrderedGroups();
     };
 
     WorkspacePlusPlus.prototype.normalizeGroupTabOrder = function (order) {
-        return this.getGroupManager().normalizeGroupTabOrder(order);
+        return this.getGroupStore().normalizeGroupTabOrder(order);
     };
 
     WorkspacePlusPlus.prototype.getOrderedGroupTabIds = function () {
-        return this.getGroupManager().getOrderedGroupTabIds();
+        return this.getGroupStore().getOrderedGroupTabIds();
     };
 
     WorkspacePlusPlus.prototype.setGroupTabOrder = function (order, options) {
-        return this.getGroupManager().setGroupTabOrder(order, options);
+        return this.getGroupStore().setGroupTabOrder(order, options);
     };
 
     WorkspacePlusPlus.prototype.getActiveGroup = function () {
-        return this.getGroupManager().getActiveGroup();
+        return this.getGroupStore().getActiveGroup();
     };
 
     WorkspacePlusPlus.prototype.createGroup = function (name) {
-        return this.getGroupManager().createGroup(name);
+        return this.getGroupStore().createGroup(name);
     };
 
     WorkspacePlusPlus.prototype.deleteGroup = function (groupId) {
-        return this.getGroupManager().deleteGroup(groupId);
+        return this.getGroupStore().deleteGroup(groupId);
     };
 
     WorkspacePlusPlus.prototype.renameGroup = function (groupId, newName) {
-        return this.getGroupManager().renameGroup(groupId, newName);
+        return this.getGroupStore().renameGroup(groupId, newName);
     };
 
     WorkspacePlusPlus.prototype.setActiveGroup = function (groupId) {
-        return this.getGroupManager().setActiveGroup(groupId);
+        return this.getGroupStore().setActiveGroup(groupId);
     };
 
     WorkspacePlusPlus.prototype.exitGroup = function () {
-        return this.getGroupManager().exitGroup();
+        return this.getGroupStore().exitGroup();
     };
 
     WorkspacePlusPlus.prototype.getRelativeGroupId = function (baseGroupId, offset) {
-        return this.getGroupManager().getRelativeGroupId(baseGroupId, offset);
+        return this.getGroupStore().getRelativeGroupId(baseGroupId, offset);
     };
 
     WorkspacePlusPlus.prototype.resolveGroupSelection = function (groupId) {
-        return this.getGroupManager().resolveGroupSelection(groupId);
+        return this.getGroupStore().resolveGroupSelection(groupId);
     };
 
     WorkspacePlusPlus.prototype.switchGroupRelative = function (offset) {
-        return this.getGroupManager().switchGroupRelative(offset);
+        return this.getGroupStore().switchGroupRelative(offset);
     };
 
     WorkspacePlusPlus.prototype.removeGroupMembershipFromAllSessions = function (groupId, options) {
-        return this.getGroupManager().removeGroupMembershipFromAllSessions(groupId, options);
+        return this.getGroupStore().removeGroupMembershipFromAllSessions(groupId, options);
     };
 
     WorkspacePlusPlus.prototype.removeAllSessionsFromGroup = function (groupId, options) {
-        return this.getGroupManager().removeAllSessionsFromGroup(groupId, options);
+        return this.getGroupStore().removeAllSessionsFromGroup(groupId, options);
     };
 
     WorkspacePlusPlus.prototype.moveSessionToGroupExclusive = function (sessionId, groupId, options) {
-        return this.getGroupManager().moveSessionToGroupExclusive(sessionId, groupId, options);
+        return this.getGroupStore().moveSessionToGroupExclusive(sessionId, groupId, options);
     };
 
     WorkspacePlusPlus.prototype.clearAllGroups = function (options) {
-        return this.getGroupManager().clearAllGroups(options);
+        return this.getGroupStore().clearAllGroups(options);
     };
 
     WorkspacePlusPlus.prototype.addSessionToGroup = function (sessionId, groupId) {
-        return this.getGroupManager().addSessionToGroup(sessionId, groupId);
+        return this.getGroupStore().addSessionToGroup(sessionId, groupId);
     };
 
     WorkspacePlusPlus.prototype.removeSessionFromGroup = function (sessionId, groupId) {
-        return this.getGroupManager().removeSessionFromGroup(sessionId, groupId);
+        return this.getGroupStore().removeSessionFromGroup(sessionId, groupId);
     };
 
     WorkspacePlusPlus.prototype.getGroupSessionIds = function (groupId) {
-        return this.getGroupManager().getGroupSessionIds(groupId);
+        return this.getGroupStore().getGroupSessionIds(groupId);
     };
 }
 

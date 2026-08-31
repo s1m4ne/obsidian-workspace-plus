@@ -2,13 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { setupHarness } from './lock/harness/index.ts';
 import { DEFAULT_DATA, type PluginData, type SessionItem } from '../src/storage/default-data.ts';
-import type { GroupManagerHost } from '../src/state/group-manager.ts';
+import type { GroupStoreHost } from '../src/state/group-store.ts';
 
 const harness = setupHarness();
-const { GroupManager, normalizeGroupTabOrder } = await import('../src/state/group-manager.ts');
+const { GroupStore, normalizeGroupTabOrder } = await import('../src/state/group-store.ts');
 
 function createMockHost(initialData?: Partial<PluginData>): {
-    host: GroupManagerHost;
+    host: GroupStoreHost;
     events: {
         persists: number;
         statusBarUpdates: number;
@@ -27,7 +27,7 @@ function createMockHost(initialData?: Partial<PluginData>): {
         switchedSessionId: null as string | null,
     };
 
-    const host: GroupManagerHost = {
+    const host: GroupStoreHost = {
         data: Object.assign({}, DEFAULT_DATA, {
             groupFeatureEnabled: true,
             groups: {
@@ -91,7 +91,7 @@ test('normalizeGroupTabOrder: pure order resolution with __all__ preservation', 
     assert.deepEqual(normalizeGroupTabOrder([], groups), ['__all__', 'g1', 'g2']);
 });
 
-test('GroupManager: container reference reactivity on reassignment (P1)', () => {
+test('GroupStore: container reference reactivity on reassignment (P1)', () => {
     let currentData: PluginData = Object.assign({}, DEFAULT_DATA, {
         groupFeatureEnabled: true,
         groups: { g1: { id: 'g1', name: 'First' } },
@@ -99,7 +99,7 @@ test('GroupManager: container reference reactivity on reassignment (P1)', () => 
     });
 
     const { host: template } = createMockHost();
-    const manager = new GroupManager(() => Object.assign({}, template, { data: currentData }));
+    const manager = new GroupStore(() => Object.assign({}, template, { data: currentData }));
 
     assert.equal(manager.getOrderedGroups().length, 1);
     assert.equal(manager.getOrderedGroups()[0]?.name, 'First');
@@ -115,9 +115,9 @@ test('GroupManager: container reference reactivity on reassignment (P1)', () => 
     assert.equal(manager.getOrderedGroups()[0]?.name, 'Second');
 });
 
-test('GroupManager: CRUD, active group, and session membership', async () => {
+test('GroupStore: CRUD, active group, and session membership', async () => {
     const { host, events } = createMockHost();
-    const manager = new GroupManager(host);
+    const manager = new GroupStore(host);
 
     // Create group
     const newGid = await manager.createGroup('Group 3');

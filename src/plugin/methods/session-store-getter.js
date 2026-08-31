@@ -11,7 +11,7 @@ function attachSessionStoreGetter(WorkspacePlusPlus) {
                 get data() { return self.data; },
                 get app() { return self.app; },
                 get manifestId() { return self.manifest ? self.manifest.id : undefined; },
-                get groupManager() { return typeof self.getGroupManager === 'function' ? self.getGroupManager() : undefined; },
+                get groupStore() { return typeof self.getGroupStore === 'function' ? self.getGroupStore() : undefined; },
                 get settingsState() { return typeof self.getSettingsState === 'function' ? self.getSettingsState() : undefined; },
                 getCurrentWorkspaceLayout: function () {
                     if (self.getCurrentWorkspaceLayout && self.getCurrentWorkspaceLayout !== WorkspacePlusPlus.prototype.getCurrentWorkspaceLayout) {
@@ -32,8 +32,8 @@ function attachSessionStoreGetter(WorkspacePlusPlus) {
                     if (self.moveSessionToGroupExclusive && self.moveSessionToGroupExclusive !== WorkspacePlusPlus.prototype.moveSessionToGroupExclusive) {
                         return self.moveSessionToGroupExclusive(sid, gid);
                     }
-                    if (typeof self.getGroupManager === 'function') {
-                        return self.getGroupManager().moveSessionToGroupExclusive(sid, gid);
+                    if (typeof self.getGroupStore === 'function') {
+                        return self.getGroupStore().moveSessionToGroupExclusive(sid, gid);
                     }
                     return Promise.resolve(false);
                 },
@@ -41,16 +41,16 @@ function attachSessionStoreGetter(WorkspacePlusPlus) {
                     if (self.resolveGroupSelection && self.resolveGroupSelection !== WorkspacePlusPlus.prototype.resolveGroupSelection) {
                         return self.resolveGroupSelection(gid);
                     }
-                    if (typeof self.getGroupManager === 'function') {
-                        return self.getGroupManager().resolveGroupSelection(gid);
+                    if (typeof self.getGroupStore === 'function') {
+                        return self.getGroupStore().resolveGroupSelection(gid);
                     }
                     return Promise.resolve({ resolvedGroupId: gid });
                 },
                 attachSessionToActiveGroup: function (sid) {
                     if (self.attachSessionToActiveGroup && self.attachSessionToActiveGroup !== WorkspacePlusPlus.prototype.attachSessionToActiveGroup) {
                         self.attachSessionToActiveGroup(sid);
-                    } else if (typeof self.getGroupManager === 'function') {
-                        self.getGroupManager().attachSessionToActiveGroup(sid);
+                    } else if (typeof self.getGroupStore === 'function') {
+                        self.getGroupStore().attachSessionToActiveGroup(sid);
                     }
                 },
                 persistData: function () {

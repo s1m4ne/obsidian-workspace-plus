@@ -20,7 +20,7 @@ const GETTER_TO_CLASS = {
     getSessionStore: 'SessionStore',
     getSessionSwitcher: 'SessionSwitcher',
     getSessionSaver: 'SessionSaver',
-    getGroupManager: 'GroupManager',
+    getGroupStore: 'GroupStore',
     getHistoryService: 'HistoryService',
     getSettingsState: 'SettingsState',
     getCommandRegistry: 'CommandRegistry',

@@ -4,7 +4,7 @@ import { generateId } from '../utils.ts';
 import type { PluginData, SessionItem } from '../storage/default-data.ts';
 import type { SettingsState } from './settings-state.ts';
 import type { SessionStore } from './session-store.ts';
-import type { GroupManager } from './group-manager.ts';
+import type { GroupStore } from './group-store.ts';
 import type { HistoryService } from './history-service.ts';
 
 export interface SaveLayoutResult {
@@ -27,7 +27,7 @@ export interface SessionSaverHost {
     app?: App;
     settingsState?: SettingsState;
     sessionStore?: SessionStore;
-    groupManager?: GroupManager;
+    groupStore?: GroupStore;
     historyService?: HistoryService;
     getActiveSession: () => SessionItem | null;
     getCurrentWorkspaceLayout: () => unknown;

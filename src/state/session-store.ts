@@ -3,14 +3,14 @@ import { L } from '../i18n.ts';
 import { generateId } from '../utils.ts';
 import { serializeLayout, layoutsEqual, layoutsEqualStructural, cloneLayout } from '../layout-utils.ts';
 import type { PluginData, SessionItem } from '../storage/default-data.ts';
-import type { GroupManager } from './group-manager.ts';
+import type { GroupStore } from './group-store.ts';
 import type { SettingsState } from './settings-state.ts';
 
 export interface SessionStoreHost {
     data: PluginData;
     app?: App;
     manifestId?: string;
-    groupManager?: GroupManager;
+    groupStore?: GroupStore;
     settingsState?: SettingsState;
     getCurrentWorkspaceLayout: () => unknown;
     createSessionValidated?: (name: string, options?: SessionPersistOption) => Promise<SessionValidationResult>;
@@ -171,8 +171,8 @@ export class SessionStore {
 
     getOrderedSessionsForGroup(groupId: string | null): SessionItem[] {
         const all = this.getOrderedSessionsUnfiltered();
-        const groupsEnabled = this.host.groupManager
-            ? this.host.groupManager.isGroupFeatureEnabled()
+        const groupsEnabled = this.host.groupStore
+            ? this.host.groupStore.isGroupFeatureEnabled()
             : (this.data.groupFeatureEnabled !== false);
         if (!groupsEnabled) {
             return all;
@@ -187,8 +187,8 @@ export class SessionStore {
     }
 
     getOrderedSessions(): SessionItem[] {
-        const groupsEnabled = this.host.groupManager
-            ? this.host.groupManager.isGroupFeatureEnabled()
+        const groupsEnabled = this.host.groupStore
+            ? this.host.groupStore.isGroupFeatureEnabled()
             : (this.data.groupFeatureEnabled !== false);
         if (!groupsEnabled) {
             return this.getOrderedSessionsUnfiltered();
@@ -373,8 +373,8 @@ export class SessionStore {
     }
 
     async createSessionForViewedGroup(name: string, viewedGroupId: string | null, options?: SessionPersistOption): Promise<SessionValidationResult> {
-        const groupsEnabled = this.host.groupManager
-            ? this.host.groupManager.isGroupFeatureEnabled()
+        const groupsEnabled = this.host.groupStore
+            ? this.host.groupStore.isGroupFeatureEnabled()
             : (this.data.groupFeatureEnabled !== false);
         const targetGroupId = groupsEnabled ? (viewedGroupId || null) : null;
         const beforeActiveGroupId = groupsEnabled ? (this.data.activeGroupId || null) : null;

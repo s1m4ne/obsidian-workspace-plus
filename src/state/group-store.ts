@@ -4,7 +4,7 @@ import { generateId } from '../utils.ts';
 import type { PluginData, SessionGroup, SessionItem } from '../storage/default-data.ts';
 import type { SettingsState } from './settings-state.ts';
 
-export interface GroupManagerHost {
+export interface GroupStoreHost {
     data: PluginData;
     settingsState?: SettingsState;
     persistData: () => Promise<boolean>;
@@ -66,10 +66,10 @@ export function normalizeGroupTabOrder(order: unknown, groups: Record<string, Se
     return out;
 }
 
-export class GroupManager {
-    private readonly hostProvider: () => GroupManagerHost;
+export class GroupStore {
+    private readonly hostProvider: () => GroupStoreHost;
 
-    constructor(hostOrProvider: GroupManagerHost | (() => GroupManagerHost)) {
+    constructor(hostOrProvider: GroupStoreHost | (() => GroupStoreHost)) {
         if (typeof hostOrProvider === 'function') {
             this.hostProvider = hostOrProvider;
         } else {
@@ -77,7 +77,7 @@ export class GroupManager {
         }
     }
 
-    private get host(): GroupManagerHost {
+    private get host(): GroupStoreHost {
         return this.hostProvider();
     }
 

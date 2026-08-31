@@ -36,8 +36,8 @@ module.exports = function attachFrontmatterMethods(WorkspacePlusPlus) {
                         if (typeof self.setActiveGroup === 'function') {
                             return self.setActiveGroup(groupId);
                         }
-                        if (typeof self.getGroupManager === 'function') {
-                            return self.getGroupManager().setActiveGroup(groupId);
+                        if (typeof self.getGroupStore === 'function') {
+                            return self.getGroupStore().setActiveGroup(groupId);
                         }
                         return Promise.resolve(false);
                     },
@@ -45,8 +45,8 @@ module.exports = function attachFrontmatterMethods(WorkspacePlusPlus) {
                         if (typeof self.isGroupFeatureEnabled === 'function') {
                             return self.isGroupFeatureEnabled();
                         }
-                        if (typeof self.getGroupManager === 'function') {
-                            return self.getGroupManager().isGroupFeatureEnabled();
+                        if (typeof self.getGroupStore === 'function') {
+                            return self.getGroupStore().isGroupFeatureEnabled();
                         }
                         return true;
                     },

@@ -1,4 +1,4 @@
-// GroupManager reaches real group/session resolution without mock overrides.
+// GroupStore reaches real group/session resolution without mock overrides.
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -12,7 +12,7 @@ interface TestPlugin {
     _switchedSessionId: string | null;
     persistData(): Promise<boolean>;
     switchSession(sessionId: string): Promise<boolean>;
-    getGroupManager(): {
+    getGroupStore(): {
         resolveGroupSelection(groupId: string | null): Promise<{
             switched: boolean;
             resolvedGroupId: string | null;
@@ -73,10 +73,10 @@ async function createPlugin(): Promise<TestPlugin> {
     return plugin;
 }
 
-test('GroupManager resolves group selection and filters sessions through production wiring', async () => {
+test('GroupStore resolves group selection and filters sessions through production wiring', async () => {
     const plugin = await createPlugin();
 
-    const result = await plugin.getGroupManager().resolveGroupSelection('g2');
+    const result = await plugin.getGroupStore().resolveGroupSelection('g2');
     assert.equal(result.switched, true);
     assert.equal(result.resolvedGroupId, 'g2');
     assert.deepEqual(result.sessions.map((s) => s.id), ['s2']);

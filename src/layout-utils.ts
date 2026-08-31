@@ -1,3 +1,5 @@
+import { cloneJson } from './clone-json.ts';
+
 export interface LayoutComparisonOptions {
     restoreScope?: string;
 }
@@ -14,10 +16,9 @@ export function layoutsEqual(a: unknown, b: unknown): boolean {
     return serializeLayout(a) === serializeLayout(b);
 }
 
-export function cloneLayout<T = unknown>(layout: T): T {
-    if (layout === undefined) return undefined as unknown as T;
-    return JSON.parse(JSON.stringify(layout)) as T;
-}
+// The layout is JSON on disk; cloning it is the general operation under a
+// name that says what it is used for here.
+export const cloneLayout = cloneJson;
 
 export function nodeContainsId(node: unknown, id: string): boolean {
     if (!id || !node) return false;

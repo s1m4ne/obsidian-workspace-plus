@@ -1,10 +1,9 @@
 import { SESSION_FILE_MTIME_EPSILON_MS } from './sync-watcher.ts';
 import type { SessionItem } from './default-data.ts';
+import { cloneJson } from '../clone-json.ts';
 
-export function cloneJson<T>(value: T): T {
-    if (value === undefined) return undefined as unknown as T;
-    return JSON.parse(JSON.stringify(value)) as T;
-}
+// Re-exported so the .js callers that still require this module keep working.
+export { cloneJson };
 
 export function getSessionModified(session: unknown): number {
     if (!session || typeof session !== 'object') return 0;
