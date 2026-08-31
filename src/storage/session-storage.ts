@@ -220,6 +220,8 @@ export class SessionStorage {
             if (Object.keys(split.history).length === 0) return sessionData;
 
             await this.store.ensureDir(this.getSessionStorageDirPath());
+            // History is recoverable data; failing to write it must not fail the
+            // session write it accompanies.
             await this.writeSessionHistory(split.history).catch(() => {});
             return sessionData;
         } catch {

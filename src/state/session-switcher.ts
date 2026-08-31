@@ -762,7 +762,7 @@ export class SessionSwitcher {
         const current = this.getActiveSession();
         const autoSaveOnSwitch = this.isAutoSaveOnSwitchEnabled();
 
-        const performSwitch = (skipCurrentSave: boolean): Promise<boolean> => {
+        const performSwitch = async (skipCurrentSave: boolean): Promise<boolean> => {
             if (current && !skipCurrentSave) {
                 this.pushLayoutToHistory(current);
                 current.layout = this.host.getCurrentWorkspaceLayout();
@@ -779,20 +779,19 @@ export class SessionSwitcher {
                 ? this.applyWorkspaceLayout(target.layout)
                 : Promise.resolve(true);
 
-            return applyLayout.then(async () => {
-                this.host.updateStatusBar?.();
-                await this.host.persistData();
+            await applyLayout;
+            this.host.updateStatusBar?.();
+            await this.host.persistData();
 
-                if (opts.switchNoticeMode === 'replace') {
-                    const noticeOpts = opts.switchNoticeDurationMs !== undefined
-                        ? { durationMs: opts.switchNoticeDurationMs }
-                        : undefined;
-                    this.showSessionSwitchNotice(target.name, noticeOpts);
-                } else if (!opts.silent) {
-                    new Notice(formatString(L.loaded, target.name));
-                }
-                return true;
-            });
+            if (opts.switchNoticeMode === 'replace') {
+                const noticeOpts = opts.switchNoticeDurationMs !== undefined
+                    ? { durationMs: opts.switchNoticeDurationMs }
+                    : undefined;
+                this.showSessionSwitchNotice(target.name, noticeOpts);
+            } else if (!opts.silent) {
+                new Notice(formatString(L.loaded, target.name));
+            }
+            return true;
         };
 
         const shouldWarn = !autoSaveOnSwitch

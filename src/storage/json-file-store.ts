@@ -66,6 +66,9 @@ export class JsonFileStore {
             const adapter = this.resolveAdapter();
             const exists = await adapter.exists(path);
             if (!exists && typeof adapter.mkdir === 'function') {
+                // A concurrent writer may have created it already, and Obsidian
+                // rejects mkdir on an existing folder. The write that follows
+                // reports a directory that genuinely could not be made.
                 await adapter.mkdir(path).catch(() => {});
             }
         } catch {
@@ -89,6 +92,7 @@ export class JsonFileStore {
             const adapter = this.resolveAdapter();
             const exists = await adapter.exists(path);
             if (!exists) return;
+            // Removing what is already gone is the outcome the caller wanted.
             await adapter.remove(path).catch(() => {});
         } catch {
             // Ignore
@@ -100,6 +104,8 @@ export class JsonFileStore {
             const adapter = this.resolveAdapter();
             const exists = await adapter.exists(fromPath);
             if (!exists) return;
+            // Rotation is best-effort: losing one backup slot must not stop the
+            // write it is making room for.
             await adapter.rename(fromPath, toPath).catch(() => {});
         } catch {
             // Ignore

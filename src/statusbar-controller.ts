@@ -219,6 +219,8 @@ export class StatusBarController {
             hostObj.statusBarScrollSwitchAt = this._scrollSwitchAt;
         }
 
+        // A scroll gesture that cannot switch is not worth a message; the next
+        // notch tries again.
         void this.host.switchRelativeFromScroll(direction).catch(() => {});
         return true;
     }
