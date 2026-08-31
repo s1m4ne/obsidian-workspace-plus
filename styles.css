@@ -943,3 +943,9 @@ body.wpp-session-list-dragging * {
     text-align: center;
     padding: 24px 0;
 }
+
+.wpp-measure-overlay {
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+

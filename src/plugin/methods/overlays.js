@@ -5,9 +5,9 @@ var i18n = require('../../i18n.ts');
 var ConfirmModal = require('../../modals/confirm-modal.ts').ConfirmModal;
 var groupTabUi = require('../../group-tab-ui.ts');
 var navigationUtils = require('../../navigation-utils.ts');
-var utils = require('../../utils.ts');
 var sessionPresenter = require('../../ui/shared/session-presenter.ts');
 var sessionDrag = require('../../ui/shared/session-drag.ts');
+var SwitchOverlay = require('../../ui/overlays/switch-overlay.ts').SwitchOverlay;
 var searchOverlayKeys = require('../../search-overlay-key-handler');
 var sessionContextActions = require('../../session-context-actions');
 var settingsContextMenu = require('../../settings-context-menu');
@@ -942,327 +942,97 @@ function attachOverlayMethods(WorkspacePlusPlus) {
         }, 20);
     };
 
+    WorkspacePlusPlus.prototype.getSwitchOverlay = function () {
+        if (!this._switchOverlay) {
+            this._switchOverlay = new SwitchOverlay(this);
+        }
+        return this._switchOverlay;
+    };
+
+    Object.defineProperty(WorkspacePlusPlus.prototype, 'switchOverlayEl', {
+        get: function () {
+            return this.getSwitchOverlay().overlayEl;
+        },
+        set: function (val) {
+            this.getSwitchOverlay().overlayEl = val;
+        },
+        configurable: true,
+        enumerable: true,
+    });
+
+    Object.defineProperty(WorkspacePlusPlus.prototype, 'switchOverlayViewGroupId', {
+        get: function () {
+            return this.getSwitchOverlay().viewGroupId;
+        },
+        set: function (val) {
+            this.getSwitchOverlay().viewGroupId = val;
+        },
+        configurable: true,
+        enumerable: true,
+    });
+
+    Object.defineProperty(WorkspacePlusPlus.prototype, 'switchOverlayTimer', {
+        get: function () {
+            return this.getSwitchOverlay().timer;
+        },
+        set: function (val) {
+            this.getSwitchOverlay().timer = val;
+        },
+        configurable: true,
+        enumerable: true,
+    });
+
+    Object.defineProperty(WorkspacePlusPlus.prototype, 'overlayKeyUpHandler', {
+        get: function () {
+            return this.getSwitchOverlay().keyUpHandler;
+        },
+        set: function (val) {
+            this.getSwitchOverlay().keyUpHandler = val;
+        },
+        configurable: true,
+        enumerable: true,
+    });
+
+    Object.defineProperty(WorkspacePlusPlus.prototype, 'overlayKeyDownHandler', {
+        get: function () {
+            return this.getSwitchOverlay().keyDownHandler;
+        },
+        set: function (val) {
+            this.getSwitchOverlay().keyDownHandler = val;
+        },
+        configurable: true,
+        enumerable: true,
+    });
+
+    Object.defineProperty(WorkspacePlusPlus.prototype, 'overlayBlurHandler', {
+        get: function () {
+            return this.getSwitchOverlay().blurHandler;
+        },
+        set: function (val) {
+            this.getSwitchOverlay().blurHandler = val;
+        },
+        configurable: true,
+        enumerable: true,
+    });
+
     WorkspacePlusPlus.prototype.showSwitchPreviewOverlay = function (ordered, activeIndex, viewGroupId) {
-        return this.showSwitchOverlay(ordered, activeIndex, viewGroupId, { mode: 'preview' });
+        return this.getSwitchOverlay().showPreview(ordered, activeIndex, viewGroupId);
     };
 
     WorkspacePlusPlus.prototype.showSwitchFeedbackOverlay = function (ordered, activeIndex, viewGroupId, options) {
-        options = Object.assign({}, options, { mode: 'feedback' });
-        return this.showSwitchOverlay(ordered, activeIndex, viewGroupId, options);
+        return this.getSwitchOverlay().showFeedback(ordered, activeIndex, viewGroupId, options);
     };
 
     WorkspacePlusPlus.prototype.showSwitchOverlay = function (ordered, activeIndex, viewGroupId, options) {
-        options = options || {};
-        var L = i18n.L;
-        if (this.clearSessionSwitchNotice) {
-            this.clearSessionSwitchNotice();
-        }
-        this.hideSearchOverlay();
-        // Clean up existing overlay and listeners
-        this.cleanupOverlayListeners();
-        if (this.switchOverlayEl) {
-            this.switchOverlayEl.remove();
-        }
-        if (this.switchOverlayTimer) {
-            clearTimeout(this.switchOverlayTimer);
-        }
-        var overlayGroupId = this.isGroupFeatureEnabled()
-            ? (typeof viewGroupId === 'undefined'
-                ? (this.data.activeGroupId || null)
-                : (viewGroupId || null))
-            : null;
-        if (overlayGroupId && !(this.data.groups || {})[overlayGroupId]) {
-            overlayGroupId = this.data.activeGroupId || null;
-        }
-        var overlayMode = options.mode || 'preview';
-        var feedbackDurationMs = Math.max(0, Number(options.durationMs) || 400);
-        this.switchOverlayViewGroupId = overlayGroupId;
-        var self = this;
-
-        function reopenOverlayForGroup(result) {
-            var newOrdered = result.sessions;
-            var newActiveIndex = self.getActiveSessionIndex(newOrdered);
-            self.showSwitchOverlay(newOrdered, newActiveIndex, result.resolvedGroupId, options);
-        }
-
-        function onGroupTabClick(targetGroupId, e) {
-            if (e) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
-            self.resolveGroupSelection(targetGroupId || null).then(reopenOverlayForGroup);
-        }
-
-        function onSessionItemClick(sessionId, e) {
-            if (e) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
-            if (!sessionId) return;
-            if (sessionId === self.data.activeSessionId) {
-                self.hideSwitchOverlay();
-                return;
-            }
-            self.switchSession(sessionId, { silent: true }).then(function (switched) {
-                if (switched) self.hideSwitchOverlay();
-            });
-        }
-
-        var overlay = document.createElement('div');
-        overlay.className = 'wpp-switch-overlay';
-
-        // Count
-        var countSpan = document.createElement('div');
-        countSpan.className = 'wpp-switch-count';
-        countSpan.textContent = ordered.length > 0
-            ? (activeIndex + 1) + ' / ' + ordered.length
-            : '0 / 0';
-        overlay.appendChild(countSpan);
-
-        // Group tabs (only when groups exist)
-        var realGroups = this.getOrderedGroups();
-        if (realGroups.length > 0) {
-            var groupTabsRow = document.createElement('div');
-            groupTabsRow.className = 'wpp-group-tabs';
-
-            var allGroups = this.data.groups || {};
-            var groupOrder = this.getOrderedGroupTabIds();
-            for (var gi = 0; gi < groupOrder.length; gi++) {
-                var gid = groupOrder[gi];
-                if (gid === '__all__') {
-                    var allTab = document.createElement('div');
-                    allTab.className = 'wpp-group-tab';
-                    if (!overlayGroupId) allTab.classList.add('is-active');
-                    allTab.textContent = L.groupAll;
-                    allTab.addEventListener('click', function (e) {
-                        onGroupTabClick(null, e);
-                    });
-                    groupTabsRow.appendChild(allTab);
-                } else if (allGroups[gid]) {
-                    var tab = document.createElement('div');
-                    tab.className = 'wpp-group-tab';
-                    if (overlayGroupId === gid) tab.classList.add('is-active');
-                    tab.textContent = allGroups[gid].name;
-                    (function (targetGroupId) {
-                        tab.addEventListener('click', function (e) {
-                            onGroupTabClick(targetGroupId, e);
-                        });
-                    })(gid);
-                    groupTabsRow.appendChild(tab);
-                }
-            }
-
-            overlay.appendChild(groupTabsRow);
-        }
-
-        // Session list
-        var list = document.createElement('div');
-        list.className = 'wpp-switch-list';
-
-        for (var i = 0; i < ordered.length; i++) {
-            var presentation = sessionPresenter.deriveSessionPresentation(ordered[i], {
-                activeSessionId: self.data.activeSessionId,
-                index: i,
-                commandHotkey: i <= 8 ? this.getCommandHotkey('switch-to-' + (i + 1)) : '',
-            });
-            var item = document.createElement('div');
-            item.className = 'wpp-switch-item';
-            if (i === activeIndex) {
-                item.classList.add('is-active');
-            }
-            item.dataset.sessionId = presentation.id;
-
-            var name = document.createElement('div');
-            name.className = 'wpp-switch-name';
-            name.textContent = presentation.name;
-            item.appendChild(name);
-
-            var hotkeyEl = document.createElement('div');
-            hotkeyEl.className = 'wpp-switch-hotkey';
-            hotkeyEl.textContent = presentation.hotkeyText;
-            item.appendChild(hotkeyEl);
-
-            (function (targetSessionId) {
-                item.addEventListener('click', function (e) {
-                    onSessionItemClick(targetSessionId, e);
-                });
-            })(ordered[i].id);
-
-            list.appendChild(item);
-        }
-
-        overlay.appendChild(list);
-
-        // Footer
-        var footerRow = document.createElement('div');
-        footerRow.className = 'wpp-switch-footer';
-
-        // Group hint (only when groups exist)
-        if (realGroups.length > 0) {
-            var groupLine = document.createElement('div');
-            groupLine.textContent = (L.keyTab || 'Tab') + '  ' + L.switchGroup;
-            footerRow.appendChild(groupLine);
-        }
-
-        var nextKey = this.getCommandHotkey('next-session');
-        if (nextKey) {
-            var line1 = document.createElement('div');
-            line1.textContent = L.cmdNext + '  ' + nextKey;
-            footerRow.appendChild(line1);
-        }
-
-        var prevKey2 = this.getCommandHotkey('previous-session');
-        var nextKey2 = this.getCommandHotkey('next-session', 1);
-        if (prevKey2 || nextKey2) {
-            var line2 = document.createElement('div');
-            var parts = [];
-            if (prevKey2) parts.push(L.switchLeft + ' ' + prevKey2);
-            if (nextKey2) parts.push(L.switchRight + ' ' + nextKey2);
-            line2.textContent = parts.join('  /  ');
-            footerRow.appendChild(line2);
-        }
-
-        overlay.appendChild(footerRow);
-
-        // Measure max size using ALL sessions (unfiltered) before showing
-        var allSessions = this.getOrderedSessionsUnfiltered();
-        if (allSessions.length > ordered.length) {
-            var measure = overlay.cloneNode(false);
-            measure.style.visibility = 'hidden';
-            measure.style.pointerEvents = 'none';
-            // Clone count + group tabs
-            for (var ci = 0; ci < overlay.childNodes.length; ci++) {
-                if (overlay.childNodes[ci] === list) break;
-                measure.appendChild(overlay.childNodes[ci].cloneNode(true));
-            }
-            // Build full session list for measurement
-            var measureList = document.createElement('div');
-            measureList.className = 'wpp-switch-list';
-            for (var mi = 0; mi < allSessions.length; mi++) {
-                var mPresentation = sessionPresenter.deriveSessionPresentation(allSessions[mi], {
-                    index: mi,
-                });
-                var mItem = document.createElement('div');
-                mItem.className = 'wpp-switch-item';
-                var mName = document.createElement('div');
-                mName.className = 'wpp-switch-name';
-                mName.textContent = mPresentation.name;
-                mItem.appendChild(mName);
-                var mHk = document.createElement('div');
-                mHk.className = 'wpp-switch-hotkey';
-                mHk.textContent = mPresentation.hotkeyText;
-                mItem.appendChild(mHk);
-                measureList.appendChild(mItem);
-            }
-            measure.appendChild(measureList);
-            // Clone footer
-            measure.appendChild(footerRow.cloneNode(true));
-            document.body.appendChild(measure);
-            overlay.style.minWidth = measure.offsetWidth + 'px';
-            overlay.style.minHeight = measure.offsetHeight + 'px';
-            measure.remove();
-        }
-
-        document.body.appendChild(overlay);
-        this.switchOverlayEl = overlay;
-
-        if (overlayMode === 'feedback') {
-            this.overlayBlurHandler = function () {
-                self.hideSwitchOverlay();
-            };
-            window.addEventListener('blur', this.overlayBlurHandler);
-            this.switchOverlayTimer = setTimeout(function () {
-                if (!self.switchOverlayEl) return;
-                self.hideSwitchOverlay();
-            }, feedbackDurationMs);
-            return;
-        }
-
-        // Dismiss when modifier keys are released
-        var showTime = Date.now();
-
-        this.overlayKeyUpHandler = function (e) {
-            if (!utils.isModShiftPressed(e)) {
-                // Ensure minimum 300ms visibility
-                var elapsed = Date.now() - showTime;
-                var minDelay = Math.max(0, 300 - elapsed);
-                self.cleanupOverlayListeners();
-                if (minDelay > 0) {
-                    self.switchOverlayTimer = setTimeout(function () {
-                        self.hideSwitchOverlay();
-                    }, minDelay);
-                } else {
-                    self.hideSwitchOverlay();
-                }
-            }
-        };
-
-        this.overlayBlurHandler = function () {
-            self.hideSwitchOverlay();
-        };
-
-        document.addEventListener('keyup', this.overlayKeyUpHandler);
-        window.addEventListener('blur', this.overlayBlurHandler);
-
-        // Safety fallback – only dismiss if modifier keys are no longer held
-        function safetyCheck() {
-            self.switchOverlayTimer = setTimeout(function () {
-                if (!self.switchOverlayEl) return;
-                self.hideSwitchOverlay();
-            }, 5000);
-        }
-        this.overlayKeyDownHandler = function (e) {
-            // Any keydown means user is still active – reset the safety timer
-            if (self.switchOverlayTimer) {
-                clearTimeout(self.switchOverlayTimer);
-            }
-            safetyCheck();
-
-            // Tab cycles groups (only when groups exist)
-            if (e.key === 'Tab' && self.switchOverlayEl && !utils.isModPressed(e)) {
-                if (!self.isGroupFeatureEnabled() || self.getOrderedGroups().length === 0) return;
-                e.preventDefault();
-                e.stopImmediatePropagation();
-                var nextGroupId = self.getRelativeGroupId(overlayGroupId, e.shiftKey ? -1 : 1);
-                if (typeof nextGroupId === 'undefined') return;
-
-                self.resolveGroupSelection(nextGroupId).then(function (result) {
-                    var newOrdered = result.sessions;
-                    var newActiveIndex = self.getActiveSessionIndex(newOrdered);
-                    self.showSwitchOverlay(newOrdered, newActiveIndex, result.resolvedGroupId);
-                });
-            }
-        };
-        document.addEventListener('keydown', this.overlayKeyDownHandler);
-        safetyCheck();
+        return this.getSwitchOverlay().show(ordered, activeIndex, viewGroupId, options);
     };
 
     WorkspacePlusPlus.prototype.cleanupOverlayListeners = function () {
-        if (this.overlayKeyUpHandler) {
-            document.removeEventListener('keyup', this.overlayKeyUpHandler);
-            this.overlayKeyUpHandler = null;
-        }
-        if (this.overlayKeyDownHandler) {
-            document.removeEventListener('keydown', this.overlayKeyDownHandler);
-            this.overlayKeyDownHandler = null;
-        }
-        if (this.overlayBlurHandler) {
-            window.removeEventListener('blur', this.overlayBlurHandler);
-            this.overlayBlurHandler = null;
-        }
-        if (this.switchOverlayTimer) {
-            clearTimeout(this.switchOverlayTimer);
-            this.switchOverlayTimer = null;
-        }
+        return this.getSwitchOverlay().cleanupListeners();
     };
 
     WorkspacePlusPlus.prototype.hideSwitchOverlay = function () {
-        if (this.switchOverlayEl) {
-            this.switchOverlayEl.remove();
-            this.switchOverlayEl = null;
-        }
-        this.switchOverlayViewGroupId = null;
-        this.cleanupOverlayListeners();
+        return this.getSwitchOverlay().hide();
     };
 
     WorkspacePlusPlus.prototype.hideSearchOverlay = function () {
