@@ -24,7 +24,7 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
-const ENTRY = 'src/main.js';
+const ENTRY = 'src/main.ts';
 
 // Reachable from the tests but deliberately not from the plugin entry.
 const ALLOWED = new Map([

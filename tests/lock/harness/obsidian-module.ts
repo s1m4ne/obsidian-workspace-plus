@@ -238,7 +238,7 @@ const PluginProto: Record<string, unknown> = {
     },
     addRibbonIcon(): HTMLElement { return ownerDocument().createElement('div'); },
     addStatusBarItem(): HTMLElement { return ownerDocument().createElement('div'); },
-    addSettingTab(): void {},
+    addSettingTab(): void { registry.log.record('Plugin', 'addSettingTab'); },
     registerEvent(): void {},
     registerDomEvent(
         el: { addEventListener(t: string, h: EventListener): void },

@@ -6,7 +6,7 @@ const prod = process.argv[2] === "production";
 const builtins = builtinModules.flatMap((name) => [name, `node:${name}`]);
 
 const context = await esbuild.context({
-    entryPoints: ["src/main.js"],
+    entryPoints: ["src/main.ts"],
     bundle: true,
     external: [
         "obsidian",
