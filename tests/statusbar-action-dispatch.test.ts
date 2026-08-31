@@ -34,6 +34,8 @@ test('an unknown action falls back to the label for none', () => {
 // host has to answer everything they ask. A thinner mock would only prove
 // that a stand-in was called.
 const menuPluginStubs = {
+    manifest: { id: 'workspace-plus-plus', name: 'Workspace++' },
+    _lastRotationBackupAt: 0,
     confirmOverwriteSessionWithCurrentLayout: () => false,
     duplicateSession: async () => false,
     renameSessionById: async () => false,
@@ -49,13 +51,20 @@ const menuPluginStubs = {
     extractFilePathsFromLayout: () => [],
     countPanesInLayout: () => 0,
     restoreFromHistoryEntry: async () => false,
-    setAutoSaveOnSwitch: () => false,
-    setConfirmDeleteByHotkey: () => false,
-    setConfirmQuickActions: () => false,
-    setGroupFeatureEnabled: () => false,
-    setShowFilterInput: () => false,
-    setVersionHistoryEnabled: () => false,
-    setWarnOnUnsavedSwitch: () => false,
+    setAutoSaveOnSwitch: async () => false,
+    setConfirmDeleteByHotkey: async () => false,
+    setConfirmQuickActions: async () => false,
+    setGroupFeatureEnabled: async () => false,
+    setShowFilterInput: async () => false,
+    setVersionHistoryEnabled: async () => false,
+    setWarnOnUnsavedSwitch: async () => false,
+    extractSessionData: () => ({}),
+    prepareRotationBackupData: () => ({}),
+    ensureDir: async () => {},
+    getBackupsDirPath: () => 'backups',
+    copyFileIfExists: async () => {},
+    getRotationBackupPath: (generation: number) => `backups/sessions.${generation}.json`,
+    writeJson: async () => {},
 };
 
 test('each configurable action performs its own effect and no other', async () => {

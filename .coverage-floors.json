@@ -14,13 +14,13 @@
         "storage-backup.js": 80,
         "sessions-validation.js": 80,
         "session-context-actions.js": 80,
-        "session-context-menu.js": 80,
-        "settings-context-menu.js": 80,
         "session-list-actions.js": 80,
         "group-tab-ui.js": 80,
         "settings.js": 80,
         "overlays.js": 60,
         "persistence-service.ts": 80,
-        "session-manager-modal-class.ts": 60
+        "session-manager-modal-class.ts": 60,
+        "session-context-menu-items.ts": 80,
+        "settings-context-menu-items.ts": 80
     }
 }

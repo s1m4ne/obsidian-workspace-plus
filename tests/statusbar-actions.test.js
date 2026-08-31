@@ -42,9 +42,6 @@ function loadStatusBarActions() {
     const sessionContextActionsStub = {
         openSessionContextMenu: function () {},
     };
-    const settingsContextMenuStub = {
-        openSettingsContextMenu: function () {},
-    };
 
     const originalLoad = Module._load;
     Module._load = function (request, parent, isMain) {
@@ -52,7 +49,6 @@ function loadStatusBarActions() {
         if (request === './i18n' || request === './i18n.ts') return i18nStub;
         if (request === './modals') return modalsStub;
         if (request === './session-context-actions' || request === './session-context-actions.ts') return sessionContextActionsStub;
-        if (request === './settings-context-menu') return settingsContextMenuStub;
         return originalLoad(request, parent, isMain);
     };
 

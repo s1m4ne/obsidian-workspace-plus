@@ -9,11 +9,12 @@ import { deriveSessionPresentation } from '../ui/shared/session-presenter.ts';
 import * as sessionDrag from '../ui/shared/session-drag.ts';
 import * as sessionContextActions from '../session-context-actions.ts';
 import * as settingsContextMenu from '../settings-context-menu.js';
+import type { SettingsContextMenuPluginHost } from '../settings-context-menu-items.ts';
 import * as sessionListActions from '../session-list-actions.ts';
 import type { SessionGroup, SessionItem } from '../storage/default-data.ts';
 import type { HistoryModalPluginHost } from './history-modal.ts';
 
-export interface SessionManagerModalHost extends GroupTabPluginHost, HistoryModalPluginHost {
+export interface SessionManagerModalHost extends GroupTabPluginHost, HistoryModalPluginHost, SettingsContextMenuPluginHost {
     app: App;
     data: {
         activeSessionId: string | null;

@@ -2,6 +2,7 @@ import { Notice, type App } from 'obsidian';
 import { L } from './i18n.ts';
 import { HistoryModal, type HistoryModalPluginHost } from './modals/history-modal.ts';
 import * as sessionContextMenu from './session-context-menu.js';
+import type { SessionContextMenuPluginHost } from './session-context-menu-items.ts';
 import {
     deleteSessionWithPrompt,
     renameSessionWithPrompt,
@@ -27,7 +28,7 @@ type ContextActionName =
     | 'onVersionHistory';
 type ContextActionOverrides = Partial<Record<ContextActionName, Action | MoveToGroupAction>>;
 
-export interface SessionContextActionsHost extends SessionListActionsHost, HistoryModalPluginHost {
+export interface SessionContextActionsHost extends SessionListActionsHost, HistoryModalPluginHost, SessionContextMenuPluginHost {
     data: SessionListActionsHost['data'] & {
         activeSessionId: string | null;
         groups: Record<string, SessionGroup>;

@@ -3,11 +3,12 @@ import { L } from './i18n.ts';
 import type { PluginData, SessionItem } from './storage/default-data.ts';
 import { openSessionContextMenu } from './session-context-actions.ts';
 import { openSettingsContextMenu } from './settings-context-menu.js';
+import type { SettingsContextMenuPluginHost } from './settings-context-menu-items.ts';
 import type { HistoryModalPluginHost } from './modals/history-modal.ts';
 import type { SessionGroup } from './storage/default-data.ts';
 
 
-export interface StatusBarActionPluginHost extends HistoryModalPluginHost {
+export interface StatusBarActionPluginHost extends HistoryModalPluginHost, SettingsContextMenuPluginHost {
     // Required: see command-registry.ts.
     openSessionManagerModal(): void;
     openHistoryModal(session: SessionItem): void;

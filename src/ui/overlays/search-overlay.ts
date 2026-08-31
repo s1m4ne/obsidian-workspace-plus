@@ -8,6 +8,7 @@ import { deriveSessionPresentation } from '../shared/session-presenter.ts';
 import * as sessionDrag from '../shared/session-drag.ts';
 import * as sessionContextActions from '../../session-context-actions.ts';
 import * as settingsContextMenu from '../../settings-context-menu.js';
+import type { SettingsContextMenuPluginHost } from '../../settings-context-menu-items.ts';
 import * as sessionListActions from '../../session-list-actions.ts';
 import * as utils from '../../utils.ts';
 import type { SessionGroup, SessionItem } from '../../storage/default-data.ts';
@@ -235,7 +236,7 @@ function handleSearchOverlaySlashKey(event: KeyboardEvent, options: SearchOverla
     navigationUtils.focusTextInputSelect(options.searchInput);
 }
 
-export interface SearchOverlayHost extends GroupTabPluginHost, HistoryModalPluginHost {
+export interface SearchOverlayHost extends GroupTabPluginHost, HistoryModalPluginHost, SettingsContextMenuPluginHost {
     app: App;
     data: {
         activeSessionId: string | null;
