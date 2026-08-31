@@ -13,6 +13,7 @@ const {
 function createMockHost() {
     const commands: import('obsidian').Command[] = [];
     const calls: string[] = [];
+    const shownActiveIndexes: number[] = [];
 
     const sessionsMap: Record<string, import('../src/storage/default-data.ts').SessionItem> = {
         s1: { id: 's1', name: 'Session 1', layout: {} },
@@ -77,8 +78,16 @@ function createMockHost() {
         importSessionsFromLatestExport: async () => { calls.push('importSnapshot'); },
         isGroupFeatureEnabled: () => true,
         getOrderedSessionsForGroup() { return this.getOrderedSessions(); },
-        findActiveSessionIndex() { return 0; },
-        showSwitchOverlay() { calls.push('showSwitchOverlay'); },
+        // Answers from the data, so a caller that hard-codes an index - or
+        // reintroduces the "not found means the first one" substitution P9
+        // removed - is visible here.
+        findActiveSessionIndex(sessions: Array<{ id: string }>) {
+            return sessions.findIndex((s) => s.id === this.data.activeSessionId);
+        },
+        showSwitchOverlay(_ordered: unknown, activeIndex: number) {
+            calls.push('showSwitchOverlay');
+            shownActiveIndexes.push(activeIndex);
+        },
         getRelativeGroupId(_current: string | null, step: number) { return step > 0 ? 'g1' : undefined; },
         resolveGroupSelection: async (gid: string) => ({ resolvedGroupId: gid }),
         exitGroup() { calls.push('exitGroup'); },
@@ -89,7 +98,7 @@ function createMockHost() {
         openConfirmModal(msg: string, onConfirm: () => void) { calls.push(`openConfirm:${msg}`); onConfirm(); },
     };
 
-    return { host, commands, calls };
+    return { host, commands, calls, shownActiveIndexes };
 }
 
 test('CommandRegistry: registers all core commands and handles callbacks', async () => {
@@ -214,3 +223,23 @@ test('CommandRegistry: syncSessionCommands manages numbered and dynamic named co
 });
 
 test.after(() => harness.restore());
+
+test('opening another group offers no active row when the active session is not in it', async () => {
+    const { commands, shownActiveIndexes, host } = createMockHost();
+    new CommandRegistry(host).registerCommands();
+    const cmdMap = new Map(commands.map((c) => [c.id, c]));
+
+    // The active session belongs somewhere else, which is the ordinary state
+    // once groups are in use. Before P9 the overlay was handed 0 and highlighted
+    // the first row of a group the active session is not in.
+    host.data.activeSessionId = 'not-in-any-group';
+
+    cmdMap.get('switch-group')?.callback?.();
+    await new Promise((resolve) => setTimeout(resolve, 10));
+
+    assert.equal(
+        shownActiveIndexes[shownActiveIndexes.length - 1],
+        -1,
+        'the overlay must be told there is no active row, not handed the first one',
+    );
+});
