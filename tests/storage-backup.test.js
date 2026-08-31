@@ -59,13 +59,15 @@ function createPlugin(vaultFiles = {}) {
         normalizeSessionData(d) {
             return d;
         },
-        syncSessionOrder() {},
-        updateStatusBar() {},
-        syncSessionCommands() {},
+        calls: [],
+        syncSessionOrder() { this.calls.push('syncSessionOrder'); },
+        updateStatusBar() { this.calls.push('updateStatusBar'); },
+        syncSessionCommands() { this.calls.push('syncSessionCommands'); },
         getActiveSession() {
             return this.data.sessions[this.data.activeSessionId];
         },
-        applyWorkspaceLayout() {
+        applyWorkspaceLayout(layout) {
+            this.calls.push(['applyWorkspaceLayout', layout]);
             return Promise.resolve();
         },
     };
@@ -180,6 +182,38 @@ test('storage backup: restoreFromRotationBackup restores valid backup and handle
         const failedShape = await plugin3.restoreFromRotationBackup(3);
         assert.equal(failedShape, false);
         assert.equal(plugin3.data.sessions.s1.name, 'S1');
+    } finally {
+        harness.restore();
+    }
+});
+
+test('storage backup: a restored backup reaches the screen, not just the data', async () => {
+    const harness = setupHarness();
+    try {
+        const { plugin, files } = createPlugin();
+        files.set(plugin.getRotationBackupPath(1), JSON.stringify({
+            activeSessionId: 's1',
+            sessions: { s1: { id: 's1', name: 'Restored', layout: { root: 'restored' } } },
+            sessionOrder: ['s1'],
+        }));
+
+        const ok = await plugin.restoreFromRotationBackup(1);
+        assert.equal(ok, true);
+
+        // Data alone is not a restore. The workspace still shows what it showed
+        // before, and the first session switch would write that back over the
+        // restored layout - the same shape as the import bug recorded in
+        // tests/storage-import-applies-layout.test.ts.
+        assert.deepEqual(
+            plugin.calls.filter((entry) => Array.isArray(entry) && entry[0] === 'applyWorkspaceLayout'),
+            [['applyWorkspaceLayout', { root: 'restored' }]],
+            'the restored layout is applied exactly once',
+        );
+
+        // And the order the sessions came back in has to be rebuilt, or the
+        // switch commands point at the wrong rows.
+        assert.ok(plugin.calls.includes('syncSessionOrder'), 'the order is rebuilt');
+        assert.ok(plugin.calls.includes('syncSessionCommands'), 'the commands follow it');
     } finally {
         harness.restore();
     }
