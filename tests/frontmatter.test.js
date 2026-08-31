@@ -44,9 +44,6 @@ function createPlugin(options) {
 
     plugin.notices = notices;
     plugin.isSwitchingSession = false;
-    plugin.getStartupSettleRemainingMs = function () {
-        return 0;
-    };
     plugin.registerEvent = function (ref) {
         plugin.registeredEvent = ref;
     };
@@ -79,7 +76,7 @@ test('frontmatter listener uses file-open instead of active leaf changes', funct
             },
         },
     });
-    plugin.handleFrontmatterTriggers = function (incomingFile) {
+    plugin.getFrontmatterLinker().handleFrontmatterTriggers = function (incomingFile) {
         handledFile = incomingFile;
     };
 
@@ -109,7 +106,7 @@ test('frontmatter listener skips files that are already loaded in the active lea
             },
         },
     });
-    plugin.handleFrontmatterTriggers = function () {
+    plugin.getFrontmatterLinker().handleFrontmatterTriggers = function () {
         handledCount += 1;
     };
 
@@ -139,7 +136,7 @@ test('frontmatter listener handles a new file loaded into the active leaf once',
             },
         },
     });
-    plugin.handleFrontmatterTriggers = function () {
+    plugin.getFrontmatterLinker().handleFrontmatterTriggers = function () {
         handledCount += 1;
     };
 
@@ -168,7 +165,7 @@ test('frontmatter listener treats a file as newly loaded after active leaf close
             },
         },
     });
-    plugin.handleFrontmatterTriggers = function () {
+    plugin.getFrontmatterLinker().handleFrontmatterTriggers = function () {
         handledCount += 1;
     };
 

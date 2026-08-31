@@ -51,15 +51,6 @@ function createPlugin(initialData) {
         plugin.data.activeSessionId = id;
         return Promise.resolve(true);
     };
-    plugin.moveSessionToGroupExclusive = function (sessionId, groupId) {
-        plugin.data.sessionGroups[sessionId] = [groupId];
-        return Promise.resolve(true);
-    };
-    plugin.resolveGroupSelection = function (groupId) {
-        return Promise.resolve({
-            resolvedGroupId: groupId,
-        });
-    };
     plugin.createGroup = function (name) {
         const id = 'grp-' + name;
         plugin.data.groups[id] = { id: id, name: name };

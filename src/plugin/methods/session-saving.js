@@ -24,9 +24,6 @@ function attachSessionSavingMethods(WorkspacePlusPlus) {
                         return null;
                     },
                     getCurrentWorkspaceLayout: function () {
-                        if (self.getCurrentWorkspaceLayout && self.getCurrentWorkspaceLayout !== WorkspacePlusPlus.prototype.getCurrentWorkspaceLayout) {
-                            return self.getCurrentWorkspaceLayout();
-                        }
                         if (typeof self.getSessionStore === 'function') {
                             return self.getSessionStore().getCurrentWorkspaceLayout();
                         }
@@ -94,9 +91,6 @@ function attachSessionSavingMethods(WorkspacePlusPlus) {
                         if (typeof self.stopHistorySnapshotTimer === 'function') self.stopHistorySnapshotTimer();
                     },
                     applyWorkspaceLayout: function (layout) {
-                        if (self.applyWorkspaceLayout && self.applyWorkspaceLayout !== WorkspacePlusPlus.prototype.applyWorkspaceLayout) {
-                            return self.applyWorkspaceLayout(layout);
-                        }
                         if (typeof self.getSessionSwitcher === 'function') {
                             return self.getSessionSwitcher().applyWorkspaceLayout(layout);
                         }
@@ -138,14 +132,8 @@ function attachSessionSavingMethods(WorkspacePlusPlus) {
                         new ConfirmModal(self.app, message, onConfirm, options).open();
                     },
                     saveActiveSession: function (options) {
-                        if (self.saveActiveSession && self.saveActiveSession !== WorkspacePlusPlus.prototype.saveActiveSession) {
-                            return self.saveActiveSession(options);
-                        }
                     },
                     overwriteSessionWithCurrentLayout: function (sessionId, options) {
-                        if (self.overwriteSessionWithCurrentLayout && self.overwriteSessionWithCurrentLayout !== WorkspacePlusPlus.prototype.overwriteSessionWithCurrentLayout) {
-                            return self.overwriteSessionWithCurrentLayout(sessionId, options);
-                        }
                     },
                 });
             }

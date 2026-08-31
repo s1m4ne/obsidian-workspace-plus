@@ -26,10 +26,12 @@ function loadGroupMethods() {
 }
 
 const attachGroupMethods = loadGroupMethods();
+const attachSessionSwitchingMethods = require('../src/plugin/methods/session-switching');
 
 function createPlugin(initialData) {
     function PluginMock() {}
     attachGroupMethods(PluginMock);
+    attachSessionSwitchingMethods(PluginMock);
     const plugin = new PluginMock();
     plugin.data = Object.assign({
         activeGroupId: null,
@@ -75,9 +77,8 @@ function createPlugin(initialData) {
             return groups && groups.includes(groupId);
         });
     };
-    plugin.switchSession = function () {
-        return Promise.resolve(false);
-    };
+    plugin._switcher = { switchSession: function () { return Promise.resolve(false); } };
+    plugin.getSessionSwitcher = function () { return plugin._switcher; };
     return plugin;
 }
 
@@ -224,7 +225,7 @@ test('group methods: lifecycle, CRUD, switching, and membership management', asy
 
     // setActiveGroup and exitGroup
     let switchCalledWith = null;
-    plugin.switchSession = function (id) {
+    plugin.getSessionSwitcher().switchSession = function (id) {
         switchCalledWith = id;
         plugin.data.activeSessionId = id;
         return Promise.resolve(true);

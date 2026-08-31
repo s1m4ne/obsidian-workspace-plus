@@ -7,9 +7,11 @@ const assert = require('node:assert/strict');
 
 const attachHistoryMethods = require('../src/plugin/methods/history');
 const attachLayoutRestoreMethods = require('../src/plugin/methods/layout-restore');
+const attachSessionMethods = require('../src/plugin/methods/sessions');
 
 function createPlugin(initialData) {
     function PluginMock() {}
+    attachSessionMethods(PluginMock);
     attachLayoutRestoreMethods(PluginMock);
     attachHistoryMethods(PluginMock);
     const plugin = new PluginMock();
@@ -44,17 +46,11 @@ function createPlugin(initialData) {
     plugin.updateStatusBar = function () {
         plugin.statusBarUpdates += 1;
     };
-    plugin.isAutoSaveOnSwitchEnabled = function () {
-        return plugin.data.autoSaveOnSwitch !== false;
-    };
-    plugin.getActiveSession = function () {
-        return plugin.data.sessions[plugin.data.activeSessionId] || null;
-    };
-    plugin.getCurrentWorkspaceLayout = function () {
-        return { type: 'leaf', main: { type: 'leaf' } };
-    };
-    plugin.applyWorkspaceLayout = function (_layout) {
-        return Promise.resolve(true);
+    plugin.app = {
+        workspace: {
+            getLayout: function () { return { type: 'leaf', main: { type: 'leaf' } }; },
+            changeLayout: function () { return Promise.resolve(true); },
+        },
     };
     return plugin;
 }

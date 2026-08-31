@@ -6,9 +6,13 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 
 const attachSessionStartupMethods = require('../src/plugin/methods/session-startup');
+const attachSessionMethods = require('../src/plugin/methods/sessions');
+const attachHistoryMethods = require('../src/plugin/methods/history');
 
 function createPlugin(initialData) {
     function PluginMock() {}
+    attachSessionMethods(PluginMock);
+    attachHistoryMethods(PluginMock);
     attachSessionStartupMethods(PluginMock);
     const plugin = new PluginMock();
     plugin.data = Object.assign({
@@ -21,21 +25,17 @@ function createPlugin(initialData) {
     plugin.historyPushes = 0;
     plugin.persistCalls = 0;
     plugin.flushCalls = 0;
-    plugin.isAutoSaveOnSwitchEnabled = function () {
-        return plugin.data.autoSaveOnSwitch !== false;
-    };
-    plugin.getActiveSession = function () {
-        return plugin.data.sessions[plugin.data.activeSessionId] || null;
-    };
-    plugin.getCurrentWorkspaceLayout = function () {
-        return { layout: 'current' };
-    };
-    plugin.pushLayoutToHistory = function () {
-        plugin.historyPushes += 1;
-    };
     plugin.persistData = function () {
         plugin.persistCalls += 1;
         return Promise.resolve(true);
+    };
+    plugin.app = {
+        workspace: {
+            getLayout: function () { return { layout: 'current' }; },
+        },
+    };
+    plugin.getHistoryService().pushLayoutToHistory = function () {
+        plugin.historyPushes += 1;
     };
     return plugin;
 }

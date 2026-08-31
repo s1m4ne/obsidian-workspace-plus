@@ -19,42 +19,28 @@ function attachSessionStoreGetter(WorkspacePlusPlus) {
                 get groupStore() { return typeof self.getGroupStore === 'function' ? self.getGroupStore() : undefined; },
                 get settingsState() { return typeof self.getSettingsState === 'function' ? self.getSettingsState() : undefined; },
                 getCurrentWorkspaceLayout: function () {
-                    if (self.getCurrentWorkspaceLayout && self.getCurrentWorkspaceLayout !== WorkspacePlusPlus.prototype.getCurrentWorkspaceLayout) {
-                        return self.getCurrentWorkspaceLayout();
-                    }
                     if (self.app && self.app.workspace && typeof self.app.workspace.getLayout === 'function') {
                         return self.app.workspace.getLayout();
                     }
                     return {};
                 },
                 createSessionValidated: function (name, options) {
-                    if (self.createSessionValidated && self.createSessionValidated !== WorkspacePlusPlus.prototype.createSessionValidated) {
-                        return self.createSessionValidated(name, options);
-                    }
                     return undefined;
                 },
                 moveSessionToGroupExclusive: function (sid, gid) {
-                    if (self.moveSessionToGroupExclusive && self.moveSessionToGroupExclusive !== WorkspacePlusPlus.prototype.moveSessionToGroupExclusive) {
-                        return self.moveSessionToGroupExclusive(sid, gid);
-                    }
                     if (typeof self.getGroupStore === 'function') {
                         return self.getGroupStore().moveSessionToGroupExclusive(sid, gid);
                     }
                     return Promise.resolve(false);
                 },
                 resolveGroupSelection: function (gid) {
-                    if (self.resolveGroupSelection && self.resolveGroupSelection !== WorkspacePlusPlus.prototype.resolveGroupSelection) {
-                        return self.resolveGroupSelection(gid);
-                    }
                     if (typeof self.getGroupStore === 'function') {
                         return self.getGroupStore().resolveGroupSelection(gid);
                     }
                     return Promise.resolve({ resolvedGroupId: gid });
                 },
                 attachSessionToActiveGroup: function (sid) {
-                    if (self.attachSessionToActiveGroup && self.attachSessionToActiveGroup !== WorkspacePlusPlus.prototype.attachSessionToActiveGroup) {
-                        self.attachSessionToActiveGroup(sid);
-                    } else if (typeof self.getGroupStore === 'function') {
+                    if (typeof self.getGroupStore === 'function') {
                         self.getGroupStore().attachSessionToActiveGroup(sid);
                     }
                 },
@@ -74,9 +60,6 @@ function attachSessionStoreGetter(WorkspacePlusPlus) {
                     if (typeof self.captureActiveSessionLayoutIfAutoSave === 'function') self.captureActiveSessionLayoutIfAutoSave();
                 },
                 applyWorkspaceLayout: function (layout) {
-                    if (self.applyWorkspaceLayout && self.applyWorkspaceLayout !== WorkspacePlusPlus.prototype.applyWorkspaceLayout) {
-                        return self.applyWorkspaceLayout(layout);
-                    }
                     if (self.app && self.app.workspace && typeof self.app.workspace.changeLayout === 'function') {
                         return self.app.workspace.changeLayout(layout);
                     }

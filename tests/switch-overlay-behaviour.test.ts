@@ -17,6 +17,12 @@ const attachSessions = (sessionsMod.default ?? sessionsMod) as (cls: unknown) =>
 const switchingMod = await import('../src/plugin/methods/session-switching.js');
 const attachSwitching = (switchingMod.default ?? switchingMod) as (cls: unknown) => void;
 
+const groupsMod = await import('../src/plugin/methods/groups.js');
+const attachGroups = (groupsMod.default ?? groupsMod) as (cls: unknown) => void;
+
+const savingMod = await import('../src/plugin/methods/session-saving.js');
+const attachSaving = (savingMod.default ?? savingMod) as (cls: unknown) => void;
+
 interface TestPlugin {
     data: {
         activeSessionId: string;
@@ -24,7 +30,7 @@ interface TestPlugin {
         sessions: Record<string, { id: string; name: string; layout?: unknown }>;
         groups: Record<string, { id: string; name: string }>;
         groupOrder: string[];
-        sessionGroups: Record<string, string>;
+        sessionGroups: Record<string, string[]>;
         activeGroupId: string | null;
         groupFeatureEnabled: boolean;
         [key: string]: unknown;
@@ -56,6 +62,9 @@ interface TestPlugin {
     resolveGroupSelection(groupId: string | null): Promise<{ sessions: unknown[]; resolvedGroupId: string | null }>;
     switchSession(sessionId: string, options?: unknown): Promise<boolean>;
     getRelativeGroupId(currentGroupId: string | null, delta: number): string | null;
+    getGroupStore(): { resolveGroupSelection(groupId: string | null): Promise<{ sessions: unknown[]; resolvedGroupId: string | null }> };
+    getSessionSaver(): { saveActiveSession(): Promise<unknown> };
+    getSessionSwitcher(): { switchSession(sessionId: string, options?: unknown): Promise<boolean> };
     [key: string]: unknown;
 }
 
@@ -63,6 +72,8 @@ function createTestPlugin(): TestPlugin {
     function PluginMock() {}
     attachSessions(PluginMock);
     attachSwitching(PluginMock);
+    attachGroups(PluginMock);
+    attachSaving(PluginMock);
     attachOverlays(PluginMock);
 
     const plugin = new (PluginMock as unknown as { new(): TestPlugin })();
@@ -79,10 +90,12 @@ function createTestPlugin(): TestPlugin {
         },
         groupOrder: ['g1'],
         sessionGroups: {
-            s1: 'g1',
+            s1: ['g1'],
         },
         activeGroupId: null,
         groupFeatureEnabled: true,
+        autoSaveOnSwitch: false,
+        warnOnUnsavedSwitch: false,
     };
 
     plugin.app = {
@@ -97,8 +110,6 @@ function createTestPlugin(): TestPlugin {
         if (cmd === 'switch-to-1') return 'Ctrl+1';
         return '';
     };
-    plugin.isAutoSaveOnSwitchEnabled = (): boolean => false;
-    plugin.isWarnOnUnsavedSwitchEnabled = (): boolean => false;
     plugin.isVersionHistoryEnabled = (): boolean => false;
     plugin.syncSessionCommands = (): void => {};
     plugin.updateStatusBar = (): void => {};
@@ -188,7 +199,7 @@ test('the overlay shows no active position when the active session is outside it
 test('clicking a session in the overlay switches to it', async () => {
     const plugin = createTestPlugin();
     let switchedTo: string | null = null;
-    plugin.switchSession = async (id: string) => {
+    plugin.getSessionSwitcher().switchSession = async (id: string) => {
         switchedTo = id;
         return true;
     };
@@ -211,7 +222,7 @@ test('clicking a session in the overlay switches to it', async () => {
 test('clicking a group tab shows the sessions in that group', async () => {
     const plugin = createTestPlugin();
     let resolvedGroup: string | null = null;
-    plugin.resolveGroupSelection = async (gid: string | null) => {
+    plugin.getGroupStore().resolveGroupSelection = async (gid: string | null) => {
         resolvedGroup = gid;
         return {
             sessions: [{ id: 's1', name: 'Session 1' }],
@@ -244,7 +255,7 @@ test('Tab cycles groups, and releasing the modifiers dismisses the overlay', asy
     const plugin = createTestPlugin();
     plugin.getRelativeGroupId = () => 'g1';
     let resolvedGroup: string | null = null;
-    plugin.resolveGroupSelection = async (gid: string | null) => {
+    plugin.getGroupStore().resolveGroupSelection = async (gid: string | null) => {
         resolvedGroup = gid;
         return {
             sessions: [{ id: 's1', name: 'Session 1' }],
@@ -346,7 +357,7 @@ test('the search overlay saves the current layout and closes', async () => {
 test('the search overlay filters as you type and offers per-row actions', async () => {
     const plugin = createTestPlugin();
     plugin.persistData = async () => {};
-    plugin.saveActiveSession = async () => {};
+    plugin.getSessionSaver().saveActiveSession = async () => {};
     plugin.reloadCurrentSessionWithoutSaving = () => {};
     plugin.data.confirmQuickActions = true;
 
@@ -689,7 +700,7 @@ test('Tab cycles groups while the modifiers are held', async () => {
     const plugin = createTestPlugin();
     let askedFor: string | null | undefined = 'unset';
     plugin.getRelativeGroupId = (): string => 'g1';
-    plugin.resolveGroupSelection = async (gid: string | null) => {
+    plugin.getGroupStore().resolveGroupSelection = async (gid: string | null) => {
         askedFor = gid;
         return { sessions: [{ id: 's1', name: 'Session 1' }], resolvedGroupId: gid };
     };
@@ -709,7 +720,7 @@ test('G cycles groups too, for when Mod+Shift+Tab is taken', async () => {
     const plugin = createTestPlugin();
     let askedFor: string | null | undefined = 'unset';
     plugin.getRelativeGroupId = (): string => 'g1';
-    plugin.resolveGroupSelection = async (gid: string | null) => {
+    plugin.getGroupStore().resolveGroupSelection = async (gid: string | null) => {
         askedFor = gid;
         return { sessions: [{ id: 's1', name: 'Session 1' }], resolvedGroupId: gid };
     };

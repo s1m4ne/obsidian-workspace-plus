@@ -49,6 +49,7 @@ const attachSessionStatusBarMethods = loadPluginMethod('../src/plugin/methods/se
 const attachSessionStartupMethods = loadPluginMethod('../src/plugin/methods/session-startup');
 const attachSessionSwitchingMethods = loadPluginMethod('../src/plugin/methods/session-switching');
 const attachSessionCommandMethods = loadPluginMethod('../src/plugin/methods/session-commands');
+const attachHistoryMethods = loadPluginMethod('../src/plugin/methods/history');
 
 function createPlugin(initialData) {
     function PluginMock() {}
@@ -58,6 +59,7 @@ function createPlugin(initialData) {
     attachGroupMethods(PluginMock);
     attachSessionCrudMethods(PluginMock);
     attachSessionSavingMethods(PluginMock);
+    attachHistoryMethods(PluginMock);
     attachSessionStatusBarMethods(PluginMock);
     attachSessionStartupMethods(PluginMock);
     attachSessionSwitchingMethods(PluginMock);
@@ -83,6 +85,7 @@ function createPlugin(initialData) {
 
     plugin.app = {
         workspace: {
+            getLayout: function () { return plugin.currentLayout(); },
             changeLayout: function (layout) {
                 plugin._changeLayoutCalls.push(layout);
                 return Promise.resolve();
@@ -97,12 +100,13 @@ function createPlugin(initialData) {
 
     plugin.updateStatusBar = function () {};
     plugin.syncSessionCommands = function () {};
-    plugin.pushLayoutToHistory = function (session) {
+    plugin.showSwitchPreviewOverlay = function () {};
+    plugin.showSwitchFeedbackOverlay = function () {};
+    plugin.currentLayout = function () { return {}; };
+    plugin.getHistoryService().pushLayoutToHistory = function (session) {
         plugin._historyPushes += 1;
         plugin._historyPushTargets.push(session ? session.id : null);
     };
-    plugin.showSwitchPreviewOverlay = function () {};
-    plugin.showSwitchFeedbackOverlay = function () {};
 
     return plugin;
 }
@@ -118,7 +122,7 @@ test('session switch auto-saves current layout and applies target layout', async
         },
         autoSaveOnSwitch: true,
     });
-    plugin.getCurrentWorkspaceLayout = function () {
+    plugin.currentLayout = function () {
         return currentLayout;
     };
 
@@ -156,7 +160,7 @@ test('session switch can keep current sidebars while restoring target main area'
         autoSaveOnSwitch: true,
         restoreSidebars: false,
     });
-    plugin.getCurrentWorkspaceLayout = function () {
+    plugin.currentLayout = function () {
         return currentLayout;
     };
 
@@ -181,7 +185,7 @@ test('overwriteSessionWithCurrentLayout saves current layout to selected session
         },
         autoSaveOnSwitch: false,
     });
-    plugin.getCurrentWorkspaceLayout = function () {
+    plugin.currentLayout = function () {
         return currentLayout;
     };
 
@@ -207,7 +211,7 @@ test('unsaved status bar highlight is shown only in manual save mode with layout
         autoSaveOnSwitch: false,
     });
 
-    plugin.getCurrentWorkspaceLayout = function () {
+    plugin.currentLayout = function () {
         return { layout: 'changed' };
     };
 
@@ -221,12 +225,12 @@ test('unsaved status bar highlight is shown only in manual save mode with layout
     assert.equal(plugin.shouldShowUnsavedStatusBarHighlight(), false);
 
     plugin.data.autoSaveOnSwitch = false;
-    plugin.getCurrentWorkspaceLayout = function () {
+    plugin.currentLayout = function () {
         return { layout: 'saved' };
     };
     assert.equal(plugin.shouldShowUnsavedStatusBarHighlight(), false);
 
-    plugin.getCurrentWorkspaceLayout = function () {
+    plugin.currentLayout = function () {
         return { layout: 'saved', scroll: 25, left: 10, top: 20 };
     };
     assert.equal(plugin.shouldShowUnsavedStatusBarHighlight(), false);
@@ -310,7 +314,7 @@ test('structural layout comparison ignores Obsidian volatile workspace ids and f
         autoSaveOnSwitch: false,
     });
 
-    plugin.getCurrentWorkspaceLayout = function () {
+    plugin.currentLayout = function () {
         return currentLayout;
     };
     assert.equal(plugin.shouldShowUnsavedStatusBarHighlight(), false);
@@ -369,33 +373,10 @@ test('viewed-group session creation uses exclusive group assignment', async func
         },
     });
 
-    let movedArgs = null;
-    let addCalled = false;
-
-    plugin.createSessionValidated = function () {
-        return Promise.resolve({
-            created: true,
-            reason: '',
-            name: 'New',
-            sessionId: 'new-session',
-        });
-    };
-    plugin.moveSessionToGroupExclusive = function (sessionId, groupId) {
-        movedArgs = [sessionId, groupId];
-        return Promise.resolve(true);
-    };
-    plugin.addSessionToGroup = function () {
-        addCalled = true;
-        return Promise.resolve(true);
-    };
-    plugin.resolveGroupSelection = function () {
-        return Promise.resolve({ resolvedGroupId: 'g2' });
-    };
-
     const result = await plugin.createSessionForViewedGroup('New', 'g2');
 
-    assert.deepEqual(movedArgs, ['new-session', 'g2']);
-    assert.equal(addCalled, false);
+    assert.ok(result.sessionId);
+    assert.deepEqual(plugin.data.sessionGroups[result.sessionId], ['g2']);
     assert.equal(result.viewGroupId, 'g2');
 });
 
@@ -412,7 +393,7 @@ test('switchSession waits for startup settle window before switching', async fun
     let switchedAt = 0;
     const startedAt = Date.now();
 
-    plugin.performSessionSwitch = function () {
+    plugin.getSessionSwitcher().performSessionSwitch = function () {
         switchedAt = Date.now();
         return Promise.resolve(true);
     };
@@ -435,7 +416,7 @@ test('scheduleStartupFlush waits until startup settle completes', async function
     });
 
     const calls = [];
-    plugin.flushOnStartup = function () {
+    plugin.getSessionSwitcher().flushOnStartup = function () {
         calls.push(Date.now());
         return Promise.resolve(true);
     };
@@ -467,7 +448,7 @@ test('switchRelative shows preview overlay before switching when preview is enab
     plugin.showSwitchPreviewOverlay = function (ordered, index) {
         previewCalls.push([ordered.map(function (s) { return s.id; }), index]);
     };
-    plugin.switchSession = function () {
+    plugin.getSessionSwitcher().switchSession = function () {
         switchCalled = true;
         return Promise.resolve(true);
     };
@@ -497,7 +478,7 @@ test('switchRelativeImmediate bypasses preview-only first step and uses feedback
     plugin.showSwitchFeedbackOverlay = function (ordered, index) {
         overlayCalls.push([ordered.map(function (s) { return s.id; }), index]);
     };
-    plugin.switchSession = function (sessionId, options) {
+    plugin.getSessionSwitcher().switchSession = function (sessionId, options) {
         switchCalls.push([sessionId, options]);
         return Promise.resolve(true);
     };
@@ -530,7 +511,7 @@ test('switchRelativeImmediate can suppress feedback overlay', async function () 
     plugin.showSwitchFeedbackOverlay = function () {
         overlayCalled = true;
     };
-    plugin.switchSession = function (sessionId, options) {
+    plugin.getSessionSwitcher().switchSession = function (sessionId, options) {
         switchCalls.push([sessionId, options]);
         return Promise.resolve(true);
     };
@@ -568,7 +549,7 @@ test('switchRelativeFromStatusBar bypasses preview-only first step and uses a re
     plugin.showSwitchFeedbackOverlay = function () {
         feedbackCalled = true;
     };
-    plugin.switchSession = function (sessionId, options) {
+    plugin.getSessionSwitcher().switchSession = function (sessionId, options) {
         switchCalls.push([sessionId, options]);
         return Promise.resolve(true);
     };
@@ -606,7 +587,7 @@ test('switchRelativeFromScroll switches without showing overlay', async function
     plugin.showSwitchFeedbackOverlay = function () {
         feedbackCalled = true;
     };
-    plugin.switchSession = function (sessionId, options) {
+    plugin.getSessionSwitcher().switchSession = function (sessionId, options) {
         switchCalls.push([sessionId, options]);
         return Promise.resolve(true);
     };
@@ -638,7 +619,7 @@ test('switchSessionByIdFromCommand uses overlay feedback without switch notice',
     plugin.showSwitchFeedbackOverlay = function (ordered, index) {
         overlayCalls.push([ordered.map(function (s) { return s.id; }), index]);
     };
-    plugin.switchSession = function (sessionId, options) {
+    plugin.getSessionSwitcher().switchSession = function (sessionId, options) {
         switchCalls.push([sessionId, options]);
         return Promise.resolve(true);
     };
@@ -664,10 +645,10 @@ test('performSessionSwitch can emit a replaceable session switch notice', async 
     });
 
     const noticeCalls = [];
-    plugin.showSessionSwitchNotice = function (sessionName, options) {
+    plugin.getSessionSwitcher().showSessionSwitchNotice = function (sessionName, options) {
         noticeCalls.push([sessionName, options]);
     };
-    plugin.getCurrentWorkspaceLayout = function () {
+    plugin.currentLayout = function () {
         return { layout: 'current' };
     };
 

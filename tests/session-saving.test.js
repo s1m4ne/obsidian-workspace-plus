@@ -12,9 +12,15 @@ i18n.resolveLocale('en');
 
 const attachSessionSavingMethods = require('../src/plugin/methods/session-saving');
 const attachLayoutRestoreMethods = require('../src/plugin/methods/layout-restore');
+const attachSessionMethods = require('../src/plugin/methods/sessions');
+const attachSessionCrudMethods = require('../src/plugin/methods/session-crud');
+const attachHistoryMethods = require('../src/plugin/methods/history');
 
 function createPlugin(initialData) {
     function PluginMock() {}
+    attachSessionMethods(PluginMock);
+    attachSessionCrudMethods(PluginMock);
+    attachHistoryMethods(PluginMock);
     attachLayoutRestoreMethods(PluginMock);
     attachSessionSavingMethods(PluginMock);
     const plugin = new PluginMock();
@@ -36,20 +42,8 @@ function createPlugin(initialData) {
     plugin.historyStarts = 0;
     plugin.historyStops = 0;
     plugin.changeLayoutCalls = [];
-    plugin.getActiveSession = function () {
-        return plugin.data.sessions[plugin.data.activeSessionId] || null;
-    };
-    plugin.getCurrentWorkspaceLayout = function () {
-        return { layout: 'current' };
-    };
     plugin.layoutsEqualStructural = function (a, b) {
         return JSON.stringify(a) === JSON.stringify(b);
-    };
-    plugin.getDefaultSessionName = function () {
-        return 'Default';
-    };
-    plugin.pushLayoutToHistory = function (session) {
-        plugin.historyPushes.push(session ? session.id : null);
     };
     plugin.updateStatusBar = function () {
         plugin.statusBarUpdates += 1;
@@ -61,20 +55,6 @@ function createPlugin(initialData) {
         plugin.persistCalls += 1;
         return Promise.resolve(true);
     };
-    plugin.createSessionRecord = function (id, name, layout, options) {
-        options = options || {};
-        return {
-            id,
-            name,
-            layout,
-            modified: typeof options.modified === 'number' ? options.modified : Date.now(),
-        };
-    };
-    plugin.insertSessionAndActivate = function (session) {
-        plugin.data.sessions[session.id] = session;
-        plugin.data.sessionOrder.push(session.id);
-        plugin.data.activeSessionId = session.id;
-    };
     plugin.startHistorySnapshotTimer = function () {
         plugin.historyStarts += 1;
     };
@@ -83,11 +63,18 @@ function createPlugin(initialData) {
     };
     plugin.app = {
         workspace: {
+            getLayout: function () {
+                return plugin.currentLayout();
+            },
             changeLayout: function (layout) {
                 plugin.changeLayoutCalls.push(layout);
                 return Promise.resolve(true);
             },
         },
+    };
+    plugin.currentLayout = function () { return { layout: 'current' }; };
+    plugin.getHistoryService().pushLayoutToHistory = function (session) {
+        plugin.historyPushes.push(session ? session.id : null);
     };
     return plugin;
 }
@@ -124,7 +111,7 @@ test('session saving captures active layout only when auto-save is enabled', fun
 
 test('session dirty check tolerates layout being unavailable during startup', function () {
     const plugin = createPlugin();
-    plugin.getCurrentWorkspaceLayout = function () {
+    plugin.currentLayout = function () {
         throw new Error('layout not ready');
     };
 

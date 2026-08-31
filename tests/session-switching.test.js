@@ -47,13 +47,7 @@ function createPlugin(options) {
     plugin.appliedLayouts = [];
     plugin.pendingLayoutResolvers = [];
 
-    plugin.isGroupFeatureEnabled = function () { return false; };
-    plugin.getStartupSettleRemainingMs = function () { return 0; };
-    plugin.isAutoSaveOnSwitchEnabled = function () { return false; };
-    plugin.isWarnOnUnsavedSwitchEnabled = function () { return false; };
     plugin.isActiveSessionDirty = function () { return false; };
-    plugin.pushLayoutToHistory = function () {};
-    plugin.getCurrentWorkspaceLayout = function () { return { root: 'current' }; };
     plugin.updateStatusBar = function () {};
     plugin.persistData = function () { return Promise.resolve(); };
     plugin.showSwitchPreviewOverlay = function (ordered, index) {
@@ -62,11 +56,16 @@ function createPlugin(options) {
     plugin.overlayIndexes = [];
 
     // Hold every layout application open until the test releases it.
-    plugin.applyWorkspaceLayout = function (layout) {
-        plugin.appliedLayouts.push(layout);
-        return new Promise(function (resolve) {
-            plugin.pendingLayoutResolvers.push(resolve);
-        });
+    plugin.app = {
+        workspace: {
+            getLayout: function () { return { root: 'current' }; },
+            changeLayout: function (layout) {
+                plugin.appliedLayouts.push(layout);
+                return new Promise(function (resolve) {
+                    plugin.pendingLayoutResolvers.push(resolve);
+                });
+            },
+        },
     };
 
     plugin.releaseLayouts = function () {
@@ -128,9 +127,11 @@ test('switching stays responsive when the active session is not in the current v
     const plugin = createPlugin();
     // Simulates the active session having been removed from the active group:
     // it is no longer part of the ordered list the command navigates.
-    plugin.getOrderedSessions = function () {
-        return ['b', 'c', 'd'].map(function (id) { return plugin.data.sessions[id]; });
-    };
+    plugin.data.groupFeatureEnabled = true;
+    plugin.data.activeGroupId = 'g1';
+    plugin.data.groups = { g1: { id: 'g1', name: 'Current group' } };
+    plugin.data.groupOrder = ['__all__', 'g1'];
+    plugin.data.sessionGroups = { b: ['g1'], c: ['g1'], d: ['g1'] };
 
     const context = plugin.getRelativeSwitchContext(1);
     assert.notEqual(context, null, 'a missing active session must not make the command inert');

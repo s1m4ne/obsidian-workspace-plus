@@ -7,6 +7,7 @@ const assert = require('node:assert/strict');
 
 const i18n = require('../src/i18n.ts');
 const attachSessionCommandMethods = require('../src/plugin/methods/session-commands');
+const attachSessionMethods = require('../src/plugin/methods/sessions');
 
 i18n.resolveLocale('en');
 
@@ -16,6 +17,7 @@ function createSession(id, name) {
 
 function createPlugin(initialData) {
     function PluginMock() {}
+    attachSessionMethods(PluginMock);
     attachSessionCommandMethods(PluginMock);
     const plugin = new PluginMock();
     plugin.data = Object.assign({
@@ -37,11 +39,6 @@ function createPlugin(initialData) {
     };
     plugin.removeCommand = function (id) {
         plugin.removedCommandIds.push(id);
-    };
-    plugin.getOrderedSessions = function () {
-        return plugin.data.sessionOrder.map(function (id) {
-            return plugin.data.sessions[id];
-        }).filter(Boolean);
     };
     plugin.switchToIndex = function (index) {
         plugin.switchToIndexCalls.push(index);

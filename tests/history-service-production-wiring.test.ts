@@ -23,6 +23,7 @@ async function createPlugin(): Promise<TestPlugin> {
         import('../src/plugin/methods/history.js'),
         import('../src/plugin/methods/sessions.js'),
         import('../src/plugin/methods/session-store-getter.js'),
+        import('../src/plugin/methods/layout-restore.js'),
     ]);
 
     function PluginMock(this: unknown) {}
@@ -53,9 +54,13 @@ async function createPlugin(): Promise<TestPlugin> {
         plugin._persistCalls += 1;
         return true;
     };
-    plugin.applyWorkspaceLayout = async function (layout: unknown) {
-        plugin._appliedLayouts.push(layout);
-        return true;
+    plugin.app = {
+        workspace: {
+            changeLayout: async (layout: unknown) => {
+                plugin._appliedLayouts.push(layout);
+                return true;
+            },
+        },
     };
     return plugin;
 }

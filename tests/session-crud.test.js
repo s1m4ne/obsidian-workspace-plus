@@ -13,9 +13,11 @@ i18n.resolveLocale('en');
 const attachSessionCrudMethods = require('../src/plugin/methods/session-crud');
 const attachLayoutRestoreMethods = require('../src/plugin/methods/layout-restore');
 const attachSessionValidationMethods = require('../src/plugin/methods/sessions-validation');
+const attachSessionMethods = require('../src/plugin/methods/sessions');
 
 function createPlugin(initialData) {
     function PluginMock() {}
+    attachSessionMethods(PluginMock);
     attachLayoutRestoreMethods(PluginMock);
     attachSessionCrudMethods(PluginMock);
     attachSessionValidationMethods(PluginMock);
@@ -41,12 +43,6 @@ function createPlugin(initialData) {
     plugin.commandSyncs = 0;
     plugin.attachedSessions = [];
     plugin.detachedLeaves = 0;
-    plugin.getActiveSession = function () {
-        return (plugin.data.sessions && plugin.data.activeSessionId) ? plugin.data.sessions[plugin.data.activeSessionId] || null : null;
-    };
-    plugin.getCurrentWorkspaceLayout = function () {
-        return { layout: 'current' };
-    };
     plugin.updateStatusBar = function () {
         plugin.statusBarUpdates += 1;
     };
@@ -57,13 +53,13 @@ function createPlugin(initialData) {
         plugin.persistCalls += 1;
         return Promise.resolve(true);
     };
-    plugin.attachSessionToActiveGroup = function (sessionId) {
-        plugin.attachedSessions.push(sessionId);
-    };
     plugin.captureActiveSessionLayoutIfAutoSave = function () {};
     plugin.hideSwitchOverlay = function () {};
     plugin.app = {
         workspace: {
+            getLayout: function () {
+                return { layout: 'current' };
+            },
             changeLayout: function () {
                 return Promise.resolve(true);
             },
@@ -72,6 +68,9 @@ function createPlugin(initialData) {
                 callback({ detach: function () { plugin.detachedLeaves += 1; } });
             },
         },
+    };
+    plugin.getGroupStore().attachSessionToActiveGroup = function (sessionId) {
+        plugin.attachedSessions.push(sessionId);
     };
     return plugin;
 }

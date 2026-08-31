@@ -29,6 +29,7 @@ async function createPlugin(): Promise<TestPlugin> {
         import('../src/plugin/methods/session-commands.js'),
         import('../src/plugin/methods/session-statusbar.js'),
         import('../src/plugin/methods/session-store-getter.js'),
+        import('../src/plugin/methods/session-switching.js'),
     ]);
 
     function PluginMock(this: unknown) {}
@@ -65,10 +66,14 @@ async function createPlugin(): Promise<TestPlugin> {
         plugin._persistCalls += 1;
         return true;
     };
-    plugin.switchSession = async function (sid: string) {
-        plugin._switchedSessionId = sid;
-        (plugin.data as { activeSessionId: string }).activeSessionId = sid;
-        return true;
+    plugin.getSessionSwitcher = function () {
+        return {
+            switchSession: async (sid: string) => {
+                plugin._switchedSessionId = sid;
+                (plugin.data as { activeSessionId: string }).activeSessionId = sid;
+                return true;
+            },
+        };
     };
     return plugin;
 }

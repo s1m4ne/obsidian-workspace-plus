@@ -10,6 +10,7 @@ const i18n = require('../src/i18n.ts');
 i18n.resolveLocale('en');
 
 const attachSessionStatusBarMethods = require('../src/plugin/methods/session-statusbar.js');
+const attachSessionMethods = require('../src/plugin/methods/sessions.js');
 
 function createStatusBarEl() {
     const el = harness.dom.document.createElement('div');
@@ -36,15 +37,20 @@ function createStatusBarEl() {
 function createPlugin(options) {
     options = options || {};
     function PluginMock() {}
+    attachSessionMethods(PluginMock);
     attachSessionStatusBarMethods(PluginMock);
     const plugin = new PluginMock();
+    plugin.data = {
+        activeSessionId: options.session ? 's1' : null,
+        sessions: options.session ? { s1: options.session } : {},
+        sessionOrder: options.session ? ['s1'] : [],
+        groupFeatureEnabled: true,
+        activeGroupId: options.group ? 'g1' : null,
+        groups: options.group ? { g1: options.group } : {},
+        groupOrder: options.group ? ['__all__', 'g1'] : ['__all__'],
+        sessionGroups: {},
+    };
     plugin.statusBarEl = options.statusBarEl === false ? null : createStatusBarEl();
-    plugin.getActiveSession = function () {
-        return options.session || null;
-    };
-    plugin.getActiveGroup = function () {
-        return options.group || null;
-    };
     plugin.shouldShowUnsavedStatusBarHighlight = function () {
         return !!options.unsaved;
     };

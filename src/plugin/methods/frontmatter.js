@@ -65,11 +65,6 @@ module.exports = function attachFrontmatterMethods(WorkspacePlusPlus) {
                         }
                         return false;
                     },
-                    handleFrontmatterTriggers: function (file) {
-                        if (typeof self.handleFrontmatterTriggers === 'function' && self.handleFrontmatterTriggers !== WorkspacePlusPlus.prototype.handleFrontmatterTriggers) {
-                            self.handleFrontmatterTriggers(file);
-                        }
-                    },
                     registerEvent: function (eventRef) {
                         if (typeof self.registerEvent === 'function') {
                             self.registerEvent(eventRef);
