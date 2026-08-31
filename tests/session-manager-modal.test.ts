@@ -29,6 +29,7 @@ interface ModalPlugin {
     /** Sessions this mock refuses to delete, as a real failure would. */
     undeletable: Set<string>;
     movedToGroup: Array<{ sessionId: string; groupId: string }>;
+    removedFromGroup: Array<{ sessionId: string; groupId: string }>;
     reordered: string[][];
     isGroupFeatureEnabled(): boolean;
     getOrderedSessionsForGroup(groupId: string | null): Session[];
@@ -63,6 +64,7 @@ interface SessionManagerModalInstance {
     getRowActionTarget(row: HTMLElement | null, actionKey?: string): HTMLElement | null;
     renderList(): void;
     onBulkDelete(): void;
+    selectGroup(groupId: string | null): Promise<boolean>;
 }
 
 type ModalConstructor = new (app: unknown, plugin: ModalPlugin) => SessionManagerModalInstance;
@@ -125,6 +127,7 @@ function makePlugin(containerEl: HTMLElement, groupFeatureEnabled = false): Moda
         deletedIds: [],
         undeletable: new Set<string>(),
         movedToGroup: [],
+        removedFromGroup: [],
         reordered: [],
         isGroupFeatureEnabled: (): boolean => plugin.data.groupFeatureEnabled,
         getOrderedSessionsForGroup: (groupId): Session[] => plugin.data.sessionOrder
@@ -156,6 +159,7 @@ function makePlugin(containerEl: HTMLElement, groupFeatureEnabled = false): Moda
             plugin.data.sessionGroups[sessionId] = [groupId];
         },
         removeSessionFromGroup: async (sessionId, groupId): Promise<void> => {
+            plugin.removedFromGroup.push({ sessionId, groupId });
             plugin.data.sessionGroups[sessionId] = (plugin.data.sessionGroups[sessionId] || [])
                 .filter((currentGroupId) => currentGroupId !== groupId);
         },
@@ -285,6 +289,55 @@ test('session manager bulk delete is gated by confirmation and only reports the 
             /\b1\b/,
             'the count reports one deletion, not two attempts',
         );
+    } finally {
+        modal.close();
+        h.restore();
+    }
+});
+
+test('dropping a row on the All tab takes it out of the group being viewed', async () => {
+    const { h, plugin, modal } = await openModal(true);
+    try {
+        // "All" is a view, not a group, so the drop means "leave the group I am
+        // looking at" - which only makes sense while one is selected.
+        await modal.selectGroup('g1');
+        makeVisible(modal.contentEl);
+
+        const row = modal.listEl.querySelector<HTMLElement>('.wpp-session-item');
+        const allTab = modal.groupTabsRow.querySelector<HTMLElement>('[data-group-id="__all__"]');
+        assert.ok(row);
+        assert.ok(allTab, 'the All tab has to be on screen for the drop to have a target');
+        row.getBoundingClientRect = (): DOMRect => makeRect(0, 100, 200, 30);
+        allTab.getBoundingClientRect = (): DOMRect => makeRect(10, 10, 60, 30);
+
+        row.dispatchEvent(new h.dom.window.MouseEvent('mousedown', { bubbles: true, button: 0, clientX: 5, clientY: 105 }));
+        h.dom.document.dispatchEvent(new h.dom.window.MouseEvent('mousemove', { bubbles: true, clientX: 20, clientY: 20 }));
+        h.dom.document.dispatchEvent(new h.dom.window.MouseEvent('mouseup', { bubbles: true, clientX: 20, clientY: 20 }));
+        await Promise.resolve();
+        await Promise.resolve();
+
+        assert.deepEqual(plugin.removedFromGroup, [{ sessionId: 's1', groupId: 'g1' }]);
+        assert.deepEqual(plugin.movedToGroup, [], 'a drop on All must not add the session to anything');
+    } finally {
+        modal.close();
+        h.restore();
+    }
+});
+
+test('the last remaining session offers no delete button', async () => {
+    const { h, plugin, modal } = await openModal();
+    try {
+        const withThree = modal.listEl.querySelectorAll('[data-action-key="delete"]');
+        assert.equal(withThree.length, 3, 'every row is deletable while others remain');
+
+        plugin.data.sessions = { s1: { id: 's1', name: 'Work', modified: 1, layout: {} } };
+        plugin.data.sessionOrder = ['s1'];
+        modal.renderList();
+
+        // There has to be a session left, so the only row loses its delete
+        // control rather than relying on the user not to press it.
+        assert.equal(modal.listEl.querySelectorAll('[data-action-key="delete"]').length, 0);
+        assert.equal(modal.listEl.querySelectorAll('[data-action-key="rename"]').length, 1, 'rename is still offered');
     } finally {
         modal.close();
         h.restore();

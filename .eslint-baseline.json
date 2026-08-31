@@ -1,8 +1,8 @@
 {
-    "total": 46,
+    "total": 45,
     "rules": {
         "@typescript-eslint/no-unnecessary-type-assertion": 2,
-        "@typescript-eslint/no-unused-vars": 5,
+        "@typescript-eslint/no-unused-vars": 4,
         "obsidianmd/hardcoded-config-path": 20,
         "obsidianmd/no-static-styles-assignment": 13,
         "obsidianmd/prefer-window-timers": 6
