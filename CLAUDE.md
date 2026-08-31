@@ -7,8 +7,9 @@ directory. `src/` is ES5-style CommonJS JavaScript, bundled by esbuild into
 ## Right now, this repository is mid-migration
 
 Issue #111 is rewriting `src/` as TypeScript with owned state and real classes.
-It runs to 57 commits on one branch, and the constraint is that **observable
-behaviour must not change** apart from four named exceptions.
+It runs to 34 commits on one branch, and the constraint is that **observable
+behaviour must not change** apart from four named exceptions in Phase 4 and one
+authorized during Phase 3 (both recorded in the issue).
 
 **Before touching anything under `src/` or `tests/`:**
 
@@ -17,8 +18,8 @@ node scripts/progress.js     # where the migration stands, measured
 gh issue view 111            # the plan - the source of truth for what comes next
 ```
 
-Then load the `refactoring-workspace-plus` skill. It carries the rules that make
-this safe, and they are not obvious from the code:
+Then read `.claude/skills/refactoring-workspace-plus/SKILL.md`. It carries the
+rules that make this safe, and they are not obvious from the code:
 
 - Behavior Lock tests in `tests/lock/` are **never edited**. If one fails, the
   refactor broke something. If the test itself looks wrong, stop and ask.
@@ -26,9 +27,33 @@ this safe, and they are not obvious from the code:
 - Evidence before claims: if you have not run the command in this message, you
   cannot say it passes.
 
-Two sibling skills own the details: `writing-typescript` for how to write the
-code, `obsidian` for the plugin guidelines. Load them before writing `.ts` or
-touching UI, events, storage or styles.
+Two sibling documents own the details. Read both before writing `.ts` or touching
+UI, events, storage or styles:
+
+```
+.claude/skills/writing-typescript/SKILL.md     how to write the code    133 lines
+.claude/skills/obsidian/SKILL.md               the plugin guidelines    360 lines
+```
+
+Each has a `reference/` directory beside it. Those are not for reading front to
+back - `obsidian/reference/` alone is 3,264 lines. Open one when its subject is
+the thing in front of you:
+
+| Reading | When |
+|---|---|
+| `refactoring-workspace-plus/reference/commit-specs.md` | before writing the commit you are on - it records what is peculiar about that module |
+| `refactoring-workspace-plus/reference/behavior-lock.md` | a lock failed, or you are tempted to edit one |
+| `refactoring-workspace-plus/reference/architecture.md` | a module does not fit the planned class boundary |
+| `refactoring-workspace-plus/reference/design-targets.md` | the P-number your commit carries |
+| `writing-typescript/reference/patterns.md` | class composition, options objects, frozen schemas |
+| `writing-typescript/reference/typing-obsidian.md` | typing an undocumented Obsidian API |
+| `obsidian/reference/css-styling.md`, `ui-ux.md` | building or moving DOM - commits 25-31 |
+| `obsidian/reference/memory-management.md` | listeners, timers, anything with a lifetime |
+| `obsidian/reference/accessibility.md` | Phase 4 (P12) |
+| `obsidian/reference/community-scanner.md`, `submission.md` | Phase 4 and release |
+
+`AGENTS.md` and `GEMINI.md` are symlinks to this file, so every assistant reads
+the same instructions. There is nothing else to configure.
 
 `refactoring-workspace-plus/reference/commit-specs.md` carries what is peculiar
 about the code each near-term commit touches. Read the entry for your commit
