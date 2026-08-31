@@ -27,14 +27,14 @@ const ROOT = path.join(__dirname, '..');
 const ENTRY = 'src/main.ts';
 
 // Reachable from the tests but deliberately not from the plugin entry.
-const ALLOWED = new Map([
-    [
-        'src/plugin/register-commands.js',
-        'Behavior Lock suites import it to register commands; main.js goes through '
-        + 'getCommandRegistry(). Locks are never edited, so it stays until they are '
-        + 'retired at the end of issue #111.',
-    ],
-]);
+// Zero unreachable files. Nothing is exempt: the one entry that used to be here
+// existed because a Behavior Lock imported src/plugin/register-commands.js while
+// production reached the same code through getCommandRegistry(). That lock was
+// retired with the rest of the Phase 3 safety net, and the file went with it.
+//
+// A file that must stay out needs a reason and a removal condition recorded
+// here, not silence.
+const ALLOWED = new Map([]);
 
 function walk(dir, out = []) {
     for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
