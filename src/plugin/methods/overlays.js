@@ -3,10 +3,10 @@
 var obsidian = require('obsidian');
 var i18n = require('../../i18n.ts');
 var ConfirmModal = require('../../modals/confirm-modal.ts').ConfirmModal;
-var formatRelativeTime = require('../../modals/format-relative-time.ts').formatRelativeTime;
 var groupTabUi = require('../../group-tab-ui.ts');
 var navigationUtils = require('../../navigation-utils.ts');
 var utils = require('../../utils.ts');
+var sessionPresenter = require('../../ui/shared/session-presenter.ts');
 var searchOverlayKeys = require('../../search-overlay-key-handler');
 var sessionContextActions = require('../../session-context-actions');
 var settingsContextMenu = require('../../settings-context-menu');
@@ -281,11 +281,14 @@ function attachOverlayMethods(WorkspacePlusPlus) {
 
             for (var i = 0; i < filtered.length; i++) {
                 var session = filtered[i];
-                var isActive = session.id === self.data.activeSessionId;
+                var presentation = sessionPresenter.deriveSessionPresentation(session, {
+                    activeSessionId: self.data.activeSessionId,
+                });
+                var isActive = presentation.isActive;
                 var item = document.createElement('div');
                 item.className = 'wpp-switch-item';
                 if (i === selectedIndex) item.classList.add('wpp-kb-selected');
-                item.dataset.sessionId = session.id;
+                item.dataset.sessionId = presentation.id;
 
                 // Info column (name + modified time)
                 var infoCol = document.createElement('div');
@@ -296,7 +299,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
 
                 var name = document.createElement('div');
                 name.className = 'wpp-switch-name';
-                name.textContent = session.name;
+                name.textContent = presentation.name;
                 nameRow.appendChild(name);
 
                 infoCol.appendChild(nameRow);
@@ -304,7 +307,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
                 // Modified timestamp
                 var modifiedEl = document.createElement('div');
                 modifiedEl.className = 'wpp-qs-modified';
-                modifiedEl.textContent = formatRelativeTime(session.modified);
+                modifiedEl.textContent = presentation.modifiedText;
                 infoCol.appendChild(modifiedEl);
 
                 item.appendChild(infoCol);
@@ -1161,22 +1164,26 @@ function attachOverlayMethods(WorkspacePlusPlus) {
         list.className = 'wpp-switch-list';
 
         for (var i = 0; i < ordered.length; i++) {
+            var presentation = sessionPresenter.deriveSessionPresentation(ordered[i], {
+                activeSessionId: self.data.activeSessionId,
+                index: i,
+                commandHotkey: i <= 8 ? this.getCommandHotkey('switch-to-' + (i + 1)) : '',
+            });
             var item = document.createElement('div');
             item.className = 'wpp-switch-item';
             if (i === activeIndex) {
                 item.classList.add('is-active');
             }
-            item.dataset.sessionId = ordered[i].id;
+            item.dataset.sessionId = presentation.id;
 
             var name = document.createElement('div');
             name.className = 'wpp-switch-name';
-            name.textContent = ordered[i].name;
+            name.textContent = presentation.name;
             item.appendChild(name);
 
-            var hk = i <= 8 ? this.getCommandHotkey('switch-to-' + (i + 1)) : '';
             var hotkeyEl = document.createElement('div');
             hotkeyEl.className = 'wpp-switch-hotkey';
-            hotkeyEl.textContent = hk || String(i + 1);
+            hotkeyEl.textContent = presentation.hotkeyText;
             item.appendChild(hotkeyEl);
 
             (function (targetSessionId) {
@@ -1236,15 +1243,18 @@ function attachOverlayMethods(WorkspacePlusPlus) {
             var measureList = document.createElement('div');
             measureList.className = 'wpp-switch-list';
             for (var mi = 0; mi < allSessions.length; mi++) {
+                var mPresentation = sessionPresenter.deriveSessionPresentation(allSessions[mi], {
+                    index: mi,
+                });
                 var mItem = document.createElement('div');
                 mItem.className = 'wpp-switch-item';
                 var mName = document.createElement('div');
                 mName.className = 'wpp-switch-name';
-                mName.textContent = allSessions[mi].name;
+                mName.textContent = mPresentation.name;
                 mItem.appendChild(mName);
                 var mHk = document.createElement('div');
                 mHk.className = 'wpp-switch-hotkey';
-                mHk.textContent = String(mi + 1);
+                mHk.textContent = mPresentation.hotkeyText;
                 mItem.appendChild(mHk);
                 measureList.appendChild(mItem);
             }

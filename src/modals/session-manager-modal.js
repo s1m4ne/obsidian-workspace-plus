@@ -3,10 +3,10 @@
 var obsidian = require('obsidian');
 var i18n = require('../i18n.ts');
 var ConfirmModal = require('./confirm-modal.ts').ConfirmModal;
-var formatRelativeTime = require('./format-relative-time.ts').formatRelativeTime;
 var groupTabUi = require('../group-tab-ui.ts');
 var navigationUtils = require('../navigation-utils.ts');
 var utils = require('../utils.ts');
+var sessionPresenter = require('../ui/shared/session-presenter.ts');
 var sessionContextActions = require('../session-context-actions');
 var settingsContextMenu = require('../settings-context-menu');
 var sessionListActions = require('../session-list-actions');
@@ -605,11 +605,18 @@ var SessionManagerModal = /** @class */ (function (_super) {
 
     SessionManagerModal.prototype.renderSessionItem = function (session, index, orderIndex) {
         var L = i18n.L;
-        var isActive = session.id === this.plugin.data.activeSessionId;
+        var hintIndex = typeof orderIndex === 'number' ? orderIndex : index;
+        var presentation = sessionPresenter.deriveSessionPresentation(session, {
+            activeSessionId: this.plugin.data.activeSessionId,
+            index: hintIndex,
+            commandHotkey: hintIndex <= 8 ? this.plugin.getCommandHotkey('switch-to-' + (hintIndex + 1)) : '',
+            defaultSessionName: this.plugin.getDefaultSessionName(),
+        });
+        var isActive = presentation.isActive;
         var self = this;
 
         var item = this.listEl.createDiv({ cls: 'wpp-session-item' });
-        item.dataset.sessionId = session.id;
+        item.dataset.sessionId = presentation.id;
 
         // Click handler for focus / Cmd+Click selection
         item.addEventListener('click', function (e) {
@@ -664,21 +671,19 @@ var SessionManagerModal = /** @class */ (function (_super) {
         });
 
         // Hotkey hint
-        var hintIndex = typeof orderIndex === 'number' ? orderIndex : index;
-        var hk = hintIndex <= 8 ? self.plugin.getCommandHotkey('switch-to-' + (hintIndex + 1)) : '';
-        item.createSpan({ text: hk || String(hintIndex + 1), cls: 'wpp-session-index' });
+        item.createSpan({ text: presentation.hotkeyText, cls: 'wpp-session-index' });
 
         // Info section
         var info = item.createDiv({ cls: 'wpp-session-info' });
         var nameRow = info.createDiv({ cls: 'wpp-session-name-row' });
-        nameRow.createSpan({ text: session.name, cls: 'wpp-session-name' });
-        if (session.isDefault && session.name !== this.plugin.getDefaultSessionName()) {
+        nameRow.createSpan({ text: presentation.name, cls: 'wpp-session-name' });
+        if (presentation.isDefault) {
             nameRow.createSpan({ text: L.defaultLabel, cls: 'wpp-default-label' });
         }
         if (isActive) {
             nameRow.createSpan({ text: L.active, cls: 'wpp-active-badge' });
         }
-        info.createDiv({ text: formatRelativeTime(session.modified), cls: 'wpp-session-modified' });
+        info.createDiv({ text: presentation.modifiedText, cls: 'wpp-session-modified' });
 
         // Action buttons
         var actions = item.createDiv({ cls: 'wpp-session-actions' });
