@@ -215,6 +215,62 @@ test('advanced export, import confirmation, rotation backup and restore use thei
     } finally { h.restore(); }
 });
 
+test('the General tab controls reach their own setters', async () => {
+    const h = setupHarness();
+    try {
+        const { WorkspacePlusPlusSettingTab, L } = load(h);
+        const { plugin, calls } = createPlugin();
+        const tab = new WorkspacePlusPlusSettingTab(plugin.app, plugin);
+        tab.activeTab = 'general'; tab.display();
+
+        await componentFor(h, L.settingsLanguage, 'DropdownStub').trigger('ja');
+        // Deliberately not the first slot: with `click` the assertion would still
+        // pass if the slot key were hardcoded, and twelve slots share one builder.
+        await componentFor(h, L.statusBarSlotModRightClick(), 'DropdownStub').trigger('sessionManager');
+
+        assert.deepEqual(calls.filter((entry) => ['language', 'statusAction'].includes(entry[0])), [
+            ['language', 'ja'],
+            ['statusAction', 'modRightClick', 'sessionManager'],
+        ], 'each control writes through its own setter, with its own arguments');
+    } finally { h.restore(); }
+});
+
+test('a toggle that changes which rows exist redraws the tab', async () => {
+    const h = setupHarness();
+    try {
+        const { WorkspacePlusPlusSettingTab, L } = load(h);
+        const { plugin } = createPlugin();
+        const tab = new WorkspacePlusPlusSettingTab(plugin.app, plugin);
+        tab.activeTab = 'sessions'; tab.display();
+
+        const names = () => h.obsidian.settings.map((setting) => setting.nameEl.textContent);
+        assert.ok(names().includes(L.settingsWarnUnsavedSwitch), 'the dependent rows are there with auto-save off');
+
+        // The toggle has to be found before the record is cleared, or there is
+        // nothing left to click.
+        const autoSaveToggle = toggleFor(h, L.settingsAutoSaveOnSwitch);
+        h.obsidian.settings.length = 0;
+        await autoSaveToggle.trigger(true);
+        await Promise.resolve();
+
+        // Three rows only make sense while switching does not save, so turning
+        // auto-save on has to take them off the screen - which needs a redraw,
+        // not just a stored value.
+        //
+        // The evidence has to be a row only a redraw draws. Counting rows does
+        // not work: the rotation-backup list fills in asynchronously and lands
+        // here whether or not anything was redrawn.
+        assert.ok(
+            names().includes(L.settingsAutoSaveOnSwitch),
+            'the tab was drawn again, not merely left as it was',
+        );
+        assert.ok(
+            !names().includes(L.settingsWarnUnsavedSwitch),
+            'and the rows that no longer apply are gone from it',
+        );
+    } finally { h.restore(); }
+});
+
 test('a manual backup shifts the generations oldest-first so none is overwritten early', async () => {
     const h = setupHarness();
     try {
@@ -270,137 +326,5 @@ test('settings controls exercise both session layouts and the enabled group layo
         tab.activeTab = 'groups';
         tab.display();
         assert.ok(h.obsidian.settings.some((setting) => setting.nameEl.textContent === 'Focus'));
-    } finally { h.restore(); }
-});
-
-test('the General page controls reach their own setters when rendered imperatively', async () => {
-    const h = setupHarness();
-    try {
-        const { WorkspacePlusPlusSettingTab, L } = load(h);
-        const { plugin, calls } = createPlugin();
-        const tab = new WorkspacePlusPlusSettingTab(plugin.app, plugin);
-        tab.activeTab = 'general'; tab.display();
-
-        // On Obsidian below 1.13 this is the only path that runs: the
-        // definitions are not what is on screen there. The declarative
-        // setControlValue dispatch is tested separately and cannot stand in for
-        // it - the two reach the setters by different routes.
-        await componentFor(h, L.settingsLanguage, 'DropdownStub').trigger('ja');
-        // Deliberately not the first slot: with `click` the assertion would
-        // still pass if the slot key were hardcoded, and there are twelve of them
-        // sharing one builder.
-        await componentFor(h, L.statusBarSlotModRightClick(), 'DropdownStub').trigger('sessionManager');
-
-        assert.deepEqual(calls.filter((entry) => ['language', 'statusAction'].includes(entry[0])), [
-            ['language', 'ja'],
-            ['statusAction', 'modRightClick', 'sessionManager'],
-        ], 'each control writes through its own setter, with its own arguments');
-    } finally { h.restore(); }
-});
-
-test('a toggle that changes which rows exist redraws the page', async () => {
-    const h = setupHarness();
-    try {
-        const { WorkspacePlusPlusSettingTab, L } = load(h);
-        const { plugin } = createPlugin();
-        const tab = new WorkspacePlusPlusSettingTab(plugin.app, plugin);
-        tab.activeTab = 'sessions'; tab.display();
-
-        const names = () => h.obsidian.settings.map((setting) => setting.nameEl.textContent);
-        assert.ok(names().includes(L.settingsWarnUnsavedSwitch), 'the dependent rows are there with auto-save off');
-
-        // The toggle has to be found before the record is cleared, or there is
-        // nothing left to click.
-        const autoSaveToggle = toggleFor(h, L.settingsAutoSaveOnSwitch);
-        h.obsidian.settings.length = 0;
-        await autoSaveToggle.trigger(true);
-        await Promise.resolve();
-
-        // Three rows only make sense while switching does not save, so turning
-        // auto-save on has to take them off the screen - which needs a redraw,
-        // not just a stored value. Below Obsidian 1.13 that redraw is display().
-        //
-        // The evidence has to be a row only display() draws. Counting rows does
-        // not work: the rotation-backup list fills in asynchronously and lands
-        // here whether or not anything was redrawn.
-        assert.ok(
-            names().includes(L.settingsAutoSaveOnSwitch),
-            'the page was drawn again, not merely left as it was',
-        );
-        assert.ok(
-            !names().includes(L.settingsWarnUnsavedSwitch),
-            'and the rows that no longer apply are gone from it',
-        );
-    } finally { h.restore(); }
-});
-
-test('declarative definitions expose the four settings pages and keep the fallback rows identical', async () => {
-    const h = setupHarness();
-    try {
-        const { WorkspacePlusPlusSettingTab, L } = load(h);
-        const { plugin } = createPlugin();
-        const tab = new WorkspacePlusPlusSettingTab(plugin.app, plugin);
-        const definitions = tab.getSettingDefinitions();
-
-        assert.equal(definitions.length, 4, 'a non-empty definition array activates Obsidian 1.13 rendering');
-        assert.deepEqual(definitions.map((definition) => definition.type), ['page', 'page', 'page', 'page']);
-        assert.deepEqual(definitions.map((definition) => definition.name), [
-            L.settingsSectionGeneral, L.settingsTabSessions, L.settingsSectionGroups, L.settingsSectionAdvanced,
-        ]);
-
-        for (const definition of definitions) {
-            h.obsidian.settings.length = 0;
-            definition.renderImperatively(h.dom.document.body);
-            const fromDefinition = h.obsidian.settings.map((setting) => setting.nameEl.textContent);
-
-            h.obsidian.settings.length = 0;
-            tab.activeTab = definition.id;
-            tab.display();
-            const fromDisplay = h.obsidian.settings.map((setting) => setting.nameEl.textContent);
-            assert.deepEqual(fromDisplay, fromDefinition,
-                `${definition.name} fallback must render its definition's exact Setting rows`);
-        }
-    } finally { h.restore(); }
-});
-
-test('declarative control writes dispatch to their owned setters and dynamic rows follow their conditions', async () => {
-    const h = setupHarness();
-    try {
-        const { WorkspacePlusPlusSettingTab, L } = load(h);
-        const { plugin, calls } = createPlugin();
-        const tab = new WorkspacePlusPlusSettingTab(plugin.app, plugin);
-        const writes = [
-            ['language', 'ja', 'language'],
-            ['confirmQuickActions', true, 'confirmQuick'],
-            ['statusBarModScrollSwitch', false, 'modScroll'],
-            ['statusBarScrollPreset', 'trackpad', 'preset'],
-            ['statusBarScrollModifierMode', 'altOnly', 'modifier'],
-            ['statusBarScrollThreshold', '60', 'threshold'],
-            ['statusBarScrollCooldownMs', '750', 'cooldown'],
-            ['statusBarScrollResetMs', '400', 'resetWindow'],
-            ['statusBarScrollInvert', true, 'invert'],
-            ['showActiveSwitchCommand', true, 'activeCommand'],
-            ['numberedSwitchCommands', true, 'numbered'],
-            ['previewNext', true, 'previewNext'],
-            ['previewPrevious', true, 'previewPrevious'],
-            ['showFilterInput', true, 'filter'],
-            ['overlayDefaultFocus', 'session-filter', 'focus'],
-            ['confirmDeleteByHotkey', false, 'confirmDelete'],
-        ];
-        for (const [key, value] of writes) tab.setControlValue(key, value);
-        assert.deepEqual(calls.map((call) => call[0]), writes.map(([, , setter]) => setter),
-            'each declarative key must retain its dedicated setter, in order');
-
-        for (const autoSaveOnSwitch of [false, true]) {
-            plugin.data.autoSaveOnSwitch = autoSaveOnSwitch;
-            h.obsidian.settings.length = 0;
-            tab.activeTab = 'sessions';
-            tab.display();
-            const names = h.obsidian.settings.map((setting) => setting.nameEl.textContent);
-            assert.equal(names.includes(L.settingsWarnUnsavedSwitch), !autoSaveOnSwitch,
-                'unsaved-switch controls appear only while auto-save is off');
-            assert.equal(names.includes(L.settingsVersionHistoryInterval), autoSaveOnSwitch,
-                'history interval appears only while auto-save is on');
-        }
     } finally { h.restore(); }
 });

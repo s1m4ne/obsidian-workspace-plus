@@ -1,4 +1,4 @@
-import { Notice, PluginSettingTab, Setting, type App, type Plugin, type SettingDefinitionItem } from 'obsidian';
+import { Notice, PluginSettingTab, Setting, type App, type Plugin } from 'obsidian';
 import { L, LANG_OPTIONS, LANG_ORDER } from './i18n.ts';
 import { openHotkeysSetting } from './platform/obsidian-internals.ts';
 import { ConfirmModal } from './modals/confirm-modal.ts';
@@ -15,7 +15,7 @@ import {
     type GroupSessionsModalHost,
     type SettingText,
 } from './settings-ui.ts';
-import type { SessionGroup, StatusBarActions } from './storage/default-data.ts';
+import type { SessionGroup, SessionItem, StatusBarActions } from './storage/default-data.ts';
 import type { RotationBackupInfo } from './storage/storage-backup.ts';
 
 export interface StorageDiagnosticsInfo {
@@ -123,19 +123,6 @@ export interface SettingsTabHost extends GroupSessionsModalHost {
 
 type TabId = 'general' | 'sessions' | 'groups' | 'advanced';
 
-/**
- * A page is the one source for both settings renderers. Obsidian 1.13+ uses
- * `items`; the small extra callback lets the pre-1.13 display adapter render
- * exactly the same page without teaching old Obsidian about definitions.
- */
-interface SettingsPageDefinition {
-    type: 'page';
-    id: TabId;
-    name: string;
-    items: SettingDefinitionItem[];
-    renderImperatively(contentEl: HTMLElement): void;
-}
-
 // Which locale key names each status-bar click slot. The slots are data, so the
 // labels cannot be written beside them.
 const SLOT_LABEL_KEYS: Record<string, string> = {
@@ -198,47 +185,6 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
         this.plugin = plugin;
     }
 
-    override getSettingDefinitions(): SettingDefinitionItem[] {
-        return this.getPageDefinitions();
-    }
-
-    /**
-     * The 1.13 renderer calls this for its custom rows. The settings state has
-     * deliberately owned setters with effects, so its values cannot be written
-     * straight into Plugin.settings by the default implementation.
-     */
-    override getControlValue(key: string): unknown {
-        return this.plugin.data[key];
-    }
-
-    override setControlValue(key: string, value: unknown): void | Promise<void> {
-        const setters: Record<string, (next: unknown) => unknown> = {
-            language: (next) => this.plugin.setLanguageSetting(text(next)),
-            confirmQuickActions: (next) => this.plugin.setConfirmQuickActions(!!next),
-            statusBarModScrollSwitch: (next) => this.plugin.setStatusBarModScrollSwitch(!!next),
-            statusBarScrollPreset: (next) => this.plugin.setStatusBarScrollPreset(text(next)),
-            statusBarScrollModifierMode: (next) => this.plugin.setStatusBarScrollModifierMode(text(next)),
-            statusBarScrollThreshold: (next) => this.plugin.setStatusBarScrollThreshold(text(next)),
-            statusBarScrollCooldownMs: (next) => this.plugin.setStatusBarScrollCooldownMs(text(next)),
-            statusBarScrollResetMs: (next) => this.plugin.setStatusBarScrollResetMs(text(next)),
-            statusBarScrollInvert: (next) => this.plugin.setStatusBarScrollInvert(!!next),
-            showActiveSwitchCommand: (next) => this.plugin.setShowActiveSwitchCommand(!!next),
-            numberedSwitchCommands: (next) => this.plugin.setNumberedSwitchCommands(!!next),
-            previewNext: (next) => this.plugin.setPreviewNext(!!next),
-            previewPrevious: (next) => this.plugin.setPreviewPrevious(!!next),
-            showFilterInput: (next) => this.plugin.setShowFilterInput(!!next),
-            overlayDefaultFocus: (next) => this.plugin.setOverlayDefaultFocus(text(next)),
-            confirmDeleteByHotkey: (next) => this.plugin.setConfirmDeleteByHotkey(!!next),
-        };
-        const setter = setters[key];
-        if (setter) {
-            const result = setter(value);
-            this.refresh();
-            return result instanceof Promise ? result : undefined;
-        }
-        this.plugin.data[key] = value;
-    }
-
     override display(): void {
         const containerEl = this.containerEl;
         containerEl.empty();
@@ -259,77 +205,18 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
             });
             btn.addEventListener('click', () => {
                 this.activeTab = tab.id;
-                this.refresh();
+                this.display();
             });
         }
 
         const contentEl = containerEl.createDiv({ cls: 'wpp-settings-tab-content' });
 
-        const page = this.getPageDefinitions().find((definition) => definition.id === this.activeTab);
-        page?.renderImperatively(contentEl);
+        if (this.activeTab === 'general') this.displayGeneral(contentEl);
+        if (this.activeTab === 'sessions') this.displaySessions(contentEl);
+        if (this.activeTab === 'groups') this.displayGroups(contentEl);
+        if (this.activeTab === 'advanced') this.displayAdvanced(contentEl);
 
         this.displayFooter(containerEl);
-    }
-
-    private getPageDefinitions(): SettingsPageDefinition[] {
-        return [
-            this.createPageDefinition('general', text(L.settingsSectionGeneral), (contentEl) => {
-                this.displayGeneral(contentEl);
-            }),
-            this.createPageDefinition('sessions', text(L.settingsTabSessions), (contentEl) => {
-                this.displaySessions(contentEl);
-            }),
-            this.createPageDefinition('groups', text(L.settingsSectionGroups), (contentEl) => {
-                this.displayGroups(contentEl);
-            }),
-            this.createPageDefinition('advanced', text(L.settingsSectionAdvanced), (contentEl) => {
-                this.displayAdvanced(contentEl);
-            }),
-        ];
-    }
-
-    private createPageDefinition(
-        id: TabId,
-        name: string,
-        renderImperatively: (contentEl: HTMLElement) => void,
-    ): SettingsPageDefinition {
-        return {
-            type: 'page',
-            id,
-            name,
-            items: [{
-                name,
-                searchable: false,
-                render: (setting) => {
-                    setting.settingEl.empty();
-                    renderImperatively(setting.settingEl);
-                },
-            }],
-            renderImperatively,
-        };
-    }
-
-    /**
-     * Redraw after a change that alters which rows are visible.
-     *
-     * update() re-reads the definitions and arrived in 1.13.0. minAppVersion is
-     * 1.11.0, so on an older Obsidian it does not exist - and there the
-     * definitions are not what is on screen anyway, so display() is the redraw.
-     * The check is on the method rather than on a version, because that is the
-     * thing actually being relied on.
-     *
-     * obsidianmd/no-unsupported-api flags both lines below, correctly: update()
-     * does postdate minAppVersion. The guard is what makes the call safe, and the
-     * rule cannot see a guard. The two violations are recorded in the lint
-     * baseline rather than suppressed here, and they go when minAppVersion is
-     * eventually raised past 1.13 and this method becomes one line.
-     */
-    private refresh(): void {
-        if (typeof this.update === 'function') {
-            this.update();
-            return;
-        }
-        this.display();
     }
 
     private addSection(contentEl: HTMLElement, title: unknown): void {
@@ -347,7 +234,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
                 }
                 dropdown.setValue(this.plugin.data.language || 'auto');
                 dropdown.onChange((value) => {
-                    void this.plugin.setLanguageSetting(value).then(() => { this.refresh(); });
+                    void this.plugin.setLanguageSetting(value).then(() => { this.display(); });
                 });
             });
 
@@ -386,7 +273,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
             .addToggle((toggle) => {
                 toggle.setValue(autoSaveOnSwitch);
                 toggle.onChange((value) => {
-                    void this.plugin.setAutoSaveOnSwitch(value).then(() => { this.refresh(); });
+                    void this.plugin.setAutoSaveOnSwitch(value).then(() => { this.display(); });
                 });
             });
 
@@ -441,7 +328,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
             desc: text(L.settingsStatusBarModScrollSwitchDesc),
             value: !!this.plugin.data.statusBarModScrollSwitch,
             onChange: (value) => {
-                void this.plugin.setStatusBarModScrollSwitch(value).then(() => { this.refresh(); });
+                void this.plugin.setStatusBarModScrollSwitch(value).then(() => { this.display(); });
             },
         });
 
@@ -458,7 +345,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
                 custom: text(L.settingsStatusBarScrollPresetCustom),
             },
             onChange: (value) => {
-                void this.plugin.setStatusBarScrollPreset(value).then(() => { this.refresh(); });
+                void this.plugin.setStatusBarScrollPreset(value).then(() => { this.display(); });
             },
         });
 
@@ -547,7 +434,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
             .addToggle((toggle) => {
                 toggle.setValue(allOn);
                 toggle.onChange((value) => {
-                    void this.plugin.setSwitchPreviewEnabled(value).then(() => { this.refresh(); });
+                    void this.plugin.setSwitchPreviewEnabled(value).then(() => { this.display(); });
                 });
             });
 
@@ -559,7 +446,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
             .addToggle((toggle) => {
                 toggle.setValue(!!this.plugin.data.previewNext);
                 toggle.onChange((value) => {
-                    void this.plugin.setPreviewNext(value).then(() => { this.refresh(); });
+                    void this.plugin.setPreviewNext(value).then(() => { this.display(); });
                 });
             });
 
@@ -568,7 +455,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
             .addToggle((toggle) => {
                 toggle.setValue(!!this.plugin.data.previewPrevious);
                 toggle.onChange((value) => {
-                    void this.plugin.setPreviewPrevious(value).then(() => { this.refresh(); });
+                    void this.plugin.setPreviewPrevious(value).then(() => { this.display(); });
                 });
             });
     }
@@ -617,7 +504,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
             .addToggle((toggle) => {
                 toggle.setValue(versionHistoryEnabled);
                 toggle.onChange((value) => {
-                    void this.plugin.setVersionHistoryEnabled(value).then(() => { this.refresh(); });
+                    void this.plugin.setVersionHistoryEnabled(value).then(() => { this.display(); });
                 });
             });
 
@@ -676,7 +563,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
                         .then(() => this.plugin.writeJson(this.plugin.getRotationBackupPath(1), backupData))
                         .then(() => {
                             this.plugin._lastRotationBackupAt = Date.now();
-                            this.refresh();
+                            this.display();
                         })
                         .catch(() => { btn.setDisabled(false); });
                 });
@@ -720,7 +607,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
                     // deliberately not awaited - it redraws itself when it lands.
                     () => {
                         void this.plugin.restoreFromRotationBackup(backup.generation).then((ok) => {
-                            if (ok) this.refresh();
+                            if (ok) this.display();
                         });
                     },
                     { confirmText: text(L.rotationBackupRestore) },
@@ -735,7 +622,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
             desc: text(L.settingsSectionGroupsDesc),
             value: this.plugin.isGroupFeatureEnabled(),
             onChange: (value) => {
-                void this.plugin.setGroupFeatureEnabled(value).then(() => { this.refresh(); });
+                void this.plugin.setGroupFeatureEnabled(value).then(() => { this.display(); });
             },
         });
 
@@ -756,7 +643,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
             btn.onClick(() => {
                 if (!groupNameInput) return;
                 void this.plugin.createGroupValidated(groupNameInput.getValue()).then((created) => {
-                    if (created) this.refresh();
+                    if (created) this.display();
                 });
             });
         });
@@ -783,7 +670,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
             btn.onClick(() => {
                 new RenameModal(this.app, group.name, (newName: string) => {
                     void this.plugin.renameGroupValidated(group.id, newName).then((renamed) => {
-                        if (renamed) this.refresh();
+                        if (renamed) this.display();
                     });
                 }, { emptyNotice: text(L.groupEmptyName) }).open();
             });
@@ -794,7 +681,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
             btn.setTooltip(text(L.settingsGroupDelete));
             btn.onClick(() => {
                 new ConfirmModal(this.app, format(L.settingsGroupDeleteConfirm, group.name), () => {
-                    void this.plugin.deleteGroup(group.id).then(() => { this.refresh(); });
+                    void this.plugin.deleteGroup(group.id).then(() => { this.display(); });
                 }).open();
             });
         });
@@ -814,12 +701,12 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
             onChange: (value) => {
                 void this.plugin
                     .setSessionStorageLocation(value ? 'vault-folder' : 'plugin-folder')
-                    .then(() => { this.refresh(); })
+                    .then(() => { this.display(); })
                     .catch(() => {
                         // The move rolls itself back, so the screen has to be
                         // redrawn from what the location actually is now.
                         new Notice(text(L.sessionStorageMoveFailed));
-                        this.refresh();
+                        this.display();
                     });
             },
         });
@@ -860,7 +747,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
 
     private displayResets(contentEl: HTMLElement): void {
         this.addSection(contentEl, L.settingsSectionReset);
-        const redraw = (): void => { this.refresh(); };
+        const redraw = (): void => { this.display(); };
 
         addDangerResetSetting(contentEl, this.app, redraw, {
             name: text(L.settingsResetSettings),
