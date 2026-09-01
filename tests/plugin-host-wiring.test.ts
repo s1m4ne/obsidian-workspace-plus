@@ -13,7 +13,7 @@ import { setupHarness } from './lock/harness/index.ts';
 
 const harness = setupHarness();
 const { createRealPlugin } = await import('./real-plugin.ts');
-const { sessionStoreHost, sessionSwitcherHost, settingsStateHost, groupStoreHost, historyServiceHost } = await import('../src/main.ts');
+const { sessionStoreHost, sessionSwitcherHost, settingsStateHost, groupStoreHost, historyServiceHost, sessionSaverHost } = await import('../src/main.ts');
 
 type Call = string;
 
@@ -231,6 +231,115 @@ test('the HistoryService host reaches the collaborator each member names', () =>
         'plugin.persistData',
         'sessionSaver.isAutoSaveOnSwitchEnabled',
     ]);
+});
+
+test('the SessionSaver host reaches the collaborator each member names', () => {
+    const { plugin, calls } = createPlugin();
+    plugin.startHistorySnapshotTimer = (): void => { calls.push('plugin.startHistorySnapshotTimer'); };
+    plugin.stopHistorySnapshotTimer = (): void => { calls.push('plugin.stopHistorySnapshotTimer'); };
+    const host = sessionSaverHost(asPlugin(plugin));
+
+    host.getActiveSession();
+    host.getCurrentWorkspaceLayout();
+    host.layoutsEqualStructural({}, {});
+    host.getDefaultSessionName();
+    host.pushLayoutToHistory({ id: 's1', name: 'S', layout: {}, modified: 0 });
+    host.updateStatusBar?.();
+    host.syncSessionCommands?.();
+    void host.persistData();
+    host.createSessionRecord('id', 'name', {});
+    host.insertSessionAndActivate({ id: 's1', name: 'S', layout: {}, modified: 0 });
+    host.startHistorySnapshotTimer?.();
+    host.stopHistorySnapshotTimer?.();
+    void host.applyWorkspaceLayout({});
+    host.getOrderedSessionsUnfiltered();
+    host.getOrderedGroupTabIds();
+    host.isGroupFeatureEnabled();
+
+    assert.deepEqual(calls, [
+        'sessionStore.getActiveSession',
+        'sessionStore.getCurrentWorkspaceLayout',
+        'sessionStore.layoutsEqualStructural',
+        'sessionStore.getDefaultSessionName',
+        'historyService.pushLayoutToHistory',
+        'plugin.updateStatusBar',
+        'plugin.syncSessionCommands',
+        'plugin.persistData',
+        'sessionStore.createSessionRecord',
+        'sessionStore.insertSessionAndActivate',
+        'plugin.startHistorySnapshotTimer',
+        'plugin.stopHistorySnapshotTimer',
+        'sessionSwitcher.applyWorkspaceLayout',
+        'sessionStore.getOrderedSessionsUnfiltered',
+        'groupStore.getOrderedGroupTabIds',
+        'groupStore.isGroupFeatureEnabled',
+    ]);
+});
+
+test('the saver host leaves out the two hooks the adapter supplied as empty functions', () => {
+    const { plugin } = createPlugin();
+    const host = sessionSaverHost(asPlugin(plugin));
+
+    // The saver survived the empty functions only because it tests the result
+    // for undefined rather than the hook for existence.
+    assert.equal('saveActiveSession' in host, false);
+    assert.equal('overwriteSessionWithCurrentLayout' in host, false);
+});
+
+test('every host reads its live collaborator fields from the plugin', () => {
+    const { plugin, calls } = createPlugin();
+
+    // The fields are getters, so reading one is what proves it reaches the
+    // plugin rather than a value captured when the host was built. Each recorder
+    // is a distinct object, so the assertion also names which collaborator.
+    const seen: string[] = [];
+    const note = (label: string, value: unknown): void => {
+        seen.push(`${label}:${typeof value === 'object' && value !== null ? 'object' : String(value)}`);
+    };
+
+    const store = sessionStoreHost(asPlugin(plugin));
+    note('store.data', store.data);
+    note('store.app', store.app);
+    note('store.manifestId', store.manifestId);
+    note('store.groupStore', store.groupStore);
+    note('store.settingsState', store.settingsState);
+
+    const switcher = sessionSwitcherHost(asPlugin(plugin));
+    note('switcher.data', switcher.data);
+    note('switcher.app', switcher.app);
+    note('switcher.switchOverlayEl', switcher.switchOverlayEl);
+    note('switcher.settingsState', switcher.settingsState);
+    note('switcher.sessionStore', switcher.sessionStore);
+    note('switcher.historyService', switcher.historyService);
+    note('switcher.sessionSaver', switcher.sessionSaver);
+
+    const saver = sessionSaverHost(asPlugin(plugin));
+    note('saver.data', saver.data);
+    note('saver.app', saver.app);
+    note('saver.settingsState', saver.settingsState);
+    note('saver.sessionStore', saver.sessionStore);
+    note('saver.groupStore', saver.groupStore);
+    note('saver.historyService', saver.historyService);
+
+    const history = historyServiceHost(asPlugin(plugin));
+    note('history.data', history.data);
+    note('history.settingsState', history.settingsState);
+    note('history.sessionStore', history.sessionStore);
+
+    const groups = groupStoreHost(asPlugin(plugin));
+    note('groups.data', groups.data);
+    note('groups.settingsState', groups.settingsState);
+
+    const settings = settingsStateHost(asPlugin(plugin));
+    note('settings.data', settings.data);
+
+    assert.deepEqual(
+        seen.filter((entry) => entry.endsWith(':undefined')),
+        [],
+        'every field must resolve; undefined means the getter reached nothing',
+    );
+    assert.equal(store.manifestId, 'workspace-plus-plus');
+    assert.deepEqual(calls, [], 'reading a field must not call a collaborator method');
 });
 
 test('the switcher host leaves out the hooks the switcher implements itself', () => {

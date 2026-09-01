@@ -16,7 +16,8 @@ import { GroupStore } from './state/group-store.ts';
 import type { GroupStoreHost } from './state/group-store.ts';
 import { HistoryService } from './state/history-service.ts';
 import type { HistoryServiceHost } from './state/history-service.ts';
-import type { SessionSaver } from './state/session-saver.ts';
+import { SessionSaver } from './state/session-saver.ts';
+import type { SessionSaverHost } from './state/session-saver.ts';
 import { SessionStore } from './state/session-store.ts';
 import type { SessionStoreHost } from './state/session-store.ts';
 import { SessionSwitcher } from './state/session-switcher.ts';
@@ -47,7 +48,6 @@ interface AttachedPluginMethods {
 
     getSessionStorage(): SessionStorage;
     getSyncWatcher(): SyncWatcher;
-    getSessionSaver(): SessionSaver;
     getFrontmatterLinker(): FrontmatterLinker;
     getStatusBarController(): StatusBarController;
     getCommandRegistry(): CommandRegistry;
@@ -184,6 +184,15 @@ export class WorkspacePlusPlus extends Plugin {
             this.sessionStoreInstance = new SessionStore(sessionStoreHost(this));
         }
         return this.sessionStoreInstance;
+    }
+
+    private sessionSaverInstance?: SessionSaver;
+
+    getSessionSaver(): SessionSaver {
+        if (!this.sessionSaverInstance) {
+            this.sessionSaverInstance = new SessionSaver(sessionSaverHost(this));
+        }
+        return this.sessionSaverInstance;
     }
 
     private historyServiceInstance?: HistoryService;
@@ -448,5 +457,49 @@ export function historyServiceHost(plugin: WorkspacePlusPlus): HistoryServiceHos
         updateStatusBar: () => { plugin.updateStatusBar(); },
         persistData: () => plugin.persistData(),
         isAutoSaveOnSwitchEnabled: () => plugin.getSessionSaver().isAutoSaveOnSwitchEnabled(),
+    };
+}
+
+/**
+ * The host SessionSaver is given.
+ *
+ * saveActiveSession and overwriteSessionWithCurrentLayout are absent. The
+ * adapter supplied both as empty functions, which the saver survived only
+ * because it tests the *result* for undefined rather than the hook for
+ * existence - two of the fifteen dual-dispatch sites the ratchet records. An
+ * absent hook says the same thing and cannot be mistaken for a hook someone
+ * forgot to finish.
+ */
+export function sessionSaverHost(plugin: WorkspacePlusPlus): SessionSaverHost {
+    return {
+        get data() { return plugin.data; },
+        get app() { return plugin.app; },
+        get settingsState() { return plugin.getSettingsState(); },
+        get sessionStore() { return plugin.getSessionStore(); },
+        get groupStore() { return plugin.getGroupStore(); },
+        get historyService() { return plugin.getHistoryService(); },
+        getActiveSession: () => plugin.getSessionStore().getActiveSession(),
+        getCurrentWorkspaceLayout: () => plugin.getSessionStore().getCurrentWorkspaceLayout(),
+        layoutsEqualStructural: (a, b) => plugin.getSessionStore().layoutsEqualStructural(a, b),
+        getDefaultSessionName: () => plugin.getSessionStore().getDefaultSessionName(),
+        pushLayoutToHistory: (session) => { plugin.getHistoryService().pushLayoutToHistory(session); },
+        updateStatusBar: () => { plugin.updateStatusBar(); },
+        syncSessionCommands: () => { plugin.syncSessionCommands(); },
+        persistData: () => plugin.persistData(),
+        createSessionRecord: (id, name, layout, options) =>
+            plugin.getSessionStore().createSessionRecord(id, name, layout, options),
+        insertSessionAndActivate: (session) => { plugin.getSessionStore().insertSessionAndActivate(session); },
+        startHistorySnapshotTimer: () => { plugin.startHistorySnapshotTimer(); },
+        stopHistorySnapshotTimer: () => { plugin.stopHistorySnapshotTimer(); },
+        applyWorkspaceLayout: (layout) => plugin.getSessionSwitcher().applyWorkspaceLayout(layout),
+        getOrderedSessionsUnfiltered: () => plugin.getSessionStore().getOrderedSessionsUnfiltered(),
+        getOrderedGroupTabIds: () => plugin.getGroupStore().getOrderedGroupTabIds(),
+        isGroupFeatureEnabled: () => plugin.getGroupStore().isGroupFeatureEnabled(),
+        openRenameModal: (placeholder, onRename, options) => {
+            new RenameModal(plugin.app, placeholder, onRename, options).open();
+        },
+        openConfirmModal: (message, onConfirm, options) => {
+            new ConfirmModal(plugin.app, message, onConfirm, options).open();
+        },
     };
 }
