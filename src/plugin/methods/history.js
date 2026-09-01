@@ -1,61 +1,7 @@
 'use strict';
 
-var attachSettingsStateMethods = require('./settings-state');
-var historyService = require('../../state/history-service.ts');
-var layoutUtils = require('../../layout-utils.ts');
-
-function attachHistoryStoreGetter(WorkspacePlusPlus) {
-    attachSettingsStateMethods(WorkspacePlusPlus);
-
-    if (WorkspacePlusPlus.prototype.getHistoryService) return;
-    WorkspacePlusPlus.prototype.getHistoryService = function () {
-        var self = this;
-        if (!this._historyService) {
-            this._historyService = new historyService.HistoryService({
-                get data() { return self.data; },
-                get settingsState() { return typeof self.getSettingsState === 'function' ? self.getSettingsState() : undefined; },
-                get sessionStore() { return typeof self.getSessionStore === 'function' ? self.getSessionStore() : undefined; },
-                getActiveSession: function () {
-                    return typeof self.getActiveSession === 'function' ? self.getActiveSession() : null;
-                },
-                getCurrentWorkspaceLayout: function () {
-                    return typeof self.getCurrentWorkspaceLayout === 'function' ? self.getCurrentWorkspaceLayout() : {};
-                },
-                applyWorkspaceLayout: function (layout) {
-                    return typeof self.applyWorkspaceLayout === 'function'
-                        ? self.applyWorkspaceLayout(layout)
-                        : Promise.resolve(true);
-                },
-                layoutsEqualStructural: function (a, b) {
-                    if (typeof self.layoutsEqualStructural === 'function') {
-                        return self.layoutsEqualStructural(a, b);
-                    }
-                    var restoreScope = typeof self.getWorkspaceRestoreScope === 'function'
-                        ? self.getWorkspaceRestoreScope()
-                        : 'full';
-                    return layoutUtils.layoutsEqualStructural(a, b, { restoreScope: restoreScope });
-                },
-                updateStatusBar: function () {
-                    if (typeof self.updateStatusBar === 'function') self.updateStatusBar();
-                },
-                persistData: function () {
-                    return typeof self.persistData === 'function'
-                        ? self.persistData()
-                        : Promise.resolve(true);
-                },
-                isAutoSaveOnSwitchEnabled: function () {
-                    return typeof self.isAutoSaveOnSwitchEnabled === 'function'
-                        ? self.isAutoSaveOnSwitchEnabled()
-                        : (self.data.autoSaveOnSwitch !== false);
-                },
-            });
-        }
-        return this._historyService;
-    };
-}
 
 function attachHistoryMethods(WorkspacePlusPlus) {
-    attachHistoryStoreGetter(WorkspacePlusPlus);
 
     WorkspacePlusPlus.prototype.isVersionHistoryEnabled = function () {
         return this.getHistoryService().isVersionHistoryEnabled();

@@ -13,7 +13,7 @@ import { setupHarness } from './lock/harness/index.ts';
 
 const harness = setupHarness();
 const { createRealPlugin } = await import('./real-plugin.ts');
-const { sessionStoreHost, sessionSwitcherHost, settingsStateHost, groupStoreHost } = await import('../src/main.ts');
+const { sessionStoreHost, sessionSwitcherHost, settingsStateHost, groupStoreHost, historyServiceHost } = await import('../src/main.ts');
 
 type Call = string;
 
@@ -205,6 +205,31 @@ test('the GroupStore host reaches the collaborator each member names', () => {
         'sessionSwitcher.switchSession',
         'sessionStore.getOrderedSessionsUnfiltered',
         'sessionStore.getOrderedSessionsForGroup',
+    ]);
+});
+
+test('the HistoryService host reaches the collaborator each member names', () => {
+    const { plugin, calls } = createPlugin();
+    const host = historyServiceHost(asPlugin(plugin));
+
+    host.getActiveSession();
+    host.getCurrentWorkspaceLayout();
+    void host.applyWorkspaceLayout({ pane: 'next' });
+    // Not recomputed here: the adapter had a second implementation of this
+    // comparison, reachable only when the plugin method was missing.
+    host.layoutsEqualStructural({}, {});
+    host.updateStatusBar?.();
+    void host.persistData();
+    host.isAutoSaveOnSwitchEnabled();
+
+    assert.deepEqual(calls, [
+        'sessionStore.getActiveSession',
+        'sessionStore.getCurrentWorkspaceLayout',
+        'sessionSwitcher.applyWorkspaceLayout',
+        'sessionStore.layoutsEqualStructural',
+        'plugin.updateStatusBar',
+        'plugin.persistData',
+        'sessionSaver.isAutoSaveOnSwitchEnabled',
     ]);
 });
 

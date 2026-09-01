@@ -14,7 +14,8 @@ import type { CommandRegistry } from './core/command-registry.ts';
 import type { FrontmatterLinker } from './core/frontmatter-linker.ts';
 import { GroupStore } from './state/group-store.ts';
 import type { GroupStoreHost } from './state/group-store.ts';
-import type { HistoryService } from './state/history-service.ts';
+import { HistoryService } from './state/history-service.ts';
+import type { HistoryServiceHost } from './state/history-service.ts';
 import type { SessionSaver } from './state/session-saver.ts';
 import { SessionStore } from './state/session-store.ts';
 import type { SessionStoreHost } from './state/session-store.ts';
@@ -46,7 +47,6 @@ interface AttachedPluginMethods {
 
     getSessionStorage(): SessionStorage;
     getSyncWatcher(): SyncWatcher;
-    getHistoryService(): HistoryService;
     getSessionSaver(): SessionSaver;
     getFrontmatterLinker(): FrontmatterLinker;
     getStatusBarController(): StatusBarController;
@@ -184,6 +184,15 @@ export class WorkspacePlusPlus extends Plugin {
             this.sessionStoreInstance = new SessionStore(sessionStoreHost(this));
         }
         return this.sessionStoreInstance;
+    }
+
+    private historyServiceInstance?: HistoryService;
+
+    getHistoryService(): HistoryService {
+        if (!this.historyServiceInstance) {
+            this.historyServiceInstance = new HistoryService(historyServiceHost(this));
+        }
+        return this.historyServiceInstance;
     }
 
     private groupStoreInstance?: GroupStore;
@@ -416,5 +425,28 @@ export function groupStoreHost(plugin: WorkspacePlusPlus): GroupStoreHost {
         switchSession: (sessionId) => plugin.getSessionSwitcher().switchSession(sessionId),
         getOrderedSessionsUnfiltered: () => plugin.getSessionStore().getOrderedSessionsUnfiltered(),
         getOrderedSessionsForGroup: (groupId) => plugin.getSessionStore().getOrderedSessionsForGroup(groupId),
+    };
+}
+
+/**
+ * The host HistoryService is given.
+ *
+ * layoutsEqualStructural goes to the store rather than being recomputed here.
+ * The adapter had a fallback that called layout-utils directly with a restore
+ * scope it resolved itself, so the same comparison had two implementations and
+ * only one of them was reachable in production.
+ */
+export function historyServiceHost(plugin: WorkspacePlusPlus): HistoryServiceHost {
+    return {
+        get data() { return plugin.data; },
+        get settingsState() { return plugin.getSettingsState(); },
+        get sessionStore() { return plugin.getSessionStore(); },
+        getActiveSession: () => plugin.getSessionStore().getActiveSession(),
+        getCurrentWorkspaceLayout: () => plugin.getSessionStore().getCurrentWorkspaceLayout(),
+        applyWorkspaceLayout: (layout) => plugin.getSessionSwitcher().applyWorkspaceLayout(layout),
+        layoutsEqualStructural: (a, b) => plugin.getSessionStore().layoutsEqualStructural(a, b),
+        updateStatusBar: () => { plugin.updateStatusBar(); },
+        persistData: () => plugin.persistData(),
+        isAutoSaveOnSwitchEnabled: () => plugin.getSessionSaver().isAutoSaveOnSwitchEnabled(),
     };
 }
