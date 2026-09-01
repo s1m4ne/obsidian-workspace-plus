@@ -5,9 +5,6 @@ var storageBackup = require('../../storage/storage-backup.ts');
 function attachStorageBackupMethods(WorkspacePlusPlus) {
     // --- Rotation backup ---
 
-    WorkspacePlusPlus.prototype.getBackupPlatformLabel = function () {
-        return storageBackup.getBackupPlatformLabel();
-    };
 
     WorkspacePlusPlus.prototype.prepareRotationBackupData = function (sessionData) {
         return storageBackup.prepareRotationBackupData(sessionData);

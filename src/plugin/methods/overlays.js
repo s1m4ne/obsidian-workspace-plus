@@ -91,9 +91,6 @@ function attachOverlayMethods(WorkspacePlusPlus) {
         return this.getSwitchOverlay().show(ordered, activeIndex, viewGroupId, options);
     };
 
-    WorkspacePlusPlus.prototype.cleanupOverlayListeners = function () {
-        return this.getSwitchOverlay().cleanupListeners();
-    };
 
     WorkspacePlusPlus.prototype.hideSwitchOverlay = function () {
         return this.getSwitchOverlay().hide();

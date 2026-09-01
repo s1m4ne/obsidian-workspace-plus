@@ -41,9 +41,6 @@ function attachSessionMethods(WorkspacePlusPlus) {
         return this.getSessionStore().getOrderedSessionsForGroup(groupId);
     };
 
-    WorkspacePlusPlus.prototype.mergeVisibleSessionOrder = function (visibleOrder) {
-        return this.getSessionStore().mergeVisibleSessionOrder(visibleOrder);
-    };
 
     WorkspacePlusPlus.prototype.setSessionOrderFromVisible = function (visibleOrder, options) {
         return this.getSessionStore().setSessionOrderFromVisible(visibleOrder, options);
@@ -53,13 +50,7 @@ function attachSessionMethods(WorkspacePlusPlus) {
         return this.getSessionStore().getCurrentWorkspaceLayout();
     };
 
-    WorkspacePlusPlus.prototype.serializeLayout = function (layout) {
-        return this.getSessionStore().serializeLayout(layout);
-    };
 
-    WorkspacePlusPlus.prototype.layoutsEqual = function (a, b) {
-        return this.getSessionStore().layoutsEqual(a, b);
-    };
 
     WorkspacePlusPlus.prototype.layoutsEqualStructural = function (a, b) {
         return this.getSessionStore().layoutsEqualStructural(a, b);

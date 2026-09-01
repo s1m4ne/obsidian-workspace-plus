@@ -23,17 +23,11 @@ function attachHistoryMethods(WorkspacePlusPlus) {
         return this.getHistoryService().countPanesInLayout(layout);
     };
 
-    WorkspacePlusPlus.prototype.compactHistory = function (history) {
-        return this.getHistoryService().compactHistory(history);
-    };
 
     WorkspacePlusPlus.prototype.pushLayoutToHistory = function (session) {
         return this.getHistoryService().pushLayoutToHistory(session);
     };
 
-    WorkspacePlusPlus.prototype.restoreFromHistoryEntry = function (sessionId, entryIndex) {
-        return this.getHistoryService().restoreFromHistoryEntry(sessionId, entryIndex);
-    };
 
     WorkspacePlusPlus.prototype.quickRestoreLatestHistory = function () {
         return this.getHistoryService().quickRestoreLatestHistory();

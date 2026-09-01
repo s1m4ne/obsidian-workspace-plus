@@ -10,15 +10,7 @@ var sessionSync = require('../../storage/session-sync.ts');
 function attachSessionSyncMethods(WorkspacePlusPlus) {
     attachSessionMethods(WorkspacePlusPlus);
 
-    WorkspacePlusPlus.prototype.getComparableSessionData = function (data) {
-        var self = this;
-        return sessionSync.getComparableSessionData(function (d) { return self.normalizeSessionData(d); }, data);
-    };
 
-    WorkspacePlusPlus.prototype.getComparableSessionDataJson = function (data) {
-        var self = this;
-        return sessionSync.getComparableSessionDataJson(function (d) { return self.normalizeSessionData(d); }, data);
-    };
 
     WorkspacePlusPlus.prototype.recordSessionStorageState = function (stamp, mtime, data) {
         return sessionSync.recordSessionStorageState(this, stamp, mtime, data);
@@ -28,13 +20,7 @@ function attachSessionSyncMethods(WorkspacePlusPlus) {
         return sessionSync.recordSessionDataStored(this, sessionData);
     };
 
-    WorkspacePlusPlus.prototype.getSessionStorageInfo = function () {
-        return sessionSync.getSessionStorageInfo(this);
-    };
 
-    WorkspacePlusPlus.prototype.isSessionStorageInfoNewer = function (info) {
-        return sessionSync.isSessionStorageInfoNewerForHost(this, info);
-    };
 
     WorkspacePlusPlus.prototype.hasLocalSessionChangesSinceStorage = function () {
         return sessionSync.hasLocalSessionChangesSinceStorage(this);

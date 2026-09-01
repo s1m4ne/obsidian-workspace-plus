@@ -46,17 +46,11 @@ function attachGroupMethods(WorkspacePlusPlus) {
         return this.getGroupStore().getActiveGroup();
     };
 
-    WorkspacePlusPlus.prototype.createGroup = function (name) {
-        return this.getGroupStore().createGroup(name);
-    };
 
     WorkspacePlusPlus.prototype.deleteGroup = function (groupId) {
         return this.getGroupStore().deleteGroup(groupId);
     };
 
-    WorkspacePlusPlus.prototype.renameGroup = function (groupId, newName) {
-        return this.getGroupStore().renameGroup(groupId, newName);
-    };
 
     WorkspacePlusPlus.prototype.setActiveGroup = function (groupId) {
         return this.getGroupStore().setActiveGroup(groupId);
@@ -78,9 +72,6 @@ function attachGroupMethods(WorkspacePlusPlus) {
         return this.getGroupStore().switchGroupRelative(offset);
     };
 
-    WorkspacePlusPlus.prototype.removeGroupMembershipFromAllSessions = function (groupId, options) {
-        return this.getGroupStore().removeGroupMembershipFromAllSessions(groupId, options);
-    };
 
     WorkspacePlusPlus.prototype.removeAllSessionsFromGroup = function (groupId, options) {
         return this.getGroupStore().removeAllSessionsFromGroup(groupId, options);

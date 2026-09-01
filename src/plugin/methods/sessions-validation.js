@@ -5,13 +5,7 @@ var attachGroupMethods = require('./groups');
 function attachSessionValidationMethods(WorkspacePlusPlus) {
     attachGroupMethods(WorkspacePlusPlus);
 
-    WorkspacePlusPlus.prototype.isSessionNameTaken = function (name, excludeSessionId) {
-        return this.getSessionStore().isSessionNameTaken(name, excludeSessionId);
-    };
 
-    WorkspacePlusPlus.prototype.isGroupNameTaken = function (name, excludeGroupId) {
-        return this.getSessionStore().isGroupNameTaken(name, excludeGroupId);
-    };
 
     WorkspacePlusPlus.prototype.createSessionValidated = function (name, options) {
         return this.getSessionStore().createSessionValidated(name, options);

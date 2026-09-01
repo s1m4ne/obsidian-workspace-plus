@@ -10,9 +10,6 @@ function attachSessionCommandMethods(WorkspacePlusPlus) {
         return this.getCommandRegistry().registerCommands();
     };
 
-    WorkspacePlusPlus.prototype.formatHotkey = function (hotkey) {
-        return this.getCommandRegistry().formatHotkey(hotkey);
-    };
 
     WorkspacePlusPlus.prototype.getCommandHotkey = function (commandId, index) {
         return this.getCommandRegistry().getCommandHotkey(commandId, index);

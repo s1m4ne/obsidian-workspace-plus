@@ -7,9 +7,6 @@ function attachSessionCrudMethods(WorkspacePlusPlus) {
         return this.getSessionStore().getDefaultSessionName();
     };
 
-    WorkspacePlusPlus.prototype.getAutoSessionName = function (n) {
-        return this.getSessionStore().getAutoSessionName(n);
-    };
 
     WorkspacePlusPlus.prototype.insertSessionAndActivate = function (session) {
         return this.getSessionStore().insertSessionAndActivate(session);
@@ -19,9 +16,6 @@ function attachSessionCrudMethods(WorkspacePlusPlus) {
         return this.getSessionStore().createSessionRecord(id, name, layout, options);
     };
 
-    WorkspacePlusPlus.prototype.createSession = function (name) {
-        return this.getSessionStore().createSession(name);
-    };
 
     WorkspacePlusPlus.prototype.deleteSession = function (sessionId) {
         return this.getSessionStore().deleteSession(sessionId);
@@ -39,9 +33,6 @@ function attachSessionCrudMethods(WorkspacePlusPlus) {
         return this.getSessionStore().deleteAllInactiveSessions();
     };
 
-    WorkspacePlusPlus.prototype.getNextSessionName = function () {
-        return this.getSessionStore().getNextSessionName();
-    };
 
     WorkspacePlusPlus.prototype.resetSessionsToDefault = function () {
         return this.getSessionStore().resetSessionsToDefault();
