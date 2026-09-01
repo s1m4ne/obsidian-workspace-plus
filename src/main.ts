@@ -1,6 +1,8 @@
 import { Plugin } from 'obsidian';
 import { L, resolveLocale } from './i18n.ts';
-import SessionManagerModal from './modals/session-manager-modal.js';
+import { SessionManagerModal, openSessionManagerModal } from './modals/session-manager-modal-class.ts';
+import { HistoryModal } from './modals/history-modal.ts';
+import type { HistoryModalPluginHost } from './modals/history-modal.ts';
 import * as settings from './settings.js';
 import DEFAULT_DATA from './plugin/default-data.js';
 import attachPluginMethods from './plugin/methods/index.js';
@@ -197,6 +199,27 @@ export class WorkspacePlusPlus extends Plugin {
      * one place.
      */
     private frontmatterLinkerInstance?: FrontmatterLinker;
+
+    /**
+     * The plugin owns modal construction.
+     *
+     * The command registry and the status bar used to reach for the modal
+     * classes through optional hooks - `plugin.openHistoryModal?.(session)` -
+     * that nothing defined, so the manage-sessions, create-session and
+     * version-history commands and the status bar actions all did nothing while
+     * every test passed. Defining them here also keeps the modal modules out of
+     * the import graph of statusbar-actions.ts and command-registry.ts: both
+     * modal files evaluate obsidian.Modal when they load, and a static import
+     * from either would pull them in while the test harness is still linking,
+     * before the obsidian stub exists.
+     */
+    openSessionManagerModal(focusName?: boolean): SessionManagerModal {
+        return openSessionManagerModal(this.app, this.asHost<SessionManagerModalHost>(), focusName);
+    }
+
+    openHistoryModal(session: SessionItem): void {
+        new HistoryModal(this.app, this.asHost<HistoryModalPluginHost>(), session).open();
+    }
 
     getFrontmatterLinker(): FrontmatterLinker {
         if (!this.frontmatterLinkerInstance) {

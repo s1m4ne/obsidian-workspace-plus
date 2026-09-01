@@ -179,8 +179,8 @@ async function openModal(
     clearModals(h.dom.document);
     const i18n = await import('../src/i18n.ts');
     i18n.resolveLocale('en');
-    const raw = await import('../src/modals/session-manager-modal.js');
-    const SessionManagerModal = (raw.default ?? raw) as unknown as ModalConstructor;
+    const raw = await import('../src/modals/session-manager-modal-class.ts');
+    const SessionManagerModal = raw.SessionManagerModal as unknown as ModalConstructor;
     const plugin = makePlugin(h.dom.container(), groupFeatureEnabled);
     const modal = new SessionManagerModal(plugin.app, plugin);
     modal.open();
