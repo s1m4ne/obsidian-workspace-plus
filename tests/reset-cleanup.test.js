@@ -2,29 +2,24 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { loadPluginMethods } = require('./helpers');
+const { installObsidianStub } = require('./lock/harness/index.ts');
 
+installObsidianStub();
 
-const methods = loadPluginMethods(['persistence', 'history', 'storage-backup']);
-const attachPersistenceMethods = methods.persistence;
-const attachHistoryMethods = methods.history;
-const attachStorageBackupMethods = methods['storage-backup'];
+const i18n = require('../src/i18n.ts');
+i18n.resolveLocale('en');
+
+const { PersistenceService } = require('../src/storage/persistence-service.ts');
+const { HistoryService } = require('../src/state/history-service.ts');
 
 function createPlugin(options) {
     options = options || {};
-    function PluginMock() {}
-    attachPersistenceMethods(PluginMock);
-    attachStorageBackupMethods(PluginMock);
-    attachHistoryMethods(PluginMock);
 
     const existingFiles = new Set(options.files || []);
     const removedFiles = [];
-    const plugin = new PluginMock();
+    let persistCalls = 0;
 
-    plugin.manifest = {
-        dir: '.obsidian/plugins/workspace-plus-plus',
-    };
-    plugin.data = Object.assign({
+    const data = Object.assign({
         activeSessionId: 'a',
         sessions: {
             a: {
@@ -43,33 +38,57 @@ function createPlugin(options) {
             },
         },
     }, options.data || {});
-    plugin.persistCalls = 0;
-    plugin.app = {
-        vault: {
-            adapter: {
-                exists: function (path) {
-                    return Promise.resolve(existingFiles.has(path));
-                },
-                remove: function (path) {
-                    removedFiles.push(path);
-                    existingFiles.delete(path);
-                    return Promise.resolve();
+
+    const historyService = new HistoryService({ data });
+
+    let persistenceService;
+    const host = {
+        data: data,
+        manifest: { dir: '.obsidian/plugins/workspace-plus-plus' },
+        app: {
+            vault: {
+                adapter: {
+                    exists: function (path) {
+                        return Promise.resolve(existingFiles.has(path));
+                    },
+                    remove: function (path) {
+                        removedFiles.push(path);
+                        existingFiles.delete(path);
+                        return Promise.resolve();
+                    },
                 },
             },
         },
+        clearVersionHistoryEntries: function () {
+            return historyService.clearVersionHistoryEntries();
+        },
+        persistData: function () {
+            persistCalls += 1;
+            return Promise.resolve(true);
+        },
+        resetSessionsToDefault: function () {
+            return Promise.resolve(false);
+        },
+        clearBackupFiles: function () {
+            return persistenceService.clearBackupFiles();
+        },
     };
-    plugin.persistData = function () {
-        plugin.persistCalls += 1;
-        return Promise.resolve(true);
-    };
-    plugin.getRemovedFiles = function () {
-        return removedFiles.slice();
-    };
-    plugin.hasFile = function (path) {
-        return existingFiles.has(path);
-    };
+    persistenceService = new PersistenceService(host);
 
-    return plugin;
+    return {
+        persistenceService: persistenceService,
+        host: host,
+        data: data,
+        getPersistCalls: function () {
+            return persistCalls;
+        },
+        getRemovedFiles: function () {
+            return removedFiles.slice();
+        },
+        hasFile: function (path) {
+            return existingFiles.has(path);
+        },
+    };
 }
 
 test('clearBackupsAndVersionHistory removes backup files and session history', async function () {
@@ -82,15 +101,15 @@ test('clearBackupsAndVersionHistory removes backup files and session history', a
         '.workspace-plus-plus/exports/sessions-keep.json',
     ];
     const plugin = createPlugin({ files: files });
-    plugin._lastRotationBackupAt = 123;
+    plugin.persistenceService.setLastRotationBackupAt(123);
 
-    await plugin.clearBackupsAndVersionHistory();
+    await plugin.persistenceService.clearBackupsAndVersionHistory();
 
     assert.equal(plugin.data.sessions.a.history, undefined);
     assert.equal(plugin.data.sessions.b.history, undefined);
     assert.equal(Object.prototype.hasOwnProperty.call(plugin.data.sessions.c, 'history'), false);
-    assert.equal(plugin.persistCalls, 1);
-    assert.equal(plugin._lastRotationBackupAt, 0);
+    assert.equal(plugin.getPersistCalls(), 1);
+    assert.equal(plugin.persistenceService.getLastRotationBackupAt(), 0);
 
     const removed = plugin.getRemovedFiles().sort();
     assert.deepEqual(removed, [
@@ -113,9 +132,9 @@ test('clearBackupsAndVersionHistory deletes backups even when no history exists'
         },
     });
 
-    await plugin.clearBackupsAndVersionHistory();
+    await plugin.persistenceService.clearBackupsAndVersionHistory();
 
-    assert.equal(plugin.persistCalls, 0);
+    assert.equal(plugin.getPersistCalls(), 0);
     assert.deepEqual(plugin.getRemovedFiles(), ['.workspace-plus-plus/sessions.backup.json']);
 });
 
@@ -124,16 +143,16 @@ test('resetSessionsAndSettingsToDefault also clears backup files', async functio
     let sessionsReset = false;
     let backupsCleared = false;
 
-    plugin.resetSessionsToDefault = function () {
+    plugin.host.resetSessionsToDefault = function () {
         sessionsReset = true;
         return Promise.resolve(true);
     };
-    plugin.clearBackupFiles = function () {
+    plugin.host.clearBackupFiles = function () {
         backupsCleared = true;
         return Promise.resolve(true);
     };
 
-    await plugin.resetSessionsAndSettingsToDefault();
+    await plugin.persistenceService.resetSessionsAndSettingsToDefault();
 
     assert.equal(sessionsReset, true);
     assert.equal(backupsCleared, true);
