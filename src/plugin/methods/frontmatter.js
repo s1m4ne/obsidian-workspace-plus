@@ -1,81 +1,11 @@
 'use strict';
 
-var frontmatterLinker = require('../../core/frontmatter-linker.ts');
 
 // ============================================================
 // Front-matter integration adapter
 // ============================================================
 
 module.exports = function attachFrontmatterMethods(WorkspacePlusPlus) {
-    if (!WorkspacePlusPlus.prototype.getFrontmatterLinker) {
-        WorkspacePlusPlus.prototype.getFrontmatterLinker = function () {
-            var self = this;
-            if (!this._frontmatterLinker) {
-                this._frontmatterLinker = new frontmatterLinker.FrontmatterLinker({
-                    get data() { return self.data; },
-                    get app() { return self.app; },
-                    saveCurrentLayoutAsSessionName: function (name, options) {
-                        if (typeof self.saveCurrentLayoutAsSessionName === 'function') {
-                            return self.saveCurrentLayoutAsSessionName(name, options);
-                        }
-                        if (typeof self.getSessionSaver === 'function') {
-                            return self.getSessionSaver().saveCurrentLayoutAsSessionName(name, options);
-                        }
-                        return Promise.resolve(false);
-                    },
-                    switchSession: function (sessionId, options) {
-                        if (typeof self.switchSession === 'function') {
-                            return self.switchSession(sessionId, options);
-                        }
-                        if (typeof self.getSessionSwitcher === 'function') {
-                            return self.getSessionSwitcher().switchSession(sessionId, options);
-                        }
-                        return Promise.resolve(false);
-                    },
-                    setActiveGroup: function (groupId) {
-                        if (typeof self.setActiveGroup === 'function') {
-                            return self.setActiveGroup(groupId);
-                        }
-                        if (typeof self.getGroupStore === 'function') {
-                            return self.getGroupStore().setActiveGroup(groupId);
-                        }
-                        return Promise.resolve(false);
-                    },
-                    isGroupFeatureEnabled: function () {
-                        if (typeof self.isGroupFeatureEnabled === 'function') {
-                            return self.isGroupFeatureEnabled();
-                        }
-                        if (typeof self.getGroupStore === 'function') {
-                            return self.getGroupStore().isGroupFeatureEnabled();
-                        }
-                        return true;
-                    },
-                    getStartupSettleRemainingMs: function () {
-                        if (typeof self.getStartupSettleRemainingMs === 'function') {
-                            return self.getStartupSettleRemainingMs();
-                        }
-                        if (typeof self.getSessionSwitcher === 'function') {
-                            return self.getSessionSwitcher().getStartupSettleRemainingMs();
-                        }
-                        return 0;
-                    },
-                    isSessionSwitcherActive: function () {
-                        if (typeof self.getSessionSwitcher === 'function') {
-                            return Boolean(self.getSessionSwitcher().isSwitching);
-                        }
-                        return false;
-                    },
-                    registerEvent: function (eventRef) {
-                        if (typeof self.registerEvent === 'function') {
-                            self.registerEvent(eventRef);
-                        }
-                    },
-                });
-            }
-            return this._frontmatterLinker;
-        };
-    }
-
     WorkspacePlusPlus.prototype.getFileFrontmatter = function (file) {
         return this.getFrontmatterLinker().getFileFrontmatter(file);
     };

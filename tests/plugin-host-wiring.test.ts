@@ -13,7 +13,7 @@ import { setupHarness } from './lock/harness/index.ts';
 
 const harness = setupHarness();
 const { createRealPlugin } = await import('./real-plugin.ts');
-const { sessionStoreHost, sessionSwitcherHost, settingsStateHost, groupStoreHost, historyServiceHost, sessionSaverHost } = await import('../src/main.ts');
+const { sessionStoreHost, sessionSwitcherHost, settingsStateHost, groupStoreHost, historyServiceHost, sessionSaverHost, frontmatterLinkerHost } = await import('../src/main.ts');
 
 type Call = string;
 
@@ -22,6 +22,12 @@ function recorder(name: string, calls: Call[]): Record<string, unknown> {
     return new Proxy({}, {
         get(_target, prop: string) {
             if (prop === 'then') return undefined;
+            // Data, not a method: returning a function here would make the
+            // reader see a truthy value and prove nothing about the wiring.
+            if (prop === 'isSwitching') {
+                calls.push(`${name}.${prop}`);
+                return false;
+            }
             return (...args: unknown[]): unknown => {
                 calls.push(`${name}.${prop}`);
                 if (prop.startsWith('getOrdered') || prop === 'findSessionIndex') return [];
@@ -340,6 +346,32 @@ test('every host reads its live collaborator fields from the plugin', () => {
     );
     assert.equal(store.manifestId, 'workspace-plus-plus');
     assert.deepEqual(calls, [], 'reading a field must not call a collaborator method');
+});
+
+test('the FrontmatterLinker host reaches the collaborator each member names', () => {
+    const { plugin, calls } = createPlugin();
+    plugin.registerEvent = (): void => { calls.push('plugin.registerEvent'); };
+    const host = frontmatterLinkerHost(asPlugin(plugin));
+
+    void host.saveCurrentLayoutAsSessionName('S');
+    void host.switchSession('s1');
+    void host.setActiveGroup?.('g1');
+    host.isGroupFeatureEnabled();
+    host.getStartupSettleRemainingMs?.();
+    host.isSessionSwitcherActive?.();
+    host.registerEvent?.({});
+
+    assert.deepEqual(calls, [
+        'sessionSaver.saveCurrentLayoutAsSessionName',
+        'sessionSwitcher.switchSession',
+        'groupStore.setActiveGroup',
+        'groupStore.isGroupFeatureEnabled',
+        'sessionSwitcher.getStartupSettleRemainingMs',
+        'sessionSwitcher.isSwitching',
+        'plugin.registerEvent',
+    ]);
+    // The linker defines this itself; a hook here would be a second answer.
+    assert.equal('handleFrontmatterTriggers' in host, false);
 });
 
 test('the switcher host leaves out the hooks the switcher implements itself', () => {

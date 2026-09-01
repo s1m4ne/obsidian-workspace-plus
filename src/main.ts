@@ -12,7 +12,8 @@ import { openSettingTab } from './platform/obsidian-internals.ts';
 import type { PluginData, SessionItem } from './storage/default-data.ts';
 import { CommandRegistry } from './core/command-registry.ts';
 import type { CommandRegistryHost } from './core/command-registry.ts';
-import type { FrontmatterLinker } from './core/frontmatter-linker.ts';
+import { FrontmatterLinker } from './core/frontmatter-linker.ts';
+import type { FrontmatterLinkerHost } from './core/frontmatter-linker.ts';
 import { GroupStore } from './state/group-store.ts';
 import type { GroupStoreHost } from './state/group-store.ts';
 import { HistoryService } from './state/history-service.ts';
@@ -54,7 +55,6 @@ interface AttachedPluginMethods {
 
     getSessionStorage(): SessionStorage;
     getSyncWatcher(): SyncWatcher;
-    getFrontmatterLinker(): FrontmatterLinker;
 
     normalizeGroupFeatureState(): void;
     syncSessionOrder(): void;
@@ -196,6 +196,15 @@ export class WorkspacePlusPlus extends Plugin {
      * there is nothing to wire - only the narrowing, which asHost() carries in
      * one place.
      */
+    private frontmatterLinkerInstance?: FrontmatterLinker;
+
+    getFrontmatterLinker(): FrontmatterLinker {
+        if (!this.frontmatterLinkerInstance) {
+            this.frontmatterLinkerInstance = new FrontmatterLinker(frontmatterLinkerHost(this));
+        }
+        return this.frontmatterLinkerInstance;
+    }
+
     private commandRegistryInstance?: CommandRegistry;
     private statusBarControllerInstance?: StatusBarController;
     private switchOverlayInstance?: SwitchOverlay;
@@ -544,5 +553,27 @@ export function sessionSaverHost(plugin: WorkspacePlusPlus): SessionSaverHost {
         openConfirmModal: (message, onConfirm, options) => {
             new ConfirmModal(plugin.app, message, onConfirm, options).open();
         },
+    };
+}
+
+/**
+ * The host FrontmatterLinker is given.
+ *
+ * handleFrontmatterTriggers is absent: the linker defines it, and the adapter
+ * declared no hook for it either. Every other member had a two- or three-step
+ * fallback, of which only the first step ran.
+ */
+export function frontmatterLinkerHost(plugin: WorkspacePlusPlus): FrontmatterLinkerHost {
+    return {
+        get data() { return plugin.data; },
+        get app() { return plugin.app; },
+        saveCurrentLayoutAsSessionName: (name, options) =>
+            plugin.getSessionSaver().saveCurrentLayoutAsSessionName(name, options),
+        switchSession: (sessionId) => plugin.getSessionSwitcher().switchSession(sessionId),
+        setActiveGroup: (groupId) => plugin.getGroupStore().setActiveGroup(groupId),
+        isGroupFeatureEnabled: () => plugin.getGroupStore().isGroupFeatureEnabled(),
+        getStartupSettleRemainingMs: () => plugin.getSessionSwitcher().getStartupSettleRemainingMs(),
+        isSessionSwitcherActive: () => plugin.getSessionSwitcher().isSwitching,
+        registerEvent: (eventRef) => { plugin.registerEvent(eventRef); },
     };
 }
