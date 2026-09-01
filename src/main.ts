@@ -19,7 +19,8 @@ import { SessionStore } from './state/session-store.ts';
 import type { SessionStoreHost } from './state/session-store.ts';
 import { SessionSwitcher } from './state/session-switcher.ts';
 import type { SessionSwitcherHost } from './state/session-switcher.ts';
-import type { SettingsState } from './state/settings-state.ts';
+import { SettingsState } from './state/settings-state.ts';
+import type { SettingsStateHost } from './state/settings-state.ts';
 import type { SessionStorage } from './storage/session-storage.ts';
 import type { SyncWatcher } from './storage/sync-watcher.ts';
 import type { StatusBarController, StatusBarControllerHost } from './statusbar-controller.ts';
@@ -44,7 +45,6 @@ interface AttachedPluginMethods {
 
     getSessionStorage(): SessionStorage;
     getSyncWatcher(): SyncWatcher;
-    getSettingsState(): SettingsState;
     getGroupStore(): GroupStore;
     getHistoryService(): HistoryService;
     getSessionSaver(): SessionSaver;
@@ -184,6 +184,15 @@ export class WorkspacePlusPlus extends Plugin {
             this.sessionStoreInstance = new SessionStore(sessionStoreHost(this));
         }
         return this.sessionStoreInstance;
+    }
+
+    private settingsStateInstance?: SettingsState;
+
+    getSettingsState(): SettingsState {
+        if (!this.settingsStateInstance) {
+            this.settingsStateInstance = new SettingsState(settingsStateHost(this));
+        }
+        return this.settingsStateInstance;
     }
 
     private sessionSwitcherInstance?: SessionSwitcher;
@@ -364,5 +373,17 @@ export function sessionSwitcherHost(plugin: WorkspacePlusPlus): SessionSwitcherH
         openUnsavedSwitchModal: (message, onSaveAndSwitch, onSwitchWithoutSaving, onCancel) => {
             new UnsavedSwitchModal(plugin.app, message, onSaveAndSwitch, onSwitchWithoutSaving, onCancel).open();
         },
+    };
+}
+
+/** The host SettingsState is given. */
+export function settingsStateHost(plugin: WorkspacePlusPlus): SettingsStateHost {
+    return {
+        get data() { return plugin.data; },
+        persistData: () => plugin.persistData(),
+        updateStatusBar: () => { plugin.updateStatusBar(); },
+        syncSessionCommands: () => { plugin.syncSessionCommands(); },
+        startHistorySnapshotTimer: () => { plugin.startHistorySnapshotTimer(); },
+        stopHistorySnapshotTimer: () => { plugin.stopHistorySnapshotTimer(); },
     };
 }

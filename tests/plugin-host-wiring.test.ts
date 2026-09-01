@@ -13,7 +13,7 @@ import { setupHarness } from './lock/harness/index.ts';
 
 const harness = setupHarness();
 const { createRealPlugin } = await import('./real-plugin.ts');
-const { sessionStoreHost, sessionSwitcherHost } = await import('../src/main.ts');
+const { sessionStoreHost, sessionSwitcherHost, settingsStateHost } = await import('../src/main.ts');
 
 type Call = string;
 
@@ -158,6 +158,27 @@ test('the SessionSwitcher host reaches the collaborator each member names', () =
         'plugin.updateStatusBar',
         'plugin.showSwitchPreviewOverlay',
         'plugin.showSwitchFeedbackOverlay',
+    ]);
+});
+
+test('the SettingsState host reaches the collaborator each member names', () => {
+    const { plugin, calls } = createPlugin();
+    plugin.startHistorySnapshotTimer = (): void => { calls.push('plugin.startHistorySnapshotTimer'); };
+    plugin.stopHistorySnapshotTimer = (): void => { calls.push('plugin.stopHistorySnapshotTimer'); };
+    const host = settingsStateHost(asPlugin(plugin));
+
+    void host.persistData();
+    host.updateStatusBar?.();
+    host.syncSessionCommands?.();
+    host.startHistorySnapshotTimer?.();
+    host.stopHistorySnapshotTimer?.();
+
+    assert.deepEqual(calls, [
+        'plugin.persistData',
+        'plugin.updateStatusBar',
+        'plugin.syncSessionCommands',
+        'plugin.startHistorySnapshotTimer',
+        'plugin.stopHistorySnapshotTimer',
     ]);
 });
 

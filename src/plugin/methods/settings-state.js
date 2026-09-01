@@ -1,22 +1,7 @@
 'use strict';
 
-var settingsState = require('../../state/settings-state.ts');
 
 function attachSettingsStateMethods(WorkspacePlusPlus) {
-    WorkspacePlusPlus.prototype.getSettingsState = function () {
-        var self = this;
-        if (!this._settingsState) {
-            this._settingsState = new settingsState.SettingsState({
-                get data() { return self.data; },
-                persistData: function () { return self.persistData(); },
-                updateStatusBar: function () { self.updateStatusBar(); },
-                syncSessionCommands: function () { self.syncSessionCommands(); },
-                startHistorySnapshotTimer: function () { self.startHistorySnapshotTimer(); },
-                stopHistorySnapshotTimer: function () { self.stopHistorySnapshotTimer(); },
-            });
-        }
-        return this._settingsState;
-    };
 
     WorkspacePlusPlus.prototype.setLanguageSetting = function (value, options) {
         return this.getSettingsState().setLanguageSetting(value, options);
