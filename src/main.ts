@@ -10,7 +10,8 @@ import { RenameModal } from './modals/rename-modal.ts';
 import { UnsavedSwitchModal } from './modals/unsaved-switch-modal.ts';
 import { openSettingTab } from './platform/obsidian-internals.ts';
 import type { PluginData, SessionItem } from './storage/default-data.ts';
-import type { CommandRegistry } from './core/command-registry.ts';
+import { CommandRegistry } from './core/command-registry.ts';
+import type { CommandRegistryHost } from './core/command-registry.ts';
 import type { FrontmatterLinker } from './core/frontmatter-linker.ts';
 import { GroupStore } from './state/group-store.ts';
 import type { GroupStoreHost } from './state/group-store.ts';
@@ -26,7 +27,12 @@ import { SettingsState } from './state/settings-state.ts';
 import type { SettingsStateHost } from './state/settings-state.ts';
 import type { SessionStorage } from './storage/session-storage.ts';
 import type { SyncWatcher } from './storage/sync-watcher.ts';
-import type { StatusBarController, StatusBarControllerHost } from './statusbar-controller.ts';
+import { StatusBarController } from './statusbar-controller.ts';
+import type { StatusBarControllerHost } from './statusbar-controller.ts';
+import { SwitchOverlay } from './ui/overlays/switch-overlay.ts';
+import type { SwitchOverlayHost } from './ui/overlays/switch-overlay.ts';
+import { SearchOverlay } from './ui/overlays/search-overlay.ts';
+import type { SearchOverlayHost } from './ui/overlays/search-overlay.ts';
 import type { SessionManagerModalHost } from './modals/session-manager-modal-class.ts';
 import type { SettingsTabHost } from './settings-tab.ts';
 
@@ -49,8 +55,6 @@ interface AttachedPluginMethods {
     getSessionStorage(): SessionStorage;
     getSyncWatcher(): SyncWatcher;
     getFrontmatterLinker(): FrontmatterLinker;
-    getStatusBarController(): StatusBarController;
-    getCommandRegistry(): CommandRegistry;
 
     normalizeGroupFeatureState(): void;
     syncSessionOrder(): void;
@@ -184,6 +188,45 @@ export class WorkspacePlusPlus extends Plugin {
             this.sessionStoreInstance = new SessionStore(sessionStoreHost(this));
         }
         return this.sessionStoreInstance;
+    }
+
+    /**
+     * The four collaborators that take the plugin itself rather than a host
+     * literal. Their host interfaces name members the plugin already has, so
+     * there is nothing to wire - only the narrowing, which asHost() carries in
+     * one place.
+     */
+    private commandRegistryInstance?: CommandRegistry;
+    private statusBarControllerInstance?: StatusBarController;
+    private switchOverlayInstance?: SwitchOverlay;
+    private searchOverlayInstance?: SearchOverlay;
+
+    getCommandRegistry(): CommandRegistry {
+        if (!this.commandRegistryInstance) {
+            this.commandRegistryInstance = new CommandRegistry(this.asHost<CommandRegistryHost>());
+        }
+        return this.commandRegistryInstance;
+    }
+
+    getStatusBarController(): StatusBarController {
+        if (!this.statusBarControllerInstance) {
+            this.statusBarControllerInstance = new StatusBarController(this.asHost<StatusBarControllerHost>());
+        }
+        return this.statusBarControllerInstance;
+    }
+
+    getSwitchOverlay(): SwitchOverlay {
+        if (!this.switchOverlayInstance) {
+            this.switchOverlayInstance = new SwitchOverlay(this.asHost<SwitchOverlayHost>());
+        }
+        return this.switchOverlayInstance;
+    }
+
+    getSearchOverlay(): SearchOverlay {
+        if (!this.searchOverlayInstance) {
+            this.searchOverlayInstance = new SearchOverlay(this.asHost<SearchOverlayHost>());
+        }
+        return this.searchOverlayInstance;
     }
 
     private sessionSaverInstance?: SessionSaver;

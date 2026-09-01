@@ -1,17 +1,7 @@
 'use strict';
 
-var statusBarController = require('../../statusbar-controller.ts');
 
 function attachSessionStatusBarMethods(WorkspacePlusPlus) {
-    if (!WorkspacePlusPlus.prototype.getStatusBarController) {
-        WorkspacePlusPlus.prototype.getStatusBarController = function () {
-            if (!this._statusBarController) {
-                this._statusBarController = new statusBarController.StatusBarController(this);
-            }
-            return this._statusBarController;
-        };
-    }
-
     WorkspacePlusPlus.prototype.updateStatusBar = function () {
         return this.getStatusBarController().updateStatusBar();
     };

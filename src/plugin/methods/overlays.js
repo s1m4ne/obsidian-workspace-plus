@@ -1,16 +1,7 @@
 'use strict';
 
-var SwitchOverlay = require('../../ui/overlays/switch-overlay.ts').SwitchOverlay;
-var SearchOverlay = require('../../ui/overlays/search-overlay.ts').SearchOverlay;
 
 function attachOverlayMethods(WorkspacePlusPlus) {
-    WorkspacePlusPlus.prototype.getSearchOverlay = function () {
-        if (!this._searchOverlay) {
-            this._searchOverlay = new SearchOverlay(this);
-        }
-        return this._searchOverlay;
-    };
-
     WorkspacePlusPlus.prototype.filterSessionsByQuery = function (sessions, query) {
         return this.getSearchOverlay().filterSessionsByQuery(sessions, query);
     };
@@ -21,13 +12,6 @@ function attachOverlayMethods(WorkspacePlusPlus) {
 
     // Session sync invokes this legacy hook until commit 27 replaces the
     // reverse dependency with a subscription.
-
-    WorkspacePlusPlus.prototype.getSwitchOverlay = function () {
-        if (!this._switchOverlay) {
-            this._switchOverlay = new SwitchOverlay(this);
-        }
-        return this._switchOverlay;
-    };
 
     Object.defineProperty(WorkspacePlusPlus.prototype, 'switchOverlayEl', {
         get: function () {
@@ -116,7 +100,7 @@ function attachOverlayMethods(WorkspacePlusPlus) {
     };
 
     WorkspacePlusPlus.prototype.hideSearchOverlay = function () {
-        if (this._searchOverlay) return this._searchOverlay.hide();
+        return this.getSearchOverlay().hide();
     };
 }
 
