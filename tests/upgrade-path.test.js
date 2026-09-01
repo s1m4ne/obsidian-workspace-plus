@@ -2,9 +2,15 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { loadPluginMethods } = require('./helpers');
+const { installObsidianStub } = require('./lock/harness/index.ts');
 
-const methods = loadPluginMethods(['persistence', 'session-sync', 'storage-backup']);
+installObsidianStub();
+
+const i18n = require('../src/i18n.ts');
+i18n.resolveLocale('en');
+
+const { PersistenceService } = require('../src/storage/persistence-service.ts');
+const sessionSync = require('../src/storage/session-sync.ts');
 
 const PLUGIN_DIR = '.obsidian/plugins/workspace-plus-plus';
 const DATA_PATH = PLUGIN_DIR + '/data.json';
@@ -13,68 +19,95 @@ const HISTORY_PATH = PLUGIN_DIR + '/history.json';
 const LOCAL_SETTINGS_PATH = '.workspace-plus-plus/settings.local.json';
 
 function createPlugin(files) {
-    function PluginMock() {}
-    methods.persistence(PluginMock);
-    methods['storage-backup'](PluginMock);
-    methods['session-sync'](PluginMock);
+    const manifest = { id: 'workspace-plus-plus', dir: PLUGIN_DIR };
+    const pluginFiles = Object.assign({}, files);
+    const renames = [];
+    const data = {};
 
-    const plugin = new PluginMock();
-    plugin.manifest = { id: 'workspace-plus-plus', dir: PLUGIN_DIR };
-    plugin.files = Object.assign({}, files);
-    plugin.renames = [];
-    plugin.data = {};
-
-    plugin.app = {
+    const app = {
         vault: {
             adapter: {
                 exists: (p) => Promise.resolve(
-                    Object.prototype.hasOwnProperty.call(plugin.files, p)
+                    Object.prototype.hasOwnProperty.call(pluginFiles, p)
                     || p === PLUGIN_DIR || p === '.workspace-plus-plus'
                 ),
                 mkdir: () => Promise.resolve(),
                 read: (p) => (
-                    Object.prototype.hasOwnProperty.call(plugin.files, p)
-                        ? Promise.resolve(plugin.files[p])
+                    Object.prototype.hasOwnProperty.call(pluginFiles, p)
+                        ? Promise.resolve(pluginFiles[p])
                         : Promise.reject(new Error('missing ' + p))
                 ),
                 write: (p, raw) => {
-                    plugin.files[p] = raw;
+                    pluginFiles[p] = raw;
                     return Promise.resolve();
                 },
                 remove: (p) => {
-                    delete plugin.files[p];
+                    delete pluginFiles[p];
                     return Promise.resolve();
                 },
                 rename: (from, to) => {
-                    plugin.renames.push([from, to]);
-                    plugin.files[to] = plugin.files[from];
-                    delete plugin.files[from];
+                    renames.push([from, to]);
+                    pluginFiles[to] = pluginFiles[from];
+                    delete pluginFiles[from];
                     return Promise.resolve();
                 },
                 stat: (p) => Promise.resolve(
-                    Object.prototype.hasOwnProperty.call(plugin.files, p)
-                        ? { mtime: 1000, size: plugin.files[p].length }
+                    Object.prototype.hasOwnProperty.call(pluginFiles, p)
+                        ? { mtime: 1000, size: pluginFiles[p].length }
                         : null
                 ),
             },
         },
     };
 
-    plugin.saveData = (data) => {
-        plugin.files[DATA_PATH] = JSON.stringify(data);
-        return Promise.resolve();
+    let persistenceService;
+    const host = {
+        data: data,
+        manifest: manifest,
+        app: app,
+        loadData: () => Promise.resolve(
+            Object.prototype.hasOwnProperty.call(pluginFiles, DATA_PATH)
+                ? JSON.parse(pluginFiles[DATA_PATH])
+                : null
+        ),
+        saveData: (savedValue) => {
+            pluginFiles[DATA_PATH] = JSON.stringify(savedValue);
+            return Promise.resolve();
+        },
+        normalizeSessionData: (d) => persistenceService.normalizeSessionData(d),
+        getSessionsPath: () => persistenceService.getSessionsPath(),
+        readJsonIfExists: (path) => persistenceService.getJsonStore().readJsonIfExists(path),
+        getFileMtime: (path) => persistenceService.getJsonStore().getFileMtime(path),
+        // Real implementations, not stubs: this is what the production adapter
+        // wires when session-sync is attached, and loadWithBackup()'s legacy
+        // migration path exercises them for real (recording the stamp/mtime it
+        // just wrote).
+        recordSessionStorageState: function (stamp, mtime, sessionData) {
+            return sessionSync.recordSessionStorageState(host, stamp, mtime, sessionData);
+        },
+        recordSessionDataStored: function (sessionData) {
+            return sessionSync.recordSessionDataStored(host, sessionData);
+        },
+        reloadExternalSessionStorageIfChanged: () => Promise.resolve(false),
+        rotateBackupIfNeeded: () => Promise.resolve(),
+        clearVersionHistoryEntries: () => false,
+        resetSessionsToDefault: () => Promise.resolve(false),
+        persistData: () => persistenceService.persistData(),
+        persistDataImmediate: () => persistenceService.persistDataImmediate(),
+        clearBackupFiles: () => persistenceService.clearBackupFiles(),
     };
-    plugin.loadData = () => Promise.resolve(
-        Object.prototype.hasOwnProperty.call(plugin.files, DATA_PATH)
-            ? JSON.parse(plugin.files[DATA_PATH])
-            : null
-    );
-    plugin.updateStatusBar = () => {};
-    plugin.syncSessionCommands = () => {};
-    plugin.syncSessionOrder = () => {};
-    plugin.normalizeGroupFeatureState = () => {};
+    persistenceService = new PersistenceService(host);
 
-    return plugin;
+    return {
+        persistenceService: persistenceService,
+        files: pluginFiles,
+        getRenames: function () {
+            return renames.slice();
+        },
+        resetRenames: function () {
+            renames.length = 0;
+        },
+    };
 }
 
 // A 0.7.17 install that used every feature the storage rework touched:
@@ -110,7 +143,7 @@ test('a 0.7.17 install upgrades cleanly in one load', async function () {
         [LOCAL_SETTINGS_PATH]: JSON.stringify({ language: 'ja' }),
     });
 
-    const loaded = await plugin.loadWithBackup();
+    const loaded = await plugin.persistenceService.loadWithBackup();
 
     // Sessions survive, with history reattached in memory.
     assert.deepEqual(Object.keys(loaded.sessions).sort(), ['s1', 's2']);
@@ -138,7 +171,7 @@ test('a 0.7.17 install upgrades cleanly in one load', async function () {
     // Nothing was destroyed on the way.
     assert.ok(plugin.files[LEGACY_SESSIONS_PATH], 'the old sessions file is kept');
     assert.deepEqual(
-        plugin.renames,
+        plugin.getRenames(),
         [[LOCAL_SETTINGS_PATH, LOCAL_SETTINGS_PATH + '.migrated']],
         'local settings are renamed, not deleted'
     );
@@ -168,18 +201,18 @@ test('the upgraded install is stable on the next load', async function () {
         }),
     });
 
-    await plugin.loadWithBackup();
+    await plugin.persistenceService.loadWithBackup();
     const afterFirst = plugin.files[DATA_PATH];
-    plugin.renames = [];
+    plugin.resetRenames();
 
     // Second launch: nothing left to migrate, and the leftover sessions.json must
     // not overwrite what data.json now holds.
-    const second = await plugin.loadWithBackup();
+    const second = await plugin.persistenceService.loadWithBackup();
 
     assert.equal(second.sessions.s1.name, 'Work');
     assert.equal(second.sessions.s1.history.length, 1);
     assert.equal(plugin.files[DATA_PATH], afterFirst, 'a settled install rewrites nothing');
-    assert.deepEqual(plugin.renames, []);
+    assert.deepEqual(plugin.getRenames(), []);
 });
 
 test('a vault-folder install is not dragged into data.json', async function () {
@@ -198,7 +231,7 @@ test('a vault-folder install is not dragged into data.json', async function () {
         }),
     });
 
-    const loaded = await plugin.loadWithBackup();
+    const loaded = await plugin.persistenceService.loadWithBackup();
 
     assert.equal(loaded.sessions.v1.name, 'Vault');
     const stored = JSON.parse(plugin.files[DATA_PATH]);
