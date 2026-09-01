@@ -213,6 +213,17 @@ export class WorkspacePlusPlus extends Plugin {
      * from either would pull them in while the test harness is still linking,
      * before the obsidian stub exists.
      */
+    /**
+     * Settings reads this, and a settings tab has no business knowing which
+     * collaborator owns the answer. Three siblings the adapter defined beside it
+     * - applyWorkspaceLayout, buildLayoutForRestore and getWorkspaceRestoreScope
+     * - had no caller at plugin level at all and are simply gone; the host
+     * factories above reach the switcher directly.
+     */
+    isSidebarRestoreEnabled(): boolean {
+        return this.getSessionSwitcher().isSidebarRestoreEnabled();
+    }
+
     openSessionManagerModal(focusName?: boolean): SessionManagerModal {
         return openSessionManagerModal(this.app, this.asHost<SessionManagerModalHost>(), focusName);
     }

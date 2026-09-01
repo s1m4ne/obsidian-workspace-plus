@@ -6,7 +6,6 @@ var attachStorageBackupMethods = require('./storage-backup');
 var attachStorageTransferMethods = require('./storage-transfer');
 var attachSessionSyncMethods = require('./session-sync');
 var attachSessionMethods = require('./sessions');
-var attachLayoutRestoreMethods = require('./layout-restore');
 var attachSessionValidationMethods = require('./sessions-validation');
 var attachGroupMethods = require('./groups');
 var attachSessionCrudMethods = require('./session-crud');
@@ -26,7 +25,6 @@ function attachPluginMethods(WorkspacePlusPlus) {
     attachStorageTransferMethods(WorkspacePlusPlus);
     attachSessionSyncMethods(WorkspacePlusPlus);
     attachSessionMethods(WorkspacePlusPlus);
-    attachLayoutRestoreMethods(WorkspacePlusPlus);
     attachSessionValidationMethods(WorkspacePlusPlus);
     attachGroupMethods(WorkspacePlusPlus);
     attachSessionCrudMethods(WorkspacePlusPlus);
