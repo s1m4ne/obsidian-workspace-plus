@@ -10,18 +10,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { setupHarness } from './lock/harness/index.ts';
+import type { PluginData, SessionItem } from '../src/storage/default-data.ts';
+import type { SessionDataPayload } from '../src/storage/storage-backup.ts';
 
 const EXPORT_DIR = '.obsidian/plugins/workspace-plus-plus/exports';
 const EXPORT_FILE = `${EXPORT_DIR}/sessions-20260101-000000.json`;
 
 type Layout = { readonly pane: string };
 
-interface TestPlugin {
-    data: Record<string, unknown>;
+interface TestHost {
+    data: PluginData;
     appliedLayouts: Layout[];
+    app: { vault: { adapter: { read: (p: string) => Promise<string> } } };
     importSessionsFromLatestExport(): Promise<boolean>;
-    reloadCurrentSessionWithoutSaving(options?: { silent?: boolean }): Promise<boolean>;
-    [key: string]: unknown;
 }
 
 function snapshot(layout: Layout): string {
@@ -40,74 +41,137 @@ function snapshot(layout: Layout): string {
     });
 }
 
-async function createPlugin(onScreen: Layout, exported: Layout): Promise<TestPlugin> {
-    const modules = await Promise.all([
-        import('../src/plugin/methods/persistence.js'),
-        import('../src/plugin/methods/sessions.js'),
-        import('../src/plugin/methods/session-saving.js'),
-        import('../src/plugin/methods/storage-transfer.js'),
-        import('../src/plugin/methods/layout-restore.js'),
-    ]);
 
-    function PluginMock(this: unknown) {}
-    for (const mod of modules) {
-        const attach = ((mod as { default?: unknown }).default ?? mod) as (target: unknown) => void;
-        attach(PluginMock);
+// The old fixture handed the import an identity function, so nothing narrowed
+// the parsed snapshot. Typed here as a guard rather than a cast: it passes
+// through exactly the fields the import path reads, and returns an empty
+// payload for anything that is not a record - which is what makes the
+// corrupted-snapshot test fail the import rather than throw.
+function toSessionDataPayload(raw: unknown): SessionDataPayload {
+    if (raw === null || typeof raw !== 'object') return {};
+    const record: Record<string, unknown> = { ...raw };
+    const out: SessionDataPayload = {};
+    if (typeof record.activeSessionId === 'string') out.activeSessionId = record.activeSessionId;
+    if (isSessionMap(record.sessions)) out.sessions = record.sessions;
+    if (isStringArray(record.sessionOrder)) out.sessionOrder = record.sessionOrder;
+    if (isStringArray(record.groupOrder)) out.groupOrder = record.groupOrder;
+    if (record.activeGroupId === null || typeof record.activeGroupId === 'string') {
+        out.activeGroupId = record.activeGroupId;
     }
+    return out;
+}
+
+function isStringArray(value: unknown): value is string[] {
+    return Array.isArray(value) && value.every((entry) => typeof entry === 'string');
+}
+
+function isSessionMap(value: unknown): value is Record<string, SessionItem> {
+    if (value === null || typeof value !== 'object') return false;
+    return Object.values(value).every((entry) => (
+        entry !== null && typeof entry === 'object' && typeof (entry as { id?: unknown }).id === 'string'
+    ));
+}
+
+async function createHost(onScreen: Layout, exported: Layout): Promise<TestHost> {
+    const [transfer, sessionStorageMod, saverMod, jsonStoreMod] = await Promise.all([
+        import('../src/storage/storage-transfer.ts'),
+        import('../src/storage/session-storage.ts'),
+        import('../src/state/session-saver.ts'),
+        import('../src/storage/json-file-store.ts'),
+    ]);
+    const { DEFAULT_DATA } = await import('../src/storage/default-data.ts');
 
     const files: Record<string, string> = { [EXPORT_FILE]: snapshot(exported) };
-    const plugin = new (PluginMock as unknown as new () => TestPlugin)();
+    const appliedLayouts: Layout[] = [];
 
-    plugin.manifest = { id: 'workspace-plus-plus', dir: '.obsidian/plugins/workspace-plus-plus' };
-    plugin.data = {
+    const adapter = {
+        exists: (p: string) => Promise.resolve(p === EXPORT_DIR || p in files),
+        list: () => Promise.resolve({ files: Object.keys(files), folders: [] }),
+        read: (p: string) => Promise.resolve(files[p] ?? ''),
+        write: (p: string, raw: string) => { files[p] = raw; return Promise.resolve(); },
+        mkdir: () => Promise.resolve(),
+        stat: () => Promise.resolve({ mtime: 1 }),
+        remove: (p: string) => { delete files[p]; return Promise.resolve(); },
+        rename: (from: string, to: string) => {
+            const raw = files[from];
+            if (raw !== undefined) { files[to] = raw; delete files[from]; }
+            return Promise.resolve();
+        },
+    };
+
+    const data: PluginData = Object.assign({}, DEFAULT_DATA, {
         activeSessionId: 'a',
         sessions: { a: { id: 'a', name: 'A', layout: onScreen, modified: 9 } },
         sessionOrder: ['a'],
         groups: {}, groupOrder: [], sessionGroups: {}, activeGroupId: null,
-    };
-    plugin.appliedLayouts = [];
+    });
 
-    plugin.app = {
-        vault: {
-            configDir: '.obsidian',
-            adapter: {
-                exists: (p: string) => Promise.resolve(p === EXPORT_DIR || p in files),
-                list: () => Promise.resolve({ files: Object.keys(files), folders: [] }),
-                read: (p: string) => Promise.resolve(files[p] ?? ''),
-                write: (p: string, raw: string) => { files[p] = raw; return Promise.resolve(); },
-                mkdir: () => Promise.resolve(),
-                stat: () => Promise.resolve({ mtime: 1 }),
-            },
-        },
-        workspace: {
-            // Records what the plugin asks the workspace to display.
-            changeLayout: (layout: Layout) => { plugin.appliedLayouts.push(layout); return Promise.resolve(); },
-            getLayout: () => onScreen,
-        },
+    const sessionStorage = new sessionStorageMod.SessionStorage({
+        store: new jsonStoreMod.JsonFileStore(() => adapter),
+        manifestDir: '.obsidian/plugins/workspace-plus-plus',
+        configDir: '.obsidian',
+    });
+
+    const getActiveSession = (): SessionItem | null => {
+        const id = data.activeSessionId;
+        return (id && data.sessions[id]) || null;
+    };
+    const applyWorkspaceLayout = (layout: unknown): Promise<boolean> => {
+        appliedLayouts.push(layout as Layout);
+        return Promise.resolve(true);
     };
 
-    plugin.updateStatusBar = (): void => {};
-    plugin.syncSessionCommands = (): void => {};
-    plugin.persistData = (): Promise<void> => Promise.resolve();
-    plugin.normalizeGroupTabOrder = (order: unknown): unknown => order ?? [];
+    // The real saver, so the layout the import applies travels the path a
+    // running plugin uses rather than a stub standing in for it.
+    const saver = new saverMod.SessionSaver({
+        data,
+        getActiveSession,
+        getCurrentWorkspaceLayout: () => onScreen,
+        layoutsEqualStructural: () => false,
+        getDefaultSessionName: () => 'A',
+        pushLayoutToHistory: () => {},
+        persistData: () => Promise.resolve(true),
+        createSessionRecord: (id: string, name: string, layout: unknown) => ({ id, name, layout }),
+        insertSessionAndActivate: () => {},
+        getOrderedSessionsUnfiltered: () => [],
+        getOrderedGroupTabIds: () => [],
+        isGroupFeatureEnabled: () => false,
+        applyWorkspaceLayout,
+    });
 
-    return plugin;
+    const host = {
+        app: { vault: { adapter } },
+        data,
+        appliedLayouts,
+        getExportDirPath: () => sessionStorage.getExportDirPath(),
+        normalizeSessionData: toSessionDataPayload,
+        normalizeGroupTabOrder: (order: string[]) => order,
+        syncSessionOrder: () => {},
+        updateStatusBar: () => {},
+        syncSessionCommands: () => {},
+        persistData: () => Promise.resolve(true),
+        reloadCurrentSessionWithoutSaving: (options?: { silent?: boolean }) =>
+            saver.reloadCurrentSessionWithoutSaving(options),
+        importSessionsFromLatestExport: (): Promise<boolean> =>
+            transfer.importSessionsFromLatestExport(host),
+    };
+
+    return host;
 }
 
 test('importing a snapshot applies the imported layout to the workspace', async () => {
     const harness = setupHarness();
     try {
-        const plugin = await createPlugin({ pane: 'two' }, { pane: 'one' });
+        const host = await createHost({ pane: 'two' }, { pane: 'one' });
 
-        const imported = await plugin.importSessionsFromLatestExport();
+        const imported = await host.importSessionsFromLatestExport();
         assert.equal(imported, true, 'the import itself must succeed');
 
-        const sessions = plugin.data.sessions as Record<string, { layout: Layout }>;
-        assert.deepEqual(sessions.a?.layout, { pane: 'one' }, 'data holds the imported layout');
+        assert.deepEqual(host.data.sessions.a?.layout, { pane: 'one' }, 'data holds the imported layout');
 
         // The point of the fix: the screen follows the data.
         assert.deepEqual(
-            plugin.appliedLayouts,
+            host.appliedLayouts,
             [{ pane: 'one' }],
             'the imported layout must be applied to the workspace exactly once',
         );
@@ -119,18 +183,17 @@ test('importing a snapshot applies the imported layout to the workspace', async 
 test('a failed import leaves the workspace untouched', async () => {
     const harness = setupHarness();
     try {
-        const plugin = await createPlugin({ pane: 'two' }, { pane: 'one' });
+        const host = await createHost({ pane: 'two' }, { pane: 'one' });
         // Replace the snapshot with something that is not session data.
-        const app = plugin.app as { vault: { adapter: { read: (p: string) => Promise<string> } } };
-        app.vault.adapter.read = (): Promise<string> => Promise.resolve(JSON.stringify({ nothing: true }));
+        host.app.vault.adapter.read = (): Promise<string> => Promise.resolve(JSON.stringify({ nothing: true }));
 
-        const imported = await plugin.importSessionsFromLatestExport();
+        const imported = await host.importSessionsFromLatestExport();
         assert.equal(imported, false);
-        assert.deepEqual(plugin.appliedLayouts, [], 'nothing is applied when the import is rejected');
+        assert.deepEqual(host.appliedLayouts, [], 'nothing is applied when the import is rejected');
 
         // Corrupted JSON syntax error handling
-        app.vault.adapter.read = (): Promise<string> => Promise.resolve('{ invalid json syntax');
-        const importedCorrupted = await plugin.importSessionsFromLatestExport();
+        host.app.vault.adapter.read = (): Promise<string> => Promise.resolve('{ invalid json syntax');
+        const importedCorrupted = await host.importSessionsFromLatestExport();
         assert.equal(importedCorrupted, false);
     } finally {
         harness.restore();
