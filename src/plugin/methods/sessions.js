@@ -1,9 +1,7 @@
 'use strict';
 
-var attachSessionStoreGetter = require('./session-store-getter');
 
 function attachSessionMethods(WorkspacePlusPlus) {
-    attachSessionStoreGetter(WorkspacePlusPlus);
 
     WorkspacePlusPlus.prototype.syncSessionOrder = function () {
         return this.getSessionStore().syncSessionOrder();

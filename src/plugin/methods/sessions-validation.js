@@ -1,10 +1,8 @@
 'use strict';
 
-var attachSessionStoreGetter = require('./session-store-getter');
 var attachGroupMethods = require('./groups');
 
 function attachSessionValidationMethods(WorkspacePlusPlus) {
-    attachSessionStoreGetter(WorkspacePlusPlus);
     attachGroupMethods(WorkspacePlusPlus);
 
     WorkspacePlusPlus.prototype.isSessionNameTaken = function (name, excludeSessionId) {

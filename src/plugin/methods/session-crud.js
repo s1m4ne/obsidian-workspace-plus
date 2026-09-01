@@ -1,9 +1,7 @@
 'use strict';
 
-var attachSessionStoreGetter = require('./session-store-getter');
 
 function attachSessionCrudMethods(WorkspacePlusPlus) {
-    attachSessionStoreGetter(WorkspacePlusPlus);
 
     WorkspacePlusPlus.prototype.getDefaultSessionName = function () {
         return this.getSessionStore().getDefaultSessionName();

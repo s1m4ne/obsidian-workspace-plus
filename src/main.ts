@@ -5,13 +5,17 @@ import * as settings from './settings.js';
 import DEFAULT_DATA from './plugin/default-data.js';
 import attachPluginMethods from './plugin/methods/index.js';
 import { setupStatusBar } from './statusbar-controller.ts';
+import { ConfirmModal } from './modals/confirm-modal.ts';
+import { RenameModal } from './modals/rename-modal.ts';
+import { openSettingTab } from './platform/obsidian-internals.ts';
 import type { PluginData } from './storage/default-data.ts';
 import type { CommandRegistry } from './core/command-registry.ts';
 import type { FrontmatterLinker } from './core/frontmatter-linker.ts';
 import type { GroupStore } from './state/group-store.ts';
 import type { HistoryService } from './state/history-service.ts';
 import type { SessionSaver } from './state/session-saver.ts';
-import type { SessionStore } from './state/session-store.ts';
+import { SessionStore } from './state/session-store.ts';
+import type { SessionStoreHost } from './state/session-store.ts';
 import type { SessionSwitcher } from './state/session-switcher.ts';
 import type { SettingsState } from './state/settings-state.ts';
 import type { SessionStorage } from './storage/session-storage.ts';
@@ -34,12 +38,12 @@ resolveLocale();
 interface AttachedPluginMethods {
     loadWithBackup(): Promise<Partial<PluginData> | null>;
     flushPendingPersistence(): Promise<unknown>;
+    persistData(): Promise<boolean>;
 
     getSessionStorage(): SessionStorage;
     getSyncWatcher(): SyncWatcher;
     getSettingsState(): SettingsState;
     getGroupStore(): GroupStore;
-    getSessionStore(): SessionStore;
     getHistoryService(): HistoryService;
     getSessionSwitcher(): SessionSwitcher;
     getSessionSaver(): SessionSaver;
@@ -152,6 +156,28 @@ export class WorkspacePlusPlus extends Plugin {
     }
 
     /**
+     * The store, and the host it is given.
+     *
+     * This is the first collaborator whose construction lives in the plugin
+     * class rather than in a plugin/methods adapter. The adapter built the same
+     * host as an untyped object literal, so nothing checked that the members
+     * matched what SessionStore asks for; three shims in this codebase pointed
+     * at methods nobody had written for exactly that reason.
+     *
+     * Built lazily, and behind a getter, because the collaborators reference one
+     * another: the group store needs the session store's ordering and the
+     * session store needs the group store's selection.
+     */
+    private sessionStoreInstance?: SessionStore;
+
+    getSessionStore(): SessionStore {
+        if (!this.sessionStoreInstance) {
+            this.sessionStoreInstance = new SessionStore(sessionStoreHost(this));
+        }
+        return this.sessionStoreInstance;
+    }
+
+    /**
      * Three collaborators take the plugin as a structural host, and it does
      * satisfy all of them - plugin/methods/ attaches every member they name.
      * It cannot satisfy them as one *type*: the interfaces were written at
@@ -224,4 +250,44 @@ export default WorkspacePlusPlus;
 
 function text(value: unknown): string {
     return typeof value === 'string' ? value : '';
+}
+
+/**
+ * The host SessionStore is given.
+ *
+ * A function taking the plugin, rather than a method building the object from
+ * `this`: the live fields have to be getters, and a getter inside an object
+ * literal sees the literal rather than the plugin.
+ */
+function sessionStoreHost(plugin: WorkspacePlusPlus): SessionStoreHost {
+    return {
+        get data() { return plugin.data; },
+        get app() { return plugin.app; },
+        get manifestId() { return plugin.manifest.id; },
+        get groupStore() { return plugin.getGroupStore(); },
+        get settingsState() { return plugin.getSettingsState(); },
+        getCurrentWorkspaceLayout: () => plugin.app.workspace.getLayout(),
+        moveSessionToGroupExclusive: (sessionId, groupId) =>
+            plugin.getGroupStore().moveSessionToGroupExclusive(sessionId, groupId),
+        resolveGroupSelection: (groupId) => plugin.getGroupStore().resolveGroupSelection(groupId),
+        attachSessionToActiveGroup: (sessionId) => {
+            plugin.getGroupStore().attachSessionToActiveGroup(sessionId);
+        },
+        persistData: () => plugin.persistData(),
+        updateStatusBar: () => { plugin.updateStatusBar(); },
+        syncSessionCommands: () => { plugin.syncSessionCommands(); },
+        hideSwitchOverlay: () => { plugin.hideSwitchOverlay(); },
+        captureActiveSessionLayoutIfAutoSave: () => {
+            plugin.getSessionSaver().captureActiveSessionLayoutIfAutoSave();
+        },
+        applyWorkspaceLayout: (layout) => plugin.getSessionSwitcher().applyWorkspaceLayout(layout),
+        getWorkspaceRestoreScope: () => plugin.getSessionSwitcher().getWorkspaceRestoreScope(),
+        openRenameModal: (currentName, onRename) => {
+            new RenameModal(plugin.app, currentName, onRename, { emptyNotice: text(L.emptyName) }).open();
+        },
+        openConfirmModal: (message, onConfirm, options) => {
+            new ConfirmModal(plugin.app, message, onConfirm, options).open();
+        },
+        openPluginSettings: () => { openSettingTab(plugin.app, plugin.manifest.id); },
+    };
 }
