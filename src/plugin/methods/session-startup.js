@@ -1,9 +1,7 @@
 'use strict';
 
-var attachSessionSwitcherGetter = require('./session-switcher-getter');
 
 function attachSessionStartupMethods(WorkspacePlusPlus) {
-    attachSessionSwitcherGetter(WorkspacePlusPlus);
 
     WorkspacePlusPlus.prototype.setStartupSettleDeadline = function (deadlineMs) {
         return this.getSessionSwitcher().setStartupSettleDeadline(deadlineMs);

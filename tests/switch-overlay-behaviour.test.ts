@@ -192,6 +192,9 @@ function createTestPlugin() {
         confirmOverwriteSessionWithCurrentLayout: (id: string, options: { onSaved: () => void }) =>
             sessionSaver.confirmOverwriteSessionWithCurrentLayout(id, options),
         isAutoSaveOnSwitchEnabled: () => settingsState.autoSaveOnSwitch,
+        // Reached from the overlay's settings menu. Without it a TypeError was
+        // printed and swallowed: the test passed while the menu path threw.
+        isWarnOnUnsavedSwitchEnabled: () => settingsState.warnOnUnsavedSwitch,
         reloadCurrentSessionWithoutSaving: (): void => { void sessionSaver.reloadCurrentSessionWithoutSaving(); },
 
         getGroupStore: () => groupStore,

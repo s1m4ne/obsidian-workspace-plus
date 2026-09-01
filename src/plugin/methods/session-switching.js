@@ -1,9 +1,7 @@
 'use strict';
 
-var attachSessionSwitcherGetter = require('./session-switcher-getter');
 
 function attachSessionSwitchingMethods(WorkspacePlusPlus) {
-    attachSessionSwitcherGetter(WorkspacePlusPlus);
 
     WorkspacePlusPlus.prototype.clearSessionSwitchNotice = function () {
         return this.getSessionSwitcher().clearSessionSwitchNotice();

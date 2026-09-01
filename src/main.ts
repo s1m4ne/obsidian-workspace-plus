@@ -7,8 +7,9 @@ import attachPluginMethods from './plugin/methods/index.js';
 import { setupStatusBar } from './statusbar-controller.ts';
 import { ConfirmModal } from './modals/confirm-modal.ts';
 import { RenameModal } from './modals/rename-modal.ts';
+import { UnsavedSwitchModal } from './modals/unsaved-switch-modal.ts';
 import { openSettingTab } from './platform/obsidian-internals.ts';
-import type { PluginData } from './storage/default-data.ts';
+import type { PluginData, SessionItem } from './storage/default-data.ts';
 import type { CommandRegistry } from './core/command-registry.ts';
 import type { FrontmatterLinker } from './core/frontmatter-linker.ts';
 import type { GroupStore } from './state/group-store.ts';
@@ -16,7 +17,8 @@ import type { HistoryService } from './state/history-service.ts';
 import type { SessionSaver } from './state/session-saver.ts';
 import { SessionStore } from './state/session-store.ts';
 import type { SessionStoreHost } from './state/session-store.ts';
-import type { SessionSwitcher } from './state/session-switcher.ts';
+import { SessionSwitcher } from './state/session-switcher.ts';
+import type { SessionSwitcherHost } from './state/session-switcher.ts';
 import type { SettingsState } from './state/settings-state.ts';
 import type { SessionStorage } from './storage/session-storage.ts';
 import type { SyncWatcher } from './storage/sync-watcher.ts';
@@ -45,7 +47,6 @@ interface AttachedPluginMethods {
     getSettingsState(): SettingsState;
     getGroupStore(): GroupStore;
     getHistoryService(): HistoryService;
-    getSessionSwitcher(): SessionSwitcher;
     getSessionSaver(): SessionSaver;
     getFrontmatterLinker(): FrontmatterLinker;
     getStatusBarController(): StatusBarController;
@@ -69,6 +70,14 @@ interface AttachedPluginMethods {
     initRotationBackupTimestamp(): Promise<unknown>;
     registerFrontmatterListeners(): void;
 
+    switchOverlayEl: HTMLElement | null;
+    showSwitchPreviewOverlay(ordered: SessionItem[], index: number, viewGroupId?: string | null): void;
+    showSwitchFeedbackOverlay(
+        ordered: SessionItem[],
+        index: number,
+        viewGroupId?: string | null,
+        overlayOptions?: unknown,
+    ): void;
     hideSwitchOverlay(): void;
     hideSearchOverlay(): void;
     clearSessionSwitchNotice(): void;
@@ -177,6 +186,15 @@ export class WorkspacePlusPlus extends Plugin {
         return this.sessionStoreInstance;
     }
 
+    private sessionSwitcherInstance?: SessionSwitcher;
+
+    getSessionSwitcher(): SessionSwitcher {
+        if (!this.sessionSwitcherInstance) {
+            this.sessionSwitcherInstance = new SessionSwitcher(sessionSwitcherHost(this));
+        }
+        return this.sessionSwitcherInstance;
+    }
+
     /**
      * Three collaborators take the plugin as a structural host, and it does
      * satisfy all of them - plugin/methods/ attaches every member they name.
@@ -258,8 +276,13 @@ function text(value: unknown): string {
  * A function taking the plugin, rather than a method building the object from
  * `this`: the live fields have to be getters, and a getter inside an object
  * literal sees the literal rather than the plugin.
+ *
+ * Exported so the wiring itself can be tested. Every member here is a hook the
+ * type checker can see the shape of but not the destination of - an arrow that
+ * calls the wrong collaborator method type-checks perfectly - and the delegation
+ * gate only resolves `this.getX().y()`, not arrows inside a host literal.
  */
-function sessionStoreHost(plugin: WorkspacePlusPlus): SessionStoreHost {
+export function sessionStoreHost(plugin: WorkspacePlusPlus): SessionStoreHost {
     return {
         get data() { return plugin.data; },
         get app() { return plugin.app; },
@@ -289,5 +312,57 @@ function sessionStoreHost(plugin: WorkspacePlusPlus): SessionStoreHost {
             new ConfirmModal(plugin.app, message, onConfirm, options).open();
         },
         openPluginSettings: () => { openSettingTab(plugin.app, plugin.manifest.id); },
+    };
+}
+
+/**
+ * The host SessionSwitcher is given.
+ *
+ * Six hooks the adapter declared are absent rather than translated:
+ * showSessionSwitchNotice, switchSession, performSessionSwitch,
+ * scheduleStartupFlush, flushOnStartup and getStartupSettleRemainingMs. Each was
+ * a function returning undefined, which is how the adapter said "the switcher
+ * should use its own"; the switcher already does that when the hook is missing,
+ * and a hook that exists and answers undefined is one the unwired-hooks gate
+ * cannot tell from a mistake.
+ */
+export function sessionSwitcherHost(plugin: WorkspacePlusPlus): SessionSwitcherHost {
+    return {
+        get data() { return plugin.data; },
+        get app() { return plugin.app; },
+        get switchOverlayEl() { return plugin.switchOverlayEl; },
+        get settingsState() { return plugin.getSettingsState(); },
+        get sessionStore() { return plugin.getSessionStore(); },
+        get historyService() { return plugin.getHistoryService(); },
+        get sessionSaver() { return plugin.getSessionSaver(); },
+        getOrderedSessions: (viewGroupId) => {
+            const store = plugin.getSessionStore();
+            if (viewGroupId === null || viewGroupId === '__all__') return store.getOrderedSessionsUnfiltered();
+            if (typeof viewGroupId === 'string') return store.getOrderedSessionsForGroup(viewGroupId);
+            return store.getOrderedSessions();
+        },
+        findSessionIndex: (sessions, sessionId) => plugin.getSessionStore().findSessionIndex(sessions, sessionId),
+        getActiveSession: () => plugin.getSessionStore().getActiveSession(),
+        getCurrentWorkspaceLayout: () => plugin.getSessionStore().getCurrentWorkspaceLayout(),
+        // The workspace itself, not the switcher's own restore: the switcher
+        // builds the layout and then calls this to put it on screen. Pointing it
+        // back at applyWorkspaceLayout would recurse.
+        applyWorkspaceLayout: (layout) => plugin.app.workspace.changeLayout(layout).then(() => true),
+        pushLayoutToHistory: (session) => { plugin.getHistoryService().pushLayoutToHistory(session); },
+        saveActiveSession: (options) => plugin.getSessionSaver().saveActiveSession(options),
+        isActiveSessionDirty: () => plugin.getSessionSaver().isActiveSessionDirty(),
+        isAutoSaveOnSwitchEnabled: () => plugin.getSessionSaver().isAutoSaveOnSwitchEnabled(),
+        isWarnOnUnsavedSwitchEnabled: () => plugin.getSessionSaver().isWarnOnUnsavedSwitchEnabled(),
+        persistData: () => plugin.persistData(),
+        updateStatusBar: () => { plugin.updateStatusBar(); },
+        showSwitchPreviewOverlay: (ordered, index, viewGroupId) => {
+            plugin.showSwitchPreviewOverlay(ordered, index, viewGroupId);
+        },
+        showSwitchFeedbackOverlay: (ordered, index, viewGroupId, overlayOptions) => {
+            plugin.showSwitchFeedbackOverlay(ordered, index, viewGroupId, overlayOptions);
+        },
+        openUnsavedSwitchModal: (message, onSaveAndSwitch, onSwitchWithoutSaving, onCancel) => {
+            new UnsavedSwitchModal(plugin.app, message, onSaveAndSwitch, onSwitchWithoutSaving, onCancel).open();
+        },
     };
 }

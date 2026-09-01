@@ -1,9 +1,7 @@
 'use strict';
 
-var attachSessionSwitcherGetter = require('./session-switcher-getter');
 
 function attachLayoutRestoreMethods(WorkspacePlusPlus) {
-    attachSessionSwitcherGetter(WorkspacePlusPlus);
 
     WorkspacePlusPlus.prototype.isSidebarRestoreEnabled = function () {
         return this.getSessionSwitcher().isSidebarRestoreEnabled();
