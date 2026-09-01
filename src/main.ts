@@ -12,7 +12,8 @@ import { openSettingTab } from './platform/obsidian-internals.ts';
 import type { PluginData, SessionItem } from './storage/default-data.ts';
 import type { CommandRegistry } from './core/command-registry.ts';
 import type { FrontmatterLinker } from './core/frontmatter-linker.ts';
-import type { GroupStore } from './state/group-store.ts';
+import { GroupStore } from './state/group-store.ts';
+import type { GroupStoreHost } from './state/group-store.ts';
 import type { HistoryService } from './state/history-service.ts';
 import type { SessionSaver } from './state/session-saver.ts';
 import { SessionStore } from './state/session-store.ts';
@@ -45,7 +46,6 @@ interface AttachedPluginMethods {
 
     getSessionStorage(): SessionStorage;
     getSyncWatcher(): SyncWatcher;
-    getGroupStore(): GroupStore;
     getHistoryService(): HistoryService;
     getSessionSaver(): SessionSaver;
     getFrontmatterLinker(): FrontmatterLinker;
@@ -184,6 +184,15 @@ export class WorkspacePlusPlus extends Plugin {
             this.sessionStoreInstance = new SessionStore(sessionStoreHost(this));
         }
         return this.sessionStoreInstance;
+    }
+
+    private groupStoreInstance?: GroupStore;
+
+    getGroupStore(): GroupStore {
+        if (!this.groupStoreInstance) {
+            this.groupStoreInstance = new GroupStore(groupStoreHost(this));
+        }
+        return this.groupStoreInstance;
     }
 
     private settingsStateInstance?: SettingsState;
@@ -385,5 +394,27 @@ export function settingsStateHost(plugin: WorkspacePlusPlus): SettingsStateHost 
         syncSessionCommands: () => { plugin.syncSessionCommands(); },
         startHistorySnapshotTimer: () => { plugin.startHistorySnapshotTimer(); },
         stopHistorySnapshotTimer: () => { plugin.stopHistorySnapshotTimer(); },
+    };
+}
+
+/**
+ * The host GroupStore is given.
+ *
+ * settingsState is required, not optional. The adapter guarded it with a typeof
+ * check, and the branch that covered for an undefined settings state is where a
+ * duplicated default survived: two places decided what "groups enabled" meant.
+ */
+export function groupStoreHost(plugin: WorkspacePlusPlus): GroupStoreHost {
+    return {
+        get data() { return plugin.data; },
+        get settingsState() { return plugin.getSettingsState(); },
+        persistData: () => plugin.persistData(),
+        updateStatusBar: () => { plugin.updateStatusBar(); },
+        syncSessionCommands: () => { plugin.syncSessionCommands(); },
+        hideSwitchOverlay: () => { plugin.hideSwitchOverlay(); },
+        hideSearchOverlay: () => { plugin.hideSearchOverlay(); },
+        switchSession: (sessionId) => plugin.getSessionSwitcher().switchSession(sessionId),
+        getOrderedSessionsUnfiltered: () => plugin.getSessionStore().getOrderedSessionsUnfiltered(),
+        getOrderedSessionsForGroup: (groupId) => plugin.getSessionStore().getOrderedSessionsForGroup(groupId),
     };
 }

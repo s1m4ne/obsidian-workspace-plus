@@ -13,7 +13,7 @@ import { setupHarness } from './lock/harness/index.ts';
 
 const harness = setupHarness();
 const { createRealPlugin } = await import('./real-plugin.ts');
-const { sessionStoreHost, sessionSwitcherHost, settingsStateHost } = await import('../src/main.ts');
+const { sessionStoreHost, sessionSwitcherHost, settingsStateHost, groupStoreHost } = await import('../src/main.ts');
 
 type Call = string;
 
@@ -179,6 +179,32 @@ test('the SettingsState host reaches the collaborator each member names', () => 
         'plugin.syncSessionCommands',
         'plugin.startHistorySnapshotTimer',
         'plugin.stopHistorySnapshotTimer',
+    ]);
+});
+
+test('the GroupStore host reaches the collaborator each member names', () => {
+    const { plugin, calls } = createPlugin();
+    plugin.hideSearchOverlay = (): void => { calls.push('plugin.hideSearchOverlay'); };
+    const host = groupStoreHost(asPlugin(plugin));
+
+    void host.persistData();
+    host.updateStatusBar?.();
+    host.syncSessionCommands?.();
+    host.hideSwitchOverlay?.();
+    host.hideSearchOverlay?.();
+    void host.switchSession('s1');
+    host.getOrderedSessionsUnfiltered();
+    host.getOrderedSessionsForGroup('g1');
+
+    assert.deepEqual(calls, [
+        'plugin.persistData',
+        'plugin.updateStatusBar',
+        'plugin.syncSessionCommands',
+        'plugin.hideSwitchOverlay',
+        'plugin.hideSearchOverlay',
+        'sessionSwitcher.switchSession',
+        'sessionStore.getOrderedSessionsUnfiltered',
+        'sessionStore.getOrderedSessionsForGroup',
     ]);
 });
 

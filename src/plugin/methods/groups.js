@@ -5,29 +5,10 @@
 // subsets, and a dependency that is sometimes undefined is what let a duplicated
 // default survive in the branch that covered for it.
 var attachSettingsStateMethods = require('./settings-state');
-var groupStore = require('../../state/group-store.ts');
 
 function attachGroupMethods(WorkspacePlusPlus) {
     attachSettingsStateMethods(WorkspacePlusPlus);
 
-    WorkspacePlusPlus.prototype.getGroupStore = function () {
-        var self = this;
-        if (!this._groupStore) {
-            this._groupStore = new groupStore.GroupStore({
-                get data() { return self.data; },
-                get settingsState() { return typeof self.getSettingsState === 'function' ? self.getSettingsState() : undefined; },
-                persistData: function () { return self.persistData(); },
-                updateStatusBar: function () { self.updateStatusBar(); },
-                syncSessionCommands: function () { self.syncSessionCommands(); },
-                hideSwitchOverlay: function () { self.hideSwitchOverlay(); },
-                hideSearchOverlay: function () { self.hideSearchOverlay(); },
-                switchSession: function (sid) { return self.switchSession(sid); },
-                getOrderedSessionsUnfiltered: function () { return self.getOrderedSessionsUnfiltered(); },
-                getOrderedSessionsForGroup: function (gid) { return self.getOrderedSessionsForGroup(gid); },
-            });
-        }
-        return this._groupStore;
-    };
 
     WorkspacePlusPlus.prototype.isGroupFeatureEnabled = function () {
         return this.getGroupStore().isGroupFeatureEnabled();
