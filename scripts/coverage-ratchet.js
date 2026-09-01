@@ -119,6 +119,25 @@ function mergeState(target, source) {
     }
 }
 
+/**
+ * src/plugin/methods/* are the retiring adapters: thin forwarding shims that
+ * exist only until their callers reach the classes directly. They are still
+ * measured per file, but they do not steer the project-wide ratchet.
+ *
+ * Counting them inverts the gate's incentive. Pointing a test at the real class
+ * instead of the adapter is the whole object of the migration, and it strands
+ * the adapter at once - one such conversion dropped sessions-validation.js from
+ * 100% to 33% and the project figure by 0.20 with no other file moving. The
+ * ratchet then blocks the commit that made things better, and the only ways
+ * through are to keep the test aimed at code being deleted, or to loosen the
+ * baseline for real code too.
+ *
+ * Removal condition: delete this constant and the two guards that read it in
+ * the same commit that deletes src/plugin/methods/. If the directory is gone
+ * and this is still here, the exclusion is hiding something.
+ */
+const RETIRING = /^src[\\/]plugin[\\/]methods[\\/]/;
+
 function collect(dir) {
     const sources = new Map();
     const functions = new Map();
@@ -197,12 +216,17 @@ function collect(dir) {
             else if (state[i] === UNCOVERED && lineState !== COVERED) lineState = UNCOVERED;
         }
 
-        funcTotal += fnTotal;
-        funcHit += fnHit;
-        lineTotal += lTotal;
-        lineHit += lHit;
+        const relative = path.relative(ROOT, file);
 
-        files[path.relative(ROOT, file)] = {
+        // Measured and reported, but kept out of the project-wide figure.
+        if (!RETIRING.test(relative)) {
+            funcTotal += fnTotal;
+            funcHit += fnHit;
+            lineTotal += lTotal;
+            lineHit += lHit;
+        }
+
+        files[relative] = {
             line: percent(lHit, lTotal),
             func: percent(fnHit, fnTotal),
         };
