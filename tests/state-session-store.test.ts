@@ -281,9 +281,13 @@ test('SessionStore: CRUD operations, duplicate, reset, and default session', asy
     assert.equal(createRes.created, true);
     assert.equal(store.findSession(createRes.sessionId!)?.name, 'Session 3');
 
-    // Create for viewed group
+    // Create for viewed group. viewGroupId is the return contract the search
+    // overlay and the session manager modal read to decide which group tab to
+    // show next, so it is asserted here rather than only `created`: breaking it
+    // used to leave every other test in the suite green.
     const groupRes = await store.createSessionForViewedGroup('Session 4', 'g1', { notify: false });
     assert.equal(groupRes.created, true);
+    assert.equal(groupRes.viewGroupId, 'g1');
 
     // Rename session
     const renamed = await store.renameSessionById('s1', 'Session 1 Renamed', { notify: false });
