@@ -4,69 +4,27 @@ require('./lock/harness/index.ts').installObsidianStub();
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const Module = require('module');
 
-function loadPluginMethod(modulePath) {
-    const obsidianStub = {
-        Modal: class {},
-        Notice: class {
-            constructor(_message) {}
-            hide() {}
-            setMessage() { return this; }
-        },
-        Plugin: class {},
-        PluginSettingTab: class {},
-        Setting: class {},
-        setIcon: function () {},
-        setTooltip: function () {},
-        Menu: class {
-            addItem() { return this; }
-            addSeparator() { return this; }
-            showAtMouseEvent() {}
-        },
-    };
+const i18n = require('../src/i18n.ts');
+i18n.resolveLocale('en');
 
-    const originalLoad = Module._load;
-    Module._load = function (request, parent, isMain) {
-        if (request === 'obsidian') return obsidianStub;
-        return originalLoad(request, parent, isMain);
-    };
+const { SessionStore } = require('../src/state/session-store.ts');
+const { GroupStore } = require('../src/state/group-store.ts');
+const { SettingsState } = require('../src/state/settings-state.ts');
+const { SessionSaver } = require('../src/state/session-saver.ts');
+const { SessionSwitcher } = require('../src/state/session-switcher.ts');
+const { DEFAULT_DATA } = require('../src/storage/default-data.ts');
 
-    try {
-        return require(modulePath);
-    } finally {
-        Module._load = originalLoad;
-    }
-}
-
-const attachSessionMethods = loadPluginMethod('../src/plugin/methods/sessions');
-const attachLayoutRestoreMethods = loadPluginMethod('../src/plugin/methods/layout-restore');
-const attachSessionValidationMethods = loadPluginMethod('../src/plugin/methods/sessions-validation');
-const attachGroupMethods = loadPluginMethod('../src/plugin/methods/groups');
-const attachSessionCrudMethods = loadPluginMethod('../src/plugin/methods/session-crud');
-const attachSessionSavingMethods = loadPluginMethod('../src/plugin/methods/session-saving');
-const attachSessionStatusBarMethods = loadPluginMethod('../src/plugin/methods/session-statusbar');
-const attachSessionStartupMethods = loadPluginMethod('../src/plugin/methods/session-startup');
-const attachSessionSwitchingMethods = loadPluginMethod('../src/plugin/methods/session-switching');
-const attachSessionCommandMethods = loadPluginMethod('../src/plugin/methods/session-commands');
-const attachHistoryMethods = loadPluginMethod('../src/plugin/methods/history');
-
+// Eleven adapters were attached to a mock plugin here, over a Module._load
+// patch of the obsidian specifier. Both are gone: the classes are constructed
+// directly, and the harness's registerHooks redirection covers the specifier
+// for require() and import alike - which the _load patch did not.
+//
+// showSwitchPreviewOverlay and showSwitchFeedbackOverlay stay as recording
+// stubs. They are host hooks the switcher calls outward, and several tests
+// assert on what reached them.
 function createPlugin(initialData) {
-    function PluginMock() {}
-    attachSessionMethods(PluginMock);
-    attachLayoutRestoreMethods(PluginMock);
-    attachSessionValidationMethods(PluginMock);
-    attachGroupMethods(PluginMock);
-    attachSessionCrudMethods(PluginMock);
-    attachSessionSavingMethods(PluginMock);
-    attachHistoryMethods(PluginMock);
-    attachSessionStatusBarMethods(PluginMock);
-    attachSessionStartupMethods(PluginMock);
-    attachSessionSwitchingMethods(PluginMock);
-    attachSessionCommandMethods(PluginMock);
-    const plugin = new PluginMock();
-
-    plugin.data = Object.assign({
+    const data = Object.assign({}, DEFAULT_DATA, {
         activeSessionId: null,
         sessions: {},
         sessionOrder: [],
@@ -78,42 +36,148 @@ function createPlugin(initialData) {
         warnOnUnsavedSwitch: true,
     }, initialData || {});
 
-    plugin._persistCalls = 0;
-    plugin._changeLayoutCalls = [];
-    plugin._historyPushes = 0;
-    plugin._historyPushTargets = [];
+    const calls = {
+        persist: 0,
+        changeLayout: [],
+        historyPushes: 0,
+        historyPushTargets: [],
+        previewOverlays: [],
+        feedbackOverlays: [],
+    };
 
-    plugin.app = {
+    let layoutSource = function () { return {}; };
+    const setLayoutSource = (fn) => { layoutSource = fn; };
+
+    const app = {
         workspace: {
-            getLayout: function () { return plugin.currentLayout(); },
+            getLayout: function () { return layoutSource(); },
             changeLayout: function (layout) {
-                plugin._changeLayoutCalls.push(layout);
+                calls.changeLayout.push(layout);
                 return Promise.resolve();
             },
         },
     };
 
-    plugin.persistData = function () {
-        plugin._persistCalls += 1;
-        return Promise.resolve();
+    const base = {
+        data: data,
+        app: app,
+        persistData: function () { calls.persist += 1; return Promise.resolve(true); },
+        updateStatusBar: function () {},
+        syncSessionCommands: function () {},
+        hideSwitchOverlay: function () {},
     };
 
-    plugin.updateStatusBar = function () {};
-    plugin.syncSessionCommands = function () {};
-    plugin.showSwitchPreviewOverlay = function () {};
-    plugin.showSwitchFeedbackOverlay = function () {};
-    plugin.currentLayout = function () { return {}; };
-    plugin.getHistoryService().pushLayoutToHistory = function (session) {
-        plugin._historyPushes += 1;
-        plugin._historyPushTargets.push(session ? session.id : null);
+    const settingsState = new SettingsState(base);
+    const getCurrentWorkspaceLayout = function () { return app.workspace.getLayout(); };
+    // Two distinct steps, as in production. SessionSwitcher owns the restore -
+    // including the sidebar merge these tests check - and then hands the built
+    // layout to the workspace. Its own host therefore gets the raw workspace
+    // call; everything else gets the switcher, so the merge is not skipped.
+    // Pointing both at the switcher recurses until the stack runs out.
+    const applyLayoutToWorkspace = function (layout) {
+        return app.workspace.changeLayout(layout).then(function () { return true; });
+    };
+    const applyWorkspaceLayout = function (layout, options) {
+        return sessionSwitcher.applyWorkspaceLayout(layout, options);
+    };
+    // The real comparison, not a JSON equality stub: it ignores Obsidian's
+    // volatile workspace ids and focus state, which is what several of these
+    // tests are about.
+    const layoutsEqualStructural = function (a, b) {
+        return sessionStore.layoutsEqualStructural(a, b);
+    };
+    const pushLayoutToHistory = function (session) {
+        calls.historyPushes += 1;
+        calls.historyPushTargets.push(session ? session.id : null);
     };
 
-    return plugin;
+    let sessionStore;
+    let sessionSwitcher;
+
+    // The switcher calls these outward, and several tests replace them to see
+    // what reached them. Held in one object so a test can swap one out.
+    const hooks = {
+        showSwitchPreviewOverlay: function () {},
+        showSwitchFeedbackOverlay: function () {},
+    };
+    const groupStore = new GroupStore(Object.assign({}, base, {
+        settingsState: settingsState,
+        switchSession: function (id) { return sessionSwitcher.switchSession(id); },
+        getOrderedSessionsUnfiltered: function () { return sessionStore.getOrderedSessionsUnfiltered(); },
+        getOrderedSessionsForGroup: function (gid) { return sessionStore.getOrderedSessionsForGroup(gid); },
+    }));
+
+    sessionStore = new SessionStore(Object.assign({}, base, {
+        settingsState: settingsState,
+        groupStore: groupStore,
+        getCurrentWorkspaceLayout: getCurrentWorkspaceLayout,
+        moveSessionToGroupExclusive: function (sid, gid) { return groupStore.moveSessionToGroupExclusive(sid, gid); },
+        resolveGroupSelection: function (gid) { return groupStore.resolveGroupSelection(gid); },
+        attachSessionToActiveGroup: function (sid) { groupStore.attachSessionToActiveGroup(sid); },
+        applyWorkspaceLayout: applyWorkspaceLayout,
+        getWorkspaceRestoreScope: function () { return sessionSwitcher.getWorkspaceRestoreScope(); },
+        openRenameModal: function () {},
+        openConfirmModal: function (message, onConfirm) { onConfirm(); },
+    }));
+
+    const sessionSaver = new SessionSaver(Object.assign({}, base, {
+        settingsState: settingsState,
+        sessionStore: sessionStore,
+        groupStore: groupStore,
+        getActiveSession: function () { return sessionStore.getActiveSession(); },
+        getCurrentWorkspaceLayout: getCurrentWorkspaceLayout,
+        layoutsEqualStructural: layoutsEqualStructural,
+        getDefaultSessionName: function () { return sessionStore.getDefaultSessionName(); },
+        pushLayoutToHistory: pushLayoutToHistory,
+        createSessionRecord: function (id, name, layout, options) {
+            return sessionStore.createSessionRecord(id, name, layout, options);
+        },
+        insertSessionAndActivate: function (session) { sessionStore.insertSessionAndActivate(session); },
+        getOrderedSessionsUnfiltered: function () { return sessionStore.getOrderedSessionsUnfiltered(); },
+        getOrderedGroupTabIds: function () { return groupStore.getOrderedGroupTabIds(); },
+        isGroupFeatureEnabled: function () { return groupStore.isGroupFeatureEnabled(); },
+        applyWorkspaceLayout: applyWorkspaceLayout,
+        openRenameModal: function () {},
+        openConfirmModal: function (message, onConfirm) { onConfirm(); },
+    }));
+
+    sessionSwitcher = new SessionSwitcher(Object.assign({}, base, {
+        settingsState: settingsState,
+        sessionStore: sessionStore,
+        sessionSaver: sessionSaver,
+        getOrderedSessions: function (gid) { return sessionStore.getOrderedSessionsForGroup(gid ?? null); },
+        findSessionIndex: function (sessions, id) { return sessionStore.findSessionIndex(sessions, id); },
+        getActiveSession: function () { return sessionStore.getActiveSession(); },
+        getCurrentWorkspaceLayout: getCurrentWorkspaceLayout,
+        applyWorkspaceLayout: applyLayoutToWorkspace,
+        pushLayoutToHistory: pushLayoutToHistory,
+        saveActiveSession: function (options) { return sessionSaver.saveActiveSession(options); },
+        isActiveSessionDirty: function () { return sessionSaver.isActiveSessionDirty(); },
+        isWarnOnUnsavedSwitchEnabled: function () { return settingsState.warnOnUnsavedSwitch; },
+        isAutoSaveOnSwitchEnabled: function () { return settingsState.autoSaveOnSwitch; },
+        showSwitchPreviewOverlay: function (ordered, index, viewGroupId) {
+            hooks.showSwitchPreviewOverlay(ordered, index, viewGroupId);
+        },
+        showSwitchFeedbackOverlay: function (ordered, index, viewGroupId, options) {
+            hooks.showSwitchFeedbackOverlay(ordered, index, viewGroupId, options);
+        },
+    }));
+
+    return {
+        data: data,
+        calls: calls,
+        setLayoutSource: setLayoutSource,
+        store: sessionStore,
+        groupStore: groupStore,
+        saver: sessionSaver,
+        switcher: sessionSwitcher,
+        hooks: hooks,
+    };
 }
 
 test('session switch auto-saves current layout and applies target layout', async function () {
     const currentLayout = { layout: 'current' };
-    const plugin = createPlugin({
+    const { data, calls, switcher, setLayoutSource } = createPlugin({
         activeSessionId: 'a',
         sessionOrder: ['a', 'b'],
         sessions: {
@@ -122,19 +186,19 @@ test('session switch auto-saves current layout and applies target layout', async
         },
         autoSaveOnSwitch: true,
     });
-    plugin.currentLayout = function () {
+    setLayoutSource(function () {
         return currentLayout;
-    };
+    });
 
-    const switched = await plugin.performSessionSwitch('b', { silent: true });
+    const switched = await switcher.performSessionSwitch('b', { silent: true });
 
     assert.equal(switched, true);
-    assert.equal(plugin.data.activeSessionId, 'b');
-    assert.deepEqual(plugin.data.sessions.a.layout, currentLayout);
-    assert.equal(plugin._historyPushes, 1);
-    assert.equal(plugin._persistCalls, 1);
-    assert.equal(plugin._changeLayoutCalls.length, 1);
-    assert.deepEqual(plugin._changeLayoutCalls[0], { layout: 'target-b' });
+    assert.equal(data.activeSessionId, 'b');
+    assert.deepEqual(data.sessions.a.layout, currentLayout);
+    assert.equal(calls.historyPushes, 1);
+    assert.equal(calls.persist, 1);
+    assert.equal(calls.changeLayout.length, 1);
+    assert.deepEqual(calls.changeLayout[0], { layout: 'target-b' });
 });
 
 test('session switch can keep current sidebars while restoring target main area', async function () {
@@ -150,7 +214,7 @@ test('session switch can keep current sidebars while restoring target main area'
         right: { id: 'target-right', type: 'leaf', state: { type: 'backlink' } },
         active: 'target-main',
     };
-    const plugin = createPlugin({
+    const { calls, switcher, setLayoutSource } = createPlugin({
         activeSessionId: 'a',
         sessionOrder: ['a', 'b'],
         sessions: {
@@ -160,23 +224,23 @@ test('session switch can keep current sidebars while restoring target main area'
         autoSaveOnSwitch: true,
         restoreSidebars: false,
     });
-    plugin.currentLayout = function () {
+    setLayoutSource(function () {
         return currentLayout;
-    };
+    });
 
-    const switched = await plugin.performSessionSwitch('b', { silent: true });
+    const switched = await switcher.performSessionSwitch('b', { silent: true });
 
     assert.equal(switched, true);
-    assert.equal(plugin._changeLayoutCalls.length, 1);
-    assert.deepEqual(plugin._changeLayoutCalls[0].main, targetLayout.main);
-    assert.deepEqual(plugin._changeLayoutCalls[0].left, currentLayout.left);
-    assert.deepEqual(plugin._changeLayoutCalls[0].right, currentLayout.right);
-    assert.equal(plugin._changeLayoutCalls[0].active, 'target-main');
+    assert.equal(calls.changeLayout.length, 1);
+    assert.deepEqual(calls.changeLayout[0].main, targetLayout.main);
+    assert.deepEqual(calls.changeLayout[0].left, currentLayout.left);
+    assert.deepEqual(calls.changeLayout[0].right, currentLayout.right);
+    assert.equal(calls.changeLayout[0].active, 'target-main');
 });
 
 test('overwriteSessionWithCurrentLayout saves current layout to selected session without switching', async function () {
     const currentLayout = { layout: 'current' };
-    const plugin = createPlugin({
+    const { data, calls, saver, setLayoutSource } = createPlugin({
         activeSessionId: 'a',
         sessionOrder: ['a', 'b'],
         sessions: {
@@ -185,24 +249,24 @@ test('overwriteSessionWithCurrentLayout saves current layout to selected session
         },
         autoSaveOnSwitch: false,
     });
-    plugin.currentLayout = function () {
+    setLayoutSource(function () {
         return currentLayout;
-    };
+    });
 
-    const saved = await plugin.overwriteSessionWithCurrentLayout('b', { silent: true });
+    const saved = await saver.overwriteSessionWithCurrentLayout('b', { silent: true });
 
     assert.equal(saved, true);
-    assert.equal(plugin.data.activeSessionId, 'a');
-    assert.deepEqual(plugin.data.sessions.a.layout, { layout: 'active-a' });
-    assert.deepEqual(plugin.data.sessions.b.layout, currentLayout);
-    assert.notEqual(plugin.data.sessions.b.modified, 1);
-    assert.deepEqual(plugin._historyPushTargets, ['b']);
-    assert.equal(plugin._persistCalls, 1);
-    assert.equal(plugin._changeLayoutCalls.length, 0);
+    assert.equal(data.activeSessionId, 'a');
+    assert.deepEqual(data.sessions.a.layout, { layout: 'active-a' });
+    assert.deepEqual(data.sessions.b.layout, currentLayout);
+    assert.notEqual(data.sessions.b.modified, 1);
+    assert.deepEqual(calls.historyPushTargets, ['b']);
+    assert.equal(calls.persist, 1);
+    assert.equal(calls.changeLayout.length, 0);
 });
 
 test('unsaved status bar highlight is shown only in manual save mode with layout changes', function () {
-    const plugin = createPlugin({
+    const { data, saver, setLayoutSource } = createPlugin({
         activeSessionId: 'a',
         sessionOrder: ['a'],
         sessions: {
@@ -211,29 +275,29 @@ test('unsaved status bar highlight is shown only in manual save mode with layout
         autoSaveOnSwitch: false,
     });
 
-    plugin.currentLayout = function () {
+    setLayoutSource(function () {
         return { layout: 'changed' };
-    };
+    });
 
-    assert.equal(plugin.shouldShowUnsavedStatusBarHighlight(), true);
+    assert.equal(saver.shouldShowUnsavedStatusBarHighlight(), true);
 
-    plugin.data.highlightUnsavedSessionChanges = false;
-    assert.equal(plugin.shouldShowUnsavedStatusBarHighlight(), false);
+    data.highlightUnsavedSessionChanges = false;
+    assert.equal(saver.shouldShowUnsavedStatusBarHighlight(), false);
 
-    plugin.data.highlightUnsavedSessionChanges = true;
-    plugin.data.autoSaveOnSwitch = true;
-    assert.equal(plugin.shouldShowUnsavedStatusBarHighlight(), false);
+    data.highlightUnsavedSessionChanges = true;
+    data.autoSaveOnSwitch = true;
+    assert.equal(saver.shouldShowUnsavedStatusBarHighlight(), false);
 
-    plugin.data.autoSaveOnSwitch = false;
-    plugin.currentLayout = function () {
+    data.autoSaveOnSwitch = false;
+    setLayoutSource(function () {
         return { layout: 'saved' };
-    };
-    assert.equal(plugin.shouldShowUnsavedStatusBarHighlight(), false);
+    });
+    assert.equal(saver.shouldShowUnsavedStatusBarHighlight(), false);
 
-    plugin.currentLayout = function () {
+    setLayoutSource(function () {
         return { layout: 'saved', scroll: 25, left: 10, top: 20 };
-    };
-    assert.equal(plugin.shouldShowUnsavedStatusBarHighlight(), false);
+    });
+    assert.equal(saver.shouldShowUnsavedStatusBarHighlight(), false);
 });
 
 test('structural layout comparison ignores Obsidian volatile workspace ids and focus state', function () {
@@ -305,7 +369,7 @@ test('structural layout comparison ignores Obsidian volatile workspace ids and f
         active: 'current-leaf-a',
         lastOpenFiles: ['b.md', 'a.md'],
     };
-    const plugin = createPlugin({
+    const { saver, setLayoutSource } = createPlugin({
         activeSessionId: 'a',
         sessionOrder: ['a'],
         sessions: {
@@ -314,17 +378,17 @@ test('structural layout comparison ignores Obsidian volatile workspace ids and f
         autoSaveOnSwitch: false,
     });
 
-    plugin.currentLayout = function () {
+    setLayoutSource(function () {
         return currentLayout;
-    };
-    assert.equal(plugin.shouldShowUnsavedStatusBarHighlight(), false);
+    });
+    assert.equal(saver.shouldShowUnsavedStatusBarHighlight(), false);
 
     currentLayout.main.children[0].currentTab = 1;
-    assert.equal(plugin.shouldShowUnsavedStatusBarHighlight(), true);
+    assert.equal(saver.shouldShowUnsavedStatusBarHighlight(), true);
 });
 
 test('deleting active session applies fallback active layout', async function () {
-    const plugin = createPlugin({
+    const { data, calls, store } = createPlugin({
         activeSessionId: 'a',
         sessionOrder: ['a', 'b'],
         sessions: {
@@ -334,18 +398,18 @@ test('deleting active session applies fallback active layout', async function ()
         sessionGroups: {},
     });
 
-    const deleted = await plugin.deleteSession('a');
+    const deleted = await store.deleteSession('a');
 
     assert.equal(deleted, true);
-    assert.equal(plugin.data.activeSessionId, 'b');
-    assert.equal(plugin.data.sessions.a, undefined);
-    assert.equal(plugin._persistCalls, 1);
-    assert.equal(plugin._changeLayoutCalls.length, 1);
-    assert.deepEqual(plugin._changeLayoutCalls[0], { layout: 'b' });
+    assert.equal(data.activeSessionId, 'b');
+    assert.equal(data.sessions.a, undefined);
+    assert.equal(calls.persist, 1);
+    assert.equal(calls.changeLayout.length, 1);
+    assert.deepEqual(calls.changeLayout[0], { layout: 'b' });
 });
 
 test('deleting non-active session does not change current layout', async function () {
-    const plugin = createPlugin({
+    const { data, calls, store } = createPlugin({
         activeSessionId: 'a',
         sessionOrder: ['a', 'b'],
         sessions: {
@@ -355,17 +419,17 @@ test('deleting non-active session does not change current layout', async functio
         sessionGroups: {},
     });
 
-    const deleted = await plugin.deleteSession('b');
+    const deleted = await store.deleteSession('b');
 
     assert.equal(deleted, true);
-    assert.equal(plugin.data.activeSessionId, 'a');
-    assert.equal(plugin.data.sessions.b, undefined);
-    assert.equal(plugin._persistCalls, 1);
-    assert.equal(plugin._changeLayoutCalls.length, 0);
+    assert.equal(data.activeSessionId, 'a');
+    assert.equal(data.sessions.b, undefined);
+    assert.equal(calls.persist, 1);
+    assert.equal(calls.changeLayout.length, 0);
 });
 
 test('viewed-group session creation uses exclusive group assignment', async function () {
-    const plugin = createPlugin({
+    const { data, store } = createPlugin({
         activeGroupId: 'g1',
         groups: {
             g1: { id: 'g1', name: 'Group 1' },
@@ -373,15 +437,15 @@ test('viewed-group session creation uses exclusive group assignment', async func
         },
     });
 
-    const result = await plugin.createSessionForViewedGroup('New', 'g2');
+    const result = await store.createSessionForViewedGroup('New', 'g2');
 
     assert.ok(result.sessionId);
-    assert.deepEqual(plugin.data.sessionGroups[result.sessionId], ['g2']);
+    assert.deepEqual(data.sessionGroups[result.sessionId], ['g2']);
     assert.equal(result.viewGroupId, 'g2');
 });
 
 test('switchSession waits for startup settle window before switching', async function () {
-    const plugin = createPlugin({
+    const { switcher } = createPlugin({
         activeSessionId: 'a',
         sessionOrder: ['a', 'b'],
         sessions: {
@@ -393,20 +457,20 @@ test('switchSession waits for startup settle window before switching', async fun
     let switchedAt = 0;
     const startedAt = Date.now();
 
-    plugin.getSessionSwitcher().performSessionSwitch = function () {
+    switcher.performSessionSwitch = function () {
         switchedAt = Date.now();
         return Promise.resolve(true);
     };
 
-    plugin.startStartupSettleWindow(20);
-    const switched = await plugin.switchSession('b', { silent: true });
+    switcher.startStartupSettleWindow(20);
+    const switched = await switcher.switchSession('b', { silent: true });
 
     assert.equal(switched, true);
     assert.ok(switchedAt >= startedAt + 15);
 });
 
 test('scheduleStartupFlush waits until startup settle completes', async function () {
-    const plugin = createPlugin({
+    const { switcher } = createPlugin({
         activeSessionId: 'a',
         sessionOrder: ['a'],
         sessions: {
@@ -415,22 +479,22 @@ test('scheduleStartupFlush waits until startup settle completes', async function
         autoSaveOnSwitch: true,
     });
 
-    const calls = [];
-    plugin.getSessionSwitcher().flushOnStartup = function () {
-        calls.push(Date.now());
+    const flushes = [];
+    switcher.flushOnStartup = function () {
+        flushes.push(Date.now());
         return Promise.resolve(true);
     };
 
     const startedAt = Date.now();
-    plugin.startStartupSettleWindow(20);
-    await plugin.scheduleStartupFlush();
+    switcher.startStartupSettleWindow(20);
+    await switcher.scheduleStartupFlush();
 
-    assert.equal(calls.length, 1);
-    assert.ok(calls[0] >= startedAt + 15);
+    assert.equal(flushes.length, 1);
+    assert.ok(flushes[0] >= startedAt + 15);
 });
 
 test('switchRelative shows preview overlay before switching when preview is enabled', function () {
-    const plugin = createPlugin({
+    const { switcher, hooks } = createPlugin({
         activeSessionId: 'a',
         sessionOrder: ['a', 'b', 'c'],
         sessions: {
@@ -445,22 +509,22 @@ test('switchRelative shows preview overlay before switching when preview is enab
     const previewCalls = [];
     let switchCalled = false;
 
-    plugin.showSwitchPreviewOverlay = function (ordered, index) {
+    hooks.showSwitchPreviewOverlay = function (ordered, index) {
         previewCalls.push([ordered.map(function (s) { return s.id; }), index]);
     };
-    plugin.getSessionSwitcher().switchSession = function () {
+    switcher.switchSession = function () {
         switchCalled = true;
         return Promise.resolve(true);
     };
 
-    plugin.switchRelative(1);
+    switcher.switchRelative(1);
 
     assert.deepEqual(previewCalls, [[['a', 'b', 'c'], 0]]);
     assert.equal(switchCalled, false);
 });
 
 test('switchRelativeImmediate bypasses preview-only first step and uses feedback overlay', async function () {
-    const plugin = createPlugin({
+    const { switcher, hooks } = createPlugin({
         activeSessionId: 'a',
         sessionOrder: ['a', 'b', 'c'],
         sessions: {
@@ -475,15 +539,15 @@ test('switchRelativeImmediate bypasses preview-only first step and uses feedback
     const overlayCalls = [];
     const switchCalls = [];
 
-    plugin.showSwitchFeedbackOverlay = function (ordered, index) {
+    hooks.showSwitchFeedbackOverlay = function (ordered, index) {
         overlayCalls.push([ordered.map(function (s) { return s.id; }), index]);
     };
-    plugin.getSessionSwitcher().switchSession = function (sessionId, options) {
+    switcher.switchSession = function (sessionId, options) {
         switchCalls.push([sessionId, options]);
         return Promise.resolve(true);
     };
 
-    const switched = await plugin.switchRelativeImmediate(1);
+    const switched = await switcher.switchRelativeImmediate(1);
 
     assert.equal(switched, true);
     assert.deepEqual(overlayCalls, [[['a', 'b', 'c'], 1]]);
@@ -494,7 +558,7 @@ test('switchRelativeImmediate bypasses preview-only first step and uses feedback
 });
 
 test('switchRelativeImmediate can suppress feedback overlay', async function () {
-    const plugin = createPlugin({
+    const { switcher, hooks } = createPlugin({
         activeSessionId: 'a',
         sessionOrder: ['a', 'b'],
         sessions: {
@@ -508,15 +572,15 @@ test('switchRelativeImmediate can suppress feedback overlay', async function () 
     let overlayCalled = false;
     const switchCalls = [];
 
-    plugin.showSwitchFeedbackOverlay = function () {
+    hooks.showSwitchFeedbackOverlay = function () {
         overlayCalled = true;
     };
-    plugin.getSessionSwitcher().switchSession = function (sessionId, options) {
+    switcher.switchSession = function (sessionId, options) {
         switchCalls.push([sessionId, options]);
         return Promise.resolve(true);
     };
 
-    const switched = await plugin.switchRelativeImmediate(1, { showOverlay: false });
+    const switched = await switcher.switchRelativeImmediate(1, { showOverlay: false });
 
     assert.equal(switched, true);
     assert.equal(overlayCalled, false);
@@ -527,7 +591,7 @@ test('switchRelativeImmediate can suppress feedback overlay', async function () 
 });
 
 test('switchRelativeFromStatusBar bypasses preview-only first step and uses a replaceable notice', async function () {
-    const plugin = createPlugin({
+    const { switcher, hooks } = createPlugin({
         activeSessionId: 'a',
         sessionOrder: ['a', 'b', 'c'],
         sessions: {
@@ -543,18 +607,18 @@ test('switchRelativeFromStatusBar bypasses preview-only first step and uses a re
     let feedbackCalled = false;
     const switchCalls = [];
 
-    plugin.showSwitchPreviewOverlay = function () {
+    hooks.showSwitchPreviewOverlay = function () {
         previewCalled = true;
     };
-    plugin.showSwitchFeedbackOverlay = function () {
+    hooks.showSwitchFeedbackOverlay = function () {
         feedbackCalled = true;
     };
-    plugin.getSessionSwitcher().switchSession = function (sessionId, options) {
+    switcher.switchSession = function (sessionId, options) {
         switchCalls.push([sessionId, options]);
         return Promise.resolve(true);
     };
 
-    const switched = await plugin.switchRelativeFromStatusBar(1);
+    const switched = await switcher.switchRelativeFromStatusBar(1);
 
     assert.equal(switched, true);
     assert.equal(previewCalled, false);
@@ -566,7 +630,7 @@ test('switchRelativeFromStatusBar bypasses preview-only first step and uses a re
 });
 
 test('switchRelativeFromScroll switches without showing overlay', async function () {
-    const plugin = createPlugin({
+    const { switcher, hooks } = createPlugin({
         activeSessionId: 'a',
         sessionOrder: ['a', 'b'],
         sessions: {
@@ -581,18 +645,18 @@ test('switchRelativeFromScroll switches without showing overlay', async function
     let feedbackCalled = false;
     const switchCalls = [];
 
-    plugin.showSwitchPreviewOverlay = function () {
+    hooks.showSwitchPreviewOverlay = function () {
         previewCalled = true;
     };
-    plugin.showSwitchFeedbackOverlay = function () {
+    hooks.showSwitchFeedbackOverlay = function () {
         feedbackCalled = true;
     };
-    plugin.getSessionSwitcher().switchSession = function (sessionId, options) {
+    switcher.switchSession = function (sessionId, options) {
         switchCalls.push([sessionId, options]);
         return Promise.resolve(true);
     };
 
-    const switched = await plugin.switchRelativeFromScroll(1);
+    const switched = await switcher.switchRelativeFromScroll(1);
 
     assert.equal(switched, true);
     assert.equal(previewCalled, false);
@@ -604,7 +668,7 @@ test('switchRelativeFromScroll switches without showing overlay', async function
 });
 
 test('switchSessionByIdFromCommand uses overlay feedback without switch notice', async function () {
-    const plugin = createPlugin({
+    const { switcher, hooks } = createPlugin({
         activeSessionId: 'a',
         sessionOrder: ['a', 'b'],
         sessions: {
@@ -616,15 +680,15 @@ test('switchSessionByIdFromCommand uses overlay feedback without switch notice',
     const overlayCalls = [];
     const switchCalls = [];
 
-    plugin.showSwitchFeedbackOverlay = function (ordered, index) {
+    hooks.showSwitchFeedbackOverlay = function (ordered, index) {
         overlayCalls.push([ordered.map(function (s) { return s.id; }), index]);
     };
-    plugin.getSessionSwitcher().switchSession = function (sessionId, options) {
+    switcher.switchSession = function (sessionId, options) {
         switchCalls.push([sessionId, options]);
         return Promise.resolve(true);
     };
 
-    const switched = await plugin.switchSessionByIdFromCommand('b');
+    const switched = await switcher.switchSessionByIdFromCommand('b');
 
     assert.equal(switched, true);
     assert.deepEqual(overlayCalls, [[['a', 'b'], 1]]);
@@ -635,7 +699,7 @@ test('switchSessionByIdFromCommand uses overlay feedback without switch notice',
 });
 
 test('performSessionSwitch can emit a replaceable session switch notice', async function () {
-    const plugin = createPlugin({
+    const { switcher, setLayoutSource } = createPlugin({
         activeSessionId: 'a',
         sessionOrder: ['a', 'b'],
         sessions: {
@@ -645,14 +709,14 @@ test('performSessionSwitch can emit a replaceable session switch notice', async 
     });
 
     const noticeCalls = [];
-    plugin.getSessionSwitcher().showSessionSwitchNotice = function (sessionName, options) {
+    switcher.showSessionSwitchNotice = function (sessionName, options) {
         noticeCalls.push([sessionName, options]);
     };
-    plugin.currentLayout = function () {
+    setLayoutSource(function () {
         return { layout: 'current' };
-    };
+    });
 
-    const switched = await plugin.performSessionSwitch('b', {
+    const switched = await switcher.performSessionSwitch('b', {
         silent: true,
         switchNoticeMode: 'replace',
         switchNoticeDurationMs: 900,
