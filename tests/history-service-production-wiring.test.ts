@@ -5,73 +5,58 @@ import assert from 'node:assert/strict';
 import { setupHarness } from './lock/harness/index.ts';
 
 const harness = setupHarness();
+const { createRealPlugin } = await import('./real-plugin.ts');
 
-interface TestPlugin {
-    data: Record<string, unknown>;
-    _persistCalls: number;
-    _appliedLayouts: unknown[];
-    persistData(): Promise<boolean>;
-    applyWorkspaceLayout(layout: unknown): Promise<boolean>;
-    getHistoryService(): {
-        restoreFromHistoryEntry(sessionId: string, entryIndex: number): Promise<boolean>;
-    };
-    [key: string]: unknown;
+interface HistoryServiceSurface {
+    restoreFromHistoryEntry(sessionId: string, entryIndex: number): Promise<boolean>;
 }
 
-async function createPlugin(): Promise<TestPlugin> {
-    const modules = await Promise.all([
-        import('../src/plugin/methods/history.js'),
-        import('../src/plugin/methods/sessions.js'),
-        import('../src/plugin/methods/session-store-getter.js'),
-        import('../src/plugin/methods/layout-restore.js'),
-    ]);
-
-    function PluginMock(this: unknown) {}
-    for (const mod of modules) {
-        const attach = ((mod as { default?: unknown }).default ?? mod) as (target: unknown) => void;
-        attach(PluginMock);
-    }
-
-    const plugin = new (PluginMock as unknown as new () => TestPlugin)();
-    plugin.data = {
-        versionHistoryEnabled: true,
-        activeSessionId: 's1',
-        sessions: {
-            s1: {
-                id: 's1',
-                name: 'Session 1',
-                layout: { root: 'current' },
-                history: [
-                    { layout: { root: 'historical' }, savedAt: Date.now() - 1000 },
-                ],
+function createPlugin(): {
+    plugin: ReturnType<typeof createRealPlugin>;
+    persistCalls: () => number;
+    appliedLayouts: unknown[];
+} {
+    const appliedLayouts: unknown[] = [];
+    const plugin = createRealPlugin({
+        app: {
+            workspace: {
+                changeLayout: async (layout: unknown): Promise<boolean> => {
+                    appliedLayouts.push(layout);
+                    return true;
+                },
             },
         },
-        sessionOrder: ['s1'],
-    };
-    plugin._persistCalls = 0;
-    plugin._appliedLayouts = [];
-    plugin.persistData = async function () {
-        plugin._persistCalls += 1;
-        return true;
-    };
-    plugin.app = {
-        workspace: {
-            changeLayout: async (layout: unknown) => {
-                plugin._appliedLayouts.push(layout);
-                return true;
+        data: {
+            versionHistoryEnabled: true,
+            activeSessionId: 's1',
+            sessions: {
+                s1: {
+                    id: 's1',
+                    name: 'Session 1',
+                    layout: { root: 'current' },
+                    history: [{ layout: { root: 'historical' }, savedAt: Date.now() - 1000 }],
+                },
             },
+            sessionOrder: ['s1'],
         },
-    };
-    return plugin;
+    });
+
+    let calls = 0;
+    plugin.persistData = async (): Promise<boolean> => { calls += 1; return true; };
+    return { plugin, persistCalls: () => calls, appliedLayouts };
+}
+
+function historyService(plugin: ReturnType<typeof createRealPlugin>): HistoryServiceSurface {
+    return (plugin.getHistoryService as () => HistoryServiceSurface)();
 }
 
 test('HistoryService restores entry and persists through production wiring', async () => {
-    const plugin = await createPlugin();
+    const { plugin, persistCalls, appliedLayouts } = createPlugin();
 
-    const ok = await plugin.getHistoryService().restoreFromHistoryEntry('s1', 0);
+    const ok = await historyService(plugin).restoreFromHistoryEntry('s1', 0);
     assert.equal(ok, true);
-    assert.deepEqual(plugin._appliedLayouts, [{ root: 'historical' }]);
-    assert.equal(plugin._persistCalls, 1, 'must call host.persistData()');
+    assert.deepEqual(appliedLayouts, [{ root: 'historical' }]);
+    assert.equal(persistCalls(), 1, 'must call host.persistData()');
 });
 
 test.after(() => harness.restore());

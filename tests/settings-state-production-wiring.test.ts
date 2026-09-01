@@ -1,58 +1,50 @@
+// SettingsState reaches the plugin's real persistence, not a double.
+
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { setupHarness } from './lock/harness/index.ts';
 
 const harness = setupHarness();
+const { createRealPlugin } = await import('./real-plugin.ts');
 
-interface TestPlugin {
-    data: Record<string, unknown>;
-    _persistCalls: number;
-    persistData(): Promise<boolean>;
-    getSettingsState(): {
-        setWarnOnUnsavedSwitch(enabled: boolean): Promise<boolean>;
-        warnOnUnsavedSwitch: boolean;
-    };
+interface SettingsStateSurface {
     setWarnOnUnsavedSwitch(enabled: boolean): Promise<boolean>;
-    [key: string]: unknown;
+    warnOnUnsavedSwitch: boolean;
 }
 
-async function createPlugin(): Promise<TestPlugin> {
-    const modules = await Promise.all([
-        import('../src/plugin/methods/settings-state.js'),
-    ]);
-
-    function PluginMock(this: unknown) {}
-    for (const mod of modules) {
-        const attach = ((mod as { default?: unknown }).default ?? mod) as (target: unknown) => void;
-        attach(PluginMock);
-    }
-
-    const plugin = new (PluginMock as unknown as new () => TestPlugin)();
-    plugin.data = { warnOnUnsavedSwitch: true };
-    plugin._persistCalls = 0;
-    plugin.persistData = async function () {
-        plugin._persistCalls += 1;
-        return true;
-    };
-    return plugin;
+function createPlugin(): {
+    plugin: ReturnType<typeof createRealPlugin>;
+    persistCalls: () => number;
+} {
+    const plugin = createRealPlugin({ data: { warnOnUnsavedSwitch: true } });
+    let calls = 0;
+    // The one outward hook this test counts. Overriding it on the instance is
+    // the path a caller replacing plugin.persistData takes in production too.
+    plugin.persistData = async (): Promise<boolean> => { calls += 1; return true; };
+    return { plugin, persistCalls: () => calls };
 }
 
-test('SettingsState calls real plugin.persistData on setting mutation', async () => {
-    const plugin = await createPlugin();
+function settingsState(plugin: ReturnType<typeof createRealPlugin>): SettingsStateSurface {
+    return (plugin.getSettingsState as () => SettingsStateSurface)();
+}
 
-    assert.equal(plugin.getSettingsState().warnOnUnsavedSwitch, true);
-    await plugin.getSettingsState().setWarnOnUnsavedSwitch(false);
+test('SettingsState calls the plugin persistData on a setting mutation', async () => {
+    const { plugin, persistCalls } = createPlugin();
+
+    assert.equal(settingsState(plugin).warnOnUnsavedSwitch, true);
+    await settingsState(plugin).setWarnOnUnsavedSwitch(false);
 
     assert.equal(plugin.data.warnOnUnsavedSwitch, false);
-    assert.equal(plugin._persistCalls, 1, 'SettingsState must call host.persistData()');
+    assert.equal(persistCalls(), 1, 'SettingsState must call host.persistData()');
 });
 
-test('prototype shim delegates to SettingsState and persists', async () => {
-    const plugin = await createPlugin();
+test('the plugin method delegates to SettingsState and persists', async () => {
+    const { plugin, persistCalls } = createPlugin();
 
-    await plugin.setWarnOnUnsavedSwitch(false);
+    await (plugin.setWarnOnUnsavedSwitch as (v: boolean) => Promise<boolean>)(false);
+
     assert.equal(plugin.data.warnOnUnsavedSwitch, false);
-    assert.equal(plugin._persistCalls, 1);
+    assert.equal(persistCalls(), 1);
 });
 
 test.after(() => harness.restore());

@@ -5,68 +5,52 @@ import assert from 'node:assert/strict';
 import { setupHarness } from './lock/harness/index.ts';
 
 const harness = setupHarness();
+const { createRealPlugin } = await import('./real-plugin.ts');
 
-interface TestPlugin {
-    data: Record<string, unknown>;
-    app: { workspace: { getLayout: () => unknown; changeLayout: (layout: unknown) => Promise<boolean> } };
-    _persistCalls: number;
-    persistData(): Promise<boolean>;
-    getSessionSaver(): {
-        saveCurrentLayoutAsSessionName(name: string, options?: { silent?: boolean }): Promise<{
-            saved: boolean;
-            created: boolean;
-            sessionId: string | null;
-        }>;
-    };
-    [key: string]: unknown;
+interface SessionSaverSurface {
+    saveCurrentLayoutAsSessionName(name: string, options?: { silent?: boolean }): Promise<{
+        saved: boolean;
+        created: boolean;
+        sessionId: string | null;
+    }>;
 }
 
-async function createPlugin(): Promise<TestPlugin> {
-    const modules = await Promise.all([
-        import('../src/plugin/methods/session-saving.js'),
-        import('../src/plugin/methods/sessions.js'),
-        import('../src/plugin/methods/session-store-getter.js'),
-        import('../src/plugin/methods/history.js'),
-        import('../src/plugin/methods/groups.js'),
-    ]);
-
-    function PluginMock(this: unknown) {}
-    for (const mod of modules) {
-        const attach = ((mod as { default?: unknown }).default ?? mod) as (target: unknown) => void;
-        attach(PluginMock);
-    }
-
-    const plugin = new (PluginMock as unknown as new () => TestPlugin)();
-    plugin.data = {
-        sessions: {
-            s1: { id: 's1', name: 'Work', layout: { root: 'old' } },
+function createPlugin(): {
+    plugin: ReturnType<typeof createRealPlugin>;
+    persistCalls: () => number;
+} {
+    const plugin = createRealPlugin({
+        app: {
+            workspace: {
+                getLayout: () => ({ root: 'live-app-layout' }),
+                changeLayout: async (): Promise<boolean> => true,
+            },
         },
-        sessionOrder: ['s1'],
-        activeSessionId: 's1',
-        groups: {},
-        groupOrder: [],
-        sessionGroups: {},
-        activeGroupId: null,
-        groupFeatureEnabled: false,
-    };
-    plugin.app = {
-        workspace: {
-            getLayout: () => ({ root: 'live-app-layout' }),
-            changeLayout: async () => true,
+        data: {
+            sessions: { s1: { id: 's1', name: 'Work', layout: { root: 'old' } } },
+            sessionOrder: ['s1'],
+            activeSessionId: 's1',
+            groups: {},
+            groupOrder: [],
+            sessionGroups: {},
+            activeGroupId: null,
+            groupFeatureEnabled: false,
         },
-    };
-    plugin._persistCalls = 0;
-    plugin.persistData = async function () {
-        plugin._persistCalls += 1;
-        return true;
-    };
-    return plugin;
+    });
+
+    let calls = 0;
+    plugin.persistData = async (): Promise<boolean> => { calls += 1; return true; };
+    return { plugin, persistCalls: () => calls };
+}
+
+function sessionSaver(plugin: ReturnType<typeof createRealPlugin>): SessionSaverSurface {
+    return (plugin.getSessionSaver as () => SessionSaverSurface)();
 }
 
 test('SessionSaver creates and activates session from real workspace without overrides', async () => {
-    const plugin = await createPlugin();
+    const { plugin, persistCalls } = createPlugin();
 
-    const result = await plugin.getSessionSaver().saveCurrentLayoutAsSessionName('Brand New', { silent: true });
+    const result = await sessionSaver(plugin).saveCurrentLayoutAsSessionName('Brand New', { silent: true });
     assert.equal(result.saved, true);
     assert.equal(result.created, true);
     const sessionId = result.sessionId as string;
@@ -76,7 +60,7 @@ test('SessionSaver creates and activates session from real workspace without ove
     assert.equal(created.name, 'Brand New');
     assert.deepEqual(created.layout, { root: 'live-app-layout' });
     assert.equal(plugin.data.activeSessionId, result.sessionId);
-    assert.equal(plugin._persistCalls, 1);
+    assert.equal(persistCalls(), 1);
 });
 
 test.after(() => harness.restore());
