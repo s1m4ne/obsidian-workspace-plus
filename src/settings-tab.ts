@@ -6,13 +6,11 @@ import { RenameModal } from './modals/rename-modal.ts';
 import { formatRelativeTime } from './modals/format-relative-time.ts';
 import * as statusBarActions from './statusbar-actions.ts';
 import {
-    GroupSessionsModal,
     addDangerResetSetting,
     addDropdownSetting,
     addSubsection,
     addToggleSetting,
     resolveSettingText,
-    type GroupSessionsModalHost,
     type SettingText,
 } from './settings-ui.ts';
 import type { SessionGroup, StatusBarActions } from './storage/default-data.ts';
@@ -24,7 +22,21 @@ import type { SessionSaver } from './state/session-saver.ts';
 import type { SessionStore } from './state/session-store.ts';
 import type { HistoryService } from './state/history-service.ts';
 
-export interface SettingsTabHost extends GroupSessionsModalHost {
+export interface SettingsTabHost {
+    /**
+     * The session set, its ordering and the CRUD on it are owned by
+     * SessionStore. Naming the store rather than restating its methods keeps
+     * one list, the way getGroupStore() and getSessionSaver() do.
+     *
+     * Declared here rather than inherited: these two came from
+     * GroupSessionsModalHost, an interface that existed only to type the
+     * group-membership modal, which is gone.
+     */
+    getSessionStore(): SessionStore;
+
+    /** Group state is owned by GroupStore; naming the store keeps one list. */
+    getGroupStore(): GroupStore;
+
     /**
      * Owned by HistoryService; naming it keeps one list rather than a
      * forwarding method per call on the plugin.
@@ -652,12 +664,11 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
         const sessionCount = this.plugin.getGroupStore().getGroupSessionIds(group.id).length;
         const groupSetting = new Setting(contentEl)
             .setName(group.name)
-            .setDesc(`${text(L.settingsGroupManageSessionsDesc)} · ${format(L.settingsGroupSessionCount, sessionCount)}`);
-
-        groupSetting.addButton((btn) => {
-            btn.setButtonText(text(L.settingsGroupManageSessions));
-            btn.onClick(() => { new GroupSessionsModal(this.app, this.plugin, group).open(); });
-        });
+            // The description used to lead with "Add or remove sessions from
+            // this group", which named a button that is gone: membership is
+            // changed by dragging a session onto a group tab, or from a
+            // session's context menu. The count is what is left worth saying.
+            .setDesc(format(L.settingsGroupSessionCount, sessionCount));
 
         groupSetting.addExtraButton((btn) => {
             btn.setIcon('pencil');

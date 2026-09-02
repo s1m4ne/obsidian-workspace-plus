@@ -139,11 +139,12 @@ test('GroupStore: CRUD, active group, and session membership', async () => {
     await manager.renameGroup(newGid, 'Group 3 Renamed');
     assert.equal(host.data.groups[newGid]?.name, 'Group 3 Renamed');
 
-    // Add session to group
-    await manager.addSessionToGroup('s1', newGid);
+    // Put a session in a group. Exclusive is the only way now: the additive
+    // path went with the settings modal that was its only caller.
+    await manager.moveSessionToGroupExclusive('s1', newGid);
     assert.ok(manager.getGroupSessionIds(newGid).includes('s1'));
 
-    // Move session exclusive
+    // Moving again replaces rather than accumulates, which is the whole point.
     await manager.moveSessionToGroupExclusive('s1', 'g2');
     assert.deepEqual(host.data.sessionGroups.s1, ['g2']);
 

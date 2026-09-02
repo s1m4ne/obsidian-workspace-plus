@@ -494,19 +494,13 @@ export class GroupStore {
         return true;
     }
 
-    async addSessionToGroup(sessionId: string, groupId: string): Promise<boolean> {
-        if (!this.data.sessions?.[sessionId]) return false;
-        if (!this.groups[groupId]) return false;
-
-        if (!this.sessionGroups[sessionId]) this.sessionGroups[sessionId] = [];
-        const groupList = this.sessionGroups[sessionId];
-        if (groupList && groupList.includes(groupId)) return false;
-
-        groupList?.push(groupId);
-        this.host.syncSessionCommands?.();
-        await this.persistIfNeeded();
-        return true;
-    }
+    // No addSessionToGroup. It was the only additive membership call and its
+    // only caller was the group-membership modal in the settings screen, which
+    // is gone: a session belongs to one group, and moveSessionToGroupExclusive
+    // is how it gets there. `sessionGroups` stays `Record<string, string[]>`
+    // because the on-disk format is frozen, so an install that already holds a
+    // multi-group session keeps it until that session is next moved - collapsing
+    // those arrays on load would take a session out of a group without asking.
 
     async removeSessionFromGroup(sessionId: string, groupId: string): Promise<boolean> {
         const arr = this.sessionGroups[sessionId];

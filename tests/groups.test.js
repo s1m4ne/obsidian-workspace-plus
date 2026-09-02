@@ -168,11 +168,20 @@ test('group methods: lifecycle, CRUD, switching, and membership management', asy
     await store.deleteGroup(newGid);
     assert.equal(data.groups[newGid], undefined);
 
-    // addSessionToGroup and removeSessionFromGroup
-    await store.addSessionToGroup('s2', 'g1');
-    assert.ok(data.sessionGroups.s2.includes('g1'));
+    // moveSessionToGroupExclusive and removeSessionFromGroup
+    await store.moveSessionToGroupExclusive('s2', 'g1');
+    assert.deepEqual(data.sessionGroups.s2, ['g1'], 'membership is replaced, not accumulated');
     await store.removeSessionFromGroup('s2', 'g1');
-    assert.ok(!data.sessionGroups.s2.includes('g1'));
+    // The entry is dropped, not left as an empty array. Under single
+    // membership that is the whole of it: removing the one group removes the
+    // session's membership record.
+    assert.equal(data.sessionGroups.s2, undefined);
+
+    // Back into g2, where the rest of this test expects it. The original
+    // sequence relied on addSessionToGroup leaving g2 in place while g1 was
+    // added and removed alongside it; without an additive path the move has to
+    // be undone explicitly.
+    await store.moveSessionToGroupExclusive('s2', 'g2');
 
     // getGroupSessionIds
     const g1Sessions = store.getGroupSessionIds('g1');
