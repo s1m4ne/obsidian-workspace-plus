@@ -361,3 +361,19 @@ test('the last remaining session offers no delete button', async () => {
         h.restore();
     }
 });
+
+test('the row action icons carry a name, not just a tooltip (P12)', async () => {
+    const { h, modal } = await openModal();
+    try {
+        // Both are divs with an icon and a role, so aria-label is the only
+        // thing a screen reader has to read out. setTooltip alone is not it.
+        const rename = modal.listEl.querySelector('[data-action-key="rename"]');
+        assert.equal(rename?.getAttribute('aria-label'), 'Rename');
+
+        const del = modal.listEl.querySelector('[data-action-key="delete"]');
+        assert.equal(del?.getAttribute('aria-label'), 'Delete');
+    } finally {
+        modal.close();
+        h.restore();
+    }
+});

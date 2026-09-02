@@ -141,7 +141,14 @@ export class SwitchOverlay {
             });
         };
 
-        const overlay = document.body.createDiv({ cls: 'wpp-switch-overlay' });
+        const overlay = document.body.createDiv({
+            cls: 'wpp-switch-overlay',
+            attr: {
+                role: 'dialog',
+                'aria-modal': 'true',
+                'aria-label': typeof L.cmdSearchOverlay === 'string' ? L.cmdSearchOverlay : 'Search sessions',
+            },
+        });
 
         // Count
         const countText = activeIndex >= 0

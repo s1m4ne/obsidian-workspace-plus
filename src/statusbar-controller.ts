@@ -346,11 +346,22 @@ export class StatusBarController {
             });
         }
 
+        const sessionName = session ? session.name : String(L.noSession || '');
         if (typeof el.createSpan === 'function') {
             el.createSpan({
-                text: session ? session.name : String(L.noSession || ''),
+                text: sessionName,
                 cls: 'wpp-status-name',
             });
+        }
+
+        // The item is clickable, middle-clickable, right-clickable and
+        // scrollable, and its own text is split across up to four spans. One
+        // name on the container is what a screen reader reads out, and it is
+        // rebuilt here rather than at setup because the session changes.
+        if (typeof el.setAttribute === 'function') {
+            el.setAttribute('aria-label', activeGroup
+                ? `${activeGroup.name} / ${sessionName}`
+                : sessionName);
         }
     }
 }

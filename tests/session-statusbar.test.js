@@ -125,3 +125,29 @@ test('session status bar safely skips rendering before element exists', function
         controller.updateStatusBar();
     });
 });
+
+test('the status bar carries one accessible name for its four spans', function () {
+    const plain = createController({ session: { id: 's1', name: 'Session One' } });
+    plain.controller.updateStatusBar();
+    assert.equal(plain.statusBarEl.getAttribute('aria-label'), 'Session One');
+
+    // With a group active the item reads "Group / Session" across three spans,
+    // none of which a screen reader would join on its own.
+    const grouped = createController({
+        session: { id: 's1', name: 'Session One' },
+        group: { id: 'g1', name: 'Group One' },
+    });
+    grouped.controller.updateStatusBar();
+    assert.equal(grouped.statusBarEl.getAttribute('aria-label'), 'Group One / Session One');
+
+    // The name has to follow the session, not be set once at setup.
+    grouped.controller.host.data.sessions.s1.name = 'Session Two';
+    grouped.controller.updateStatusBar();
+    assert.equal(grouped.statusBarEl.getAttribute('aria-label'), 'Group One / Session Two');
+});
+
+test('with no session the status bar still has a name', function () {
+    const { controller, statusBarEl } = createController({});
+    controller.updateStatusBar();
+    assert.equal(statusBarEl.getAttribute('aria-label'), 'No session');
+});

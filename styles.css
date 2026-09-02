@@ -1005,3 +1005,40 @@ body.wpp-session-list-dragging * {
 .wpp-settings-footer-help {
     margin: 0 0 4px;
 }
+
+/* ---------------------------------------------------------------------------
+   Accessibility (P12)
+   --------------------------------------------------------------------------- */
+
+/* Every custom control the plugin builds is a div, so none of them inherit a
+   focus ring. :focus-visible rather than :focus so the ring appears for
+   keyboard focus and not on click. */
+.wpp-qs-action-btn:focus-visible,
+.wpp-search-close:focus-visible,
+.wpp-group-add-btn:focus-visible,
+.wpp-group-tab:focus-visible,
+.wpp-switch-item:focus-visible,
+.wpp-session-item:focus-visible {
+    outline: 2px solid var(--interactive-accent);
+    outline-offset: 2px;
+}
+
+/* Inputs follow Obsidian's focus box-shadow pattern instead of an outline. */
+.wpp-search-input:focus-visible,
+.wpp-save-input:focus-visible {
+    box-shadow: 0 0 0 3px var(--background-modifier-border-focus);
+    border-radius: var(--input-radius);
+}
+
+/* The icon controls are 20-28px, which is a comfortable mouse target and too
+   small for a finger. The minimum is raised on mobile only: applying it
+   everywhere would loosen the dense desktop rows this plugin is built around,
+   and the manifest is not desktop-only, so mobile is a real target. */
+.is-mobile .wpp-qs-action-btn,
+.is-mobile .wpp-search-close,
+.is-mobile .wpp-group-add-btn,
+.is-mobile .wpp-icon-btn {
+    min-width: 44px;
+    min-height: 44px;
+}
+

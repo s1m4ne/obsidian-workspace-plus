@@ -1043,3 +1043,53 @@ test('dragging the left edge inward stops at the minimum width', () => {
     assert.ok(box.width >= 220, `width holds at the minimum, got ${box.width}`);
     plugin.hideSearchOverlay();
 });
+
+/**
+ * P12. Every control the overlays build is a div, so none of them carries a
+ * name or a role from its tag. These assert the names exist and are the
+ * localized strings rather than placeholders - the failure mode is silent, and
+ * an icon added without a label breaks nothing a behaviour test can see.
+ */
+test('every icon-only control in the search overlay has a role and a name', () => {
+    const { plugin, searchOverlay } = createTestPlugin();
+    clearModals();
+    plugin.data.autoSaveOnSwitch = false;
+    searchOverlay.open();
+    const overlay = plugin.searchOverlayEl;
+    assert.ok(overlay);
+
+    assert.equal(overlay.getAttribute('role'), 'dialog');
+    assert.equal(overlay.getAttribute('aria-modal'), 'true');
+    assert.equal(overlay.getAttribute('aria-label'), 'Search sessions');
+
+    const close = overlay.querySelector('.wpp-search-close');
+    assert.equal(close?.getAttribute('role'), 'button');
+    assert.equal(close?.getAttribute('aria-label'), 'Close');
+
+    const actions = overlay.querySelectorAll('.wpp-qs-action-btn');
+    assert.ok(actions.length > 0, 'the rows build action icons to check');
+    const names: string[] = [];
+    actions.forEach((el: Element) => {
+        assert.equal(el.getAttribute('role'), 'button', 'every action icon is a button');
+        const label = el.getAttribute('aria-label');
+        assert.ok(label, `an action icon has no name: ${el.outerHTML.slice(0, 60)}`);
+        names.push(label);
+    });
+    // The active row is the one that offers save and reload, so all four appear.
+    for (const expected of ['Save', 'Reload this session', 'Rename', 'Delete']) {
+        assert.ok(names.includes(expected), `no action icon is named "${expected}", got ${names.join(', ')}`);
+    }
+
+    plugin.hideSearchOverlay();
+});
+
+test('the switch overlay announces itself as a dialog', () => {
+    const { switchOverlay } = createTestPlugin();
+    switchOverlay.show([{ id: 's1', name: 'Session 1', layout: {} }], 0, null, { mode: 'preview' });
+    const overlay = switchOverlay.overlayEl;
+    assert.ok(overlay);
+
+    assert.equal(overlay.getAttribute('role'), 'dialog');
+    assert.equal(overlay.getAttribute('aria-label'), 'Search sessions');
+    switchOverlay.hide();
+});

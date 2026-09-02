@@ -291,10 +291,16 @@ export function renderGroupTabs(options: RenderGroupTabsOptions): void {
         setupGroupTabDrag(tab);
     }
 
-    const addBtn = containerEl.createDiv({ cls: 'wpp-group-add-btn' });
+    const addBtn = containerEl.createDiv({
+        cls: 'wpp-group-add-btn',
+        attr: { role: 'button' },
+    });
     setIcon(addBtn, 'plus');
     if (opts.addButtonTooltip) {
         setTooltip(addBtn, opts.addButtonTooltip);
+        // The icon carries no text, so the tooltip is also the only name a
+        // screen reader can read out.
+        addBtn.setAttribute('aria-label', opts.addButtonTooltip);
     }
     addBtn.addEventListener('click', () => {
         if (typeof opts.onAddGroupClick === 'function') {

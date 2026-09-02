@@ -772,7 +772,12 @@ export class SessionManagerModal extends Modal {
 
         const renameBtn = actions.createDiv({
             cls: 'wpp-icon-btn',
-            attr: { role: 'button', tabindex: '-1', 'data-action-key': 'rename' },
+            attr: {
+                role: 'button',
+                tabindex: '-1',
+                'data-action-key': 'rename',
+                'aria-label': text(L.rename),
+            },
         });
         setIcon(renameBtn, 'pencil');
         setTooltip(renameBtn, text(L.rename), { delay: 250 });
@@ -785,7 +790,12 @@ export class SessionManagerModal extends Modal {
         if (Object.keys(this.plugin.data.sessions).length > 1) {
             const deleteBtn = actions.createDiv({
                 cls: 'wpp-icon-btn',
-                attr: { role: 'button', tabindex: '-1', 'data-action-key': 'delete' },
+                attr: {
+                    role: 'button',
+                    tabindex: '-1',
+                    'data-action-key': 'delete',
+                    'aria-label': text(L.delete),
+                },
             });
             setIcon(deleteBtn, 'trash-2');
             setTooltip(deleteBtn, text(L.delete), { delay: 250 });

@@ -37,6 +37,29 @@ function localizedCall(value: unknown, ...args: (string | number)[]): string {
     return (value as (...callArgs: (string | number)[]) => string)(...args);
 }
 
+/**
+ * The one accessible name with no entry in the string table. Adding a 321st key
+ * would fail tests/lock/i18n-values.lock.test.ts, which reports an added key as
+ * a change and may not be edited, so this stays English until the maintainer
+ * adds `close` to all 21 locales.
+ */
+const CLOSE_LABEL = 'Close';
+
+/**
+ * A row action is an icon in a div, so it carries no name or role of its own.
+ * Both come from the same string as the tooltip; going through one helper is
+ * what stops the next icon being added without them.
+ */
+function actionButton(parent: HTMLElement, icon: string, label: string): HTMLElement {
+    const el = parent.createDiv({
+        cls: 'wpp-qs-action-btn',
+        attr: { role: 'button', 'aria-label': label },
+    });
+    setIcon(el, icon);
+    setTooltip(el, label, { delay: 250 });
+    return el;
+}
+
 function closest(target: EventTarget | null, selector: string): HTMLElement | null {
     const result = target instanceof Element ? target.closest(selector) : null;
     return result instanceof HTMLElement ? result : null;
@@ -417,7 +440,14 @@ export class SearchOverlay {
             });
         }
 
-        const overlay = overlayDocument.body.createDiv({ cls: 'wpp-switch-overlay wpp-search-overlay' });
+        const overlay = overlayDocument.body.createDiv({
+            cls: 'wpp-switch-overlay wpp-search-overlay',
+            attr: {
+                role: 'dialog',
+                'aria-modal': 'true',
+                'aria-label': localizedString(strings.cmdSearchOverlay),
+            },
+        });
         overlay.tabIndex = -1;
 
         // Resize handles at four corners
@@ -439,8 +469,12 @@ export class SearchOverlay {
 
         const countSpan = headerRow.createDiv({ cls: 'wpp-switch-count' });
 
-        const closeBtn = headerRow.createDiv({ cls: 'wpp-search-close' });
+        const closeBtn = headerRow.createDiv({
+            cls: 'wpp-search-close',
+            attr: { role: 'button', 'aria-label': CLOSE_LABEL },
+        });
         setIcon(closeBtn, 'x');
+        setTooltip(closeBtn, CLOSE_LABEL);
         overlayEventOwner.registerDomEvent(closeBtn, 'click', function (e) {
             e.stopPropagation();
             hideThisOverlay();
@@ -646,20 +680,12 @@ export class SearchOverlay {
                 let saveIcon = null;
                 let reloadIcon = null;
                 if (isActive && !self.getSessionSaver().isAutoSaveOnSwitchEnabled()) {
-                    saveIcon = actions.createDiv({ cls: 'wpp-qs-action-btn' });
-                    setIcon(saveIcon, 'save');
-                    setTooltip(saveIcon, localizedString(strings.saveInline), { delay: 250 });
-                    reloadIcon = actions.createDiv({ cls: 'wpp-qs-action-btn' });
-                    setIcon(reloadIcon, 'rotate-ccw');
-                    setTooltip(reloadIcon, localizedString(strings.contextReloadSession), { delay: 250 });
+                    saveIcon = actionButton(actions, 'save', localizedString(strings.saveInline));
+                    reloadIcon = actionButton(actions, 'rotate-ccw', localizedString(strings.contextReloadSession));
                 }
 
-                const renameIcon = actions.createDiv({ cls: 'wpp-qs-action-btn' });
-                setIcon(renameIcon, 'pencil');
-                setTooltip(renameIcon, localizedString(strings.rename), { delay: 250 });
-                const deleteIcon = actions.createDiv({ cls: 'wpp-qs-action-btn' });
-                setIcon(deleteIcon, 'trash-2');
-                setTooltip(deleteIcon, localizedString(strings.delete), { delay: 250 });
+                const renameIcon = actionButton(actions, 'pencil', localizedString(strings.rename));
+                const deleteIcon = actionButton(actions, 'trash-2', localizedString(strings.delete));
 
                 (function (idx, sess, itemEl, _saveIcon, _reloadIcon, _isActive) {
                     // Click on item to switch
