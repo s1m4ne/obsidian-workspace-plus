@@ -110,7 +110,12 @@ export const DEFAULT_DATA: PluginData = {
     restoreSidebars: true,
     statusBarQuickSwitcher: true,
     groupFeatureEnabled: true,
-    showFilterInput: false,
+    // On by default. It used to be off, which meant a fresh install had no
+    // session filter *and* - once the search command started following this
+    // setting - no "Search sessions" command either, so a feature the README
+    // lists would never have appeared. Installs that already carry a value keep
+    // it; this only changes what a new one starts with.
+    showFilterInput: true,
     overlayDefaultFocus: 'current-session',
     showActiveSwitchCommand: false,
     numberedSwitchCommands: true,

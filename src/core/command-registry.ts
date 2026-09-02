@@ -375,8 +375,19 @@ export class CommandRegistry {
             },
         });
 
-        addSimpleCommand('search-session-overlay', String(L.cmdSearchOverlay || ''), () => {
-            host.getSearchOverlay().open();
+        host.addCommand({
+            id: 'search-session-overlay',
+            name: String(L.cmdSearchOverlay || ''),
+            // Follows the session-filter setting, the way version-history
+            // follows its own. With the filter off the overlay renders no filter
+            // row, so a command called "Search sessions" opened something that
+            // could not search. The overlay itself stays reachable from the
+            // status bar, where its job is the quick switcher.
+            checkCallback: (checking) => {
+                if (!host.getSettingsState().showFilterInput) return false;
+                if (!checking) host.getSearchOverlay().open();
+                return true;
+            },
         });
 
         host.addCommand({

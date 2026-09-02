@@ -199,7 +199,11 @@ test('CommandRegistry: registers all core commands and handles callbacks', async
     cmdMap.get('toggle-auto-save-on-switch')?.callback?.();
     assert.ok(calls.includes('toggleAutoSave'));
 
-    cmdMap.get('search-session-overlay')?.callback?.();
+    // A checkCallback now: the command follows the session-filter setting, so
+    // it reports whether it is available before it runs.
+    const searchOverlay = cmdMap.get('search-session-overlay');
+    assert.equal(searchOverlay?.checkCallback?.(true), true, 'available while the filter is on');
+    searchOverlay?.checkCallback?.(false);
     assert.ok(calls.includes('openSearchOverlay'));
 
     cmdMap.get('export-sessions-snapshot')?.callback?.();
@@ -269,6 +273,28 @@ test('CommandRegistry: syncSessionCommands manages numbered and dynamic named co
     // Standalone functions
     registerCommands(host);
     syncSessionCommands(host);
+});
+
+/**
+ * The reported fault: with the session filter off, "Search sessions" opened an
+ * overlay whose filter row is `display: none`, so the command could not do the
+ * one thing its name promises. It reports itself unavailable now, the way
+ * version-history does when history is off.
+ */
+test('the search command is absent while the session filter is off', () => {
+    const { host, data, commands } = createMockHost();
+    const registry = new CommandRegistry(host);
+    registry.registerCommands();
+
+    const cmdMap = new Map(commands.map((c) => [c.id, c]));
+    const search = cmdMap.get('search-session-overlay');
+    assert.ok(search, 'the command is always registered');
+
+    data.showFilterInput = true;
+    assert.equal(search?.checkCallback?.(true), true);
+
+    data.showFilterInput = false;
+    assert.equal(search?.checkCallback?.(true), false, 'and hides itself when it cannot search');
 });
 
 test.after(() => harness.restore());

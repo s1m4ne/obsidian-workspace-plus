@@ -175,7 +175,7 @@ test('resetting settings restores defaults and persists the restored settings wi
     const stored = readData(plugin);
     assert.equal(plugin.data.language, 'auto');
     assert.equal(plugin.data.autoSaveOnSwitch, true);
-    assert.equal(plugin.data.showFilterInput, false);
+    assert.equal(plugin.data.showFilterInput, true, 'the session filter defaults on');
     assert.equal(stored.sessions.a.name, 'A', 'resetting settings must not erase the session payload');
 });
 
