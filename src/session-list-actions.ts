@@ -14,7 +14,6 @@ export interface SessionRenameActionsHost {
     getSessionStore(): SessionStore;
 
     app: App;
-    renameSessionById(sessionId: string, name: string): Promise<boolean>;
 }
 
 export interface SessionDeleteActionsHost {
@@ -83,7 +82,7 @@ export function renameSessionWithPrompt(options: RenameSessionWithPromptOptions 
     };
 
     new RenameModal(app, session.name, (newName) => {
-        void plugin.renameSessionById(session.id, newName).then((renamed) => {
+        void plugin.getSessionStore().renameSessionById(session.id, newName).then((renamed) => {
             if (!renamed) return;
             options.onRenamed?.(session, newName);
         });

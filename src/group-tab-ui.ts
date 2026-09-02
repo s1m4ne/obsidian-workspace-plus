@@ -29,8 +29,6 @@ export interface GroupTabPluginHost {
         groupOrder?: string[] | undefined;
         sessions?: Record<string, SessionItem> | undefined;
     };
-    createGroupValidated(name: string): Promise<boolean>;
-    renameGroupValidated(groupId: string, name: string): Promise<boolean>;
 }
 
 export interface AttachGroupTabDragOptions {
@@ -86,7 +84,7 @@ export function openCreateGroupPrompt(
         app,
         '',
         (name) => {
-            void plugin.createGroupValidated(name).then((created) => {
+            void plugin.getGroupStore().createGroupValidated(name).then((created) => {
                 if (!created) return;
                 if (typeof onCreated === 'function') onCreated();
             });
@@ -110,7 +108,7 @@ export function openRenameGroupPrompt(
         app,
         group.name,
         (newName) => {
-            void plugin.renameGroupValidated(group.id, newName).then((renamed) => {
+            void plugin.getGroupStore().renameGroupValidated(group.id, newName).then((renamed) => {
                 if (!renamed) return;
                 if (typeof onRenamed === 'function') onRenamed();
             });

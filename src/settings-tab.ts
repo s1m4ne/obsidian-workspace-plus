@@ -110,8 +110,6 @@ export interface SettingsTabHost extends GroupSessionsModalHost {
     getRotationBackupInfo(): Promise<RotationBackupInfo[]>;
     restoreFromRotationBackup(generation: number): Promise<boolean>;
 
-    createGroupValidated(name: string): Promise<boolean>;
-    renameGroupValidated(groupId: string, name: string): Promise<boolean>;
 
     getSessionsPath(): string;
     getSessionStorageLocation(): string;
@@ -648,7 +646,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
             btn.setButtonText(text(L.settingsGroupCreateBtn));
             btn.onClick(() => {
                 if (!groupNameInput) return;
-                void this.plugin.createGroupValidated(groupNameInput.getValue()).then((created) => {
+                void this.plugin.getGroupStore().createGroupValidated(groupNameInput.getValue()).then((created) => {
                     if (created) this.display();
                 });
             });
@@ -675,7 +673,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
             btn.setTooltip(text(L.rename));
             btn.onClick(() => {
                 new RenameModal(this.app, group.name, (newName: string) => {
-                    void this.plugin.renameGroupValidated(group.id, newName).then((renamed) => {
+                    void this.plugin.getGroupStore().renameGroupValidated(group.id, newName).then((renamed) => {
                         if (renamed) this.display();
                     });
                 }, { emptyNotice: text(L.groupEmptyName) }).open();

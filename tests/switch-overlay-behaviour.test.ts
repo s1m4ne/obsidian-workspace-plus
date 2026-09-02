@@ -438,7 +438,9 @@ test('the search overlay saves the current layout and closes', async () => {
     const { plugin, searchOverlay } = createTestPlugin();
     plugin.persistData = async () => true;
     let createdWithName: string | null = null;
-    plugin.createSessionForViewedGroup = async (name: string, _gid: string | null) => {
+    // The overlay reaches this through the store now, so the override goes
+    // there rather than onto the plugin, where it would never be consulted.
+    plugin.getSessionStore().createSessionForViewedGroup = async (name: string, _gid: string | null) => {
         createdWithName = name;
         return {
             created: true,

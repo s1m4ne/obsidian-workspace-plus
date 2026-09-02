@@ -60,11 +60,6 @@ export interface SessionManagerModalHost extends GroupTabPluginHost, HistoryModa
         [key: string]: unknown;
     };
     getCommandHotkey(commandId: string): string;
-    renameSessionById(sessionId: string, name: string): Promise<boolean>;
-    createSessionForViewedGroup(
-        name: string,
-        groupId: string | null
-    ): Promise<{ created: boolean; name: string; viewGroupId?: string | null } | null>;
 }
 
 /** Where the keyboard target currently sits. */
@@ -851,7 +846,7 @@ export class SessionManagerModal extends Modal {
 
     onSave(): void {
         const selectedGroupId = this.getModalGroupId();
-        void this.plugin.createSessionForViewedGroup(this.nameInput.value, selectedGroupId).then((result) => {
+        void this.plugin.getSessionStore().createSessionForViewedGroup(this.nameInput.value, selectedGroupId).then((result) => {
             if (!result || !result.created) return;
             this.modalGroupId = result.viewGroupId || null;
             this.nameInput.value = '';

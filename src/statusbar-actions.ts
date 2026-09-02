@@ -59,7 +59,6 @@ export interface StatusBarActionPluginHost extends HistoryModalPluginHost, Setti
     hideSearchOverlay(): void;
     openSearchOverlay(anchorEl?: HTMLElement | null): void;
     saveCurrentNoteNameAsSession(): Promise<unknown>;
-    renameSessionById(sessionId: string, name: string): Promise<boolean>;
     openConfirmModal?(
         message: string,
         onConfirm: () => void,

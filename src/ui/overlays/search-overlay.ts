@@ -296,8 +296,6 @@ export interface SearchOverlayHost extends GroupTabPluginHost, HistoryModalPlugi
     filterSessionsByQuery(sessions: SessionItem[], query: string): SessionItem[];
     hideSwitchOverlay(): void;
     hideSearchOverlay(): void;
-    createSessionForViewedGroup(name: string, groupId: string | null): Promise<{ created: boolean; name: string; viewGroupId?: string | null }>;
-    renameSessionById(sessionId: string, name: string): Promise<boolean>;
     persistData(): Promise<unknown>;
 }
 
@@ -453,7 +451,7 @@ export class SearchOverlay {
 
         function onOverlaySave() {
             const selectedGroupId = getOverlayGroupId();
-            void self.createSessionForViewedGroup(saveInput.value, selectedGroupId).then(function (result) {
+            void self.getSessionStore().createSessionForViewedGroup(saveInput.value, selectedGroupId).then(function (result) {
                 if (!result || !result.created) return;
                 const createdName = result.name;
                 overlayGroupId = result.viewGroupId || null;
