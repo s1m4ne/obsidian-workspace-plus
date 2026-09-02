@@ -9,6 +9,9 @@ const {
     registerCommands,
     syncSessionCommands,
 } = await import('../src/core/command-registry.ts');
+// Dynamically, after setupHarness: a static import is resolved while the module
+// graph links, before the hooks that point `obsidian` at the stubs exist.
+const { SettingsState } = await import('../src/state/settings-state.ts');
 
 function createMockHost() {
     const commands: import('obsidian').Command[] = [];
@@ -21,9 +24,10 @@ function createMockHost() {
         s3: { id: 's3', name: 'Session 3', layout: {} },
     };
 
-    const host: import('../src/core/command-registry.ts').CommandRegistryHost = {
-        manifest: { id: 'workspace-plus-plus' },
-        data: {
+    // The registry's host no longer carries `data` - it asks the three owners
+    // instead - so the fixture holds it here and builds the store doubles from
+    // it, which is what the plugin does too.
+    const data = {
             ...DEFAULT_DATA,
             numberedSwitchCommands: true,
             showActiveSwitchCommand: false,
@@ -36,7 +40,10 @@ function createMockHost() {
             },
             groupOrder: ['g1'],
             sessionGroups: { s1: ['g1'] },
-        },
+    };
+
+    const host: import('../src/core/command-registry.ts').CommandRegistryHost = {
+        manifest: { id: 'workspace-plus-plus' },
         app: {} as import('obsidian').App,
         _dynamicSessionCommandIds: [] as string[],
         addCommand(command: import('obsidian').Command) {
@@ -52,7 +59,7 @@ function createMockHost() {
         // own data there rather than carrying the members twice.
         getSessionStore(): never {
             const ordered = (): unknown[] =>
-                this.data.sessionOrder.map((id: string) => this.data.sessions[id]).filter(Boolean);
+                data.sessionOrder.map((id: string) => data.sessions[id]).filter(Boolean);
             return {
                 getOrderedSessions: ordered,
                 getOrderedSessionsUnfiltered: ordered,
@@ -61,13 +68,15 @@ function createMockHost() {
                 // or reintroduces the "not found means the first one"
                 // substitution P9 removed - is visible here.
                 findActiveSessionIndex: (sessions: Array<{ id: string }>) =>
-                    sessions.findIndex((x) => x.id === this.data.activeSessionId),
+                    sessions.findIndex((x) => x.id === data.activeSessionId),
                 renameCurrentSession: () => { calls.push('rename'); },
                 deleteCurrentSession: () => { calls.push('delete'); },
                 createEmptySession: async () => { calls.push('createEmpty'); return true; },
                 duplicateCurrentSession: async () => { calls.push('duplicate'); return true; },
                 getActiveSession: () =>
-                    (this.data.activeSessionId && this.data.sessions[this.data.activeSessionId]) || null,
+                    (data.activeSessionId && data.sessions[data.activeSessionId]) || null,
+                // The active id is the store's answer now.
+                getActiveSessionId: () => data.activeSessionId ?? null,
             } as never;
         },
         // The saver members the registry reaches now come through the saver.
@@ -115,15 +124,30 @@ function createMockHost() {
                 exitGroup: () => { calls.push('exitGroup'); },
                 switchGroupRelative: (step: number) => { calls.push(`switchGroupRelative:${step}`); },
                 isGroupFeatureEnabled: () => true,
+                // The registry asks the store for the active group id now,
+                // answered from the fixture's own data so the test at the
+                // bottom that sets it still steers the overlay.
+                getActiveGroupId: () => data.activeGroupId ?? null,
                 resolveGroupSelection: async (groupId: string | null) => ({ resolvedGroupId: groupId, switched: true, targetGroupId: groupId, sessions: [] }),
             } as never;
         },
         openSessionManagerModal(focusName: boolean) { calls.push(`openSessionManager:${focusName}`); },
         openHistoryModal(session: import('../src/storage/default-data.ts').SessionItem) { calls.push(`openHistory:${session.name}`); },
         openConfirmModal(msg: string, onConfirm: () => void) { calls.push(`openConfirm:${msg}`); onConfirm(); },
+        // A real SettingsState over this fixture's own data, not a stub. The
+        // registry reads numberedSwitchCommands and showActiveSwitchCommand
+        // through the owner now, and a stub returning fixed answers would stop
+        // the two values set in `data` above from reaching the branches under
+        // test while every assertion still passed.
+        getSettingsState: () => settingsState,
     };
 
-    return { host, commands, calls, shownActiveIndexes };
+    const settingsState = new SettingsState({
+        data,
+        persistData: async () => true,
+    });
+
+    return { host, data, commands, calls, shownActiveIndexes };
 }
 
 test('CommandRegistry: registers all core commands and handles callbacks', async () => {
@@ -216,7 +240,7 @@ test('CommandRegistry: registers all core commands and handles callbacks', async
 });
 
 test('CommandRegistry: syncSessionCommands manages numbered and dynamic named commands', () => {
-    const { host, commands } = createMockHost();
+    const { host, data, commands } = createMockHost();
     const registry = new CommandRegistry(host);
 
     registry.syncSessionCommands();
@@ -233,7 +257,7 @@ test('CommandRegistry: syncSessionCommands manages numbered and dynamic named co
     assert.equal(switchTo2?.checkCallback?.(true), true); // s2 is not active
 
     // Now test with numberedSwitchCommands disabled and dynamic commands from 0 onward
-    host.data.numberedSwitchCommands = false;
+    data.numberedSwitchCommands = false;
     registry.syncSessionCommands();
 
     const newIds = commands.map((c) => c.id);
@@ -250,14 +274,14 @@ test('CommandRegistry: syncSessionCommands manages numbered and dynamic named co
 test.after(() => harness.restore());
 
 test('opening another group offers no active row when the active session is not in it', async () => {
-    const { commands, shownActiveIndexes, host } = createMockHost();
+    const { commands, data, shownActiveIndexes, host } = createMockHost();
     new CommandRegistry(host).registerCommands();
     const cmdMap = new Map(commands.map((c) => [c.id, c]));
 
     // The active session belongs somewhere else, which is the ordinary state
     // once groups are in use. Before P9 the overlay was handed 0 and highlighted
     // the first row of a group the active session is not in.
-    host.data.activeSessionId = 'not-in-any-group';
+    data.activeSessionId = 'not-in-any-group';
 
     cmdMap.get('switch-group')?.callback?.();
     await new Promise((resolve) => setTimeout(resolve, 10));

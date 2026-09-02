@@ -87,6 +87,16 @@ function createMockHost(initialData?: Partial<PluginData>) {
     const host: FrontmatterLinkerHost = {
         data,
         app,
+        // The linker asks the two stores for the group map and the active ids
+        // now. Both are built over this fixture's own `data`, so a test that
+        // changes a session or a group still steers the linker.
+        getSessionStore: () => ({
+            getActiveSessionId: () => data.activeSessionId ?? null,
+        }) as never,
+        getGroupStore: () => ({
+            getActiveGroupId: () => data.activeGroupId ?? null,
+            getGroupMap: () => data.groups ?? {},
+        }) as never,
         saveCurrentLayoutAsSessionName: async (name: string) => {
             events.savedLayouts.push(name);
             return true;

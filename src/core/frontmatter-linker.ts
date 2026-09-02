@@ -8,6 +8,9 @@ export interface ParsedWorkspaceSession {
     sessionName: string;
 }
 
+import type { SessionStore } from '../state/session-store.ts';
+import type { GroupStore } from '../state/group-store.ts';
+
 export interface FrontmatterLinkerHost {
     data: PluginData;
     app: App;
@@ -15,6 +18,15 @@ export interface FrontmatterLinkerHost {
     switchSession: (sessionId: string) => Promise<boolean>;
     setActiveGroup?: (groupId: string) => Promise<boolean>;
     isGroupFeatureEnabled: () => boolean;
+
+    /**
+     * The session set and the group map are owned by their stores. Naming the
+     * stores rather than restating their methods keeps one list, the way the
+     * other hosts do; the linker read `data.groups`, `data.sessions` and both
+     * active ids directly, which is what P1's contract stage removes.
+     */
+    getSessionStore(): SessionStore;
+    getGroupStore(): GroupStore;
     getStartupSettleRemainingMs?: () => number;
     isSessionSwitcherActive?: () => boolean;
     handleFrontmatterTriggers?: (file: TFile) => void;
@@ -125,7 +137,7 @@ export class FrontmatterLinker {
             return { groupName: null, sessionName: trimmed };
         }
 
-        const groups = this.data.groups || {};
+        const groups = this.host.getGroupStore().getGroupMap();
         const groupKeys = Object.keys(groups);
         for (let i = 0; i < groupKeys.length; i++) {
             const key = groupKeys[i];
@@ -162,8 +174,8 @@ export class FrontmatterLinker {
             return;
         }
 
-        const alreadyOnSession = session.id === this.data.activeSessionId;
-        const alreadyOnGroup = !parsed.groupId || this.data.activeGroupId === parsed.groupId;
+        const alreadyOnSession = session.id === this.host.getSessionStore().getActiveSessionId();
+        const alreadyOnGroup = !parsed.groupId || this.host.getGroupStore().getActiveGroupId() === parsed.groupId;
 
         if (alreadyOnSession && alreadyOnGroup) {
             new Notice(formatString(L.frontmatterAlreadyActive, parsed.sessionName));
@@ -174,7 +186,7 @@ export class FrontmatterLinker {
 
         if (parsed.groupId && isGroupEnabled && !alreadyOnGroup && typeof this.host.setActiveGroup === 'function') {
             void this.host.setActiveGroup(parsed.groupId).then(() => {
-                if (session.id !== this.data.activeSessionId) {
+                if (session.id !== this.host.getSessionStore().getActiveSessionId()) {
                     void this.host.switchSession(session.id);
                 }
             });

@@ -69,7 +69,11 @@ export interface PluginData {
     overlayDefaultFocus: string;
     showActiveSwitchCommand: boolean;
     numberedSwitchCommands: boolean;
-    searchOverlayPosition: { x: number; y: number } | null;
+    // Written and read as left/bottom - see search-overlay.ts, which anchors
+    // the overlay from the bottom-left because it hangs off the status bar. The
+    // declaration said `{ x, y }`, which no code has ever produced or consumed;
+    // the on-disk format is unchanged by correcting it.
+    searchOverlayPosition: { left: number; bottom: number } | null;
     searchOverlaySize: { width: number; height: number } | null;
     groups: Record<string, SessionGroup>;
     groupOrder: string[];

@@ -64,6 +64,27 @@ function coverageNow() {
     return JSON.parse(out).all;
 }
 
+/**
+ * The files that own a slice of `plugin.data` and are supposed to read it.
+ *
+ * The three stores own their own state. The storage layer owns the whole bag:
+ * it serialises it, replaces it wholesale when another device's copy arrives
+ * (the #105 path), and restores it from backup, none of which can be done
+ * through per-key accessors.
+ */
+const DATA_OWNERS = [
+    'state/settings-state.ts',
+    'state/session-store.ts',
+    'state/group-store.ts',
+    'storage/session-sync.ts',
+    'storage/storage-backup.ts',
+    'storage/storage-transfer.ts',
+    'storage/persistence-service.ts',
+    'storage/session-storage.ts',
+    'storage/session-data.ts',
+    'storage/migrations.ts',
+];
+
 function main() {
     const files = walk(SRC, []);
     const ts = files.filter((f) => f.endsWith('.ts'));
@@ -78,9 +99,23 @@ function main() {
     const prototypes = countMatches(js, /\.prototype\.\w+\s*=/g);
     console.log(`  prototype methods remaining   ${prototypes}   (started at 309)`);
 
-    // P1: direct reads of the shared bag. Contract cannot begin until these hit 0.
+    // P1: direct reads of the shared bag.
+    //
+    // The project-wide number cannot reach zero and never could: the classes
+    // that *own* a slice read `this.data.x` because that is their job. Counting
+    // them made the figure meaningless - it was reported as 324 while more than
+    // half of that was the three stores doing exactly what they exist to do.
+    //
+    // What P1's contract stage is actually about is reads from outside an
+    // owner, so both numbers are printed and the second is the one with a
+    // target of zero.
     const dataReads = countMatches(files, /\.data\.\w+/g);
-    console.log(`  direct plugin.data reads      ${dataReads}   (started at 264+)`);
+    const owners = files.filter((f) => DATA_OWNERS.some((suffix) => f.endsWith(suffix)));
+    const nonOwners = files.filter((f) => !owners.includes(f));
+    const ownerReads = countMatches(owners, /\.data\.\w+/g);
+    const outsideReads = countMatches(nonOwners, /\.data\.\w+/g);
+    console.log(`  plugin.data reads, total      ${dataReads}   (${ownerReads} inside an owner)`);
+    console.log(`  ... from outside an owner     ${outsideReads}   (was ~145, target 0)`);
     console.log(`  CommonJS requires remaining   ${countMatches(js, /require\(/g)}`);
 
     const lintBaseline = readJson(path.join(ROOT, '.eslint-baseline.json'), { total: null });

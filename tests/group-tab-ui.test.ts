@@ -20,7 +20,22 @@ function createMockPlugin() {
     const plugin = {
         // Session state goes through getSessionStore(); this double carries
         // those members itself, so it stands in as its own store.
-        getSessionStore(): never { return this as never; },
+        getSessionStore(): never {
+            // The double still carries the store members; these five are the
+            // ones P1's contract stage moved onto the owners, answered from
+            // this fixture's own data so a test that changes a session or a
+            // group still steers the path under test.
+            const bag = plugin.data as Record<string, unknown>;
+            const groups = (): Record<string, { id: string; name: string }> =>
+                (bag['groups'] ?? {}) as Record<string, { id: string; name: string }>;
+            return Object.assign(Object.create(this) as object, {
+                getActiveSessionId: (): string | null => (bag['activeSessionId'] ?? null) as string | null,
+                getSessionCount: () => Object.keys(bag['sessions'] ?? {}).length,
+                getActiveGroupId: (): string | null => (bag['activeGroupId'] ?? null) as string | null,
+                findGroup: (id: string | null) => (id ? groups()[id] ?? null : null),
+                getGroupMap: () => groups(),
+            }) as never;
+        },
         app: mockApp,
         data: {
             groups: {
@@ -38,7 +53,19 @@ function createMockPlugin() {
         },
         // Group calls go through getGroupStore(). This double carries the group
         // members itself, so it stands in as its own group store.
-        getGroupStore(): never { return this as never; },
+        getGroupStore(): never {
+            // Same as getSessionStore above: the double carries the group
+            // members, plus the three P1 moved onto GroupStore, answered from
+            // this fixture's own data.
+            const bag = plugin.data as Record<string, unknown>;
+            const groups = (): Record<string, { id: string; name: string }> =>
+                (bag['groups'] ?? {}) as Record<string, { id: string; name: string }>;
+            return Object.assign(Object.create(this) as object, {
+                getActiveGroupId: (): string | null => (bag['activeGroupId'] ?? null) as string | null,
+                findGroup: (id: string | null) => (id ? groups()[id] ?? null : null),
+                getGroupMap: () => groups(),
+            }) as never;
+        },
         getOrderedGroups() {
             return [{ id: 'g1', name: 'Work' }, { id: 'g2', name: 'Study' }];
         },

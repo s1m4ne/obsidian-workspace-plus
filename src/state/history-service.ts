@@ -14,7 +14,13 @@ export interface HistoryEntry extends SessionHistoryEntry {
 export interface HistoryServiceHost {
     data: PluginData;
     settingsState: SettingsState;
-    sessionStore?: SessionStore;
+
+    /**
+     * Was `sessionStore?: SessionStore` - declared, optional, and never read
+     * once. It is required now and used: the active id is SessionStore's to
+     * answer, and reading `data.activeSessionId` here was P1's contract stage.
+     */
+    getSessionStore(): SessionStore;
     getActiveSession: () => SessionItem | null;
     getCurrentWorkspaceLayout: () => unknown;
     applyWorkspaceLayout: (layout: unknown) => Promise<boolean>;
@@ -72,6 +78,21 @@ export class HistoryService {
 
     // --- Setting accessors ---
 
+    /**
+     * NOT routed through SettingsState, though the owner has a getter for it.
+     * The two disagree when the key is absent: this returns false, and
+     * `SettingsState.versionHistoryEnabled` falls back to
+     * DEFAULT_DATA.versionHistoryEnabled, which is `true`. Switching would turn
+     * version history on for anyone whose data.json predates the key. In
+     * practice loadWithBackup merges DEFAULT_DATA so it is always present, but
+     * that is not a reason to change what this answers when it is not.
+     *
+     * Same for the interval below: it clamps anything under 1 to 5, and the
+     * owner's getter only fills in a missing value.
+     *
+     * Both are real duplication and both are a behaviour change to remove.
+     * Recorded rather than made.
+     */
     isVersionHistoryEnabled(): boolean {
         return Boolean(this.data.versionHistoryEnabled);
     }
@@ -238,7 +259,7 @@ export class HistoryService {
         session.layout = cloneLayout(entry.layout);
         session.modified = Date.now();
 
-        const isActive = session.id === this.data.activeSessionId;
+        const isActive = session.id === this.host.getSessionStore().getActiveSessionId();
         if (isActive && session.layout) {
             await this.host.applyWorkspaceLayout(session.layout);
         }

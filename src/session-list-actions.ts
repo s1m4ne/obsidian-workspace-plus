@@ -4,6 +4,7 @@ import { ConfirmModal, type ConfirmModalOptions } from './modals/confirm-modal.t
 import { RenameModal, type RenameModalOptions } from './modals/rename-modal.ts';
 import type { SessionItem } from './storage/default-data.ts';
 import type { SessionStore } from './state/session-store.ts';
+import type { SettingsState } from './state/settings-state.ts';
 
 export interface SessionRenameActionsHost {
     /**
@@ -22,10 +23,16 @@ export interface SessionDeleteActionsHost {
      */
     getSessionStore(): SessionStore;
 
+    /**
+     * The confirmation flag and its default are owned by SettingsState. This
+     * was `data.confirmDeleteByHotkey !== false` here, one of the five places
+     * that re-derived the same default - P5's defect, in P1's contract stage.
+     */
+    getSettingsState(): SettingsState;
+
     app: App;
     data: {
         sessions: Record<string, SessionItem>;
-        confirmDeleteByHotkey: boolean;
     };
 }
 
@@ -125,7 +132,7 @@ export function deleteSessionWithPrompt(
         });
     };
 
-    const shouldConfirm = !!options.forceConfirm || plugin.data.confirmDeleteByHotkey !== false;
+    const shouldConfirm = !!options.forceConfirm || plugin.getSettingsState().confirmDeleteByHotkey;
     if (shouldConfirm) {
         new ConfirmModal(
             app,

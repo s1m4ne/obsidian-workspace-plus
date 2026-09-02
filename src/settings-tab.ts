@@ -236,7 +236,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
                 for (const code of LANG_ORDER) {
                     dropdown.addOption(code, LANG_OPTIONS[code] ?? code);
                 }
-                dropdown.setValue(this.plugin.data.language || 'auto');
+                dropdown.setValue(this.plugin.getSettingsState().language);
                 dropdown.onChange((value) => {
                     void this.plugin.getSettingsState().setLanguageSetting(value).then(() => { this.display(); });
                 });
@@ -261,7 +261,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
                     for (const actionId of statusBarActions.ACTION_IDS) {
                         dropdown.addOption(actionId, statusBarActions.getActionLabel(L, actionId));
                     }
-                    dropdown.setValue((this.plugin.data.statusBarActions || {})[slotKey] || 'none');
+                    dropdown.setValue(this.plugin.getSettingsState().statusBarActions[slotKey] || 'none');
                     dropdown.onChange((value) => { void this.plugin.getSettingsState().setStatusBarAction(slotKey, value); });
                 });
         }
@@ -301,7 +301,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
             addToggleSetting(contentEl, {
                 name: text(L.settingsConfirmQuickActions),
                 desc: text(L.settingsConfirmQuickActionsDesc),
-                value: !!this.plugin.data.confirmQuickActions,
+                value: this.plugin.getSettingsState().confirmQuickActions,
                 onChange: (value) => { void this.plugin.getSettingsState().setConfirmQuickActions(value); },
             });
         }
@@ -330,18 +330,18 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
         addToggleSetting(contentEl, {
             name: text(L.settingsStatusBarModScrollSwitch),
             desc: text(L.settingsStatusBarModScrollSwitchDesc),
-            value: !!this.plugin.data.statusBarModScrollSwitch,
+            value: this.plugin.getSettingsState().statusBarModScrollSwitch,
             onChange: (value) => {
                 void this.plugin.getSettingsState().setStatusBarModScrollSwitch(value).then(() => { this.display(); });
             },
         });
 
-        if (!this.plugin.data.statusBarModScrollSwitch) return;
+        if (!this.plugin.getSettingsState().statusBarModScrollSwitch) return;
 
         addDropdownSetting(contentEl, {
             name: text(L.settingsStatusBarScrollPreset),
             desc: text(L.settingsStatusBarScrollPresetDesc),
-            value: this.plugin.data.statusBarScrollPreset || 'trackpad',
+            value: this.plugin.getSettingsState().statusBarScrollPreset,
             items: {
                 trackpad: text(L.settingsStatusBarScrollPresetTrackpad),
                 notchedWheel: text(L.settingsStatusBarScrollPresetNotchedWheel),
@@ -357,9 +357,9 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
             name: text(L.settingsStatusBarScrollModifier),
             desc: text(L.settingsStatusBarScrollModifierDesc),
             // 'recommended' is the stored name of what the UI calls modOrAlt.
-            value: this.plugin.data.statusBarScrollModifierMode === 'recommended'
+            value: this.plugin.getSettingsState().statusBarScrollModifierMode === 'recommended'
                 ? 'modOrAlt'
-                : (this.plugin.data.statusBarScrollModifierMode || 'none'),
+                : this.plugin.getSettingsState().statusBarScrollModifierMode,
             items: {
                 none: text(L.settingsStatusBarScrollModifierNone),
                 modOnly: text(L.settingsStatusBarScrollModifierModOnly),
@@ -371,12 +371,12 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
 
         // The three numbers below belong to the custom preset; the other presets
         // set them, so they are shown greyed rather than hidden.
-        const useCustomScroll = (this.plugin.data.statusBarScrollPreset || 'trackpad') === 'custom';
+        const useCustomScroll = this.plugin.getSettingsState().statusBarScrollPreset === 'custom';
 
         addDropdownSetting(contentEl, {
             name: text(L.settingsStatusBarScrollThreshold),
             desc: text(L.settingsStatusBarScrollThresholdDesc),
-            value: String(this.plugin.data.statusBarScrollThreshold || 30),
+            value: String(this.plugin.getSettingsState().statusBarScrollThreshold),
             disabled: !useCustomScroll,
             items: { '12': '12', '16': '16', '24': '24', '30': '30', '40': '40', '60': '60', '90': '90' },
             onChange: (value) => { void this.plugin.getSettingsState().setStatusBarScrollThreshold(value); },
@@ -385,7 +385,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
         addDropdownSetting(contentEl, {
             name: text(L.settingsStatusBarScrollCooldown),
             desc: text(L.settingsStatusBarScrollCooldownDesc),
-            value: String(this.plugin.data.statusBarScrollCooldownMs || 500),
+            value: String(this.plugin.getSettingsState().statusBarScrollCooldownMs),
             disabled: !useCustomScroll,
             items: { '200': '200 ms', '350': '350 ms', '500': '500 ms', '750': '750 ms', '1000': '1000 ms' },
             onChange: (value) => { void this.plugin.getSettingsState().setStatusBarScrollCooldownMs(value); },
@@ -394,7 +394,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
         addDropdownSetting(contentEl, {
             name: text(L.settingsStatusBarScrollResetWindow),
             desc: text(L.settingsStatusBarScrollResetWindowDesc),
-            value: String(this.plugin.data.statusBarScrollResetMs || 250),
+            value: String(this.plugin.getSettingsState().statusBarScrollResetMs),
             disabled: !useCustomScroll,
             items: { '150': '150 ms', '250': '250 ms', '400': '400 ms', '600': '600 ms' },
             onChange: (value) => { void this.plugin.getSettingsState().setStatusBarScrollResetMs(value); },
@@ -403,7 +403,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
         addToggleSetting(contentEl, {
             name: text(L.settingsStatusBarScrollInvert),
             desc: text(L.settingsStatusBarScrollInvertDesc),
-            value: !!this.plugin.data.statusBarScrollInvert,
+            value: this.plugin.getSettingsState().statusBarScrollInvert,
             onChange: (value) => { void this.plugin.getSettingsState().setStatusBarScrollInvert(value); },
         });
     }
@@ -414,14 +414,14 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
         addToggleSetting(contentEl, {
             name: text(L.settingsShowActiveSwitchCommand),
             desc: text(L.settingsShowActiveSwitchCommandDesc),
-            value: !!this.plugin.data.showActiveSwitchCommand,
+            value: this.plugin.getSettingsState().showActiveSwitchCommand,
             onChange: (value) => { void this.plugin.getSettingsState().setShowActiveSwitchCommand(value); },
         });
 
         addToggleSetting(contentEl, {
             name: text(L.settingsNumberedSwitchCommands),
             desc: text(L.settingsNumberedSwitchCommandsDesc),
-            value: !!this.plugin.data.numberedSwitchCommands,
+            value: this.plugin.getSettingsState().numberedSwitchCommands,
             onChange: (value) => { void this.plugin.getSettingsState().setNumberedSwitchCommands(value); },
         });
     }
@@ -431,7 +431,8 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
 
         // The master toggle is on only when both directions are, so turning it
         // on cannot leave a half-enabled state behind.
-        const allOn = !!this.plugin.data.previewNext && !!this.plugin.data.previewPrevious;
+        const settingsState = this.plugin.getSettingsState();
+        const allOn = settingsState.previewNext && settingsState.previewPrevious;
         const masterSetting = new Setting(contentEl)
             .setName(text(L.settingsPreviewHeading))
             .setDesc(text(L.settingsPreviewDesc))
@@ -448,7 +449,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
         new Setting(nestedDiv)
             .setName(text(L.settingsPreviewNext))
             .addToggle((toggle) => {
-                toggle.setValue(!!this.plugin.data.previewNext);
+                toggle.setValue(this.plugin.getSettingsState().previewNext);
                 toggle.onChange((value) => {
                     void this.plugin.getSettingsState().setPreviewNext(value).then(() => { this.display(); });
                 });
@@ -457,7 +458,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
         new Setting(nestedDiv)
             .setName(text(L.settingsPreviewPrevious))
             .addToggle((toggle) => {
-                toggle.setValue(!!this.plugin.data.previewPrevious);
+                toggle.setValue(this.plugin.getSettingsState().previewPrevious);
                 toggle.onChange((value) => {
                     void this.plugin.getSettingsState().setPreviewPrevious(value).then(() => { this.display(); });
                 });
@@ -470,7 +471,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
         addToggleSetting(contentEl, {
             name: text(L.settingsShowFilterInput),
             desc: text(L.settingsShowFilterInputDesc),
-            value: !!this.plugin.data.showFilterInput,
+            value: this.plugin.getSettingsState().showFilterInput,
             onChange: (value) => { void this.plugin.getSettingsState().setShowFilterInput(value); },
         });
 
@@ -481,7 +482,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
                 dropdown.addOption('current-session', text(L.settingsOverlayFocusCurrentSession));
                 dropdown.addOption('session-filter', text(L.settingsOverlayFocusSessionFilter));
                 dropdown.addOption('session-create', text(L.settingsOverlayFocusSessionCreate));
-                dropdown.setValue(this.plugin.data.overlayDefaultFocus || 'current-session');
+                dropdown.setValue(this.plugin.getSettingsState().overlayDefaultFocus);
                 dropdown.onChange((value) => { void this.plugin.getSettingsState().setOverlayDefaultFocus(value); });
             });
     }
@@ -493,7 +494,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
             name: text(L.settingsConfirmDelete),
             desc: text(L.settingsConfirmDeleteDesc),
             // Absent means on: the confirmation predates the setting.
-            value: this.plugin.data.confirmDeleteByHotkey !== false,
+            value: this.plugin.getSettingsState().confirmDeleteByHotkey,
             onChange: (value) => { void this.plugin.getSettingsState().setConfirmDeleteByHotkey(value); },
         });
     }

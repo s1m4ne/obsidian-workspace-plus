@@ -15,6 +15,8 @@ import type { SessionManagerModalHost } from '../src/modals/session-manager-moda
 import type { HistoryModalPluginHost } from '../src/modals/history-modal.ts';
 
 const harness = setupHarness();
+// After setupHarness, so `obsidian` resolves to the recording stubs.
+const { SettingsState } = await import('../src/state/settings-state.ts');
 
 interface TestPlugin {
     app: unknown;
@@ -27,6 +29,10 @@ interface TestPlugin {
 const SESSION = { id: 's1', name: 'Session One', layout: {}, history: [{ savedAt: 1, layout: {} }] };
 
 function createPlugin(): TestPlugin {
+    const settingsState = new SettingsState({
+        data: { sessions: { s1: SESSION }, sessionOrder: ['s1'], activeSessionId: 's1' },
+        persistData: async () => true,
+    } as never);
     const plugin: TestPlugin = {
         app: { workspace: { getLayout: () => ({}) } },
         data: { sessions: { s1: SESSION }, sessionOrder: ['s1'], activeSessionId: 's1', groups: {}, groupOrder: [], sessionGroups: {}, activeGroupId: null },
@@ -39,7 +45,25 @@ function createPlugin(): TestPlugin {
         getOrderedGroups: () => [],
         getOrderedGroupTabIds: () => [],
         // Session state goes through getSessionStore(); this double carries those members itself.
-        getSessionStore(): never { return this as never; },
+        getSessionStore(): never {
+            // The double still carries the store members; these five are the
+            // ones P1's contract stage moved onto the owners, answered from
+            // this fixture's own data so a test that changes a session or a
+            // group still steers the path under test.
+            const bag: Record<string, unknown> = plugin.data;
+            const groups = (): Record<string, { id: string; name: string }> =>
+                (bag['groups'] ?? {}) as Record<string, { id: string; name: string }>;
+            return Object.assign(Object.create(this) as object, {
+                getActiveSessionId: (): string | null => (bag['activeSessionId'] ?? null) as string | null,
+                getSessionCount: () => Object.keys(bag['sessions'] ?? {}).length,
+                getActiveGroupId: (): string | null => (bag['activeGroupId'] ?? null) as string | null,
+                findGroup: (id: string | null) => (id ? groups()[id] ?? null : null),
+                getGroupMap: () => groups(),
+            }) as never;
+        },
+        // The modal reads showFilterInput and overlayDefaultFocus through the
+        // owner, so it gets a real one over this fixture's own data.
+        getSettingsState: () => settingsState,
         getOrderedSessionsForGroup: () => [SESSION],
         findActiveSessionIndex: () => 0,
         // Commands go through getCommandRegistry(); this double carries those members itself.

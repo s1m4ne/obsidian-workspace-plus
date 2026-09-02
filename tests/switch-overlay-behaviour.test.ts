@@ -202,6 +202,7 @@ function createTestPlugin() {
         reloadCurrentSessionWithoutSaving: (): void => { void sessionSaver.reloadCurrentSessionWithoutSaving(); },
 
         getGroupStore: () => groupStore,
+        getSettingsState: () => settingsState,
         getSessionSaver: () => sessionSaver,
         getSessionSwitcher: () => sessionSwitcher,
         getSessionStore: () => sessionStore,

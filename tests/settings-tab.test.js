@@ -85,10 +85,13 @@ function createPlugin(overrides = {}) {
         exportSessionsSnapshot: promiseCall('export'),
         importSessionsFromLatestExport: promiseCall('import'),
         restoreFromRotationBackup: promiseCall('restore'),
-        // The settings screen writes through plugin.getSettingsState() now. This
-        // double records the setters itself, so it is its own settings state and
-        // every assertion below still names the same calls.
-        getSettingsState() { return this; },
+        // The settings screen both writes and reads through
+        // plugin.getSettingsState() now. Writes stay on this double so the
+        // assertions below still name the same calls; reads fall through to a
+        // real SettingsState over this same `data`, so the screen is seeded
+        // with the owner's effective values - defaults included - rather than
+        // with whatever a hand-written stub happened to return.
+        getSettingsState() { return settingsFacade; },
         setLanguageSetting: promiseCall('language', (value) => { data.language = value; }),
         setStatusBarAction: promiseCall('statusAction'),
         setAutoSaveOnSwitch: promiseCall('autoSave', (value) => { data.autoSaveOnSwitch = value; }),
@@ -109,6 +112,24 @@ function createPlugin(overrides = {}) {
         resetSessionsAndSettingsToDefault: promiseCall('resetEverything'),
         ...overrides.plugin,
     };
+
+    const { SettingsState } = require('../src/state/settings-state.ts');
+    const realSettingsState = new SettingsState({ data, persistData: async () => true });
+    const settingsFacade = new Proxy({}, {
+        get(_target, prop) {
+            // `set*` is the write surface and is what the assertions count;
+            // everything else is a read and must come from the owner.
+            if (typeof prop === 'string' && prop.startsWith('set') && typeof plugin[prop] === 'function') {
+                return plugin[prop].bind(plugin);
+            }
+            if (typeof prop === 'string' && (prop.startsWith('reset') || prop.startsWith('clear'))) {
+                return plugin[prop].bind(plugin);
+            }
+            const value = realSettingsState[prop];
+            return typeof value === 'function' ? value.bind(realSettingsState) : value;
+        },
+    });
+
     return { plugin, calls };
 }
 

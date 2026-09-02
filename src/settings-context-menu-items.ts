@@ -120,9 +120,9 @@ export function openSettingsContextMenu(initialOptions?: SettingsContextMenuOpti
         menu.addItem((mi) => {
             mi.setTitle(text(L.settingsConfirmQuickActions));
             mi.setIcon('check-circle');
-            if (plugin.data.confirmQuickActions) mi.setChecked(true);
+            if (plugin.getSettingsState().confirmQuickActions) mi.setChecked(true);
             mi.onClick(() => {
-                void plugin.getSettingsState().setConfirmQuickActions(!plugin.data.confirmQuickActions).then(() => {
+                void plugin.getSettingsState().setConfirmQuickActions(!plugin.getSettingsState().confirmQuickActions).then(() => {
                     call(options.onChanged);
                 });
             });
@@ -132,9 +132,9 @@ export function openSettingsContextMenu(initialOptions?: SettingsContextMenuOpti
     menu.addItem((mi) => {
         mi.setTitle(text(L.settingsConfirmDelete));
         mi.setIcon('shield');
-        if (plugin.data.confirmDeleteByHotkey !== false) mi.setChecked(true);
+        if (plugin.getSettingsState().confirmDeleteByHotkey) mi.setChecked(true);
         mi.onClick(() => {
-            void plugin.getSettingsState().setConfirmDeleteByHotkey(!(plugin.data.confirmDeleteByHotkey !== false)).then(() => {
+            void plugin.getSettingsState().setConfirmDeleteByHotkey(!plugin.getSettingsState().confirmDeleteByHotkey).then(() => {
                 call(options.onChanged);
             });
         });
@@ -169,9 +169,9 @@ export function openSettingsContextMenu(initialOptions?: SettingsContextMenuOpti
     menu.addItem((mi) => {
         mi.setTitle(text(L.settingsShowFilterInput));
         mi.setIcon('search');
-        if (plugin.data.showFilterInput) mi.setChecked(true);
+        if (plugin.getSettingsState().showFilterInput) mi.setChecked(true);
         mi.onClick(() => {
-            void plugin.getSettingsState().setShowFilterInput(!plugin.data.showFilterInput).then(() => {
+            void plugin.getSettingsState().setShowFilterInput(!plugin.getSettingsState().showFilterInput).then(() => {
                 call(options.onChanged);
             });
         });

@@ -88,7 +88,27 @@ function createPlugin(calls, overrides = {}) {
             return Promise.resolve(true);
         },
         // Session state goes through getSessionStore(); this double carries those members itself.
-        getSessionStore() { return this; },
+        getSessionStore() {
+            // The double still carries the store members; these five are the
+            // ones P1's contract stage moved onto the owners, answered from
+            // this fixture's own data.
+            const data = this.data;
+            return Object.assign(Object.create(this), {
+                getActiveSessionId() { return data.activeSessionId ?? null; },
+                getSessionCount() { return Object.keys(data.sessions || {}).length; },
+                getActiveGroupId() { return data.activeGroupId ?? null; },
+                findGroup(id) { return id ? (data.groups || {})[id] || null : null; },
+                getGroupMap() { return data.groups || {}; },
+            });
+        },
+        // P1's contract stage: the code under test asks the owners for these
+        // rather than reading `data` itself. Answered from this double's own
+        // data so a test that changes it still steers the path.
+        getActiveSessionId() { return this.data.activeSessionId ?? null; },
+        getSessionCount() { return Object.keys(this.data.sessions || {}).length; },
+        getActiveGroupId() { return this.data.activeGroupId ?? null; },
+        findGroup(id) { return id ? (this.data.groups || {})[id] || null : null; },
+        getGroupMap() { return this.data.groups || {}; },
         duplicateSession(sessionId) {
             calls.push(['duplicate', sessionId]);
             return Promise.resolve(true);

@@ -8,6 +8,7 @@ const harness = setupHarness();
 const { L, resolveLocale } = require('../src/i18n.ts');
 const { openSessionContextMenu } = require('../src/session-context-menu-items.ts');
 const { openSettingsContextMenu } = require('../src/settings-context-menu-items.ts');
+const { SettingsState } = require('../src/state/settings-state.ts');
 
 resolveLocale('en');
 
@@ -80,10 +81,11 @@ function createPlugin(overrides = {}) {
             this.data.autoSaveOnSwitch = enabled;
             return Promise.resolve();
         },
-        // The settings screen writes through plugin.getSettingsState() now. This
-        // double records the setters itself, so it is its own settings state and
-        // every assertion below still names the same calls.
-        getSettingsState() { return this; },
+        // The menu both writes and reads through plugin.getSettingsState() now.
+        // Writes stay on this double so the assertions below still name the
+        // same calls; reads fall through to a real SettingsState over this same
+        // `data`, so the checkmarks reflect the owner's effective values.
+        getSettingsState() { return settingsFacade; },
         setWarnOnUnsavedSwitch(enabled) {
             calls.push(['warnUnsaved', enabled]);
             this.data.warnOnUnsavedSwitch = enabled;
@@ -132,6 +134,20 @@ function createPlugin(overrides = {}) {
 
     Object.assign(data, dataOverrides);
     Object.assign(plugin, pluginOverrides);
+
+    const realSettingsState = new SettingsState({ data, persistData: async () => true });
+    const settingsFacade = new Proxy({}, {
+        get(_target, prop) {
+            // `set*` is the write surface the assertions count; everything else
+            // is a read and comes from the owner.
+            if (typeof prop === 'string' && prop.startsWith('set') && typeof plugin[prop] === 'function') {
+                return plugin[prop].bind(plugin);
+            }
+            const value = realSettingsState[prop];
+            return typeof value === 'function' ? value.bind(realSettingsState) : value;
+        },
+    });
+
     return { plugin, calls };
 }
 

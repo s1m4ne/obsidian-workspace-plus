@@ -224,7 +224,7 @@ export function renderGroupTabs(options: RenderGroupTabsOptions): void {
     while (containerEl.firstChild) containerEl.removeChild(containerEl.firstChild);
 
     const app = opts.app || plugin.app;
-    const groups = opts.groups || plugin.data.groups || {};
+    const groups = opts.groups || plugin.getGroupStore().getGroupMap();
     const groupOrder = opts.groupOrder || plugin.getGroupStore().getOrderedGroupTabIds();
     const selectedGroupId = opts.selectedGroupId || null;
 
@@ -361,7 +361,7 @@ export function openAllGroupsTabContextMenu(options: AllGroupsContextMenuOptions
         });
     }
 
-    const sessionCount = Object.keys(plugin.data.sessions || {}).length;
+    const sessionCount = plugin.getSessionStore().getSessionCount();
     if (sessionCount > 1) {
         if (allGroups.length === 0) menu.addSeparator();
         menu.addItem((mi) => {

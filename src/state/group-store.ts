@@ -191,6 +191,31 @@ export class GroupStore {
         return this.groups[this.data.activeGroupId] || null;
     }
 
+    /**
+     * The active id on its own. Unlike getActiveGroup() this does not consult
+     * the feature flag, because every caller that reads `data.activeGroupId`
+     * directly does so to seed a view that has already decided whether groups
+     * are in play. Folding the flag in here would change what they see.
+     */
+    getActiveGroupId(): string | null {
+        return this.data.activeGroupId ?? null;
+    }
+
+    /** One group by id, or null. The read form of `data.groups[id]`. */
+    findGroup(groupId: string | null | undefined): SessionGroup | null {
+        if (!groupId) return null;
+        return this.groups[groupId] ?? null;
+    }
+
+    /**
+     * The whole group map, for the callers that index into it repeatedly or
+     * hand it to a renderer. Readonly: what the store owns is not theirs to
+     * mutate.
+     */
+    getGroupMap(): Readonly<Record<string, SessionGroup>> {
+        return this.groups;
+    }
+
     async createGroup(name: string): Promise<string> {
         const id = generateId();
         this.groups[id] = { id, name };

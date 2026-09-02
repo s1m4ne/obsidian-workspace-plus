@@ -110,6 +110,25 @@ export class SessionStore {
         return this.sessions[this.data.activeSessionId] || null;
     }
 
+    /**
+     * The active id on its own, for the callers that only compare it. They read
+     * `data.activeSessionId` directly, which is P1's contract stage: the id is
+     * this store's to answer, and reaching past it is what gave changing the
+     * shape of session state a blast radius of twenty-three files.
+     */
+    getActiveSessionId(): string | null {
+        return this.data.activeSessionId ?? null;
+    }
+
+    /**
+     * How many sessions exist. Three callers wrote
+     * `Object.keys(data.sessions).length` to decide whether deleting is
+     * allowed at all - there has to be one session left.
+     */
+    getSessionCount(): number {
+        return Object.keys(this.sessions).length;
+    }
+
     findSessionIndex(sessions: SessionItem[], sessionId: string | null | undefined): number {
         if (!sessions || sessions.length === 0 || !sessionId) return -1;
         for (let i = 0; i < sessions.length; i++) {

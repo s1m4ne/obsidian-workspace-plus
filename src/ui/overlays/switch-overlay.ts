@@ -99,13 +99,13 @@ export class SwitchOverlay {
 
         let overlayGroupId: string | null = this.host.getGroupStore().isGroupFeatureEnabled()
             ? (typeof viewGroupId === 'undefined'
-                ? (this.host.data.activeGroupId || null)
+                ? this.host.getGroupStore().getActiveGroupId()
                 : (viewGroupId || null))
             : null;
 
-        const groups = this.host.data.groups || {};
+        const groups = this.host.getGroupStore().getGroupMap();
         if (overlayGroupId && !groups[overlayGroupId]) {
-            overlayGroupId = this.host.data.activeGroupId || null;
+            overlayGroupId = this.host.getGroupStore().getActiveGroupId();
         }
 
         const overlayMode = opts.mode || 'preview';
@@ -132,7 +132,7 @@ export class SwitchOverlay {
                 e.stopPropagation();
             }
             if (!sessionId) return;
-            if (sessionId === this.host.data.activeSessionId) {
+            if (sessionId === this.host.getSessionStore().getActiveSessionId()) {
                 this.hide();
                 return;
             }
@@ -161,7 +161,7 @@ export class SwitchOverlay {
         if (realGroups.length > 0) {
             const groupTabsRow = overlay.createDiv({ cls: 'wpp-group-tabs' });
 
-            const allGroups = this.host.data.groups || {};
+            const allGroups = this.host.getGroupStore().getGroupMap();
             const groupOrder = this.host.getGroupStore().getOrderedGroupTabIds();
             for (let gi = 0; gi < groupOrder.length; gi++) {
                 const gid = groupOrder[gi];
@@ -194,7 +194,7 @@ export class SwitchOverlay {
             const session = ordered[i];
             if (!session) continue;
             const presentation = deriveSessionPresentation(session, {
-                activeSessionId: this.host.data.activeSessionId,
+                activeSessionId: this.host.getSessionStore().getActiveSessionId(),
                 index: i,
                 commandHotkey: i <= 8 ? this.host.getCommandRegistry().getCommandHotkey(`switch-to-${i + 1}`) : '',
             });

@@ -39,7 +39,14 @@ function createService(initialData) {
             get versionHistorySnapshotInterval() { return data.versionHistorySnapshotInterval || 5; },
             get versionHistoryConfirmRestore() { return data.versionHistoryConfirmRestore !== false; },
         },
-        sessionStore: { getSession: (id) => data.sessions[id], getActiveSession },
+        // getSessionStore(), not a `sessionStore` field: the host declared that
+        // field, never read it once, and now names the store the way every
+        // other host does.
+        getSessionStore: () => ({
+            getSession: (id) => data.sessions[id],
+            getActiveSession,
+            getActiveSessionId: () => data.activeSessionId ?? null,
+        }),
         getActiveSession,
         getCurrentWorkspaceLayout: () => ({ type: 'leaf', main: { type: 'leaf' } }),
         applyWorkspaceLayout: () => Promise.resolve(true),

@@ -2,6 +2,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { setupHarness } from './lock/harness/index.ts';
 
+/**
+ * Loaded inside openModal(), after setupHarness(). This file sets the harness
+ * up per test rather than once at module scope, so even a top-level dynamic
+ * import would link `obsidian` before the hooks that point it at the stubs
+ * exist.
+ */
+let SettingsState: typeof import('../src/state/settings-state.ts').SettingsState;
+
 interface Session {
     readonly id: string;
     readonly name: string;
@@ -34,6 +42,7 @@ interface ModalPlugin {
     getGroupStore(): never;
     isGroupFeatureEnabled(): boolean;
     getSessionStore(): never;
+    getSettingsState(): never;
     getSessionSwitcher(): never;
     getCommandRegistry(): never;
     getOrderedSessionsForGroup(groupId: string | null): Session[];
@@ -125,6 +134,9 @@ function makePlugin(containerEl: HTMLElement, groupFeatureEnabled = false): Moda
         showFilterInput: true,
         overlayDefaultFocus: 'session-create',
     };
+    // The fixture data is the modal-relevant slice, not a whole PluginData;
+    // SettingsState reads its own keys off it and falls back to DEFAULT_DATA.
+    const settingsState = new SettingsState({ data, persistData: async () => true } as never);
     const plugin: ModalPlugin = {
         app: { workspace: { containerEl } },
         data,
@@ -136,11 +148,44 @@ function makePlugin(containerEl: HTMLElement, groupFeatureEnabled = false): Moda
         reordered: [],
         // Group calls go through getGroupStore(). This double carries the group
         // members itself, so it stands in as its own group store.
-        getGroupStore(): never { return this as never; },
+        getGroupStore(): never {
+            // Same as getSessionStore above: the double carries the group
+            // members, plus the three P1 moved onto GroupStore, answered from
+            // this fixture's own data.
+            const bag = plugin.data as Record<string, unknown>;
+            const groups = (): Record<string, { id: string; name: string }> =>
+                (bag['groups'] ?? {}) as Record<string, { id: string; name: string }>;
+            return Object.assign(Object.create(this) as object, {
+                getActiveGroupId: (): string | null => (bag['activeGroupId'] ?? null) as string | null,
+                findGroup: (id: string | null) => (id ? groups()[id] ?? null : null),
+                getGroupMap: () => groups(),
+            }) as never;
+        },
         isGroupFeatureEnabled: (): boolean => plugin.data.groupFeatureEnabled,
         // Session state goes through getSessionStore(); this double carries those
         // members itself, so it stands in as its own store.
-        getSessionStore(): never { return this as never; },
+        getSessionStore(): never {
+            // The double still carries the store members; these five are the
+            // ones P1's contract stage moved onto the owners, answered from
+            // this fixture's own data so a test that changes a session or a
+            // group still steers the path under test.
+            const bag = plugin.data as Record<string, unknown>;
+            const groups = (): Record<string, { id: string; name: string }> =>
+                (bag['groups'] ?? {}) as Record<string, { id: string; name: string }>;
+            return Object.assign(Object.create(this) as object, {
+                getActiveSessionId: (): string | null => (bag['activeSessionId'] ?? null) as string | null,
+                getSessionCount: () => Object.keys(bag['sessions'] ?? {}).length,
+                findSession: (id: string) =>
+                    ((bag['sessions'] ?? {}) as Record<string, unknown>)[id] ?? null,
+                getActiveGroupId: (): string | null => (bag['activeGroupId'] ?? null) as string | null,
+                findGroup: (id: string | null) => (id ? groups()[id] ?? null : null),
+                getGroupMap: () => groups(),
+            }) as never;
+        },
+        // A real SettingsState over this fixture's own data: showFilterInput
+        // and overlayDefaultFocus are read through the owner now, and both are
+        // set above precisely to steer the tests below.
+        getSettingsState(): never { return settingsState as never; },
         getOrderedSessionsForGroup: (groupId): Session[] => plugin.data.sessionOrder
             .map((id) => plugin.data.sessions[id])
             .filter((session): session is Session => session !== undefined)
@@ -197,6 +242,7 @@ async function openModal(
     clearModals(h.dom.document);
     const i18n = await import('../src/i18n.ts');
     i18n.resolveLocale('en');
+    ({ SettingsState } = await import('../src/state/settings-state.ts'));
     const raw = await import('../src/modals/session-manager-modal-class.ts');
     const SessionManagerModal = raw.SessionManagerModal as unknown as ModalConstructor;
     const plugin = makePlugin(h.dom.container(), groupFeatureEnabled);

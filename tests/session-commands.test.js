@@ -7,6 +7,7 @@ const assert = require('node:assert/strict');
 
 const i18n = require('../src/i18n.ts');
 const { CommandRegistry } = require('../src/core/command-registry.ts');
+const { SettingsState } = require('../src/state/settings-state.ts');
 
 i18n.resolveLocale('en');
 
@@ -26,13 +27,38 @@ function createRegistry(initialData) {
         },
     }, initialData || {});
     const events = { addedCommands: [], removedCommandIds: [], switchToIndexCalls: [], switchByIdCalls: [] };
+    // A real SettingsState over this fixture's data. numberedSwitchCommands and
+    // showActiveSwitchCommand are read through the owner now, and both are set
+    // above to steer which commands the registry builds.
+    const settingsState = new SettingsState({ data, persistData: async () => true });
     const host = {
         data,
+        getSettingsState() { return settingsState; },
         app: { workspace: {} }, manifest: { id: 'workspace-plus-plus' },
         addCommand: (command) => { events.addedCommands.push(command); return command; },
         removeCommand: (id) => { events.removedCommandIds.push(id); },
         // Session state goes through getSessionStore(); this double carries those members itself.
-        getSessionStore() { return this; },
+        getSessionStore() {
+            // The double still carries the store members; these five are the
+            // ones P1's contract stage moved onto the owners, answered from
+            // this fixture's own data.
+            const data = this.data;
+            return Object.assign(Object.create(this), {
+                getActiveSessionId() { return data.activeSessionId ?? null; },
+                getSessionCount() { return Object.keys(data.sessions || {}).length; },
+                getActiveGroupId() { return data.activeGroupId ?? null; },
+                findGroup(id) { return id ? (data.groups || {})[id] || null : null; },
+                getGroupMap() { return data.groups || {}; },
+            });
+        },
+        // P1's contract stage: the code under test asks the owners for these
+        // rather than reading `data` itself. Answered from this double's own
+        // data so a test that changes it still steers the path.
+        getActiveSessionId() { return this.data.activeSessionId ?? null; },
+        getSessionCount() { return Object.keys(this.data.sessions || {}).length; },
+        getActiveGroupId() { return this.data.activeGroupId ?? null; },
+        findGroup(id) { return id ? (this.data.groups || {})[id] || null : null; },
+        getGroupMap() { return this.data.groups || {}; },
         getOrderedSessions: () => data.sessionOrder.map((id) => data.sessions[id]).filter(Boolean),
         getOrderedSessionsUnfiltered: () => data.sessionOrder.map((id) => data.sessions[id]).filter(Boolean),
         // Switching goes through getSessionSwitcher(); this double carries those members itself.

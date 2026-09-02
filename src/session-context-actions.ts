@@ -123,7 +123,7 @@ function callAfter(value: unknown, fn: Action | undefined): unknown {
 }
 
 function getGroupName(plugin: SessionContextActionsHost, groupId: string): string {
-    const groups = plugin.data.groups || {};
+    const groups = plugin.getGroupStore().getGroupMap();
     return groups[groupId]?.name || '';
 }
 
@@ -159,7 +159,7 @@ export function createSessionContextMenuOptions(options: SessionContextMenuOptio
 
     const isActive = hasOwn(options, 'isActive')
         ? !!options.isActive
-        : session.id === plugin.data.activeSessionId;
+        : session.id === plugin.getSessionStore().getActiveSessionId();
     const getViewGroupId = typeof options.getViewGroupId === 'function'
         ? options.getViewGroupId
         : () => null;

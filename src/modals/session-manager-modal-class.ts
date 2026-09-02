@@ -173,7 +173,7 @@ export class SessionManagerModal extends Modal {
         this.saveBtn = saveBtn;
 
         this.filterInput = null;
-        if (this.plugin.data.showFilterInput) {
+        if (this.plugin.getSettingsState().showFilterInput) {
             const filterContainer = contentEl.createDiv({ cls: 'wpp-filter-container' });
             this.filterInput = filterContainer.createEl('input', {
                 type: 'text',
@@ -183,7 +183,7 @@ export class SessionManagerModal extends Modal {
         }
 
         this.modalGroupId = this.plugin.getGroupStore().isGroupFeatureEnabled()
-            ? (this.plugin.data.activeGroupId || null)
+            ? this.plugin.getGroupStore().getActiveGroupId()
             : null;
         saveBtn.addEventListener('click', () => { this.onSave(); });
         saveBtn.addEventListener('focus', () => { this.setKeyboardTarget({ zone: 'create-button' }); });
@@ -292,9 +292,7 @@ export class SessionManagerModal extends Modal {
 
         // Obsidian auto-focuses the first input, so the configured focus target
         // has to be applied after that has happened.
-        const focusTarget = typeof this.plugin.data.overlayDefaultFocus === 'string'
-            ? this.plugin.data.overlayDefaultFocus
-            : 'current-session';
+        const focusTarget = this.plugin.getSettingsState().overlayDefaultFocus;
         if (focusTarget !== 'session-create') {
             setTimeout(() => {
                 if (focusTarget === 'session-filter' && this.filterInput) {
@@ -318,9 +316,9 @@ export class SessionManagerModal extends Modal {
             this.modalGroupId = null;
             return null;
         }
-        const groups = this.plugin.data.groups || {};
+        const groups = this.plugin.getGroupStore().getGroupMap();
         if (this.modalGroupId && !groups[this.modalGroupId]) {
-            this.modalGroupId = this.plugin.data.activeGroupId || null;
+            this.modalGroupId = this.plugin.getGroupStore().getActiveGroupId();
         }
         return this.modalGroupId || null;
     }
@@ -701,7 +699,7 @@ export class SessionManagerModal extends Modal {
         // because that is what the numbered commands switch to.
         const hintIndex = typeof orderIndex === 'number' ? orderIndex : index;
         const presentation = deriveSessionPresentation(session, {
-            activeSessionId: this.plugin.data.activeSessionId,
+            activeSessionId: this.plugin.getSessionStore().getActiveSessionId(),
             index: hintIndex,
             commandHotkey: hintIndex <= 8 ? this.plugin.getCommandRegistry().getCommandHotkey(`switch-to-${hintIndex + 1}`) : '',
             defaultSessionName: this.plugin.getSessionStore().getDefaultSessionName(),
@@ -797,7 +795,7 @@ export class SessionManagerModal extends Modal {
         });
 
         // No delete on the last remaining session: there has to be one left.
-        if (Object.keys(this.plugin.data.sessions).length > 1) {
+        if (this.plugin.getSessionStore().getSessionCount() > 1) {
             const deleteBtn = actions.createDiv({
                 cls: 'wpp-icon-btn',
                 attr: {
@@ -828,8 +826,8 @@ export class SessionManagerModal extends Modal {
                 groupTabsContainer: this.groupTabsRow,
                 bodyDraggingClass: 'wpp-session-list-dragging',
                 onDropOnGroup: (sessionId: string, groupId: string) => {
-                    const sessionName = this.plugin.data.sessions[sessionId]?.name || '';
-                    const groupName = this.plugin.data.groups[groupId]?.name || '';
+                    const sessionName = this.plugin.getSessionStore().findSession(sessionId)?.name || '';
+                    const groupName = this.plugin.getGroupStore().findGroup(groupId)?.name || '';
                     return this.plugin.getGroupStore().moveSessionToGroupExclusive(sessionId, groupId).then(() => {
                         new Notice(format(L.groupAddedSession, sessionName, groupName));
                         this.renderGroupTabs();
@@ -841,8 +839,8 @@ export class SessionManagerModal extends Modal {
                     // leaving whichever group is currently being viewed.
                     const currentGroupId = this.getModalGroupId();
                     if (!currentGroupId) return undefined;
-                    const sessionName = this.plugin.data.sessions[sessionId]?.name || '';
-                    const groupName = this.plugin.data.groups[currentGroupId]?.name || '';
+                    const sessionName = this.plugin.getSessionStore().findSession(sessionId)?.name || '';
+                    const groupName = this.plugin.getGroupStore().findGroup(currentGroupId)?.name || '';
                     return this.plugin.getGroupStore().removeSessionFromGroup(sessionId, currentGroupId).then(() => {
                         new Notice(format(L.groupRemovedSession, sessionName, groupName));
                         this.renderGroupTabs();
@@ -882,7 +880,7 @@ export class SessionManagerModal extends Modal {
     }
 
     onLoad(sessionId: string): void {
-        if (sessionId === this.plugin.data.activeSessionId) return;
+        if (sessionId === this.plugin.getSessionStore().getActiveSessionId()) return;
         void this.plugin.getSessionSwitcher().switchSession(sessionId).then((switched) => {
             if (switched) this.close();
         });
@@ -898,7 +896,7 @@ export class SessionManagerModal extends Modal {
     }
 
     onDelete(session: SessionItem): unknown {
-        const isActive = session.id === this.plugin.data.activeSessionId;
+        const isActive = session.id === this.plugin.getSessionStore().getActiveSessionId();
         return sessionListActions.deleteSessionWithPrompt({
             app: this.app,
             plugin: this.plugin,
@@ -980,14 +978,14 @@ export class SessionManagerModal extends Modal {
             app: this.app,
             plugin: this.plugin,
             containerEl: el,
-            groups: this.plugin.data.groups || {},
+            groups: this.plugin.getGroupStore().getGroupMap(),
             groupOrder: this.plugin.getGroupStore().getOrderedGroupTabIds(),
             selectedGroupId: this.getModalGroupId(),
             onSelectGroup: (groupId: string | null) => { void this.selectGroup(groupId); },
             onResetViewGroup: () => { this.modalGroupId = null; },
             onDeleteGroup: (deletedGroupId: string) => {
                 if (this.modalGroupId === deletedGroupId) {
-                    this.modalGroupId = this.plugin.data.activeGroupId || null;
+                    this.modalGroupId = this.plugin.getGroupStore().getActiveGroupId();
                 }
             },
             onGroupsChanged: () => { this.renderGroupTabs(); },

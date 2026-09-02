@@ -7,7 +7,7 @@ import {
 } from 'obsidian';
 import { L } from '../i18n.ts';
 import * as obsidianInternals from '../platform/obsidian-internals.ts';
-import type { PluginData, SessionItem } from '../storage/default-data.ts';
+import type { SessionItem } from '../storage/default-data.ts';
 import { isMacPlatform } from '../utils.ts';
 import type { GroupStore } from '../state/group-store.ts';
 import type { SessionSaver } from '../state/session-saver.ts';
@@ -15,6 +15,7 @@ import type { SessionStore } from '../state/session-store.ts';
 import type { HistoryService } from '../state/history-service.ts';
 import type { SessionSwitcher } from '../state/session-switcher.ts';
 import type { FrontmatterLinker } from '../core/frontmatter-linker.ts';
+import type { SettingsState } from '../state/settings-state.ts';
 
 
 export interface CommandRegistryHost {
@@ -23,6 +24,13 @@ export interface CommandRegistryHost {
      * forwarding method per call on the plugin.
      */
     getFrontmatterLinker(): FrontmatterLinker;
+
+    /**
+     * Settings and their defaults are owned by SettingsState. Reading
+     * `data.X` here re-derived a default the owner already holds, which is the
+     * duplication P5 named and P1's contract stage removes.
+     */
+    getSettingsState(): SettingsState;
 
     /**
      * Owned by SessionSwitcher; naming it keeps one list rather than a
@@ -62,7 +70,12 @@ export interface CommandRegistryHost {
     // fail silently at run time the way `openHistoryModal?.()` did.
     openSessionManagerModal(focusName: boolean): void;
     openHistoryModal(session: SessionItem): void;
-    data: PluginData;
+
+    // No `data`. The registry read `activeSessionId`, `activeGroupId`,
+    // `numberedSwitchCommands` and `showActiveSwitchCommand` off the shared bag
+    // and now asks the three owners instead, so it needs no access to it at
+    // all - which is what P1's contract stage is for. Declaring it anyway would
+    // hand back the reach it just gave up.
     app: App;
     manifest: { id: string };
     addCommand(command: Command): Command;
@@ -131,10 +144,6 @@ export class CommandRegistry {
 
     private get host(): CommandRegistryHost {
         return this.hostProvider();
-    }
-
-    private get data(): PluginData {
-        return this.host.data;
     }
 
     get dynamicSessionCommandIds(): readonly string[] {
@@ -253,17 +262,17 @@ export class CommandRegistry {
         );
 
         // Numbered session switching (Mod+Shift+1 through 9)
-        if (this.data.numberedSwitchCommands) {
+        if (this.host.getSettingsState().numberedSwitchCommands) {
             for (let n = 1; n <= 9; n++) {
                 const num = n;
                 host.addCommand({
                     id: 'switch-to-' + num,
                     name: (L.cmdSwitchTo as (n: number) => string)(num),
                     checkCallback: (checking) => {
-                        if (!this.data.showActiveSwitchCommand) {
+                        if (!this.host.getSettingsState().showActiveSwitchCommand) {
                             const ordered = host.getSessionStore().getOrderedSessions();
                             const session = ordered[num - 1];
-                            if (session && session.id === this.data.activeSessionId) return false;
+                            if (session && session.id === this.host.getSessionStore().getActiveSessionId()) return false;
                         }
                         if (!checking) void host.getSessionSwitcher().switchToIndex(num - 1);
                         return true;
@@ -409,7 +418,7 @@ export class CommandRegistry {
             const overlay = host.getSwitchOverlay();
             if (overlay.overlayEl) return overlay.viewGroupId || null;
             if (host.searchOverlayEl) return host.searchOverlayViewGroupId || null;
-            return this.data.activeGroupId || null;
+            return this.host.getGroupStore().getActiveGroupId();
         };
 
         const showSwitchOverlayForGroup = (groupId: string | null) => {
@@ -422,7 +431,7 @@ export class CommandRegistry {
             if (!host.getGroupStore().isGroupFeatureEnabled()) return;
             const targetGroupId = host.getGroupStore().getRelativeGroupId(getCurrentGroupViewId(), step);
             if (typeof targetGroupId === 'undefined') {
-                showSwitchOverlayForGroup(this.data.activeGroupId || null);
+                showSwitchOverlayForGroup(this.host.getGroupStore().getActiveGroupId());
                 return;
             }
 
@@ -444,7 +453,7 @@ export class CommandRegistry {
             name: String(L.cmdExitGroup || ''),
             checkCallback: (checking) => {
                 if (!host.getGroupStore().isGroupFeatureEnabled()) return false;
-                if (!this.data.activeGroupId) return false;
+                if (!this.host.getGroupStore().getActiveGroupId()) return false;
                 if (!checking) void host.getGroupStore().exitGroup();
                 return true;
             },
@@ -488,7 +497,7 @@ export class CommandRegistry {
 
         let dynamicStart: number;
 
-        if (this.data.numberedSwitchCommands) {
+        if (this.host.getSettingsState().numberedSwitchCommands) {
             // 2a. Re-register numbered commands (1-9) with session names
             for (let n = 1; n <= 9; n++) {
                 const num = n;
@@ -501,10 +510,10 @@ export class CommandRegistry {
                         session ? session.name : undefined
                     ),
                     checkCallback: (checking) => {
-                        if (!this.data.showActiveSwitchCommand) {
+                        if (!this.host.getSettingsState().showActiveSwitchCommand) {
                             const currentOrdered = host.getSessionStore().getOrderedSessions();
                             const targetSession = currentOrdered[num - 1];
-                            if (targetSession && targetSession.id === this.data.activeSessionId) {
+                            if (targetSession && targetSession.id === this.host.getSessionStore().getActiveSessionId()) {
                                 return false;
                             }
                         }
@@ -531,8 +540,8 @@ export class CommandRegistry {
                 id: cmdId,
                 name: (L.cmdSwitchToNamed as (name?: string) => string)(session.name),
                 checkCallback: (checking) => {
-                    if (!this.data.showActiveSwitchCommand) {
-                        if (session.id === this.data.activeSessionId) return false;
+                    if (!this.host.getSettingsState().showActiveSwitchCommand) {
+                        if (session.id === this.host.getSessionStore().getActiveSessionId()) return false;
                     }
                     if (!checking) void host.getSessionSwitcher().switchSessionByIdFromCommand(session.id);
                     return true;

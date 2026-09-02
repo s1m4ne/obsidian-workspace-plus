@@ -736,7 +736,7 @@ export function historyServiceHost(plugin: WorkspacePlusPlus): HistoryServiceHos
     return {
         get data() { return plugin.data; },
         get settingsState() { return plugin.getSettingsState(); },
-        get sessionStore() { return plugin.getSessionStore(); },
+        getSessionStore: () => plugin.getSessionStore(),
         getActiveSession: () => plugin.getSessionStore().getActiveSession(),
         getCurrentWorkspaceLayout: () => plugin.getSessionStore().getCurrentWorkspaceLayout(),
         applyWorkspaceLayout: (layout) => plugin.getSessionSwitcher().applyWorkspaceLayout(layout),
@@ -807,6 +807,8 @@ export function frontmatterLinkerHost(plugin: WorkspacePlusPlus): FrontmatterLin
         switchSession: (sessionId) => plugin.getSessionSwitcher().switchSession(sessionId),
         setActiveGroup: (groupId) => plugin.getGroupStore().setActiveGroup(groupId),
         isGroupFeatureEnabled: () => plugin.getGroupStore().isGroupFeatureEnabled(),
+        getSessionStore: () => plugin.getSessionStore(),
+        getGroupStore: () => plugin.getGroupStore(),
         getStartupSettleRemainingMs: () => plugin.getSessionSwitcher().getStartupSettleRemainingMs(),
         isSessionSwitcherActive: () => plugin.getSessionSwitcher().isSwitching,
         registerEvent: (eventRef) => { plugin.registerEvent(eventRef); },

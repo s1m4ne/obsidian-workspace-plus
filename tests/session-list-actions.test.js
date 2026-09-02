@@ -13,6 +13,7 @@ const { setupHarness } = require('./lock/harness/index.ts');
 
 const harness = setupHarness();
 const actions = require('../src/session-list-actions.ts');
+const { SettingsState } = require('../src/state/settings-state.ts');
 const { L } = require('../src/i18n.ts');
 
 function createPlugin(options = {}) {
@@ -20,10 +21,16 @@ function createPlugin(options = {}) {
     const sessions = {};
     for (let i = 0; i < count; i++) sessions[`s${i}`] = { id: `s${i}`, name: `Session ${i}`, layout: {} };
     const calls = [];
+    const data = { sessions, confirmDeleteByHotkey: options.confirmDeleteByHotkey ?? true };
+    // A real SettingsState over this fixture's data. The confirmation flag is
+    // read through the owner now, and a stub would let the value set above stop
+    // reaching the branch under test with the assertions still passing.
+    const settingsState = new SettingsState({ data, persistData: async () => true });
     return {
         app: {},
-        data: { sessions, confirmDeleteByHotkey: options.confirmDeleteByHotkey ?? true },
+        data,
         calls,
+        getSettingsState() { return settingsState; },
         // Session state goes through getSessionStore(); this double carries those members itself.
         getSessionStore() { return this; },
         deleteSession(id) {

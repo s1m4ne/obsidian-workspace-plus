@@ -150,7 +150,32 @@ export class SettingsState {
         return this.data.groupFeatureEnabled ?? DEFAULT_DATA.groupFeatureEnabled;
     }
 
+    /**
+     * Where the user last left the search overlay, and how big. Both are null
+     * until the overlay has been dragged or resized, which is what tells it to
+     * position itself against the status bar instead.
+     */
+    get searchOverlayPosition(): PluginData['searchOverlayPosition'] {
+        return this.data.searchOverlayPosition ?? DEFAULT_DATA.searchOverlayPosition;
+    }
+
+    get searchOverlaySize(): PluginData['searchOverlaySize'] {
+        return this.data.searchOverlaySize ?? DEFAULT_DATA.searchOverlaySize;
+    }
+
     // --- Setters ---
+
+    /**
+     * The geometry is written mid-gesture on every mousemove, so these do not
+     * persist on their own; the overlay persists once when the gesture ends.
+     */
+    setSearchOverlayGeometry(geometry: {
+        position?: PluginData['searchOverlayPosition'];
+        size?: PluginData['searchOverlaySize'];
+    }): void {
+        if ('position' in geometry) this.data.searchOverlayPosition = geometry.position ?? null;
+        if ('size' in geometry) this.data.searchOverlaySize = geometry.size ?? null;
+    }
 
     async setLanguageSetting(value: string, options?: SetOption): Promise<boolean> {
         this.data.language = value || 'auto';

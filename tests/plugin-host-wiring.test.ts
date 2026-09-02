@@ -324,7 +324,7 @@ test('every host reads its live collaborator fields from the plugin', () => {
     const history = historyServiceHost(asPlugin(plugin));
     note('history.data', history.data);
     note('history.settingsState', history.settingsState);
-    note('history.sessionStore', history.sessionStore);
+    note('history.sessionStore', history.getSessionStore());
 
     const groups = groupStoreHost(asPlugin(plugin));
     note('groups.data', groups.data);

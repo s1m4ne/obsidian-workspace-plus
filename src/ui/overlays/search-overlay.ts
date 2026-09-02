@@ -14,6 +14,7 @@ import * as utils from '../../utils.ts';
 import type { SessionGroup, SessionItem } from '../../storage/default-data.ts';
 import type { HistoryModalPluginHost } from '../../modals/history-modal.ts';
 import type { GroupStore } from '../../state/group-store.ts';
+import type { SettingsState } from '../../state/settings-state.ts';
 import type { SessionSaver } from '../../state/session-saver.ts';
 import type { SessionStore } from '../../state/session-store.ts';
 import type { SessionSwitcher } from '../../state/session-switcher.ts';
@@ -193,7 +194,7 @@ function handleSearchOverlayDeleteKey(event: KeyboardEvent, activeEl: Element | 
     if (selectedIndex < 0 || selectedIndex >= filtered.length) return true;
     const session = filtered[selectedIndex];
     if (!session) return true;
-    if (Object.keys(options.plugin.data.sessions).length <= 1) {
+    if (options.plugin.getSessionStore().getSessionCount() <= 1) {
         new Notice(localizedString(L.cannotDeleteLast));
         return true;
     }
@@ -206,11 +207,11 @@ function handleSearchOverlayDeleteKey(event: KeyboardEvent, activeEl: Element | 
         });
     };
 
-    if (options.plugin.data.confirmDeleteByHotkey !== false) {
+    if (options.plugin.getSettingsState().confirmDeleteByHotkey) {
         // Only say "active session" when it is one. The message was fixed at the
         // active wording, so deleting any other row claimed the wrong thing
         // about it.
-        const isActive = session.id === options.plugin.data.activeSessionId;
+        const isActive = session.id === options.plugin.getSessionStore().getActiveSessionId();
         const message = isActive
             ? localizedCall(L.confirmDeleteActive, session.name)
             : localizedCall(L.confirmDelete, session.name);
@@ -292,6 +293,14 @@ export interface SearchOverlayHost extends GroupTabPluginHost, HistoryModalPlugi
      * lacked the member.
      */
     getGroupStore(): GroupStore;
+
+    /**
+     * The settings and their defaults are owned by SettingsState. The overlay
+     * read `data.confirmQuickActions` and `data.confirmDeleteByHotkey !== false`
+     * directly, re-deriving defaults the owner already holds - P1's contract
+     * stage and the same duplication P5 named.
+     */
+    getSettingsState(): SettingsState;
 
     app: App;
     data: {
@@ -393,11 +402,11 @@ export class SearchOverlay {
         const createInteractionEventOwner = (): Component => this.createInteractionEventOwner();
         const releaseInteractionEventOwner = (owner: Component): void => this.releaseInteractionEventOwner(owner);
         let overlayGroupId = self.getGroupStore().isGroupFeatureEnabled()
-            ? (self.data.activeGroupId || null)
+            ? self.getGroupStore().getActiveGroupId()
             : null;
         self.searchOverlayViewGroupId = overlayGroupId;
         let ordered = self.getSessionStore().getOrderedSessionsForGroup(overlayGroupId);
-        const focusTarget = self.data.overlayDefaultFocus || 'current-session';
+        const focusTarget = self.getSettingsState().overlayDefaultFocus;
 
         self.getSwitchOverlay().hide();
         hideThisOverlay();
@@ -422,9 +431,9 @@ export class SearchOverlay {
                 self.searchOverlayViewGroupId = null;
                 return null;
             }
-            const groups = self.data.groups || {};
+            const groups = self.getGroupStore().getGroupMap();
             if (overlayGroupId && !groups[overlayGroupId]) {
-                overlayGroupId = self.data.activeGroupId || null;
+                overlayGroupId = self.getGroupStore().getActiveGroupId();
             }
             self.searchOverlayViewGroupId = overlayGroupId || null;
             return overlayGroupId || null;
@@ -520,7 +529,7 @@ export class SearchOverlay {
             attr: { type: 'text', placeholder: localizedString(strings.searchOverlayPlaceholder) },
         });
         self.searchOverlayInputEl = searchInput;
-        if (!self.data.showFilterInput) {
+        if (!self.getSettingsState().showFilterInput) {
             searchRow.classList.add('is-hidden');
         }
 
@@ -539,7 +548,7 @@ export class SearchOverlay {
                 footerRow.textContent = autoSave ? stripSaveHint(localizedString(strings.searchOverlayHelp)) : localizedString(strings.searchOverlayHelp);
                 return;
             }
-            const groups = self.data.groups || {};
+            const groups = self.getGroupStore().getGroupMap();
             const realGroups = self.getGroupStore().getOrderedGroups();
             groupTabsRow.classList.remove('is-hidden');
             const helpText = realGroups.length > 0
@@ -565,7 +574,7 @@ export class SearchOverlay {
                 },
                 onDeleteGroup: function (deletedGroupId) {
                     if (overlayGroupId === deletedGroupId) {
-                        overlayGroupId = self.data.activeGroupId || null;
+                        overlayGroupId = self.getGroupStore().getActiveGroupId();
                         self.searchOverlayViewGroupId = overlayGroupId || null;
                     }
                 },
@@ -649,7 +658,7 @@ export class SearchOverlay {
                 const session = filtered[i];
                 if (!session) continue;
                 const presentation = deriveSessionPresentation(session, {
-                    activeSessionId: self.data.activeSessionId,
+                    activeSessionId: self.getSessionStore().getActiveSessionId(),
                 });
                 const isActive = presentation.isActive;
                 const item = list.createDiv({ cls: 'wpp-switch-item' });
@@ -738,7 +747,7 @@ export class SearchOverlay {
                                     refreshOrderedSessions();
                                 });
                             };
-                            if (self.data.confirmQuickActions) {
+                            if (self.getSettingsState().confirmQuickActions) {
                                 new ConfirmModal(self.app, localizedCall(strings.confirmSaveSession, sess.name), doSave, { confirmText: localizedString(strings.saveInline), confirmClass: 'mod-cta' }).open();
                             } else {
                                 doSave();
@@ -753,7 +762,7 @@ export class SearchOverlay {
                             const doReload = function () {
                                 void self.getSessionSaver().reloadCurrentSessionWithoutSaving();
                             };
-                            if (self.data.confirmQuickActions) {
+                            if (self.getSettingsState().confirmQuickActions) {
                                 new ConfirmModal(self.app, localizedCall(strings.confirmReloadSession, sess.name), doReload, { confirmText: localizedString(strings.load), confirmClass: 'mod-cta' }).open();
                             } else {
                                 doReload();
@@ -808,8 +817,8 @@ export class SearchOverlay {
                 ignoreSelector: '.wpp-qs-action-btn',
                 groupTabsContainer: groupTabsRow,
                 onDropOnGroup: function (sessionId, groupId) {
-                    const sessionName = (self.data.sessions[sessionId] || {}).name || '';
-                    const groupName = (self.data.groups[groupId] || {}).name || '';
+                    const sessionName = self.getSessionStore().findSession(sessionId)?.name || '';
+                    const groupName = self.getGroupStore().findGroup(groupId)?.name || '';
                     return self.getGroupStore().moveSessionToGroupExclusive(sessionId, groupId).then(function () {
                         new Notice(localizedCall(L.groupAddedSession, sessionName, groupName));
                         renderGroupTabs();
@@ -819,8 +828,8 @@ export class SearchOverlay {
                 onDropOnAllGroup: function (sessionId) {
                     const currentGroupId = getOverlayGroupId();
                     if (currentGroupId) {
-                        const rmSessionName = (self.data.sessions[sessionId] || {}).name || '';
-                        const rmGroupName = (self.data.groups[currentGroupId] || {}).name || '';
+                        const rmSessionName = self.getSessionStore().findSession(sessionId)?.name || '';
+                        const rmGroupName = self.getGroupStore().findGroup(currentGroupId)?.name || '';
                         return self.getGroupStore().removeSessionFromGroup(sessionId, currentGroupId).then(function () {
                             new Notice(localizedCall(L.groupRemovedSession, rmSessionName, rmGroupName));
                             renderGroupTabs();
@@ -898,14 +907,14 @@ export class SearchOverlay {
             if (selectedIndex < 0 || selectedIndex >= filtered.length) return;
             const target = filtered[selectedIndex];
             if (!target) return;
-            if (target.id === self.data.activeSessionId) {
+            if (target.id === self.getSessionStore().getActiveSessionId()) {
                 if (opts.shiftKey) {
                     const doSave = function () {
                         void self.getSessionSaver().saveActiveSession().then(function () {
                             refreshOrderedSessions();
                         });
                     };
-                    if (self.data.confirmQuickActions) {
+                    if (self.getSettingsState().confirmQuickActions) {
                         new ConfirmModal(self.app, localizedCall(strings.confirmSaveSession, target.name), doSave, { confirmText: localizedString(strings.saveInline), confirmClass: 'mod-cta' }).open();
                     } else {
                         doSave();
@@ -914,7 +923,7 @@ export class SearchOverlay {
                     const doReload = function () {
                         void self.getSessionSaver().reloadCurrentSessionWithoutSaving();
                     };
-                    if (self.data.confirmQuickActions) {
+                    if (self.getSettingsState().confirmQuickActions) {
                         new ConfirmModal(self.app, localizedCall(strings.confirmReloadSession, target.name), doReload, { confirmText: localizedString(strings.load), confirmClass: 'mod-cta' }).open();
                     } else {
                         doReload();
@@ -950,7 +959,7 @@ export class SearchOverlay {
             focusSearchInput: focusSearchInput,
             focusFirstResult: focusFirstResult,
             focusLastResult: focusLastResult,
-            hasSearchInput: function () { return !!self.data.showFilterInput; },
+            hasSearchInput: function () { return self.getSettingsState().showFilterInput; },
             getFiltered: function () { return filtered; },
             getSelectedIndex: function () { return selectedIndex; },
             setSelectedIndex: function (value: number) { selectedIndex = value; },
@@ -1023,7 +1032,7 @@ export class SearchOverlay {
         }
 
         // Apply saved size
-        const savedSize = self.data.searchOverlaySize;
+        const savedSize = self.getSettingsState().searchOverlaySize;
         const MIN_WIDTH = 220;
         const MIN_HEIGHT = 140;
 
@@ -1040,7 +1049,7 @@ export class SearchOverlay {
         }
 
         // Position: saved position > anchor-based > CSS default
-        const savedPos = self.data.searchOverlayPosition;
+        const savedPos = self.getSettingsState().searchOverlayPosition;
 
         if (savedPos && savedPos.left != null && savedPos.bottom != null) {
             const overlayRect = overlay.getBoundingClientRect();
@@ -1061,8 +1070,7 @@ export class SearchOverlay {
             if (closest(e.target, '.wpp-qs-action-btn')) return;
             resetSize();
             positionToAnchor();
-            self.data.searchOverlayPosition = null;
-            self.data.searchOverlaySize = null;
+            self.getSettingsState().setSearchOverlayGeometry({ position: null, size: null });
             void self.persistData();
         });
 
@@ -1082,12 +1090,11 @@ export class SearchOverlay {
                 onResetOverlay: function () {
                     resetSize();
                     positionToAnchor();
-                    self.data.searchOverlayPosition = null;
-                    self.data.searchOverlaySize = null;
+                    self.getSettingsState().setSearchOverlayGeometry({ position: null, size: null });
                     void self.persistData();
                 },
                 onChanged: function () {
-                    searchRow.classList.toggle('is-hidden', !self.data.showFilterInput);
+                    searchRow.classList.toggle('is-hidden', !self.getSettingsState().showFilterInput);
                     renderGroupTabs();
                     refreshOrderedSessions();
                 },
@@ -1178,14 +1185,10 @@ export class SearchOverlay {
                 releaseInteractionEventOwner(resizeEventOwner);
 
                 const finalRect = overlay.getBoundingClientRect();
-                self.data.searchOverlaySize = {
-                    width: finalRect.width,
-                    height: finalRect.height,
-                };
-                self.data.searchOverlayPosition = {
-                    left: finalRect.left,
-                    bottom: window.innerHeight - finalRect.bottom,
-                };
+                self.getSettingsState().setSearchOverlayGeometry({
+                    size: { width: finalRect.width, height: finalRect.height },
+                    position: { left: finalRect.left, bottom: window.innerHeight - finalRect.bottom },
+                });
                 void self.persistData();
             }
 
@@ -1232,10 +1235,9 @@ export class SearchOverlay {
 
                 // Save position (bottom-based for stable positioning on resize)
                 const finalRect = overlay.getBoundingClientRect();
-                self.data.searchOverlayPosition = {
-                    left: finalRect.left,
-                    bottom: window.innerHeight - finalRect.bottom,
-                };
+                self.getSettingsState().setSearchOverlayGeometry({
+                    position: { left: finalRect.left, bottom: window.innerHeight - finalRect.bottom },
+                });
                 void self.persistData();
             }
 
@@ -1249,7 +1251,7 @@ export class SearchOverlay {
                 if (e.target === saveInput) {
                     e.preventDefault();
                     e.stopImmediatePropagation();
-                    if (focusTarget === 'session-filter' && self.data.showFilterInput) {
+                    if (focusTarget === 'session-filter' && self.getSettingsState().showFilterInput) {
                         searchInput.focus();
                     } else {
                         overlay.focus();
@@ -1269,7 +1271,7 @@ export class SearchOverlay {
         }
 
         setTimeout(function () {
-            if (focusTarget === 'session-filter' && self.data.showFilterInput) {
+            if (focusTarget === 'session-filter' && self.getSettingsState().showFilterInput) {
                 navigationUtils.focusTextInputSelect(searchInput);
             } else if (focusTarget === 'session-create') {
                 saveInput.focus();

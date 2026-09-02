@@ -22,6 +22,11 @@ function createMockHost(initialData?: Partial<PluginData>): {
     };
 
     const host: HistoryServiceHost = {
+        // The active id is SessionStore's answer now; this reads the same data
+        // object so flipping it in a test still reaches the service.
+        getSessionStore: () => ({
+            getActiveSessionId: () => (host.data as Record<string, unknown>)['activeSessionId'] ?? null,
+        }) as never,
         // Reads the same data object the real SettingsState reads, so a test that
         // flips a setting sees the effect instead of a frozen answer.
         settingsState: {
