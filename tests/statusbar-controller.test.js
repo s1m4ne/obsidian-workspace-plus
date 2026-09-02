@@ -124,7 +124,7 @@ test('status bar controller accumulates wheel delta and switches after threshold
         isSwitchingSession: false,
         // Switching goes through getSessionSwitcher(); this double carries those members itself.
         getSessionSwitcher() { return this; },
-        switchRelativeFromScroll: function (direction) {
+        switchRelativeFromStatusBar: function (direction) {
             calls.push(direction);
             return Promise.resolve(true);
         },

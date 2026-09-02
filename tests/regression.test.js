@@ -523,7 +523,7 @@ test('switchRelativeFromCommand shows preview overlay before switching when prev
     assert.equal(switchCalled, false);
 });
 
-test('switchRelativeFromStatusBar bypasses preview-only first step and uses a replaceable notice', async function () {
+test('a status-bar switch skips the preview step, shows no overlay and replaces the notice', async function () {
     const { switcher, hooks } = createPlugin({
         activeSessionId: 'a',
         sessionOrder: ['a', 'b', 'c'],
@@ -552,44 +552,6 @@ test('switchRelativeFromStatusBar bypasses preview-only first step and uses a re
     };
 
     const switched = await switcher.switchRelativeFromStatusBar(1);
-
-    assert.equal(switched, true);
-    assert.equal(previewCalled, false);
-    assert.equal(feedbackCalled, false);
-    assert.equal(switchCalls.length, 1);
-    assert.equal(switchCalls[0][0], 'b');
-    assert.equal(switchCalls[0][1].silent, true);
-    assert.equal(switchCalls[0][1].switchNoticeMode, 'replace');
-});
-
-test('switchRelativeFromScroll switches without showing overlay', async function () {
-    const { switcher, hooks } = createPlugin({
-        activeSessionId: 'a',
-        sessionOrder: ['a', 'b'],
-        sessions: {
-            a: { id: 'a', name: 'A', layout: { layout: 'a' }, modified: 1 },
-            b: { id: 'b', name: 'B', layout: { layout: 'b' }, modified: 1 },
-        },
-        previewNext: true,
-        previewPrevious: true,
-    });
-
-    let previewCalled = false;
-    let feedbackCalled = false;
-    const switchCalls = [];
-
-    hooks.showSwitchPreviewOverlay = function () {
-        previewCalled = true;
-    };
-    hooks.showSwitchFeedbackOverlay = function () {
-        feedbackCalled = true;
-    };
-    switcher.switchSession = function (sessionId, options) {
-        switchCalls.push([sessionId, options]);
-        return Promise.resolve(true);
-    };
-
-    const switched = await switcher.switchRelativeFromScroll(1);
 
     assert.equal(switched, true);
     assert.equal(previewCalled, false);

@@ -566,15 +566,14 @@ export class SessionSwitcher {
         });
     }
 
+    /**
+     * Both status-bar gestures - clicking a next/previous action and scrolling
+     * over the bar - switch on the spot: no overlay, and a notice that replaces
+     * the previous one rather than stacking. They were two methods with
+     * identical bodies, which asserted a difference in policy that has never
+     * existed.
+     */
     switchRelativeFromStatusBar(offset: number): Promise<boolean> {
-        return this.switchRelativeDirect(offset, {
-            overlayMode: 'none',
-            switchNoticeMode: 'replace',
-            silent: true,
-        });
-    }
-
-    switchRelativeFromScroll(offset: number): Promise<boolean> {
         return this.switchRelativeDirect(offset, {
             overlayMode: 'none',
             switchNoticeMode: 'replace',

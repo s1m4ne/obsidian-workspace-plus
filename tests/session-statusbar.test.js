@@ -63,7 +63,7 @@ function createController(options) {
         // save methods itself, so it stands in as its own saver.
         getSessionSaver() { return this; },
         shouldShowUnsavedStatusBarHighlight: () => !!options.unsaved,
-        switchRelativeFromScroll: async () => true,
+        switchRelativeFromStatusBar: async () => true,
     });
     return { controller, statusBarEl };
 }

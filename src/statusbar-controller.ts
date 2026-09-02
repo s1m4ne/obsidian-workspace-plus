@@ -219,7 +219,7 @@ export class StatusBarController {
 
         // A scroll gesture that cannot switch is not worth a message; the next
         // notch tries again.
-        void this.host.getSessionSwitcher().switchRelativeFromScroll(direction).catch(() => {});
+        void this.host.getSessionSwitcher().switchRelativeFromStatusBar(direction).catch(() => {});
         return true;
     }
 

@@ -232,7 +232,7 @@ test('StatusBarController: wheel accumulation and threshold switching', async ()
         toggleAutoSaveOnSwitch: async () => true,
         quickRestoreLatestHistory() {},
         getSessionSwitcher: (): never => ({
-            switchRelativeFromScroll: async (dir: number) => {
+            switchRelativeFromStatusBar: async (dir: number) => {
                 switchedDirections.push(dir);
                 return true;
             },
@@ -290,7 +290,7 @@ test('StatusBarController: wheel accumulation and threshold switching', async ()
     // Both members, or the wheel path loses the switch it is meant to make.
     const switcher = (isSwitching: boolean): never => ({
         isSwitching,
-        switchRelativeFromScroll: async (dir: number) => { switchedDirections.push(dir); return true; },
+        switchRelativeFromStatusBar: async (dir: number) => { switchedDirections.push(dir); return true; },
     }) as never;
     host.getSessionSwitcher = () => switcher(true);
     assert.equal(controller.handleWheel(createEvt(20), 3000), false);
@@ -374,7 +374,6 @@ test('StatusBarController: setup and update DOM rendering', () => {
         createEmptySession: async () => true,
         toggleAutoSaveOnSwitch: async () => true,
         quickRestoreLatestHistory() {},
-        switchRelativeFromScroll: async () => true,
     };
 
     const controller = new StatusBarController(() => host);

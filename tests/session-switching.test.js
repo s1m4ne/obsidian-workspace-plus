@@ -178,7 +178,7 @@ test('session-switching prototype methods: notices and direct switches', async (
     await p5;
     assert.equal(data.activeSessionId, 'd');
 
-    const p6 = switcher.switchRelativeFromScroll(-1);
+    const p6 = switcher.switchRelativeFromStatusBar(-1);
     await releaseLayouts();
     await p6;
     assert.equal(data.activeSessionId, 'c');

@@ -158,7 +158,7 @@ test('SessionSwitcher: direct and relative switch helpers', async () => {
     await switcher.switchRelativeFromStatusBar(1);
     assert.equal(host.data.activeSessionId, 's2');
 
-    await switcher.switchRelativeFromScroll(-1);
+    await switcher.switchRelativeFromStatusBar(-1);
     assert.equal(host.data.activeSessionId, 's1');
 
     await switcher.switchRelativeDirect(1, { silent: true });
