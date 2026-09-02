@@ -132,7 +132,7 @@ test('the SessionSwitcher host reaches the collaborator each member names', () =
     host.getActiveSession();
     host.getCurrentWorkspaceLayout();
     void host.applyWorkspaceLayout({ pane: 'next' });
-    host.pushLayoutToHistory({ id: 's1', name: 'S', layout: {}, modified: 0 });
+    host.commitWorkspaceToSession({ id: 's1', name: 'S', layout: {}, modified: 0 });
     void host.saveActiveSession();
     host.isActiveSessionDirty();
     host.isAutoSaveOnSwitchEnabled();
@@ -153,7 +153,7 @@ test('the SessionSwitcher host reaches the collaborator each member names', () =
         // then calls this to put it on screen, so routing it back at the
         // switcher would recurse until the stack ran out.
         'workspace.changeLayout',
-        'historyService.pushLayoutToHistory',
+        'sessionSaver.commitWorkspaceToSession',
         'sessionSaver.saveActiveSession',
         'sessionSaver.isActiveSessionDirty',
         'sessionSaver.isAutoSaveOnSwitchEnabled',
@@ -220,6 +220,7 @@ test('the HistoryService host reaches the collaborator each member names', () =>
     // Not recomputed here: the adapter had a second implementation of this
     // comparison, reachable only when the plugin method was missing.
     host.layoutsEqualStructural({}, {});
+    host.commitLayoutToSession({ id: 's1', name: 'S', layout: {}, modified: 0 }, {});
     host.updateStatusBar?.();
     void host.persistData();
     host.isAutoSaveOnSwitchEnabled();
@@ -229,6 +230,7 @@ test('the HistoryService host reaches the collaborator each member names', () =>
         'sessionStore.getCurrentWorkspaceLayout',
         'sessionSwitcher.applyWorkspaceLayout',
         'sessionStore.layoutsEqualStructural',
+        'sessionSaver.commitLayoutToSession',
         'statusBarController.updateStatusBar',
         'plugin.persistData',
         'sessionSaver.isAutoSaveOnSwitchEnabled',

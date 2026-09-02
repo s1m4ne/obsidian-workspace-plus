@@ -25,6 +25,7 @@ export interface HistoryServiceHost {
     getCurrentWorkspaceLayout: () => unknown;
     applyWorkspaceLayout: (layout: unknown) => Promise<boolean>;
     layoutsEqualStructural: (a: unknown, b: unknown) => boolean;
+    commitLayoutToSession: (session: SessionItem, layout: unknown, options?: { touchModified?: boolean }) => boolean;
     persistData: () => Promise<boolean>;
     isAutoSaveOnSwitchEnabled: () => boolean;
     updateStatusBar?: () => void;
@@ -338,12 +339,13 @@ export class HistoryService {
             const session = this.host.getActiveSession();
             if (!session) return;
 
+            // Whether an unchanged workspace is worth a snapshot is this
+            // timer's own decision, and the answer is no - so the check stays
+            // here and CAPTURE is only reached once it has passed.
             const currentLayout = this.host.getCurrentWorkspaceLayout();
             if (!currentLayout || this.checkLayoutsEqualStructural(session.layout, currentLayout)) return;
 
-            this.pushLayoutToHistory(session);
-            session.layout = currentLayout;
-            session.modified = Date.now();
+            this.host.commitLayoutToSession(session, currentLayout, { touchModified: true });
             void this.host.persistData();
         }, intervalMs);
     }

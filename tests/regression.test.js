@@ -150,7 +150,11 @@ function createPlugin(initialData) {
         getActiveSession: function () { return sessionStore.getActiveSession(); },
         getCurrentWorkspaceLayout: getCurrentWorkspaceLayout,
         applyWorkspaceLayout: applyLayoutToWorkspace,
-        pushLayoutToHistory: pushLayoutToHistory,
+        // The real saver, as in production. CAPTURE has one implementation and
+        // the switcher reaches it rather than repeating it.
+        commitWorkspaceToSession: function (session, options) {
+            return sessionSaver.commitWorkspaceToSession(session, options);
+        },
         saveActiveSession: function (options) { return sessionSaver.saveActiveSession(options); },
         isActiveSessionDirty: function () { return sessionSaver.isActiveSessionDirty(); },
         isWarnOnUnsavedSwitchEnabled: function () { return settingsState.warnOnUnsavedSwitch; },

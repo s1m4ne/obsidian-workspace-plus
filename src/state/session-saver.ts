@@ -22,6 +22,17 @@ export interface ConfirmOverwriteOptions {
     onSaved?: (session: SessionItem) => void;
 }
 
+export interface CommitWorkspaceOptions {
+    /** Stamp `modified` even when the layout is unchanged. */
+    readonly touchModified?: boolean | undefined;
+
+    /**
+     * Do not push the session's previous layout to its history. Used where the
+     * caller has already snapshotted this session in the same operation.
+     */
+    readonly skipHistory?: boolean | undefined;
+}
+
 export interface SessionSaverHost {
     data: PluginData;
     app?: App;
@@ -200,6 +211,40 @@ export class SessionSaver {
         return this.host.getOrderedSessionsUnfiltered();
     }
 
+    /**
+     * CAPTURE: write `layout` into `session`, keeping the layout it held in
+     * that session's version history, and report whether the layout actually
+     * changed.
+     *
+     * These four lines were written eight times - twice as a whole method
+     * (here and privately on SessionSwitcher, identical), and six times inline
+     * in the save paths, the switch path and the snapshot timer. They differed
+     * only in the two axes this options object names, so every copy was an
+     * opportunity for them to differ in a third.
+     */
+    commitLayoutToSession(session: SessionItem, layout: unknown, options?: CommitWorkspaceOptions): boolean {
+        const changed = !this.checkLayoutsEqual(session.layout, layout);
+        if (!options?.skipHistory) {
+            this.pushLayoutToHistory(session);
+        }
+        session.layout = layout;
+        if (changed || options?.touchModified) {
+            session.modified = Date.now();
+        }
+        return changed;
+    }
+
+    /** CAPTURE from the live workspace. */
+    commitWorkspaceToSession(session: SessionItem, options?: CommitWorkspaceOptions): boolean {
+        const currentLayout = this.getCurrentWorkspaceLayout();
+
+        // Reading the workspace came back empty. Assigning that would destroy
+        // the session's layout, and only the snapshot timer guarded against it.
+        if (!currentLayout) return false;
+
+        return this.commitLayoutToSession(session, currentLayout, options);
+    }
+
     isActiveSessionDirty(): boolean {
         const session = this.getActiveSession();
         if (!session) return false;
@@ -266,9 +311,7 @@ export class SessionSaver {
         ) {
             const doSave = async (name: string): Promise<boolean> => {
                 session.name = name;
-                this.pushLayoutToHistory(session);
-                session.layout = this.getCurrentWorkspaceLayout();
-                session.modified = Date.now();
+                this.commitWorkspaceToSession(session, { touchModified: true });
                 this.host.updateStatusBar?.();
                 this.host.syncSessionCommands?.();
                 await this.persistData();
@@ -295,13 +338,7 @@ export class SessionSaver {
             });
         }
 
-        const currentLayout = this.getCurrentWorkspaceLayout();
-        const changed = !this.checkLayoutsEqual(session.layout, currentLayout);
-        this.pushLayoutToHistory(session);
-        session.layout = currentLayout;
-        if (changed || opts.touchModified) {
-            session.modified = Date.now();
-        }
+        const changed = this.commitWorkspaceToSession(session, { touchModified: opts.touchModified });
         this.host.updateStatusBar?.();
 
         const name = session.name;
@@ -328,13 +365,7 @@ export class SessionSaver {
             return false;
         }
 
-        const currentLayout = this.getCurrentWorkspaceLayout();
-        const changed = !this.checkLayoutsEqual(session.layout, currentLayout);
-        this.pushLayoutToHistory(session);
-        session.layout = currentLayout;
-        if (changed || opts.touchModified) {
-            session.modified = Date.now();
-        }
+        const changed = this.commitWorkspaceToSession(session, { touchModified: opts.touchModified });
         this.host.updateStatusBar?.();
 
         await this.persistData();
@@ -367,7 +398,6 @@ export class SessionSaver {
             this.captureActiveSessionLayoutIfAutoSave();
         }
 
-        const currentLayout = this.getCurrentWorkspaceLayout();
         const existing = findSessionByName(this.data, sessionName);
         let session: SessionItem;
         let created = false;
@@ -376,12 +406,13 @@ export class SessionSaver {
 
         if (existing) {
             session = existing;
-            changed = !this.checkLayoutsEqual(session.layout, currentLayout);
-            if (!(this.isAutoSaveOnSwitchEnabled() && session.id === previousActiveId)) {
-                this.pushLayoutToHistory(session);
-            }
-            session.layout = currentLayout;
-            session.modified = Date.now();
+            // captureActiveSessionLayoutIfAutoSave just above has already
+            // snapshotted this session if it was the active one, so a second
+            // push here would record the same layout twice.
+            changed = this.commitWorkspaceToSession(session, {
+                touchModified: true,
+                skipHistory: this.isAutoSaveOnSwitchEnabled() && session.id === previousActiveId,
+            });
             if (this.data) {
                 this.data.activeSessionId = session.id;
             }
@@ -392,7 +423,7 @@ export class SessionSaver {
             overwritten = true;
         } else {
             const id = generateId();
-            session = this.createSessionRecord(id, sessionName, currentLayout);
+            session = this.createSessionRecord(id, sessionName, this.getCurrentWorkspaceLayout());
             this.insertSessionAndActivate(session);
             created = true;
         }
@@ -466,12 +497,11 @@ export class SessionSaver {
         }
     }
 
+    /** The autosave policy in front of CAPTURE, and nothing else. */
     captureActiveSessionLayoutIfAutoSave(): void {
         const current = this.getActiveSession();
         if (!current || !this.isAutoSaveOnSwitchEnabled()) return;
-        this.pushLayoutToHistory(current);
-        current.layout = this.getCurrentWorkspaceLayout();
-        current.modified = Date.now();
+        this.commitWorkspaceToSession(current, { touchModified: true });
     }
 
     saveAsSession(): Promise<boolean> {
@@ -499,8 +529,14 @@ export class SessionSaver {
                     }
 
                     if (existing) {
-                        existing.layout = layout;
-                        existing.modified = Date.now();
+                        // skipHistory because this path never pushed one, and
+                        // going through CAPTURE makes that visible rather than
+                        // implicit. It differs from
+                        // overwriteSessionWithCurrentLayout, which does push.
+                        this.commitLayoutToSession(existing, layout, {
+                            touchModified: true,
+                            skipHistory: true,
+                        });
                         if (this.data) {
                             this.data.activeSessionId = existing.id;
                         }

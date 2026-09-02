@@ -38,19 +38,28 @@ function createSwitcher(captureFails: () => boolean): { switcher: Switcher; data
     };
     const ordered = [session('a'), session('b')];
 
+    const readLayout = (): unknown => {
+        if (captureFails()) throw new Error('workspace refused to report its layout');
+        return {};
+    };
+
     const host = {
         data,
         app: { workspace: { getLayout: (): unknown => ({}), changeLayout: async (): Promise<boolean> => true } },
         getOrderedSessions: (): unknown[] => ordered,
         findSessionIndex: (list: { id: string }[], id: string): number => list.findIndex((s) => s.id === id),
         getActiveSession: (): unknown => (data['sessions'] as Record<string, unknown>)['a'],
-        getCurrentWorkspaceLayout: (): unknown => {
-            if (captureFails()) throw new Error('workspace refused to report its layout');
-            return {};
+        getCurrentWorkspaceLayout: readLayout,
+        // CAPTURE is the saver's now, and reading the workspace is the part of
+        // it that throws - so the double has to read it here, or the failure
+        // this file exists for stops happening.
+        commitWorkspaceToSession: (target: { layout: unknown; modified: number }): boolean => {
+            target.layout = readLayout();
+            target.modified = Date.now();
+            return true;
         },
         applyWorkspaceLayout: async (): Promise<boolean> => true,
         persistData: async (): Promise<boolean> => true,
-        pushLayoutToHistory: (): void => {},
         saveActiveSession: async (): Promise<boolean> => true,
         isActiveSessionDirty: (): boolean => false,
         isWarnOnUnsavedSwitchEnabled: (): boolean => false,

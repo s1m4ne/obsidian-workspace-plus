@@ -755,7 +755,8 @@ export function sessionSwitcherHost(plugin: WorkspacePlusPlus): SessionSwitcherH
         // builds the layout and then calls this to put it on screen. Pointing it
         // back at applyWorkspaceLayout would recurse.
         applyWorkspaceLayout: (layout) => plugin.app.workspace.changeLayout(layout).then(() => true),
-        pushLayoutToHistory: (session) => { plugin.getHistoryService().pushLayoutToHistory(session); },
+        commitWorkspaceToSession: (session, options) =>
+            plugin.getSessionSaver().commitWorkspaceToSession(session, options),
         saveActiveSession: (options) => plugin.getSessionSaver().saveActiveSession(options),
         isActiveSessionDirty: () => plugin.getSessionSaver().isActiveSessionDirty(),
         isAutoSaveOnSwitchEnabled: () => plugin.getSessionSaver().isAutoSaveOnSwitchEnabled(),
@@ -825,6 +826,8 @@ export function historyServiceHost(plugin: WorkspacePlusPlus): HistoryServiceHos
         getCurrentWorkspaceLayout: () => plugin.getSessionStore().getCurrentWorkspaceLayout(),
         applyWorkspaceLayout: (layout) => plugin.getSessionSwitcher().applyWorkspaceLayout(layout),
         layoutsEqualStructural: (a, b) => plugin.getSessionStore().layoutsEqualStructural(a, b),
+        commitLayoutToSession: (session, layout, options) =>
+            plugin.getSessionSaver().commitLayoutToSession(session, layout, options),
         updateStatusBar: () => { plugin.getStatusBarController().updateStatusBar(); },
         persistData: () => plugin.persistData(),
         isAutoSaveOnSwitchEnabled: () => plugin.getSessionSaver().isAutoSaveOnSwitchEnabled(),

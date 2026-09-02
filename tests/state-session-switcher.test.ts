@@ -54,8 +54,15 @@ function createMockHost(initialData?: Partial<PluginData>): {
         updateStatusBar: () => {
             events.statusBarUpdates += 1;
         },
-        pushLayoutToHistory: (session: SessionItem) => {
+        // Stands in for the saver's CAPTURE, and does the same four things, so
+        // an assertion about session.layout after a switch still means something.
+        commitWorkspaceToSession: (session: SessionItem, options?: { touchModified?: boolean }) => {
             events.pushedHistory.push(session);
+            const layout = host.getCurrentWorkspaceLayout();
+            const changed = JSON.stringify(session.layout) !== JSON.stringify(layout);
+            session.layout = layout;
+            if (changed || options?.touchModified) session.modified = Date.now();
+            return changed;
         },
         saveActiveSession: async () => {
             events.savedActive += 1;

@@ -50,7 +50,7 @@ export interface SessionSwitcherHost {
     getCurrentWorkspaceLayout: () => unknown;
     applyWorkspaceLayout: (layout: unknown, options?: LayoutRestoreOptions) => Promise<boolean>;
     persistData: () => Promise<boolean>;
-    pushLayoutToHistory: (session: SessionItem) => void;
+    commitWorkspaceToSession: (session: SessionItem, options?: { touchModified?: boolean }) => boolean;
     saveActiveSession: (options?: { silent?: boolean; touchModified?: boolean }) => Promise<boolean>;
     isActiveSessionDirty: () => boolean;
     isWarnOnUnsavedSwitchEnabled: () => boolean;
@@ -470,13 +470,7 @@ export class SessionSwitcher {
     private captureActiveSessionLayoutIfAutoSave(): void {
         const current = this.getActiveSession();
         if (!current || !this.isAutoSaveOnSwitchEnabled()) return;
-        this.pushLayoutToHistory(current);
-        current.layout = this.host.getCurrentWorkspaceLayout();
-        current.modified = Date.now();
-    }
-
-    private pushLayoutToHistory(session: SessionItem): void {
-        this.host.pushLayoutToHistory(session);
+        this.host.commitWorkspaceToSession(current, { touchModified: true });
     }
 
     private saveActiveSession(options?: { silent?: boolean; touchModified?: boolean }): Promise<boolean> {
@@ -724,9 +718,7 @@ export class SessionSwitcher {
 
         const performSwitch = async (skipCurrentSave: boolean): Promise<boolean> => {
             if (current && !skipCurrentSave) {
-                this.pushLayoutToHistory(current);
-                current.layout = this.host.getCurrentWorkspaceLayout();
-                current.modified = Date.now();
+                this.host.commitWorkspaceToSession(current, { touchModified: true });
             }
 
             // 2. Update active synchronously

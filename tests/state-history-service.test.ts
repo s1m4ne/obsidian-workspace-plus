@@ -68,6 +68,12 @@ function createMockHost(initialData?: Partial<PluginData>): {
             return true;
         },
         layoutsEqualStructural: (_a: unknown, _b: unknown) => false,
+        commitLayoutToSession: (session, layout, options) => {
+            const changed = JSON.stringify(session.layout) !== JSON.stringify(layout);
+            session.layout = layout;
+            if (changed || options?.touchModified) session.modified = Date.now();
+            return changed;
+        },
         updateStatusBar: () => {
             events.statusBarUpdates += 1;
         },
