@@ -779,7 +779,9 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
         addDangerResetSetting(contentEl, this.app, redraw, {
             name: text(L.settingsResetBackupsAndHistory),
             desc: text(L.settingsResetBackupsAndHistoryDesc),
-            buttonText: text(L.settingsResetBtn),
+            // Its own verb, not the shared reset one: this row deletes, and the
+            // button has to say what the row says.
+            buttonText: text(L.settingsResetBackupsAndHistoryBtn),
             confirmMessage: text(L.confirmResetBackupsAndHistory),
             confirmHint: text(L.resetBackupsAndHistoryHint),
             run: () => this.plugin.clearBackupsAndVersionHistory(),

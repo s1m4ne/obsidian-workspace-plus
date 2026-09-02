@@ -1,6 +1,6 @@
 // Behavior Lock: what every i18n key actually resolves to.
 //
-// The other i18n lock proves the shape holds - 317 keys in all 21 locales, the
+// The other i18n lock proves the shape holds - 318 keys in all 21 locales, the
 // right types, plurals picking the right form. It does not prove the values are
 //
 // Edited deliberately, with the maintainer's authorization, at the commit that
@@ -25,6 +25,12 @@
 //
 // No value changed: every locale already had a short reset verb in
 // settingsResetSessionsBtn, and the three buttons now use it. 319 keys -> 317.
+//
+// And once more, restoring settingsResetBackupsAndHistoryBtn: that row deletes
+// rather than resets, so its button says so. The 21 values were recovered from
+// git, not retyped, which keeps the per-context wording a translator chose -
+// Hindi uses मिटाएँ for deleting files against हटाएँ for deleting a session.
+// 317 keys -> 318.
 // unchanged, and a key can survive with the wrong text: two of the five merge
 // loops in i18n.js use opposite precedence rules (6571 overwrites, 6583 fills
 // only gaps), so flattening the six tables in Phase 3 can silently hand a key
@@ -132,10 +138,10 @@ test('the fixture covers every locale and key, so the comparison is not vacuous'
 
     assert.equal(locales.length, 21);
     for (const locale of locales) {
-        assert.equal(Object.keys(expected[locale] ?? {}).length, 317, `locale ${locale}`);
+        assert.equal(Object.keys(expected[locale] ?? {}).length, 318, `locale ${locale}`);
     }
 
-    // 63 of the 317 are functions, recorded from their output rather than their
+    // 63 of the 318 are functions, recorded from their output rather than their
     // source, so a rewritten implementation with the same output still passes.
     const functionEntries = Object.values(expected.en ?? {}).filter((v) => v.startsWith('fn:'));
     assert.equal(functionEntries.length, 63);

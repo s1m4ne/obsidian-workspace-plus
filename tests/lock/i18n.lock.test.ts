@@ -1,7 +1,7 @@
 // Behavior Lock: i18n
 //
 // Locks the resolved i18n fixed point after all 6 string tables and 5 merge
-// loops have executed. Captures all 317 keys across all 21 locales, calling
+// loops have executed. Captures all 318 keys across all 21 locales, calling
 // all 63 function-valued keys with representative arguments (including Russian
 // 3-form and Arabic 4-form plurals) and under both Mac and Windows platforms.
 //
@@ -19,7 +19,7 @@ const EXPECTED_LOCALES = [
     'de', 'it', 'tr', 'id', 'vi', 'th', 'hi', 'bn', 'fa', 'ms', 'pl',
 ] as const;
 
-const EXPECTED_KEY_COUNT = 317;
+const EXPECTED_KEY_COUNT = 318;
 const EXPECTED_FUNCTION_KEY_COUNT = 63;
 
 interface I18nModule {
@@ -52,7 +52,7 @@ test('i18n exposes all 21 supported locales in LANG_ORDER and LANG_OPTIONS', asy
     }
 });
 
-test('every locale contains exactly all 317 keys and matches English keys', async () => {
+test('every locale contains exactly all 318 keys and matches English keys', async () => {
     const h = setupHarness();
     try {
         const i18n = await loadI18n();
