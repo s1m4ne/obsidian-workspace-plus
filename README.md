@@ -129,7 +129,7 @@ All commands can be assigned custom hotkeys in **Settings** > **Hotkeys**.
 | Save current session as... | - |
 | Save current note name as session | - |
 | Save current layout to session... | - |
-| Reload current session without saving | - |
+| Reload current session (without saving) | - |
 | Toggle auto-save on switch | - |
 | Enable auto-save on switch | - |
 | Disable auto-save on switch | - |
@@ -138,7 +138,7 @@ All commands can be assigned custom hotkeys in **Settings** > **Hotkeys**.
 | Export sessions snapshot | - |
 | Import latest sessions snapshot | - |
 | Switch group | - |
-| Show all sessions / exit group | - |
+| Show all sessions (exit group) | - |
 | Next group | `Cmd/Ctrl+Shift+Tab` |
 | Previous group | - |
 
