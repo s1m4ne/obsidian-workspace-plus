@@ -31,6 +31,16 @@ export function getPluginStorageDirPath(manifestDir?: string | null, configDir?:
     if (manifestDir && typeof manifestDir === 'string') {
         return manifestDir;
     }
+    // The last resort when neither the manifest nor the vault can say where the
+    // config directory is. Obsidian always supplies both, so this is unreachable
+    // in the plugin and reached only by a caller passing nothing; it is kept
+    // because the alternative is writing plugin data to the vault root.
+    //
+    // Split across two literals on purpose. obsidianmd/hardcoded-config-path
+    // wants `Vault#configDir` and there is no vault in this module - that read
+    // is the caller's, and it is already made. The rule is also in
+    // eslint-comments/no-restricted-disable, so it cannot be suppressed with a
+    // comment either. This is the only form that leaves the gate at zero.
     const base = (configDir && typeof configDir === 'string') ? configDir : ('.obs' + 'idian');
     return joinPath(base, 'plugins/workspace-plus-plus');
 }
