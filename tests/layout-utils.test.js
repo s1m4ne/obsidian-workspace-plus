@@ -301,3 +301,47 @@ test('describeLayout reports nothing for a layout with no main area', function (
     assert.deepEqual(layoutUtils.describeLayout(null), { paneCount: 0, filePaths: [] });
     assert.deepEqual(layoutUtils.describeLayout({}), { paneCount: 0, filePaths: [] });
 });
+
+test('structural comparison treats a tab selection like a focus change: not a change', function () {
+    const front = realisticLayout();
+    const back = realisticLayout();
+    back.main.children[0].currentTab = 0;
+
+    // The two differ in nothing but which tab of the main group is in front,
+    // which is what `active` already says at the root and is ignored there.
+    assert.equal(front.main.children[0].currentTab, 1);
+    assert.equal(
+        layoutUtils.layoutsEqualStructural(front, back, { restoreScope: 'full' }),
+        true
+    );
+    assert.equal(
+        layoutUtils.layoutsEqualStructural(front, back, { restoreScope: 'main-only' }),
+        true
+    );
+});
+
+test('structural comparison still sees a change behind an unchanged tab selection', function () {
+    const before = realisticLayout();
+    const after = realisticLayout();
+    after.main.children[0].children[0].state.state.file = 'Notes/C.md';
+
+    assert.equal(
+        layoutUtils.layoutsEqualStructural(before, after, { restoreScope: 'full' }),
+        false
+    );
+});
+
+test('structural comparison sees a tab opened even when the selection matches', function () {
+    const before = realisticLayout();
+    const after = realisticLayout();
+    after.main.children[0].children.push({
+        id: 'leaf-c',
+        type: 'leaf',
+        state: { type: 'markdown', state: { file: 'Notes/C.md' } },
+    });
+
+    assert.equal(
+        layoutUtils.layoutsEqualStructural(before, after, { restoreScope: 'full' }),
+        false
+    );
+});

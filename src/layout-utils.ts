@@ -119,7 +119,25 @@ function normalizeLayoutForComparison(layout: unknown, options: LayoutComparison
                 // A numeric `left` is a coordinate; an object `left` is the sidebar.
                 if (key === 'left' && (obj[key] === null || typeof obj[key] !== 'object')) continue;
                 if (key === 'id' && isWorkspaceItem) continue;
+
+                // `active` and `currentTab` are the same question at two
+                // scopes - which thing is in front - so they get the same
+                // answer. `active` at the root is the focused leaf's id;
+                // `currentTab` is the selected tab of one tab group, which is
+                // why it never sits at depth 0 and was never reached by the
+                // line above it.
+                //
+                // Authorized exception to the behaviour lock in issue #111.
+                // With auto-save on, the default, nothing changes: the layout
+                // is captured on every switch regardless. With auto-save off,
+                // selecting a different tab no longer lights the unsaved
+                // indicator - which is already true of moving focus between
+                // panes, so the two are consistent now instead of opposite.
+                // It also stops the snapshot timer spending the history budget
+                // on tab clicks: three entries for one session in half an hour
+                // differed in nothing else.
                 if (key === 'active' && depth === 0 && typeof obj[key] === 'string') continue;
+                if (key === 'currentTab') continue;
                 normalized[key] = normalizeNode(obj[key], depth + 1);
             }
             return normalized;

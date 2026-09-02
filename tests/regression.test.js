@@ -387,7 +387,15 @@ test('structural layout comparison ignores Obsidian volatile workspace ids and f
     });
     assert.equal(saver.shouldShowUnsavedStatusBarHighlight(), false);
 
+    // Selecting a different tab is the same kind of fact as `active` above it -
+    // which thing is in front - and is ignored for the same reason. This line
+    // asserted the opposite when the highlight landed in 4df7f55, where
+    // currentTab was picked as the positive control for "a real change is
+    // still detected". The control is a real change now.
     currentLayout.main.children[0].currentTab = 1;
+    assert.equal(saver.shouldShowUnsavedStatusBarHighlight(), false);
+
+    currentLayout.main.children[0].children[1].state.state.file = 'c.md';
     assert.equal(saver.shouldShowUnsavedStatusBarHighlight(), true);
 });
 
