@@ -16,7 +16,6 @@ var attachSessionSwitchingMethods = require('./session-switching');
 var attachSessionCommandMethods = require('./session-commands');
 var attachHistoryMethods = require('./history');
 var attachFrontmatterMethods = require('./frontmatter');
-var attachSettingsStateMethods = require('./settings-state');
 
 function attachPluginMethods(WorkspacePlusPlus) {
     attachOverlayMethods(WorkspacePlusPlus);
@@ -35,7 +34,6 @@ function attachPluginMethods(WorkspacePlusPlus) {
     attachSessionCommandMethods(WorkspacePlusPlus);
     attachHistoryMethods(WorkspacePlusPlus);
     attachFrontmatterMethods(WorkspacePlusPlus);
-    attachSettingsStateMethods(WorkspacePlusPlus);
 }
 
 module.exports = attachPluginMethods;

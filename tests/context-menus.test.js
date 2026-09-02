@@ -71,6 +71,10 @@ function createPlugin(overrides = {}) {
             this.data.autoSaveOnSwitch = enabled;
             return Promise.resolve();
         },
+        // The settings screen writes through plugin.getSettingsState() now. This
+        // double records the setters itself, so it is its own settings state and
+        // every assertion below still names the same calls.
+        getSettingsState() { return this; },
         setWarnOnUnsavedSwitch(enabled) {
             calls.push(['warnUnsaved', enabled]);
             this.data.warnOnUnsavedSwitch = enabled;

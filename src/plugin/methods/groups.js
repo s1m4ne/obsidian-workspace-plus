@@ -4,10 +4,8 @@
 // adapter attaches the settings methods itself. Tests build plugins from module
 // subsets, and a dependency that is sometimes undefined is what let a duplicated
 // default survive in the branch that covered for it.
-var attachSettingsStateMethods = require('./settings-state');
 
 function attachGroupMethods(WorkspacePlusPlus) {
-    attachSettingsStateMethods(WorkspacePlusPlus);
 
 
     WorkspacePlusPlus.prototype.isGroupFeatureEnabled = function () {

@@ -4,6 +4,9 @@ import { setupHarness } from './lock/harness/index.ts';
 import { DEFAULT_DATA } from '../src/storage/default-data.ts';
 
 const harness = setupHarness();
+// Loaded after the harness: settings-state reaches utils.ts, which imports
+// 'obsidian' statically, and the stub does not exist until setupHarness() runs.
+const { SettingsState } = await import('../src/state/settings-state.ts');
 const {
     executeStatusBarAction,
     getActionLabel,
@@ -58,6 +61,15 @@ const menuPluginStubs = {
     setShowFilterInput: async () => false,
     setVersionHistoryEnabled: async () => false,
     setWarnOnUnsavedSwitch: async () => false,
+    // The settings the status bar reaches are owned by the store, so the double
+    // hands over a real one rather than restating its setters.
+    // The settings the status bar reaches are owned by the store, so the double
+    // hands over a real one rather than restating its setters. These tests do
+    // not assert on settings writes, so it gets its own data.
+    getSettingsState: (): InstanceType<typeof SettingsState> => new SettingsState({
+        data: Object.assign({}, DEFAULT_DATA),
+        persistData: async (): Promise<boolean> => true,
+    }),
     extractSessionData: () => ({}),
     prepareRotationBackupData: () => ({}),
     ensureDir: async () => {},

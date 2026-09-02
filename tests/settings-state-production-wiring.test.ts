@@ -38,10 +38,10 @@ test('SettingsState calls the plugin persistData on a setting mutation', async (
     assert.equal(persistCalls(), 1, 'SettingsState must call host.persistData()');
 });
 
-test('the plugin method delegates to SettingsState and persists', async () => {
+test('the settings screen route reaches SettingsState and persists', async () => {
     const { plugin, persistCalls } = createPlugin();
 
-    await (plugin.setWarnOnUnsavedSwitch as (v: boolean) => Promise<boolean>)(false);
+    await settingsState(plugin).setWarnOnUnsavedSwitch(false);
 
     assert.equal(plugin.data.warnOnUnsavedSwitch, false);
     assert.equal(persistCalls(), 1);

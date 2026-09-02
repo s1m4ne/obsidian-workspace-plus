@@ -1,11 +1,20 @@
 import { Menu, Notice, type App } from 'obsidian';
 import { L } from './i18n.ts';
 import * as obsidianInternals from './platform/obsidian-internals.ts';
+import type { SettingsState } from './state/settings-state.ts';
 
 type SettingsMenuCallbackName = 'onResetOverlay' | 'onChanged';
 type SettingsMenuCallbacks = Partial<Record<SettingsMenuCallbackName, () => void>>;
 
 export interface SettingsContextMenuPluginHost {
+    /**
+     * The settings the UI writes are owned by SettingsState. Naming the store
+     * here rather than restating its twenty-four setters keeps one list: the
+     * plugin used to carry a forwarding method per setter, and a setter added
+     * to the store without one silently did nothing from the settings screen.
+     */
+    getSettingsState(): SettingsState;
+
     app: App;
     data: {
         confirmDeleteByHotkey?: boolean;
@@ -20,12 +29,7 @@ export interface SettingsContextMenuPluginHost {
     isVersionHistoryEnabled(): boolean;
     isGroupFeatureEnabled(): boolean;
     setAutoSaveOnSwitch(enabled: boolean, options: { notify: boolean }): Promise<unknown>;
-    setWarnOnUnsavedSwitch(enabled: boolean): Promise<unknown>;
-    setConfirmQuickActions(enabled: boolean): Promise<unknown>;
-    setConfirmDeleteByHotkey(enabled: boolean): Promise<unknown>;
-    setVersionHistoryEnabled(enabled: boolean): Promise<unknown>;
     setGroupFeatureEnabled(enabled: boolean): Promise<unknown>;
-    setShowFilterInput(enabled: boolean): Promise<unknown>;
     extractSessionData(data: unknown): Record<string, unknown>;
     prepareRotationBackupData(sessionData: Record<string, unknown>): Record<string, unknown>;
     ensureDir(path: string): Promise<unknown>;
@@ -88,7 +92,7 @@ export function openSettingsContextMenu(initialOptions?: SettingsContextMenuOpti
             mi.setIcon('alert-triangle');
             if (plugin.isWarnOnUnsavedSwitchEnabled()) mi.setChecked(true);
             mi.onClick(() => {
-                void plugin.setWarnOnUnsavedSwitch(!plugin.isWarnOnUnsavedSwitchEnabled()).then(() => {
+                void plugin.getSettingsState().setWarnOnUnsavedSwitch(!plugin.isWarnOnUnsavedSwitchEnabled()).then(() => {
                     call(options.onChanged);
                 });
             });
@@ -99,7 +103,7 @@ export function openSettingsContextMenu(initialOptions?: SettingsContextMenuOpti
             mi.setIcon('check-circle');
             if (plugin.data.confirmQuickActions) mi.setChecked(true);
             mi.onClick(() => {
-                void plugin.setConfirmQuickActions(!plugin.data.confirmQuickActions).then(() => {
+                void plugin.getSettingsState().setConfirmQuickActions(!plugin.data.confirmQuickActions).then(() => {
                     call(options.onChanged);
                 });
             });
@@ -111,7 +115,7 @@ export function openSettingsContextMenu(initialOptions?: SettingsContextMenuOpti
         mi.setIcon('shield');
         if (plugin.data.confirmDeleteByHotkey !== false) mi.setChecked(true);
         mi.onClick(() => {
-            void plugin.setConfirmDeleteByHotkey(!(plugin.data.confirmDeleteByHotkey !== false)).then(() => {
+            void plugin.getSettingsState().setConfirmDeleteByHotkey(!(plugin.data.confirmDeleteByHotkey !== false)).then(() => {
                 call(options.onChanged);
             });
         });
@@ -126,7 +130,7 @@ export function openSettingsContextMenu(initialOptions?: SettingsContextMenuOpti
         if (plugin.isVersionHistoryEnabled()) mi.setChecked(true);
         mi.onClick(() => {
             const next = !plugin.isVersionHistoryEnabled();
-            void plugin.setVersionHistoryEnabled(next).then(() => {
+            void plugin.getSettingsState().setVersionHistoryEnabled(next).then(() => {
                 call(options.onChanged);
             });
         });
@@ -148,7 +152,7 @@ export function openSettingsContextMenu(initialOptions?: SettingsContextMenuOpti
         mi.setIcon('search');
         if (plugin.data.showFilterInput) mi.setChecked(true);
         mi.onClick(() => {
-            void plugin.setShowFilterInput(!plugin.data.showFilterInput).then(() => {
+            void plugin.getSettingsState().setShowFilterInput(!plugin.data.showFilterInput).then(() => {
                 call(options.onChanged);
             });
         });

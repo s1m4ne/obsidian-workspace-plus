@@ -73,6 +73,10 @@ function createPlugin(overrides = {}) {
         exportSessionsSnapshot: promiseCall('export'),
         importSessionsFromLatestExport: promiseCall('import'),
         restoreFromRotationBackup: promiseCall('restore'),
+        // The settings screen writes through plugin.getSettingsState() now. This
+        // double records the setters itself, so it is its own settings state and
+        // every assertion below still names the same calls.
+        getSettingsState() { return this; },
         setLanguageSetting: promiseCall('language', (value) => { data.language = value; }),
         setStatusBarAction: promiseCall('statusAction'),
         setAutoSaveOnSwitch: promiseCall('autoSave', (value) => { data.autoSaveOnSwitch = value; }),
