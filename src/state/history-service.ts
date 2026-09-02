@@ -1,5 +1,5 @@
 import { Notice } from 'obsidian';
-import { L } from '../i18n.ts';
+import { L, formatString } from '../i18n.ts';
 import { cloneLayout } from '../layout-utils.ts';
 import type { PluginData, SessionItem, SessionHistoryEntry } from '../storage/default-data.ts';
 import type { SettingsState } from './settings-state.ts';
@@ -32,14 +32,6 @@ export const MAX_HISTORY = 45;
 
 function getEntryTime(entry: SessionHistoryEntry): number {
     return entry.savedAt ?? entry.timestamp ?? 0;
-}
-
-function formatString(fnOrStr: unknown, ...args: Array<string | number>): string {
-    if (typeof fnOrStr === 'function') {
-        const fn = fnOrStr as (...a: Array<string | number>) => string;
-        return fn(...args);
-    }
-    return typeof fnOrStr === 'string' ? fnOrStr : '';
 }
 
 export class HistoryService {

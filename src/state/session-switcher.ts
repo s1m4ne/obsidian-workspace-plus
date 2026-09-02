@@ -1,5 +1,5 @@
 import { Notice, type App } from 'obsidian';
-import { L } from '../i18n.ts';
+import { L, formatString } from '../i18n.ts';
 import { mergeMainLayoutIntoCurrent } from '../layout-utils.ts';
 import type { RestoreScope } from '../layout-utils.ts';
 import type { PluginData, SessionItem } from '../storage/default-data.ts';
@@ -84,14 +84,6 @@ export const STARTUP_SETTLE_MS = 1200;
 export const STARTUP_LAYOUT_CHANGE_SETTLE_MS = 400;
 export const STARTUP_SETTLE_MAX_MS = 5000;
 export const SESSION_SWITCH_NOTICE_DURATION_MS = 1200;
-
-function formatString(fnOrStr: unknown, ...args: Array<string | number>): string {
-    if (typeof fnOrStr === 'function') {
-        const fn = fnOrStr as (...a: Array<string | number>) => string;
-        return fn(...args);
-    }
-    return typeof fnOrStr === 'string' ? fnOrStr : '';
-}
 
 function getSetTimeout(): (handler: () => void, timeout?: number) => ReturnType<typeof setTimeout> {
     if (typeof window !== 'undefined' && typeof window.setTimeout === 'function') {

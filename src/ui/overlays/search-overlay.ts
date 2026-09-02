@@ -1,5 +1,5 @@
 import { Component, Notice, setIcon, setTooltip, type App } from 'obsidian';
-import { L } from '../../i18n.ts';
+import { L, formatString, text } from '../../i18n.ts';
 import { ConfirmModal } from '../../modals/confirm-modal.ts';
 import * as groupTabUi from '../../group-tab-ui.ts';
 import type { GroupTabPluginHost } from '../../group-tab-ui.ts';
@@ -27,15 +27,6 @@ export interface SearchOverlayPosition {
 export interface SearchOverlaySize {
     width: number;
     height: number;
-}
-
-function localizedString(value: unknown): string {
-    return typeof value === 'string' ? value : '';
-}
-
-function localizedCall(value: unknown, ...args: (string | number)[]): string {
-    if (typeof value !== 'function') return '';
-    return (value as (...callArgs: (string | number)[]) => string)(...args);
 }
 
 /**
@@ -187,14 +178,14 @@ function handleSearchOverlayDeleteKey(event: KeyboardEvent, activeEl: Element | 
     const session = filtered[selectedIndex];
     if (!session) return true;
     if (options.plugin.getSessionStore().getSessionCount() <= 1) {
-        new Notice(localizedString(L.cannotDeleteLast));
+        new Notice(text(L.cannotDeleteLast));
         return true;
     }
 
     const doDelete = (): void => {
         void options.plugin.getSessionStore().deleteSession(session.id).then((deleted) => {
             if (!deleted) return;
-            new Notice(localizedCall(L.deleted, session.name));
+            new Notice(formatString(L.deleted, session.name));
             options.refreshOrderedSessions();
         });
     };
@@ -205,8 +196,8 @@ function handleSearchOverlayDeleteKey(event: KeyboardEvent, activeEl: Element | 
         // about it.
         const isActive = session.id === options.plugin.getSessionStore().getActiveSessionId();
         const message = isActive
-            ? localizedCall(L.confirmDeleteActive, session.name)
-            : localizedCall(L.confirmDelete, session.name);
+            ? formatString(L.confirmDeleteActive, session.name)
+            : formatString(L.confirmDelete, session.name);
         new ConfirmModal(options.plugin.app, message, doDelete).open();
     } else {
         doDelete();
@@ -464,7 +455,7 @@ export class SearchOverlay {
         overlay.createSpan({
             cls: 'wpp-sr-only',
             attr: { id: labelId },
-            text: localizedString(strings.cmdSearchOverlay),
+            text: text(strings.cmdSearchOverlay),
         });
 
         // Resize handles at four corners
@@ -488,10 +479,10 @@ export class SearchOverlay {
 
         const closeBtn = headerRow.createDiv({
             cls: 'wpp-search-close',
-            attr: { role: 'button', 'aria-label': localizedString(strings.close) },
+            attr: { role: 'button', 'aria-label': text(strings.close) },
         });
         setIcon(closeBtn, 'x');
-        setTooltip(closeBtn, localizedString(strings.close));
+        setTooltip(closeBtn, text(strings.close));
         overlayEventOwner.registerDomEvent(closeBtn, 'click', function (e) {
             e.stopPropagation();
             hideThisOverlay();
@@ -501,9 +492,9 @@ export class SearchOverlay {
         const saveRow = overlay.createDiv({ cls: 'wpp-save-container' });
         const saveInput = saveRow.createEl('input', {
             cls: 'wpp-save-input',
-            attr: { type: 'text', placeholder: localizedString(strings.savePlaceholder) },
+            attr: { type: 'text', placeholder: text(strings.savePlaceholder) },
         });
-        const saveBtn = saveRow.createEl('button', { cls: 'wpp-save-btn', text: localizedString(strings.create) });
+        const saveBtn = saveRow.createEl('button', { cls: 'wpp-save-btn', text: text(strings.create) });
 
         function onOverlaySave() {
             const selectedGroupId = getOverlayGroupId();
@@ -513,7 +504,7 @@ export class SearchOverlay {
                 overlayGroupId = result.viewGroupId || null;
                 self.searchOverlayViewGroupId = overlayGroupId;
                 saveInput.value = '';
-                new Notice(localizedCall(strings.created, createdName));
+                new Notice(formatString(strings.created, createdName));
                 renderGroupTabs();
                 refreshOrderedSessions();
             });
@@ -534,7 +525,7 @@ export class SearchOverlay {
         const searchRow = overlay.createDiv({ cls: 'wpp-search-row' });
         const searchInput = searchRow.createEl('input', {
             cls: 'wpp-search-input',
-            attr: { type: 'text', placeholder: localizedString(strings.searchOverlayPlaceholder) },
+            attr: { type: 'text', placeholder: text(strings.searchOverlayPlaceholder) },
         });
         self.searchOverlayInputEl = searchInput;
         if (!self.getSettingsState().showFilterInput) {
@@ -553,15 +544,15 @@ export class SearchOverlay {
             const autoSave = self.getSessionSaver().isAutoSaveOnSwitchEnabled();
             if (!self.getGroupStore().isGroupFeatureEnabled()) {
                 groupTabsRow.classList.add('is-hidden');
-                footerRow.textContent = autoSave ? stripSaveHint(localizedString(strings.searchOverlayHelp)) : localizedString(strings.searchOverlayHelp);
+                footerRow.textContent = autoSave ? stripSaveHint(text(strings.searchOverlayHelp)) : text(strings.searchOverlayHelp);
                 return;
             }
             const groups = self.getGroupStore().getGroupMap();
             const realGroups = self.getGroupStore().getOrderedGroups();
             groupTabsRow.classList.remove('is-hidden');
             const helpText = realGroups.length > 0
-                ? (localizedString(strings.searchOverlayHelpWithGroups) || localizedString(strings.searchOverlayHelp))
-                : localizedString(strings.searchOverlayHelp);
+                ? (text(strings.searchOverlayHelpWithGroups) || text(strings.searchOverlayHelp))
+                : text(strings.searchOverlayHelp);
             footerRow.textContent = autoSave ? stripSaveHint(helpText) : helpText;
 
             const groupOrder = self.getGroupStore().getOrderedGroupTabIds();
@@ -595,7 +586,7 @@ export class SearchOverlay {
                 onGroupOrderCommit: function (newOrder) {
                     void self.getGroupStore().setGroupTabOrder(newOrder);
                 },
-                addButtonTooltip: localizedString(strings.groupCreateNew),
+                addButtonTooltip: text(strings.groupCreateNew),
                 onAddGroupClick: function () {
                     groupTabUi.openCreateGroupPrompt(self.app, self, function () {
                         renderGroupTabs();
@@ -608,7 +599,7 @@ export class SearchOverlay {
         const list = overlay.createDiv({ cls: 'wpp-switch-list wpp-search-list' });
 
         const emptyEl = overlay.createDiv({ cls: 'wpp-search-empty' });
-        emptyEl.textContent = localizedString(strings.noFilteredSessions);
+        emptyEl.textContent = text(strings.noFilteredSessions);
 
         // Referenced by renderGroupTabs above, which only ever runs from a
         // callback - so it resolves after this line, and let is enough.
@@ -644,9 +635,9 @@ export class SearchOverlay {
                 countSpan.textContent = '0 / 0';
                 // Show appropriate message: empty group vs no search results
                 if (getOverlayGroupId() && ordered.length === 0) {
-                    emptyEl.textContent = localizedString(strings.noGroupSessions);
+                    emptyEl.textContent = text(strings.noGroupSessions);
                 } else {
-                    emptyEl.textContent = localizedString(strings.noFilteredSessions);
+                    emptyEl.textContent = text(strings.noFilteredSessions);
                 }
                 list.classList.add('is-hidden');
                 emptyEl.classList.add('is-visible');
@@ -687,7 +678,7 @@ export class SearchOverlay {
 
                 if (isActive) {
                     const badge = item.createSpan({ cls: 'wpp-active-badge' });
-                    badge.textContent = localizedString(strings.active);
+                    badge.textContent = text(strings.active);
                 }
 
                 // Action icons (save?, rename & delete)
@@ -697,12 +688,12 @@ export class SearchOverlay {
                 let saveIcon = null;
                 let reloadIcon = null;
                 if (isActive && !self.getSessionSaver().isAutoSaveOnSwitchEnabled()) {
-                    saveIcon = actionButton(actions, 'save', localizedString(strings.save));
-                    reloadIcon = actionButton(actions, 'rotate-ccw', localizedString(strings.contextReloadSession));
+                    saveIcon = actionButton(actions, 'save', text(strings.save));
+                    reloadIcon = actionButton(actions, 'rotate-ccw', text(strings.contextReloadSession));
                 }
 
-                const renameIcon = actionButton(actions, 'pencil', localizedString(strings.rename));
-                const deleteIcon = actionButton(actions, 'trash-2', localizedString(strings.delete));
+                const renameIcon = actionButton(actions, 'pencil', text(strings.rename));
+                const deleteIcon = actionButton(actions, 'trash-2', text(strings.delete));
 
                 (function (idx, sess, itemEl, _saveIcon, _reloadIcon, _isActive) {
                     // Click on item to switch
@@ -740,7 +731,7 @@ export class SearchOverlay {
                                 switchSelected();
                             },
                             showMoveToGroup: self.getGroupStore().isGroupFeatureEnabled() && self.getGroupStore().getOrderedGroups().length > 0,
-                            deleteConfirmMessage: localizedCall(strings.confirmDeleteActive, sess.name),
+                            deleteConfirmMessage: formatString(strings.confirmDeleteActive, sess.name),
                             onGroupsChanged: renderGroupTabs,
                             onSessionsChanged: refreshOrderedSessions,
                         });
@@ -756,7 +747,7 @@ export class SearchOverlay {
                                 });
                             };
                             if (self.getSettingsState().confirmQuickActions) {
-                                new ConfirmModal(self.app, localizedCall(strings.confirmSaveSession, sess.name), doSave, { confirmText: localizedString(strings.save), confirmClass: 'mod-cta' }).open();
+                                new ConfirmModal(self.app, formatString(strings.confirmSaveSession, sess.name), doSave, { confirmText: text(strings.save), confirmClass: 'mod-cta' }).open();
                             } else {
                                 doSave();
                             }
@@ -771,7 +762,7 @@ export class SearchOverlay {
                                 void self.getSessionSaver().reloadCurrentSessionWithoutSaving();
                             };
                             if (self.getSettingsState().confirmQuickActions) {
-                                new ConfirmModal(self.app, localizedCall(strings.confirmReloadSession, sess.name), doReload, { confirmText: localizedString(strings.switchTo) }).open();
+                                new ConfirmModal(self.app, formatString(strings.confirmReloadSession, sess.name), doReload, { confirmText: text(strings.switchTo) }).open();
                             } else {
                                 doReload();
                             }
@@ -799,7 +790,7 @@ export class SearchOverlay {
                             plugin: self,
                             session: sess,
                             isActive: _isActive,
-                            confirmMessage: localizedCall(strings.confirmDeleteActive, sess.name),
+                            confirmMessage: formatString(strings.confirmDeleteActive, sess.name),
                             onDeleted: function () {
                                 refreshOrderedSessions();
                             },
@@ -828,7 +819,7 @@ export class SearchOverlay {
                     const sessionName = self.getSessionStore().findSession(sessionId)?.name || '';
                     const groupName = self.getGroupStore().findGroup(groupId)?.name || '';
                     return self.getGroupStore().moveSessionToGroupExclusive(sessionId, groupId).then(function () {
-                        new Notice(localizedCall(L.groupAddedSession, sessionName, groupName));
+                        new Notice(formatString(L.groupAddedSession, sessionName, groupName));
                         renderGroupTabs();
                         refreshOrderedSessions();
                     });
@@ -839,7 +830,7 @@ export class SearchOverlay {
                         const rmSessionName = self.getSessionStore().findSession(sessionId)?.name || '';
                         const rmGroupName = self.getGroupStore().findGroup(currentGroupId)?.name || '';
                         return self.getGroupStore().removeSessionFromGroup(sessionId, currentGroupId).then(function () {
-                            new Notice(localizedCall(L.groupRemovedSession, rmSessionName, rmGroupName));
+                            new Notice(formatString(L.groupRemovedSession, rmSessionName, rmGroupName));
                             renderGroupTabs();
                             refreshOrderedSessions();
                         });
@@ -923,7 +914,7 @@ export class SearchOverlay {
                         });
                     };
                     if (self.getSettingsState().confirmQuickActions) {
-                        new ConfirmModal(self.app, localizedCall(strings.confirmSaveSession, target.name), doSave, { confirmText: localizedString(strings.save), confirmClass: 'mod-cta' }).open();
+                        new ConfirmModal(self.app, formatString(strings.confirmSaveSession, target.name), doSave, { confirmText: text(strings.save), confirmClass: 'mod-cta' }).open();
                     } else {
                         doSave();
                     }
@@ -932,7 +923,7 @@ export class SearchOverlay {
                         void self.getSessionSaver().reloadCurrentSessionWithoutSaving();
                     };
                     if (self.getSettingsState().confirmQuickActions) {
-                        new ConfirmModal(self.app, localizedCall(strings.confirmReloadSession, target.name), doReload, { confirmText: localizedString(strings.switchTo) }).open();
+                        new ConfirmModal(self.app, formatString(strings.confirmReloadSession, target.name), doReload, { confirmText: text(strings.switchTo) }).open();
                     } else {
                         doReload();
                     }

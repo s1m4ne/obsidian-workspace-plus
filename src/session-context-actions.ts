@@ -1,5 +1,5 @@
 import { Notice, type App } from 'obsidian';
-import { L } from './i18n.ts';
+import { L, formatString } from './i18n.ts';
 import { HistoryModal, type HistoryModalPluginHost } from './modals/history-modal.ts';
 import * as sessionContextMenu from './session-context-menu-items.ts';
 import type { SessionContextMenuPluginHost } from './session-context-menu-items.ts';
@@ -83,11 +83,6 @@ export type SessionContextMenuOptions = ContextActionOverrides & {
 
 export interface OpenSessionContextMenuOptions extends SessionContextMenuOptions {
     event: MouseEvent;
-}
-
-function format(value: unknown, ...args: (string | number)[]): string {
-    if (typeof value !== 'function') return '';
-    return (value as (...callArgs: (string | number)[]) => string)(...args);
 }
 
 function hasOwn(options: object, key: string): boolean {
@@ -200,7 +195,7 @@ export function createSessionContextMenuOptions(options: SessionContextMenuOptio
         if (!groupId) return;
         const groupName = getGroupName(plugin, groupId);
         return plugin.getGroupStore().removeSessionFromGroup(session.id, groupId).then(() => {
-            new Notice(format(L.groupRemovedSession, session.name, groupName));
+            new Notice(formatString(L.groupRemovedSession, session.name, groupName));
             refreshGroupsAndSessions(options);
         });
     };
@@ -209,7 +204,7 @@ export function createSessionContextMenuOptions(options: SessionContextMenuOptio
         const groupName = getGroupName(plugin, groupId);
         return plugin.getGroupStore().moveSessionToGroupExclusive(session.id, groupId).then((moved) => {
             if (!moved) return false;
-            new Notice(format(L.groupAddedSession, session.name, groupName));
+            new Notice(formatString(L.groupAddedSession, session.name, groupName));
             refreshGroupsAndSessions(options);
             return true;
         });
@@ -219,8 +214,8 @@ export function createSessionContextMenuOptions(options: SessionContextMenuOptio
         const confirmMessage = hasOwn(options, 'deleteConfirmMessage')
             ? options.deleteConfirmMessage
             : (isActive
-                ? format(L.confirmDeleteActive, session.name)
-                : format(L.confirmDelete, session.name));
+                ? formatString(L.confirmDeleteActive, session.name)
+                : formatString(L.confirmDelete, session.name));
         return deleteSessionWithPrompt({
             app,
             plugin,

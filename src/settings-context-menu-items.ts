@@ -1,5 +1,5 @@
 import { Menu, Notice, type App } from 'obsidian';
-import { L } from './i18n.ts';
+import { L, text } from './i18n.ts';
 import * as obsidianInternals from './platform/obsidian-internals.ts';
 import type { SettingsState } from './state/settings-state.ts';
 import type { TabId } from './settings-tab.ts';
@@ -67,10 +67,6 @@ export type SettingsContextMenuOptions = SettingsMenuCallbacks & {
     event?: MouseEvent | undefined;
     showResetOverlay?: boolean | undefined;
 };
-
-function text(value: unknown): string {
-    return typeof value === 'string' ? value : '';
-}
 
 function isCallback(value: unknown): value is () => void {
     return typeof value === 'function';

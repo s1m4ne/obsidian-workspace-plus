@@ -1,15 +1,8 @@
 import { Notice } from 'obsidian';
-import { L } from '../i18n.ts';
+import { L, formatString } from '../i18n.ts';
 import { splitSessionHistory, hasSessionShape, hasNonEmptySessions } from './session-data.ts';
 import type { PluginData } from './default-data.ts';
 import type { SessionDataPayload } from './storage-backup.ts';
-
-function formatString(fnOrStr: unknown, ...args: Array<string | number>): string {
-    if (typeof fnOrStr === 'function') {
-        return (fnOrStr as (...args: Array<string | number>) => string)(...args);
-    }
-    return typeof fnOrStr === 'string' ? fnOrStr : '';
-}
 
 export function pad2(n: number): string {
     return n < 10 ? `0${n}` : String(n);

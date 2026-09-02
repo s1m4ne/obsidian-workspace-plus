@@ -1,15 +1,8 @@
 import { Notice, Platform } from 'obsidian';
-import { L } from '../i18n.ts';
+import { L, formatString } from '../i18n.ts';
 import { getPersistStamp, hasSessionShape, hasNonEmptySessions } from './session-data.ts';
 import type { JsonFileStore, ReadJsonResult } from './json-file-store.ts';
 import type { PluginData, SessionGroup, SessionItem } from './default-data.ts';
-
-function formatString(fnOrStr: unknown, ...args: Array<string | number>): string {
-    if (typeof fnOrStr === 'function') {
-        return (fnOrStr as (...args: Array<string | number>) => string)(...args);
-    }
-    return typeof fnOrStr === 'string' ? fnOrStr : '';
-}
 
 export const BACKUP_ROTATION_INTERVAL = 3600000; // 1 hour
 

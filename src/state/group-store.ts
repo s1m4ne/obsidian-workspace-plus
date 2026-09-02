@@ -1,5 +1,5 @@
 import { Notice } from 'obsidian';
-import { L } from '../i18n.ts';
+import { L, formatString } from '../i18n.ts';
 import { generateId } from '../utils.ts';
 import type { PluginData, SessionGroup, SessionItem } from '../storage/default-data.ts';
 import type { SettingsState } from './settings-state.ts';
@@ -26,14 +26,6 @@ export interface GroupSelectionResult {
 
 export interface GroupPersistOption {
     persist?: boolean;
-}
-
-function formatString(fnOrStr: unknown, ...args: Array<string | number>): string {
-    if (typeof fnOrStr === 'function') {
-        const fn = fnOrStr as (...a: Array<string | number>) => string;
-        return fn(...args);
-    }
-    return typeof fnOrStr === 'string' ? fnOrStr : '';
 }
 
 export function normalizeGroupTabOrder(order: unknown, groups: Record<string, SessionGroup>): string[] {

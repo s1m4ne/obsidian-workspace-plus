@@ -1,5 +1,5 @@
 import { Notice, type App } from 'obsidian';
-import { L } from './i18n.ts';
+import { L, formatString, text } from './i18n.ts';
 import { ConfirmModal, type ConfirmModalOptions } from './modals/confirm-modal.ts';
 import { RenameModal, type RenameModalOptions } from './modals/rename-modal.ts';
 import type { SessionItem } from './storage/default-data.ts';
@@ -59,15 +59,6 @@ export interface DeleteSessionWithPromptOptions {
     onDeleted?: ((session: SessionItem) => void) | undefined;
 }
 
-function text(value: unknown): string {
-    return typeof value === 'string' ? value : '';
-}
-
-function format(value: unknown, ...args: (string | number)[]): string {
-    if (typeof value !== 'function') return '';
-    return (value as (...callArgs: (string | number)[]) => string)(...args);
-}
-
 function resolveApp(options: {
     app?: App | undefined;
     plugin?: { app: App } | undefined;
@@ -102,8 +93,8 @@ function getDeleteConfirmMessage(
 ): string {
     if (options.confirmMessage) return options.confirmMessage;
     return options.isActive
-        ? format(L.confirmDeleteActive, session.name)
-        : format(L.confirmDelete, session.name);
+        ? formatString(L.confirmDeleteActive, session.name)
+        : formatString(L.confirmDelete, session.name);
 }
 
 export function deleteSessionWithPrompt(
@@ -125,7 +116,7 @@ export function deleteSessionWithPrompt(
         return plugin.getSessionStore().deleteSession(session.id).then((deleted) => {
             if (!deleted) return false;
             if (options.notifyDeleted !== false) {
-                new Notice(format(L.deleted, session.name));
+                new Notice(formatString(L.deleted, session.name));
             }
             options.onDeleted?.(session);
             return true;

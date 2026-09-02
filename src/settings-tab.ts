@@ -1,5 +1,5 @@
 import { Notice, PluginSettingTab, Setting, type App, type Plugin } from 'obsidian';
-import { L, LANG_OPTIONS, LANG_ORDER } from './i18n.ts';
+import { L, LANG_OPTIONS, LANG_ORDER, formatString, text } from './i18n.ts';
 import { openHotkeysSetting } from './platform/obsidian-internals.ts';
 import { ConfirmModal } from './modals/confirm-modal.ts';
 import { RenameModal } from './modals/rename-modal.ts';
@@ -145,15 +145,6 @@ const SLOT_LABEL_KEYS: Record<string, string> = {
     modRightClick: 'statusBarSlotModRightClick',
     shiftRightClick: 'statusBarSlotShiftRightClick',
 };
-
-function text(value: unknown): string {
-    return typeof value === 'string' ? value : '';
-}
-
-function format(value: unknown, ...args: (string | number)[]): string {
-    if (typeof value !== 'function') return '';
-    return (value as (...callArgs: (string | number)[]) => string)(...args);
-}
 
 function localeEntry(key: string): SettingText {
     const value = (L as Record<string, unknown>)[key];
@@ -594,7 +585,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
 
     private renderBackupRow(backupListEl: HTMLElement, backup: RotationBackupInfo): void {
         const savedAtText = absoluteTime(backup.savedAt);
-        const summary = `${formatRelativeTime(backup.savedAt)}  ·  ${format(L.rotationBackupGeneration, backup.sessionCount)}`;
+        const summary = `${formatRelativeTime(backup.savedAt)}  ·  ${formatString(L.rotationBackupGeneration, backup.sessionCount)}`;
         let desc = savedAtText;
         if (backup.backupPlatform) desc += `  ·  ${backup.backupPlatform}`;
 
@@ -607,7 +598,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
             btn.onClick(() => {
                 new ConfirmModal(
                     this.app,
-                    format(L.rotationBackupRestoreConfirm, savedAtText, backup.sessionCount),
+                    formatString(L.rotationBackupRestoreConfirm, savedAtText, backup.sessionCount),
                     // ConfirmModal ignores what this returns, so the restore is
                     // deliberately not awaited - it redraws itself when it lands.
                     () => {
@@ -666,7 +657,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
             // this group", which named a button that is gone: membership is
             // changed by dragging a session onto a group tab, or from a
             // session's context menu. The count is what is left worth saying.
-            .setDesc(format(L.settingsGroupSessionCount, sessionCount));
+            .setDesc(formatString(L.settingsGroupSessionCount, sessionCount));
 
         groupSetting.addExtraButton((btn) => {
             btn.setIcon('pencil');
@@ -684,7 +675,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
             btn.setIcon('trash-2');
             btn.setTooltip(text(L.settingsGroupDelete));
             btn.onClick(() => {
-                new ConfirmModal(this.app, format(L.settingsGroupDeleteConfirm, group.name), () => {
+                new ConfirmModal(this.app, formatString(L.settingsGroupDeleteConfirm, group.name), () => {
                     void this.plugin.getGroupStore().deleteGroup(group.id).then(() => { this.display(); });
                 }).open();
             });
@@ -696,7 +687,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
 
         new Setting(contentEl)
             .setName(text(L.settingsSessionStorageLocation))
-            .setDesc(format(L.settingsSessionStorageLocationDesc, this.plugin.getSessionsPath()));
+            .setDesc(formatString(L.settingsSessionStorageLocationDesc, this.plugin.getSessionsPath()));
 
         addToggleSetting(contentEl, {
             name: text(L.settingsVaultOnlySessions),

@@ -1,5 +1,5 @@
 import { Notice, type App } from 'obsidian';
-import { L } from '../i18n.ts';
+import { L, formatString } from '../i18n.ts';
 import { generateId } from '../utils.ts';
 import type { PluginData, SessionItem } from '../storage/default-data.ts';
 import type { SettingsState } from './settings-state.ts';
@@ -80,14 +80,6 @@ export interface SessionSaverHost {
 }
 
 export const SESSION_NAME_MAX_LENGTH = 100;
-
-function formatString(fnOrStr: unknown, ...args: Array<string | number>): string {
-    if (typeof fnOrStr === 'function') {
-        const fn = fnOrStr as (...a: Array<string | number>) => string;
-        return fn(...args);
-    }
-    return typeof fnOrStr === 'string' ? fnOrStr : '';
-}
 
 export function findSessionByName(data: PluginData | null | undefined, name: string): SessionItem | null {
     const sessions = (data && data.sessions) || {};

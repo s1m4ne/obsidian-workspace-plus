@@ -1,5 +1,5 @@
 import { Notice, type App, type WorkspaceLeaf } from 'obsidian';
-import { L } from '../i18n.ts';
+import { L, formatString } from '../i18n.ts';
 import { generateId } from '../utils.ts';
 import { layoutsEqualStructural, cloneLayout } from '../layout-utils.ts';
 import type { RestoreScope } from '../layout-utils.ts';
@@ -47,14 +47,6 @@ export interface SessionPersistOption {
     persist?: boolean;
     notify?: boolean;
     syncCommands?: boolean;
-}
-
-function formatString(fnOrStr: unknown, ...args: Array<string | number>): string {
-    if (typeof fnOrStr === 'function') {
-        const fn = fnOrStr as (...a: Array<string | number>) => string;
-        return fn(...args);
-    }
-    return typeof fnOrStr === 'string' ? fnOrStr : '';
 }
 
 export class SessionStore {

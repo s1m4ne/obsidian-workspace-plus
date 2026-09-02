@@ -7265,6 +7265,46 @@ function navigatorLanguage(): string {
 
 export let L: LocaleDictionary = STRINGS.en || {};
 
+/**
+ * A locale value that is meant to be a plain string, as a string.
+ *
+ * `L`'s values are `unknown` because a key can hold either a string or a
+ * message builder, and 320 keys across 21 locales is not a shape the type
+ * system is going to describe usefully. So every caller has to narrow, and
+ * before this lived here, six modules had each written the same two lines:
+ * main.ts, settings-tab.ts, settings-context-menu-items.ts,
+ * session-context-menu-items.ts, session-list-actions.ts and
+ * session-manager-modal-class.ts, plus `localizedString` in search-overlay.ts
+ * under a different name.
+ *
+ * Kept separate from `formatString` on purpose. They differ only for a
+ * function-valued key, and there the caller knows which kind it is asking for:
+ * merging them would make `text()` of a message builder start rendering that
+ * builder's output where it renders nothing today, which is a visible change
+ * in text.
+ */
+export function text(value: unknown): string {
+    return typeof value === 'string' ? value : '';
+}
+
+/**
+ * A locale value as a string, calling it with `args` when it is a builder.
+ *
+ * Eight modules had a copy of this - the six under `state/` and `core/` plus
+ * `storage/storage-backup.ts` and `storage/storage-transfer.ts` - and five more
+ * had a variant that returned `''` for a plain string instead of the string
+ * (`format` in four files, `localizedCall` in search-overlay.ts). Those five
+ * now call this, which differs only for a string-valued key reached through a
+ * builder call site; the i18n locks prove every one of the 63 function keys is
+ * a function in all 21 locales, so no call site can be in that case.
+ */
+export function formatString(value: unknown, ...args: Array<string | number>): string {
+    if (typeof value === 'function') {
+        return (value as (...callArgs: Array<string | number>) => string)(...args);
+    }
+    return typeof value === 'string' ? value : '';
+}
+
 export function resolveLocale(override?: string): LocaleDictionary {
     const lang = override && override !== 'auto' ? override : navigatorLanguage();
     let key = lang.slice(0, 2);

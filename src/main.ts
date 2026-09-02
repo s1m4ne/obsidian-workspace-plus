@@ -1,5 +1,5 @@
 import { Plugin } from 'obsidian';
-import { L, resolveLocale } from './i18n.ts';
+import { L, resolveLocale, text } from './i18n.ts';
 import { SessionManagerModal, openSessionManagerModal } from './modals/session-manager-modal-class.ts';
 import { HistoryModal } from './modals/history-modal.ts';
 import type { HistoryModalPluginHost } from './modals/history-modal.ts';
@@ -672,10 +672,6 @@ export class WorkspacePlusPlus extends Plugin {
 }
 
 export default WorkspacePlusPlus;
-
-function text(value: unknown): string {
-    return typeof value === 'string' ? value : '';
-}
 
 /**
  * The host SessionStore is given.

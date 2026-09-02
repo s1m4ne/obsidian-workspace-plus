@@ -1,5 +1,5 @@
 import { Notice, type App, type EventRef, type TFile, type WorkspaceLeaf } from 'obsidian';
-import { L } from '../i18n.ts';
+import { L, formatString } from '../i18n.ts';
 import type { PluginData, SessionItem } from '../storage/default-data.ts';
 
 export interface ParsedWorkspaceSession {
@@ -31,14 +31,6 @@ export interface FrontmatterLinkerHost {
     isSessionSwitcherActive?: () => boolean;
     handleFrontmatterTriggers?: (file: TFile) => void;
     registerEvent?: (eventRef: EventRef) => void;
-}
-
-function formatString(fnOrStr: unknown, ...args: Array<string | number>): string {
-    if (typeof fnOrStr === 'function') {
-        const fn = fnOrStr as (...a: Array<string | number>) => string;
-        return fn(...args);
-    }
-    return typeof fnOrStr === 'string' ? fnOrStr : '';
 }
 
 export class FrontmatterLinker {

@@ -1,5 +1,5 @@
 import { Menu, type App, type MenuItem } from 'obsidian';
-import { L } from './i18n.ts';
+import { L, text } from './i18n.ts';
 import * as obsidianInternals from './platform/obsidian-internals.ts';
 import type { SessionItem } from './storage/default-data.ts';
 import type { TabId } from './settings-tab.ts';
@@ -68,10 +68,6 @@ export type SessionContextMenuOptions = SessionContextMenuActions & {
     showMoveToGroup?: boolean | undefined;
     showCustomizeClicks?: boolean | undefined;
 };
-
-function text(value: unknown): string {
-    return typeof value === 'string' ? value : '';
-}
 
 function isAction(value: unknown): value is Action {
     return typeof value === 'function';

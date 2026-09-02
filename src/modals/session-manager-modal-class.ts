@@ -1,5 +1,5 @@
 import { Modal, Notice, setIcon, setTooltip, type App } from 'obsidian';
-import { L } from '../i18n.ts';
+import { L, formatString, text } from '../i18n.ts';
 import { ConfirmModal } from './confirm-modal.ts';
 import * as groupTabUi from '../group-tab-ui.ts';
 import type { GroupTabPluginHost } from '../group-tab-ui.ts';
@@ -95,15 +95,6 @@ const ARROW_NAVIGABLE_SELECTOR = [
 // The locale dictionary is Record<string, StringValue>, so every lookup is
 // possibly undefined and possibly a formatter. These two narrow it at the point
 // of use, which is what the other migrated UI does.
-function text(value: unknown): string {
-    return typeof value === 'string' ? value : '';
-}
-
-function format(value: unknown, ...args: (string | number)[]): string {
-    if (typeof value !== 'function') return '';
-    return (value as (...callArgs: (string | number)[]) => string)(...args);
-}
-
 // Every caller reads elements out of the modal's own markup, so an HTMLElement
 // is all this ever sees. offsetParent alone is not enough: it is null for a
 // fixed-position element as well as a hidden one, hence the rect fallback.
@@ -840,7 +831,7 @@ export class SessionManagerModal extends Modal {
                     const sessionName = this.plugin.getSessionStore().findSession(sessionId)?.name || '';
                     const groupName = this.plugin.getGroupStore().findGroup(groupId)?.name || '';
                     return this.plugin.getGroupStore().moveSessionToGroupExclusive(sessionId, groupId).then(() => {
-                        new Notice(format(L.groupAddedSession, sessionName, groupName));
+                        new Notice(formatString(L.groupAddedSession, sessionName, groupName));
                         this.renderGroupTabs();
                         this.renderList();
                     });
@@ -853,7 +844,7 @@ export class SessionManagerModal extends Modal {
                     const sessionName = this.plugin.getSessionStore().findSession(sessionId)?.name || '';
                     const groupName = this.plugin.getGroupStore().findGroup(currentGroupId)?.name || '';
                     return this.plugin.getGroupStore().removeSessionFromGroup(sessionId, currentGroupId).then(() => {
-                        new Notice(format(L.groupRemovedSession, sessionName, groupName));
+                        new Notice(formatString(L.groupRemovedSession, sessionName, groupName));
                         this.renderGroupTabs();
                         this.renderList();
                     });
@@ -886,7 +877,7 @@ export class SessionManagerModal extends Modal {
             this.nameInput.value = '';
             this.renderGroupTabs();
             this.renderList();
-            new Notice(format(L.created, result.name));
+            new Notice(formatString(L.created, result.name));
         });
     }
 
@@ -913,7 +904,7 @@ export class SessionManagerModal extends Modal {
             plugin: this.plugin,
             session,
             isActive,
-            confirmMessage: isActive ? format(L.confirmDeleteActive, session.name) : format(L.confirmDelete, session.name),
+            confirmMessage: isActive ? formatString(L.confirmDeleteActive, session.name) : formatString(L.confirmDelete, session.name),
             forceConfirm: true,
             onDeleted: () => { this.renderList(); },
         });
@@ -944,7 +935,7 @@ export class SessionManagerModal extends Modal {
         const hasSelection = this.selectedIds.size > 0;
         this.bulkActionsEl.classList.toggle('wpp-is-hidden', !hasSelection);
         if (hasSelection) {
-            this.bulkDeleteBtn.textContent = format(L.bulkDelete, this.selectedIds.size);
+            this.bulkDeleteBtn.textContent = formatString(L.bulkDelete, this.selectedIds.size);
         }
     }
 
@@ -962,14 +953,14 @@ export class SessionManagerModal extends Modal {
         const ids: string[] = [];
         this.selectedIds.forEach((id) => { ids.push(id); });
 
-        new ConfirmModal(this.app, format(L.confirmBulkDelete, ids.length), () => {
+        new ConfirmModal(this.app, formatString(L.confirmBulkDelete, ids.length), () => {
             void Promise.all(ids.map((id) => this.plugin.getSessionStore().deleteSession(id))).then((results) => {
                 // Report what actually went, not what was attempted.
                 const deletedCount = results.filter(Boolean).length;
                 this.selectedIds.clear();
                 this.renderList();
                 if (deletedCount > 0) {
-                    new Notice(format(L.bulkDeleted, deletedCount));
+                    new Notice(formatString(L.bulkDeleted, deletedCount));
                 }
             });
         }).open();
