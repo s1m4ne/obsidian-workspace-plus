@@ -47,6 +47,9 @@ function createPlugin(overrides = {}) {
         return Promise.resolve(true);
     };
     const plugin = {
+        // Session state goes through getSessionStore(); this double carries
+        // those members itself, so it stands in as its own store.
+        getSessionStore() { return this; },
         data,
         manifest: { name: 'Workspace++' },
         app: { setting: { activeTab: null, openTabById() {} } },

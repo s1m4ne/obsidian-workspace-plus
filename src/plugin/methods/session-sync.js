@@ -4,11 +4,9 @@
 // suites attach this module on its own. A dependency that is sometimes missing
 // is what let a duplicated default survive once already, so this module puts
 // what it needs in place rather than guarding the call.
-var attachSessionMethods = require('./sessions');
 var sessionSync = require('../../storage/session-sync.ts');
 
 function attachSessionSyncMethods(WorkspacePlusPlus) {
-    attachSessionMethods(WorkspacePlusPlus);
 
 
 

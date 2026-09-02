@@ -3,19 +3,31 @@ import { L } from './i18n.ts';
 import { ConfirmModal, type ConfirmModalOptions } from './modals/confirm-modal.ts';
 import { RenameModal, type RenameModalOptions } from './modals/rename-modal.ts';
 import type { SessionItem } from './storage/default-data.ts';
+import type { SessionStore } from './state/session-store.ts';
 
 export interface SessionRenameActionsHost {
+    /**
+     * The session set, its ordering and the CRUD on it are owned by
+     * SessionStore. Naming the store rather than restating its methods keeps
+     * one list, the way getGroupStore() and getSessionSaver() do.
+     */
+    getSessionStore(): SessionStore;
+
     app: App;
     renameSessionById(sessionId: string, name: string): Promise<boolean>;
 }
 
 export interface SessionDeleteActionsHost {
+    /**
+     * Deleting is owned by SessionStore; naming the store keeps one list.
+     */
+    getSessionStore(): SessionStore;
+
     app: App;
     data: {
         sessions: Record<string, SessionItem>;
         confirmDeleteByHotkey: boolean;
     };
-    deleteSession(sessionId: string): Promise<boolean>;
 }
 
 export interface SessionListActionsHost extends SessionRenameActionsHost, SessionDeleteActionsHost {}
@@ -104,7 +116,7 @@ export function deleteSessionWithPrompt(
     }
 
     const doDelete = (): Promise<boolean> => {
-        return plugin.deleteSession(session.id).then((deleted) => {
+        return plugin.getSessionStore().deleteSession(session.id).then((deleted) => {
             if (!deleted) return false;
             if (options.notifyDeleted !== false) {
                 new Notice(format(L.deleted, session.name));

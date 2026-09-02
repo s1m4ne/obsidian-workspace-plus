@@ -48,11 +48,27 @@ function createMockHost() {
             const idx = commands.findIndex((c) => c.id === id);
             if (idx >= 0) commands.splice(idx, 1);
         },
-        getOrderedSessions() {
-            return this.data.sessionOrder.map((id) => this.data.sessions[id]!).filter(Boolean);
-        },
-        getOrderedSessionsUnfiltered() {
-            return this.getOrderedSessions();
+        // Session state goes through the store, so the double answers from its
+        // own data there rather than carrying the members twice.
+        getSessionStore(): never {
+            const ordered = (): unknown[] =>
+                this.data.sessionOrder.map((id: string) => this.data.sessions[id]).filter(Boolean);
+            return {
+                getOrderedSessions: ordered,
+                getOrderedSessionsUnfiltered: ordered,
+                getOrderedSessionsForGroup: ordered,
+                // Answers from the data, so a caller that hard-codes an index -
+                // or reintroduces the "not found means the first one"
+                // substitution P9 removed - is visible here.
+                findActiveSessionIndex: (sessions: Array<{ id: string }>) =>
+                    sessions.findIndex((x) => x.id === this.data.activeSessionId),
+                renameCurrentSession: () => { calls.push('rename'); },
+                deleteCurrentSession: () => { calls.push('delete'); },
+                createEmptySession: async () => { calls.push('createEmpty'); return true; },
+                duplicateCurrentSession: async () => { calls.push('duplicate'); return true; },
+                getActiveSession: () =>
+                    (this.data.activeSessionId && this.data.sessions[this.data.activeSessionId]) || null,
+            } as never;
         },
         // The saver members the registry reaches now come through the saver.
         getSessionSaver(): never {
@@ -66,27 +82,14 @@ function createMockHost() {
                 setAutoSaveOnSwitch: (val: boolean) => { calls.push(`setAutoSave:${val}`); },
             } as never;
         },
-        renameCurrentSession() { calls.push('rename'); },
-        deleteCurrentSession() { calls.push('delete'); },
-        createEmptySession() { calls.push('createEmpty'); },
-        duplicateCurrentSession: async () => { calls.push('duplicate'); return true; },
+
         switchToIndex: async (idx: number) => { calls.push(`switchToIndex:${idx}`); return true; },
         switchRelativeFromCommand: async (dir: number) => { calls.push(`switchRelative:${dir}`); return true; },
         saveCurrentNoteNameAsSession: async () => { calls.push('saveCurrentNote'); return true; },
         openSearchOverlay: () => { calls.push('openSearchOverlay'); },
         isVersionHistoryEnabled: () => true,
-        getActiveSession() {
-            return (this.data.activeSessionId && this.data.sessions[this.data.activeSessionId]) || null;
-        },
         exportSessionsSnapshot: async () => { calls.push('exportSnapshot'); },
         importSessionsFromLatestExport: async () => { calls.push('importSnapshot'); },
-        getOrderedSessionsForGroup() { return this.getOrderedSessions(); },
-        // Answers from the data, so a caller that hard-codes an index - or
-        // reintroduces the "not found means the first one" substitution P9
-        // removed - is visible here.
-        findActiveSessionIndex(sessions: Array<{ id: string }>) {
-            return sessions.findIndex((s) => s.id === this.data.activeSessionId);
-        },
         showSwitchOverlay(_ordered: unknown, activeIndex: number) {
             calls.push('showSwitchOverlay');
             shownActiveIndexes.push(activeIndex);

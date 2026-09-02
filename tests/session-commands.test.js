@@ -31,6 +31,8 @@ function createRegistry(initialData) {
         app: { workspace: {} }, manifest: { id: 'workspace-plus-plus' },
         addCommand: (command) => { events.addedCommands.push(command); return command; },
         removeCommand: (id) => { events.removedCommandIds.push(id); },
+        // Session state goes through getSessionStore(); this double carries those members itself.
+        getSessionStore() { return this; },
         getOrderedSessions: () => data.sessionOrder.map((id) => data.sessions[id]).filter(Boolean),
         getOrderedSessionsUnfiltered: () => data.sessionOrder.map((id) => data.sessions[id]).filter(Boolean),
         switchToIndex: function (index) {

@@ -15,8 +15,16 @@ import type { SessionGroup, SessionItem } from '../storage/default-data.ts';
 import type { HistoryModalPluginHost } from './history-modal.ts';
 import type { GroupStore } from '../state/group-store.ts';
 import type { SessionSaver } from '../state/session-saver.ts';
+import type { SessionStore } from '../state/session-store.ts';
 
 export interface SessionManagerModalHost extends GroupTabPluginHost, HistoryModalPluginHost, SettingsContextMenuPluginHost {
+    /**
+     * The session set, its ordering and the CRUD on it are owned by
+     * SessionStore. Naming the store rather than restating its methods keeps
+     * one list, the way getGroupStore() and getSessionSaver() do.
+     */
+    getSessionStore(): SessionStore;
+
     /**
      * Saving and the auto-save flags are owned by SessionSaver. Naming it here
      * rather than restating its methods keeps one list, the way getGroupStore()
@@ -44,19 +52,13 @@ export interface SessionManagerModalHost extends GroupTabPluginHost, HistoryModa
         overlayDefaultFocus: string;
         [key: string]: unknown;
     };
-    getOrderedSessionsForGroup(groupId: string | null): SessionItem[];
     getCommandHotkey(commandId: string): string;
-    getDefaultSessionName(): string;
-    findActiveSessionIndex(sessions: SessionItem[]): number;
     renameSessionById(sessionId: string, name: string): Promise<boolean>;
-    duplicateSession(sessionId: string): Promise<unknown>;
     createSessionForViewedGroup(
         name: string,
         groupId: string | null
     ): Promise<{ created: boolean; name: string; viewGroupId?: string | null } | null>;
     switchSession(sessionId: string): Promise<boolean>;
-    deleteSession(sessionId: string): Promise<boolean>;
-    setSessionOrderFromVisible(order: string[], options?: { syncCommands?: boolean }): void;
 }
 
 /** Where the keyboard target currently sits. */
@@ -289,7 +291,7 @@ export class SessionManagerModal extends Modal {
     }
 
     getVisibleSessions(): SessionItem[] {
-        const sessions = this.plugin.getOrderedSessionsForGroup(this.getModalGroupId());
+        const sessions = this.plugin.getSessionStore().getOrderedSessionsForGroup(this.getModalGroupId());
         const query = (this.filterQuery || '').trim().toLowerCase();
         if (!query) return sessions;
         return sessions.filter((session) => (session.name || '').toLowerCase().indexOf(query) !== -1);
@@ -363,7 +365,7 @@ export class SessionManagerModal extends Modal {
     getDefaultSessionTarget(): KeyboardTargetRequest {
         const sessions = this.getNavigationSessions();
         if (sessions.length === 0) return { zone: this.filterInput ? 'filter' : 'create-input' };
-        const activeIdx = this.plugin.findActiveSessionIndex(sessions);
+        const activeIdx = this.plugin.getSessionStore().findActiveSessionIndex(sessions);
         return { zone: 'session-action', rowIndex: activeIdx !== -1 ? activeIdx : 0, actionKey: 'load' };
     }
 
@@ -644,7 +646,7 @@ export class SessionManagerModal extends Modal {
         this.listEl.empty();
         const sessions = this.getVisibleSessions();
         const selectedGroupId = this.getModalGroupId();
-        const ordered = this.plugin.getOrderedSessionsForGroup(selectedGroupId);
+        const ordered = this.plugin.getSessionStore().getOrderedSessionsForGroup(selectedGroupId);
         const orderIndex: Record<string, number> = {};
         for (let i = 0; i < ordered.length; i++) {
             const session = ordered[i];
@@ -686,7 +688,7 @@ export class SessionManagerModal extends Modal {
             activeSessionId: this.plugin.data.activeSessionId,
             index: hintIndex,
             commandHotkey: hintIndex <= 8 ? this.plugin.getCommandHotkey(`switch-to-${hintIndex + 1}`) : '',
-            defaultSessionName: this.plugin.getDefaultSessionName(),
+            defaultSessionName: this.plugin.getSessionStore().getDefaultSessionName(),
         });
         const isActive = presentation.isActive;
 
@@ -835,7 +837,7 @@ export class SessionManagerModal extends Modal {
                     item.classList.add('wpp-just-moved');
                     setTimeout(() => { item.classList.remove('wpp-just-moved'); }, 600);
 
-                    this.plugin.setSessionOrderFromVisible(newVisibleOrder, { syncCommands: false });
+                    void this.plugin.getSessionStore().setSessionOrderFromVisible(newVisibleOrder, { syncCommands: false });
                 },
             });
         });
@@ -927,7 +929,7 @@ export class SessionManagerModal extends Modal {
         this.selectedIds.forEach((id) => { ids.push(id); });
 
         new ConfirmModal(this.app, format(L.confirmBulkDelete, ids.length), () => {
-            void Promise.all(ids.map((id) => this.plugin.deleteSession(id))).then((results) => {
+            void Promise.all(ids.map((id) => this.plugin.getSessionStore().deleteSession(id))).then((results) => {
                 // Report what actually went, not what was attempted.
                 const deletedCount = results.filter(Boolean).length;
                 this.selectedIds.clear();

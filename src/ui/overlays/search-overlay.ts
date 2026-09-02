@@ -15,6 +15,7 @@ import type { SessionGroup, SessionItem } from '../../storage/default-data.ts';
 import type { HistoryModalPluginHost } from '../../modals/history-modal.ts';
 import type { GroupStore } from '../../state/group-store.ts';
 import type { SessionSaver } from '../../state/session-saver.ts';
+import type { SessionStore } from '../../state/session-store.ts';
 
 export interface SearchOverlayPosition {
     left: number;
@@ -77,7 +78,7 @@ function syncSearchOverlaySelectedIndex(
 ): number {
     if (filtered.length === 0) return -1;
 
-    const activeIdx = plugin.findActiveSessionIndex(filtered);
+    const activeIdx = plugin.getSessionStore().findActiveSessionIndex(filtered);
     if (activeIdx !== -1) return activeIdx;
 
     if (options.preserveWhenMissing) {
@@ -174,7 +175,7 @@ function handleSearchOverlayDeleteKey(event: KeyboardEvent, activeEl: Element | 
     }
 
     const doDelete = (): void => {
-        void options.plugin.deleteSession(session.id).then((deleted) => {
+        void options.plugin.getSessionStore().deleteSession(session.id).then((deleted) => {
             if (!deleted) return;
             new Notice(localizedCall(L.deleted, session.name));
             options.refreshOrderedSessions();
@@ -240,6 +241,13 @@ function handleSearchOverlaySlashKey(event: KeyboardEvent, options: SearchOverla
 
 export interface SearchOverlayHost extends GroupTabPluginHost, HistoryModalPluginHost, SettingsContextMenuPluginHost {
     /**
+     * The session set, its ordering and the CRUD on it are owned by
+     * SessionStore. Naming the store rather than restating its methods keeps
+     * one list, the way getGroupStore() and getSessionSaver() do.
+     */
+    getSessionStore(): SessionStore;
+
+    /**
      * Saving and the auto-save flags are owned by SessionSaver. Naming it here
      * rather than restating its methods keeps one list, the way getGroupStore()
      * does for group state.
@@ -276,20 +284,14 @@ export interface SearchOverlayHost extends GroupTabPluginHost, HistoryModalPlugi
     searchOverlayInputHandler?: (() => void) | null;
     searchOverlayKeyHandler?: ((event: KeyboardEvent) => void) | null;
     searchOverlayClickOutsideHandler?: ((event: MouseEvent) => void) | null;
-    onSessionsChanged(listener: () => void): () => void;
     _cachedBarHeight?: number;
     _cachedAnchorCenterX?: number;
     filterSessionsByQuery(sessions: SessionItem[], query: string): SessionItem[];
-    getOrderedSessionsForGroup(groupId: string | null): SessionItem[];
     hideSwitchOverlay(): void;
     hideSearchOverlay(): void;
-    findActiveSessionIndex(sessions: SessionItem[]): number;
     createSessionForViewedGroup(name: string, groupId: string | null): Promise<{ created: boolean; name: string; viewGroupId?: string | null }>;
-    setSessionOrderFromVisible(order: string[]): void;
     renameSessionById(sessionId: string, name: string): Promise<boolean>;
-    duplicateSession(sessionId: string): Promise<unknown>;
     switchSession(sessionId: string, options: { silent: boolean }): Promise<boolean>;
-    deleteSession(sessionId: string): Promise<boolean>;
     persistData(): Promise<unknown>;
 }
 
@@ -362,7 +364,7 @@ export class SearchOverlay {
             ? (self.data.activeGroupId || null)
             : null;
         self.searchOverlayViewGroupId = overlayGroupId;
-        let ordered = self.getOrderedSessionsForGroup(overlayGroupId);
+        let ordered = self.getSessionStore().getOrderedSessionsForGroup(overlayGroupId);
         const focusTarget = self.data.overlayDefaultFocus || 'current-session';
 
         self.hideSwitchOverlay();
@@ -562,12 +564,12 @@ export class SearchOverlay {
         // and session-sync.js called it back, a dependency pointing from
         // storage into the UI.
         this.releaseSessionSubscription();
-        this.unsubscribeSessions = self.onSessionsChanged(() => {
+        this.unsubscribeSessions = self.getSessionStore().onSessionsChanged(() => {
             refreshOrderedSessions();
         });
 
         function refreshOrderedSessions() {
-            ordered = self.getOrderedSessionsForGroup(getOverlayGroupId());
+            ordered = self.getSessionStore().getOrderedSessionsForGroup(getOverlayGroupId());
             filtered = self.filterSessionsByQuery(ordered, searchInput.value);
             syncSelectedIndexToActive({ preserveWhenMissing: true });
             renderList();
@@ -590,7 +592,7 @@ export class SearchOverlay {
             }
 
             if (selectedIndex < 0 || selectedIndex >= filtered.length) {
-                const activeIdx = self.findActiveSessionIndex(filtered);
+                const activeIdx = self.getSessionStore().findActiveSessionIndex(filtered);
                 selectedIndex = activeIdx !== -1 ? activeIdx : 0;
             }
 
@@ -790,7 +792,7 @@ export class SearchOverlay {
                     }
                 },
                 onReorder: function (newVisibleOrder) {
-                    self.setSessionOrderFromVisible(newVisibleOrder);
+                    void self.getSessionStore().setSessionOrderFromVisible(newVisibleOrder);
                     dragItem.classList.add('wpp-just-moved');
                     setTimeout(function () {
                         dragItem.classList.remove('wpp-just-moved');

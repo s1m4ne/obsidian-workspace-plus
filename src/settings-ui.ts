@@ -1,13 +1,21 @@
 import { Modal, Notice, Setting, type App } from 'obsidian';
 import { L } from './i18n.ts';
 import { ConfirmModal } from './modals/confirm-modal.ts';
-import type { SessionGroup, SessionItem } from './storage/default-data.ts';
+import type { SessionGroup } from './storage/default-data.ts';
 import type { GroupStore } from './state/group-store.ts';
+import type { SessionStore } from './state/session-store.ts';
 
 /** A label that is either already a string or a locale getter to call now. */
 export type SettingText = string | (() => string) | undefined;
 
 export interface GroupSessionsModalHost {
+    /**
+     * The session set, its ordering and the CRUD on it are owned by
+     * SessionStore. Naming the store rather than restating its methods keeps
+     * one list, the way getGroupStore() and getSessionSaver() do.
+     */
+    getSessionStore(): SessionStore;
+
     /**
      * Group state is owned by GroupStore. Naming the store rather than
      * restating its methods keeps one list: the plugin used to carry a
@@ -17,7 +25,6 @@ export interface GroupSessionsModalHost {
      */
     getGroupStore(): GroupStore;
 
-    getOrderedSessionsUnfiltered(): SessionItem[];
 }
 
 export interface ToggleSettingOptions {
@@ -85,7 +92,7 @@ export class GroupSessionsModal extends Modal {
         contentEl.empty();
         contentEl.createEl('h3', { text: `${this.group.name} — ${resolveSettingText(L.settingsGroupManageSessions)}` });
 
-        const allSessions = this.plugin.getOrderedSessionsUnfiltered();
+        const allSessions = this.plugin.getSessionStore().getOrderedSessionsUnfiltered();
         // Membership is read once: the toggles below change it, and re-reading
         // per row would have each row see the previous row's edit.
         const memberIds = this.plugin.getGroupStore().getGroupSessionIds(this.group.id);

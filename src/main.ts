@@ -61,7 +61,6 @@ interface AttachedPluginMethods {
 
     getSessionStorage(): SessionStorage;
 
-    syncSessionOrder(): void;
     syncSessionCommands(): void;
 
     updateStatusBar(): void;
@@ -121,7 +120,7 @@ export class WorkspacePlusPlus extends Plugin {
         this.migrateLegacyStatusBarSettings();
 
         this.getGroupStore().normalizeGroupFeatureState();
-        this.syncSessionOrder();
+        this.getSessionStore().syncSessionOrder();
         this.getSyncWatcher().registerListeners();
         // Re-resolved now that the saved language is known; the call at module
         // load only had 'auto'.

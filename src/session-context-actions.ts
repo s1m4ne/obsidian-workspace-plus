@@ -12,6 +12,7 @@ import {
 import type { SessionGroup, SessionItem } from './storage/default-data.ts';
 import type { GroupStore } from './state/group-store.ts';
 import type { SessionSaver } from './state/session-saver.ts';
+import type { SessionStore } from './state/session-store.ts';
 
 type Action = () => unknown;
 type GroupIdGetter = () => string | null;
@@ -32,6 +33,13 @@ type ContextActionOverrides = Partial<Record<ContextActionName, Action | MoveToG
 
 export interface SessionContextActionsHost extends SessionListActionsHost, HistoryModalPluginHost, SessionContextMenuPluginHost {
     /**
+     * The session set, its ordering and the CRUD on it are owned by
+     * SessionStore. Naming the store rather than restating its methods keeps
+     * one list, the way getGroupStore() and getSessionSaver() do.
+     */
+    getSessionStore(): SessionStore;
+
+    /**
      * Saving and the auto-save flags are owned by SessionSaver. Naming it here
      * rather than restating its methods keeps one list, the way getGroupStore()
      * does for group state.
@@ -51,7 +59,6 @@ export interface SessionContextActionsHost extends SessionListActionsHost, Histo
         activeSessionId: string | null;
         groups: Record<string, SessionGroup>;
     };
-    duplicateSession(sessionId: string): Promise<unknown>;
 }
 
 export type SessionContextMenuOptions = ContextActionOverrides & {
@@ -184,7 +191,7 @@ export function createSessionContextMenuOptions(options: SessionContextMenuOptio
         });
     };
 
-    const defaultDuplicate = (): unknown => callAfter(plugin.duplicateSession(session.id), () => {
+    const defaultDuplicate = (): unknown => callAfter(plugin.getSessionStore().duplicateSession(session.id), () => {
         refreshSessions(options);
     });
 

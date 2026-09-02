@@ -5,8 +5,9 @@ import {
     executeStatusBarAction,
     type StatusBarActionPluginHost,
 } from './statusbar-actions.ts';
-import type { PluginData, SessionItem } from './storage/default-data.ts';
+import type { PluginData } from './storage/default-data.ts';
 import type { SessionSaver } from './state/session-saver.ts';
+import type { SessionStore } from './state/session-store.ts';
 
 export interface StatusBarScrollPresetConfig {
     threshold: number;
@@ -34,6 +35,13 @@ export const STATUS_BAR_SCROLL_PRESETS: Record<string, StatusBarScrollPresetConf
 
 export interface StatusBarControllerHost extends StatusBarActionPluginHost {
     /**
+     * The session set, its ordering and the CRUD on it are owned by
+     * SessionStore. Naming the store rather than restating its methods keeps
+     * one list, the way getGroupStore() and getSessionSaver() do.
+     */
+    getSessionStore(): SessionStore;
+
+    /**
      * Saving and the auto-save flags are owned by SessionSaver. Naming it here
      * rather than restating its methods keeps one list, the way getGroupStore()
      * does for group state.
@@ -43,7 +51,6 @@ export interface StatusBarControllerHost extends StatusBarActionPluginHost {
     data: PluginData;
     statusBarEl?: HTMLElement | null;
     addStatusBarItem(): HTMLElement;
-    getActiveSession(): SessionItem | null;
     switchRelativeFromScroll(direction: number): Promise<boolean>;
     getSessionSwitcher?(): { isSwitching?: boolean };
     getStatusBarController?(): StatusBarController;
@@ -293,7 +300,10 @@ export class StatusBarController {
     }
 
     updateStatusBar(): void {
-        const session = typeof this.host.getActiveSession === 'function' ? this.host.getActiveSession() : null;
+        // Unconditional. The guard tested the plugin for a forwarder while the
+        // call went to the store, so a plugin that stopped forwarding rendered
+        // no session name at all - which the production-wiring test caught.
+        const session = this.host.getSessionStore().getActiveSession();
         const el = this.statusBarEl || this.host.statusBarEl;
         if (!el) return;
         const showUnsavedHighlight = typeof this.host.shouldShowUnsavedStatusBarHighlight === 'function'

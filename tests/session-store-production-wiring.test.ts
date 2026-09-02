@@ -22,7 +22,6 @@ const WorkspacePlusPlus = (await import('../src/main.ts')).default as unknown as
     manifest: { id: string; dir: string },
 ) => {
     data: Record<string, unknown>;
-    getCurrentWorkspaceLayout(): unknown;
     getSessionStore(): { getCurrentWorkspaceLayout(): unknown };
 };
 
@@ -53,12 +52,13 @@ test('the store reads the layout from the real workspace when nothing overrides 
     );
 });
 
-test('the plugin and the store agree on the layout', () => {
+test('the store is the only reader of the workspace layout', () => {
     const plugin = createPlugin({ pane: 'live' });
 
-    // Both must observe the same workspace rather than one of them silently
-    // returning an empty layout.
-    assert.deepEqual(plugin.getCurrentWorkspaceLayout(), { pane: 'live' });
+    // The plugin used to forward this, so two implementations could disagree
+    // and one of them silently return an empty layout. There is one now.
+    assert.equal('getCurrentWorkspaceLayout' in plugin, false);
+    assert.deepEqual(plugin.getSessionStore().getCurrentWorkspaceLayout(), { pane: 'live' });
 });
 
 test.after(() => harness.restore());

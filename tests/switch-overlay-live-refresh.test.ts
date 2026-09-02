@@ -48,6 +48,8 @@ function createOverlay(): { overlay: Overlay; sessions: Session[]; announce: () 
         isGroupFeatureEnabled: (): boolean => false,
         getOrderedGroups: (): Array<{ id: string; name: string }> => [],
         getOrderedGroupTabIds: (): string[] => [],
+        // Session state goes through getSessionStore(); this double carries those members itself.
+        getSessionStore(): never { return this as never; },
         getOrderedSessionsUnfiltered: (): Session[] => sessions,
         getOrderedSessionsForGroup: (): Session[] => sessions,
         getCommandHotkey: (): string => '',

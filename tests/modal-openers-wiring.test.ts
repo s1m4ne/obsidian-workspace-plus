@@ -38,6 +38,8 @@ function createPlugin(): TestPlugin {
     Object.assign(plugin, {
         getOrderedGroups: () => [],
         getOrderedGroupTabIds: () => [],
+        // Session state goes through getSessionStore(); this double carries those members itself.
+        getSessionStore(): never { return this as never; },
         getOrderedSessionsForGroup: () => [SESSION],
         findActiveSessionIndex: () => 0,
         getCommandHotkey: () => '',

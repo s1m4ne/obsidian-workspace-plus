@@ -33,6 +33,7 @@ interface ModalPlugin {
     reordered: string[][];
     getGroupStore(): never;
     isGroupFeatureEnabled(): boolean;
+    getSessionStore(): never;
     getOrderedSessionsForGroup(groupId: string | null): Session[];
     getOrderedGroups(): Array<{ id: string; name: string }>;
     getOrderedGroupTabIds(): string[];
@@ -135,6 +136,9 @@ function makePlugin(containerEl: HTMLElement, groupFeatureEnabled = false): Moda
         // members itself, so it stands in as its own group store.
         getGroupStore(): never { return this as never; },
         isGroupFeatureEnabled: (): boolean => plugin.data.groupFeatureEnabled,
+        // Session state goes through getSessionStore(); this double carries those
+        // members itself, so it stands in as its own store.
+        getSessionStore(): never { return this as never; },
         getOrderedSessionsForGroup: (groupId): Session[] => plugin.data.sessionOrder
             .map((id) => plugin.data.sessions[id])
             .filter((session): session is Session => session !== undefined)

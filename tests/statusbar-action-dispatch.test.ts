@@ -40,6 +40,8 @@ const menuPluginStubs = {
     manifest: { id: 'workspace-plus-plus', name: 'Workspace++' },
     _lastRotationBackupAt: 0,
     confirmOverwriteSessionWithCurrentLayout: () => false,
+    // Session state goes through getSessionStore(); this double carries those members itself.
+    getSessionStore(): never { return this as never; },
     duplicateSession: async () => false,
     renameSessionById: async () => false,
     deleteSession: async () => false,

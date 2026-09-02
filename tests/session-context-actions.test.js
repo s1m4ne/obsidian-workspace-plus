@@ -85,6 +85,8 @@ function createPlugin(calls, overrides = {}) {
             calls.push(['rename', sessionId, name]);
             return Promise.resolve(true);
         },
+        // Session state goes through getSessionStore(); this double carries those members itself.
+        getSessionStore() { return this; },
         duplicateSession(sessionId) {
             calls.push(['duplicate', sessionId]);
             return Promise.resolve(true);

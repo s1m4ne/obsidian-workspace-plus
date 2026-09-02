@@ -18,6 +18,9 @@ const {
 function createMockPlugin() {
     const calls: string[] = [];
     const plugin = {
+        // Session state goes through getSessionStore(); this double carries
+        // those members itself, so it stands in as its own store.
+        getSessionStore(): never { return this as never; },
         app: mockApp,
         data: {
             groups: {

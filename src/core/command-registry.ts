@@ -11,9 +11,17 @@ import type { PluginData, SessionItem } from '../storage/default-data.ts';
 import { isMacPlatform } from '../utils.ts';
 import type { GroupStore } from '../state/group-store.ts';
 import type { SessionSaver } from '../state/session-saver.ts';
+import type { SessionStore } from '../state/session-store.ts';
 
 
 export interface CommandRegistryHost {
+    /**
+     * The session set, its ordering and the CRUD on it are owned by
+     * SessionStore. Naming the store rather than restating its methods keeps
+     * one list, the way getGroupStore() and getSessionSaver() do.
+     */
+    getSessionStore(): SessionStore;
+
     /**
      * Saving and the auto-save flags are owned by SessionSaver. Naming it here
      * rather than restating its methods keeps one list, the way getGroupStore()
@@ -38,22 +46,13 @@ export interface CommandRegistryHost {
     manifest: { id: string };
     addCommand(command: Command): Command;
     removeCommand(id: string): void;
-    getOrderedSessions(): SessionItem[];
-    getOrderedSessionsUnfiltered(): SessionItem[];
-    renameCurrentSession(): void;
-    deleteCurrentSession(): void;
-    createEmptySession(): void;
-    duplicateCurrentSession(): Promise<boolean> | void;
     switchToIndex(index: number): Promise<boolean> | void;
     switchRelativeFromCommand(direction: number): Promise<boolean> | void;
     saveCurrentNoteNameAsSession(): Promise<boolean> | void;
     openSearchOverlay(): void;
     isVersionHistoryEnabled(): boolean;
-    getActiveSession(): SessionItem | null;
     exportSessionsSnapshot(): Promise<void>;
     importSessionsFromLatestExport(): Promise<void>;
-    getOrderedSessionsForGroup(groupId: string | null): SessionItem[];
-    findActiveSessionIndex(sessions: SessionItem[]): number;
     showSwitchOverlay(sessions: SessionItem[], activeIndex: number, groupId: string | null): void;
     switchSessionByIdFromCommand(sessionId: string): Promise<boolean> | void;
 
@@ -150,7 +149,7 @@ export class CommandRegistry {
     }
 
     openSaveCurrentLayoutToSessionModal(): void {
-        const sessions = this.host.getOrderedSessionsUnfiltered();
+        const sessions = this.host.getSessionStore().getOrderedSessionsUnfiltered();
         if (!sessions || sessions.length === 0) {
             new Notice(String(L.noSession || ''));
             return;
@@ -208,7 +207,7 @@ export class CommandRegistry {
             'rename-session',
             String(L.cmdRename || ''),
             () => {
-                host.renameCurrentSession();
+                host.getSessionStore().renameCurrentSession();
             },
             [{ modifiers: ['Mod', 'Shift'], key: 'R' }]
         );
@@ -217,20 +216,20 @@ export class CommandRegistry {
             'delete-session',
             String(L.cmdDelete || ''),
             () => {
-                host.deleteCurrentSession();
+                host.getSessionStore().deleteCurrentSession();
             },
             [{ modifiers: ['Mod', 'Shift'], key: 'Backspace' }]
         );
 
         addSimpleCommand('new-empty-session', String(L.cmdNewEmpty || ''), () => {
-            host.createEmptySession();
+            void host.getSessionStore().createEmptySession();
         });
 
         addSimpleCommand(
             'duplicate-session',
             String(L.cmdDuplicate || ''),
             () => {
-                void host.duplicateCurrentSession();
+                void host.getSessionStore().duplicateCurrentSession();
             },
             [{ modifiers: ['Mod', 'Shift'], key: 'M' }]
         );
@@ -244,7 +243,7 @@ export class CommandRegistry {
                     name: (L.cmdSwitchTo as (n: number) => string)(num),
                     checkCallback: (checking) => {
                         if (!this.data.showActiveSwitchCommand) {
-                            const ordered = host.getOrderedSessions();
+                            const ordered = host.getSessionStore().getOrderedSessions();
                             const session = ordered[num - 1];
                             if (session && session.id === this.data.activeSessionId) return false;
                         }
@@ -355,7 +354,7 @@ export class CommandRegistry {
             name: String(L.cmdVersionHistory || ''),
             checkCallback: (checking) => {
                 if (!host.isVersionHistoryEnabled()) return false;
-                const session = host.getActiveSession();
+                const session = host.getSessionStore().getActiveSession();
                 if (!session) return false;
                 if (!checking) host.openHistoryModal(session);
                 return true;
@@ -395,8 +394,8 @@ export class CommandRegistry {
         };
 
         const showSwitchOverlayForGroup = (groupId: string | null) => {
-            const ordered = host.getOrderedSessionsForGroup(groupId || null);
-            const activeIndex = host.findActiveSessionIndex(ordered);
+            const ordered = host.getSessionStore().getOrderedSessionsForGroup(groupId || null);
+            const activeIndex = host.getSessionStore().findActiveSessionIndex(ordered);
             host.showSwitchOverlay(ordered, activeIndex, groupId || null);
         };
 
@@ -455,7 +454,7 @@ export class CommandRegistry {
 
     syncSessionCommands(): void {
         const host = this.host;
-        const ordered = host.getOrderedSessions();
+        const ordered = host.getSessionStore().getOrderedSessions();
 
         // 1. Remove old dynamic commands
         const oldIds = this._dynamicSessionCommandIds.length > 0
@@ -484,7 +483,7 @@ export class CommandRegistry {
                     ),
                     checkCallback: (checking) => {
                         if (!this.data.showActiveSwitchCommand) {
-                            const currentOrdered = host.getOrderedSessions();
+                            const currentOrdered = host.getSessionStore().getOrderedSessions();
                             const targetSession = currentOrdered[num - 1];
                             if (targetSession && targetSession.id === this.data.activeSessionId) {
                                 return false;

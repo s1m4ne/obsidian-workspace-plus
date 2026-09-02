@@ -92,6 +92,8 @@ test('status bar actions delegate new direct actions to plugin methods', async f
             calls.push('saveCurrentNoteNameAsSession');
             return Promise.resolve(true);
         },
+        // Session state goes through getSessionStore(); this double carries those members itself.
+        getSessionStore() { return this; },
         renameCurrentSession: function () {
             calls.push('renameCurrentSession');
         },

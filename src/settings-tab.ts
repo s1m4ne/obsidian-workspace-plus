@@ -20,6 +20,7 @@ import type { RotationBackupInfo } from './storage/storage-backup.ts';
 import type { SettingsState } from './state/settings-state.ts';
 import type { GroupStore } from './state/group-store.ts';
 import type { SessionSaver } from './state/session-saver.ts';
+import type { SessionStore } from './state/session-store.ts';
 
 export interface StorageDiagnosticsInfo {
     syncedByObsidianSync: boolean;
@@ -31,6 +32,13 @@ export interface StorageDiagnosticsInfo {
 }
 
 export interface SettingsTabHost extends GroupSessionsModalHost {
+    /**
+     * The session set, its ordering and the CRUD on it are owned by
+     * SessionStore. Naming the store rather than restating its methods keeps
+     * one list, the way getGroupStore() and getSessionSaver() do.
+     */
+    getSessionStore(): SessionStore;
+
     /**
      * Saving and the auto-save flags are owned by SessionSaver. Naming it here
      * rather than restating its methods keeps one list, the way getGroupStore()
@@ -108,7 +116,6 @@ export interface SettingsTabHost extends GroupSessionsModalHost {
     importSessionsFromLatestExport(): Promise<unknown>;
 
     resetSettingsToDefault(): Promise<unknown>;
-    resetSessionsToDefault(): Promise<unknown>;
     clearBackupsAndVersionHistory(): Promise<unknown>;
     resetSessionsAndSettingsToDefault(): Promise<unknown>;
 
@@ -760,7 +767,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
             buttonText: text(L.settingsResetSessionsBtn),
             confirmMessage: text(L.confirmResetSessions),
             confirmHint: text(L.resetSessionsHint),
-            run: () => this.plugin.resetSessionsToDefault(),
+            run: () => this.plugin.getSessionStore().resetSessionsToDefault(),
             successNotice: text(L.resetSessionsDone),
             failureNotice: text(L.resetSessionsFailed),
         });

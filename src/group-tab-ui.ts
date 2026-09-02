@@ -4,8 +4,16 @@ import { ConfirmModal } from './modals/confirm-modal.ts';
 import { RenameModal } from './modals/rename-modal.ts';
 import type { SessionGroup, SessionItem } from './storage/default-data.ts';
 import type { GroupStore } from './state/group-store.ts';
+import type { SessionStore } from './state/session-store.ts';
 
 export interface GroupTabPluginHost {
+    /**
+     * The session set, its ordering and the CRUD on it are owned by
+     * SessionStore. Naming the store rather than restating its methods keeps
+     * one list, the way getGroupStore() and getSessionSaver() do.
+     */
+    getSessionStore(): SessionStore;
+
     /**
      * Group state is owned by GroupStore. Naming the store rather than
      * restating its methods keeps one list: the plugin used to carry a
@@ -23,7 +31,6 @@ export interface GroupTabPluginHost {
     };
     createGroupValidated(name: string): Promise<boolean>;
     renameGroupValidated(groupId: string, name: string): Promise<boolean>;
-    deleteAllInactiveSessions(): Promise<number>;
 }
 
 export interface AttachGroupTabDragOptions {
@@ -357,7 +364,7 @@ export function openAllGroupsTabContextMenu(options: AllGroupsContextMenuOptions
                     app,
                     (L.confirmDeleteAllSessions as (n: number) => string)(sessionCount - 1),
                     () => {
-                        void plugin.deleteAllInactiveSessions().then((deletedCount) => {
+                        void plugin.getSessionStore().deleteAllInactiveSessions().then((deletedCount) => {
                             if (typeof opts.onGroupsChanged === 'function') {
                                 opts.onGroupsChanged();
                             }

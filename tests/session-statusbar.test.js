@@ -50,6 +50,8 @@ function createController(options) {
         data,
         statusBarEl,
         addStatusBarItem: createStatusBarEl,
+        // Session state goes through getSessionStore(); this double carries those members itself.
+        getSessionStore() { return this; },
         getActiveSession: () => data.activeSessionId ? data.sessions[data.activeSessionId] : null,
         // The controller asks the store whether groups are on, rather than the
         // plugin, so the double supplies just that.

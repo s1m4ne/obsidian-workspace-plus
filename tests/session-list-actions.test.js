@@ -24,6 +24,8 @@ function createPlugin(options = {}) {
         app: {},
         data: { sessions, confirmDeleteByHotkey: options.confirmDeleteByHotkey ?? true },
         calls,
+        // Session state goes through getSessionStore(); this double carries those members itself.
+        getSessionStore() { return this; },
         deleteSession(id) {
             calls.push(['delete', id]);
             return Promise.resolve(options.deleteSucceeds ?? true);

@@ -7,9 +7,17 @@ import type { SettingsContextMenuPluginHost } from './settings-context-menu-item
 import type { HistoryModalPluginHost } from './modals/history-modal.ts';
 import type { GroupStore } from './state/group-store.ts';
 import type { SessionSaver } from './state/session-saver.ts';
+import type { SessionStore } from './state/session-store.ts';
 
 
 export interface StatusBarActionPluginHost extends HistoryModalPluginHost, SettingsContextMenuPluginHost {
+    /**
+     * The session set, its ordering and the CRUD on it are owned by
+     * SessionStore. Naming the store rather than restating its methods keeps
+     * one list, the way getGroupStore() and getSessionSaver() do.
+     */
+    getSessionStore(): SessionStore;
+
     /**
      * Saving and the auto-save flags are owned by SessionSaver. Naming it here
      * rather than restating its methods keeps one list, the way getGroupStore()
@@ -33,20 +41,14 @@ export interface StatusBarActionPluginHost extends HistoryModalPluginHost, Setti
     data: PluginData;
     searchOverlayEl?: HTMLElement | null;
     statusBarEl?: HTMLElement | null;
-    getActiveSession(): SessionItem | null;
     isVersionHistoryEnabled(): boolean;
     isVersionHistoryConfirmRestoreEnabled(): boolean;
     updateStatusBar(): void;
     hideSearchOverlay(): void;
     openSearchOverlay(anchorEl?: HTMLElement | null): void;
     saveCurrentNoteNameAsSession(): Promise<unknown>;
-    renameCurrentSession(): void;
-    duplicateCurrentSession(): Promise<unknown>;
     renameSessionById(sessionId: string, name: string): Promise<boolean>;
-    duplicateSession(sessionId: string): Promise<unknown>;
-    deleteSession(sessionId: string): Promise<boolean>;
     switchRelativeFromStatusBar(offset: number): Promise<boolean>;
-    createEmptySession(): Promise<unknown>;
     quickRestoreLatestHistory(): void;
     openConfirmModal?(
         message: string,
@@ -121,14 +123,14 @@ export const ACTIONS: readonly StatusBarAction[] = [
         id: 'renameSession',
         labelKey: 'cmdRename',
         run(plugin) {
-            plugin.renameCurrentSession();
+            plugin.getSessionStore().renameCurrentSession();
         },
     },
     {
         id: 'duplicateSession',
         labelKey: 'cmdDuplicate',
         run(plugin) {
-            return plugin.duplicateCurrentSession();
+            return plugin.getSessionStore().duplicateCurrentSession();
         },
     },
     {
@@ -149,7 +151,7 @@ export const ACTIONS: readonly StatusBarAction[] = [
         id: 'newEmptySession',
         labelKey: 'cmdNewEmpty',
         run(plugin) {
-            return plugin.createEmptySession();
+            return plugin.getSessionStore().createEmptySession();
         },
     },
     {
@@ -163,7 +165,7 @@ export const ACTIONS: readonly StatusBarAction[] = [
         id: 'versionHistory',
         labelKey: 'statusBarActionVersionHistory',
         run(plugin) {
-            const session = plugin.getActiveSession();
+            const session = plugin.getSessionStore().getActiveSession();
             if (session) {
                 plugin.openHistoryModal(session);
             }
@@ -177,7 +179,7 @@ export const ACTIONS: readonly StatusBarAction[] = [
                 new Notice(String(L.historyNoEntries || ''));
                 return;
             }
-            const activeSession = plugin.getActiveSession();
+            const activeSession = plugin.getSessionStore().getActiveSession();
             if (!activeSession || !activeSession.history || activeSession.history.length === 0) {
                 new Notice(String(L.historyNoEntries || ''));
                 return;
@@ -203,7 +205,7 @@ export const ACTIONS: readonly StatusBarAction[] = [
         id: 'sessionMenu',
         labelKey: 'statusBarActionSessionMenu',
         run(plugin, event) {
-            const sess = plugin.getActiveSession();
+            const sess = plugin.getSessionStore().getActiveSession();
             if (!sess) return;
             openSessionContextMenu({
                 plugin,

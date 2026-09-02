@@ -3,8 +3,16 @@ import { deriveSessionPresentation } from '../shared/session-presenter.ts';
 import { isModShiftPressed } from '../../utils.ts';
 import type { SessionItem } from '../../storage/default-data.ts';
 import type { GroupStore } from '../../state/group-store.ts';
+import type { SessionStore } from '../../state/session-store.ts';
 
 export interface SwitchOverlayHost {
+    /**
+     * The session set, its ordering and the CRUD on it are owned by
+     * SessionStore. Naming the store rather than restating its methods keeps
+     * one list, the way getGroupStore() and getSessionSaver() do.
+     */
+    getSessionStore(): SessionStore;
+
     /**
      * Group state is owned by GroupStore. Naming the store rather than
      * restating its methods keeps one list: the plugin used to carry a
@@ -19,12 +27,8 @@ export interface SwitchOverlayHost {
         groups?: Record<string, { id: string; name: string }>;
         [key: string]: unknown;
     };
-    getOrderedSessionsUnfiltered(): SessionItem[];
     getCommandHotkey(cmd: string, slot?: number): string;
-    findActiveSessionIndex(sessions: SessionItem[]): number;
     switchSession(sessionId: string, options?: { silent?: boolean }): Promise<boolean>;
-    getOrderedSessionsForGroup(groupId: string | null): SessionItem[];
-    onSessionsChanged(listener: () => void): () => void;
     clearSessionSwitchNotice?: (() => void) | undefined;
     hideSearchOverlay?: (() => void) | undefined;
 }
@@ -98,7 +102,7 @@ export class SwitchOverlay {
 
         const reopenOverlayForGroup = (result: { sessions: SessionItem[]; resolvedGroupId: string | null }): void => {
             const newOrdered = result.sessions;
-            const newActiveIndex = this.host.findActiveSessionIndex(newOrdered);
+            const newActiveIndex = this.host.getSessionStore().findActiveSessionIndex(newOrdered);
             this.show(newOrdered, newActiveIndex, result.resolvedGroupId, opts);
         };
 
@@ -222,7 +226,7 @@ export class SwitchOverlay {
         }
 
         // Measure max size using ALL sessions (unfiltered) before showing
-        const allSessions = this.host.getOrderedSessionsUnfiltered();
+        const allSessions = this.host.getSessionStore().getOrderedSessionsUnfiltered();
         if (allSessions.length > ordered.length) {
             // Carries the overlay's own class as well. Measuring inside a bare
             // div loses the flex layout and the padding, so the width came back
@@ -260,7 +264,7 @@ export class SwitchOverlay {
         // Listen only while visible, so there is nothing to leak and no work
         // done when the overlay is closed.
         if (!this.unsubscribeSessions) {
-            this.unsubscribeSessions = this.host.onSessionsChanged(() => {
+            this.unsubscribeSessions = this.host.getSessionStore().onSessionsChanged(() => {
                 this.refreshSessions();
             });
         }
@@ -341,7 +345,7 @@ export class SwitchOverlay {
 
                 void this.host.getGroupStore().resolveGroupSelection(nextGroupId).then((result) => {
                     const newOrdered = result.sessions;
-                    const newActiveIndex = this.host.findActiveSessionIndex(newOrdered);
+                    const newActiveIndex = this.host.getSessionStore().findActiveSessionIndex(newOrdered);
                     this.show(newOrdered, newActiveIndex, result.resolvedGroupId);
                 });
             }
@@ -362,8 +366,8 @@ export class SwitchOverlay {
     // keeps the 300 ms floor measured from when the overlay appeared.
     refreshSessions(): void {
         if (!this.overlayEl) return;
-        const ordered = this.host.getOrderedSessionsForGroup(this.viewGroupId);
-        const activeIndex = this.host.findActiveSessionIndex(ordered);
+        const ordered = this.host.getSessionStore().getOrderedSessionsForGroup(this.viewGroupId);
+        const activeIndex = this.host.getSessionStore().findActiveSessionIndex(ordered);
         this.show(ordered, activeIndex, this.viewGroupId, { mode: 'preview', keepShownAt: true });
     }
 
