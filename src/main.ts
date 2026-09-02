@@ -32,8 +32,23 @@ import type { SessionStorage } from './storage/session-storage.ts';
 import type { SyncWatcher } from './storage/sync-watcher.ts';
 import { getSyncWatcher, onExternalSettingsChange, clearSessionStorageSyncTimers } from './storage/session-sync.ts';
 import type { SyncWatcherHost } from './storage/session-sync.ts';
-import { initRotationBackupTimestampForHost } from './storage/storage-backup.ts';
-import type { RotationBackupTimestampHost } from './storage/storage-backup.ts';
+import {
+    initRotationBackupTimestampForHost,
+    prepareRotationBackupData,
+    rotateBackupIfNeededForHost,
+    copyFileIfExists,
+    getRotationBackupInfoForHost,
+    restoreFromRotationBackup,
+} from './storage/storage-backup.ts';
+import { exportSessionsSnapshot, importSessionsFromLatestExport } from './storage/storage-transfer.ts';
+import type {
+    RotationBackupTimestampHost,
+    RotateBackupHost,
+    StorageRestoreHost,
+    RotationBackupInfo,
+    SessionDataPayload,
+} from './storage/storage-backup.ts';
+import type { StorageExportHost, StorageImportHost } from './storage/storage-transfer.ts';
 import { StatusBarController } from './statusbar-controller.ts';
 import type { StatusBarControllerHost } from './statusbar-controller.ts';
 import { SwitchOverlay } from './ui/overlays/switch-overlay.ts';
@@ -210,6 +225,43 @@ export class WorkspacePlusPlus extends Plugin {
      */
     override onExternalSettingsChange(): void {
         onExternalSettingsChange(this.asHost<SyncWatcherHost>());
+    }
+
+    /**
+     * Snapshot export/import and the rotation backups.
+     *
+     * These take the plugin as their host - they read its data and reach its
+     * vault - so unlike the collaborators there is nothing to construct, only
+     * somewhere for the settings screen and the commands to call. That is here
+     * rather than a plugin/methods adapter so the host each one wants is
+     * type-checked at the call rather than assumed.
+     */
+    exportSessionsSnapshot(): Promise<string> {
+        return exportSessionsSnapshot(this.asHost<StorageExportHost>());
+    }
+
+    importSessionsFromLatestExport(): Promise<boolean> {
+        return importSessionsFromLatestExport(this.asHost<StorageImportHost>());
+    }
+
+    prepareRotationBackupData(sessionData: unknown): Record<string, unknown> {
+        return prepareRotationBackupData(sessionData);
+    }
+
+    rotateBackupIfNeeded(sessionData: unknown): Promise<void> {
+        return rotateBackupIfNeededForHost(this.asHost<RotateBackupHost>(), sessionData);
+    }
+
+    copyFileIfExists(srcPath: string, dstPath: string): Promise<void> {
+        return copyFileIfExists(this.app.vault.adapter, srcPath, dstPath);
+    }
+
+    getRotationBackupInfo(): Promise<RotationBackupInfo[]> {
+        return getRotationBackupInfoForHost(this.asHost<RotationBackupTimestampHost>());
+    }
+
+    restoreFromRotationBackup(generation: number): Promise<boolean> {
+        return restoreFromRotationBackup(this.asHost<StorageRestoreHost>(), generation);
     }
 
     isSidebarRestoreEnabled(): boolean {
