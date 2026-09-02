@@ -813,48 +813,6 @@ body.wpp-session-list-dragging * {
     margin-top: 0;
 }
 
-.wpp-advanced-details {
-    margin: 18px 0 10px;
-    border-top: 1px solid var(--background-modifier-border);
-    padding-top: 12px;
-}
-
-.wpp-advanced-summary {
-    cursor: pointer;
-    color: var(--text-normal);
-    font-size: var(--font-ui-large, 1.05rem);
-    font-weight: 700;
-}
-
-.wpp-advanced-body {
-    margin-top: 10px;
-}
-
-.wpp-advanced-subsection-title {
-    margin-top: 16px;
-}
-
-.wpp-advanced-subsection-title:first-child {
-    margin-top: 0;
-}
-
-.wpp-dev-details {
-    margin-top: 18px;
-    border-top: 1px solid var(--background-modifier-border);
-    padding-top: 12px;
-}
-
-.wpp-dev-summary {
-    cursor: pointer;
-    color: var(--text-normal);
-    font-size: var(--font-ui-large, 1.05rem);
-    font-weight: 700;
-}
-
-.wpp-dev-body {
-    margin-top: 10px;
-}
-
 .wpp-dev-card {
     border: 1px solid var(--background-modifier-border);
     border-radius: 10px;

@@ -454,38 +454,55 @@ export class CommandRegistry {
             });
         };
 
-        // All four gate on the setting, the way exit-group already did. The
-        // other three used a plain `callback`, so turning groups off left them
-        // listed in the command palette running a body that returns
-        // immediately - and left next-group holding Cmd+Shift+Tab, which is
-        // Obsidian's own reverse tab switch, for no benefit at all.
-        //
-        // Third instance of this shape: cd2275e did it for the search command
-        // and the session-filter setting.
-        host.addCommand({
-            id: 'switch-group',
-            name: String(L.cmdSwitchGroup || ''),
-            checkCallback: (checking) => {
-                if (!host.getGroupStore().isGroupFeatureEnabled()) return false;
-                if (!checking) switchGroupAndShowOverlay(1);
-                return true;
-            },
+        /**
+         * A group command is unavailable whenever the group feature is off.
+         *
+         * Three of the four used a plain `callback`, so turning groups off left
+         * them listed in the command palette running a body that returned
+         * immediately - and left next-group holding Cmd+Shift+Tab, which is
+         * Obsidian's own reverse tab switch, for no benefit at all. Third
+         * instance of that shape: cd2275e did it for the search command and the
+         * session-filter setting.
+         *
+         * Writing the guard once rather than four times is the other half. It
+         * also removes the one duplicate body in this file: switch-group and
+         * next-group run the same action, which is a product question - the
+         * vaguer name is the older one, and deleting a command silently breaks
+         * whatever hotkey somebody put on it - so both stay for now.
+         */
+        const addGroupCommand = (
+            id: string,
+            name: string,
+            run: () => void,
+            options?: { hotkeys?: Hotkey[]; isAvailable?: () => boolean }
+        ) => {
+            const command: Command = {
+                id,
+                name,
+                checkCallback: (checking) => {
+                    if (!host.getGroupStore().isGroupFeatureEnabled()) return false;
+                    if (options?.isAvailable && !options.isAvailable()) return false;
+                    if (!checking) run();
+                    return true;
+                },
+            };
+            if (options?.hotkeys) command.hotkeys = options.hotkeys;
+            host.addCommand(command);
+        };
+
+        addGroupCommand('switch-group', String(L.cmdSwitchGroup || ''), () => {
+            switchGroupAndShowOverlay(1);
         });
 
-        host.addCommand({
-            id: 'exit-group',
-            name: String(L.cmdExitGroup || ''),
-            checkCallback: (checking) => {
-                if (!host.getGroupStore().isGroupFeatureEnabled()) return false;
-                if (!this.host.getGroupStore().getActiveGroupId()) return false;
-                if (!checking) void host.getGroupStore().exitGroup();
-                return true;
-            },
+        addGroupCommand('exit-group', String(L.cmdExitGroup || ''), () => {
+            void host.getGroupStore().exitGroup();
+        }, {
+            isAvailable: () => Boolean(this.host.getGroupStore().getActiveGroupId()),
         });
 
-        host.addCommand({
-            id: 'next-group',
-            name: String(L.cmdNextGroup || ''),
+        addGroupCommand('next-group', String(L.cmdNextGroup || ''), () => {
+            switchGroupAndShowOverlay(1);
+        }, {
             // Two bindings for one command. Mod+Shift+Tab is contended - the
             // window manager takes it on macOS, and Obsidian uses it for its own
             // tabs - so G is offered as the one that reliably arrives. Tab stays
@@ -494,21 +511,10 @@ export class CommandRegistry {
                 { modifiers: ['Mod', 'Shift'], key: 'Tab' },
                 { modifiers: ['Mod', 'Shift'], key: 'G' },
             ],
-            checkCallback: (checking) => {
-                if (!host.getGroupStore().isGroupFeatureEnabled()) return false;
-                if (!checking) switchGroupAndShowOverlay(1);
-                return true;
-            },
         });
 
-        host.addCommand({
-            id: 'previous-group',
-            name: String(L.cmdPreviousGroup || ''),
-            checkCallback: (checking) => {
-                if (!host.getGroupStore().isGroupFeatureEnabled()) return false;
-                if (!checking) void host.getGroupStore().switchGroupRelative(-1);
-                return true;
-            },
+        addGroupCommand('previous-group', String(L.cmdPreviousGroup || ''), () => {
+            void host.getGroupStore().switchGroupRelative(-1);
         });
     }
 
