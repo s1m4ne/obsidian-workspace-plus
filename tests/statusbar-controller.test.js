@@ -122,9 +122,6 @@ test('status bar controller accumulates wheel delta and switches after threshold
             statusBarScrollInvert: false,
         },
         isSwitchingSession: false,
-        statusBarScrollDelta: 0,
-        statusBarScrollEventAt: 0,
-        statusBarScrollSwitchAt: 0,
         // Switching goes through getSessionSwitcher(); this double carries those members itself.
         getSessionSwitcher() { return this; },
         switchRelativeFromScroll: function (direction) {
@@ -139,14 +136,19 @@ test('status bar controller accumulates wheel delta and switches after threshold
     const wheelController = new controller.StatusBarController(plugin);
     plugin.getStatusBarController = function () { return wheelController; };
 
+    // Read from the controller, which is where the counters live. They used to
+    // be mirrored onto the plugin as plain properties and asserted there, a
+    // shape the running plugin has not had since it stopped carrying them: the
+    // mirror only ever wrote when the host already had the property, so in
+    // Obsidian it wrote nothing and only this double kept it alive.
     assert.equal(controller.handleStatusBarWheel(plugin, first, 1000), false);
-    assert.equal(plugin.statusBarScrollDelta, 10);
+    assert.equal(wheelController.scrollDelta, 10);
     assert.equal(first.prevented, 1);
     assert.equal(first.stopped, 1);
 
     assert.equal(controller.handleStatusBarWheel(plugin, second, 1050), true);
-    assert.equal(plugin.statusBarScrollDelta, 0);
-    assert.equal(plugin.statusBarScrollSwitchAt, 1050);
+    assert.equal(wheelController.scrollDelta, 0);
+    assert.equal(wheelController.scrollSwitchAt, 1050);
     assert.deepEqual(calls, [1]);
 });
 

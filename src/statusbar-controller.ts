@@ -157,19 +157,6 @@ export class StatusBarController {
         } else {
             this.hostProvider = () => hostOrProvider;
         }
-        const hostObj = (typeof hostOrProvider === 'function' ? hostOrProvider() : hostOrProvider) as unknown as Record<string, unknown>;
-        const descDelta = Object.getOwnPropertyDescriptor(hostObj, 'statusBarScrollDelta');
-        if (descDelta && !descDelta.get && typeof hostObj.statusBarScrollDelta === 'number') {
-            this._scrollDelta = hostObj.statusBarScrollDelta;
-        }
-        const descEventAt = Object.getOwnPropertyDescriptor(hostObj, 'statusBarScrollEventAt');
-        if (descEventAt && !descEventAt.get && typeof hostObj.statusBarScrollEventAt === 'number') {
-            this._scrollEventAt = hostObj.statusBarScrollEventAt;
-        }
-        const descSwitchAt = Object.getOwnPropertyDescriptor(hostObj, 'statusBarScrollSwitchAt');
-        if (descSwitchAt && !descSwitchAt.get && typeof hostObj.statusBarScrollSwitchAt === 'number') {
-            this._scrollSwitchAt = hostObj.statusBarScrollSwitchAt;
-        }
     }
 
     private get host(): StatusBarControllerHost {
@@ -188,10 +175,11 @@ export class StatusBarController {
         return this._scrollEventAt;
     }
 
-    // onunload clears these. The plugin exposes them as getter-only accessors,
-    // so assigning to them from outside throws under strict mode - which is what
-    // main.js was doing, taking flushPendingPersistence() down with it and
-    // losing whatever had not been written yet.
+    // onunload clears these through here rather than by assignment. The plugin
+    // used to carry the counters itself and expose them as getter-only
+    // accessors, and main.js assigned to one - which throws under strict mode,
+    // took flushPendingPersistence() down with it, and lost whatever had not
+    // been written. check:readonly is the live guard against that shape now.
     resetScrollState(): void {
         this._scrollDelta = 0;
         this._scrollEventAt = 0;
@@ -222,30 +210,12 @@ export class StatusBarController {
         this._scrollEventAt = currentTime;
         this._scrollDelta += normalizeWheelDeltaY(evt);
 
-        const hostObj = this.host as unknown as Record<string, unknown>;
-        const descDelta = Object.getOwnPropertyDescriptor(hostObj, 'statusBarScrollDelta');
-        if (descDelta && !descDelta.get) {
-            hostObj.statusBarScrollDelta = this._scrollDelta;
-        }
-        const descEventAt = Object.getOwnPropertyDescriptor(hostObj, 'statusBarScrollEventAt');
-        if (descEventAt && !descEventAt.get) {
-            hostObj.statusBarScrollEventAt = this._scrollEventAt;
-        }
-
         if (Math.abs(this._scrollDelta) < cfg.threshold) return false;
 
         let direction = this._scrollDelta < 0 ? -1 : 1;
         if (this.data?.statusBarScrollInvert) direction *= -1;
         this._scrollDelta = 0;
         this._scrollSwitchAt = currentTime;
-
-        if (descDelta && !descDelta.get) {
-            hostObj.statusBarScrollDelta = 0;
-        }
-        const descSwitchAt = Object.getOwnPropertyDescriptor(hostObj, 'statusBarScrollSwitchAt');
-        if (descSwitchAt && !descSwitchAt.get) {
-            hostObj.statusBarScrollSwitchAt = this._scrollSwitchAt;
-        }
 
         // A scroll gesture that cannot switch is not worth a message; the next
         // notch tries again.

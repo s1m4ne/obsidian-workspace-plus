@@ -260,6 +260,11 @@ function createSearchOverlayKeyHandler(options: SearchOverlayKeyboardOptions): (
 }
 
 function handleSearchOverlaySlashKey(event: KeyboardEvent, options: SearchOverlayKeyboardOptions): void {
+    // Nothing to jump to when the filter row is hidden, and focusing a
+    // display:none input silently does nothing - so `/` swallowed the keystroke
+    // and looked broken. Left unhandled it types a slash, which is what a
+    // hidden filter should do.
+    if (!options.hasSearchInput()) return;
     event.preventDefault();
     navigationUtils.focusTextInputSelect(options.searchInput);
 }

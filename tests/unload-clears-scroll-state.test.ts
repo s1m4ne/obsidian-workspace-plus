@@ -38,17 +38,11 @@ test('the scroll counters are cleared through the controller, not by assignment'
     assert.equal(controller.scrollDelta, 0);
 });
 
-test('assigning to the mirrored counter still throws, so nobody reintroduces it', () => {
-    // Documents why resetScrollState exists: the read path is deliberately
-    // read-only, and this is the failure that shape produces.
-    const plugin = { getStatusBarController: (): null => null } as Record<string, unknown>;
-    Object.defineProperty(plugin, 'statusBarScrollDelta', {
-        get: () => 0,
-        configurable: true,
-    });
-    assert.throws(() => {
-        (plugin as { statusBarScrollDelta: number }).statusBarScrollDelta = 0;
-    }, TypeError);
-});
+// The test that used to sit here defined a getter-only property on a plain
+// object and asserted that assigning to it throws - JavaScript's own behaviour
+// rather than this plugin's, and it referred to a mirror that no longer exists.
+// check:readonly is the live guard: it finds every prototype accessor with a
+// getter and no setter, then every assignment to one, and zero is the only
+// acceptable count.
 
 test.after(() => harness.restore());

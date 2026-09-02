@@ -1,4 +1,4 @@
-import { Notice, type App } from 'obsidian';
+import { Notice, type App, type WorkspaceLeaf } from 'obsidian';
 import { L } from '../i18n.ts';
 import { generateId } from '../utils.ts';
 import { serializeLayout, layoutsEqual, layoutsEqualStructural, cloneLayout } from '../layout-utils.ts';
@@ -607,17 +607,19 @@ export class SessionStore {
         const session = this.createSessionRecord(id, name, null);
         this.insertSessionAndActivate(session);
 
-        if (this.host.app?.workspace) {
-            const leaves: Array<{ detach: () => void }> = [];
-            const ws = this.host.app.workspace as unknown as { iterateRootLeaves?: (cb: (leaf: { detach: () => void }) => void) => void };
-            if (typeof ws.iterateRootLeaves === 'function') {
-                ws.iterateRootLeaves((leaf: { detach: () => void }) => {
-                    leaves.push(leaf);
-                });
-                for (let i = 0; i < leaves.length; i++) {
-                    leaves[i]?.detach();
-                }
-            }
+        // `iterateRootLeaves` is public - obsidian.d.ts declares it on Workspace -
+        // so neither the cast nor the `typeof` guard that used to be here bought
+        // anything. They read as an undocumented API being approached carefully,
+        // which is what platform/obsidian-internals.ts exists for; this is not
+        // one of those.
+        //
+        // Collected first, detached after: detaching inside the iteration
+        // mutates what is being walked.
+        const workspace = this.host.app?.workspace;
+        if (workspace) {
+            const leaves: WorkspaceLeaf[] = [];
+            workspace.iterateRootLeaves((leaf) => { leaves.push(leaf); });
+            for (const leaf of leaves) leaf.detach();
         }
 
         session.layout = this.getCurrentWorkspaceLayout();
