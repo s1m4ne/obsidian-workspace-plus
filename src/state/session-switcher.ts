@@ -507,19 +507,8 @@ export class SessionSwitcher {
         };
     }
 
-    getRelativeSwitchTarget(offset: number, options?: SessionSwitchOptions): RelativeSwitchContext {
-        return this.getRelativeSwitchContext(offset, options);
-    }
 
-    switchSessionAtOrderedIndex(ordered: SessionItem[] | number, indexOrOptions?: number | SessionSwitchOptions, options?: SessionSwitchOptions): Promise<boolean> {
-        if (typeof ordered === 'number') {
-            const index = ordered;
-            const opts = indexOrOptions as SessionSwitchOptions | undefined;
-            return this.switchToIndex(index, opts);
-        }
-
-        const sessions = ordered;
-        const index = typeof indexOrOptions === 'number' ? indexOrOptions : 0;
+    switchSessionAtOrderedIndex(sessions: SessionItem[], index: number, options?: SessionSwitchOptions): Promise<boolean> {
         const opts = options || {};
 
         if (index < 0 || index >= sessions.length) return Promise.resolve(false);
@@ -593,52 +582,11 @@ export class SessionSwitcher {
         });
     }
 
-    switchRelativeFromWheel(offset: number, options?: SessionSwitchOptions): Promise<boolean> {
-        return this.switchRelativeDirect(offset, options || {
-            overlayMode: 'none',
-            switchNoticeMode: 'replace',
-            silent: true,
-        });
-    }
 
-    switchRelativeFromQuickSwitcher(offset: number, options?: SessionSwitchOptions): Promise<boolean> {
-        return this.switchRelativeDirect(offset, options || {
-            overlayMode: 'none',
-            switchNoticeMode: 'replace',
-            silent: true,
-        });
-    }
 
-    switchRelativeFromSidebar(offset: number, options?: SessionSwitchOptions): Promise<boolean> {
-        return this.switchRelativeDirect(offset, options || {
-            overlayMode: 'none',
-            switchNoticeMode: 'replace',
-            silent: true,
-        });
-    }
 
-    switchRelativeFromNotice(offset: number, options?: SessionSwitchOptions): Promise<boolean> {
-        return this.switchRelativeDirect(offset, options || {
-            overlayMode: 'none',
-            switchNoticeMode: 'replace',
-            silent: true,
-        });
-    }
 
-    switchRelative(offset: number): Promise<boolean> {
-        return this.switchRelativeFromCommand(offset);
-    }
 
-    switchRelativeImmediate(offset: number, options?: { showOverlay?: boolean; overlayOptions?: SwitchOverlayOptions }): Promise<boolean> {
-        const opts: SessionSwitchOptions = {
-            overlayMode: options?.showOverlay === false ? 'none' : 'feedback',
-            silent: true,
-        };
-        if (options?.overlayOptions !== undefined) {
-            opts.overlayOptions = options.overlayOptions;
-        }
-        return this.switchRelativeDirect(offset, opts);
-    }
 
     switchSessionByIdFromCommand(sessionId: string, options?: SessionSwitchOptions): Promise<boolean> {
         const ordered = this.getOrderedSessions();

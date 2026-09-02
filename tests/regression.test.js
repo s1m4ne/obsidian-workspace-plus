@@ -493,7 +493,7 @@ test('scheduleStartupFlush waits until startup settle completes', async function
     assert.ok(flushes[0] >= startedAt + 15);
 });
 
-test('switchRelative shows preview overlay before switching when preview is enabled', function () {
+test('switchRelativeFromCommand shows preview overlay before switching when preview is enabled', function () {
     const { switcher, hooks } = createPlugin({
         activeSessionId: 'a',
         sessionOrder: ['a', 'b', 'c'],
@@ -517,77 +517,10 @@ test('switchRelative shows preview overlay before switching when preview is enab
         return Promise.resolve(true);
     };
 
-    switcher.switchRelative(1);
+    switcher.switchRelativeFromCommand(1);
 
     assert.deepEqual(previewCalls, [[['a', 'b', 'c'], 0]]);
     assert.equal(switchCalled, false);
-});
-
-test('switchRelativeImmediate bypasses preview-only first step and uses feedback overlay', async function () {
-    const { switcher, hooks } = createPlugin({
-        activeSessionId: 'a',
-        sessionOrder: ['a', 'b', 'c'],
-        sessions: {
-            a: { id: 'a', name: 'A', layout: { layout: 'a' }, modified: 1 },
-            b: { id: 'b', name: 'B', layout: { layout: 'b' }, modified: 1 },
-            c: { id: 'c', name: 'C', layout: { layout: 'c' }, modified: 1 },
-        },
-        previewNext: true,
-        previewPrevious: true,
-    });
-
-    const overlayCalls = [];
-    const switchCalls = [];
-
-    hooks.showSwitchFeedbackOverlay = function (ordered, index) {
-        overlayCalls.push([ordered.map(function (s) { return s.id; }), index]);
-    };
-    switcher.switchSession = function (sessionId, options) {
-        switchCalls.push([sessionId, options]);
-        return Promise.resolve(true);
-    };
-
-    const switched = await switcher.switchRelativeImmediate(1);
-
-    assert.equal(switched, true);
-    assert.deepEqual(overlayCalls, [[['a', 'b', 'c'], 1]]);
-    assert.equal(switchCalls.length, 1);
-    assert.equal(switchCalls[0][0], 'b');
-    assert.equal(switchCalls[0][1].silent, true);
-    assert.equal(switchCalls[0][1].switchNoticeMode, undefined);
-});
-
-test('switchRelativeImmediate can suppress feedback overlay', async function () {
-    const { switcher, hooks } = createPlugin({
-        activeSessionId: 'a',
-        sessionOrder: ['a', 'b'],
-        sessions: {
-            a: { id: 'a', name: 'A', layout: { layout: 'a' }, modified: 1 },
-            b: { id: 'b', name: 'B', layout: { layout: 'b' }, modified: 1 },
-        },
-        previewNext: true,
-        previewPrevious: true,
-    });
-
-    let overlayCalled = false;
-    const switchCalls = [];
-
-    hooks.showSwitchFeedbackOverlay = function () {
-        overlayCalled = true;
-    };
-    switcher.switchSession = function (sessionId, options) {
-        switchCalls.push([sessionId, options]);
-        return Promise.resolve(true);
-    };
-
-    const switched = await switcher.switchRelativeImmediate(1, { showOverlay: false });
-
-    assert.equal(switched, true);
-    assert.equal(overlayCalled, false);
-    assert.equal(switchCalls.length, 1);
-    assert.equal(switchCalls[0][0], 'b');
-    assert.equal(switchCalls[0][1].silent, true);
-    assert.equal(switchCalls[0][1].switchNoticeMode, undefined);
 });
 
 test('switchRelativeFromStatusBar bypasses preview-only first step and uses a replaceable notice', async function () {

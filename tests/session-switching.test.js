@@ -183,23 +183,18 @@ test('session-switching prototype methods: notices and direct switches', async (
     await p6;
     assert.equal(data.activeSessionId, 'c');
 
-    const p7 = switcher.switchRelative(1);
+    const p7 = switcher.switchRelativeFromCommand(1);
     await releaseLayouts();
     await p7;
     assert.equal(data.activeSessionId, 'd');
 
-    const p8 = switcher.switchRelativeImmediate(-1, { showOverlay: false });
+    const p8 = switcher.performSessionSwitch('a');
     await releaseLayouts();
     await p8;
-    assert.equal(data.activeSessionId, 'c');
-
-    const p9 = switcher.performSessionSwitch('a');
-    await releaseLayouts();
-    await p9;
     assert.equal(data.activeSessionId, 'a');
 
-    const p10 = switcher.switchSession('b', { silent: true });
+    const p9 = switcher.switchSession('b', { silent: true });
     await releaseLayouts();
-    await p10;
+    await p9;
     assert.equal(data.activeSessionId, 'b');
 });
