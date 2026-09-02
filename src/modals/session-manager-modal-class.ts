@@ -169,7 +169,7 @@ export class SessionManagerModal extends Modal {
             placeholder: text(L.savePlaceholder),
             cls: 'wpp-save-input',
         });
-        const saveBtn = saveContainer.createEl('button', { text: text(L.save), cls: 'wpp-save-btn' });
+        const saveBtn = saveContainer.createEl('button', { text: text(L.create), cls: 'wpp-save-btn' });
         this.saveBtn = saveBtn;
 
         this.filterInput = null;
@@ -770,14 +770,14 @@ export class SessionManagerModal extends Modal {
 
         const actions = item.createDiv({ cls: 'wpp-session-actions' });
 
-        const loadBtn = actions.createEl('button', { text: text(L.load), cls: 'wpp-load-btn' });
+        const loadBtn = actions.createEl('button', { text: text(L.switchTo), cls: 'wpp-load-btn' });
         loadBtn.setAttribute('data-action-key', 'load');
         loadBtn.addEventListener('click', () => { this.onLoad(session.id); });
 
         // Saving the current layout only means anything on the active session,
         // and only when it is not already saved on every switch.
         if (isActive && !this.plugin.getSessionSaver().isAutoSaveOnSwitchEnabled()) {
-            const saveCurrentBtn = actions.createEl('button', { text: text(L.saveInline), cls: 'wpp-save-inline-btn' });
+            const saveCurrentBtn = actions.createEl('button', { text: text(L.save), cls: 'wpp-save-inline-btn' });
             saveCurrentBtn.setAttribute('data-action-key', 'save-inline');
             saveCurrentBtn.addEventListener('click', (e: MouseEvent) => {
                 e.stopPropagation();

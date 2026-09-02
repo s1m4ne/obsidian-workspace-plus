@@ -1,7 +1,7 @@
 // Behavior Lock: i18n
 //
 // Locks the resolved i18n fixed point after all 6 string tables and 5 merge
-// loops have executed. Captures all 320 keys across all 21 locales, calling
+// loops have executed. Captures all 319 keys across all 21 locales, calling
 // all 63 function-valued keys with representative arguments (including Russian
 // 3-form and Arabic 4-form plurals) and under both Mac and Windows platforms.
 //
@@ -19,7 +19,7 @@ const EXPECTED_LOCALES = [
     'de', 'it', 'tr', 'id', 'vi', 'th', 'hi', 'bn', 'fa', 'ms', 'pl',
 ] as const;
 
-const EXPECTED_KEY_COUNT = 320;
+const EXPECTED_KEY_COUNT = 319;
 const EXPECTED_FUNCTION_KEY_COUNT = 63;
 
 interface I18nModule {
@@ -52,7 +52,7 @@ test('i18n exposes all 21 supported locales in LANG_ORDER and LANG_OPTIONS', asy
     }
 });
 
-test('every locale contains exactly all 320 keys and matches English keys', async () => {
+test('every locale contains exactly all 319 keys and matches English keys', async () => {
     const h = setupHarness();
     try {
         const i18n = await loadI18n();
@@ -299,13 +299,13 @@ test('resolveLocale resolves language correctly from auto and explicit codes', a
 
         // Explicit locales
         const ja = i18n.resolveLocale('ja');
-        assert.equal(ja.save, '作成');
+        assert.equal(ja.create, '作成');
 
         const fr = i18n.resolveLocale('fr');
-        assert.equal(fr.save, 'Créer');
+        assert.equal(fr.create, 'Créer');
 
         const de = i18n.resolveLocale('de');
-        assert.equal(de.save, 'Erstellen');
+        assert.equal(de.create, 'Erstellen');
 
         // Navigator auto detection
         const win = h.dom.window;
@@ -313,29 +313,29 @@ test('resolveLocale resolves language correctly from auto and explicit codes', a
         // Chinese variants
         Object.defineProperty(win.navigator, 'language', { value: 'zh-CN', configurable: true });
         const zhCN = i18n.resolveLocale('auto');
-        assert.equal(zhCN.save, '创建');
+        assert.equal(zhCN.create, '创建');
 
         Object.defineProperty(win.navigator, 'language', { value: 'zh-TW', configurable: true });
         const zhTW = i18n.resolveLocale('auto');
-        assert.equal(zhTW.save, '建立');
+        assert.equal(zhTW.create, '建立');
 
         Object.defineProperty(win.navigator, 'language', { value: 'zh-HK', configurable: true });
         const zhHK = i18n.resolveLocale('auto');
-        assert.equal(zhHK.save, '建立');
+        assert.equal(zhHK.create, '建立');
 
         // General prefix matching
         Object.defineProperty(win.navigator, 'language', { value: 'ja-JP', configurable: true });
         const jaJP = i18n.resolveLocale('auto');
-        assert.equal(jaJP.save, '作成');
+        assert.equal(jaJP.create, '作成');
 
         Object.defineProperty(win.navigator, 'language', { value: 'en-US', configurable: true });
         const enUS = i18n.resolveLocale('auto');
-        assert.equal(enUS.save, 'Create');
+        assert.equal(enUS.create, 'Create');
 
         // Unknown locale falls back to en
         Object.defineProperty(win.navigator, 'language', { value: 'xyz-UNKNOWN', configurable: true });
         const fallback = i18n.resolveLocale('auto');
-        assert.equal(fallback.save, 'Create');
+        assert.equal(fallback.create, 'Create');
     } finally {
         h.restore();
     }
@@ -347,18 +347,18 @@ test('P15 language-switch path: resolveLocale updates exports.L and leaves live 
         const i18n = await loadI18n();
 
         i18n.resolveLocale('en');
-        assert.equal((i18n.L as Record<string, string>).save, 'Create');
+        assert.equal((i18n.L as Record<string, string>).create, 'Create');
 
         const enRef = i18n.L;
 
         i18n.resolveLocale('ja');
-        assert.equal((i18n.L as Record<string, string>).save, '作成');
+        assert.equal((i18n.L as Record<string, string>).create, '作成');
         // Under CommonJS exports.L is reassigned; enRef remains the old object
-        assert.equal((enRef as Record<string, string>).save, 'Create');
+        assert.equal((enRef as Record<string, string>).create, 'Create');
         assert.notEqual(i18n.L, enRef);
 
         i18n.resolveLocale('de');
-        assert.equal((i18n.L as Record<string, string>).save, 'Erstellen');
+        assert.equal((i18n.L as Record<string, string>).create, 'Erstellen');
     } finally {
         h.restore();
     }

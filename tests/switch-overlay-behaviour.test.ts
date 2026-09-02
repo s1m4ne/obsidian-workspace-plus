@@ -9,8 +9,8 @@ import type { App } from 'obsidian';
 const harness = setupHarness();
 
 const i18nMod = await import('../src/i18n.ts');
-const i18n = (i18nMod.default ?? i18nMod) as { resolveLocale(l: string): void };
-i18n.resolveLocale('en');
+const i18n = (i18nMod.default ?? i18nMod) as { resolveLocale(l: string): Record<string, unknown> };
+const i18nStrings = i18n.resolveLocale('en');
 
 const { SwitchOverlay } = await import('../src/ui/overlays/switch-overlay.ts');
 const { DEFAULT_DATA } = await import('../src/storage/default-data.ts');
@@ -1065,7 +1065,11 @@ test('every icon-only control in the search overlay has a role and a name', () =
 
     const close = overlay.querySelector('.wpp-search-close');
     assert.equal(close?.getAttribute('role'), 'button');
-    assert.equal(close?.getAttribute('aria-label'), 'Close');
+    // From the string table, not a literal. This was the English constant
+    // `CLOSE_LABEL` while there was no `close` key to reach; asserting against
+    // the table is what keeps it from drifting back.
+    assert.equal(close?.getAttribute('aria-label'), String(i18nStrings.close));
+    assert.ok(i18nStrings.close, 'the locale has a close label');
 
     const actions = overlay.querySelectorAll('.wpp-qs-action-btn');
     assert.ok(actions.length > 0, 'the rows build action icons to check');

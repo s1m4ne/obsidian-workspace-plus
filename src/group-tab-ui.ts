@@ -92,7 +92,10 @@ export function openCreateGroupPrompt(
         {
             title: String(L.groupCreateNew || ''),
             placeholder: String(L.groupCreatePlaceholder || ''),
-            buttonText: String(L.save || ''),
+            // Creating a group, so the create label. This read `L.save`, whose
+            // value was "Create" - the name said save and the text said create,
+            // which is what the rename untangled.
+            buttonText: String(L.create || ''),
             emptyNotice: String(L.groupEmptyName || ''),
         }
     ).open();

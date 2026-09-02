@@ -1,7 +1,21 @@
 // Behavior Lock: what every i18n key actually resolves to.
 //
-// The other i18n lock proves the shape holds - 320 keys in all 21 locales, the
+// The other i18n lock proves the shape holds - 319 keys in all 21 locales, the
 // right types, plurals picking the right form. It does not prove the values are
+//
+// Edited deliberately, with the maintainer's authorization, at the commit that
+// renamed three misleading keys and added `close`. The lock's job is to prove
+// the *migration* did not move a string; a decided rename is not that, and the
+// commit carries the proof that no value changed - every locale's set of string
+// values is byte-identical before and after, checked across all 21.
+//
+//   save       -> create     the value was "Create"
+//   saveInline -> save       the value was "Save"
+//   load       -> switchTo   the value was "Switch"
+//   + close                  the search overlay's close button had no key
+//   - settingsGroupManageSessions, ...Desc   the modal that used them is gone
+//
+// 320 keys -> 319.
 // unchanged, and a key can survive with the wrong text: two of the five merge
 // loops in i18n.js use opposite precedence rules (6571 overwrites, 6583 fills
 // only gaps), so flattening the six tables in Phase 3 can silently hand a key
@@ -109,10 +123,10 @@ test('the fixture covers every locale and key, so the comparison is not vacuous'
 
     assert.equal(locales.length, 21);
     for (const locale of locales) {
-        assert.equal(Object.keys(expected[locale] ?? {}).length, 320, `locale ${locale}`);
+        assert.equal(Object.keys(expected[locale] ?? {}).length, 319, `locale ${locale}`);
     }
 
-    // 63 of the 320 are functions, recorded from their output rather than their
+    // 63 of the 319 are functions, recorded from their output rather than their
     // source, so a rewritten implementation with the same output still passes.
     const functionEntries = Object.values(expected.en ?? {}).filter((v) => v.startsWith('fn:'));
     assert.equal(functionEntries.length, 63);

@@ -39,14 +39,6 @@ function localizedCall(value: unknown, ...args: (string | number)[]): string {
 }
 
 /**
- * The one accessible name with no entry in the string table. Adding a 321st key
- * would fail tests/lock/i18n-values.lock.test.ts, which reports an added key as
- * a change and may not be edited, so this stays English until the maintainer
- * adds `close` to all 21 locales.
- */
-const CLOSE_LABEL = 'Close';
-
-/**
  * A row action is an icon in a div, so it carries no name or role of its own.
  * Both come from the same string as the tooltip; going through one helper is
  * what stops the next icon being added without them.
@@ -488,10 +480,10 @@ export class SearchOverlay {
 
         const closeBtn = headerRow.createDiv({
             cls: 'wpp-search-close',
-            attr: { role: 'button', 'aria-label': CLOSE_LABEL },
+            attr: { role: 'button', 'aria-label': localizedString(strings.close) },
         });
         setIcon(closeBtn, 'x');
-        setTooltip(closeBtn, CLOSE_LABEL);
+        setTooltip(closeBtn, localizedString(strings.close));
         overlayEventOwner.registerDomEvent(closeBtn, 'click', function (e) {
             e.stopPropagation();
             hideThisOverlay();
@@ -503,7 +495,7 @@ export class SearchOverlay {
             cls: 'wpp-save-input',
             attr: { type: 'text', placeholder: localizedString(strings.savePlaceholder) },
         });
-        const saveBtn = saveRow.createEl('button', { cls: 'wpp-save-btn', text: localizedString(strings.save) });
+        const saveBtn = saveRow.createEl('button', { cls: 'wpp-save-btn', text: localizedString(strings.create) });
 
         function onOverlaySave() {
             const selectedGroupId = getOverlayGroupId();
@@ -697,7 +689,7 @@ export class SearchOverlay {
                 let saveIcon = null;
                 let reloadIcon = null;
                 if (isActive && !self.getSessionSaver().isAutoSaveOnSwitchEnabled()) {
-                    saveIcon = actionButton(actions, 'save', localizedString(strings.saveInline));
+                    saveIcon = actionButton(actions, 'save', localizedString(strings.save));
                     reloadIcon = actionButton(actions, 'rotate-ccw', localizedString(strings.contextReloadSession));
                 }
 
@@ -756,7 +748,7 @@ export class SearchOverlay {
                                 });
                             };
                             if (self.getSettingsState().confirmQuickActions) {
-                                new ConfirmModal(self.app, localizedCall(strings.confirmSaveSession, sess.name), doSave, { confirmText: localizedString(strings.saveInline), confirmClass: 'mod-cta' }).open();
+                                new ConfirmModal(self.app, localizedCall(strings.confirmSaveSession, sess.name), doSave, { confirmText: localizedString(strings.save), confirmClass: 'mod-cta' }).open();
                             } else {
                                 doSave();
                             }
@@ -771,7 +763,7 @@ export class SearchOverlay {
                                 void self.getSessionSaver().reloadCurrentSessionWithoutSaving();
                             };
                             if (self.getSettingsState().confirmQuickActions) {
-                                new ConfirmModal(self.app, localizedCall(strings.confirmReloadSession, sess.name), doReload, { confirmText: localizedString(strings.load) }).open();
+                                new ConfirmModal(self.app, localizedCall(strings.confirmReloadSession, sess.name), doReload, { confirmText: localizedString(strings.switchTo) }).open();
                             } else {
                                 doReload();
                             }
@@ -923,7 +915,7 @@ export class SearchOverlay {
                         });
                     };
                     if (self.getSettingsState().confirmQuickActions) {
-                        new ConfirmModal(self.app, localizedCall(strings.confirmSaveSession, target.name), doSave, { confirmText: localizedString(strings.saveInline), confirmClass: 'mod-cta' }).open();
+                        new ConfirmModal(self.app, localizedCall(strings.confirmSaveSession, target.name), doSave, { confirmText: localizedString(strings.save), confirmClass: 'mod-cta' }).open();
                     } else {
                         doSave();
                     }
@@ -932,7 +924,7 @@ export class SearchOverlay {
                         void self.getSessionSaver().reloadCurrentSessionWithoutSaving();
                     };
                     if (self.getSettingsState().confirmQuickActions) {
-                        new ConfirmModal(self.app, localizedCall(strings.confirmReloadSession, target.name), doReload, { confirmText: localizedString(strings.load) }).open();
+                        new ConfirmModal(self.app, localizedCall(strings.confirmReloadSession, target.name), doReload, { confirmText: localizedString(strings.switchTo) }).open();
                     } else {
                         doReload();
                     }

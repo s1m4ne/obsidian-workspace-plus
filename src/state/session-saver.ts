@@ -283,7 +283,7 @@ export class SessionSaver {
                     }, {
                         title: formatString(L.nameSessionTitle),
                         placeholder: formatString(L.nameSessionPlaceholder),
-                        buttonText: formatString(L.saveInline),
+                        buttonText: formatString(L.save),
                         skipButtonText: formatString(L.saveWithoutNaming),
                         onSkip: () => {
                             void doSave(session.name).then(resolve);
@@ -433,7 +433,7 @@ export class SessionSaver {
                     });
                 },
                 {
-                    confirmText: formatString(L.saveInline),
+                    confirmText: formatString(L.save),
                     confirmClass: 'mod-cta',
                 }
             );
@@ -520,7 +520,7 @@ export class SessionSaver {
                 }, {
                     title: formatString(L.nameSessionTitle),
                     placeholder: formatString(L.nameSessionPlaceholder),
-                    buttonText: formatString(L.saveInline),
+                    buttonText: formatString(L.save),
                     emptyNotice: formatString(L.emptyName),
                 });
             } else {

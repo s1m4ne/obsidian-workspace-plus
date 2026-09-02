@@ -60,7 +60,11 @@ function collectUsedI18nKeys(sourceDir) {
 
     const used = new Set();
     const refMap = {};
-    const re = /(?:\bL|i18n\.L)\.([A-Za-z0-9_]+)/g;
+    // `L.key` and `i18n.L.key`, plus `strings.key`: the search overlay takes a
+    // resolved table as `strings` and reads every one of its labels that way,
+    // so matching only `L.` reported five live keys as unused - which trains
+    // the reader to skim the warning instead of reading it.
+    const re = /(?:\bL|i18n\.L|\bstrings)\.([A-Za-z0-9_]+)/g;
 
     for (let i = 0; i < files.length; i++) {
         const rel = path.relative(repoRoot, files[i]);
