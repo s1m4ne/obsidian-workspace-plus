@@ -501,6 +501,72 @@ test('left and right belong to the caret while the field has focus', async () =>
     modal.close();
 });
 
+/**
+ * One ring, and it marks what Enter does.
+ *
+ * The mark is a class kept in step with real focus rather than `:focus`,
+ * because CSS cannot reach the case that matters most: in the rename dialog
+ * focus is in the field, so no button matches `:focus` while the affirmative
+ * button is still Enter's target. That is why delete showed a ring and rename
+ * showed none. It also removes the dependence on `:focus-visible`, which does
+ * not match a programmatic focus unless the previously focused element did,
+ * and so painted the ring only sometimes.
+ */
+const MARK = 'wpp-dialog-enter-target';
+
+function marked(modal: { contentEl: HTMLElement }): string[] {
+    return [...modal.contentEl.querySelectorAll<HTMLButtonElement>('.wpp-confirm-buttons button')]
+        .filter((btn) => btn.classList.contains(MARK))
+        .map((btn) => btn.textContent ?? '');
+}
+
+test('a confirmation marks its affirmative action from the moment it opens', async () => {
+    const modal = new ConfirmModal(app, 'Delete "Work"?', () => {});
+    modal.open();
+
+    // Before the focus timer has run at all: the dialog is never on screen
+    // without saying what Enter does.
+    assert.deepEqual(marked(modal), [String(L.delete)]);
+
+    await new Promise((resolve) => setTimeout(resolve, 80));
+    assert.deepEqual(marked(modal), [String(L.delete)], 'and still, once focus lands');
+    modal.close();
+});
+
+test('a dialog whose focus is in the field still marks the affirmative action', async () => {
+    const modal = new RenameModal(app, 'Work', () => {});
+    modal.open();
+
+    await new Promise((resolve) => setTimeout(resolve, 80));
+
+    const doc = modal.containerEl.ownerDocument || document;
+    assert.equal(doc.activeElement, modal.contentEl.querySelector('input'), 'the field has focus');
+    // No button matches :focus here, which is exactly why the mark is a class.
+    assert.deepEqual(marked(modal), [String(L.rename)]);
+    modal.close();
+});
+
+test('the mark follows the arrows, and never marks two buttons', () => {
+    const modal = new UnsavedSwitchModal(app, 'Unsaved changes', () => {}, () => {}, () => {});
+    modal.open();
+
+    const doc = modal.containerEl.ownerDocument || document;
+    assert.deepEqual(marked(modal), [String(L.saveAndSwitch)]);
+
+    doc.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowLeft' }));
+    assert.deepEqual(marked(modal), [String(L.saveAndSwitch)], 'enters at the default target');
+
+    doc.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowLeft' }));
+    assert.deepEqual(marked(modal), [String(L.cancel)], 'and moves with focus');
+
+    doc.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowLeft' }));
+    assert.deepEqual(marked(modal), [String(L.switchWithoutSaving)]);
+
+    doc.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowRight' }));
+    assert.deepEqual(marked(modal), [String(L.cancel)], 'and back');
+    modal.close();
+});
+
 test('a button the user tabbed to owns its own Enter', () => {
     let confirmed = false;
     let cancelled = false;

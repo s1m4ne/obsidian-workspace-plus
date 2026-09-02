@@ -996,27 +996,34 @@ body.wpp-session-list-dragging * {
     outline-offset: 2px;
 }
 
-/* The dialog row's focus ring, drawn on `:focus` rather than `:focus-visible`.
+/* One ring in a dialog's button row, and it means "this is what Enter does".
    
-   `:focus-visible` deliberately does not match a programmatic `.focus()` unless
-   the element that held focus immediately before it matched too - and when a
-   dialog opens, Obsidian focuses something of its own programmatically, so
-   nothing does. DialogModal then moves focus to the default target and inherits
-   "not visible", which left the delete confirmation with no visible selection
-   at all while Enter really was aimed at Delete.
+   Driven by a class DialogModal keeps in step with real focus, not by `:focus`.
+   Two reasons CSS alone could not do it:
    
-   A text field is the exception the spec makes - it always matches - which is
-   why the rename dialog showed its ring and the confirmations did not.
+   - The rename dialog's focus is in the text field, so no button matches
+     `:focus` while the affirmative button is still Enter's target. Nothing was
+     marked at all - which is why delete showed a ring and rename did not.
+   - `:focus-visible` does not match a programmatic `.focus()` unless the
+     element that held focus immediately before matched too, and when a modal
+     opens Obsidian focuses something of its own programmatically. So the ring
+     appeared only when the dialog happened to be opened from a keyboard-focused
+     control: "sometimes".
    
-   `--background-modifier-border-focus` rather than `--interactive-accent`: the
-   affirmative button is filled, `mod-cta` in accent or `mod-warning` in red,
-   and an accent ring on a red fill is the colour clash that made the previous
-   painted ring read as "selected" instead of "focused". The outline is
-   replaced rather than added to, so keyboard focus and the opening default
-   look the same and arrowing does not change the treatment. */
+   `--background-modifier-border-focus`, not `--interactive-accent`: the
+   affirmative button is filled - accent for `mod-cta`, red for `mod-warning` -
+   and an accent ring on a red fill is the colour clash that made the first
+   painted ring read as "selected" rather than "focused".
+   
+   Where focus is on a button the target *is* that button, so this doubles as
+   the focus indicator and the row never shows two rings. `outline: none` keeps
+   Obsidian's own ring from adding a second one in that case. */
+.wpp-confirm-buttons button.wpp-dialog-enter-target {
+    box-shadow: 0 0 0 3px var(--background-modifier-border-focus);
+}
+
 .wpp-confirm-buttons button:focus {
     outline: none;
-    box-shadow: 0 0 0 3px var(--background-modifier-border-focus);
 }
 
 /* Inputs follow Obsidian's focus box-shadow pattern instead of an outline. */

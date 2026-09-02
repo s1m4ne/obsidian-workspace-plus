@@ -100,6 +100,7 @@ export abstract class DialogModal extends Modal {
 
     private settled = false;
     private keyHandler: ((event: KeyboardEvent) => void) | null = null;
+    private focusHandler: (() => void) | null = null;
 
     /**
      * The document the listener went onto. Read again at close time it could be
@@ -163,9 +164,16 @@ export abstract class DialogModal extends Modal {
         this.renderFooter(contentEl);
 
         this.keyHandler = (event: KeyboardEvent): void => { this.onKeyDown(event); };
+        this.focusHandler = (): void => { this.paintEnterTarget(); };
         this.listenerDoc = this.containerEl.ownerDocument;
         this.listenerDoc.addEventListener('keydown', this.keyHandler, true);
+        // On the document, not the dialog: focus leaving the dialog entirely
+        // has to repaint too, and the container sees no focusin for that.
+        this.listenerDoc.addEventListener('focusin', this.focusHandler, true);
 
+        // Marked before the focus timer runs, so the dialog is never on screen
+        // without saying what Enter does.
+        this.paintEnterTarget();
         this.focusInitialTarget();
     }
 
@@ -265,6 +273,41 @@ export abstract class DialogModal extends Modal {
     }
 
     /**
+     * The button Enter will fire, given where focus is.
+     *
+     * The same answer `onKeyDown` acts on, so the mark cannot disagree with
+     * the behaviour - which is the defect the first version of this had, where
+     * a painted ring moved with the arrows while `buttons[ringIndex]` was what
+     * actually ran.
+     */
+    private enterTarget(): HTMLButtonElement | null {
+        const active = this.containerEl.ownerDocument.activeElement;
+        const focused = this.buttons.find((btn) => btn === active);
+        return focused ?? this.affirmativeBtn;
+    }
+
+    /**
+     * One ring, one meaning: this is what Enter does.
+     *
+     * A class rather than `:focus`, because CSS cannot express the case that
+     * matters most - the rename dialog, where focus is in the field and the
+     * affirmative button is still Enter's target, so no button matches
+     * `:focus` and nothing was marked at all. It also removes the dependence
+     * on `:focus-visible`, which does not match a programmatic focus unless
+     * the previously focused element matched, and so painted the ring only
+     * sometimes.
+     *
+     * Where focus is on a button, the target *is* the focused button, so this
+     * doubles as the focus indicator and there are never two rings in the row.
+     */
+    private paintEnterTarget(): void {
+        const target = this.enterTarget();
+        for (const btn of this.buttons) {
+            btn.classList.toggle('wpp-dialog-enter-target', btn === target);
+        }
+    }
+
+    /**
      * Real focus along the row, clamped at both ends.
      *
      * Clamped rather than wrapped: wrapping puts the discard choice one key
@@ -297,9 +340,15 @@ export abstract class DialogModal extends Modal {
     }
 
     override onClose(): void {
-        if (this.keyHandler && this.listenerDoc) {
-            this.listenerDoc.removeEventListener('keydown', this.keyHandler, true);
-            this.keyHandler = null;
+        if (this.listenerDoc) {
+            if (this.keyHandler) {
+                this.listenerDoc.removeEventListener('keydown', this.keyHandler, true);
+                this.keyHandler = null;
+            }
+            if (this.focusHandler) {
+                this.listenerDoc.removeEventListener('focusin', this.focusHandler, true);
+                this.focusHandler = null;
+            }
             this.listenerDoc = null;
         }
         // Click-outside and Obsidian's own close reach here without going
