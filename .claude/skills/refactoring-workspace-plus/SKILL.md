@@ -219,10 +219,18 @@ Do not claim the refactor is verified before the user has confirmed these.
 Features, UI changes, and bug fixes. Also removing default hotkeys, kept
 deliberately — `Cmd+Shift+Enter` is core UX.
 
-The declarative settings API is **in** scope and was not always: this note used
-to exclude it because `getSettingDefinitions` was absent from the published
-types at 1.12.3. The installed `obsidian` is 1.13.1 and declares it, so the plan
-in issue #111 uses it for the settings commit. `minAppVersion` stays at 1.11.0,
-which is why `display()` remains as the fallback rather than being deleted —
-Obsidian skips `display()` only once `getSettingDefinitions()` returns a
-non-empty array.
+The declarative settings API: **attempted in `aaaa42b`, reverted in `4f86cbe`,
+and settled.** `getSettingDefinitions()` exists in `obsidian` 1.13.1, so the
+types were never the obstacle — the layout was. It renders Obsidian's screen
+from our data, and a `page` definition becomes one entry in a vertical list of
+collapsible sections; this plugin's settings are four horizontal tabs with a
+custom bar, and the rows inside them came out wrong too. Adopting it was not a
+change of rendering path but a different settings screen. Found by checking it
+in Obsidian, which is what verify 6 was for.
+
+`display()` is the only renderer and stays. The twenty lint violations this
+would have cleared are the price of the layout and are recorded suppressions:
+eighteen `no-deprecated`, one `prefer-setting-definitions`, one
+`no-manual-html-headings`. The real cost is that the settings do not appear in
+Obsidian's settings search — a feature request, not migration work. Anything
+revisiting this answers the layout question first, not the API question.
