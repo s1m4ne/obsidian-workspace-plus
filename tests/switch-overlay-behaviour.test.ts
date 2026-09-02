@@ -146,7 +146,7 @@ function createTestPlugin() {
         findSessionIndex: (sessions: SessionItem[], id: string | null | undefined) => sessionStore.findSessionIndex(sessions, id),
         getActiveSession: () => sessionStore.getActiveSession(),
         getCurrentWorkspaceLayout: () => ({ layout: 'current' }),
-        applyWorkspaceLayout: async (): Promise<boolean> => true,
+        changeWorkspaceLayout: async (): Promise<boolean> => true,
         // The real saver, like production: the switcher's CAPTURE is the
         // saver's, and a stub here would let the two drift.
         commitWorkspaceToSession: (session: SessionItem, options?: { touchModified?: boolean }) =>

@@ -752,9 +752,8 @@ export function sessionSwitcherHost(plugin: WorkspacePlusPlus): SessionSwitcherH
         getActiveSession: () => plugin.getSessionStore().getActiveSession(),
         getCurrentWorkspaceLayout: () => plugin.getSessionStore().getCurrentWorkspaceLayout(),
         // The workspace itself, not the switcher's own restore: the switcher
-        // builds the layout and then calls this to put it on screen. Pointing it
-        // back at applyWorkspaceLayout would recurse.
-        applyWorkspaceLayout: (layout) => plugin.app.workspace.changeLayout(layout).then(() => true),
+        // builds the layout and then calls this to put it on screen.
+        changeWorkspaceLayout: (layout) => plugin.app.workspace.changeLayout(layout).then(() => true),
         commitWorkspaceToSession: (session, options) =>
             plugin.getSessionSaver().commitWorkspaceToSession(session, options),
         saveActiveSession: (options) => plugin.getSessionSaver().saveActiveSession(options),

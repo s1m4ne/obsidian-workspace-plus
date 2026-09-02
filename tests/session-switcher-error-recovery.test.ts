@@ -58,7 +58,7 @@ function createSwitcher(captureFails: () => boolean): { switcher: Switcher; data
             target.modified = Date.now();
             return true;
         },
-        applyWorkspaceLayout: async (): Promise<boolean> => true,
+        changeWorkspaceLayout: async (): Promise<boolean> => true,
         persistData: async (): Promise<boolean> => true,
         saveActiveSession: async (): Promise<boolean> => true,
         isActiveSessionDirty: (): boolean => false,

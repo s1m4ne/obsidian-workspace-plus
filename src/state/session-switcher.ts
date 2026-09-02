@@ -48,7 +48,15 @@ export interface SessionSwitcherHost {
     findSessionIndex: (sessions: SessionItem[], sessionId: string | null | undefined) => number;
     getActiveSession: () => SessionItem | null;
     getCurrentWorkspaceLayout: () => unknown;
-    applyWorkspaceLayout: (layout: unknown, options?: LayoutRestoreOptions) => Promise<boolean>;
+    /**
+     * Hand a finished layout to Obsidian. Named apart from this class's own
+     * `applyWorkspaceLayout` on purpose: that one resolves the restore scope
+     * and then calls this one, and while both were called
+     * `applyWorkspaceLayout` the only thing keeping them apart was which host
+     * object a caller happened to be holding. main.ts carried a comment
+     * warning that pointing this at the wrong one would recurse.
+     */
+    changeWorkspaceLayout: (layout: unknown, options?: LayoutRestoreOptions) => Promise<boolean>;
     persistData: () => Promise<boolean>;
     commitWorkspaceToSession: (session: SessionItem, options?: { touchModified?: boolean }) => boolean;
     saveActiveSession: (options?: { silent?: boolean; touchModified?: boolean }) => Promise<boolean>;
@@ -360,7 +368,7 @@ export class SessionSwitcher {
         const targetLayout = this.buildLayoutForRestore(layout);
 
         try {
-            await this.host.applyWorkspaceLayout(targetLayout, opts);
+            await this.host.changeWorkspaceLayout(targetLayout, opts);
             return true;
         } catch (e) {
             if (opts.catchErrors) return false;

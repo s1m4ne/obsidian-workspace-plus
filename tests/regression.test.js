@@ -149,7 +149,7 @@ function createPlugin(initialData) {
         findSessionIndex: function (sessions, id) { return sessionStore.findSessionIndex(sessions, id); },
         getActiveSession: function () { return sessionStore.getActiveSession(); },
         getCurrentWorkspaceLayout: getCurrentWorkspaceLayout,
-        applyWorkspaceLayout: applyLayoutToWorkspace,
+        changeWorkspaceLayout: applyLayoutToWorkspace,
         // The real saver, as in production. CAPTURE has one implementation and
         // the switcher reaches it rather than repeating it.
         commitWorkspaceToSession: function (session, options) {

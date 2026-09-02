@@ -49,7 +49,7 @@ function createSwitcher(initialData) {
         findSessionIndex: (sessions, id) => sessions.findIndex((session) => session.id === id),
         getActiveSession,
         getCurrentWorkspaceLayout,
-        applyWorkspaceLayout: async () => true,
+        changeWorkspaceLayout: async () => true,
         persistData,
         commitWorkspaceToSession: (session, options) =>
             sessionSaver.commitWorkspaceToSession(session, options),

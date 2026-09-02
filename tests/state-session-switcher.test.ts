@@ -68,7 +68,7 @@ function createMockHost(initialData?: Partial<PluginData>): {
             events.savedActive += 1;
             return true;
         },
-        applyWorkspaceLayout: async (layout: unknown) => {
+        changeWorkspaceLayout: async (layout: unknown) => {
             events.appliedLayouts.push(layout);
             return true;
         },

@@ -42,7 +42,7 @@ function createSwitcher(options) {
         findSessionIndex: (ordered, id) => ordered.findIndex((session) => session.id === id),
         getActiveSession: () => data.activeSessionId ? data.sessions[data.activeSessionId] : null,
         getCurrentWorkspaceLayout: () => ({ root: 'current' }),
-        applyWorkspaceLayout: (layout) => {
+        changeWorkspaceLayout: (layout) => {
             events.appliedLayouts.push(layout);
             return new Promise((resolve) => { events.pendingLayoutResolvers.push(resolve); });
         },

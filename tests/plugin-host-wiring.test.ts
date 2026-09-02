@@ -131,7 +131,7 @@ test('the SessionSwitcher host reaches the collaborator each member names', () =
     host.findSessionIndex([], 's1');
     host.getActiveSession();
     host.getCurrentWorkspaceLayout();
-    void host.applyWorkspaceLayout({ pane: 'next' });
+    void host.changeWorkspaceLayout({ pane: 'next' });
     host.commitWorkspaceToSession({ id: 's1', name: 'S', layout: {}, modified: 0 });
     void host.saveActiveSession();
     host.isActiveSessionDirty();
