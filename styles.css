@@ -996,6 +996,29 @@ body.wpp-session-list-dragging * {
     outline-offset: 2px;
 }
 
+/* The dialog row's focus ring, drawn on `:focus` rather than `:focus-visible`.
+   
+   `:focus-visible` deliberately does not match a programmatic `.focus()` unless
+   the element that held focus immediately before it matched too - and when a
+   dialog opens, Obsidian focuses something of its own programmatically, so
+   nothing does. DialogModal then moves focus to the default target and inherits
+   "not visible", which left the delete confirmation with no visible selection
+   at all while Enter really was aimed at Delete.
+   
+   A text field is the exception the spec makes - it always matches - which is
+   why the rename dialog showed its ring and the confirmations did not.
+   
+   `--background-modifier-border-focus` rather than `--interactive-accent`: the
+   affirmative button is filled, `mod-cta` in accent or `mod-warning` in red,
+   and an accent ring on a red fill is the colour clash that made the previous
+   painted ring read as "selected" instead of "focused". The outline is
+   replaced rather than added to, so keyboard focus and the opening default
+   look the same and arrowing does not change the treatment. */
+.wpp-confirm-buttons button:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--background-modifier-border-focus);
+}
+
 /* Inputs follow Obsidian's focus box-shadow pattern instead of an outline. */
 .wpp-search-input:focus-visible,
 .wpp-save-input:focus-visible {
