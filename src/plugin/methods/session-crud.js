@@ -50,9 +50,6 @@ function attachSessionCrudMethods(WorkspacePlusPlus) {
         return this.getSessionStore().duplicateSession(sessionId);
     };
 
-    WorkspacePlusPlus.prototype.ensureDefaultSession = function () {
-        return this.getSessionStore().ensureDefaultSession();
-    };
 }
 
 module.exports = attachSessionCrudMethods;

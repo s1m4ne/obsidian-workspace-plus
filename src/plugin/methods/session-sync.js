@@ -22,45 +22,21 @@ function attachSessionSyncMethods(WorkspacePlusPlus) {
 
 
 
-    WorkspacePlusPlus.prototype.hasLocalSessionChangesSinceStorage = function () {
-        return sessionSync.hasLocalSessionChangesSinceStorage(this);
-    };
 
-    WorkspacePlusPlus.prototype.mergeExternalSessionDataForWrite = function (externalData) {
-        return sessionSync.mergeExternalSessionDataForHost(this, externalData);
-    };
 
-    WorkspacePlusPlus.prototype.applySessionDataFromStorage = function (sessionData, options) {
-        return sessionSync.applySessionDataFromStorage(this, sessionData, options);
-    };
 
     WorkspacePlusPlus.prototype.reloadExternalSessionStorageIfChanged = function (options) {
         return sessionSync.reloadExternalSessionStorageIfChanged(this, options);
     };
 
-    WorkspacePlusPlus.prototype.getSyncWatcher = function () {
-        return sessionSync.getSyncWatcher(this);
-    };
 
     WorkspacePlusPlus.prototype.scheduleExternalSessionStorageReload = function (debounceMs) {
         this.getSyncWatcher().scheduleReload(debounceMs);
     };
 
-    WorkspacePlusPlus.prototype.registerSessionStorageListeners = function () {
-        this.getSyncWatcher().registerListeners();
-    };
 
-    WorkspacePlusPlus.prototype.onExternalSettingsChange = function () {
-        sessionSync.onExternalSettingsChange(this);
-    };
 
-    WorkspacePlusPlus.prototype.scheduleStartupSessionStorageChecks = function () {
-        this.getSyncWatcher().scheduleStartupChecks();
-    };
 
-    WorkspacePlusPlus.prototype.clearSessionStorageSyncTimers = function () {
-        sessionSync.clearSessionStorageSyncTimers(this);
-    };
 }
 
 module.exports = attachSessionSyncMethods;

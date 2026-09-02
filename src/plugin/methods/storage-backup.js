@@ -10,9 +10,6 @@ function attachStorageBackupMethods(WorkspacePlusPlus) {
         return storageBackup.prepareRotationBackupData(sessionData);
     };
 
-    WorkspacePlusPlus.prototype.initRotationBackupTimestamp = function () {
-        return storageBackup.initRotationBackupTimestampForHost(this);
-    };
 
     WorkspacePlusPlus.prototype.rotateBackupIfNeeded = function (sessionData) {
         return storageBackup.rotateBackupIfNeededForHost(this, sessionData);

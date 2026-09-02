@@ -30,6 +30,10 @@ import { SettingsState } from './state/settings-state.ts';
 import type { SettingsStateHost } from './state/settings-state.ts';
 import type { SessionStorage } from './storage/session-storage.ts';
 import type { SyncWatcher } from './storage/sync-watcher.ts';
+import { getSyncWatcher, onExternalSettingsChange, clearSessionStorageSyncTimers } from './storage/session-sync.ts';
+import type { SyncWatcherHost } from './storage/session-sync.ts';
+import { initRotationBackupTimestampForHost } from './storage/storage-backup.ts';
+import type { RotationBackupTimestampHost } from './storage/storage-backup.ts';
 import { StatusBarController } from './statusbar-controller.ts';
 import type { StatusBarControllerHost } from './statusbar-controller.ts';
 import { SwitchOverlay } from './ui/overlays/switch-overlay.ts';
@@ -56,25 +60,16 @@ interface AttachedPluginMethods {
     persistData(): Promise<boolean>;
 
     getSessionStorage(): SessionStorage;
-    getSyncWatcher(): SyncWatcher;
 
     normalizeGroupFeatureState(): void;
     syncSessionOrder(): void;
     syncSessionCommands(): void;
-    registerSessionStorageListeners(): void;
-    clearSessionStorageSyncTimers(): void;
-    scheduleStartupSessionStorageChecks(): void;
 
-    noteStartupLayoutChange(): void;
     updateStatusBar(): void;
-    startStartupSettleWindow(): void;
-    ensureDefaultSession(): void;
     scheduleStartupFlush(): void;
 
     startHistorySnapshotTimer(): void;
     stopHistorySnapshotTimer(): void;
-    initRotationBackupTimestamp(): Promise<unknown>;
-    registerFrontmatterListeners(): void;
 
     switchOverlayEl: HTMLElement | null;
     showSwitchPreviewOverlay(ordered: SessionItem[], index: number, viewGroupId?: string | null): void;
@@ -128,7 +123,7 @@ export class WorkspacePlusPlus extends Plugin {
 
         this.normalizeGroupFeatureState();
         this.syncSessionOrder();
-        this.registerSessionStorageListeners();
+        this.getSyncWatcher().registerListeners();
         // Re-resolved now that the saved language is known; the call at module
         // load only had 'auto'.
         resolveLocale(this.data.language);
@@ -146,7 +141,7 @@ export class WorkspacePlusPlus extends Plugin {
         this.addSettingTab(this.settingTab);
 
         this.registerEvent(this.app.workspace.on('layout-change', () => {
-            this.noteStartupLayoutChange();
+            this.getSessionSwitcher().noteStartupLayoutChange();
             this.updateStatusBar();
         }));
         this.registerEvent(this.app.workspace.on('active-leaf-change', () => {
@@ -159,14 +154,14 @@ export class WorkspacePlusPlus extends Plugin {
         // Everything here needs the workspace to exist, so it waits rather than
         // running inside onload.
         this.app.workspace.onLayoutReady(() => {
-            this.startStartupSettleWindow();
-            this.ensureDefaultSession();
+            this.getSessionSwitcher().startStartupSettleWindow();
+            this.getSessionStore().ensureDefaultSession();
             this.syncSessionCommands();
             this.scheduleStartupFlush();
             this.startHistorySnapshotTimer();
-            void this.initRotationBackupTimestamp();
-            this.registerFrontmatterListeners();
-            this.scheduleStartupSessionStorageChecks();
+            void initRotationBackupTimestampForHost(this.asHost<RotationBackupTimestampHost>());
+            this.getFrontmatterLinker().registerFrontmatterListeners();
+            this.getSyncWatcher().scheduleStartupChecks();
         });
     }
 
@@ -220,6 +215,21 @@ export class WorkspacePlusPlus extends Plugin {
      * - had no caller at plugin level at all and are simply gone; the host
      * factories above reach the switcher directly.
      */
+    getSyncWatcher(): SyncWatcher {
+        return getSyncWatcher(this.asHost<SyncWatcherHost>());
+    }
+
+    /**
+     * Obsidian's own hook, called when data.json changes on disk under us -
+     * which is how a vault synced by Obsidian Sync delivers another device's
+     * settings. Nothing in this repository calls it, so no search shows a
+     * caller and it looks exactly like a shim with no purpose; deleting it
+     * would silently take out the path issue #105 exists for.
+     */
+    override onExternalSettingsChange(): void {
+        onExternalSettingsChange(this.asHost<SyncWatcherHost>());
+    }
+
     isSidebarRestoreEnabled(): boolean {
         return this.getSessionSwitcher().isSidebarRestoreEnabled();
     }
@@ -377,7 +387,7 @@ export class WorkspacePlusPlus extends Plugin {
         // - which used to abort onunload before the flush below and lose
         // whatever had not been saved.
         this.getStatusBarController().resetScrollState();
-        this.clearSessionStorageSyncTimers();
+        clearSessionStorageSyncTimers(this.asHost<SyncWatcherHost>());
         void this.flushPendingPersistence();
     }
 }

@@ -25,7 +25,4 @@ module.exports = function attachFrontmatterMethods(WorkspacePlusPlus) {
 
 
 
-    WorkspacePlusPlus.prototype.registerFrontmatterListeners = function () {
-        return this.getFrontmatterLinker().registerFrontmatterListeners();
-    };
 };
