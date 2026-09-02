@@ -1,4 +1,5 @@
 import { Menu, Notice, type App } from 'obsidian';
+import { addCustomizeClicksItem, call, showAtMouseEvent } from './context-menu-shared.ts';
 import { L, text } from './i18n.ts';
 import * as obsidianInternals from './platform/obsidian-internals.ts';
 import type { SettingsState } from './state/settings-state.ts';
@@ -67,19 +68,6 @@ export type SettingsContextMenuOptions = SettingsMenuCallbacks & {
     event?: MouseEvent | undefined;
     showResetOverlay?: boolean | undefined;
 };
-
-function isCallback(value: unknown): value is () => void {
-    return typeof value === 'function';
-}
-
-function call(callback: unknown): void {
-    if (isCallback(callback)) callback();
-}
-
-function showAtMouseEvent(menu: Menu, event: MouseEvent | undefined): void {
-    const show = (input: MouseEvent): unknown => menu.showAtMouseEvent(input);
-    Reflect.apply(show, undefined, [event]);
-}
 
 /** Open a settings context menu on empty area of Session Manager / Quick Switcher. */
 export function openSettingsContextMenu(initialOptions?: SettingsContextMenuOptions | null): void {
@@ -217,14 +205,7 @@ export function openSettingsContextMenu(initialOptions?: SettingsContextMenuOpti
         });
     });
 
-    menu.addItem((mi) => {
-        mi.setTitle(text(L.contextCustomizeClicks));
-        mi.setIcon('mouse-pointer-click');
-        mi.onClick(() => {
-            if (plugin.settingTab) plugin.settingTab.activeTab = 'general';
-            obsidianInternals.openSettingTab(app, plugin.manifest.id);
-        });
-    });
+    addCustomizeClicksItem(menu, app, plugin);
 
     menu.addItem((mi) => {
         mi.setTitle(text(L.contextOpenSettings));

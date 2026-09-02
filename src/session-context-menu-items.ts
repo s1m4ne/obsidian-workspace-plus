@@ -1,6 +1,6 @@
 import { Menu, type App, type MenuItem } from 'obsidian';
+import { addCustomizeClicksItem, call, showAtMouseEvent } from './context-menu-shared.ts';
 import { L, text } from './i18n.ts';
-import * as obsidianInternals from './platform/obsidian-internals.ts';
 import type { SessionItem } from './storage/default-data.ts';
 import type { TabId } from './settings-tab.ts';
 import type { GroupStore } from './state/group-store.ts';
@@ -69,16 +69,8 @@ export type SessionContextMenuOptions = SessionContextMenuActions & {
     showCustomizeClicks?: boolean | undefined;
 };
 
-function isAction(value: unknown): value is Action {
-    return typeof value === 'function';
-}
-
 function isMoveToGroupAction(value: unknown): value is MoveToGroupAction {
     return typeof value === 'function';
-}
-
-function call(action: unknown): void {
-    if (isAction(action)) action();
 }
 
 function callMoveToGroup(action: unknown, groupId: string): void {
@@ -99,11 +91,6 @@ function submenuFor(item: MenuItem): Menu {
         throw new TypeError('Menu item does not support submenus');
     }
     return item.setSubmenu();
-}
-
-function showAtMouseEvent(menu: Menu, event: MouseEvent | undefined): void {
-    const show = (input: MouseEvent): unknown => menu.showAtMouseEvent(input);
-    Reflect.apply(show, undefined, [event]);
 }
 
 /** Open a context menu for a session item. */
@@ -244,14 +231,7 @@ export function openSessionContextMenu(initialOptions?: SessionContextMenuOption
     // --- Customize click actions (status bar only) ---
     if (options.showCustomizeClicks) {
         menu.addSeparator();
-        menu.addItem((mi) => {
-            mi.setTitle(text(L.contextCustomizeClicks));
-            mi.setIcon('mouse-pointer-click');
-            mi.onClick(() => {
-                if (plugin.settingTab) plugin.settingTab.activeTab = 'general';
-                obsidianInternals.openSettingTab(app, plugin.manifest.id);
-            });
-        });
+        addCustomizeClicksItem(menu, app, plugin);
     }
 
     // --- Danger group ---
