@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { setupHarness } from './lock/harness/index.ts';
 import type { PluginData, SessionItem } from '../src/storage/default-data.ts';
+import type { RestoreScope } from '../src/layout-utils.ts';
 import type { SearchOverlayHost, SearchOverlayPosition } from '../src/ui/overlays/search-overlay.ts';
 import type { SwitchOverlayHost } from '../src/ui/overlays/switch-overlay.ts';
 import type { App } from 'obsidian';
@@ -111,7 +112,7 @@ function createTestPlugin() {
         resolveGroupSelection: (gid: string | null) => groupStore.resolveGroupSelection(gid),
         attachSessionToActiveGroup: (sid: string) => groupStore.attachSessionToActiveGroup(sid),
         applyWorkspaceLayout: async (): Promise<boolean> => true,
-        getWorkspaceRestoreScope: (): string => 'full',
+        getWorkspaceRestoreScope: (): RestoreScope => 'full',
         openRenameModal: (): void => {},
         openConfirmModal: (_m: string, onConfirm: () => void): void => { onConfirm(); },
     }));

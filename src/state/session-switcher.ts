@@ -1,6 +1,7 @@
 import { Notice, type App } from 'obsidian';
 import { L } from '../i18n.ts';
 import { mergeMainLayoutIntoCurrent } from '../layout-utils.ts';
+import type { RestoreScope } from '../layout-utils.ts';
 import type { PluginData, SessionItem } from '../storage/default-data.ts';
 import type { SettingsState } from './settings-state.ts';
 import type { SessionStore } from './session-store.ts';
@@ -328,7 +329,7 @@ export class SessionSwitcher {
         return this.data?.restoreSidebars !== false;
     }
 
-    getWorkspaceRestoreScope(): 'full' | 'main-only' {
+    getWorkspaceRestoreScope(): RestoreScope {
         return this.data?.restoreSidebars === false ? 'main-only' : 'full';
     }
 

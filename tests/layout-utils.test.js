@@ -80,7 +80,7 @@ test('layout utils structural comparison ignores volatile Obsidian workspace sta
         lastOpenFiles: ['b.md', 'a.md'],
     };
 
-    assert.equal(layoutUtils.layoutsEqualStructural(savedLayout, currentLayout), true);
+    assert.equal(layoutUtils.layoutsEqualStructural(savedLayout, currentLayout, { restoreScope: 'full' }), true);
 });
 
 test('layout utils structural comparison still detects meaningful layout differences', function () {
@@ -105,7 +105,7 @@ test('layout utils structural comparison still detects meaningful layout differe
         },
     };
 
-    assert.equal(layoutUtils.layoutsEqualStructural(a, b), false);
+    assert.equal(layoutUtils.layoutsEqualStructural(a, b, { restoreScope: 'full' }), false);
 });
 
 test('layout utils cloneLayout returns a deep copy', function () {
@@ -157,7 +157,7 @@ test('layout utils main-only structural comparison ignores sidebar changes', fun
         right: { id: 'b-right', type: 'leaf', state: { type: 'outline' } },
     };
 
-    assert.equal(layoutUtils.layoutsEqualStructural(a, b), false);
+    assert.equal(layoutUtils.layoutsEqualStructural(a, b, { restoreScope: 'full' }), false);
     assert.equal(layoutUtils.layoutsEqualStructural(a, b, { restoreScope: 'main-only' }), true);
 });
 
@@ -180,8 +180,8 @@ test('layout utils full structural comparison keeps sidebar branches but ignores
         left: 10,
     };
 
-    assert.equal(layoutUtils.layoutsEqualStructural(savedLayout, sameWithPosition), true);
-    assert.equal(layoutUtils.layoutsEqualStructural(savedLayout, differentSidebar), false);
-    assert.equal(layoutUtils.layoutsEqualStructural({ layout: 'saved' }, { layout: 'saved', left: 10, top: 20 }), true);
-    assert.equal(layoutUtils.layoutsEqualStructural({ layout: 'saved', left: 10 }, sameContentWithNumericLeft), false);
+    assert.equal(layoutUtils.layoutsEqualStructural(savedLayout, sameWithPosition, { restoreScope: 'full' }), true);
+    assert.equal(layoutUtils.layoutsEqualStructural(savedLayout, differentSidebar, { restoreScope: 'full' }), false);
+    assert.equal(layoutUtils.layoutsEqualStructural({ layout: 'saved' }, { layout: 'saved', left: 10, top: 20 }, { restoreScope: 'full' }), true);
+    assert.equal(layoutUtils.layoutsEqualStructural({ layout: 'saved', left: 10 }, sameContentWithNumericLeft, { restoreScope: 'full' }), false);
 });

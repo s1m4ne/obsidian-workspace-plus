@@ -1,7 +1,22 @@
 import { cloneJson } from './clone-json.ts';
 
+/**
+ * Which regions of the workspace the plugin treats as its own.
+ *
+ * `full` restores and compares `main` plus both sidebars. `main-only` restores
+ * `main` over whatever sidebars are on screen, and must therefore compare
+ * `main` alone: comparing a region that is never restored produces a dirty
+ * flag that nothing can clear.
+ *
+ * That is why the scope is a required argument rather than an optional one. It
+ * used to be `restoreScope?: string`, so a caller that forgot it, or misspelt
+ * the value, silently got `full` - and only one of the three call paths passed
+ * it at all.
+ */
+export type RestoreScope = 'full' | 'main-only';
+
 export interface LayoutComparisonOptions {
-    restoreScope?: string;
+    readonly restoreScope: RestoreScope;
 }
 
 export function serializeLayout(layout: unknown): string {
@@ -69,7 +84,7 @@ function looksLikeWorkspaceItem(value: unknown): boolean {
         );
 }
 
-export function normalizeLayoutForComparison(layout: unknown, options: LayoutComparisonOptions = {}): unknown {
+function normalizeLayoutForComparison(layout: unknown, options: LayoutComparisonOptions): unknown {
     let root = layout;
     if (options.restoreScope === 'main-only' && root && typeof root === 'object') {
         const obj = root as Record<string, unknown>;
@@ -78,6 +93,10 @@ export function normalizeLayoutForComparison(layout: unknown, options: LayoutCom
         }
     }
 
+    // Pixel geometry and per-view ephemera. `left` belongs to this set too, and
+    // is handled below instead of here: Obsidian uses the same key for a
+    // coordinate and for the left sidebar's subtree, and 4df7f55 stripped both
+    // for four months by putting the name in this list.
     const volatileKeys: Record<string, boolean> = {
         eState: true,
         lastOpenFiles: true,
@@ -97,6 +116,7 @@ export function normalizeLayoutForComparison(layout: unknown, options: LayoutCom
             for (let i = 0; i < keys.length; i++) {
                 const key = keys[i]!;
                 if (volatileKeys[key]) continue;
+                // A numeric `left` is a coordinate; an object `left` is the sidebar.
                 if (key === 'left' && (obj[key] === null || typeof obj[key] !== 'object')) continue;
                 if (key === 'id' && isWorkspaceItem) continue;
                 if (key === 'active' && depth === 0 && typeof obj[key] === 'string') continue;
@@ -110,7 +130,7 @@ export function normalizeLayoutForComparison(layout: unknown, options: LayoutCom
     return normalizeNode(root || null, 0);
 }
 
-export function layoutsEqualStructural(a: unknown, b: unknown, options: LayoutComparisonOptions = {}): boolean {
+export function layoutsEqualStructural(a: unknown, b: unknown, options: LayoutComparisonOptions): boolean {
     try {
         return JSON.stringify(normalizeLayoutForComparison(a, options)) === JSON.stringify(normalizeLayoutForComparison(b, options));
     } catch {
