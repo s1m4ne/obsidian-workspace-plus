@@ -5,7 +5,6 @@ import { HistoryModal } from './modals/history-modal.ts';
 import type { HistoryModalPluginHost } from './modals/history-modal.ts';
 import * as settings from './settings.js';
 import DEFAULT_DATA from './plugin/default-data.js';
-import attachPersistenceMethods from './plugin/methods/persistence.js';
 import { setupStatusBar } from './statusbar-controller.ts';
 import { ConfirmModal } from './modals/confirm-modal.ts';
 import { RenameModal } from './modals/rename-modal.ts';
@@ -28,7 +27,12 @@ import { SessionSwitcher } from './state/session-switcher.ts';
 import type { SessionSwitcherHost } from './state/session-switcher.ts';
 import { SettingsState } from './state/settings-state.ts';
 import type { SettingsStateHost } from './state/settings-state.ts';
+import { PersistenceService } from './storage/persistence-service.ts';
+import type { PersistenceServiceHost } from './storage/persistence-service.ts';
 import type { SessionStorage } from './storage/session-storage.ts';
+import type { SessionStorageLocation } from './storage/paths.ts';
+import type { JsonFileStore, ReadJsonResult } from './storage/json-file-store.ts';
+import type { DataRecord, SessionData } from './storage/persistence-service.ts';
 import type { SyncWatcher } from './storage/sync-watcher.ts';
 import {
     getSyncWatcher,
@@ -71,27 +75,6 @@ import type { SessionManagerModalHost } from './modals/session-manager-modal-cla
 import type { SettingsTabHost } from './settings-tab.ts';
 
 resolveLocale();
-
-/**
- * What plugin/methods/ still attaches to the prototype.
- *
- * Declaration merging is what makes this file type-check while the attach step
- * is still how those methods arrive: TypeScript cannot see a prototype written
- * at run time. Both this interface and the attach call are deleted in commit 34b
- * of issue #111, once the Behavior Lock - whose only seam is this mechanism -
- * has been retired.
- */
-interface AttachedPluginMethods {
-    loadWithBackup(): Promise<Partial<PluginData> | null>;
-    flushPendingPersistence(): Promise<unknown>;
-    persistData(): Promise<boolean>;
-
-    getSessionStorage(): SessionStorage;
-
-
-
-
-}
 
 export class WorkspacePlusPlus extends Plugin {
     data!: PluginData;
@@ -202,6 +185,34 @@ export class WorkspacePlusPlus extends Plugin {
      * there is nothing to wire - only the narrowing, which asHost() carries in
      * one place.
      */
+    /**
+     * The rotation-backup timestamp, mirrored from the service.
+     *
+     * Read by the settings screen and written by both it and the backup
+     * rotation, so the pair is deliberate: a getter without a setter throws on
+     * assignment in the strict bundle, and that is what once aborted onunload
+     * before it reached flushPendingPersistence() and lost unsaved work. The
+     * other three mirrored fields the adapter carried - globalSettings,
+     * _lastPersistStamp and _persistQueue - had no reader outside the service
+     * and are gone.
+     */
+    get _lastRotationBackupAt(): number {
+        return this.getPersistenceService().getLastRotationBackupAt();
+    }
+
+    set _lastRotationBackupAt(value: number) {
+        this.getPersistenceService().setLastRotationBackupAt(value);
+    }
+
+    private persistenceServiceInstance?: PersistenceService;
+
+    getPersistenceService(): PersistenceService {
+        if (!this.persistenceServiceInstance) {
+            this.persistenceServiceInstance = new PersistenceService(persistenceServiceHost(this));
+        }
+        return this.persistenceServiceInstance;
+    }
+
     private frontmatterLinkerInstance?: FrontmatterLinker;
 
     /**
@@ -254,6 +265,123 @@ export class WorkspacePlusPlus extends Plugin {
      * it is given, and Obsidian reaches the fourth through
      * onExternalSettingsChange.
      */
+    /**
+     * Persistence: the twenty-five members other modules reach on the plugin.
+     *
+     * These were a table of name strings in an adapter, attached by a loop. A
+     * typo there produced a prototype without that method rather than an error -
+     * nothing else could see it, the file being JavaScript and no test happening
+     * to call the missing one - so the adapter grew a run-time assertion against
+     * PersistenceService.prototype to catch it. Written out, the type checker
+     * does that job, and each signature is checked against the service rather
+     * than assumed to match it.
+     */
+    getSessionStorage(): SessionStorage {
+        return this.getPersistenceService().getSessionStorage();
+    }
+
+    getSessionStorageLocation(): SessionStorageLocation {
+        return this.getPersistenceService().getSessionStorageLocation();
+    }
+
+    getSessionsPath(): string {
+        return this.getPersistenceService().getSessionsPath();
+    }
+
+    getExportDirPath(): string {
+        return this.getPersistenceService().getExportDirPath();
+    }
+
+    getBackupsDirPath(): string {
+        return this.getPersistenceService().getBackupsDirPath();
+    }
+
+    getRotationBackupPath(generation: number): string {
+        return this.getPersistenceService().getRotationBackupPath(generation);
+    }
+
+    extractSessionData(data: unknown): SessionData {
+        return this.getPersistenceService().extractSessionData(data);
+    }
+
+    normalizeSessionData(raw: unknown): SessionData {
+        return this.getPersistenceService().normalizeSessionData(raw);
+    }
+
+    getJsonStore(): JsonFileStore {
+        return this.getPersistenceService().getJsonStore();
+    }
+
+    ensureDir(path: string): Promise<void> {
+        return this.getPersistenceService().ensureDir(path);
+    }
+
+    ensureSessionStorageDir(): Promise<void> {
+        return this.getPersistenceService().ensureSessionStorageDir();
+    }
+
+    getFileMtime(path: string): Promise<number> {
+        return this.getPersistenceService().getFileMtime(path);
+    }
+
+    readJsonIfExists(path: string): Promise<ReadJsonResult> {
+        return this.getPersistenceService().readJsonIfExists(path);
+    }
+
+    writeJson(path: string, data: unknown, pretty?: boolean): Promise<void> {
+        return this.getPersistenceService().writeJson(path, data, pretty);
+    }
+
+    resetSettingsToDefault(): Promise<unknown> {
+        return this.getPersistenceService().resetSettingsToDefault();
+    }
+
+    resetSessionsAndSettingsToDefault(): Promise<unknown> {
+        return this.getPersistenceService().resetSessionsAndSettingsToDefault();
+    }
+
+    clearBackupFiles(): Promise<boolean> {
+        return this.getPersistenceService().clearBackupFiles();
+    }
+
+    clearBackupsAndVersionHistory(): Promise<unknown> {
+        return this.getPersistenceService().clearBackupsAndVersionHistory();
+    }
+
+    getStorageDiagnosticsInfo(): DataRecord {
+        return this.getPersistenceService().getStorageDiagnosticsInfo();
+    }
+
+    getSessionStorageSize(): Promise<number | null> {
+        return this.getPersistenceService().getSessionStorageSize();
+    }
+
+    persistDataImmediate(): Promise<unknown> {
+        return this.getPersistenceService().persistDataImmediate();
+    }
+
+    /**
+     * The service's queue resolves to whatever the last write returned, which
+     * is nothing in particular; six collaborator hosts declare this as
+     * Promise<boolean> and none of them reads the value. Settled here rather
+     * than widening all six, so nobody starts believing the boolean.
+     */
+    async persistData(): Promise<boolean> {
+        await this.getPersistenceService().persistData();
+        return true;
+    }
+
+    flushPendingPersistence(): Promise<unknown> {
+        return this.getPersistenceService().flushPendingPersistence();
+    }
+
+    loadSessionDataFromStorage(): Promise<SessionData | null> {
+        return this.getPersistenceService().loadSessionDataFromStorage();
+    }
+
+    loadWithBackup(): Promise<DataRecord> {
+        return this.getPersistenceService().loadWithBackup();
+    }
     recordSessionStorageState(stamp: number, mtime: number, data?: unknown): void {
         recordSessionStorageState(this.asHost<SessionStorageStateHost>(), stamp, mtime, data);
     }
@@ -459,10 +587,6 @@ export class WorkspacePlusPlus extends Plugin {
         void this.flushPendingPersistence();
     }
 }
-
-export interface WorkspacePlusPlus extends AttachedPluginMethods {}
-
-attachPersistenceMethods(WorkspacePlusPlus);
 
 export default WorkspacePlusPlus;
 
@@ -687,5 +811,49 @@ export function frontmatterLinkerHost(plugin: WorkspacePlusPlus): FrontmatterLin
         getStartupSettleRemainingMs: () => plugin.getSessionSwitcher().getStartupSettleRemainingMs(),
         isSessionSwitcherActive: () => plugin.getSessionSwitcher().isSwitching,
         registerEvent: (eventRef) => { plugin.registerEvent(eventRef); },
+    };
+}
+
+/**
+ * The host PersistenceService is given.
+ *
+ * Five members used to go through a router. The adapter marked its own delegate
+ * methods, so a caller that had replaced one of these on the plugin - a test
+ * seam, or a wrapper - won over the service's own, and exactly one
+ * implementation ran. Deciding it from the *return value* instead had run both,
+ * and a void override of clearBackupFiles deleted eleven backup files the caller
+ * had taken responsibility for.
+ *
+ * Nothing replaces them any more. The tests that exercise that behaviour build
+ * PersistenceService with their own host and hooks, so they check the seam where
+ * it lives rather than through the plugin; no module under src/ assigns to these
+ * at all. What the router encoded is kept as the shape of the two answers:
+ * persistData and its siblings go to the service, and readJsonIfExists and
+ * getFileMtime go to the file store, because the service's versions of those two
+ * call back into the host and would recurse.
+ */
+export function persistenceServiceHost(plugin: WorkspacePlusPlus): PersistenceServiceHost {
+    const service = (): PersistenceService => plugin.getPersistenceService();
+    const store = (): JsonFileStore => plugin.getPersistenceService().getJsonStore();
+    return {
+        get data() { return plugin.data; },
+        get app() { return plugin.app; },
+        get manifest() { return plugin.manifest; },
+        loadData: () => plugin.loadData(),
+        saveData: (data) => plugin.saveData(data),
+        reloadExternalSessionStorageIfChanged: (options) =>
+            plugin.reloadExternalSessionStorageIfChanged(options),
+        recordSessionDataStored: (data) => plugin.recordSessionDataStored(data),
+        recordSessionStorageState: (stamp, mtime, data) => {
+            plugin.recordSessionStorageState(stamp, mtime, data);
+        },
+        rotateBackupIfNeeded: (data) => plugin.rotateBackupIfNeeded(data),
+        clearVersionHistoryEntries: () => plugin.getHistoryService().clearVersionHistoryEntries(),
+        resetSessionsToDefault: () => plugin.getSessionStore().resetSessionsToDefault(),
+        persistData: () => service().persistData(),
+        persistDataImmediate: () => service().persistDataImmediate(),
+        clearBackupFiles: () => service().clearBackupFiles(),
+        readJsonIfExists: (path) => store().readJsonIfExists(path),
+        getFileMtime: (path) => store().getFileMtime(path),
     };
 }

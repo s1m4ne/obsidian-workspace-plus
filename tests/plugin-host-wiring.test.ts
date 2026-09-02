@@ -13,7 +13,7 @@ import { setupHarness } from './lock/harness/index.ts';
 
 const harness = setupHarness();
 const { createRealPlugin } = await import('./real-plugin.ts');
-const { sessionStoreHost, sessionSwitcherHost, settingsStateHost, groupStoreHost, historyServiceHost, sessionSaverHost, frontmatterLinkerHost } = await import('../src/main.ts');
+const { sessionStoreHost, sessionSwitcherHost, settingsStateHost, groupStoreHost, historyServiceHost, sessionSaverHost, frontmatterLinkerHost, persistenceServiceHost } = await import('../src/main.ts');
 
 type Call = string;
 
@@ -385,6 +385,108 @@ test('the switcher host leaves out the hooks the switcher implements itself', ()
     ]) {
         assert.equal(name in host, false, `${name} must not be supplied`);
     }
+});
+
+test('every persistence member on the plugin reaches the service method of its name', () => {
+    const { plugin, calls } = createPlugin();
+    // The adapter attached these from a table of name strings, and grew a
+    // run-time assertion against PersistenceService.prototype because a typo
+    // there produced a prototype without the method and nothing else could see
+    // it. This is that assertion, from the other side: each one is called and
+    // has to land on the service member of the same name.
+    plugin.getPersistenceService = (): unknown => recorder('persistenceService', calls);
+
+    void (plugin.getSessionStorage as (...a: unknown[]) => unknown)();
+    void (plugin.getSessionStorageLocation as (...a: unknown[]) => unknown)();
+    void (plugin.getSessionsPath as (...a: unknown[]) => unknown)();
+    void (plugin.getExportDirPath as (...a: unknown[]) => unknown)();
+    void (plugin.getBackupsDirPath as (...a: unknown[]) => unknown)();
+    void (plugin.getRotationBackupPath as (...a: unknown[]) => unknown)(0);
+    void (plugin.extractSessionData as (...a: unknown[]) => unknown)({});
+    void (plugin.normalizeSessionData as (...a: unknown[]) => unknown)({});
+    void (plugin.getJsonStore as (...a: unknown[]) => unknown)();
+    void (plugin.ensureDir as (...a: unknown[]) => unknown)('x');
+    void (plugin.ensureSessionStorageDir as (...a: unknown[]) => unknown)();
+    void (plugin.getFileMtime as (...a: unknown[]) => unknown)('x');
+    void (plugin.readJsonIfExists as (...a: unknown[]) => unknown)('x');
+    void (plugin.writeJson as (...a: unknown[]) => unknown)('x', {}, {});
+    void (plugin.resetSettingsToDefault as (...a: unknown[]) => unknown)();
+    void (plugin.resetSessionsAndSettingsToDefault as (...a: unknown[]) => unknown)();
+    void (plugin.clearBackupFiles as (...a: unknown[]) => unknown)();
+    void (plugin.clearBackupsAndVersionHistory as (...a: unknown[]) => unknown)();
+    void (plugin.getStorageDiagnosticsInfo as (...a: unknown[]) => unknown)();
+    void (plugin.getSessionStorageSize as (...a: unknown[]) => unknown)();
+    void (plugin.persistDataImmediate as (...a: unknown[]) => unknown)();
+    void (plugin.persistData as (...a: unknown[]) => unknown)();
+    void (plugin.flushPendingPersistence as (...a: unknown[]) => unknown)();
+    void (plugin.loadSessionDataFromStorage as (...a: unknown[]) => unknown)();
+    void (plugin.loadWithBackup as (...a: unknown[]) => unknown)();
+
+    assert.deepEqual(calls, [
+        'persistenceService.getSessionStorage',
+        'persistenceService.getSessionStorageLocation',
+        'persistenceService.getSessionsPath',
+        'persistenceService.getExportDirPath',
+        'persistenceService.getBackupsDirPath',
+        'persistenceService.getRotationBackupPath',
+        'persistenceService.extractSessionData',
+        'persistenceService.normalizeSessionData',
+        'persistenceService.getJsonStore',
+        'persistenceService.ensureDir',
+        'persistenceService.ensureSessionStorageDir',
+        'persistenceService.getFileMtime',
+        'persistenceService.readJsonIfExists',
+        'persistenceService.writeJson',
+        'persistenceService.resetSettingsToDefault',
+        'persistenceService.resetSessionsAndSettingsToDefault',
+        'persistenceService.clearBackupFiles',
+        'persistenceService.clearBackupsAndVersionHistory',
+        'persistenceService.getStorageDiagnosticsInfo',
+        'persistenceService.getSessionStorageSize',
+        'persistenceService.persistDataImmediate',
+        // The fixture replaces plugin.persistData to count it, so this one lands
+        // on the stub. Its own route to the service is checked below.
+        'plugin.persistData',
+        'persistenceService.flushPendingPersistence',
+        'persistenceService.loadSessionDataFromStorage',
+        'persistenceService.loadWithBackup',
+    ]);
+});
+
+test('the persistence host answers from the service and the file store', () => {
+    const { plugin, calls } = createPlugin();
+    const store = recorder('jsonStore', calls);
+    const service = recorder('persistenceService', calls);
+    plugin.getPersistenceService = (): unknown => new Proxy(service, {
+        get(target, prop: string) {
+            if (prop === 'getJsonStore') return (): unknown => store;
+            return Reflect.get(target, prop);
+        },
+    });
+    const host = persistenceServiceHost(asPlugin(plugin));
+
+    void host.persistData();
+    void host.persistDataImmediate();
+    void host.clearBackupFiles();
+    // These two go to the store, not the service: the service's versions call
+    // back into the host and would recurse until the stack ran out.
+    void host.readJsonIfExists('p');
+    void host.getFileMtime('p');
+    host.clearVersionHistoryEntries();
+    void host.resetSessionsToDefault();
+
+    assert.deepEqual(calls, [
+        'persistenceService.persistData',
+        'persistenceService.persistDataImmediate',
+        'persistenceService.clearBackupFiles',
+        'jsonStore.readJsonIfExists',
+        'jsonStore.getFileMtime',
+        // rotateBackupIfNeeded is left out: it goes to the plugin's own method,
+        // which runs the real rotation rather than forwarding, and this test is
+        // about which side of the service/store split each member lands on.
+        'historyService.clearVersionHistoryEntries',
+        'sessionStore.resetSessionsToDefault',
+    ]);
 });
 
 test.after(() => harness.restore());

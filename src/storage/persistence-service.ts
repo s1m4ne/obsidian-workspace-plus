@@ -7,8 +7,8 @@ import { normalizeSessionStorageLocation, type SessionStorageLocation } from './
 import { SessionStorage } from './session-storage.ts';
 import { getPersistStamp, hasNonEmptySessions, hasSessionShape, pickKeys, pickSessionPayload, splitSessionHistory } from './session-data.ts';
 
-type DataRecord = Record<string, unknown>;
-type SessionData = DataRecord & {
+export type DataRecord = Record<string, unknown>;
+export type SessionData = DataRecord & {
     activeSessionId?: string | null;
     sessions?: Record<string, SessionItem>;
     sessionOrder?: string[];
