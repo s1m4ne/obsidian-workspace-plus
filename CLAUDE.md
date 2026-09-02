@@ -79,8 +79,9 @@ does.
 ## Commands
 
 ```bash
-npm run check        # the gate: typecheck, lint, dual dispatch, hooks, delegation,
-                     # reachability, readonly, imports, tests, coverage, build
+npm run check        # the gate: typecheck, lint, dual dispatch, hooks,
+                     # host conformance, delegation, reachability, readonly,
+                     # imports, tests, coverage, build
 npm run dev          # esbuild watch; hot reload picks it up
 npm run build        # production bundle
 npm run progress     # where the migration landed, measured
@@ -88,8 +89,8 @@ npm run coverage:floors   # per-module coverage floors
 npm run check:i18n   # locale key completeness across 21 locales
 ```
 
-`npm run check` must pass before every commit. It is eleven gates. Three are
-ratchets; five exist because this migration produced the same failure seven times
+`npm run check` must pass before every commit. It is twelve gates. Three are
+ratchets; six exist because this migration produced the same failure eight times
 and none of the others could see it.
 
 - **Lint** compares per-rule counts against `.eslint-baseline.json`, and the
@@ -136,6 +137,19 @@ and none of the others could see it.
   the strict bundle: it never reached `flushPendingPersistence()`, so unsaved
   work was lost on every disable and reload. P2 keeps creating these accessors.
 
+- **Host conformance** resolves every `asHost<X>()` in `main.ts`, collects X's
+  required members through `extends`, and fails if the plugin class does not
+  define one. `asHost` was `return this as unknown as T` - a double cast asserts
+  a shape rather than verifying it - and fourteen required members had gone
+  missing behind it, four of them user-facing paths that did nothing in Obsidian.
+  `asHost<T>(this: T)` makes the type checker do this now; the gate exists so it
+  still holds if a cast is ever reintroduced, and it does not consult tsc.
+  Zero is the only acceptable count.
+
+  The lesson generalises: **an erasing cast at a boundary switches off every
+  check that boundary has.** `as unknown as` in `src/` is four sites, each with
+  a stated reason. Adding a fifth needs one.
+
 - **Unwired hooks** is not a ratchet - zero is the only acceptable count.
   `plugin.openHistoryModal?.(session)` reads like a call, but if nothing defines
   the method it does nothing, and neither the type checker nor the tests object.
@@ -143,7 +157,10 @@ and none of the others could see it.
   or `typeof` guard whose name is declared on one of this repo's own `*Host`
   interfaces and defined nowhere; names that come from `obsidian.d.ts` are
   Obsidian's to define, and `platform/obsidian-internals.ts` is exempt because
-  guarding undocumented API is its whole purpose.
+  guarding undocumented API is its whole purpose. It covers only members
+  declared **optional** - required ones are the type checker's job, which is
+  exactly the split that let the host-conformance failure through, so the two
+  checks have to be read as a pair.
 
 When a commit legitimately improves any of the three, re-record it in that same
 commit: `node scripts/lint-ratchet.js --update`,
