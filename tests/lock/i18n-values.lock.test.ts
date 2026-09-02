@@ -43,6 +43,14 @@
 // themselves - 293 KB instead of 610 KB, and still able to name what moved,
 // which is what a diff across 21 new locale files needs.
 //
+// And once more, same authorization, for one description that was wrong in all
+// 21 locales: settingsStatusBarModScrollSwitchDesc said scrolling switches
+// sessions "while holding the selected modifier key", but
+// statusBarScrollModifierMode defaults to 'none', which means the gesture fires
+// only when *no* modifier is held. The text described a non-default
+// configuration as the behaviour. The modifier is optional, and the new text
+// says so. 318 keys, unchanged; one value per locale.
+//
 // RULE: Behavior Lock tests are NEVER edited during the refactor. If this fails,
 // a translation changed. Regenerating the fixture is only correct when the change
 // was intended and the maintainer has said so.
