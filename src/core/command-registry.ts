@@ -454,11 +454,21 @@ export class CommandRegistry {
             });
         };
 
+        // All four gate on the setting, the way exit-group already did. The
+        // other three used a plain `callback`, so turning groups off left them
+        // listed in the command palette running a body that returns
+        // immediately - and left next-group holding Cmd+Shift+Tab, which is
+        // Obsidian's own reverse tab switch, for no benefit at all.
+        //
+        // Third instance of this shape: cd2275e did it for the search command
+        // and the session-filter setting.
         host.addCommand({
             id: 'switch-group',
             name: String(L.cmdSwitchGroup || ''),
-            callback: () => {
-                switchGroupAndShowOverlay(1);
+            checkCallback: (checking) => {
+                if (!host.getGroupStore().isGroupFeatureEnabled()) return false;
+                if (!checking) switchGroupAndShowOverlay(1);
+                return true;
             },
         });
 
@@ -484,13 +494,21 @@ export class CommandRegistry {
                 { modifiers: ['Mod', 'Shift'], key: 'Tab' },
                 { modifiers: ['Mod', 'Shift'], key: 'G' },
             ],
-            callback: () => {
-                switchGroupAndShowOverlay(1);
+            checkCallback: (checking) => {
+                if (!host.getGroupStore().isGroupFeatureEnabled()) return false;
+                if (!checking) switchGroupAndShowOverlay(1);
+                return true;
             },
         });
 
-        addSimpleCommand('previous-group', String(L.cmdPreviousGroup || ''), () => {
-            void host.getGroupStore().switchGroupRelative(-1);
+        host.addCommand({
+            id: 'previous-group',
+            name: String(L.cmdPreviousGroup || ''),
+            checkCallback: (checking) => {
+                if (!host.getGroupStore().isGroupFeatureEnabled()) return false;
+                if (!checking) void host.getGroupStore().switchGroupRelative(-1);
+                return true;
+            },
         });
     }
 

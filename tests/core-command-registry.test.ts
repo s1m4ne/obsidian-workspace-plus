@@ -123,7 +123,10 @@ function createMockHost() {
                 getRelativeGroupId: (_current: string | null, step: number) => (step > 0 ? 'g1' : undefined),
                 exitGroup: () => { calls.push('exitGroup'); },
                 switchGroupRelative: (step: number) => { calls.push(`switchGroupRelative:${step}`); },
-                isGroupFeatureEnabled: () => true,
+                // Reads the fixture's own data rather than answering `true`,
+                // so a test that turns the feature off reaches the branches
+                // under it instead of a frozen answer.
+                isGroupFeatureEnabled: () => data.groupFeatureEnabled !== false,
                 // The registry asks the store for the active group id now,
                 // answered from the fixture's own data so the test at the
                 // bottom that sets it still steers the overlay.
@@ -212,15 +215,23 @@ test('CommandRegistry: registers all core commands and handles callbacks', async
     cmdMap.get('import-latest-sessions-snapshot')?.callback?.();
     assert.ok(calls.includes('importSnapshot'));
 
-    cmdMap.get('switch-group')?.callback?.();
+    // All four group commands are checkCallbacks now, so they follow the
+    // group-feature setting instead of staying listed while it is off.
+    const switchGroup = cmdMap.get('switch-group');
+    assert.equal(switchGroup?.checkCallback?.(true), true);
+    switchGroup?.checkCallback?.(false);
     // Wait for resolveGroupSelection promise
     await new Promise((resolve) => setTimeout(resolve, 10));
     assert.ok(calls.includes('showSwitchOverlay'));
 
-    cmdMap.get('next-group')?.callback?.();
+    const nextGroup = cmdMap.get('next-group');
+    assert.equal(nextGroup?.checkCallback?.(true), true);
+    nextGroup?.checkCallback?.(false);
     await new Promise((resolve) => setTimeout(resolve, 10));
 
-    cmdMap.get('previous-group')?.callback?.();
+    const previousGroup = cmdMap.get('previous-group');
+    assert.equal(previousGroup?.checkCallback?.(true), true);
+    previousGroup?.checkCallback?.(false);
     assert.ok(calls.includes('switchGroupRelative:-1'));
 
     // Check checkCallbacks
@@ -309,7 +320,7 @@ test('opening another group offers no active row when the active session is not 
     // the first row of a group the active session is not in.
     data.activeSessionId = 'not-in-any-group';
 
-    cmdMap.get('switch-group')?.callback?.();
+    cmdMap.get('switch-group')?.checkCallback?.(false);
     await new Promise((resolve) => setTimeout(resolve, 10));
 
     assert.equal(
@@ -317,4 +328,35 @@ test('opening another group offers no active row when the active session is not 
         -1,
         'the overlay must be told there is no active row, not handed the first one',
     );
+});
+
+test('turning the group feature off withdraws every group command', () => {
+    const { commands, data, host } = createMockHost();
+    new CommandRegistry(host).registerCommands();
+    const cmdMap = new Map(commands.map((c) => [c.id, c]));
+
+    const groupCommands = ['switch-group', 'exit-group', 'next-group', 'previous-group'];
+
+    data.groupFeatureEnabled = false;
+
+    for (const id of groupCommands) {
+        const command = cmdMap.get(id);
+        assert.ok(command, `${id} is registered`);
+        assert.equal(
+            command.checkCallback?.(true),
+            false,
+            `${id} must report itself unavailable while the group feature is off`,
+        );
+    }
+
+    // next-group carries Cmd+Shift+Tab by default, which is Obsidian's own
+    // reverse tab switch. Holding it while doing nothing is the reason this
+    // matters beyond a tidy command palette.
+    assert.ok(
+        cmdMap.get('next-group')?.hotkeys?.some((h) => h.key === 'Tab'),
+        'next-group is the one holding Cmd+Shift+Tab',
+    );
+
+    data.groupFeatureEnabled = true;
+    assert.equal(cmdMap.get('switch-group')?.checkCallback?.(true), true, 'and they come back');
 });
