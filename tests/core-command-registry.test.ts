@@ -77,7 +77,6 @@ function createMockHost() {
         },
         exportSessionsSnapshot: async () => { calls.push('exportSnapshot'); },
         importSessionsFromLatestExport: async () => { calls.push('importSnapshot'); },
-        isGroupFeatureEnabled: () => true,
         getOrderedSessionsForGroup() { return this.getOrderedSessions(); },
         // Answers from the data, so a caller that hard-codes an index - or
         // reintroduces the "not found means the first one" substitution P9
@@ -89,10 +88,16 @@ function createMockHost() {
             calls.push('showSwitchOverlay');
             shownActiveIndexes.push(activeIndex);
         },
-        getRelativeGroupId(_current: string | null, step: number) { return step > 0 ? 'g1' : undefined; },
-        resolveGroupSelection: async (gid: string) => ({ resolvedGroupId: gid }),
-        exitGroup() { calls.push('exitGroup'); },
-        switchGroupRelative(step: number) { calls.push(`switchGroupRelative:${step}`); },
+        // The group members the registry reaches now come through the store.
+        getGroupStore(): never {
+            return {
+                getRelativeGroupId: (_current: string | null, step: number) => (step > 0 ? 'g1' : undefined),
+                exitGroup: () => { calls.push('exitGroup'); },
+                switchGroupRelative: (step: number) => { calls.push(`switchGroupRelative:${step}`); },
+                isGroupFeatureEnabled: () => true,
+                resolveGroupSelection: async (groupId: string | null) => ({ resolvedGroupId: groupId, switched: true, targetGroupId: groupId, sessions: [] }),
+            } as never;
+        },
         switchSessionByIdFromCommand: async (id: string) => { calls.push(`switchById:${id}`); return true; },
         openSessionManagerModal(focusName: boolean) { calls.push(`openSessionManager:${focusName}`); },
         openHistoryModal(session: import('../src/storage/default-data.ts').SessionItem) { calls.push(`openHistory:${session.name}`); },

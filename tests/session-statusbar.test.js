@@ -51,7 +51,12 @@ function createController(options) {
         statusBarEl,
         addStatusBarItem: createStatusBarEl,
         getActiveSession: () => data.activeSessionId ? data.sessions[data.activeSessionId] : null,
-        getActiveGroup: () => data.activeGroupId ? data.groups[data.activeGroupId] : null,
+        // The controller asks the store whether groups are on, rather than the
+        // plugin, so the double supplies just that.
+        getGroupStore: () => ({
+            isGroupFeatureEnabled: () => data.groupFeatureEnabled !== false,
+            getActiveGroup: () => data.activeGroupId ? data.groups[data.activeGroupId] : null,
+        }),
         shouldShowUnsavedStatusBarHighlight: () => !!options.unsaved,
         switchRelativeFromScroll: async () => true,
     });

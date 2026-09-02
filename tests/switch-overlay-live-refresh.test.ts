@@ -42,6 +42,9 @@ function createOverlay(): { overlay: Overlay; sessions: Session[]; announce: () 
 
     const host = {
         data: { activeSessionId: 's1', activeGroupId: null, groups: {} },
+        // Group calls go through getGroupStore(). This double carries the group
+        // members itself, so it stands in as its own group store.
+        getGroupStore(): never { return this as never; },
         isGroupFeatureEnabled: (): boolean => false,
         getOrderedGroups: (): Array<{ id: string; name: string }> => [],
         getOrderedGroupTabIds: (): string[] => [],

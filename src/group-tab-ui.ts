@@ -3,23 +3,27 @@ import { L } from './i18n.ts';
 import { ConfirmModal } from './modals/confirm-modal.ts';
 import { RenameModal } from './modals/rename-modal.ts';
 import type { SessionGroup, SessionItem } from './storage/default-data.ts';
+import type { GroupStore } from './state/group-store.ts';
 
 export interface GroupTabPluginHost {
+    /**
+     * Group state is owned by GroupStore. Naming the store rather than
+     * restating its methods keeps one list: the plugin used to carry a
+     * forwarding method per call, and one added to the store without a shim
+     * did nothing from here while the type checker saw a host that simply
+     * lacked the member.
+     */
+    getGroupStore(): GroupStore;
+
     app: App;
     data: {
         groups?: Record<string, SessionGroup> | undefined;
         groupOrder?: string[] | undefined;
         sessions?: Record<string, SessionItem> | undefined;
     };
-    getOrderedGroupTabIds(): string[];
-    getOrderedGroups(): SessionGroup[];
-    getGroupSessionIds(groupId: string): string[];
     createGroupValidated(name: string): Promise<boolean>;
     renameGroupValidated(groupId: string, name: string): Promise<boolean>;
-    clearAllGroups(): Promise<boolean | void>;
     deleteAllInactiveSessions(): Promise<number>;
-    removeAllSessionsFromGroup(groupId: string): Promise<boolean | void>;
-    deleteGroup(groupId: string): Promise<boolean | void>;
 }
 
 export interface AttachGroupTabDragOptions {
@@ -211,7 +215,7 @@ export function renderGroupTabs(options: RenderGroupTabsOptions): void {
 
     const app = opts.app || plugin.app;
     const groups = opts.groups || plugin.data.groups || {};
-    const groupOrder = opts.groupOrder || plugin.getOrderedGroupTabIds();
+    const groupOrder = opts.groupOrder || plugin.getGroupStore().getOrderedGroupTabIds();
     const selectedGroupId = opts.selectedGroupId || null;
 
     function setupGroupTabDrag(tabEl: HTMLElement): void {
@@ -311,7 +315,7 @@ export function openAllGroupsTabContextMenu(options: AllGroupsContextMenuOptions
         });
     });
 
-    const allGroups = plugin.getOrderedGroups();
+    const allGroups = plugin.getGroupStore().getOrderedGroups();
     if (allGroups.length > 0) {
         menu.addSeparator();
         menu.addItem((mi) => {
@@ -323,7 +327,7 @@ export function openAllGroupsTabContextMenu(options: AllGroupsContextMenuOptions
                     app,
                     (L.confirmDeleteAllGroups as (n: number) => string)(allGroups.length),
                     () => {
-                        void plugin.clearAllGroups().then(() => {
+                        void plugin.getGroupStore().clearAllGroups().then(() => {
                             if (typeof opts.onResetViewGroup === 'function') {
                                 opts.onResetViewGroup();
                             }
@@ -391,7 +395,7 @@ export function openGroupTabContextMenu(options: GroupContextMenuOptions): void 
         });
     });
 
-    const groupSessionIds = plugin.getGroupSessionIds(group.id);
+    const groupSessionIds = plugin.getGroupStore().getGroupSessionIds(group.id);
     if (groupSessionIds.length > 0) {
         menu.addItem((mi) => {
             mi.setTitle(String(L.groupRemoveAllSessions || ''));
@@ -401,7 +405,7 @@ export function openGroupTabContextMenu(options: GroupContextMenuOptions): void 
                     app,
                     (L.confirmRemoveAllFromGroup as (g: string, n: number) => string)(group.name, groupSessionIds.length),
                     () => {
-                        void plugin.removeAllSessionsFromGroup(group.id).then(() => {
+                        void plugin.getGroupStore().removeAllSessionsFromGroup(group.id).then(() => {
                             new Notice((L.groupRemovedAllSessions as (g: string) => string)(group.name));
                             if (typeof opts.onGroupsChanged === 'function') {
                                 opts.onGroupsChanged();
@@ -430,7 +434,7 @@ export function openGroupTabContextMenu(options: GroupContextMenuOptions): void 
                 app,
                 (L.confirmDeleteGroup as (g: string) => string)(group.name),
                 () => {
-                    void plugin.deleteGroup(group.id).then(() => {
+                    void plugin.getGroupStore().deleteGroup(group.id).then(() => {
                         if (typeof opts.onDeleteGroup === 'function') {
                             opts.onDeleteGroup(group.id);
                         }

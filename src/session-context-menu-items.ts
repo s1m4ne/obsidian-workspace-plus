@@ -1,7 +1,8 @@
 import { Menu, type App, type MenuItem } from 'obsidian';
 import { L } from './i18n.ts';
 import * as obsidianInternals from './platform/obsidian-internals.ts';
-import type { SessionGroup, SessionItem } from './storage/default-data.ts';
+import type { SessionItem } from './storage/default-data.ts';
+import type { GroupStore } from './state/group-store.ts';
 
 type Action = () => unknown;
 type MoveToGroupAction = (groupId: string) => unknown;
@@ -20,6 +21,15 @@ type SessionContextMenuActionName =
 type SessionContextMenuActions = Partial<Record<SessionContextMenuActionName, Action | MoveToGroupAction | undefined>>;
 
 export interface SessionContextMenuPluginHost {
+    /**
+     * Group state is owned by GroupStore. Naming the store rather than
+     * restating its methods keeps one list: the plugin used to carry a
+     * forwarding method per call, and one added to the store without a shim
+     * did nothing from here while the type checker saw a host that simply
+     * lacked the member.
+     */
+    getGroupStore(): GroupStore;
+
     app: App;
     data: {
         sessions: Record<string, SessionItem>;
@@ -29,7 +39,6 @@ export interface SessionContextMenuPluginHost {
     settingTab?: { activeTab: string } | undefined;
     isAutoSaveOnSwitchEnabled(): boolean;
     isVersionHistoryEnabled(): boolean;
-    getOrderedGroups(): readonly SessionGroup[];
 }
 
 export type SessionContextMenuOptions = SessionContextMenuActions & {
@@ -196,7 +205,7 @@ export function openSessionContextMenu(initialOptions?: SessionContextMenuOption
             mi.setTitle(text(L.groupMoveToGroup));
             mi.setIcon('folder-input');
             const submenu = submenuFor(mi);
-            const groups = plugin.getOrderedGroups();
+            const groups = plugin.getGroupStore().getOrderedGroups();
             const sessionGroupIds = plugin.data.sessionGroups?.[session.id] || [];
             for (const group of groups) {
                 submenu.addItem((sub) => {

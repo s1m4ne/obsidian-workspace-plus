@@ -5,7 +5,7 @@ import {
     executeStatusBarAction,
     type StatusBarActionPluginHost,
 } from './statusbar-actions.ts';
-import type { PluginData, SessionGroup, SessionItem } from './storage/default-data.ts';
+import type { PluginData, SessionItem } from './storage/default-data.ts';
 
 export interface StatusBarScrollPresetConfig {
     threshold: number;
@@ -36,7 +36,6 @@ export interface StatusBarControllerHost extends StatusBarActionPluginHost {
     statusBarEl?: HTMLElement | null;
     addStatusBarItem(): HTMLElement;
     getActiveSession(): SessionItem | null;
-    getActiveGroup(): SessionGroup | null;
     shouldShowUnsavedStatusBarHighlight(): boolean;
     switchRelativeFromScroll(direction: number): Promise<boolean>;
     getSessionSwitcher?(): { isSwitching?: boolean };
@@ -310,7 +309,10 @@ export class StatusBarController {
         }
 
         // Show group name if a group is active
-        const activeGroup = typeof this.host.getActiveGroup === 'function' ? this.host.getActiveGroup() : null;
+        // The guard went with the shim it protected: the store always has this,
+        // and testing the plugin for it while calling the store would have
+        // returned null on a plugin that simply never carried the forwarder.
+        const activeGroup = this.host.getGroupStore().getActiveGroup();
         if (activeGroup && typeof el.createSpan === 'function') {
             el.createSpan({
                 text: activeGroup.name,

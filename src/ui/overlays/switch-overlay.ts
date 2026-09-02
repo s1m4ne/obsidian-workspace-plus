@@ -2,23 +2,27 @@ import { L } from '../../i18n.ts';
 import { deriveSessionPresentation } from '../shared/session-presenter.ts';
 import { isModShiftPressed } from '../../utils.ts';
 import type { SessionItem } from '../../storage/default-data.ts';
+import type { GroupStore } from '../../state/group-store.ts';
 
 export interface SwitchOverlayHost {
+    /**
+     * Group state is owned by GroupStore. Naming the store rather than
+     * restating its methods keeps one list: the plugin used to carry a
+     * forwarding method per call, and one added to the store without a shim did
+     * nothing from here while the type checker saw a host merely lacking it.
+     */
+    getGroupStore(): GroupStore;
+
     data: {
         activeSessionId: string;
         activeGroupId: string | null;
         groups?: Record<string, { id: string; name: string }>;
         [key: string]: unknown;
     };
-    isGroupFeatureEnabled(): boolean;
-    getOrderedGroups(): Array<{ id: string; name: string }>;
-    getOrderedGroupTabIds(): string[];
     getOrderedSessionsUnfiltered(): SessionItem[];
     getCommandHotkey(cmd: string, slot?: number): string;
     findActiveSessionIndex(sessions: SessionItem[]): number;
-    resolveGroupSelection(groupId: string | null): Promise<{ sessions: SessionItem[]; resolvedGroupId: string | null }>;
     switchSession(sessionId: string, options?: { silent?: boolean }): Promise<boolean>;
-    getRelativeGroupId(currentGroupId: string | null, delta: number): string | null | undefined;
     getOrderedSessionsForGroup(groupId: string | null): SessionItem[];
     onSessionsChanged(listener: () => void): () => void;
     clearSessionSwitchNotice?: (() => void) | undefined;
@@ -77,7 +81,7 @@ export class SwitchOverlay {
             this.overlayEl = null;
         }
 
-        let overlayGroupId: string | null = this.host.isGroupFeatureEnabled()
+        let overlayGroupId: string | null = this.host.getGroupStore().isGroupFeatureEnabled()
             ? (typeof viewGroupId === 'undefined'
                 ? (this.host.data.activeGroupId || null)
                 : (viewGroupId || null))
@@ -103,7 +107,7 @@ export class SwitchOverlay {
                 e.preventDefault();
                 e.stopPropagation();
             }
-            void this.host.resolveGroupSelection(targetGroupId || null).then(reopenOverlayForGroup);
+            void this.host.getGroupStore().resolveGroupSelection(targetGroupId || null).then(reopenOverlayForGroup);
         };
 
         const onSessionItemClick = (sessionId: string, e?: MouseEvent): void => {
@@ -130,12 +134,12 @@ export class SwitchOverlay {
         overlay.createDiv({ cls: 'wpp-switch-count', text: countText });
 
         // Group tabs (only when groups exist)
-        const realGroups = this.host.getOrderedGroups();
+        const realGroups = this.host.getGroupStore().getOrderedGroups();
         if (realGroups.length > 0) {
             const groupTabsRow = overlay.createDiv({ cls: 'wpp-group-tabs' });
 
             const allGroups = this.host.data.groups || {};
-            const groupOrder = this.host.getOrderedGroupTabIds();
+            const groupOrder = this.host.getGroupStore().getOrderedGroupTabIds();
             for (let gi = 0; gi < groupOrder.length; gi++) {
                 const gid = groupOrder[gi];
                 if (gid === '__all__') {
@@ -329,13 +333,13 @@ export class SwitchOverlay {
             // switching - and Tab cannot be given up while people rely on it.
             const cyclesGroup = e.key === 'Tab' || e.key === 'g' || e.key === 'G';
             if (cyclesGroup && this.overlayEl) {
-                if (!this.host.isGroupFeatureEnabled() || this.host.getOrderedGroups().length === 0) return;
+                if (!this.host.getGroupStore().isGroupFeatureEnabled() || this.host.getGroupStore().getOrderedGroups().length === 0) return;
                 e.preventDefault();
                 e.stopImmediatePropagation();
-                const nextGroupId = this.host.getRelativeGroupId(overlayGroupId, e.shiftKey ? -1 : 1);
+                const nextGroupId = this.host.getGroupStore().getRelativeGroupId(overlayGroupId, e.shiftKey ? -1 : 1);
                 if (typeof nextGroupId === 'undefined') return;
 
-                void this.host.resolveGroupSelection(nextGroupId).then((result) => {
+                void this.host.getGroupStore().resolveGroupSelection(nextGroupId).then((result) => {
                     const newOrdered = result.sessions;
                     const newActiveIndex = this.host.findActiveSessionIndex(newOrdered);
                     this.show(newOrdered, newActiveIndex, result.resolvedGroupId);

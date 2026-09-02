@@ -42,6 +42,9 @@ function createPlugin(): TestPlugin {
         findActiveSessionIndex: () => 0,
         getCommandHotkey: () => '',
         getDefaultSessionName: () => 'Session',
+        // Group calls go through getGroupStore(). This double carries the group
+        // members itself, so it stands in as its own group store.
+        getGroupStore(): never { return this as never; },
         isGroupFeatureEnabled: () => false,
         isAutoSaveOnSwitchEnabled: () => true,
         isVersionHistoryConfirmRestoreEnabled: () => false,

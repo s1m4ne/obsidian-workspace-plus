@@ -10,6 +10,7 @@ import {
     type SessionListActionsHost,
 } from './session-list-actions.ts';
 import type { SessionGroup, SessionItem } from './storage/default-data.ts';
+import type { GroupStore } from './state/group-store.ts';
 
 type Action = () => unknown;
 type GroupIdGetter = () => string | null;
@@ -29,12 +30,19 @@ type ContextActionName =
 type ContextActionOverrides = Partial<Record<ContextActionName, Action | MoveToGroupAction>>;
 
 export interface SessionContextActionsHost extends SessionListActionsHost, HistoryModalPluginHost, SessionContextMenuPluginHost {
+    /**
+     * Group state is owned by GroupStore. Naming the store rather than
+     * restating its methods keeps one list: the plugin used to carry a
+     * forwarding method per call, and one added to the store without a shim
+     * did nothing from here while the type checker saw a host that simply
+     * lacked the member.
+     */
+    getGroupStore(): GroupStore;
+
     data: SessionListActionsHost['data'] & {
         activeSessionId: string | null;
         groups: Record<string, SessionGroup>;
     };
-    isGroupFeatureEnabled(): boolean;
-    getOrderedGroups(): readonly SessionGroup[];
     saveActiveSession(): Promise<unknown>;
     reloadCurrentSessionWithoutSaving(): unknown;
     saveAsSession(): Promise<unknown>;
@@ -43,8 +51,6 @@ export interface SessionContextActionsHost extends SessionListActionsHost, Histo
         options: { onSaved: () => void }
     ): unknown;
     duplicateSession(sessionId: string): Promise<unknown>;
-    removeSessionFromGroup(sessionId: string, groupId: string): Promise<unknown>;
-    moveSessionToGroupExclusive(sessionId: string, groupId: string): Promise<unknown>;
 }
 
 export type SessionContextMenuOptions = ContextActionOverrides & {
@@ -114,12 +120,13 @@ function getGroupName(plugin: SessionContextActionsHost, groupId: string): strin
 }
 
 function shouldShowMoveToGroup(plugin: SessionContextActionsHost): boolean {
+    // The two existence checks are gone with the shims they guarded: the host
+    // names the store, so a missing member is a type error rather than a menu
+    // item that quietly never appears.
     return !!(
         plugin
-        && plugin.isGroupFeatureEnabled
-        && plugin.isGroupFeatureEnabled()
-        && plugin.getOrderedGroups
-        && plugin.getOrderedGroups().length > 0
+        && plugin.getGroupStore().isGroupFeatureEnabled()
+        && plugin.getGroupStore().getOrderedGroups().length > 0
     );
 }
 
@@ -184,7 +191,7 @@ export function createSessionContextMenuOptions(options: SessionContextMenuOptio
         const groupId = getViewGroupId();
         if (!groupId) return;
         const groupName = getGroupName(plugin, groupId);
-        return plugin.removeSessionFromGroup(session.id, groupId).then(() => {
+        return plugin.getGroupStore().removeSessionFromGroup(session.id, groupId).then(() => {
             new Notice(format(L.groupRemovedSession, session.name, groupName));
             refreshGroupsAndSessions(options);
         });
@@ -192,7 +199,7 @@ export function createSessionContextMenuOptions(options: SessionContextMenuOptio
 
     const defaultMoveToGroup = (groupId: string): Promise<boolean> => {
         const groupName = getGroupName(plugin, groupId);
-        return plugin.moveSessionToGroupExclusive(session.id, groupId).then((moved) => {
+        return plugin.getGroupStore().moveSessionToGroupExclusive(session.id, groupId).then((moved) => {
             if (!moved) return false;
             new Notice(format(L.groupAddedSession, session.name, groupName));
             refreshGroupsAndSessions(options);

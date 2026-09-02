@@ -181,6 +181,9 @@ test('StatusBarController: wheel accumulation and threshold switching', async ()
         shouldShowUnsavedStatusBarHighlight() {
             return false;
         },
+        // Group calls go through getGroupStore(). This double carries the group
+        // members itself, so it stands in as its own group store.
+        getGroupStore(): never { return this as never; },
         isGroupFeatureEnabled() {
             return false;
         },
@@ -296,6 +299,17 @@ test('StatusBarController: setup and update DOM rendering', () => {
         ...menuPluginStubs,
         openSessionManagerModal() {},
         openHistoryModal() {},
+        // Group calls go through the store; this literal supplies just the two
+        // members the controller reaches.
+        getGroupStore(): never {
+            return {
+                isGroupFeatureEnabled: () => true,
+                getActiveGroup: () => activeGroup,
+                getOrderedGroups: () => (activeGroup ? [activeGroup] : []),
+                setActiveGroup: async () => true,
+                exitGroup: async () => true,
+            } as never;
+        },
         data: DEFAULT_DATA,
         app: {} as import('obsidian').App,
         addStatusBarItem: () => el,

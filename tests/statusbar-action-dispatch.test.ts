@@ -103,6 +103,9 @@ test('each configurable action performs its own effect and no other', async () =
         getActiveSession() {
             return this.data.sessions.s1 || null;
         },
+        // Group calls go through getGroupStore(). This double carries the group
+        // members itself, so it stands in as its own group store.
+        getGroupStore(): never { return this as never; },
         isGroupFeatureEnabled() {
             return true;
         },

@@ -31,6 +31,7 @@ interface ModalPlugin {
     movedToGroup: Array<{ sessionId: string; groupId: string }>;
     removedFromGroup: Array<{ sessionId: string; groupId: string }>;
     reordered: string[][];
+    getGroupStore(): never;
     isGroupFeatureEnabled(): boolean;
     getOrderedSessionsForGroup(groupId: string | null): Session[];
     getOrderedGroups(): Array<{ id: string; name: string }>;
@@ -129,6 +130,9 @@ function makePlugin(containerEl: HTMLElement, groupFeatureEnabled = false): Moda
         movedToGroup: [],
         removedFromGroup: [],
         reordered: [],
+        // Group calls go through getGroupStore(). This double carries the group
+        // members itself, so it stands in as its own group store.
+        getGroupStore(): never { return this as never; },
         isGroupFeatureEnabled: (): boolean => plugin.data.groupFeatureEnabled,
         getOrderedSessionsForGroup: (groupId): Session[] => plugin.data.sessionOrder
             .map((id) => plugin.data.sessions[id])

@@ -5,10 +5,19 @@ import { openSessionContextMenu } from './session-context-actions.ts';
 import { openSettingsContextMenu } from './settings-context-menu.js';
 import type { SettingsContextMenuPluginHost } from './settings-context-menu-items.ts';
 import type { HistoryModalPluginHost } from './modals/history-modal.ts';
-import type { SessionGroup } from './storage/default-data.ts';
+import type { GroupStore } from './state/group-store.ts';
 
 
 export interface StatusBarActionPluginHost extends HistoryModalPluginHost, SettingsContextMenuPluginHost {
+    /**
+     * Group state is owned by GroupStore. Naming the store rather than
+     * restating its methods keeps one list: the plugin used to carry a
+     * forwarding method per call, and one added to the store without a shim
+     * did nothing from here while the type checker saw a host that simply
+     * lacked the member.
+     */
+    getGroupStore(): GroupStore;
+
     // Required: see command-registry.ts.
     openSessionManagerModal(): void;
     openHistoryModal(session: SessionItem): void;
@@ -17,8 +26,6 @@ export interface StatusBarActionPluginHost extends HistoryModalPluginHost, Setti
     searchOverlayEl?: HTMLElement | null;
     statusBarEl?: HTMLElement | null;
     getActiveSession(): SessionItem | null;
-    isGroupFeatureEnabled(): boolean;
-    getOrderedGroups(): readonly SessionGroup[];
     isVersionHistoryEnabled(): boolean;
     isVersionHistoryConfirmRestoreEnabled(): boolean;
     updateStatusBar(): void;
@@ -34,8 +41,6 @@ export interface StatusBarActionPluginHost extends HistoryModalPluginHost, Setti
     duplicateSession(sessionId: string): Promise<unknown>;
     confirmOverwriteSessionWithCurrentLayout(sessionId: string, options: { onSaved: () => void }): unknown;
     deleteSession(sessionId: string): Promise<boolean>;
-    moveSessionToGroupExclusive(sessionId: string, groupId: string): Promise<unknown>;
-    removeSessionFromGroup(sessionId: string, groupId: string): Promise<unknown>;
     switchRelativeFromStatusBar(offset: number): Promise<boolean>;
     createEmptySession(): Promise<unknown>;
     toggleAutoSaveOnSwitch(options?: { notify?: boolean }): Promise<unknown>;
@@ -206,7 +211,7 @@ export const ACTIONS: readonly StatusBarAction[] = [
                 showSaveAs: true,
                 showSwitch: false,
                 showRemoveFromGroup: false,
-                showMoveToGroup: plugin.isGroupFeatureEnabled() && plugin.getOrderedGroups().length > 0,
+                showMoveToGroup: plugin.getGroupStore().isGroupFeatureEnabled() && plugin.getGroupStore().getOrderedGroups().length > 0,
                 showCustomizeClicks: true,
                 forceDeleteConfirm: true,
                 notifyDeleted: false,

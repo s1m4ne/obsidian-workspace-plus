@@ -33,6 +33,10 @@ function createPlugin(calls, overrides = {}) {
                 g1: { id: 'g1', name: 'Group 1' },
             },
         },
+        // Group calls go through plugin.getGroupStore() now. This double records
+        // the group methods itself, so it is its own group store and every
+        // assertion below still names the same calls.
+        getGroupStore() { return this; },
         isGroupFeatureEnabled() {
             return true;
         },

@@ -1,9 +1,7 @@
 'use strict';
 
-var attachGroupMethods = require('./groups');
 
 function attachSessionValidationMethods(WorkspacePlusPlus) {
-    attachGroupMethods(WorkspacePlusPlus);
 
 
 

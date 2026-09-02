@@ -13,6 +13,7 @@ import * as sessionListActions from '../../session-list-actions.ts';
 import * as utils from '../../utils.ts';
 import type { SessionGroup, SessionItem } from '../../storage/default-data.ts';
 import type { HistoryModalPluginHost } from '../../modals/history-modal.ts';
+import type { GroupStore } from '../../state/group-store.ts';
 
 export interface SearchOverlayPosition {
     left: number;
@@ -212,10 +213,10 @@ function createSearchOverlayKeyHandler(options: SearchOverlayKeyboardOptions): (
 
         if (event.key === 'Tab') {
             if (activeEl === options.saveInput || activeEl === options.saveBtn) return;
-            if (!plugin.isGroupFeatureEnabled() || plugin.getOrderedGroups().length === 0) return;
+            if (!plugin.getGroupStore().isGroupFeatureEnabled() || plugin.getGroupStore().getOrderedGroups().length === 0) return;
             event.preventDefault();
             event.stopImmediatePropagation();
-            const nextGroupId = plugin.getRelativeGroupId(options.getOverlayGroupId(), event.shiftKey ? -1 : 1);
+            const nextGroupId = plugin.getGroupStore().getRelativeGroupId(options.getOverlayGroupId(), event.shiftKey ? -1 : 1);
             if (nextGroupId === undefined) return;
             void options.applyOverlayGroupSelection(nextGroupId);
             return;
@@ -237,6 +238,15 @@ function handleSearchOverlaySlashKey(event: KeyboardEvent, options: SearchOverla
 }
 
 export interface SearchOverlayHost extends GroupTabPluginHost, HistoryModalPluginHost, SettingsContextMenuPluginHost {
+    /**
+     * Group state is owned by GroupStore. Naming the store rather than
+     * restating its methods keeps one list: the plugin used to carry a
+     * forwarding method per call, and one added to the store without a shim
+     * did nothing from here while the type checker saw a host that simply
+     * lacked the member.
+     */
+    getGroupStore(): GroupStore;
+
     app: App;
     data: {
         activeSessionId: string | null;
@@ -261,20 +271,13 @@ export interface SearchOverlayHost extends GroupTabPluginHost, HistoryModalPlugi
     onSessionsChanged(listener: () => void): () => void;
     _cachedBarHeight?: number;
     _cachedAnchorCenterX?: number;
-    isGroupFeatureEnabled(): boolean;
     filterSessionsByQuery(sessions: SessionItem[], query: string): SessionItem[];
     getOrderedSessionsForGroup(groupId: string | null): SessionItem[];
     hideSwitchOverlay(): void;
     hideSearchOverlay(): void;
     findActiveSessionIndex(sessions: SessionItem[]): number;
-    resolveGroupSelection(groupId: string | null): Promise<{ resolvedGroupId: string | null; switched: boolean }>;
     createSessionForViewedGroup(name: string, groupId: string | null): Promise<{ created: boolean; name: string; viewGroupId?: string | null }>;
     isAutoSaveOnSwitchEnabled(): boolean;
-    getOrderedGroups(): SessionGroup[];
-    getOrderedGroupTabIds(): string[];
-    setGroupTabOrder(order: string[]): void;
-    moveSessionToGroupExclusive(sessionId: string, groupId: string): Promise<unknown>;
-    removeSessionFromGroup(sessionId: string, groupId: string): Promise<unknown>;
     setSessionOrderFromVisible(order: string[]): void;
     saveActiveSession(): Promise<unknown>;
     saveAsSession(): Promise<unknown>;
@@ -284,7 +287,6 @@ export interface SearchOverlayHost extends GroupTabPluginHost, HistoryModalPlugi
     reloadCurrentSessionWithoutSaving(): void;
     switchSession(sessionId: string, options: { silent: boolean }): Promise<boolean>;
     deleteSession(sessionId: string): Promise<boolean>;
-    getRelativeGroupId(groupId: string | null, direction: number): string | null | undefined;
     persistData(): Promise<unknown>;
 }
 
@@ -353,7 +355,7 @@ export class SearchOverlay {
         const self = this.host;
         const createInteractionEventOwner = (): Component => this.createInteractionEventOwner();
         const releaseInteractionEventOwner = (owner: Component): void => this.releaseInteractionEventOwner(owner);
-        let overlayGroupId = self.isGroupFeatureEnabled()
+        let overlayGroupId = self.getGroupStore().isGroupFeatureEnabled()
             ? (self.data.activeGroupId || null)
             : null;
         self.searchOverlayViewGroupId = overlayGroupId;
@@ -378,7 +380,7 @@ export class SearchOverlay {
         syncSelectedIndexToActive();
 
         function getOverlayGroupId() {
-            if (!self.isGroupFeatureEnabled()) {
+            if (!self.getGroupStore().isGroupFeatureEnabled()) {
                 overlayGroupId = null;
                 self.searchOverlayViewGroupId = null;
                 return null;
@@ -392,7 +394,7 @@ export class SearchOverlay {
         }
 
         function applyOverlayGroupSelection(groupId: string | null): Promise<boolean> {
-            return self.resolveGroupSelection(groupId).then(function (result) {
+            return self.getGroupStore().resolveGroupSelection(groupId).then(function (result) {
                 overlayGroupId = result.resolvedGroupId || null;
                 self.searchOverlayViewGroupId = overlayGroupId;
                 renderGroupTabs();
@@ -484,20 +486,20 @@ export class SearchOverlay {
         function renderGroupTabs() {
             while (groupTabsRow.firstChild) groupTabsRow.removeChild(groupTabsRow.firstChild);
             const autoSave = self.isAutoSaveOnSwitchEnabled();
-            if (!self.isGroupFeatureEnabled()) {
+            if (!self.getGroupStore().isGroupFeatureEnabled()) {
                 groupTabsRow.classList.add('is-hidden');
                 footerRow.textContent = autoSave ? stripSaveHint(localizedString(strings.searchOverlayHelp)) : localizedString(strings.searchOverlayHelp);
                 return;
             }
             const groups = self.data.groups || {};
-            const realGroups = self.getOrderedGroups();
+            const realGroups = self.getGroupStore().getOrderedGroups();
             groupTabsRow.classList.remove('is-hidden');
             const helpText = realGroups.length > 0
                 ? (localizedString(strings.searchOverlayHelpWithGroups) || localizedString(strings.searchOverlayHelp))
                 : localizedString(strings.searchOverlayHelp);
             footerRow.textContent = autoSave ? stripSaveHint(helpText) : helpText;
 
-            const groupOrder = self.getOrderedGroupTabIds();
+            const groupOrder = self.getGroupStore().getOrderedGroupTabIds();
             groupTabUi.renderGroupTabs({
                 app: self.app,
                 plugin: self,
@@ -526,7 +528,7 @@ export class SearchOverlay {
                     refreshOrderedSessions();
                 },
                 onGroupOrderCommit: function (newOrder) {
-                    self.setGroupTabOrder(newOrder);
+                    void self.getGroupStore().setGroupTabOrder(newOrder);
                 },
                 addButtonTooltip: localizedString(strings.groupCreateNew),
                 onAddGroupClick: function () {
@@ -678,7 +680,7 @@ export class SearchOverlay {
                                 selectedIndex = idx;
                                 switchSelected();
                             },
-                            showMoveToGroup: self.isGroupFeatureEnabled() && self.getOrderedGroups().length > 0,
+                            showMoveToGroup: self.getGroupStore().isGroupFeatureEnabled() && self.getGroupStore().getOrderedGroups().length > 0,
                             deleteConfirmMessage: localizedCall(strings.confirmDeleteActive, sess.name),
                             onGroupsChanged: renderGroupTabs,
                             onSessionsChanged: refreshOrderedSessions,
@@ -766,7 +768,7 @@ export class SearchOverlay {
                 onDropOnGroup: function (sessionId, groupId) {
                     const sessionName = (self.data.sessions[sessionId] || {}).name || '';
                     const groupName = (self.data.groups[groupId] || {}).name || '';
-                    return self.moveSessionToGroupExclusive(sessionId, groupId).then(function () {
+                    return self.getGroupStore().moveSessionToGroupExclusive(sessionId, groupId).then(function () {
                         new Notice(localizedCall(L.groupAddedSession, sessionName, groupName));
                         renderGroupTabs();
                         refreshOrderedSessions();
@@ -777,7 +779,7 @@ export class SearchOverlay {
                     if (currentGroupId) {
                         const rmSessionName = (self.data.sessions[sessionId] || {}).name || '';
                         const rmGroupName = (self.data.groups[currentGroupId] || {}).name || '';
-                        return self.removeSessionFromGroup(sessionId, currentGroupId).then(function () {
+                        return self.getGroupStore().removeSessionFromGroup(sessionId, currentGroupId).then(function () {
                             new Notice(localizedCall(L.groupRemovedSession, rmSessionName, rmGroupName));
                             renderGroupTabs();
                             refreshOrderedSessions();

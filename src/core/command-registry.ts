@@ -9,9 +9,18 @@ import { L } from '../i18n.ts';
 import * as obsidianInternals from '../platform/obsidian-internals.ts';
 import type { PluginData, SessionItem } from '../storage/default-data.ts';
 import { isMacPlatform } from '../utils.ts';
+import type { GroupStore } from '../state/group-store.ts';
 
 
 export interface CommandRegistryHost {
+    /**
+     * Group state is owned by GroupStore. Naming the store rather than
+     * restating its methods keeps one list: the plugin used to carry a
+     * forwarding method per call, and one added to the store without a shim did
+     * nothing from here while the type checker saw a host merely lacking it.
+     */
+    getGroupStore(): GroupStore;
+
     // Required, not optional: an unwired modal opener must fail to compile, not
     // fail silently at run time the way `openHistoryModal?.()` did.
     openSessionManagerModal(focusName: boolean): void;
@@ -42,14 +51,9 @@ export interface CommandRegistryHost {
     getActiveSession(): SessionItem | null;
     exportSessionsSnapshot(): Promise<void>;
     importSessionsFromLatestExport(): Promise<void>;
-    isGroupFeatureEnabled(): boolean;
     getOrderedSessionsForGroup(groupId: string | null): SessionItem[];
     findActiveSessionIndex(sessions: SessionItem[]): number;
     showSwitchOverlay(sessions: SessionItem[], activeIndex: number, groupId: string | null): void;
-    getRelativeGroupId(currentGroupId: string | null, step: number): string | undefined;
-    resolveGroupSelection(groupId: string): Promise<{ resolvedGroupId: string }>;
-    exitGroup(): void;
-    switchGroupRelative(step: number): void;
     switchSessionByIdFromCommand(sessionId: string): Promise<boolean> | void;
 
     switchOverlayEl?: HTMLElement | null;
@@ -396,14 +400,14 @@ export class CommandRegistry {
         };
 
         const switchGroupAndShowOverlay = (step: number) => {
-            if (!host.isGroupFeatureEnabled()) return;
-            const targetGroupId = host.getRelativeGroupId(getCurrentGroupViewId(), step);
+            if (!host.getGroupStore().isGroupFeatureEnabled()) return;
+            const targetGroupId = host.getGroupStore().getRelativeGroupId(getCurrentGroupViewId(), step);
             if (typeof targetGroupId === 'undefined') {
                 showSwitchOverlayForGroup(this.data.activeGroupId || null);
                 return;
             }
 
-            void host.resolveGroupSelection(targetGroupId).then((result) => {
+            void host.getGroupStore().resolveGroupSelection(targetGroupId).then((result) => {
                 showSwitchOverlayForGroup(result.resolvedGroupId);
             });
         };
@@ -420,9 +424,9 @@ export class CommandRegistry {
             id: 'exit-group',
             name: String(L.cmdExitGroup || ''),
             checkCallback: (checking) => {
-                if (!host.isGroupFeatureEnabled()) return false;
+                if (!host.getGroupStore().isGroupFeatureEnabled()) return false;
                 if (!this.data.activeGroupId) return false;
-                if (!checking) host.exitGroup();
+                if (!checking) void host.getGroupStore().exitGroup();
                 return true;
             },
         });
@@ -444,7 +448,7 @@ export class CommandRegistry {
         });
 
         addSimpleCommand('previous-group', String(L.cmdPreviousGroup || ''), () => {
-            host.switchGroupRelative(-1);
+            void host.getGroupStore().switchGroupRelative(-1);
         });
     }
 

@@ -61,7 +61,6 @@ interface AttachedPluginMethods {
 
     getSessionStorage(): SessionStorage;
 
-    normalizeGroupFeatureState(): void;
     syncSessionOrder(): void;
     syncSessionCommands(): void;
 
@@ -121,7 +120,7 @@ export class WorkspacePlusPlus extends Plugin {
 
         this.migrateLegacyStatusBarSettings();
 
-        this.normalizeGroupFeatureState();
+        this.getGroupStore().normalizeGroupFeatureState();
         this.syncSessionOrder();
         this.getSyncWatcher().registerListeners();
         // Re-resolved now that the saved language is known; the call at module

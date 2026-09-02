@@ -15,9 +15,10 @@ import {
     type GroupSessionsModalHost,
     type SettingText,
 } from './settings-ui.ts';
-import type { SessionGroup, SessionItem, StatusBarActions } from './storage/default-data.ts';
+import type { SessionGroup, StatusBarActions } from './storage/default-data.ts';
 import type { RotationBackupInfo } from './storage/storage-backup.ts';
 import type { SettingsState } from './state/settings-state.ts';
+import type { GroupStore } from './state/group-store.ts';
 
 export interface StorageDiagnosticsInfo {
     syncedByObsidianSync: boolean;
@@ -29,6 +30,15 @@ export interface StorageDiagnosticsInfo {
 }
 
 export interface SettingsTabHost extends GroupSessionsModalHost {
+    /**
+     * Group state is owned by GroupStore. Naming the store rather than
+     * restating its methods keeps one list: the plugin used to carry a
+     * forwarding method per call, and one added to the store without a shim
+     * did nothing from here while the type checker saw a host that simply
+     * lacked the member.
+     */
+    getGroupStore(): GroupStore;
+
     /**
      * The settings the UI writes are owned by SettingsState. Naming the store
      * here rather than restating its twenty-four setters keeps one list: the
@@ -84,12 +94,8 @@ export interface SettingsTabHost extends GroupSessionsModalHost {
     getRotationBackupInfo(): Promise<RotationBackupInfo[]>;
     restoreFromRotationBackup(generation: number): Promise<boolean>;
 
-    isGroupFeatureEnabled(): boolean;
-    setGroupFeatureEnabled(value: boolean): Promise<unknown>;
     createGroupValidated(name: string): Promise<boolean>;
-    getOrderedGroups(): SessionGroup[];
     renameGroupValidated(groupId: string, name: string): Promise<boolean>;
-    deleteGroup(groupId: string): Promise<unknown>;
 
     getSessionsPath(): string;
     getSessionStorageLocation(): string;
@@ -605,13 +611,13 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
         addToggleSetting(contentEl, {
             name: text(L.settingsSectionGroups),
             desc: text(L.settingsSectionGroupsDesc),
-            value: this.plugin.isGroupFeatureEnabled(),
+            value: this.plugin.getGroupStore().isGroupFeatureEnabled(),
             onChange: (value) => {
-                void this.plugin.setGroupFeatureEnabled(value).then(() => { this.display(); });
+                void this.plugin.getGroupStore().setGroupFeatureEnabled(value).then(() => { this.display(); });
             },
         });
 
-        if (!this.plugin.isGroupFeatureEnabled()) return;
+        if (!this.plugin.getGroupStore().isGroupFeatureEnabled()) return;
 
         const createGroupSetting = new Setting(contentEl)
             .setName(text(L.settingsGroupCreate))
@@ -633,13 +639,13 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
             });
         });
 
-        for (const group of this.plugin.getOrderedGroups()) {
+        for (const group of this.plugin.getGroupStore().getOrderedGroups()) {
             this.renderGroupRow(contentEl, group);
         }
     }
 
     private renderGroupRow(contentEl: HTMLElement, group: SessionGroup): void {
-        const sessionCount = this.plugin.getGroupSessionIds(group.id).length;
+        const sessionCount = this.plugin.getGroupStore().getGroupSessionIds(group.id).length;
         const groupSetting = new Setting(contentEl)
             .setName(group.name)
             .setDesc(`${text(L.settingsGroupManageSessionsDesc)} · ${format(L.settingsGroupSessionCount, sessionCount)}`);
@@ -666,7 +672,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
             btn.setTooltip(text(L.settingsGroupDelete));
             btn.onClick(() => {
                 new ConfirmModal(this.app, format(L.settingsGroupDeleteConfirm, group.name), () => {
-                    void this.plugin.deleteGroup(group.id).then(() => { this.display(); });
+                    void this.plugin.getGroupStore().deleteGroup(group.id).then(() => { this.display(); });
                 }).open();
             });
         });

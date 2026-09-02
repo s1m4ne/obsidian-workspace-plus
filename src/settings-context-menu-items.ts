@@ -2,11 +2,21 @@ import { Menu, Notice, type App } from 'obsidian';
 import { L } from './i18n.ts';
 import * as obsidianInternals from './platform/obsidian-internals.ts';
 import type { SettingsState } from './state/settings-state.ts';
+import type { GroupStore } from './state/group-store.ts';
 
 type SettingsMenuCallbackName = 'onResetOverlay' | 'onChanged';
 type SettingsMenuCallbacks = Partial<Record<SettingsMenuCallbackName, () => void>>;
 
 export interface SettingsContextMenuPluginHost {
+    /**
+     * Group state is owned by GroupStore. Naming the store rather than
+     * restating its methods keeps one list: the plugin used to carry a
+     * forwarding method per call, and one added to the store without a shim
+     * did nothing from here while the type checker saw a host that simply
+     * lacked the member.
+     */
+    getGroupStore(): GroupStore;
+
     /**
      * The settings the UI writes are owned by SettingsState. Naming the store
      * here rather than restating its twenty-four setters keeps one list: the
@@ -27,9 +37,7 @@ export interface SettingsContextMenuPluginHost {
     isAutoSaveOnSwitchEnabled(): boolean;
     isWarnOnUnsavedSwitchEnabled(): boolean;
     isVersionHistoryEnabled(): boolean;
-    isGroupFeatureEnabled(): boolean;
     setAutoSaveOnSwitch(enabled: boolean, options: { notify: boolean }): Promise<unknown>;
-    setGroupFeatureEnabled(enabled: boolean): Promise<unknown>;
     extractSessionData(data: unknown): Record<string, unknown>;
     prepareRotationBackupData(sessionData: Record<string, unknown>): Record<string, unknown>;
     ensureDir(path: string): Promise<unknown>;
@@ -139,9 +147,9 @@ export function openSettingsContextMenu(initialOptions?: SettingsContextMenuOpti
     menu.addItem((mi) => {
         mi.setTitle(text(L.contextToggleGroups));
         mi.setIcon('folder');
-        if (plugin.isGroupFeatureEnabled()) mi.setChecked(true);
+        if (plugin.getGroupStore().isGroupFeatureEnabled()) mi.setChecked(true);
         mi.onClick(() => {
-            void plugin.setGroupFeatureEnabled(!plugin.isGroupFeatureEnabled()).then(() => {
+            void plugin.getGroupStore().setGroupFeatureEnabled(!plugin.getGroupStore().isGroupFeatureEnabled()).then(() => {
                 call(options.onChanged);
             });
         });

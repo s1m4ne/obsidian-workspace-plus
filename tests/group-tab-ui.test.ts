@@ -33,6 +33,9 @@ function createMockPlugin() {
         getOrderedGroupTabIds() {
             return ['__all__', 'g1', 'g2'];
         },
+        // Group calls go through getGroupStore(). This double carries the group
+        // members itself, so it stands in as its own group store.
+        getGroupStore(): never { return this as never; },
         getOrderedGroups() {
             return [{ id: 'g1', name: 'Work' }, { id: 'g2', name: 'Study' }];
         },

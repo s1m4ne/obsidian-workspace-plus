@@ -64,6 +64,10 @@ function createPlugin(overrides = {}) {
         isAutoSaveOnSwitchEnabled() { return this.data.autoSaveOnSwitch; },
         isWarnOnUnsavedSwitchEnabled() { return this.data.warnOnUnsavedSwitch; },
         isVersionHistoryEnabled() { return this.data.versionHistoryEnabled; },
+        // Group calls go through plugin.getGroupStore() now. This double records
+        // the group methods itself, so it is its own group store and every
+        // assertion below still names the same calls.
+        getGroupStore() { return this; },
         isGroupFeatureEnabled() { return this.data.groupFeatureEnabled; },
         getOrderedGroups() { return [this.data.groups.g1]; },
         setAutoSaveOnSwitch(enabled) {

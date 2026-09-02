@@ -56,6 +56,10 @@ function createPlugin(overrides = {}) {
         isSidebarRestoreEnabled() { return false; },
         isVersionHistoryEnabled() { return data.versionHistoryEnabled; },
         isVersionHistoryConfirmRestoreEnabled() { return data.versionHistoryConfirmRestore; },
+        // Group calls go through plugin.getGroupStore() now. This double records
+        // the group methods itself, so it is its own group store and every
+        // assertion below still names the same calls.
+        getGroupStore() { return this; },
         isGroupFeatureEnabled() { return false; },
         getVersionHistorySnapshotInterval() { return 5; },
         getRotationBackupInfo() { return Promise.resolve([{ generation: 1, savedAt: 0, sessionCount: 1 }]); },

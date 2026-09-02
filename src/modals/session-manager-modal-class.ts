@@ -13,8 +13,18 @@ import type { SettingsContextMenuPluginHost } from '../settings-context-menu-ite
 import * as sessionListActions from '../session-list-actions.ts';
 import type { SessionGroup, SessionItem } from '../storage/default-data.ts';
 import type { HistoryModalPluginHost } from './history-modal.ts';
+import type { GroupStore } from '../state/group-store.ts';
 
 export interface SessionManagerModalHost extends GroupTabPluginHost, HistoryModalPluginHost, SettingsContextMenuPluginHost {
+    /**
+     * Group state is owned by GroupStore. Naming the store rather than
+     * restating its methods keeps one list: the plugin used to carry a
+     * forwarding method per call, and one added to the store without a shim
+     * did nothing from here while the type checker saw a host that simply
+     * lacked the member.
+     */
+    getGroupStore(): GroupStore;
+
     app: App;
     data: {
         activeSessionId: string | null;
@@ -26,10 +36,7 @@ export interface SessionManagerModalHost extends GroupTabPluginHost, HistoryModa
         overlayDefaultFocus: string;
         [key: string]: unknown;
     };
-    isGroupFeatureEnabled(): boolean;
     getOrderedSessionsForGroup(groupId: string | null): SessionItem[];
-    getOrderedGroups(): SessionGroup[];
-    getOrderedGroupTabIds(): string[];
     getCommandHotkey(commandId: string): string;
     getDefaultSessionName(): string;
     findActiveSessionIndex(sessions: SessionItem[]): number;
@@ -45,12 +52,8 @@ export interface SessionManagerModalHost extends GroupTabPluginHost, HistoryModa
         groupId: string | null
     ): Promise<{ created: boolean; name: string; viewGroupId?: string | null } | null>;
     switchSession(sessionId: string): Promise<boolean>;
-    resolveGroupSelection(groupId: string | null): Promise<{ resolvedGroupId: string | null; switched: boolean }>;
     deleteSession(sessionId: string): Promise<boolean>;
-    moveSessionToGroupExclusive(sessionId: string, groupId: string): Promise<unknown>;
-    removeSessionFromGroup(sessionId: string, groupId: string): Promise<unknown>;
     setSessionOrderFromVisible(order: string[], options?: { syncCommands?: boolean }): void;
-    setGroupTabOrder(order: string[]): void;
 }
 
 /** Where the keyboard target currently sits. */
@@ -159,7 +162,7 @@ export class SessionManagerModal extends Modal {
             });
         }
 
-        this.modalGroupId = this.plugin.isGroupFeatureEnabled()
+        this.modalGroupId = this.plugin.getGroupStore().isGroupFeatureEnabled()
             ? (this.plugin.data.activeGroupId || null)
             : null;
         saveBtn.addEventListener('click', () => { this.onSave(); });
@@ -212,7 +215,7 @@ export class SessionManagerModal extends Modal {
             footer.createDiv({ text: `${text(L.cmdNext)}  ${nextKey}` });
         }
         footer.createDiv({ text: text(L.footerDragReorder) });
-        if (this.plugin.getOrderedGroups().length > 0) {
+        if (this.plugin.getGroupStore().getOrderedGroups().length > 0) {
             footer.createDiv({ text: text(L.footerDragToGroup) });
         }
 
@@ -290,7 +293,7 @@ export class SessionManagerModal extends Modal {
     }
 
     getModalGroupId(): string | null {
-        if (!this.plugin.isGroupFeatureEnabled()) {
+        if (!this.plugin.getGroupStore().isGroupFeatureEnabled()) {
             this.modalGroupId = null;
             return null;
         }
@@ -302,13 +305,13 @@ export class SessionManagerModal extends Modal {
     }
 
     async selectGroup(groupId: string | null): Promise<boolean> {
-        if (!this.plugin.isGroupFeatureEnabled()) {
+        if (!this.plugin.getGroupStore().isGroupFeatureEnabled()) {
             this.modalGroupId = null;
             this.renderGroupTabs();
             this.renderList();
             return false;
         }
-        const result = await this.plugin.resolveGroupSelection(groupId || null);
+        const result = await this.plugin.getGroupStore().resolveGroupSelection(groupId || null);
         this.modalGroupId = result.resolvedGroupId || null;
         this.renderGroupTabs();
         this.renderList();
@@ -715,7 +718,7 @@ export class SessionManagerModal extends Modal {
                 showRemoveFromGroup: !!selectedGroupId,
                 getViewGroupId: () => this.getModalGroupId(),
                 onSwitch: () => { this.onLoad(session.id); },
-                showMoveToGroup: this.plugin.isGroupFeatureEnabled() && this.plugin.getOrderedGroups().length > 0,
+                showMoveToGroup: this.plugin.getGroupStore().isGroupFeatureEnabled() && this.plugin.getGroupStore().getOrderedGroups().length > 0,
                 forceDeleteConfirm: true,
                 onGroupsChanged: () => { this.renderGroupTabs(); },
                 onSessionsChanged: () => { this.renderList(); },
@@ -796,7 +799,7 @@ export class SessionManagerModal extends Modal {
                 onDropOnGroup: (sessionId: string, groupId: string) => {
                     const sessionName = this.plugin.data.sessions[sessionId]?.name || '';
                     const groupName = this.plugin.data.groups[groupId]?.name || '';
-                    return this.plugin.moveSessionToGroupExclusive(sessionId, groupId).then(() => {
+                    return this.plugin.getGroupStore().moveSessionToGroupExclusive(sessionId, groupId).then(() => {
                         new Notice(format(L.groupAddedSession, sessionName, groupName));
                         this.renderGroupTabs();
                         this.renderList();
@@ -809,7 +812,7 @@ export class SessionManagerModal extends Modal {
                     if (!currentGroupId) return undefined;
                     const sessionName = this.plugin.data.sessions[sessionId]?.name || '';
                     const groupName = this.plugin.data.groups[currentGroupId]?.name || '';
-                    return this.plugin.removeSessionFromGroup(sessionId, currentGroupId).then(() => {
+                    return this.plugin.getGroupStore().removeSessionFromGroup(sessionId, currentGroupId).then(() => {
                         new Notice(format(L.groupRemovedSession, sessionName, groupName));
                         this.renderGroupTabs();
                         this.renderList();
@@ -937,7 +940,7 @@ export class SessionManagerModal extends Modal {
         const el = this.groupTabsRow;
         while (el.firstChild) el.removeChild(el.firstChild);
 
-        if (!this.plugin.isGroupFeatureEnabled()) {
+        if (!this.plugin.getGroupStore().isGroupFeatureEnabled()) {
             el.style.display = 'none';
             return;
         }
@@ -948,7 +951,7 @@ export class SessionManagerModal extends Modal {
             plugin: this.plugin,
             containerEl: el,
             groups: this.plugin.data.groups || {},
-            groupOrder: this.plugin.getOrderedGroupTabIds(),
+            groupOrder: this.plugin.getGroupStore().getOrderedGroupTabIds(),
             selectedGroupId: this.getModalGroupId(),
             onSelectGroup: (groupId: string | null) => { void this.selectGroup(groupId); },
             onResetViewGroup: () => { this.modalGroupId = null; },
@@ -959,7 +962,7 @@ export class SessionManagerModal extends Modal {
             },
             onGroupsChanged: () => { this.renderGroupTabs(); },
             onSessionsChanged: () => { this.renderList(); },
-            onGroupOrderCommit: (newOrder: string[]) => { this.plugin.setGroupTabOrder(newOrder); },
+            onGroupOrderCommit: (newOrder: string[]) => { void this.plugin.getGroupStore().setGroupTabOrder(newOrder); },
             addButtonTooltip: text(L.groupCreateNew),
             onAddGroupClick: () => {
                 groupTabUi.openCreateGroupPrompt(this.app, this.plugin, () => { this.renderGroupTabs(); });

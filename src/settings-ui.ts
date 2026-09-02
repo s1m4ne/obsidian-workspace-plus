@@ -2,15 +2,22 @@ import { Modal, Notice, Setting, type App } from 'obsidian';
 import { L } from './i18n.ts';
 import { ConfirmModal } from './modals/confirm-modal.ts';
 import type { SessionGroup, SessionItem } from './storage/default-data.ts';
+import type { GroupStore } from './state/group-store.ts';
 
 /** A label that is either already a string or a locale getter to call now. */
 export type SettingText = string | (() => string) | undefined;
 
 export interface GroupSessionsModalHost {
+    /**
+     * Group state is owned by GroupStore. Naming the store rather than
+     * restating its methods keeps one list: the plugin used to carry a
+     * forwarding method per call, and one added to the store without a shim
+     * did nothing from here while the type checker saw a host that simply
+     * lacked the member.
+     */
+    getGroupStore(): GroupStore;
+
     getOrderedSessionsUnfiltered(): SessionItem[];
-    getGroupSessionIds(groupId: string): string[];
-    addSessionToGroup(sessionId: string, groupId: string): unknown;
-    removeSessionFromGroup(sessionId: string, groupId: string): unknown;
 }
 
 export interface ToggleSettingOptions {
@@ -81,7 +88,7 @@ export class GroupSessionsModal extends Modal {
         const allSessions = this.plugin.getOrderedSessionsUnfiltered();
         // Membership is read once: the toggles below change it, and re-reading
         // per row would have each row see the previous row's edit.
-        const memberIds = this.plugin.getGroupSessionIds(this.group.id);
+        const memberIds = this.plugin.getGroupStore().getGroupSessionIds(this.group.id);
 
         for (const session of allSessions) {
             const isMember = memberIds.indexOf(session.id) !== -1;
@@ -90,8 +97,8 @@ export class GroupSessionsModal extends Modal {
                 .addToggle((toggle) => {
                     toggle.setValue(isMember);
                     toggle.onChange((value) => {
-                        if (value) this.plugin.addSessionToGroup(session.id, this.group.id);
-                        else this.plugin.removeSessionFromGroup(session.id, this.group.id);
+                        if (value) void this.plugin.getGroupStore().addSessionToGroup(session.id, this.group.id);
+                        else void this.plugin.getGroupStore().removeSessionFromGroup(session.id, this.group.id);
                     });
                 });
         }
