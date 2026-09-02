@@ -1,5 +1,6 @@
-import { type App, Modal, Notice } from 'obsidian';
+import { type App, Notice } from 'obsidian';
 import { L } from '../i18n.ts';
+import { DialogModal, type DialogAction, type DialogResult } from './dialog-modal.ts';
 
 export interface RenameModalOptions {
     title?: string;
@@ -8,16 +9,21 @@ export interface RenameModalOptions {
     skipButtonText?: string;
     emptyNotice?: string;
     onSkip?: () => void;
+
+    /**
+     * Run when the dialog goes away without an answer. `saveAsSession()` and
+     * `saveCurrentLayoutToSession()` wrap this dialog in a promise whose
+     * `resolve` was reachable only from onRename and onSkip, so dismissing it
+     * left the promise pending forever and dropped whatever was chained onto
+     * it - the session list simply never refreshed.
+     */
+    onCancel?: () => void;
 }
 
-export class RenameModal extends Modal {
+export class RenameModal extends DialogModal {
     private readonly currentName: string;
     private readonly onRename: (newName: string) => void;
     private readonly modalOptions: RenameModalOptions;
-    private buttons: HTMLButtonElement[] = [];
-    private focusedButtonIndex: number = -1;
-    private renameKeyHandler: ((e: KeyboardEvent) => void) | null = null;
-    private keyHandlerDoc: Document = document;
 
     constructor(
         app: App,
@@ -25,14 +31,14 @@ export class RenameModal extends Modal {
         onRename: (newName: string) => void,
         options?: RenameModalOptions
     ) {
-        super(app);
+        const opts = options || {};
+        super(app, opts.onCancel ? { onCancel: opts.onCancel } : {});
         this.currentName = currentName;
         this.onRename = onRename;
-        this.modalOptions = options || {};
+        this.modalOptions = opts;
     }
 
-    override onOpen(): void {
-        const contentEl = this.contentEl;
+    protected override renderBody(contentEl: HTMLElement): void {
         const opts = this.modalOptions;
         this.titleEl.setText(opts.title || String(L.renameTitle || ''));
 
@@ -43,131 +49,63 @@ export class RenameModal extends Modal {
             cls: 'wpp-rename-input',
         });
         input.select();
+        // The base focuses this after Obsidian has had its go at the first
+        // field, and keeps the ring on the affirmative button meanwhile.
+        this.inputEl = input;
+    }
 
-        const btns = contentEl.createDiv({ cls: 'wpp-confirm-buttons' });
-        const cancelBtn = btns.createEl('button', { text: String(L.cancel || 'Cancel') });
-        cancelBtn.addEventListener('click', () => {
-            this.close();
-        });
+    protected override actions(): readonly DialogAction[] {
+        const opts = this.modalOptions;
+        const actions: DialogAction[] = [];
 
-        // Optional skip button (e.g. "Save without naming")
-        let skipBtn: HTMLButtonElement | null = null;
+        // "Save without naming" - only on the save-as flow. Secondary rather
+        // than affirmative, and not destructive: it saves under the existing
+        // name rather than throwing anything away.
         if (opts.skipButtonText && opts.onSkip) {
-            skipBtn = btns.createEl('button', { text: opts.skipButtonText });
-            skipBtn.addEventListener('click', () => {
-                if (opts.onSkip) {
-                    opts.onSkip();
-                }
-                this.close();
+            actions.push({
+                text: opts.skipButtonText,
+                kind: 'secondary',
+                run: () => { opts.onSkip?.(); },
             });
         }
 
-        const renameBtn = btns.createEl('button', {
+        actions.push({
             text: opts.buttonText || String(L.rename || 'Rename'),
-            cls: 'mod-cta',
+            kind: 'affirmative',
+            run: () => this.commit(),
         });
 
-        const doRename = () => {
-            const newName = input.value.trim();
-            if (!newName) {
-                if (opts.onSkip) {
-                    opts.onSkip();
-                    this.close();
-                    return;
-                }
-                if (opts.emptyNotice) {
-                    new Notice(opts.emptyNotice);
-                }
+        return actions;
+    }
+
+    private commit(): DialogResult {
+        const input = this.inputEl;
+        const newName = (input?.value ?? '').trim();
+
+        if (!newName) {
+            // An empty name on the save-as flow means "don't name it", which is
+            // what the skip button does.
+            if (this.modalOptions.onSkip) {
+                this.modalOptions.onSkip();
                 return;
             }
-            if (newName === this.currentName) return;
-            this.onRename(newName);
-            this.close();
-        };
-
-        renameBtn.addEventListener('click', doRename);
-
-        this.buttons = skipBtn ? [cancelBtn, skipBtn, renameBtn] : [cancelBtn, renameBtn];
-        const lastBtnIdx = this.buttons.length - 1;
-        this.focusedButtonIndex = -1; // -1 = input focused
-
-        this.renameKeyHandler = (e: KeyboardEvent) => {
-            // Skip during IME composition (e.g. Japanese input conversion)
-            if (e.isComposing) return;
-
-            if (this.focusedButtonIndex === -1) {
-                // Input focused
-                if (e.key === 'ArrowDown') {
-                    e.preventDefault();
-                    this.focusedButtonIndex = lastBtnIdx;
-                    this.updateRenameBtnFocus();
-                    input.blur();
-                } else if (e.key === 'Enter') {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    doRename();
-                } else if (e.key === 'Escape') {
-                    e.preventDefault();
-                    e.stopImmediatePropagation();
-                    this.close();
-                }
-            } else {
-                // Button focused
-                if (e.key === 'ArrowUp') {
-                    e.preventDefault();
-                    this.focusedButtonIndex = -1;
-                    this.updateRenameBtnFocus();
-                    input.focus();
-                } else if (e.key === 'ArrowLeft') {
-                    e.preventDefault();
-                    if (this.focusedButtonIndex > 0) {
-                        this.focusedButtonIndex--;
-                    } else {
-                        this.focusedButtonIndex = -1;
-                        this.updateRenameBtnFocus();
-                        input.focus();
-                        return;
-                    }
-                    this.updateRenameBtnFocus();
-                } else if (e.key === 'ArrowRight') {
-                    e.preventDefault();
-                    if (this.focusedButtonIndex < lastBtnIdx) {
-                        this.focusedButtonIndex++;
-                        this.updateRenameBtnFocus();
-                    }
-                } else if (e.key === 'Enter') {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    this.buttons[this.focusedButtonIndex]?.click();
-                } else if (e.key === 'Escape') {
-                    e.preventDefault();
-                    e.stopImmediatePropagation();
-                    this.close();
-                }
+            if (this.modalOptions.emptyNotice) {
+                new Notice(this.modalOptions.emptyNotice);
             }
-        };
-
-        // Held rather than recomputed at close: removeEventListener has to target
-        // the same document the listener went onto.
-        this.keyHandlerDoc = this.containerEl.ownerDocument || document;
-        this.keyHandlerDoc.addEventListener('keydown', this.renameKeyHandler, true);
-
-        window.setTimeout(() => {
-            input.focus();
-        }, 50);
-    }
-
-    private updateRenameBtnFocus(): void {
-        this.buttons.forEach((btn, i) => {
-            btn.classList.toggle('wpp-btn-focused', i === this.focusedButtonIndex);
-        });
-    }
-
-    override onClose(): void {
-        if (this.renameKeyHandler) {
-            this.keyHandlerDoc.removeEventListener('keydown', this.renameKeyHandler, true);
-            this.renameKeyHandler = null;
+            // The name is not usable, so the dialog stays up for it to be
+            // corrected rather than closing on an empty answer.
+            return 'keep-open';
         }
-        this.contentEl.empty();
+
+        // An unchanged name used to `return` here without closing, which is why
+        // opening the dialog and pressing Enter - or clicking the button, the
+        // same code path - appeared to do nothing at all. `input.select()`
+        // preselects the current name, so "unchanged" is the state it opens in.
+        // The store already treats an unchanged name as nothing to do
+        // (SessionStore.renameSessionById returns false), so this now just
+        // closes and says nothing.
+        if (newName === this.currentName) return;
+
+        this.onRename(newName);
     }
 }

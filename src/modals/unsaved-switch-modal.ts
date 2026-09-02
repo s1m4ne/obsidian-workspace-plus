@@ -1,16 +1,11 @@
-import { type App, Modal } from 'obsidian';
+import { type App } from 'obsidian';
 import { L } from '../i18n.ts';
+import { DialogModal, type DialogAction } from './dialog-modal.ts';
 
-export class UnsavedSwitchModal extends Modal {
+export class UnsavedSwitchModal extends DialogModal {
     private readonly message: string;
-    private keyHandlerDoc: Document = document;
     private readonly onSaveAndSwitch: () => void;
     private readonly onSwitchWithoutSaving: () => void;
-    private readonly onCancel: () => void;
-    private didResolve: boolean = false;
-    private buttons: HTMLButtonElement[] = [];
-    private focusedButtonIndex: number = 1;
-    private keyHandler: ((e: KeyboardEvent) => void) | null = null;
 
     constructor(
         app: App,
@@ -19,103 +14,43 @@ export class UnsavedSwitchModal extends Modal {
         onSwitchWithoutSaving: () => void,
         onCancel?: () => void
     ) {
-        super(app);
+        // The once-only settle this dialog used to implement itself, with its own
+        // `didResolve` flag, is the base class's behaviour for all three now. It
+        // is required here rather than optional: a switch is waiting on the
+        // answer, and dismissing the dialog has to count as "no".
+        super(app, { onCancel: onCancel || (() => {}) });
         this.message = message;
         this.onSaveAndSwitch = onSaveAndSwitch;
         this.onSwitchWithoutSaving = onSwitchWithoutSaving;
-        this.onCancel = onCancel || (() => {});
     }
 
-    override onOpen(): void {
-        this.containerEl.addClass('wpp-modal-above-overlay');
-
-        const contentEl = this.contentEl;
+    protected override renderBody(contentEl: HTMLElement): void {
         contentEl.createEl('p', { text: this.message });
-
-        const btns = contentEl.createDiv({ cls: 'wpp-confirm-buttons' });
-        const finish = (callback: () => void) => {
-            if (this.didResolve) return;
-            this.didResolve = true;
-            callback();
-        };
-
-        const cancelBtn = btns.createEl('button', { text: String(L.cancel || 'Cancel') });
-        cancelBtn.addEventListener('click', () => {
-            finish(this.onCancel);
-            this.close();
-        });
-
-        const saveAndSwitchBtn = btns.createEl('button', {
-            text: String(L.saveAndSwitch || 'Save and switch'),
-            cls: 'mod-cta',
-        });
-        saveAndSwitchBtn.addEventListener('click', () => {
-            finish(this.onSaveAndSwitch);
-            this.close();
-        });
-
-        const switchWithoutSavingBtn = btns.createEl('button', {
-            text: String(L.switchWithoutSaving || 'Switch without saving'),
-            cls: 'mod-warning',
-        });
-        switchWithoutSavingBtn.addEventListener('click', () => {
-            finish(this.onSwitchWithoutSaving);
-            this.close();
-        });
-
-        this.buttons = [cancelBtn, saveAndSwitchBtn, switchWithoutSavingBtn];
-        this.focusedButtonIndex = 1;
-        this.updateButtonFocus();
-
-        this.keyHandler = (e: KeyboardEvent) => {
-            if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-                e.preventDefault();
-                this.focusedButtonIndex =
-                    (this.focusedButtonIndex - 1 + this.buttons.length) % this.buttons.length;
-                this.updateButtonFocus();
-                return;
-            }
-            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-                e.preventDefault();
-                this.focusedButtonIndex = (this.focusedButtonIndex + 1) % this.buttons.length;
-                this.updateButtonFocus();
-                return;
-            }
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                const btn = this.buttons[this.focusedButtonIndex];
-                if (btn) btn.click();
-                return;
-            }
-            if (e.key === 'Escape') {
-                e.preventDefault();
-                e.stopImmediatePropagation();
-                finish(this.onCancel);
-                this.close();
-            }
-        };
-
-        // Held rather than recomputed at close: removeEventListener has to target
-        // the same document the listener went onto.
-        this.keyHandlerDoc = this.containerEl.ownerDocument || document;
-        this.keyHandlerDoc.addEventListener('keydown', this.keyHandler, true);
     }
 
-    private updateButtonFocus(): void {
-        this.buttons.forEach((btn, i) => {
-            btn.classList.toggle('wpp-btn-focused', i === this.focusedButtonIndex);
-        });
-    }
-
-    override onClose(): void {
-        if (this.keyHandler) {
-            this.keyHandlerDoc.removeEventListener('keydown', this.keyHandler, true);
-            this.keyHandler = null;
-        }
-        if (!this.didResolve) {
-            this.didResolve = true;
-            this.onCancel();
-        }
-        this.contentEl.empty();
+    protected override actions(): readonly DialogAction[] {
+        // The order this produces is the one thing about these three dialogs
+        // that changes visibly:
+        //
+        //   was  [ Cancel ][ Save and switch ][ Switch without saving ]
+        //   now  [ Switch without saving ][ Cancel ][ Save and switch ]
+        //
+        // "Switch without saving" throws away work that is not recorded
+        // anywhere, and it used to sit at the right-hand end, one arrow key from
+        // the default. macOS puts the discard choice at the far left of its own
+        // save dialog for exactly this reason.
+        return [
+            {
+                text: String(L.switchWithoutSaving || 'Switch without saving'),
+                kind: 'secondary',
+                tone: 'destructive',
+                run: () => { this.onSwitchWithoutSaving(); },
+            },
+            {
+                text: String(L.saveAndSwitch || 'Save and switch'),
+                kind: 'affirmative',
+                run: () => { this.onSaveAndSwitch(); },
+            },
+        ];
     }
 }

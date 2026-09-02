@@ -131,8 +131,35 @@ test('UnsavedSwitchModal: handles saveAndSwitch, switchWithoutSaving, and onCanc
     modal.open();
     assert.ok(modal.containerEl.classList.contains('wpp-modal-above-overlay'));
 
+    // The order is the decision, so it is asserted rather than assumed. The
+    // discard option is at the far left, away from Enter; it used to be at the
+    // right-hand end, one arrow key from the default.
+    const labels = [...modal.contentEl.querySelectorAll('.wpp-confirm-buttons button')]
+        .map((b) => b.textContent);
+    assert.deepEqual(labels, [
+        String(L.switchWithoutSaving),
+        String(L.cancel),
+        String(L.saveAndSwitch),
+    ]);
+
+    const buttons = [...modal.contentEl.querySelectorAll('.wpp-confirm-buttons button')];
+    assert.equal(buttons[0]?.classList.contains('mod-warning'), true, 'discard is destructive');
+    assert.equal(buttons[2]?.classList.contains('mod-cta'), true, 'the affirmative action is the cta');
+
+    // The ring starts on the affirmative action, and it is painted - what Enter
+    // does must never be a guess.
+    assert.equal(buttons[2]?.classList.contains('wpp-btn-focused'), true);
+
     const doc = modal.containerEl.ownerDocument || document;
+
+    // Right is clamped at the affirmative end rather than wrapping round to the
+    // discard button.
     doc.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowRight' }));
+    assert.equal(buttons[2]?.classList.contains('wpp-btn-focused'), true);
+
+    // Two lefts to reach the discard option: the distance is the safety.
+    doc.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowLeft' }));
+    doc.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowLeft' }));
     doc.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter' }));
     assert.equal(state, 'switch');
 
@@ -203,3 +230,153 @@ test('HistoryModal: groups entries by date and renders summary and restore butto
 });
 
 test.after(() => harness.restore());
+
+/**
+ * The reported fault: from every rename route, the dialog opened with the name
+ * selected and Enter did nothing. `doRename` returned on
+ * `newName === currentName` without closing, so pressing the button did nothing
+ * either - it was never a keyboard problem.
+ */
+test('RenameModal: Enter with the name untouched closes and reports nothing', () => {
+    let renamed: string | null = null;
+    const modal = new RenameModal(app, 'Work', (name: string) => { renamed = name; });
+    modal.open();
+
+    const input = modal.contentEl.querySelector('input');
+    assert.equal(input?.value, 'Work', 'it opens on the current name');
+
+    const doc = modal.containerEl.ownerDocument || document;
+    doc.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter' }));
+
+    assert.equal(renamed, null, 'an unchanged name is nothing to do');
+    // This dialog specifically, not a count of every modal on the page: other
+    // tests in this file leave theirs open.
+    assert.equal(
+        modal.containerEl.isConnected, false,
+        'and the dialog closes rather than sitting there unresponsive',
+    );
+});
+
+test('RenameModal: the ring is on the confirm button while the field has focus', () => {
+    const modal = new RenameModal(app, 'Work', () => {});
+    modal.open();
+
+    const buttons = [...modal.contentEl.querySelectorAll('.wpp-confirm-buttons button')];
+    assert.deepEqual(buttons.map((b) => b.textContent), [String(L.cancel), String(L.rename)]);
+
+    // Painted from the start. RenameModal was the one dialog that never called
+    // its own ring update, so nothing was marked and `mod-cta` merely looked
+    // selected - which is what "the button is selected but Enter does nothing"
+    // was describing.
+    assert.equal(buttons[1]?.classList.contains('wpp-btn-focused'), true);
+    modal.close();
+});
+
+test('RenameModal: an empty name keeps the dialog open to be corrected', () => {
+    let renamed: string | null = null;
+    const modal = new RenameModal(app, 'Work', (name: string) => { renamed = name; }, {
+        emptyNotice: 'Name cannot be empty',
+    });
+    modal.open();
+
+    const input = modal.contentEl.querySelector('input');
+    if (input) input.value = '   ';
+
+    const doc = modal.containerEl.ownerDocument || document;
+    doc.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter' }));
+
+    assert.equal(renamed, null);
+    assert.equal(
+        modal.containerEl.isConnected, true,
+        'an unusable name must not close the dialog',
+    );
+    modal.close();
+});
+
+test('RenameModal: a changed name commits', () => {
+    let renamed: string | null = null;
+    const modal = new RenameModal(app, 'Work', (name: string) => { renamed = name; });
+    modal.open();
+
+    const input = modal.contentEl.querySelector('input');
+    if (input) input.value = '  Work 2  ';
+
+    const doc = modal.containerEl.ownerDocument || document;
+    doc.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter' }));
+
+    assert.equal(renamed, 'Work 2', 'trimmed, and committed');
+});
+
+/**
+ * The other half of the reported fault's family: `saveAsSession()` wraps this
+ * dialog in a promise whose resolve was reachable only from the affirmative
+ * paths, so dismissing it left the promise pending and dropped the
+ * continuation. Every dismissal settles exactly once now.
+ */
+test('RenameModal: dismissing settles the cancel callback exactly once', () => {
+    let cancels = 0;
+    const modal = new RenameModal(app, 'Work', () => {}, { onCancel: () => { cancels += 1; } });
+    modal.open();
+
+    const doc = modal.containerEl.ownerDocument || document;
+    doc.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape' }));
+    assert.equal(cancels, 1, 'Escape settles it');
+
+    // onClose runs on the way out too; it must not settle a second time.
+    modal.close();
+    assert.equal(cancels, 1);
+});
+
+test('RenameModal: committing does not also report a cancel', () => {
+    let cancels = 0;
+    let renamed: string | null = null;
+    const modal = new RenameModal(app, 'Work', (name: string) => { renamed = name; }, {
+        onCancel: () => { cancels += 1; },
+    });
+    modal.open();
+    const input = modal.contentEl.querySelector('input');
+    if (input) input.value = 'Work 2';
+    const doc = modal.containerEl.ownerDocument || document;
+    doc.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter' }));
+
+    assert.equal(renamed, 'Work 2');
+    assert.equal(cancels, 0, 'an answered dialog is not a cancelled one');
+});
+
+test('the dialogs guard IME composition, so an Enter that commits a conversion is not a press', () => {
+    let confirmed = false;
+    const modal = new ConfirmModal(app, 'Delete?', () => { confirmed = true; });
+    modal.open();
+
+    const doc = modal.containerEl.ownerDocument || document;
+    doc.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter', isComposing: true }));
+    assert.equal(confirmed, false, 'a composing Enter belongs to the field');
+
+    doc.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter' }));
+    assert.equal(confirmed, true);
+});
+
+test('ConfirmModal: the destructive default is the affirmative action, and it is last', () => {
+    const modal = new ConfirmModal(app, 'Delete "Work"?', () => {});
+    modal.open();
+
+    const buttons = [...modal.contentEl.querySelectorAll('.wpp-confirm-buttons button')];
+    assert.deepEqual(buttons.map((b) => b.textContent), [String(L.cancel), String(L.delete)]);
+    // Destructive by colour, affirmative by position: the two are separate
+    // decisions, and conflating them put this button on the wrong side.
+    assert.equal(buttons[1]?.classList.contains('mod-warning'), true);
+    assert.equal(buttons[1]?.classList.contains('wpp-btn-focused'), true);
+    modal.close();
+});
+
+test('ConfirmModal: a reversible action is the cta instead', () => {
+    const modal = new ConfirmModal(app, 'Restore?', () => {}, {
+        confirmText: 'Restore',
+        confirmClass: 'mod-cta',
+    });
+    modal.open();
+    const buttons = [...modal.contentEl.querySelectorAll('.wpp-confirm-buttons button')];
+    assert.equal(buttons[1]?.classList.contains('mod-cta'), true);
+    assert.equal(buttons[1]?.classList.contains('mod-warning'), false);
+    modal.close();
+});

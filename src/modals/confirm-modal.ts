@@ -1,21 +1,26 @@
-import { type App, Modal } from 'obsidian';
+import { type App } from 'obsidian';
 import { L } from '../i18n.ts';
+import { DialogModal, type DialogAction, type DialogActionTone } from './dialog-modal.ts';
 
 export interface ConfirmModalOptions {
     confirmText?: string;
     confirmClass?: string;
     hint?: string;
     onHintClick?: () => void;
+
+    /**
+     * Run when the dialog goes away without confirming - button, Escape,
+     * click-outside. Optional, and none of the twenty existing call sites pass
+     * one, so their behaviour is unchanged: dismissing a confirmation still
+     * does nothing at all.
+     */
+    onCancel?: () => void;
 }
 
-export class ConfirmModal extends Modal {
+export class ConfirmModal extends DialogModal {
     private readonly message: string;
-    private keyHandlerDoc: Document = document;
     private readonly onConfirm: () => void;
     private readonly options: ConfirmModalOptions;
-    private buttons: HTMLButtonElement[] = [];
-    private focusedButtonIndex: number = 1;
-    private confirmKeyHandler: ((e: KeyboardEvent) => void) | null = null;
 
     constructor(
         app: App,
@@ -23,90 +28,43 @@ export class ConfirmModal extends Modal {
         onConfirm: () => void,
         options?: ConfirmModalOptions
     ) {
-        super(app);
+        const opts = options || {};
+        super(app, opts.onCancel ? { onCancel: opts.onCancel } : {});
         this.message = message;
         this.onConfirm = onConfirm;
-        this.options = options || {};
+        this.options = opts;
     }
 
-    override onOpen(): void {
-        // Stacks above the switch overlay; the value lives in styles.css.
-        this.containerEl.addClass('wpp-modal-above-overlay');
-        const contentEl = this.contentEl;
+    protected override renderBody(contentEl: HTMLElement): void {
         contentEl.createEl('p', { text: this.message });
-        const btns = contentEl.createDiv({ cls: 'wpp-confirm-buttons' });
-
-        const cancelBtn = btns.createEl('button', { text: String(L.cancel || 'Cancel') });
-        cancelBtn.addEventListener('click', () => {
-            this.close();
-        });
-
-        const confirmText = this.options.confirmText || String(L.delete || 'Delete');
-        const confirmClass = this.options.confirmClass || 'mod-warning';
-        const confirmBtn = btns.createEl('button', { text: confirmText, cls: confirmClass });
-        confirmBtn.addEventListener('click', () => {
-            this.onConfirm();
-            this.close();
-        });
-
-        if (this.options.hint) {
-            const hintEl = contentEl.createDiv({ cls: 'wpp-confirm-hint' });
-            const hintLink = hintEl.createEl('a', { text: this.options.hint });
-            hintLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.close();
-                if (this.options.onHintClick) {
-                    this.options.onHintClick();
-                }
-            });
-        }
-
-        this.buttons = [cancelBtn, confirmBtn];
-        this.focusedButtonIndex = 1; // Default focus on confirm action
-        this.updateButtonFocus();
-
-        // Keyboard handler
-        this.confirmKeyHandler = (e: KeyboardEvent) => {
-            if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-                e.preventDefault();
-                this.focusedButtonIndex = 0;
-                this.updateButtonFocus();
-            } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-                e.preventDefault();
-                this.focusedButtonIndex = 1;
-                this.updateButtonFocus();
-            } else if (e.key === 'Enter') {
-                e.preventDefault();
-                if (this.focusedButtonIndex === 0) {
-                    this.close();
-                } else {
-                    this.onConfirm();
-                    this.close();
-                }
-            } else if (e.key === 'Escape') {
-                e.preventDefault();
-                e.stopImmediatePropagation();
-                this.close();
-            }
-        };
-
-        // Held rather than recomputed at close: removeEventListener has to target
-        // the same document the listener went onto.
-        this.keyHandlerDoc = this.containerEl.ownerDocument || document;
-        this.keyHandlerDoc.addEventListener('keydown', this.confirmKeyHandler, true);
     }
 
-    private updateButtonFocus(): void {
-        this.buttons.forEach((btn, i) => {
-            btn.classList.toggle('wpp-btn-focused', i === this.focusedButtonIndex);
-        });
+    protected override actions(): readonly DialogAction[] {
+        // Affirmative *and* usually destructive. `mod-warning` is the default
+        // because most of the twenty callers are deletes and resets, and
+        // defaulting a confirmation to the safe-looking colour is the wrong way
+        // round. Callers whose action can be undone pass `mod-cta`.
+        const tone: DialogActionTone =
+            this.options.confirmClass === 'mod-cta' ? 'default' : 'destructive';
+
+        return [{
+            text: this.options.confirmText || String(L.delete || 'Delete'),
+            kind: 'affirmative',
+            tone,
+            run: () => { this.onConfirm(); },
+        }];
     }
 
-    override onClose(): void {
-        if (this.confirmKeyHandler) {
-            this.keyHandlerDoc.removeEventListener('keydown', this.confirmKeyHandler, true);
-            this.confirmKeyHandler = null;
-        }
-        this.contentEl.empty();
+    protected override renderFooter(contentEl: HTMLElement): void {
+        if (!this.options.hint) return;
+        // Below the buttons, where it was: it offers a way out rather than a
+        // third answer, so it is not one of the actions.
+        const hintEl = contentEl.createDiv({ cls: 'wpp-confirm-hint' });
+        const hintLink = hintEl.createEl('a', { text: this.options.hint });
+        hintLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.cancel();
+            this.options.onHintClick?.();
+        });
     }
 }

@@ -766,7 +766,7 @@ export class SearchOverlay {
                                 void self.getSessionSaver().reloadCurrentSessionWithoutSaving();
                             };
                             if (self.getSettingsState().confirmQuickActions) {
-                                new ConfirmModal(self.app, localizedCall(strings.confirmReloadSession, sess.name), doReload, { confirmText: localizedString(strings.load), confirmClass: 'mod-cta' }).open();
+                                new ConfirmModal(self.app, localizedCall(strings.confirmReloadSession, sess.name), doReload, { confirmText: localizedString(strings.load) }).open();
                             } else {
                                 doReload();
                             }
@@ -927,7 +927,7 @@ export class SearchOverlay {
                         void self.getSessionSaver().reloadCurrentSessionWithoutSaving();
                     };
                     if (self.getSettingsState().confirmQuickActions) {
-                        new ConfirmModal(self.app, localizedCall(strings.confirmReloadSession, target.name), doReload, { confirmText: localizedString(strings.load), confirmClass: 'mod-cta' }).open();
+                        new ConfirmModal(self.app, localizedCall(strings.confirmReloadSession, target.name), doReload, { confirmText: localizedString(strings.load) }).open();
                     } else {
                         doReload();
                     }
