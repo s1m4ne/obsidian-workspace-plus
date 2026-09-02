@@ -27,7 +27,7 @@ export class UnsavedSwitchModal extends Modal {
     }
 
     override onOpen(): void {
-        this.containerEl.style.setProperty('z-index', '10001');
+        this.containerEl.addClass('wpp-modal-above-overlay');
 
         const contentEl = this.contentEl;
         contentEl.createEl('p', { text: this.message });

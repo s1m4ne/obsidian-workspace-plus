@@ -596,9 +596,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
         if (backup.backupPlatform) desc += `  ·  ${backup.backupPlatform}`;
 
         const setting = new Setting(backupListEl);
-        const numSpan = setting.nameEl.createSpan({ text: `${backup.generation}.` });
-        numSpan.style.color = 'var(--text-accent)';
-        numSpan.style.marginRight = '6px';
+        setting.nameEl.createSpan({ text: `${backup.generation}.`, cls: 'wpp-backup-generation-num' });
         setting.nameEl.appendText(summary);
 
         setting.setDesc(desc).addButton((btn) => {
@@ -832,13 +830,8 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
     }
 
     private displayFooter(containerEl: HTMLElement): void {
-        const footerEl = containerEl.createDiv();
-        footerEl.style.fontSize = '12px';
-        footerEl.style.color = 'var(--text-faint)';
-        footerEl.style.marginTop = '24px';
-
-        const helpEl = footerEl.createEl('p', { text: text(L.settingsTranslationHelp) });
-        helpEl.style.margin = '0 0 4px';
+        const footerEl = containerEl.createDiv({ cls: 'wpp-settings-footer' });
+        footerEl.createEl('p', { text: text(L.settingsTranslationHelp), cls: 'wpp-settings-footer-help' });
 
         footerEl.createEl('a', {
             text: text(L.settingsGitHubLink),

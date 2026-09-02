@@ -38,7 +38,7 @@ test('ConfirmModal: handles open, click, keyboard navigation and hint', () => {
     );
 
     modal.open();
-    assert.equal(modal.containerEl.style.getPropertyValue('z-index'), '10001');
+    assert.ok(modal.containerEl.classList.contains('wpp-modal-above-overlay'));
 
     const hintLink = modal.contentEl.querySelector('.wpp-confirm-hint a');
     assert.ok(hintLink);
@@ -129,7 +129,7 @@ test('UnsavedSwitchModal: handles saveAndSwitch, switchWithoutSaving, and onCanc
     );
 
     modal.open();
-    assert.equal(modal.containerEl.style.getPropertyValue('z-index'), '10001');
+    assert.ok(modal.containerEl.classList.contains('wpp-modal-above-overlay'));
 
     const doc = modal.containerEl.ownerDocument || document;
     doc.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowRight' }));

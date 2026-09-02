@@ -30,8 +30,8 @@ export class ConfirmModal extends Modal {
     }
 
     override onOpen(): void {
-        // Ensure confirm modal appears above the switch overlay (z-index 9999)
-        this.containerEl.style.setProperty('z-index', '10001');
+        // Stacks above the switch overlay; the value lives in styles.css.
+        this.containerEl.addClass('wpp-modal-above-overlay');
         const contentEl = this.contentEl;
         contentEl.createEl('p', { text: this.message });
         const btns = contentEl.createDiv({ cls: 'wpp-confirm-buttons' });

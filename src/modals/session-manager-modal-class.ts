@@ -201,8 +201,7 @@ export class SessionManagerModal extends Modal {
         this.focusedIndex = -1;
         this.selectedIds = new Set();
 
-        this.bulkActionsEl = contentEl.createDiv({ cls: 'wpp-bulk-actions' });
-        this.bulkActionsEl.style.display = 'none';
+        this.bulkActionsEl = contentEl.createDiv({ cls: 'wpp-bulk-actions wpp-is-hidden' });
         this.bulkDeleteBtn = this.bulkActionsEl.createEl('button', { cls: 'mod-warning' });
         this.bulkDeleteBtn.addEventListener('click', () => { this.onBulkDelete(); });
         const deselectBtn = this.bulkActionsEl.createEl('button', { text: text(L.deselect), cls: 'wpp-deselect-btn' });
@@ -913,11 +912,10 @@ export class SessionManagerModal extends Modal {
     }
 
     updateBulkActions(): void {
-        if (this.selectedIds.size > 0) {
-            this.bulkActionsEl.style.display = '';
+        const hasSelection = this.selectedIds.size > 0;
+        this.bulkActionsEl.classList.toggle('wpp-is-hidden', !hasSelection);
+        if (hasSelection) {
             this.bulkDeleteBtn.textContent = format(L.bulkDelete, this.selectedIds.size);
-        } else {
-            this.bulkActionsEl.style.display = 'none';
         }
     }
 
@@ -953,10 +951,10 @@ export class SessionManagerModal extends Modal {
         while (el.firstChild) el.removeChild(el.firstChild);
 
         if (!this.plugin.getGroupStore().isGroupFeatureEnabled()) {
-            el.style.display = 'none';
+            el.classList.add('wpp-is-hidden');
             return;
         }
-        el.style.display = '';
+        el.classList.remove('wpp-is-hidden');
 
         groupTabUi.renderGroupTabs({
             app: this.app,

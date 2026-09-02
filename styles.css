@@ -136,6 +136,13 @@
     border-radius: 6px;
 }
 
+/* Both bars are laid out with display:flex, so hiding them needs the
+   compound selector to win on specificity rather than an inline style. */
+.wpp-bulk-actions.wpp-is-hidden,
+.wpp-group-tabs-row.wpp-is-hidden {
+    display: none;
+}
+
 .wpp-session-item.is-dragging {
     visibility: hidden;
 }
@@ -971,4 +978,30 @@ body.wpp-session-list-dragging * {
 .wpp-measure-overlay {
     visibility: hidden !important;
     pointer-events: none !important;
+}
+
+/* The confirm and unsaved-switch modals are opened from on top of the switch
+   overlay and have to stack above it. Obsidian's own --layer-modal already
+   clears --layer-popover; the explicit value is kept as it was so the stacking
+   order does not change with this conversion, and a theme can now reach it.
+   The class is repeated to outweigh core's own single-class .modal-container
+   rule: pairing it with .modal-container instead would silently stop applying
+   if Obsidian ever renamed that element's class. */
+.wpp-modal-above-overlay.wpp-modal-above-overlay {
+    z-index: 10001;
+}
+
+.wpp-backup-generation-num {
+    color: var(--text-accent);
+    margin-right: 6px;
+}
+
+.wpp-settings-footer {
+    font-size: 12px;
+    color: var(--text-faint);
+    margin-top: 24px;
+}
+
+.wpp-settings-footer-help {
+    margin: 0 0 4px;
 }
