@@ -4,28 +4,35 @@ A session manager for Obsidian workspaces, published in the community plugin
 directory. `src/` is TypeScript with owned state and real classes, bundled by
 esbuild into `main.js` (which is generated, not tracked).
 
-## Issue #111 is code-complete and not yet verified by hand
+## Issue #111 is code-complete, and hand-checked except for one point
 
 Issue #111 rewrote `src/` from 18k lines of ES5 CommonJS. All five phases are
-committed; **the plugin has not been exercised in Obsidian since commit 34a**,
-and the modal, overlay and status-bar construction paths have all changed since.
-That check comes before the merge, and nothing here should be described as
-verified until it has happened.
+committed, and the maintainer has exercised the plugin in Obsidian across
+switching, saving, version history, sidebar restore, the dialogs and the
+settings screen. Six of the plan's seven verification points are signed off.
+
+**What is still unverified is verify 5: the search overlay's key handler** -
+Escape, Tab, the horizontal and vertical arrows, Enter, Delete/Backspace, and
+`/` to reach the filter. That is commit 27's P4 split of a ~1,000-line
+function, and switching *from* the overlay having been checked is not the same
+as its keyboard contract having been checked.
 
 Where it landed, measured rather than claimed:
 
 ```
-TypeScript                45 / 45 files          prototype methods    0  (from 309)
+TypeScript                48 / 48 files          prototype methods    0  (from 309)
 CommonJS requires         0                      lint                40  (from 255)
-plugin.data reads         226, 190 of them inside an owner
-... from outside an owner 36  (from ~145)        coverage            92% (from 22%)
-417 tests, 11 gates green
+plugin.data reads         225, 189 of them inside an owner
+... from outside an owner 36  (from ~145)        coverage            93% (from 22%)
+447 tests, 16 gates green
 ```
 
-The constraint was that **observable behaviour must not change** apart from four
-named exceptions in Phase 4 and one authorized during Phase 3, all recorded in
-the issue. The forty remaining lint violations are all recorded suppressions,
-also explained there.
+The constraint was that **observable behaviour must not change** apart from the
+exceptions recorded in the issue: four named in Phase 4, one authorized during
+Phase 3, and the ones decided during release preparation - `currentTab` no
+longer counting as a layout change, and the dialogs' keyboard contract. The
+forty remaining lint violations are all recorded suppressions, also explained
+there.
 
 **Before touching anything under `src/` or `tests/`:**
 
