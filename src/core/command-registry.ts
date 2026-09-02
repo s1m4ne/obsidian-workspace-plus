@@ -14,9 +14,16 @@ import type { SessionSaver } from '../state/session-saver.ts';
 import type { SessionStore } from '../state/session-store.ts';
 import type { HistoryService } from '../state/history-service.ts';
 import type { SessionSwitcher } from '../state/session-switcher.ts';
+import type { FrontmatterLinker } from '../core/frontmatter-linker.ts';
 
 
 export interface CommandRegistryHost {
+    /**
+     * Owned by FrontmatterLinker; naming it keeps one list rather than a
+     * forwarding method per call on the plugin.
+     */
+    getFrontmatterLinker(): FrontmatterLinker;
+
     /**
      * Owned by SessionSwitcher; naming it keeps one list rather than a
      * forwarding method per call on the plugin.
@@ -60,7 +67,6 @@ export interface CommandRegistryHost {
     manifest: { id: string };
     addCommand(command: Command): Command;
     removeCommand(id: string): void;
-    saveCurrentNoteNameAsSession(): Promise<boolean> | void;
     getSearchOverlay(): { open(anchorEl?: HTMLElement): void };
     exportSessionsSnapshot(): Promise<void>;
     importSessionsFromLatestExport(): Promise<void>;
@@ -309,7 +315,7 @@ export class CommandRegistry {
             'save-current-note-name-as-session',
             String(L.cmdSaveCurrentNoteNameAsSession || ''),
             () => {
-                void host.saveCurrentNoteNameAsSession();
+                void host.getFrontmatterLinker().saveCurrentNoteNameAsSession();
             }
         );
 

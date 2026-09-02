@@ -5,8 +5,15 @@ import type { SessionItem } from '../../storage/default-data.ts';
 import type { GroupStore } from '../../state/group-store.ts';
 import type { SessionStore } from '../../state/session-store.ts';
 import type { SessionSwitcher } from '../../state/session-switcher.ts';
+import type { CommandRegistry } from '../../core/command-registry.ts';
 
 export interface SwitchOverlayHost {
+    /**
+     * Owned by CommandRegistry; naming it keeps one list rather than a
+     * forwarding method per call on the plugin.
+     */
+    getCommandRegistry(): CommandRegistry;
+
     /**
      * Owned by SessionSwitcher; naming it keeps one list rather than a
      * forwarding method per call on the plugin.
@@ -34,7 +41,6 @@ export interface SwitchOverlayHost {
         groups?: Record<string, { id: string; name: string }>;
         [key: string]: unknown;
     };
-    getCommandHotkey(cmd: string, slot?: number): string;
     getSearchOverlay(): { hide(): void };
 }
 
@@ -183,7 +189,7 @@ export class SwitchOverlay {
             const presentation = deriveSessionPresentation(session, {
                 activeSessionId: this.host.data.activeSessionId,
                 index: i,
-                commandHotkey: i <= 8 ? this.host.getCommandHotkey(`switch-to-${i + 1}`) : '',
+                commandHotkey: i <= 8 ? this.host.getCommandRegistry().getCommandHotkey(`switch-to-${i + 1}`) : '',
             });
             const item = list.createDiv({
                 cls: i === activeIndex ? 'wpp-switch-item is-active' : 'wpp-switch-item',
@@ -210,14 +216,14 @@ export class SwitchOverlay {
             footerRow.createDiv({ text: `${keyTabText} / G  ${switchGroupText}` });
         }
 
-        const nextKey = this.host.getCommandHotkey('next-session');
+        const nextKey = this.host.getCommandRegistry().getCommandHotkey('next-session');
         if (nextKey) {
             const cmdNextText = typeof L.cmdNext === 'string' ? L.cmdNext : '';
             footerRow.createDiv({ text: `${cmdNextText}  ${nextKey}` });
         }
 
-        const prevKey2 = this.host.getCommandHotkey('previous-session');
-        const nextKey2 = this.host.getCommandHotkey('next-session', 1);
+        const prevKey2 = this.host.getCommandRegistry().getCommandHotkey('previous-session');
+        const nextKey2 = this.host.getCommandRegistry().getCommandHotkey('next-session', 1);
         if (prevKey2 || nextKey2) {
             const parts: string[] = [];
             if (prevKey2) {

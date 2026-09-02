@@ -88,6 +88,8 @@ test('status bar actions delegate new direct actions to plugin methods', async f
             calls.push('saveAsSession');
             return Promise.resolve(true);
         },
+        // Front matter goes through getFrontmatterLinker(); this double carries those members itself.
+        getFrontmatterLinker() { return this; },
         saveCurrentNoteNameAsSession: function () {
             calls.push('saveCurrentNoteNameAsSession');
             return Promise.resolve(true);

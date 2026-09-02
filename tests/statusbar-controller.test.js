@@ -136,6 +136,9 @@ test('status bar controller accumulates wheel delta and switches after threshold
     const first = createEvent({ type: 'wheel', deltaY: 10 });
     const second = createEvent({ type: 'wheel', deltaY: 25 });
 
+    const wheelController = new controller.StatusBarController(plugin);
+    plugin.getStatusBarController = function () { return wheelController; };
+
     assert.equal(controller.handleStatusBarWheel(plugin, first, 1000), false);
     assert.equal(plugin.statusBarScrollDelta, 10);
     assert.equal(first.prevented, 1);
@@ -175,6 +178,16 @@ test('status bar controller setup wires basic click handling', function () {
         },
     };
 
+    // The module-level helper reaches the plugin's controller, so the double
+    // hands back a real one built from itself.
+    plugin.getSessionStore = function () { return { getActiveSession: function () { return null; } }; };
+    plugin.getGroupStore = function () {
+        return { isGroupFeatureEnabled: function () { return false; }, getActiveGroup: function () { return null; } };
+    };
+    plugin.getSessionSaver = function () { return { shouldShowUnsavedStatusBarHighlight: function () { return false; } }; };
+    plugin.getStatusBarController = function () {
+        return new controller.StatusBarController(plugin);
+    };
     controller.setupStatusBar(plugin);
     const event = createEvent({ type: 'click' });
     listeners.click(event);
@@ -182,9 +195,11 @@ test('status bar controller setup wires basic click handling', function () {
     assert.equal(plugin.statusBarEl !== undefined, true);
     assert.equal(event.prevented, 1);
     assert.equal(event.stopped, 1);
+    // No ['update'] entry: setup redraws through the controller's own
+    // updateStatusBar rather than asking the plugin to forward back into it.
+    // The redraw still happens - the status bar element exists and is classed.
     assert.deepEqual(calls, [
         ['class', 'wpp-status-bar'],
-        ['update'],
         ['action', 'quickSwitcher', 'click'],
     ]);
 });

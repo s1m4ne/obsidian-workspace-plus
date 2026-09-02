@@ -68,14 +68,9 @@ test('StatusBarController sets up status bar element and renders active session 
     assert.ok(texts.includes('Project Group'), 'contains active group name');
     assert.ok(texts.includes('Work Session'), 'contains active session name');
 
-    // Accessors
-    assert.equal(plugin.statusBarScrollDelta, 0);
-    assert.equal(plugin.statusBarScrollEventAt, 0);
-    assert.equal(plugin.statusBarScrollSwitchAt, 0);
-
-    // updateStatusBar on plugin prototype delegates cleanly
-    (plugin.updateStatusBar as () => void)();
-
+    // The three mirrored counters are gone from the plugin: nothing read them,
+    // and a getter-only accessor is what once made onunload throw before it
+    // could flush. They live on the controller, which is the one that has them.
     const ctrl = (plugin.getStatusBarController as () => StatusBarControllerSurface)();
     assert.ok(ctrl);
     assert.equal(ctrl.scrollDelta, 0);

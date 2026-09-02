@@ -10,9 +10,23 @@ import type { SessionSaver } from './state/session-saver.ts';
 import type { SessionStore } from './state/session-store.ts';
 import type { HistoryService } from './state/history-service.ts';
 import type { SessionSwitcher } from './state/session-switcher.ts';
+import type { StatusBarController } from './statusbar-controller.ts';
+import type { FrontmatterLinker } from './core/frontmatter-linker.ts';
 
 
 export interface StatusBarActionPluginHost extends HistoryModalPluginHost, SettingsContextMenuPluginHost {
+    /**
+     * Owned by FrontmatterLinker; naming it keeps one list rather than a
+     * forwarding method per call on the plugin.
+     */
+    getFrontmatterLinker(): FrontmatterLinker;
+
+    /**
+     * Owned by StatusBarController; naming it keeps one list rather than a
+     * forwarding method per call on the plugin.
+     */
+    getStatusBarController(): StatusBarController;
+
     /**
      * Owned by SessionSwitcher; naming it keeps one list rather than a
      * forwarding method per call on the plugin.
@@ -55,10 +69,8 @@ export interface StatusBarActionPluginHost extends HistoryModalPluginHost, Setti
     data: PluginData;
     searchOverlayEl?: HTMLElement | null;
     statusBarEl?: HTMLElement | null;
-    updateStatusBar(): void;
     hideSearchOverlay(): void;
     openSearchOverlay(anchorEl?: HTMLElement | null): void;
-    saveCurrentNoteNameAsSession(): Promise<unknown>;
     openConfirmModal?(
         message: string,
         onConfirm: () => void,
@@ -118,7 +130,7 @@ export const ACTIONS: readonly StatusBarAction[] = [
         id: 'saveCurrentNoteNameAsSession',
         labelKey: 'cmdSaveCurrentNoteNameAsSession',
         run(plugin) {
-            return plugin.saveCurrentNoteNameAsSession();
+            return plugin.getFrontmatterLinker().saveCurrentNoteNameAsSession();
         },
     },
     {
@@ -230,7 +242,7 @@ export const ACTIONS: readonly StatusBarAction[] = [
                 forceDeleteConfirm: true,
                 notifyDeleted: false,
                 onSessionsChanged() {
-                    plugin.updateStatusBar();
+                    plugin.getStatusBarController().updateStatusBar();
                 },
             });
         },
@@ -244,7 +256,7 @@ export const ACTIONS: readonly StatusBarAction[] = [
                 app: plugin.app,
                 event: event as MouseEvent,
                 onChanged() {
-                    plugin.updateStatusBar();
+                    plugin.getStatusBarController().updateStatusBar();
                 },
             });
         },

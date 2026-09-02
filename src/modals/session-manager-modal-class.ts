@@ -17,8 +17,15 @@ import type { GroupStore } from '../state/group-store.ts';
 import type { SessionSaver } from '../state/session-saver.ts';
 import type { SessionStore } from '../state/session-store.ts';
 import type { SessionSwitcher } from '../state/session-switcher.ts';
+import type { CommandRegistry } from '../core/command-registry.ts';
 
 export interface SessionManagerModalHost extends GroupTabPluginHost, HistoryModalPluginHost, SettingsContextMenuPluginHost {
+    /**
+     * Owned by CommandRegistry; naming it keeps one list rather than a
+     * forwarding method per call on the plugin.
+     */
+    getCommandRegistry(): CommandRegistry;
+
     /**
      * Owned by SessionSwitcher; naming it keeps one list rather than a
      * forwarding method per call on the plugin.
@@ -59,7 +66,6 @@ export interface SessionManagerModalHost extends GroupTabPluginHost, HistoryModa
         overlayDefaultFocus: string;
         [key: string]: unknown;
     };
-    getCommandHotkey(commandId: string): string;
 }
 
 /** Where the keyboard target currently sits. */
@@ -215,7 +221,7 @@ export class SessionManagerModal extends Modal {
         };
         contentEl.addEventListener('focusin', this.contentFocusHandler, true);
 
-        const nextKey = this.plugin.getCommandHotkey('next-session');
+        const nextKey = this.plugin.getCommandRegistry().getCommandHotkey('next-session');
         const footer = contentEl.createDiv({ cls: 'wpp-modal-footer' });
         if (nextKey) {
             footer.createDiv({ text: `${text(L.cmdNext)}  ${nextKey}` });
@@ -688,7 +694,7 @@ export class SessionManagerModal extends Modal {
         const presentation = deriveSessionPresentation(session, {
             activeSessionId: this.plugin.data.activeSessionId,
             index: hintIndex,
-            commandHotkey: hintIndex <= 8 ? this.plugin.getCommandHotkey(`switch-to-${hintIndex + 1}`) : '',
+            commandHotkey: hintIndex <= 8 ? this.plugin.getCommandRegistry().getCommandHotkey(`switch-to-${hintIndex + 1}`) : '',
             defaultSessionName: this.plugin.getSessionStore().getDefaultSessionName(),
         });
         const isActive = presentation.isActive;
@@ -830,7 +836,7 @@ export class SessionManagerModal extends Modal {
                     this.listEl.querySelectorAll<HTMLElement>('.wpp-session-item').forEach((el, i) => {
                         const indexEl = el.querySelector('.wpp-session-index');
                         if (indexEl) {
-                            const hotkey = i <= 8 ? this.plugin.getCommandHotkey(`switch-to-${i + 1}`) : '';
+                            const hotkey = i <= 8 ? this.plugin.getCommandRegistry().getCommandHotkey(`switch-to-${i + 1}`) : '';
                             indexEl.textContent = hotkey || String(i + 1);
                         }
                     });

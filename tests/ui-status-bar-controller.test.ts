@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { setupHarness } from './lock/harness/index.ts';
 import { DEFAULT_DATA } from '../src/storage/default-data.ts';
+import type { StatusBarController as StatusBarControllerType } from '../src/statusbar-controller.ts';
 
 const harness = setupHarness();
 // Loaded after the harness: settings-state reaches utils.ts, which imports
@@ -39,6 +40,13 @@ function createWheelEvt(deltaY: number, deltaX = 0): WheelEvent {
 // Right-clicking the status bar builds the real session menu, so the host has
 // to answer what that menu asks.
 const menuPluginStubs = {
+    // The status bar and front matter are reached through their own getters
+    // now. Spread into every host literal below, so each gets just the members
+    // the code under test actually calls.
+    getStatusBarController: (): never => ({ updateStatusBar: (): void => {} }) as never,  // overridden where a real controller exists
+    getFrontmatterLinker: (): never => ({
+        saveCurrentNoteNameAsSession: async (): Promise<boolean> => true,
+    }) as never,
     manifest: { id: 'workspace-plus-plus', name: 'Workspace++' },
     _lastRotationBackupAt: 0,
     confirmOverwriteSessionWithCurrentLayout: () => false,
@@ -226,6 +234,9 @@ test('StatusBarController: wheel accumulation and threshold switching', async ()
     };
 
     const controller = new StatusBarController(host);
+    // The top-level helpers reach the plugin's controller, so the host has to
+    // hand back this one rather than the stub in menuPluginStubs.
+    host.getStatusBarController = (): StatusBarControllerType => controller;
     assert.equal(controller.scrollDelta, 0);
     assert.equal(controller.scrollEventAt, 0);
     assert.equal(controller.scrollSwitchAt, 0);
@@ -353,14 +364,18 @@ test('StatusBarController: setup and update DOM rendering', () => {
     };
 
     const controller = new StatusBarController(() => host);
+    host.getStatusBarController = (): StatusBarControllerType => controller;
     const createdEl = controller.setupStatusBar();
     assert.equal(createdEl, el);
     assert.ok(el.classList.contains('wpp-status-bar'));
 
-    // Top-level setupStatusBar
-    delete host.getStatusBarController;
+    // Top-level setupStatusBar goes through the plugin's controller. It used to
+    // fall back to constructing a fresh one when the getter was missing, which
+    // meant a second instance with its own scroll state; the counters this
+    // function maintains restarted from zero on every event.
     const topEl = setupStatusBar(host);
     assert.equal(topEl, el);
+    assert.equal(host.getStatusBarController(), controller, 'the plugin owns the one controller');
 
     // registerDomEvent wiring and DOM event triggers
     const listeners: Record<string, (e: unknown) => void> = {};

@@ -35,6 +35,7 @@ interface ModalPlugin {
     isGroupFeatureEnabled(): boolean;
     getSessionStore(): never;
     getSessionSwitcher(): never;
+    getCommandRegistry(): never;
     getOrderedSessionsForGroup(groupId: string | null): Session[];
     getOrderedGroups(): Array<{ id: string; name: string }>;
     getOrderedGroupTabIds(): string[];
@@ -146,6 +147,8 @@ function makePlugin(containerEl: HTMLElement, groupFeatureEnabled = false): Moda
             .filter((session) => groupId === null || (plugin.data.sessionGroups[session.id] || []).includes(groupId)),
         getOrderedGroups: (): Array<{ id: string; name: string }> => Object.values(plugin.data.groups),
         getOrderedGroupTabIds: (): string[] => plugin.data.groupOrder,
+        // Commands go through getCommandRegistry(); this double carries those members itself.
+        getCommandRegistry(): never { return this as never; },
         getCommandHotkey: (command): string => command.startsWith('switch-to-') ? 'Mod+1' : 'Mod+]',
         findActiveSessionIndex: (sessions): number => sessions.findIndex((session) => session.id === plugin.data.activeSessionId),
         getDefaultSessionName: (): string => 'Workspace',

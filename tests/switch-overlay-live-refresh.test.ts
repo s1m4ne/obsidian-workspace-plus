@@ -52,6 +52,8 @@ function createOverlay(): { overlay: Overlay; sessions: Session[]; announce: () 
         getSessionStore(): never { return this as never; },
         getOrderedSessionsUnfiltered: (): Session[] => sessions,
         getOrderedSessionsForGroup: (): Session[] => sessions,
+        // Commands go through getCommandRegistry(); this double carries those members itself.
+        getCommandRegistry(): never { return this as never; },
         getCommandHotkey: (): string => '',
         findActiveSessionIndex: (list: Session[]): number => list.findIndex((s) => s.id === host.data.activeSessionId),
         resolveGroupSelection: async (): Promise<{ sessions: Session[]; resolvedGroupId: string | null }> => ({

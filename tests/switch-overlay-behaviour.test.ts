@@ -86,6 +86,8 @@ function createTestPlugin() {
         app,
         persistData: async (): Promise<boolean> => true,
         updateStatusBar: (): void => {},
+        // Commands go through getCommandRegistry(); this double carries those members itself.
+        getCommandRegistry(): never { return this as never; },
         syncSessionCommands: (): void => {},
         hideSwitchOverlay: (): void => { switchOverlay.hide(); },
         hideSearchOverlay: (): void => { searchOverlay.hide(); },
@@ -203,6 +205,7 @@ function createTestPlugin() {
         getSessionSaver: () => sessionSaver,
         getSessionSwitcher: () => sessionSwitcher,
         getSessionStore: () => sessionStore,
+        getHistoryService: (): never => ({ isVersionHistoryEnabled: () => false }) as never,
 
         filterSessionsByQuery: (sessions: SessionItem[], query: string) => searchOverlay.filterSessionsByQuery(sessions, query),
     });

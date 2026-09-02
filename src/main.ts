@@ -61,10 +61,7 @@ interface AttachedPluginMethods {
 
     getSessionStorage(): SessionStorage;
 
-    syncSessionCommands(): void;
 
-    updateStatusBar(): void;
-    scheduleStartupFlush(): void;
 
 
 }
@@ -127,13 +124,13 @@ export class WorkspacePlusPlus extends Plugin {
 
         this.registerEvent(this.app.workspace.on('layout-change', () => {
             this.getSessionSwitcher().noteStartupLayoutChange();
-            this.updateStatusBar();
+            this.getStatusBarController().updateStatusBar();
         }));
         this.registerEvent(this.app.workspace.on('active-leaf-change', () => {
             // A switch moves many leaves; letting each one redraw the status bar
             // would show every intermediate state.
             if (this.getSessionSwitcher().isSwitching) return;
-            setTimeout(() => { this.updateStatusBar(); }, 0);
+            setTimeout(() => { this.getStatusBarController().updateStatusBar(); }, 0);
         }));
 
         // Everything here needs the workspace to exist, so it waits rather than
@@ -141,8 +138,8 @@ export class WorkspacePlusPlus extends Plugin {
         this.app.workspace.onLayoutReady(() => {
             this.getSessionSwitcher().startStartupSettleWindow();
             this.getSessionStore().ensureDefaultSession();
-            this.syncSessionCommands();
-            this.scheduleStartupFlush();
+            this.getCommandRegistry().syncSessionCommands();
+            void this.getSessionSwitcher().scheduleStartupFlush();
             this.getHistoryService().startHistorySnapshotTimer();
             void initRotationBackupTimestampForHost(this.asHost<RotationBackupTimestampHost>());
             this.getFrontmatterLinker().registerFrontmatterListeners();
@@ -414,8 +411,8 @@ export function sessionStoreHost(plugin: WorkspacePlusPlus): SessionStoreHost {
             plugin.getGroupStore().attachSessionToActiveGroup(sessionId);
         },
         persistData: () => plugin.persistData(),
-        updateStatusBar: () => { plugin.updateStatusBar(); },
-        syncSessionCommands: () => { plugin.syncSessionCommands(); },
+        updateStatusBar: () => { plugin.getStatusBarController().updateStatusBar(); },
+        syncSessionCommands: () => { plugin.getCommandRegistry().syncSessionCommands(); },
         hideSwitchOverlay: () => { plugin.getSwitchOverlay().hide(); },
         captureActiveSessionLayoutIfAutoSave: () => {
             plugin.getSessionSaver().captureActiveSessionLayoutIfAutoSave();
@@ -471,7 +468,7 @@ export function sessionSwitcherHost(plugin: WorkspacePlusPlus): SessionSwitcherH
         isAutoSaveOnSwitchEnabled: () => plugin.getSessionSaver().isAutoSaveOnSwitchEnabled(),
         isWarnOnUnsavedSwitchEnabled: () => plugin.getSessionSaver().isWarnOnUnsavedSwitchEnabled(),
         persistData: () => plugin.persistData(),
-        updateStatusBar: () => { plugin.updateStatusBar(); },
+        updateStatusBar: () => { plugin.getStatusBarController().updateStatusBar(); },
         showSwitchPreviewOverlay: (ordered, index, viewGroupId) => {
             plugin.getSwitchOverlay().showPreview(ordered, index, viewGroupId);
         },
@@ -489,8 +486,8 @@ export function settingsStateHost(plugin: WorkspacePlusPlus): SettingsStateHost 
     return {
         get data() { return plugin.data; },
         persistData: () => plugin.persistData(),
-        updateStatusBar: () => { plugin.updateStatusBar(); },
-        syncSessionCommands: () => { plugin.syncSessionCommands(); },
+        updateStatusBar: () => { plugin.getStatusBarController().updateStatusBar(); },
+        syncSessionCommands: () => { plugin.getCommandRegistry().syncSessionCommands(); },
         startHistorySnapshotTimer: () => { plugin.getHistoryService().startHistorySnapshotTimer(); },
         stopHistorySnapshotTimer: () => { plugin.getHistoryService().stopHistorySnapshotTimer(); },
     };
@@ -508,8 +505,8 @@ export function groupStoreHost(plugin: WorkspacePlusPlus): GroupStoreHost {
         get data() { return plugin.data; },
         get settingsState() { return plugin.getSettingsState(); },
         persistData: () => plugin.persistData(),
-        updateStatusBar: () => { plugin.updateStatusBar(); },
-        syncSessionCommands: () => { plugin.syncSessionCommands(); },
+        updateStatusBar: () => { plugin.getStatusBarController().updateStatusBar(); },
+        syncSessionCommands: () => { plugin.getCommandRegistry().syncSessionCommands(); },
         hideSwitchOverlay: () => { plugin.getSwitchOverlay().hide(); },
         hideSearchOverlay: () => { plugin.getSearchOverlay().hide(); },
         switchSession: (sessionId) => plugin.getSessionSwitcher().switchSession(sessionId),
@@ -535,7 +532,7 @@ export function historyServiceHost(plugin: WorkspacePlusPlus): HistoryServiceHos
         getCurrentWorkspaceLayout: () => plugin.getSessionStore().getCurrentWorkspaceLayout(),
         applyWorkspaceLayout: (layout) => plugin.getSessionSwitcher().applyWorkspaceLayout(layout),
         layoutsEqualStructural: (a, b) => plugin.getSessionStore().layoutsEqualStructural(a, b),
-        updateStatusBar: () => { plugin.updateStatusBar(); },
+        updateStatusBar: () => { plugin.getStatusBarController().updateStatusBar(); },
         persistData: () => plugin.persistData(),
         isAutoSaveOnSwitchEnabled: () => plugin.getSessionSaver().isAutoSaveOnSwitchEnabled(),
     };
@@ -564,8 +561,8 @@ export function sessionSaverHost(plugin: WorkspacePlusPlus): SessionSaverHost {
         layoutsEqualStructural: (a, b) => plugin.getSessionStore().layoutsEqualStructural(a, b),
         getDefaultSessionName: () => plugin.getSessionStore().getDefaultSessionName(),
         pushLayoutToHistory: (session) => { plugin.getHistoryService().pushLayoutToHistory(session); },
-        updateStatusBar: () => { plugin.updateStatusBar(); },
-        syncSessionCommands: () => { plugin.syncSessionCommands(); },
+        updateStatusBar: () => { plugin.getStatusBarController().updateStatusBar(); },
+        syncSessionCommands: () => { plugin.getCommandRegistry().syncSessionCommands(); },
         persistData: () => plugin.persistData(),
         createSessionRecord: (id, name, layout, options) =>
             plugin.getSessionStore().createSessionRecord(id, name, layout, options),

@@ -37,6 +37,11 @@ test('an unknown action falls back to the label for none', () => {
 // host has to answer everything they ask. A thinner mock would only prove
 // that a stand-in was called.
 const menuPluginStubs = {
+    // The status bar and front matter are reached through their own getters
+    // now. Spread into every host literal below, so each gets just the members
+    // the code under test actually calls.
+    getStatusBarController: (): never => ({ updateStatusBar: (): void => {} }) as never,
+
     manifest: { id: 'workspace-plus-plus', name: 'Workspace++' },
     _lastRotationBackupAt: 0,
     confirmOverwriteSessionWithCurrentLayout: () => false,
@@ -142,6 +147,12 @@ test('each configurable action performs its own effect and no other', async () =
             calls.push('saveAsSession');
             return true;
         },
+        getFrontmatterLinker: (): never => ({
+            saveCurrentNoteNameAsSession: async () => {
+                calls.push('saveCurrentNoteNameAsSession');
+                return true;
+            },
+        }) as never,
         saveCurrentNoteNameAsSession: async () => {
             calls.push('saveCurrentNoteNameAsSession');
             return true;

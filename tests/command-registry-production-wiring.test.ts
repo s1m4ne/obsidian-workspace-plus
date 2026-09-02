@@ -34,16 +34,16 @@ function createPlugin(): {
 
 test('CommandRegistry reaches production prototype wiring and registers/syncs commands', async () => {
     const { plugin, commands } = createPlugin();
-    const registry = (plugin.getCommandRegistry as () => unknown)();
+    const registry = (plugin.getCommandRegistry as () => { registerCommands(): void; syncSessionCommands(): void })();
 
     assert.ok(registry, 'getCommandRegistry returns CommandRegistry instance');
 
-    (plugin.registerCommands as () => void)();
+    registry.registerCommands();
     assert.ok(commands.has('manage-sessions'), 'manage-sessions registered');
     assert.ok(commands.has('previous-session'), 'previous-session registered');
     assert.ok(commands.has('next-session'), 'next-session registered');
 
-    (plugin.syncSessionCommands as () => void)();
+    registry.syncSessionCommands();
     assert.ok(commands.has('switch-to-1'), 'numbered command 1 registered');
     assert.ok(commands.has('switch-to-9'), 'numbered command 9 registered');
 });

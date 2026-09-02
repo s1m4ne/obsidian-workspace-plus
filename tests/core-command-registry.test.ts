@@ -90,7 +90,9 @@ function createMockHost() {
                 switchRelativeFromCommand: async (dir: number) => { calls.push(`switchRelative:${dir}`); return true; },
             } as never;
         },
-        saveCurrentNoteNameAsSession: async () => { calls.push('saveCurrentNote'); return true; },
+        getFrontmatterLinker: (): never => ({
+            saveCurrentNoteNameAsSession: async () => { calls.push('saveCurrentNote'); return true; },
+        }) as never,
         getSearchOverlay: (): never => ({ open: () => { calls.push('openSearchOverlay'); } }) as never,
         // Version history goes through getHistoryService(); this double carries those members itself.
         getHistoryService(): never {

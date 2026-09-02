@@ -42,6 +42,8 @@ function createPlugin(): TestPlugin {
         getSessionStore(): never { return this as never; },
         getOrderedSessionsForGroup: () => [SESSION],
         findActiveSessionIndex: () => 0,
+        // Commands go through getCommandRegistry(); this double carries those members itself.
+        getCommandRegistry(): never { return this as never; },
         getCommandHotkey: () => '',
         getDefaultSessionName: () => 'Session',
         // Group calls go through getGroupStore(). This double carries the group

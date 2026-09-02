@@ -64,8 +64,8 @@ function createPlugin(): { plugin: ReturnType<typeof createRealPlugin>; calls: C
     plugin.getSessionSwitcher = (): unknown => recorder('sessionSwitcher', calls);
     plugin.getHistoryService = (): unknown => recorder('historyService', calls);
     plugin.persistData = async (): Promise<boolean> => { calls.push('plugin.persistData'); return true; };
-    plugin.updateStatusBar = (): void => { calls.push('plugin.updateStatusBar'); };
-    plugin.syncSessionCommands = (): void => { calls.push('plugin.syncSessionCommands'); };
+    plugin.getStatusBarController = (): unknown => recorder('statusBarController', calls);
+    plugin.getCommandRegistry = (): unknown => recorder('commandRegistry', calls);
     plugin.getSwitchOverlay = (): unknown => recorder('switchOverlay', calls);
 
     return { plugin, calls };
@@ -93,8 +93,8 @@ test('the SessionStore host reaches the collaborator each member names', () => {
         'groupStore.resolveGroupSelection',
         'groupStore.attachSessionToActiveGroup',
         'plugin.persistData',
-        'plugin.updateStatusBar',
-        'plugin.syncSessionCommands',
+        'statusBarController.updateStatusBar',
+        'commandRegistry.syncSessionCommands',
         'switchOverlay.hide',
         'sessionSaver.captureActiveSessionLayoutIfAutoSave',
         'sessionSwitcher.applyWorkspaceLayout',
@@ -159,7 +159,7 @@ test('the SessionSwitcher host reaches the collaborator each member names', () =
         'sessionSaver.isAutoSaveOnSwitchEnabled',
         'sessionSaver.isWarnOnUnsavedSwitchEnabled',
         'plugin.persistData',
-        'plugin.updateStatusBar',
+        'statusBarController.updateStatusBar',
         'switchOverlay.showPreview',
         'switchOverlay.showFeedback',
     ]);
@@ -177,8 +177,8 @@ test('the SettingsState host reaches the collaborator each member names', () => 
 
     assert.deepEqual(calls, [
         'plugin.persistData',
-        'plugin.updateStatusBar',
-        'plugin.syncSessionCommands',
+        'statusBarController.updateStatusBar',
+        'commandRegistry.syncSessionCommands',
         'historyService.startHistorySnapshotTimer',
         'historyService.stopHistorySnapshotTimer',
     ]);
@@ -200,8 +200,8 @@ test('the GroupStore host reaches the collaborator each member names', () => {
 
     assert.deepEqual(calls, [
         'plugin.persistData',
-        'plugin.updateStatusBar',
-        'plugin.syncSessionCommands',
+        'statusBarController.updateStatusBar',
+        'commandRegistry.syncSessionCommands',
         'switchOverlay.hide',
         'searchOverlay.hide',
         'sessionSwitcher.switchSession',
@@ -229,7 +229,7 @@ test('the HistoryService host reaches the collaborator each member names', () =>
         'sessionStore.getCurrentWorkspaceLayout',
         'sessionSwitcher.applyWorkspaceLayout',
         'sessionStore.layoutsEqualStructural',
-        'plugin.updateStatusBar',
+        'statusBarController.updateStatusBar',
         'plugin.persistData',
         'sessionSaver.isAutoSaveOnSwitchEnabled',
     ]);
@@ -262,8 +262,8 @@ test('the SessionSaver host reaches the collaborator each member names', () => {
         'sessionStore.layoutsEqualStructural',
         'sessionStore.getDefaultSessionName',
         'historyService.pushLayoutToHistory',
-        'plugin.updateStatusBar',
-        'plugin.syncSessionCommands',
+        'statusBarController.updateStatusBar',
+        'commandRegistry.syncSessionCommands',
         'plugin.persistData',
         'sessionStore.createSessionRecord',
         'sessionStore.insertSessionAndActivate',

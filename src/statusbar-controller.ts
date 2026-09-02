@@ -58,7 +58,7 @@ export interface StatusBarControllerHost extends StatusBarActionPluginHost {
     data: PluginData;
     statusBarEl?: HTMLElement | null;
     addStatusBarItem(): HTMLElement;
-    getStatusBarController?(): StatusBarController;
+    getStatusBarController(): StatusBarController;
     registerDomEvent?(
         el: HTMLElement,
         type: string,
@@ -297,7 +297,7 @@ export class StatusBarController {
         );
 
         if (typeof this.host.updateStatusBar === 'function') {
-            this.host.updateStatusBar();
+            this.updateStatusBar();
         } else {
             this.updateStatusBar();
         }
@@ -360,17 +360,12 @@ export function handleStatusBarWheel(
     evt: WheelEvent,
     now?: number
 ): boolean {
-    if (typeof plugin.getStatusBarController === 'function') {
-        return plugin.getStatusBarController().handleWheel(evt, now);
-    }
-    const controller = new StatusBarController(plugin);
-    return controller.handleWheel(evt, now);
+    // The plugin's controller, never a fresh one. The fallback built a second
+    // instance per event, so the scroll accumulation this function exists to
+    // maintain restarted from zero every notch.
+    return plugin.getStatusBarController().handleWheel(evt, now);
 }
 
 export function setupStatusBar(plugin: StatusBarControllerHost): HTMLElement {
-    if (typeof plugin.getStatusBarController === 'function') {
-        return plugin.getStatusBarController().setupStatusBar();
-    }
-    const controller = new StatusBarController(plugin);
-    return controller.setupStatusBar();
+    return plugin.getStatusBarController().setupStatusBar();
 }

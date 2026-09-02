@@ -133,8 +133,12 @@ test('the status bar is not redrawn while a switch is still moving leaves', asyn
     // than poked - assigning to it throws, which is the point of that accessor.
     let switching = true;
     plugin['getSessionSwitcher'] = (): { isSwitching: boolean } => ({ get isSwitching() { return switching; } });
+    // The redraw goes through the controller now, so the count is taken there
+    // rather than on a plugin forwarder that nothing consults.
     let redraws = 0;
-    plugin['updateStatusBar'] = (): void => { redraws += 1; };
+    plugin['getStatusBarController'] = (): { updateStatusBar(): void } => ({
+        updateStatusBar: (): void => { redraws += 1; },
+    });
 
     onActiveLeafChange?.();
     await new Promise((resolve) => setTimeout(resolve, 5));
