@@ -1,4 +1,5 @@
 import { DEFAULT_DATA, type PluginData, type StatusBarActions, type StatusBarSlotKey } from '../storage/default-data.ts';
+import { persistIfNeeded, type PersistOption } from './persist-option.ts';
 import { resolveLocale } from '../i18n.ts';
 
 export interface SettingsStateHost {
@@ -10,9 +11,8 @@ export interface SettingsStateHost {
     stopHistorySnapshotTimer?: () => void;
 }
 
-export interface SetOption {
-    persist?: boolean;
-}
+/** Was its own `{ persist?: boolean }`; the name stays for its 26 call sites. */
+export type SetOption = PersistOption;
 
 function numberOrFallback(value: unknown, fallback: number): number {
     const parsed = Number(value);
@@ -39,8 +39,7 @@ export class SettingsState {
     }
 
     private persistIfNeeded(options?: SetOption): Promise<boolean> {
-        if (options?.persist === false) return Promise.resolve(true);
-        return this.host.persistData();
+        return persistIfNeeded(() => this.host.persistData(), options);
     }
 
     // --- Getters with central default fallbacks (P5) ---

@@ -1,4 +1,5 @@
 import { Notice, type App, type WorkspaceLeaf } from 'obsidian';
+import { persistIfNeeded, type PersistOption } from './persist-option.ts';
 import { L, formatString } from '../i18n.ts';
 import { generateId } from '../utils.ts';
 import { layoutsEqualStructural, cloneLayout } from '../layout-utils.ts';
@@ -43,8 +44,8 @@ export interface CreateSessionRecordOptions {
     isDefault?: boolean;
 }
 
-export interface SessionPersistOption {
-    persist?: boolean;
+/** The only one of the three that is genuinely wider than PersistOption. */
+export interface SessionPersistOption extends PersistOption {
     notify?: boolean;
     syncCommands?: boolean;
 }
@@ -80,8 +81,7 @@ export class SessionStore {
     }
 
     private persistIfNeeded(options?: SessionPersistOption): Promise<boolean> {
-        if (options?.persist === false) return Promise.resolve(true);
-        return this.host.persistData();
+        return persistIfNeeded(() => this.host.persistData(), options);
     }
 
     // --- Query & Lookup (P10) ---

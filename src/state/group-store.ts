@@ -1,4 +1,5 @@
 import { Notice } from 'obsidian';
+import { persistIfNeeded, type PersistOption } from './persist-option.ts';
 import { L, formatString } from '../i18n.ts';
 import { generateId } from '../utils.ts';
 import type { PluginData, SessionGroup, SessionItem } from '../storage/default-data.ts';
@@ -24,9 +25,8 @@ export interface GroupSelectionResult {
     sessions: SessionItem[];
 }
 
-export interface GroupPersistOption {
-    persist?: boolean;
-}
+/** Was its own `{ persist?: boolean }`; the name stays for its call sites. */
+export type GroupPersistOption = PersistOption;
 
 export function normalizeGroupTabOrder(order: unknown, groups: Record<string, SessionGroup>): string[] {
     const input = Array.isArray(order) ? order : [];
@@ -88,8 +88,7 @@ export class GroupStore {
     }
 
     private persistIfNeeded(options?: GroupPersistOption): Promise<boolean> {
-        if (options?.persist === false) return Promise.resolve(true);
-        return this.host.persistData();
+        return persistIfNeeded(() => this.host.persistData(), options);
     }
 
     isGroupFeatureEnabled(): boolean {
