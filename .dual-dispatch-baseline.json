@@ -1,7 +1,7 @@
 {
-    "total": 21,
+    "total": 20,
     "files": {
-        "src/statusbar-controller.ts": 4,
+        "src/statusbar-controller.ts": 3,
         "src/state/session-saver.ts": 4,
         "src/state/session-store.ts": 1,
         "src/state/session-switcher.ts": 9,

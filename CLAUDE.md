@@ -1,21 +1,37 @@
 # Workspace++
 
 A session manager for Obsidian workspaces, published in the community plugin
-directory. `src/` is ES5-style CommonJS JavaScript, bundled by esbuild into
-`main.js` (which is generated, not tracked).
+directory. `src/` is TypeScript with owned state and real classes, bundled by
+esbuild into `main.js` (which is generated, not tracked).
 
-## Right now, this repository is mid-migration
+## Issue #111 is code-complete and not yet verified by hand
 
-Issue #111 is rewriting `src/` as TypeScript with owned state and real classes.
-It runs to 37 commits on one branch, and the constraint is that **observable
-behaviour must not change** apart from four named exceptions in Phase 4 and one
-authorized during Phase 3 (both recorded in the issue).
+Issue #111 rewrote `src/` from 18k lines of ES5 CommonJS. All five phases are
+committed; **the plugin has not been exercised in Obsidian since commit 34a**,
+and the modal, overlay and status-bar construction paths have all changed since.
+That check comes before the merge, and nothing here should be described as
+verified until it has happened.
+
+Where it landed, measured rather than claimed:
+
+```
+TypeScript                45 / 45 files          prototype methods    0  (from 309)
+CommonJS requires         0                      lint                40  (from 255)
+plugin.data reads         226, 190 of them inside an owner
+... from outside an owner 36  (from ~145)        coverage            92% (from 22%)
+417 tests, 11 gates green
+```
+
+The constraint was that **observable behaviour must not change** apart from four
+named exceptions in Phase 4 and one authorized during Phase 3, all recorded in
+the issue. The forty remaining lint violations are all recorded suppressions,
+also explained there.
 
 **Before touching anything under `src/` or `tests/`:**
 
 ```bash
-node scripts/progress.js     # where the migration stands, measured
-gh issue view 111            # the plan - the source of truth for what comes next
+node scripts/progress.js     # where things stand, measured
+gh issue view 111            # the plan, and the record of what was decided
 ```
 
 Then read `.claude/skills/refactoring-workspace-plus/SKILL.md`. It carries the
@@ -56,8 +72,9 @@ the thing in front of you:
 the same instructions. There is nothing else to configure.
 
 `refactoring-workspace-plus/reference/commit-specs.md` carries what is peculiar
-about the code each near-term commit touches. Read the entry for your commit
-before writing it.
+about the code each commit of the migration touched. It is a record now rather
+than a plan, and still the fastest way to find out why a module looks the way it
+does.
 
 ## Commands
 
@@ -66,8 +83,8 @@ npm run check        # the gate: typecheck, lint, dual dispatch, hooks, delegati
                      # reachability, readonly, imports, tests, coverage, build
 npm run dev          # esbuild watch; hot reload picks it up
 npm run build        # production bundle
-npm run progress     # migration status
-npm run coverage:floors   # which modules are ready to migrate
+npm run progress     # where the migration landed, measured
+npm run coverage:floors   # per-module coverage floors
 npm run check:i18n   # locale key completeness across 21 locales
 ```
 
@@ -75,11 +92,13 @@ npm run check:i18n   # locale key completeness across 21 locales
 ratchets; five exist because this migration produced the same failure seven times
 and none of the others could see it.
 
-- **Lint** compares per-rule counts against `.eslint-baseline.json`. There are
-  255 known violations; the gate fails only when a count *rises*. Failing on the
-  existing set would block every commit until the last one.
+- **Lint** compares per-rule counts against `.eslint-baseline.json`, and the
+  gate fails only when a count *rises*. It began at 255 and is now 40 - all of
+  them recorded suppressions with a reason in issue #111, so any new violation
+  is a real one. The ratchet stays because a suppression is not a licence: it
+  keeps forty from quietly becoming forty-one.
 - **Coverage** compares project-wide function coverage against
-  `.coverage-baseline.json`. It starts at 22% and has to climb. The figures come
+  `.coverage-baseline.json`. It started at 22% and is now 92%. The figures come
   from V8's own dump (`NODE_V8_COVERAGE`), not from the table
   `--experimental-test-coverage` prints: that table drops a `.ts` module reached
   only through `require()`, which is the shape every migrated module has while a
@@ -91,23 +110,26 @@ and none of the others could see it.
 
 - **Dual dispatch** counts `typeof this.host.X === 'function'` across
   `src/state/` and `src/storage/`. A class that keeps its own fallback for a
-  hook the adapter always supplies has two implementations, and the one in the
-  class runs neither in production nor in the tests. Fifteen sites are recorded
-  because the adapter returns `undefined` there unless a test overrides the
-  plugin method - those fallbacks are the live path. The question for any new
-  site is only: does the adapter always supply this hook?
+  hook the host always supplies has two implementations, and the one in the
+  class runs neither in production nor in the tests. Twenty sites are recorded
+  because the host genuinely leaves those hooks undefined unless a test supplies
+  them - there, the fallback is the live path. The question for any new site is
+  only: does the host always supply this hook? If it does, the fallback is dead
+  code that no test can reach.
 
 - **Reachability** asks the bundler whether every file under `src/` is reachable
-  from `src/main.js`. Twice a module was extracted, tested and reported complete
+  from the esbuild entry, `src/main.ts`. Twice a module was extracted, tested and reported complete
   while nothing imported it - 1,235 lines the first time, 77 the second - and the
   code it replaced kept working, so every other gate stayed green. Zero
   unreachable files; a file that must stay out needs a reason and a removal
   condition in the script.
 
 - **Delegation** resolves every `this.getX().y()` in `src` against the methods
-  class X defines. Three shims pointed at methods nobody wrote; the file is
+  class X defines. Three shims pointed at methods nobody wrote; the file was
   JavaScript so the type checker never looked, and nothing called them so the
-  tests never ran them.
+  tests never ran them. `src/` is TypeScript throughout now, which closes that
+  particular hole - but the check also catches a call across a `never`-typed
+  seam, which several test doubles still use, so it stays.
 
 - **Read-only writes** finds prototype accessors with a getter and no setter,
   then any assignment to one. `onunload` was assigning to three, which throws in
@@ -138,12 +160,19 @@ compile time instead of at run time.
 
 **Relative imports need the `.ts` extension.** `moduleResolution: "bundler"`
 type-checks without it; Node then fails at run time. `npm run check:imports`
-covers the gap. The same applies to CommonJS callers: once a module is `paths.ts`,
-`require('./paths')` no longer resolves.
+covers the gap. This still applies to the CommonJS under `tests/` and
+`scripts/`: `require('./paths')` resolves only to `paths.js`.
 
-**During the migration, export by name only.** A `.js` caller doing
-`require('./thing.ts')` gets `{ default, __esModule }`, so a default export
-breaks it.
+**Export by name only.** `src/` has no JavaScript left, but the CommonJS tests
+still reach it: `require('./thing.ts')` on a default export gets
+`{ default, __esModule }`, and `new require(...)()` then fails with "is not a
+constructor".
+
+**`tsconfig` is strict, and two flags are deliberately off.** `checkJs` reports
+925 errors, all in the CommonJS under `tests/` and `scripts/`;
+`noPropertyAccessFromIndexSignature` reports 744, nearly all of them the
+`plugin.data.x` reads that remain. Both counts and both reasons are recorded in
+`tsconfig.json` beside the settings, so neither needs re-measuring.
 
 **`main.js` is build output** and is not tracked. A fresh clone must run
 `npm run build` before Obsidian can load the plugin.
@@ -155,8 +184,23 @@ part of a task.
 
 ## Testing
 
-`tests/` holds ordinary unit tests. `tests/lock/` holds Behavior Lock suites and
-the harness they run on.
+`tests/` holds ordinary unit tests. `tests/lock/` holds what is left of the
+Behavior Lock - the harness, and the two i18n locks - after 34b retired the nine
+suites whose job was to prove Phase 3 changed no behaviour. The two that remain
+are permanent: they pin all 320 keys in all 21 locales, by value.
+
+**The i18n locks make adding a UI string a two-step job.**
+`i18n-values.lock.test.ts` reports an *added* key as a change and fails, and a
+lock may not be edited. So a new string needs the maintainer's decision, not a
+fixture update. There is one place this bites today: the search overlay's close
+button carries the English literal `Close` because there is no `close` key and
+adding one would fail that lock. It is marked in the file.
+
+**A test double stands in for a real owner only when it cannot be one.** Where a
+fixture needs settings or session state, it builds a real `SettingsState` or
+store over its own `data` rather than returning fixed answers. Five tests were
+found passing while checking nothing because a stub answered instead of the
+object under test.
 
 The harness (`tests/lock/harness/`) installs jsdom and points the `obsidian`
 specifier at recording stubs via `module.registerHooks`, which intercepts both

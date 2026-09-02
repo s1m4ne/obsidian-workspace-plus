@@ -106,11 +106,18 @@ Copy this checklist into your response and tick it off:
 
 ### The gate
 
-Run all four. Do not commit until every one passes.
+One command, eleven gates. Do not commit until it passes.
 
 ```bash
-npm run check         # typecheck, lint ratchet, imports, tests, coverage, build
+npm run check   # typecheck, lint ratchet, dual dispatch, unwired hooks,
+                # delegation, reachability, read-only writes, import
+                # extensions, tests, coverage ratchet, build
 ```
+
+Seven of the eleven exist because this migration produced the same class of
+failure seven times with every other gate green - code written, tested,
+reported complete, and never actually run. `CLAUDE.md` explains each one and
+what it caught.
 
 `npm run check` holds the project-wide coverage ratchet. The per-module floor is
 separate, checked for the one module a commit touches, because the project figure
