@@ -114,6 +114,10 @@ https://github.com/s1m4ne/obsidian-workspace-plus
 
 All commands can be assigned custom hotkeys in **Settings** > **Hotkeys**.
 
+Some commands follow a setting and are hidden when it is off: the group
+commands need **Session groups**, and **Search sessions** needs **Show session
+filter**.
+
 | Command | Default hotkey |
 | --- | --- |
 | Manage sessions | - |
@@ -139,7 +143,7 @@ All commands can be assigned custom hotkeys in **Settings** > **Hotkeys**.
 | Import latest sessions snapshot | - |
 | Switch group | - |
 | Show all sessions (exit group) | - |
-| Next group | `Cmd/Ctrl+Shift+Tab` |
+| Next group | `Cmd/Ctrl+Shift+Tab`, `Cmd/Ctrl+Shift+G` |
 | Previous group | - |
 
 ## Sync and storage

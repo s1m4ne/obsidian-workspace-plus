@@ -150,8 +150,10 @@ the others could see it.
   Zero is the only acceptable count.
 
   The lesson generalises: **an erasing cast at a boundary switches off every
-  check that boundary has.** `as unknown as` in `src/` is four sites, each with
-  a stated reason. Adding a fifth needs one.
+  check that boundary has.** `as unknown as` in `src/` is **one** site, with a
+  stated reason - `SettingsTab`'s constructor, which types its parameter
+  structurally so a test can supply the sixty-odd members the tab uses instead
+  of a whole `Plugin`. Adding a second needs a reason too.
 
 - **Test-only members** asks the type checker which methods and exported
   functions nothing in `src/` refers to while `tests/` does.

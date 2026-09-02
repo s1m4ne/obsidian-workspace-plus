@@ -368,21 +368,6 @@ export class SessionSwitcher {
         }
     }
 
-    async applySessionLayout(session: SessionItem | null | undefined, options?: LayoutRestoreOptions): Promise<boolean> {
-        if (!session || !session.layout) return false;
-        return this.applyWorkspaceLayout(session.layout, options);
-    }
-
-    async applySessionDataFromStorage(incomingData: PluginData | null | undefined): Promise<boolean> {
-        if (!incomingData || typeof incomingData !== 'object') return false;
-        const activeId = incomingData.activeSessionId;
-        const activeSession = activeId && incomingData.sessions ? incomingData.sessions[activeId] : null;
-        if (activeSession && activeSession.layout) {
-            return this.applyWorkspaceLayout(activeSession.layout, { catchErrors: true });
-        }
-        return false;
-    }
-
     // --- Notices & Overlays ---
 
     clearSessionSwitchNotice(): void {
