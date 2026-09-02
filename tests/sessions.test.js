@@ -115,11 +115,5 @@ test('sessions: layout utilities delegation', function () {
     const layout = store.getCurrentWorkspaceLayout();
     assert.deepEqual(layout, { current: true });
 
-    const serialized = store.serializeLayout({ a: 1 });
-    assert.ok(typeof serialized === 'string');
-
-    assert.equal(store.layoutsEqual({ a: 1 }, { a: 1 }), true);
-    assert.equal(store.layoutsEqual({ a: 1 }, { a: 2 }), false);
-
     assert.equal(store.layoutsEqualStructural({ a: 1 }, { a: 1 }), true);
 });

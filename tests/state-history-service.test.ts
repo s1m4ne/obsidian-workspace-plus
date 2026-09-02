@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { setupHarness } from './lock/harness/index.ts';
-import { DEFAULT_DATA, type PluginData, type SessionItem } from '../src/storage/default-data.ts';
-import type { HistoryServiceHost, HistoryEntry } from '../src/state/history-service.ts';
+import { DEFAULT_DATA, type PluginData, type SessionItem, type SessionHistoryEntry } from '../src/storage/default-data.ts';
+import type { HistoryServiceHost } from '../src/state/history-service.ts';
 
 const harness = setupHarness();
 const { HistoryService } = await import('../src/state/history-service.ts');
@@ -113,7 +113,7 @@ test('HistoryService: compaction', () => {
     const service = new HistoryService(host);
 
     const now = Date.now();
-    const entries: HistoryEntry[] = [
+    const entries: SessionHistoryEntry[] = [
         { layout: { id: 1 }, savedAt: now - 500 },
         { layout: { id: 2 }, savedAt: now - 3600000 * 2 },
     ];

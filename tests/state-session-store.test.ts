@@ -319,11 +319,10 @@ test('SessionStore: CRUD operations, duplicate, reset, and default session', asy
     store.ensureDefaultSession();
     assert.equal(Object.keys(host.data.sessions).length, 1);
 
-    // Layout utils
-    const layout = store.getCurrentWorkspaceLayout();
-    assert.ok(layout);
-    assert.ok(typeof store.serializeLayout(layout) === 'string');
-    assert.equal(store.layoutsEqual({ a: 1 }, { a: 1 }), true);
+    // The store's own layout surface: reading the workspace, and the one
+    // comparison it owns because it resolves the restore scope. Plain
+    // serialise/equal are layout-utils' and are tested there.
+    assert.ok(store.getCurrentWorkspaceLayout());
     assert.equal(store.layoutsEqualStructural({ a: 1 }, { a: 1 }), true);
     assert.ok(events.persists > 0);
 

@@ -23,10 +23,14 @@ export type StatusBarSlotKey = typeof STATUS_BAR_SLOT_KEYS[number];
 export type StatusBarActions = Record<StatusBarSlotKey, string>;
 
 export interface SessionHistoryEntry {
+    /**
+     * `timestamp` is what releases before 0.7 wrote; `savedAt` is what is
+     * written now. Both stay declared because old files still carry the first,
+     * and `getEntryTime` reads whichever is present.
+     */
     timestamp?: number;
     savedAt?: number;
     layout: unknown;
-    note?: string;
 }
 
 export interface SessionItem {

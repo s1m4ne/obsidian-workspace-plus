@@ -1,7 +1,7 @@
 import { Notice, type App, type WorkspaceLeaf } from 'obsidian';
 import { L } from '../i18n.ts';
 import { generateId } from '../utils.ts';
-import { serializeLayout, layoutsEqual, layoutsEqualStructural, cloneLayout } from '../layout-utils.ts';
+import { layoutsEqualStructural, cloneLayout } from '../layout-utils.ts';
 import type { RestoreScope } from '../layout-utils.ts';
 import type { PluginData, SessionItem } from '../storage/default-data.ts';
 import type { GroupStore } from './group-store.ts';
@@ -697,14 +697,6 @@ export class SessionStore {
 
     getCurrentWorkspaceLayout(): unknown {
         return this.host.getCurrentWorkspaceLayout();
-    }
-
-    serializeLayout(layout: unknown): string {
-        return serializeLayout(layout);
-    }
-
-    layoutsEqual(a: unknown, b: unknown): boolean {
-        return layoutsEqual(a, b);
     }
 
     layoutsEqualStructural(a: unknown, b: unknown): boolean {

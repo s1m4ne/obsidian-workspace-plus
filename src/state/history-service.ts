@@ -5,12 +5,6 @@ import type { PluginData, SessionItem, SessionHistoryEntry } from '../storage/de
 import type { SettingsState } from './settings-state.ts';
 import type { SessionStore } from './session-store.ts';
 
-export interface HistoryEntry extends SessionHistoryEntry {
-    savedAt?: number;
-    timestamp?: number;
-    layout: unknown;
-}
-
 export interface HistoryServiceHost {
     data: PluginData;
     settingsState: SettingsState;
@@ -36,7 +30,7 @@ export const DAY = 86400000;
 export const WEEK = 7 * DAY;
 export const MAX_HISTORY = 45;
 
-function getEntryTime(entry: HistoryEntry): number {
+function getEntryTime(entry: SessionHistoryEntry): number {
     return entry.savedAt ?? entry.timestamp ?? 0;
 }
 
@@ -110,14 +104,14 @@ export class HistoryService {
 
     // --- Compaction ---
 
-    compactHistory(history: HistoryEntry[]): HistoryEntry[] {
+    compactHistory(history: SessionHistoryEntry[]): SessionHistoryEntry[] {
         if (!history || history.length === 0) return [];
         const now = Date.now();
 
         // Sort newest first
         const sorted = history.slice().sort((a, b) => getEntryTime(b) - getEntryTime(a));
 
-        const result: HistoryEntry[] = [];
+        const result: SessionHistoryEntry[] = [];
         const buckets: Record<string, boolean> = {};
 
         for (let i = 0; i < sorted.length; i++) {
@@ -174,7 +168,7 @@ export class HistoryService {
         if (!session.history) session.history = [];
 
         // Skip if structurally identical to most recent entry
-        const lastEntry = session.history.length > 0 ? (session.history[0] as HistoryEntry) : null;
+        const lastEntry = session.history.length > 0 ? session.history[0] : null;
         if (lastEntry && this.checkLayoutsEqualStructural(session.layout, lastEntry.layout)) {
             return;
         }
@@ -217,7 +211,7 @@ export class HistoryService {
     async quickRestoreLatestHistory(): Promise<boolean> {
         const session = this.host.getActiveSession();
 
-        const history = session?.history as HistoryEntry[] | undefined;
+        const history = session?.history;
         if (!session || !history || history.length === 0) {
             new Notice(formatString(L.historyNoEntries));
             return false;
