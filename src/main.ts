@@ -5,7 +5,7 @@ import { HistoryModal } from './modals/history-modal.ts';
 import type { HistoryModalPluginHost } from './modals/history-modal.ts';
 import * as settings from './settings.js';
 import DEFAULT_DATA from './plugin/default-data.js';
-import attachPluginMethods from './plugin/methods/index.js';
+import attachPersistenceMethods from './plugin/methods/persistence.js';
 import { setupStatusBar } from './statusbar-controller.ts';
 import { ConfirmModal } from './modals/confirm-modal.ts';
 import { RenameModal } from './modals/rename-modal.ts';
@@ -30,8 +30,20 @@ import { SettingsState } from './state/settings-state.ts';
 import type { SettingsStateHost } from './state/settings-state.ts';
 import type { SessionStorage } from './storage/session-storage.ts';
 import type { SyncWatcher } from './storage/sync-watcher.ts';
-import { getSyncWatcher, onExternalSettingsChange, clearSessionStorageSyncTimers } from './storage/session-sync.ts';
-import type { SyncWatcherHost } from './storage/session-sync.ts';
+import {
+    getSyncWatcher,
+    onExternalSettingsChange,
+    clearSessionStorageSyncTimers,
+    recordSessionStorageState,
+    recordSessionDataStored,
+    reloadExternalSessionStorageIfChanged,
+} from './storage/session-sync.ts';
+import type {
+    SyncWatcherHost,
+    SessionStorageStateHost,
+    RecordSessionDataStoredHost,
+    ReloadExternalSessionHost,
+} from './storage/session-sync.ts';
 import {
     initRotationBackupTimestampForHost,
     prepareRotationBackupData,
@@ -236,6 +248,28 @@ export class WorkspacePlusPlus extends Plugin {
      * rather than a plugin/methods adapter so the host each one wants is
      * type-checked at the call rather than assumed.
      */
+    /**
+     * The external-storage bookkeeping. Like the backups above, these take the
+     * plugin as their host; PersistenceService reaches all three through hooks
+     * it is given, and Obsidian reaches the fourth through
+     * onExternalSettingsChange.
+     */
+    recordSessionStorageState(stamp: number, mtime: number, data?: unknown): void {
+        recordSessionStorageState(this.asHost<SessionStorageStateHost>(), stamp, mtime, data);
+    }
+
+    recordSessionDataStored(sessionData: unknown): Promise<boolean> {
+        return recordSessionDataStored(this.asHost<RecordSessionDataStoredHost>(), sessionData);
+    }
+
+    reloadExternalSessionStorageIfChanged(options?: { mergeLocal?: boolean }): Promise<boolean> {
+        return reloadExternalSessionStorageIfChanged(this.asHost<ReloadExternalSessionHost>(), options);
+    }
+
+    scheduleExternalSessionStorageReload(debounceMs?: number): void {
+        this.getSyncWatcher().scheduleReload(debounceMs);
+    }
+
     exportSessionsSnapshot(): Promise<string> {
         return exportSessionsSnapshot(this.asHost<StorageExportHost>());
     }
@@ -428,7 +462,7 @@ export class WorkspacePlusPlus extends Plugin {
 
 export interface WorkspacePlusPlus extends AttachedPluginMethods {}
 
-attachPluginMethods(WorkspacePlusPlus);
+attachPersistenceMethods(WorkspacePlusPlus);
 
 export default WorkspacePlusPlus;
 
