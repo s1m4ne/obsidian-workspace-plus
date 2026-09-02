@@ -24,19 +24,18 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Type check
-        run: npm run typecheck
-
-      # The refactor drives a known set of violations to zero over many
-      # commits, so the gate is that the count never rises.
-      - name: Lint (ratchet)
-        run: npm run lint:ratchet
-
-      - name: Run tests
-        run: npm test
-
-      - name: Check i18n
-        run: npm run check:i18n
-
-      - name: Build
-        run: npm run build
+      # One command, thirteen gates, and deliberately not a hand-picked subset.
+      #
+      # This job used to run five of them - typecheck, the lint ratchet, tests,
+      # i18n and build - which left out every gate that exists *because* this
+      # repository produced the same failure eight times with all the others
+      # green: reachability, unwired hooks, host conformance, delegation,
+      # read-only writes, dual dispatch, import extensions and the coverage
+      # ratchet. Each of those was added after a specific defect shipped, and
+      # none of them ran here.
+      #
+      # `npm run check` is what a commit has to pass locally, so it is what CI
+      # has to pass too; anything else lets the two disagree about what "green"
+      # means.
+      - name: Gate (typecheck, lint, 9 checks, tests, coverage, build)
+        run: npm run check

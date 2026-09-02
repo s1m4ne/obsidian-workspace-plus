@@ -12,6 +12,10 @@ sessions.backup.json
 history.json
 backups/
 exports/
+
+# V8's coverage dump, written by scripts/coverage-ratchet.js on every run. Two
+# of these files were tracked; the directory is 3.7 MB of regenerated JSON.
+coverage/
 .claude/*
 !.claude/skills/
 .workspace-plus-plus/

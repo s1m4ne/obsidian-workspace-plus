@@ -81,17 +81,19 @@ does.
 ```bash
 npm run check        # the gate: typecheck, lint, dual dispatch, hooks,
                      # host conformance, delegation, reachability, readonly,
-                     # imports, tests, coverage, build
+                     # imports, i18n, tests, coverage, build
 npm run dev          # esbuild watch; hot reload picks it up
 npm run build        # production bundle
 npm run progress     # where the migration landed, measured
 npm run coverage:floors   # per-module coverage floors
-npm run check:i18n   # locale key completeness across 21 locales
+npm run check:i18n   # locale key completeness across 21 locales (also in the gate)
 ```
 
-`npm run check` must pass before every commit. It is twelve gates. Three are
-ratchets; six exist because this migration produced the same failure eight times
-and none of the others could see it.
+`npm run check` must pass before every commit. It is thirteen gates, and **CI
+runs the same command** - it used to run five of them by hand, which left out
+every gate added because a defect had already shipped. Three are ratchets; six
+exist because this migration produced the same failure eight times and none of
+the others could see it.
 
 - **Lint** compares per-rule counts against `.eslint-baseline.json`, and the
   gate fails only when a count *rises*. It began at 255 and is now 40 - all of
