@@ -412,6 +412,9 @@ export class SearchOverlay {
         hideThisOverlay();
 
         const overlayDocument = document;
+        // Timers go on the window that owns the overlay, not the bare global,
+        // so they stop with it instead of firing against elements it took.
+        const overlayWindow = overlayDocument.defaultView ?? window;
         const overlayEventOwner = new Component();
         overlayEventOwner.load();
         this.overlayEventOwner = overlayEventOwner;
@@ -843,7 +846,7 @@ export class SearchOverlay {
                 onReorder: function (newVisibleOrder) {
                     void self.getSessionStore().setSessionOrderFromVisible(newVisibleOrder);
                     dragItem.classList.add('wpp-just-moved');
-                    setTimeout(function () {
+                    overlayWindow.setTimeout(function () {
                         dragItem.classList.remove('wpp-just-moved');
                     }, 600);
                 },
@@ -1262,7 +1265,7 @@ export class SearchOverlay {
             focusGuardEventOwner.load();
             this.focusGuardEventOwner = focusGuardEventOwner;
             focusGuardEventOwner.registerDomEvent(overlay, 'focusin', guardHandler, true);
-            setTimeout(() => {
+            overlayWindow.setTimeout(() => {
                 if (this.focusGuardEventOwner === focusGuardEventOwner) {
                     focusGuardEventOwner.unload();
                     this.focusGuardEventOwner = null;
@@ -1270,7 +1273,7 @@ export class SearchOverlay {
             }, 300);
         }
 
-        setTimeout(function () {
+        overlayWindow.setTimeout(function () {
             if (focusTarget === 'session-filter' && self.getSettingsState().showFilterInput) {
                 navigationUtils.focusTextInputSelect(searchInput);
             } else if (focusTarget === 'session-create') {

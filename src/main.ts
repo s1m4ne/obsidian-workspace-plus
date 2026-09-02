@@ -139,7 +139,7 @@ export class WorkspacePlusPlus extends Plugin {
             // A switch moves many leaves; letting each one redraw the status bar
             // would show every intermediate state.
             if (this.getSessionSwitcher().isSwitching) return;
-            setTimeout(() => { this.getStatusBarController().updateStatusBar(); }, 0);
+            window.setTimeout(() => { this.getStatusBarController().updateStatusBar(); }, 0);
         }));
 
         // Everything here needs the workspace to exist, so it waits rather than

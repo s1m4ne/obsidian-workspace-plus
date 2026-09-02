@@ -294,7 +294,7 @@ export class SessionManagerModal extends Modal {
         // has to be applied after that has happened.
         const focusTarget = this.plugin.getSettingsState().overlayDefaultFocus;
         if (focusTarget !== 'session-create') {
-            setTimeout(() => {
+            this.ownerWindow().setTimeout(() => {
                 if (focusTarget === 'session-filter' && this.filterInput) {
                     this.focusFilterInput();
                 } else {
@@ -649,6 +649,17 @@ export class SessionManagerModal extends Modal {
         }
     }
 
+    /**
+     * The window that owns this modal. Timers go on it rather than on the bare
+     * global so they stop with the window the user is looking at, instead of
+     * firing later against elements that window took with it. `defaultView` is
+     * typed nullable for detached documents; a modal is always in a live one,
+     * and the fallback keeps that from being an assertion.
+     */
+    private ownerWindow(): Window {
+        return this.containerEl.ownerDocument.defaultView ?? window;
+    }
+
     blurFocusedControl(): void {
         const activeEl = this.containerEl.ownerDocument.activeElement;
         if (activeEl instanceof HTMLElement && this.contentEl.contains(activeEl)) {
@@ -859,7 +870,7 @@ export class SessionManagerModal extends Modal {
                     });
 
                     item.classList.add('wpp-just-moved');
-                    setTimeout(() => { item.classList.remove('wpp-just-moved'); }, 600);
+                    this.ownerWindow().setTimeout(() => { item.classList.remove('wpp-just-moved'); }, 600);
 
                     void this.plugin.getSessionStore().setSessionOrderFromVisible(newVisibleOrder, { syncCommands: false });
                 },

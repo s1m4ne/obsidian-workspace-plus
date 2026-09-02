@@ -1,10 +1,8 @@
 {
-    "total": 47,
+    "total": 40,
     "rules": {
         "@typescript-eslint/no-deprecated": 18,
-        "@typescript-eslint/no-unused-vars": 1,
         "obsidianmd/hardcoded-config-path": 20,
-        "obsidianmd/prefer-window-timers": 6,
         "obsidianmd/settings-tab/no-manual-html-headings": 1,
         "obsidianmd/settings-tab/prefer-setting-definitions": 1
     }

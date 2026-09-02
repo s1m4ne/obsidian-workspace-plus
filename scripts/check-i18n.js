@@ -127,7 +127,7 @@ async function main() {
 
     const enKeys = new Set(Object.keys(merged.en || {}));
     const { used, refMap } = collectUsedI18nKeys(srcRoot);
-    const { quoted, refMap: quotedRefMap } = collectQuotedNames(srcRoot);
+    const { quoted } = collectQuotedNames(srcRoot);
 
     // Locale registry consistency
     const optionLocales = Object.keys(langOptions).sort();
