@@ -43,6 +43,9 @@ const menuPluginStubs = {
     duplicateSession: async () => false,
     renameSessionById: async () => false,
     deleteSession: async () => false,
+    // Saving goes through getSessionSaver(). This double carries the save
+    // members itself, so it stands in as its own saver.
+    getSessionSaver(): never { return this as never; },
     isAutoSaveOnSwitchEnabled: () => false,
     isVersionHistoryEnabled: () => false,
     isWarnOnUnsavedSwitchEnabled: () => false,
@@ -158,7 +161,7 @@ test('each configurable action performs its own effect and no other', async () =
             calls.push('createEmptySession');
             return true;
         },
-        toggleAutoSaveOnSwitch: async (opts) => {
+        toggleAutoSaveOnSwitch: async (opts?: { notify?: boolean }) => {
             calls.push(`toggleAutoSave:${opts?.notify}`);
             return true;
         },

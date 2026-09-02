@@ -54,8 +54,17 @@ function createMockHost() {
         getOrderedSessionsUnfiltered() {
             return this.getOrderedSessions();
         },
-        confirmOverwriteSessionWithCurrentLayout(id: string) {
-            calls.push(`overwrite:${id}`);
+        // The saver members the registry reaches now come through the saver.
+        getSessionSaver(): never {
+            return {
+                confirmOverwriteSessionWithCurrentLayout: (id: string) => { calls.push(`overwrite:${id}`); },
+                saveActiveSession: async () => { calls.push('saveActive'); return true; },
+                saveAsSession: async () => { calls.push('saveAs'); return true; },
+                reloadCurrentSessionWithoutSaving: async () => { calls.push('reloadWithoutSaving'); return true; },
+                toggleAutoSaveOnSwitch: async () => { calls.push('toggleAutoSave'); return true; },
+                isAutoSaveOnSwitchEnabled: () => false,
+                setAutoSaveOnSwitch: (val: boolean) => { calls.push(`setAutoSave:${val}`); },
+            } as never;
         },
         renameCurrentSession() { calls.push('rename'); },
         deleteCurrentSession() { calls.push('delete'); },
@@ -63,13 +72,7 @@ function createMockHost() {
         duplicateCurrentSession: async () => { calls.push('duplicate'); return true; },
         switchToIndex: async (idx: number) => { calls.push(`switchToIndex:${idx}`); return true; },
         switchRelativeFromCommand: async (dir: number) => { calls.push(`switchRelative:${dir}`); return true; },
-        saveActiveSession: async () => { calls.push('saveActive'); return true; },
-        saveAsSession: async () => { calls.push('saveAs'); return true; },
         saveCurrentNoteNameAsSession: async () => { calls.push('saveCurrentNote'); return true; },
-        isAutoSaveOnSwitchEnabled: () => false,
-        setAutoSaveOnSwitch: (val: boolean) => { calls.push(`setAutoSave:${val}`); },
-        reloadCurrentSessionWithoutSaving: async () => { calls.push('reloadWithoutSaving'); return true; },
-        toggleAutoSaveOnSwitch: async () => { calls.push('toggleAutoSave'); return true; },
         openSearchOverlay: () => { calls.push('openSearchOverlay'); },
         isVersionHistoryEnabled: () => true,
         getActiveSession() {

@@ -57,6 +57,9 @@ function createController(options) {
             isGroupFeatureEnabled: () => data.groupFeatureEnabled !== false,
             getActiveGroup: () => data.activeGroupId ? data.groups[data.activeGroupId] : null,
         }),
+        // Saving goes through plugin.getSessionSaver(). This double records the
+        // save methods itself, so it stands in as its own saver.
+        getSessionSaver() { return this; },
         shouldShowUnsavedStatusBarHighlight: () => !!options.unsaved,
         switchRelativeFromScroll: async () => true,
     });

@@ -14,8 +14,16 @@ import * as sessionListActions from '../session-list-actions.ts';
 import type { SessionGroup, SessionItem } from '../storage/default-data.ts';
 import type { HistoryModalPluginHost } from './history-modal.ts';
 import type { GroupStore } from '../state/group-store.ts';
+import type { SessionSaver } from '../state/session-saver.ts';
 
 export interface SessionManagerModalHost extends GroupTabPluginHost, HistoryModalPluginHost, SettingsContextMenuPluginHost {
+    /**
+     * Saving and the auto-save flags are owned by SessionSaver. Naming it here
+     * rather than restating its methods keeps one list, the way getGroupStore()
+     * does for group state.
+     */
+    getSessionSaver(): SessionSaver;
+
     /**
      * Group state is owned by GroupStore. Naming the store rather than
      * restating its methods keeps one list: the plugin used to carry a
@@ -40,11 +48,6 @@ export interface SessionManagerModalHost extends GroupTabPluginHost, HistoryModa
     getCommandHotkey(commandId: string): string;
     getDefaultSessionName(): string;
     findActiveSessionIndex(sessions: SessionItem[]): number;
-    isAutoSaveOnSwitchEnabled(): boolean;
-    saveActiveSession(): Promise<unknown>;
-    saveAsSession(): Promise<unknown>;
-    reloadCurrentSessionWithoutSaving(): unknown;
-    confirmOverwriteSessionWithCurrentLayout(sessionId: string, options: { onSaved: () => void }): unknown;
     renameSessionById(sessionId: string, name: string): Promise<boolean>;
     duplicateSession(sessionId: string): Promise<unknown>;
     createSessionForViewedGroup(
@@ -746,12 +749,12 @@ export class SessionManagerModal extends Modal {
 
         // Saving the current layout only means anything on the active session,
         // and only when it is not already saved on every switch.
-        if (isActive && !this.plugin.isAutoSaveOnSwitchEnabled()) {
+        if (isActive && !this.plugin.getSessionSaver().isAutoSaveOnSwitchEnabled()) {
             const saveCurrentBtn = actions.createEl('button', { text: text(L.saveInline), cls: 'wpp-save-inline-btn' });
             saveCurrentBtn.setAttribute('data-action-key', 'save-inline');
             saveCurrentBtn.addEventListener('click', (e: MouseEvent) => {
                 e.stopPropagation();
-                void this.plugin.saveActiveSession().then(() => { this.renderList(); });
+                void this.plugin.getSessionSaver().saveActiveSession().then(() => { this.renderList(); });
             });
             actions.insertBefore(saveCurrentBtn, loadBtn);
             // Keep the save button the same width as the switch button it sits

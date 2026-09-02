@@ -45,6 +45,9 @@ const menuPluginStubs = {
     duplicateSession: async () => false,
     renameSessionById: async () => false,
     deleteSession: async () => false,
+    // Saving goes through getSessionSaver(). This double carries the save
+    // members itself, so it stands in as its own saver.
+    getSessionSaver(): never { return this as never; },
     isAutoSaveOnSwitchEnabled: () => false,
     isVersionHistoryEnabled: () => false,
     isWarnOnUnsavedSwitchEnabled: () => false,

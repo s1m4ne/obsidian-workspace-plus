@@ -14,6 +14,7 @@ import * as utils from '../../utils.ts';
 import type { SessionGroup, SessionItem } from '../../storage/default-data.ts';
 import type { HistoryModalPluginHost } from '../../modals/history-modal.ts';
 import type { GroupStore } from '../../state/group-store.ts';
+import type { SessionSaver } from '../../state/session-saver.ts';
 
 export interface SearchOverlayPosition {
     left: number;
@@ -239,6 +240,13 @@ function handleSearchOverlaySlashKey(event: KeyboardEvent, options: SearchOverla
 
 export interface SearchOverlayHost extends GroupTabPluginHost, HistoryModalPluginHost, SettingsContextMenuPluginHost {
     /**
+     * Saving and the auto-save flags are owned by SessionSaver. Naming it here
+     * rather than restating its methods keeps one list, the way getGroupStore()
+     * does for group state.
+     */
+    getSessionSaver(): SessionSaver;
+
+    /**
      * Group state is owned by GroupStore. Naming the store rather than
      * restating its methods keeps one list: the plugin used to carry a
      * forwarding method per call, and one added to the store without a shim
@@ -277,14 +285,9 @@ export interface SearchOverlayHost extends GroupTabPluginHost, HistoryModalPlugi
     hideSearchOverlay(): void;
     findActiveSessionIndex(sessions: SessionItem[]): number;
     createSessionForViewedGroup(name: string, groupId: string | null): Promise<{ created: boolean; name: string; viewGroupId?: string | null }>;
-    isAutoSaveOnSwitchEnabled(): boolean;
     setSessionOrderFromVisible(order: string[]): void;
-    saveActiveSession(): Promise<unknown>;
-    saveAsSession(): Promise<unknown>;
-    confirmOverwriteSessionWithCurrentLayout(sessionId: string, options: { onSaved: () => void }): unknown;
     renameSessionById(sessionId: string, name: string): Promise<boolean>;
     duplicateSession(sessionId: string): Promise<unknown>;
-    reloadCurrentSessionWithoutSaving(): void;
     switchSession(sessionId: string, options: { silent: boolean }): Promise<boolean>;
     deleteSession(sessionId: string): Promise<boolean>;
     persistData(): Promise<unknown>;
@@ -485,7 +488,7 @@ export class SearchOverlay {
 
         function renderGroupTabs() {
             while (groupTabsRow.firstChild) groupTabsRow.removeChild(groupTabsRow.firstChild);
-            const autoSave = self.isAutoSaveOnSwitchEnabled();
+            const autoSave = self.getSessionSaver().isAutoSaveOnSwitchEnabled();
             if (!self.getGroupStore().isGroupFeatureEnabled()) {
                 groupTabsRow.classList.add('is-hidden');
                 footerRow.textContent = autoSave ? stripSaveHint(localizedString(strings.searchOverlayHelp)) : localizedString(strings.searchOverlayHelp);
@@ -629,7 +632,7 @@ export class SearchOverlay {
                 // Save & reload icons (only for active session when auto-save is disabled)
                 let saveIcon = null;
                 let reloadIcon = null;
-                if (isActive && !self.isAutoSaveOnSwitchEnabled()) {
+                if (isActive && !self.getSessionSaver().isAutoSaveOnSwitchEnabled()) {
                     saveIcon = actions.createDiv({ cls: 'wpp-qs-action-btn' });
                     setIcon(saveIcon, 'save');
                     setTooltip(saveIcon, localizedString(strings.saveInline), { delay: 250 });
@@ -692,7 +695,7 @@ export class SearchOverlay {
                         overlayEventOwner.registerDomEvent(_saveIcon, 'click', function (e) {
                             e.stopPropagation();
                             const doSave = function () {
-                                void self.saveActiveSession().then(function () {
+                                void self.getSessionSaver().saveActiveSession().then(function () {
                                     refreshOrderedSessions();
                                 });
                             };
@@ -709,7 +712,7 @@ export class SearchOverlay {
                         overlayEventOwner.registerDomEvent(_reloadIcon, 'click', function (e) {
                             e.stopPropagation();
                             const doReload = function () {
-                                self.reloadCurrentSessionWithoutSaving();
+                                void self.getSessionSaver().reloadCurrentSessionWithoutSaving();
                             };
                             if (self.data.confirmQuickActions) {
                                 new ConfirmModal(self.app, localizedCall(strings.confirmReloadSession, sess.name), doReload, { confirmText: localizedString(strings.load), confirmClass: 'mod-cta' }).open();
@@ -856,7 +859,7 @@ export class SearchOverlay {
             if (target.id === self.data.activeSessionId) {
                 if (opts.shiftKey) {
                     const doSave = function () {
-                        void self.saveActiveSession().then(function () {
+                        void self.getSessionSaver().saveActiveSession().then(function () {
                             refreshOrderedSessions();
                         });
                     };
@@ -867,7 +870,7 @@ export class SearchOverlay {
                     }
                 } else {
                     const doReload = function () {
-                        self.reloadCurrentSessionWithoutSaving();
+                        void self.getSessionSaver().reloadCurrentSessionWithoutSaving();
                     };
                     if (self.data.confirmQuickActions) {
                         new ConfirmModal(self.app, localizedCall(strings.confirmReloadSession, target.name), doReload, { confirmText: localizedString(strings.load), confirmClass: 'mod-cta' }).open();

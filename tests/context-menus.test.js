@@ -61,6 +61,9 @@ function createPlugin(overrides = {}) {
         },
         data,
         manifest: { id: 'workspace-plus-plus', name: 'Workspace++' },
+        // Saving goes through plugin.getSessionSaver(). This double records the
+        // save methods itself, so it stands in as its own saver.
+        getSessionSaver() { return this; },
         isAutoSaveOnSwitchEnabled() { return this.data.autoSaveOnSwitch; },
         isWarnOnUnsavedSwitchEnabled() { return this.data.warnOnUnsavedSwitch; },
         isVersionHistoryEnabled() { return this.data.versionHistoryEnabled; },

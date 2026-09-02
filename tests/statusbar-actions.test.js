@@ -107,6 +107,9 @@ test('status bar actions delegate new direct actions to plugin methods', async f
             calls.push('createEmptySession');
             return Promise.resolve(true);
         },
+        // Saving goes through plugin.getSessionSaver(). This double records the
+        // save methods itself, so it stands in as its own saver.
+        getSessionSaver() { return this; },
         toggleAutoSaveOnSwitch: function (options) {
             calls.push(['toggleAutoSaveOnSwitch', options]);
             return Promise.resolve(true);

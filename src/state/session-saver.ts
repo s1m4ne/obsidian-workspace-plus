@@ -42,7 +42,6 @@ export interface SessionSaverHost {
     isGroupFeatureEnabled: () => boolean;
     applyWorkspaceLayout: (layout: unknown) => Promise<boolean>;
     saveActiveSession?: (options?: { silent?: boolean; touchModified?: boolean }) => Promise<boolean> | undefined;
-    overwriteSessionWithCurrentLayout?: (sessionId: string, options?: { silent?: boolean; touchModified?: boolean }) => Promise<boolean> | undefined;
     updateStatusBar?: () => void;
     syncSessionCommands?: () => void;
     startHistorySnapshotTimer?: () => void;
@@ -318,11 +317,10 @@ export class SessionSaver {
     }
 
     async overwriteSessionWithCurrentLayout(sessionId: string, options?: { silent?: boolean; touchModified?: boolean }): Promise<boolean> {
+        // No host seam here. Nothing supplies the hook now that the plugin does
+        // not carry a forwarder, so the branch could never run - which is what
+        // the unwired-hooks gate said.
         const opts = options || {};
-        if (typeof this.host.overwriteSessionWithCurrentLayout === 'function') {
-            const res = this.host.overwriteSessionWithCurrentLayout(sessionId, options);
-            if (res !== undefined) return res;
-        }
 
         const session = this.sessions[sessionId];
         if (!session) {

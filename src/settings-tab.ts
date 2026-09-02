@@ -19,6 +19,7 @@ import type { SessionGroup, StatusBarActions } from './storage/default-data.ts';
 import type { RotationBackupInfo } from './storage/storage-backup.ts';
 import type { SettingsState } from './state/settings-state.ts';
 import type { GroupStore } from './state/group-store.ts';
+import type { SessionSaver } from './state/session-saver.ts';
 
 export interface StorageDiagnosticsInfo {
     syncedByObsidianSync: boolean;
@@ -30,6 +31,13 @@ export interface StorageDiagnosticsInfo {
 }
 
 export interface SettingsTabHost extends GroupSessionsModalHost {
+    /**
+     * Saving and the auto-save flags are owned by SessionSaver. Naming it here
+     * rather than restating its methods keeps one list, the way getGroupStore()
+     * does for group state.
+     */
+    getSessionSaver(): SessionSaver;
+
     /**
      * Group state is owned by GroupStore. Naming the store rather than
      * restating its methods keeps one list: the plugin used to carry a
@@ -72,10 +80,6 @@ export interface SettingsTabHost extends GroupSessionsModalHost {
     _lastRotationBackupAt?: number;
 
 
-    isAutoSaveOnSwitchEnabled(): boolean;
-    setAutoSaveOnSwitch(value: boolean): Promise<unknown>;
-    isWarnOnUnsavedSwitchEnabled(): boolean;
-    isUnsavedStatusBarHighlightEnabled(): boolean;
     isSidebarRestoreEnabled(): boolean;
 
 
@@ -257,14 +261,14 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
     private displaySessions(contentEl: HTMLElement): void {
         addSubsection(contentEl, text(L.settingsSubsectionAutoSaveMode));
 
-        const autoSaveOnSwitch = this.plugin.isAutoSaveOnSwitchEnabled();
+        const autoSaveOnSwitch = this.plugin.getSessionSaver().isAutoSaveOnSwitchEnabled();
         new Setting(contentEl)
             .setName(text(L.settingsAutoSaveOnSwitch))
             .setDesc(text(L.settingsAutoSaveOnSwitchDesc))
             .addToggle((toggle) => {
                 toggle.setValue(autoSaveOnSwitch);
                 toggle.onChange((value) => {
-                    void this.plugin.setAutoSaveOnSwitch(value).then(() => { this.display(); });
+                    void this.plugin.getSessionSaver().setAutoSaveOnSwitch(value).then(() => { this.display(); });
                 });
             });
 
@@ -274,14 +278,14 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
             addToggleSetting(contentEl, {
                 name: text(L.settingsWarnUnsavedSwitch),
                 desc: text(L.settingsWarnUnsavedSwitchDesc),
-                value: this.plugin.isWarnOnUnsavedSwitchEnabled(),
+                value: this.plugin.getSessionSaver().isWarnOnUnsavedSwitchEnabled(),
                 onChange: (value) => { void this.plugin.getSettingsState().setWarnOnUnsavedSwitch(value); },
             });
 
             addToggleSetting(contentEl, {
                 name: text(L.settingsHighlightUnsavedSessionChanges),
                 desc: text(L.settingsHighlightUnsavedSessionChangesDesc),
-                value: this.plugin.isUnsavedStatusBarHighlightEnabled(),
+                value: this.plugin.getSessionSaver().isUnsavedStatusBarHighlightEnabled(),
                 onChange: (value) => { void this.plugin.getSettingsState().setUnsavedStatusBarHighlight(value); },
             });
 
@@ -504,7 +508,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
 
         // The interval only applies while switching saves automatically -
         // otherwise snapshots are taken on the explicit save instead.
-        if (this.plugin.isAutoSaveOnSwitchEnabled()) {
+        if (this.plugin.getSessionSaver().isAutoSaveOnSwitchEnabled()) {
             new Setting(vhNestedDiv)
                 .setName(text(L.settingsVersionHistoryInterval))
                 .setDesc(text(L.settingsVersionHistoryIntervalDesc))

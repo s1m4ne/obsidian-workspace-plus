@@ -3,11 +3,19 @@ import { L } from './i18n.ts';
 import * as obsidianInternals from './platform/obsidian-internals.ts';
 import type { SettingsState } from './state/settings-state.ts';
 import type { GroupStore } from './state/group-store.ts';
+import type { SessionSaver } from './state/session-saver.ts';
 
 type SettingsMenuCallbackName = 'onResetOverlay' | 'onChanged';
 type SettingsMenuCallbacks = Partial<Record<SettingsMenuCallbackName, () => void>>;
 
 export interface SettingsContextMenuPluginHost {
+    /**
+     * Saving and the auto-save flags are owned by SessionSaver. Naming it here
+     * rather than restating its methods keeps one list, the way getGroupStore()
+     * does for group state.
+     */
+    getSessionSaver(): SessionSaver;
+
     /**
      * Group state is owned by GroupStore. Naming the store rather than
      * restating its methods keeps one list: the plugin used to carry a
@@ -34,10 +42,7 @@ export interface SettingsContextMenuPluginHost {
     manifest: { id: string; name?: string };
     settingTab?: { activeTab: string } | undefined;
     _lastRotationBackupAt: number;
-    isAutoSaveOnSwitchEnabled(): boolean;
-    isWarnOnUnsavedSwitchEnabled(): boolean;
     isVersionHistoryEnabled(): boolean;
-    setAutoSaveOnSwitch(enabled: boolean, options: { notify: boolean }): Promise<unknown>;
     extractSessionData(data: unknown): Record<string, unknown>;
     prepareRotationBackupData(sessionData: Record<string, unknown>): Record<string, unknown>;
     ensureDir(path: string): Promise<unknown>;
@@ -81,14 +86,14 @@ export function openSettingsContextMenu(initialOptions?: SettingsContextMenuOpti
     const menu = new Menu();
 
     // --- Auto-save section ---
-    const autoSaveOn = plugin.isAutoSaveOnSwitchEnabled();
+    const autoSaveOn = plugin.getSessionSaver().isAutoSaveOnSwitchEnabled();
 
     menu.addItem((mi) => {
         mi.setTitle(text(L.settingsAutoSaveOnSwitch));
         mi.setIcon('save');
         if (autoSaveOn) mi.setChecked(true);
         mi.onClick(() => {
-            void plugin.setAutoSaveOnSwitch(!autoSaveOn, { notify: true }).then(() => {
+            void plugin.getSessionSaver().setAutoSaveOnSwitch(!autoSaveOn, { notify: true }).then(() => {
                 call(options.onChanged);
             });
         });
@@ -98,9 +103,9 @@ export function openSettingsContextMenu(initialOptions?: SettingsContextMenuOpti
         menu.addItem((mi) => {
             mi.setTitle(text(L.settingsWarnUnsavedSwitch));
             mi.setIcon('alert-triangle');
-            if (plugin.isWarnOnUnsavedSwitchEnabled()) mi.setChecked(true);
+            if (plugin.getSessionSaver().isWarnOnUnsavedSwitchEnabled()) mi.setChecked(true);
             mi.onClick(() => {
-                void plugin.getSettingsState().setWarnOnUnsavedSwitch(!plugin.isWarnOnUnsavedSwitchEnabled()).then(() => {
+                void plugin.getSettingsState().setWarnOnUnsavedSwitch(!plugin.getSessionSaver().isWarnOnUnsavedSwitchEnabled()).then(() => {
                     call(options.onChanged);
                 });
             });

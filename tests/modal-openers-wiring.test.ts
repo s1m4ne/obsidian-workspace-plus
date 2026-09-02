@@ -46,6 +46,9 @@ function createPlugin(): TestPlugin {
         // members itself, so it stands in as its own group store.
         getGroupStore(): never { return this as never; },
         isGroupFeatureEnabled: () => false,
+        // Saving goes through getSessionSaver(). This double carries the save
+        // members itself, so it stands in as its own saver.
+        getSessionSaver(): never { return this as never; },
         isAutoSaveOnSwitchEnabled: () => true,
         isVersionHistoryConfirmRestoreEnabled: () => false,
         extractFilePathsFromLayout: () => [],

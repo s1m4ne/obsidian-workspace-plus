@@ -11,6 +11,7 @@ import {
 } from './session-list-actions.ts';
 import type { SessionGroup, SessionItem } from './storage/default-data.ts';
 import type { GroupStore } from './state/group-store.ts';
+import type { SessionSaver } from './state/session-saver.ts';
 
 type Action = () => unknown;
 type GroupIdGetter = () => string | null;
@@ -31,6 +32,13 @@ type ContextActionOverrides = Partial<Record<ContextActionName, Action | MoveToG
 
 export interface SessionContextActionsHost extends SessionListActionsHost, HistoryModalPluginHost, SessionContextMenuPluginHost {
     /**
+     * Saving and the auto-save flags are owned by SessionSaver. Naming it here
+     * rather than restating its methods keeps one list, the way getGroupStore()
+     * does for group state.
+     */
+    getSessionSaver(): SessionSaver;
+
+    /**
      * Group state is owned by GroupStore. Naming the store rather than
      * restating its methods keeps one list: the plugin used to carry a
      * forwarding method per call, and one added to the store without a shim
@@ -43,13 +51,6 @@ export interface SessionContextActionsHost extends SessionListActionsHost, Histo
         activeSessionId: string | null;
         groups: Record<string, SessionGroup>;
     };
-    saveActiveSession(): Promise<unknown>;
-    reloadCurrentSessionWithoutSaving(): unknown;
-    saveAsSession(): Promise<unknown>;
-    confirmOverwriteSessionWithCurrentLayout(
-        sessionId: string,
-        options: { onSaved: () => void }
-    ): unknown;
     duplicateSession(sessionId: string): Promise<unknown>;
 }
 
@@ -156,17 +157,17 @@ export function createSessionContextMenuOptions(options: SessionContextMenuOptio
         ? options.getViewGroupId
         : () => null;
 
-    const defaultSave = (): unknown => callAfter(plugin.saveActiveSession(), () => {
+    const defaultSave = (): unknown => callAfter(plugin.getSessionSaver().saveActiveSession(), () => {
         refreshSessions(options);
     });
 
-    const defaultReload = (): unknown => plugin.reloadCurrentSessionWithoutSaving();
+    const defaultReload = (): unknown => plugin.getSessionSaver().reloadCurrentSessionWithoutSaving();
 
-    const defaultSaveAs = (): unknown => callAfter(plugin.saveAsSession(), () => {
+    const defaultSaveAs = (): unknown => callAfter(plugin.getSessionSaver().saveAsSession(), () => {
         refreshSessions(options);
     });
 
-    const defaultOverwriteWithCurrentLayout = (): unknown => plugin.confirmOverwriteSessionWithCurrentLayout(session.id, {
+    const defaultOverwriteWithCurrentLayout = (): unknown => plugin.getSessionSaver().confirmOverwriteSessionWithCurrentLayout(session.id, {
         onSaved: () => {
             refreshSessions(options);
         },

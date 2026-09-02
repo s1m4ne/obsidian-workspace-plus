@@ -3,6 +3,7 @@ import { L } from './i18n.ts';
 import * as obsidianInternals from './platform/obsidian-internals.ts';
 import type { SessionItem } from './storage/default-data.ts';
 import type { GroupStore } from './state/group-store.ts';
+import type { SessionSaver } from './state/session-saver.ts';
 
 type Action = () => unknown;
 type MoveToGroupAction = (groupId: string) => unknown;
@@ -22,6 +23,13 @@ type SessionContextMenuActions = Partial<Record<SessionContextMenuActionName, Ac
 
 export interface SessionContextMenuPluginHost {
     /**
+     * Saving and the auto-save flags are owned by SessionSaver. Naming it here
+     * rather than restating its methods keeps one list, the way getGroupStore()
+     * does for group state.
+     */
+    getSessionSaver(): SessionSaver;
+
+    /**
      * Group state is owned by GroupStore. Naming the store rather than
      * restating its methods keeps one list: the plugin used to carry a
      * forwarding method per call, and one added to the store without a shim
@@ -37,7 +45,6 @@ export interface SessionContextMenuPluginHost {
     };
     manifest: { id: string };
     settingTab?: { activeTab: string } | undefined;
-    isAutoSaveOnSwitchEnabled(): boolean;
     isVersionHistoryEnabled(): boolean;
 }
 
@@ -104,7 +111,7 @@ export function openSessionContextMenu(initialOptions?: SessionContextMenuOption
     if (!plugin || !app || !session) return;
 
     const isActive = !!options.isActive;
-    const manualSaveMode = !plugin.isAutoSaveOnSwitchEnabled();
+    const manualSaveMode = !plugin.getSessionSaver().isAutoSaveOnSwitchEnabled();
     const showOverwriteWithCurrentLayout = !isActive
         && manualSaveMode
         && typeof options.onOverwriteWithCurrentLayout === 'function';

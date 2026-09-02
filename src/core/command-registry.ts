@@ -10,9 +10,17 @@ import * as obsidianInternals from '../platform/obsidian-internals.ts';
 import type { PluginData, SessionItem } from '../storage/default-data.ts';
 import { isMacPlatform } from '../utils.ts';
 import type { GroupStore } from '../state/group-store.ts';
+import type { SessionSaver } from '../state/session-saver.ts';
 
 
 export interface CommandRegistryHost {
+    /**
+     * Saving and the auto-save flags are owned by SessionSaver. Naming it here
+     * rather than restating its methods keeps one list, the way getGroupStore()
+     * does for group state.
+     */
+    getSessionSaver(): SessionSaver;
+
     /**
      * Group state is owned by GroupStore. Naming the store rather than
      * restating its methods keeps one list: the plugin used to carry a
@@ -32,20 +40,13 @@ export interface CommandRegistryHost {
     removeCommand(id: string): void;
     getOrderedSessions(): SessionItem[];
     getOrderedSessionsUnfiltered(): SessionItem[];
-    confirmOverwriteSessionWithCurrentLayout(sessionId: string): void;
     renameCurrentSession(): void;
     deleteCurrentSession(): void;
     createEmptySession(): void;
     duplicateCurrentSession(): Promise<boolean> | void;
     switchToIndex(index: number): Promise<boolean> | void;
     switchRelativeFromCommand(direction: number): Promise<boolean> | void;
-    saveActiveSession(): Promise<boolean> | void;
-    saveAsSession(): Promise<boolean> | void;
     saveCurrentNoteNameAsSession(): Promise<boolean> | void;
-    isAutoSaveOnSwitchEnabled(): boolean;
-    setAutoSaveOnSwitch(enabled: boolean, opts?: { notify?: boolean }): Promise<void> | void;
-    reloadCurrentSessionWithoutSaving(): Promise<boolean> | void;
-    toggleAutoSaveOnSwitch(opts?: { notify?: boolean }): Promise<boolean> | void;
     openSearchOverlay(): void;
     isVersionHistoryEnabled(): boolean;
     getActiveSession(): SessionItem | null;
@@ -160,7 +161,7 @@ export class CommandRegistry {
             sessions,
             String(L.saveCurrentLayoutToSessionPlaceholder || ''),
             (session) => {
-                this.host.confirmOverwriteSessionWithCurrentLayout(session.id);
+                this.host.getSessionSaver().confirmOverwriteSessionWithCurrentLayout(session.id);
             }
         );
         modal.open();
@@ -284,13 +285,13 @@ export class CommandRegistry {
             'save-current-session',
             String(L.cmdSaveCurrent || ''),
             () => {
-                void host.saveActiveSession();
+                void host.getSessionSaver().saveActiveSession();
             },
             [{ modifiers: ['Mod', 'Shift'], key: 'S' }]
         );
 
         addSimpleCommand('save-as-session', String(L.cmdSaveAs || ''), () => {
-            void host.saveAsSession();
+            void host.getSessionSaver().saveAsSession();
         });
 
         addSimpleCommand(
@@ -305,7 +306,7 @@ export class CommandRegistry {
             id: 'save-current-layout-to-session',
             name: String(L.cmdSaveCurrentLayoutToSession || ''),
             checkCallback: (checking) => {
-                if (host.isAutoSaveOnSwitchEnabled()) return false;
+                if (host.getSessionSaver().isAutoSaveOnSwitchEnabled()) return false;
                 if (!checking) this.openSaveCurrentLayoutToSessionModal();
                 return true;
             },
@@ -315,21 +316,21 @@ export class CommandRegistry {
             'reload-current-session-without-saving',
             String(L.cmdReloadCurrentWithoutSaving || ''),
             () => {
-                void host.reloadCurrentSessionWithoutSaving();
+                void host.getSessionSaver().reloadCurrentSessionWithoutSaving();
             }
         );
 
         addSimpleCommand('toggle-auto-save-on-switch', String(L.cmdToggleAutoSave || ''), () => {
-            void host.toggleAutoSaveOnSwitch({ notify: true });
+            void host.getSessionSaver().toggleAutoSaveOnSwitch({ notify: true });
         });
 
         host.addCommand({
             id: 'enable-auto-save-on-switch',
             name: String(L.cmdEnableAutoSave || ''),
             checkCallback: (checking) => {
-                const canRun = !host.isAutoSaveOnSwitchEnabled();
+                const canRun = !host.getSessionSaver().isAutoSaveOnSwitchEnabled();
                 if (!canRun) return false;
-                if (!checking) void host.setAutoSaveOnSwitch(true, { notify: true });
+                if (!checking) void host.getSessionSaver().setAutoSaveOnSwitch(true, { notify: true });
                 return true;
             },
         });
@@ -338,9 +339,9 @@ export class CommandRegistry {
             id: 'disable-auto-save-on-switch',
             name: String(L.cmdDisableAutoSave || ''),
             checkCallback: (checking) => {
-                const canRun = host.isAutoSaveOnSwitchEnabled();
+                const canRun = host.getSessionSaver().isAutoSaveOnSwitchEnabled();
                 if (!canRun) return false;
-                if (!checking) void host.setAutoSaveOnSwitch(false, { notify: true });
+                if (!checking) void host.getSessionSaver().setAutoSaveOnSwitch(false, { notify: true });
                 return true;
             },
         });

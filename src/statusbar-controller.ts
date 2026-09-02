@@ -6,6 +6,7 @@ import {
     type StatusBarActionPluginHost,
 } from './statusbar-actions.ts';
 import type { PluginData, SessionItem } from './storage/default-data.ts';
+import type { SessionSaver } from './state/session-saver.ts';
 
 export interface StatusBarScrollPresetConfig {
     threshold: number;
@@ -32,11 +33,17 @@ export const STATUS_BAR_SCROLL_PRESETS: Record<string, StatusBarScrollPresetConf
 };
 
 export interface StatusBarControllerHost extends StatusBarActionPluginHost {
+    /**
+     * Saving and the auto-save flags are owned by SessionSaver. Naming it here
+     * rather than restating its methods keeps one list, the way getGroupStore()
+     * does for group state.
+     */
+    getSessionSaver(): SessionSaver;
+
     data: PluginData;
     statusBarEl?: HTMLElement | null;
     addStatusBarItem(): HTMLElement;
     getActiveSession(): SessionItem | null;
-    shouldShowUnsavedStatusBarHighlight(): boolean;
     switchRelativeFromScroll(direction: number): Promise<boolean>;
     getSessionSwitcher?(): { isSwitching?: boolean };
     getStatusBarController?(): StatusBarController;
@@ -290,7 +297,7 @@ export class StatusBarController {
         const el = this.statusBarEl || this.host.statusBarEl;
         if (!el) return;
         const showUnsavedHighlight = typeof this.host.shouldShowUnsavedStatusBarHighlight === 'function'
-            ? this.host.shouldShowUnsavedStatusBarHighlight()
+            ? this.host.getSessionSaver().shouldShowUnsavedStatusBarHighlight()
             : false;
 
         if (typeof el.removeClass === 'function') {

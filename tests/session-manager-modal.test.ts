@@ -39,6 +39,7 @@ interface ModalPlugin {
     getCommandHotkey(command: string): string;
     findActiveSessionIndex(sessions: Session[]): number;
     getDefaultSessionName(): string;
+    getSessionSaver(): never;
     isAutoSaveOnSwitchEnabled(): boolean;
     saveActiveSession(): Promise<void>;
     createSessionForViewedGroup(name: string, groupId: string | null): Promise<{ created: boolean; name: string; viewGroupId: string | null }>;
@@ -144,6 +145,9 @@ function makePlugin(containerEl: HTMLElement, groupFeatureEnabled = false): Moda
         findActiveSessionIndex: (sessions): number => sessions.findIndex((session) => session.id === plugin.data.activeSessionId),
         getDefaultSessionName: (): string => 'Workspace',
         isAutoSaveOnSwitchEnabled: (): boolean => false,
+        // Saving goes through getSessionSaver(). This double carries the save
+        // members itself, so it stands in as its own saver.
+        getSessionSaver(): never { return this as never; },
         saveActiveSession: async (): Promise<void> => {},
         createSessionForViewedGroup: async (name, groupId) => ({ created: Boolean(name), name, viewGroupId: groupId }),
         switchSession: async (id): Promise<boolean> => {

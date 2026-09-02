@@ -50,6 +50,9 @@ function createPlugin(overrides = {}) {
         data,
         manifest: { name: 'Workspace++' },
         app: { setting: { activeTab: null, openTabById() {} } },
+        // Saving goes through plugin.getSessionSaver(). This double records the
+        // save methods itself, so it stands in as its own saver.
+        getSessionSaver() { return this; },
         isAutoSaveOnSwitchEnabled() { return data.autoSaveOnSwitch; },
         isWarnOnUnsavedSwitchEnabled() { return data.warnOnUnsavedSwitch; },
         isUnsavedStatusBarHighlightEnabled() { return false; },

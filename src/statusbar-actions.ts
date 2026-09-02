@@ -6,9 +6,17 @@ import { openSettingsContextMenu } from './settings-context-menu.js';
 import type { SettingsContextMenuPluginHost } from './settings-context-menu-items.ts';
 import type { HistoryModalPluginHost } from './modals/history-modal.ts';
 import type { GroupStore } from './state/group-store.ts';
+import type { SessionSaver } from './state/session-saver.ts';
 
 
 export interface StatusBarActionPluginHost extends HistoryModalPluginHost, SettingsContextMenuPluginHost {
+    /**
+     * Saving and the auto-save flags are owned by SessionSaver. Naming it here
+     * rather than restating its methods keeps one list, the way getGroupStore()
+     * does for group state.
+     */
+    getSessionSaver(): SessionSaver;
+
     /**
      * Group state is owned by GroupStore. Naming the store rather than
      * restating its methods keeps one list: the plugin used to carry a
@@ -31,19 +39,14 @@ export interface StatusBarActionPluginHost extends HistoryModalPluginHost, Setti
     updateStatusBar(): void;
     hideSearchOverlay(): void;
     openSearchOverlay(anchorEl?: HTMLElement | null): void;
-    saveActiveSession(): Promise<unknown>;
-    saveAsSession(): Promise<unknown>;
     saveCurrentNoteNameAsSession(): Promise<unknown>;
-    reloadCurrentSessionWithoutSaving(): Promise<unknown>;
     renameCurrentSession(): void;
     duplicateCurrentSession(): Promise<unknown>;
     renameSessionById(sessionId: string, name: string): Promise<boolean>;
     duplicateSession(sessionId: string): Promise<unknown>;
-    confirmOverwriteSessionWithCurrentLayout(sessionId: string, options: { onSaved: () => void }): unknown;
     deleteSession(sessionId: string): Promise<boolean>;
     switchRelativeFromStatusBar(offset: number): Promise<boolean>;
     createEmptySession(): Promise<unknown>;
-    toggleAutoSaveOnSwitch(options?: { notify?: boolean }): Promise<unknown>;
     quickRestoreLatestHistory(): void;
     openConfirmModal?(
         message: string,
@@ -90,14 +93,14 @@ export const ACTIONS: readonly StatusBarAction[] = [
         id: 'saveSession',
         labelKey: 'statusBarActionSaveSession',
         run(plugin) {
-            return plugin.saveActiveSession();
+            return plugin.getSessionSaver().saveActiveSession();
         },
     },
     {
         id: 'saveAsSession',
         labelKey: 'cmdSaveAs',
         run(plugin) {
-            return plugin.saveAsSession();
+            return plugin.getSessionSaver().saveAsSession();
         },
     },
     {
@@ -111,7 +114,7 @@ export const ACTIONS: readonly StatusBarAction[] = [
         id: 'reloadWithoutSaving',
         labelKey: 'statusBarActionReloadWithoutSaving',
         run(plugin) {
-            return plugin.reloadCurrentSessionWithoutSaving();
+            return plugin.getSessionSaver().reloadCurrentSessionWithoutSaving();
         },
     },
     {
@@ -153,7 +156,7 @@ export const ACTIONS: readonly StatusBarAction[] = [
         id: 'toggleAutoSaveOnSwitch',
         labelKey: 'cmdToggleAutoSave',
         run(plugin) {
-            return plugin.toggleAutoSaveOnSwitch({ notify: true });
+            return plugin.getSessionSaver().toggleAutoSaveOnSwitch({ notify: true });
         },
     },
     {

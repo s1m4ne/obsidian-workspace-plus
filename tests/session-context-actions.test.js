@@ -43,6 +43,9 @@ function createPlugin(calls, overrides = {}) {
         getOrderedGroups() {
             return [{ id: 'g1', name: 'Group 1' }];
         },
+        // Saving goes through plugin.getSessionSaver(). This double records the
+        // save methods itself, so it stands in as its own saver.
+        getSessionSaver() { return this; },
         isAutoSaveOnSwitchEnabled() {
             return true;
         },
