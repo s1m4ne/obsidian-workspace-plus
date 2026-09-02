@@ -20,9 +20,19 @@
         "exactOptionalPropertyTypes": true,
         "noImplicitOverride": true,
         "noFallthroughCasesInSwitch": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noImplicitReturns": true,
+        "strictBuiltinIteratorReturn": true,
+        "allowUnreachableCode": false,
+        "allowUnusedLabels": false,
 
-        // src/ is migrating module by module; the remaining .js has to keep
-        // resolving, but is not type-checked.
+        // src/ holds no JavaScript any more, so every file that ships is
+        // type-checked under the settings above. These two remain for the .js
+        // under scripts/ and tests/, which run in Node and are not shipped.
+        // Turning checkJs on there reports 925 errors and is its own piece of
+        // work; noPropertyAccessFromIndexSignature reports 744, nearly all of
+        // them the `plugin.data.x` reads P1 has still to finish.
         "allowJs": true,
         "checkJs": false,
 

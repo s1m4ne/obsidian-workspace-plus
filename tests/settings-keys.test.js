@@ -10,7 +10,7 @@ const i18n = require('../src/i18n.ts');
 i18n.resolveLocale('en');
 
 const { PersistenceService } = require('../src/storage/persistence-service.ts');
-const DEFAULT_DATA = require('../src/plugin/default-data');
+const { DEFAULT_DATA } = require('../src/storage/default-data.ts');
 
 // Keys that are intentionally persisted outside SETTINGS_KEYS / SESSION_KEYS.
 // sessionStorageLocation is written explicitly by persistGlobalSettings() because

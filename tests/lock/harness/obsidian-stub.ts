@@ -385,7 +385,7 @@ export class NoticeStub {
         this.hidden = true;
     }
 
-    setMessage(message: string): this {
+    setMessage(_message: string): this {
         return this;
     }
 }

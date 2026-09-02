@@ -6,8 +6,8 @@ const { setupHarness } = require('./lock/harness/index.ts');
 
 const harness = setupHarness();
 const { L, resolveLocale } = require('../src/i18n.ts');
-const { openSessionContextMenu } = require('../src/session-context-menu.js');
-const { openSettingsContextMenu } = require('../src/settings-context-menu.js');
+const { openSessionContextMenu } = require('../src/session-context-menu-items.ts');
+const { openSettingsContextMenu } = require('../src/settings-context-menu-items.ts');
 
 resolveLocale('en');
 

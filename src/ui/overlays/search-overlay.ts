@@ -7,7 +7,7 @@ import * as navigationUtils from '../../navigation-utils.ts';
 import { deriveSessionPresentation } from '../shared/session-presenter.ts';
 import * as sessionDrag from '../shared/session-drag.ts';
 import * as sessionContextActions from '../../session-context-actions.ts';
-import * as settingsContextMenu from '../../settings-context-menu.js';
+import * as settingsContextMenu from '../../settings-context-menu-items.ts';
 import type { SettingsContextMenuPluginHost } from '../../settings-context-menu-items.ts';
 import * as sessionListActions from '../../session-list-actions.ts';
 import * as utils from '../../utils.ts';
@@ -827,6 +827,9 @@ export class SearchOverlay {
                             refreshOrderedSessions();
                         });
                     }
+                    // Nothing to remove when the overlay is showing every
+                    // session rather than one group.
+                    return undefined;
                 },
                 onReorder: function (newVisibleOrder) {
                     void self.getSessionStore().setSessionOrderFromVisible(newVisibleOrder);
@@ -1138,7 +1141,7 @@ export class SearchOverlay {
             // window is not. In a window too narrow to hold MIN_WIDTH the box
             // gets smaller rather than hanging off the edge, so the window bound
             // is applied last and wins.
-            const holdEdge = (value: number, minimumBound: number, windowLow: number, windowHigh: number): number =>
+            const holdEdge = (minimumBound: number, windowLow: number, windowHigh: number): number =>
                 Math.min(Math.max(minimumBound, windowLow), windowHigh);
 
             function onMove(ev: MouseEvent): void {
@@ -1153,10 +1156,10 @@ export class SearchOverlay {
 
                 const maxRight = window.innerWidth - margin;
                 const maxBottom = window.innerHeight - margin;
-                if (movesLeft) left = holdEdge(left, Math.min(left, right - MIN_WIDTH), margin, maxRight);
-                if (movesRight) right = holdEdge(right, Math.max(right, left + MIN_WIDTH), margin, maxRight);
-                if (movesTop) top = holdEdge(top, Math.min(top, bottom - MIN_HEIGHT), margin, maxBottom);
-                if (movesBottom) bottom = holdEdge(bottom, Math.max(bottom, top + MIN_HEIGHT), margin, maxBottom);
+                if (movesLeft) left = holdEdge(Math.min(left, right - MIN_WIDTH), margin, maxRight);
+                if (movesRight) right = holdEdge(Math.max(right, left + MIN_WIDTH), margin, maxRight);
+                if (movesTop) top = holdEdge(Math.min(top, bottom - MIN_HEIGHT), margin, maxBottom);
+                if (movesBottom) bottom = holdEdge(Math.max(bottom, top + MIN_HEIGHT), margin, maxBottom);
 
                 const newWidth = right - left;
                 const newHeight = bottom - top;

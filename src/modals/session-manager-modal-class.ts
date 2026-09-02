@@ -8,7 +8,7 @@ import * as utils from '../utils.ts';
 import { deriveSessionPresentation } from '../ui/shared/session-presenter.ts';
 import * as sessionDrag from '../ui/shared/session-drag.ts';
 import * as sessionContextActions from '../session-context-actions.ts';
-import * as settingsContextMenu from '../settings-context-menu.js';
+import * as settingsContextMenu from '../settings-context-menu-items.ts';
 import type { SettingsContextMenuPluginHost } from '../settings-context-menu-items.ts';
 import * as sessionListActions from '../session-list-actions.ts';
 import type { SessionGroup, SessionItem } from '../storage/default-data.ts';

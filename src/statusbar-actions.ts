@@ -2,7 +2,7 @@ import { Notice, type App } from 'obsidian';
 import { L } from './i18n.ts';
 import type { PluginData, SessionItem } from './storage/default-data.ts';
 import { openSessionContextMenu } from './session-context-actions.ts';
-import { openSettingsContextMenu } from './settings-context-menu.js';
+import { openSettingsContextMenu } from './settings-context-menu-items.ts';
 import type { SettingsContextMenuPluginHost } from './settings-context-menu-items.ts';
 import type { HistoryModalPluginHost } from './modals/history-modal.ts';
 import type { GroupStore } from './state/group-store.ts';

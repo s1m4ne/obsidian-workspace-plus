@@ -115,7 +115,7 @@ function createPlugin(overrides = {}) {
 function load(h) {
     const { resolveLocale, L } = require('../src/i18n.ts');
     resolveLocale('en');
-    const { WorkspacePlusPlusSettingTab } = require('../src/settings.js');
+    const { WorkspacePlusPlusSettingTab } = require('../src/settings-tab.ts');
     return { WorkspacePlusPlusSettingTab, L };
 }
 

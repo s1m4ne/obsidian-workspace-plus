@@ -3,8 +3,8 @@ import { L, resolveLocale } from './i18n.ts';
 import { SessionManagerModal, openSessionManagerModal } from './modals/session-manager-modal-class.ts';
 import { HistoryModal } from './modals/history-modal.ts';
 import type { HistoryModalPluginHost } from './modals/history-modal.ts';
-import * as settings from './settings.js';
-import DEFAULT_DATA from './plugin/default-data.js';
+import { WorkspacePlusPlusSettingTab } from './settings-tab.ts';
+import { DEFAULT_DATA } from './storage/default-data.ts';
 import { setupStatusBar } from './statusbar-controller.ts';
 import { ConfirmModal } from './modals/confirm-modal.ts';
 import { RenameModal } from './modals/rename-modal.ts';
@@ -62,7 +62,6 @@ import type {
     RotateBackupHost,
     StorageRestoreHost,
     RotationBackupInfo,
-    SessionDataPayload,
 } from './storage/storage-backup.ts';
 import type { StorageExportHost, StorageImportHost } from './storage/storage-transfer.ts';
 import { StatusBarController } from './statusbar-controller.ts';
@@ -92,7 +91,7 @@ export class WorkspacePlusPlus extends Plugin {
     frontmatterLinker?: FrontmatterLinker;
     statusBarController?: StatusBarController;
     commandRegistry?: CommandRegistry;
-    settingTab?: InstanceType<typeof settings.WorkspacePlusPlusSettingTab>;
+    settingTab?: WorkspacePlusPlusSettingTab;
 
     override async onload(): Promise<void> {
         const saved = await this.loadWithBackup();
@@ -129,7 +128,7 @@ export class WorkspacePlusPlus extends Plugin {
         this.commandRegistry = this.getCommandRegistry();
         this.commandRegistry.registerCommands();
 
-        this.settingTab = new settings.WorkspacePlusPlusSettingTab(this.app, this.asHost<SettingsTabHost>());
+        this.settingTab = new WorkspacePlusPlusSettingTab(this.app, this.asHost<SettingsTabHost>());
         this.addSettingTab(this.settingTab);
 
         this.registerEvent(this.app.workspace.on('layout-change', () => {

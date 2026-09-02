@@ -1,7 +1,7 @@
 import { Notice, type App } from 'obsidian';
 import { L } from './i18n.ts';
 import { HistoryModal, type HistoryModalPluginHost } from './modals/history-modal.ts';
-import * as sessionContextMenu from './session-context-menu.js';
+import * as sessionContextMenu from './session-context-menu-items.ts';
 import type { SessionContextMenuPluginHost } from './session-context-menu-items.ts';
 import {
     deleteSessionWithPrompt,

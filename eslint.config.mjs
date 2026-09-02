@@ -23,8 +23,8 @@ export default defineConfig([
     },
 
     {
-        // src/ is migrating to TypeScript module by module. Until a file is
-        // converted it is CommonJS running in Obsidian's Electron renderer, so
+        // src/ holds no JavaScript any more. What is left is the CommonJS under
+        // tests/ and scripts/, which runs in Node and in the jsdom harness, so
         // it needs those globals and none of the ESM-era rules apply to it.
         files: ["**/*.js"],
         languageOptions: {
