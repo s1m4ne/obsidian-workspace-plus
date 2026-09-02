@@ -17,21 +17,31 @@ import { L } from '../i18n.ts';
  *   target. Apple's own save dialog is `Don't Save … Cancel  Save` for this
  *   reason: putting "discard" next to the default is how one arrow key plus
  *   Enter loses work.
- * - **Enter fires the affirmative action, unless a button holds real focus.**
- *   Then it is that button's, and the browser fires it. Which action is the
- *   affirmative one is already visible: it is the only filled button in the
- *   row, `mod-cta` or `mod-warning` against a plain Cancel, exactly as
- *   Obsidian's own dialogs read.
+ * - **The dialog focuses what you came to do.** A dialog with a field focuses
+ *   the field, because you came to type; one without focuses the affirmative
+ *   button, because you came to confirm. That has to be done explicitly and
+ *   late: Obsidian focuses something of its own when the modal opens, and for
+ *   a confirmation that is the first button in the row, which is Cancel. While
+ *   nothing here chose, the delete dialog opened with Cancel focused and Enter
+ *   cancelled the delete.
+ * - **Arrow left and right move real focus along the row**, clamped rather
+ *   than wrapped, so the discard choice is never one key from the default.
+ * - **Enter fires whatever holds focus**; with the field focused, it fires the
+ *   affirmative action. Through `click()`, never a re-implementation, so the
+ *   mouse and the keyboard cannot drift apart.
  *
- *   This replaced a painted ring - `.wpp-btn-focused`, a 2px
- *   `--interactive-accent` outline - that moved with the arrow keys. It said
- *   the same thing the fill already said, and on a red `mod-warning` button the
- *   accent outline is a different colour from the fill, so it read as "this row
- *   is selected" rather than "this is what Enter does". Removing it also fixed
- *   a live defect: the handler clicked `buttons[ringIndex]` unconditionally, so
- *   tabbing to Cancel and pressing Enter ran the affirmative action.
- * - **Enter goes through `click()`**, never a re-implementation, so the mouse
- *   and the keyboard cannot drift apart.
+ *   Two indicators, because they say different things, which is how every
+ *   platform's dialogs work: the *focus ring* is where typing goes and where
+ *   the arrows left off, and the *fill* - `mod-cta` or `mod-warning` against a
+ *   plain Cancel - is what Enter does. The ring is Obsidian's own, because
+ *   these are real `<button>` elements.
+ *
+ *   The version before this one painted its own ring, `.wpp-btn-focused`, a 2px
+ *   `--interactive-accent` outline that moved with the arrows while real focus
+ *   stayed elsewhere. Two problems: on a red `mod-warning` button the accent
+ *   outline is a different colour from the fill, so it read as "this row is
+ *   selected"; and the handler clicked `buttons[ringIndex]` unconditionally, so
+ *   tabbing to Cancel and pressing Enter ran the affirmative action anyway.
  * - **Cancel settles exactly once, however the dialog goes away** - button,
  *   Escape, click-outside, or Obsidian closing it. `saveAsSession()` wraps this
  *   dialog in a promise whose `resolve` was reachable only from the affirmative
@@ -39,10 +49,9 @@ import { L } from '../i18n.ts';
  * - **`isComposing` guards everything**, whether or not the dialog has a field
  *   today. An IME commit arrives as Enter and belongs to the field.
  *
- * Moving between the buttons is Tab's job, and the focus ring that appears is
- * Obsidian's own: these are real `<button>` elements, so they get it for free.
- * The plugin's `:focus-visible` rules exist for the controls it builds out of
- * divs, which inherit nothing.
+ * Tab works too, and is left alone. The plugin's own `:focus-visible` rules
+ * exist for the controls it builds out of divs, which inherit nothing; these
+ * buttons need none of that.
  *
  * `kind` and `tone` are separate on purpose. They were one field in the first
  * draft, which broke the commonest dialog of the three: a delete confirmation's
@@ -157,13 +166,28 @@ export abstract class DialogModal extends Modal {
         this.listenerDoc = this.containerEl.ownerDocument;
         this.listenerDoc.addEventListener('keydown', this.keyHandler, true);
 
-        // Obsidian focuses the first field itself, and a subclass may want a
-        // selection inside it, so this runs after that has happened.
-        if (this.inputEl) {
-            const input = this.inputEl;
-            const win = this.containerEl.ownerDocument.defaultView ?? window;
-            win.setTimeout(() => { input.focus(); }, 50);
-        }
+        this.focusInitialTarget();
+    }
+
+    /**
+     * What you came to do: the field if there is one, the affirmative button if
+     * there is not.
+     *
+     * Late, on a timer, for the reason SessionManagerModal uses the same one:
+     * Obsidian focuses something itself when the modal opens, and setting focus
+     * during onOpen loses to it. Leaving it to Obsidian is what put Cancel
+     * under Enter in every confirmation.
+     */
+    private focusInitialTarget(): void {
+        const target = this.inputEl ?? this.affirmativeBtn;
+        if (!target) return;
+        const win = this.containerEl.ownerDocument.defaultView ?? window;
+        win.setTimeout(() => {
+            // The dialog may already be gone - an action can close it inside
+            // the same tick a test drives.
+            if (!this.buttons.length) return;
+            target.focus();
+        }, 50);
     }
 
     private addButton(parent: HTMLElement, action: DialogAction): HTMLButtonElement {
@@ -219,6 +243,15 @@ export abstract class DialogModal extends Modal {
             return;
         }
 
+        if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+            // Inside the field these belong to the caret. Taking them would
+            // make a dialog you are typing in jump to a button mid-word.
+            if (this.inputEl && this.containerEl.ownerDocument.activeElement === this.inputEl) return;
+            event.preventDefault();
+            this.moveFocus(event.key === 'ArrowLeft' ? -1 : 1);
+            return;
+        }
+
         if (!this.inputEl) return;
 
         // With a field, up and down move real focus in and out of it.
@@ -229,6 +262,29 @@ export abstract class DialogModal extends Modal {
             event.preventDefault();
             this.inputEl.blur();
         }
+    }
+
+    /**
+     * Real focus along the row, clamped at both ends.
+     *
+     * Clamped rather than wrapped: wrapping puts the discard choice one key
+     * from the affirmative action, which is exactly what the left-to-right
+     * ordering above is arranged to avoid.
+     */
+    private moveFocus(step: number): void {
+        const active = this.containerEl.ownerDocument.activeElement;
+        const from = this.buttons.findIndex((btn) => btn === active);
+        if (from === -1) {
+            // Nothing in the row holds focus - the initial-focus timer has not
+            // fired, or focus left the dialog. Either arrow enters at the
+            // default target rather than at an end, so the first press never
+            // lands somewhere the user did not ask for.
+            this.affirmativeBtn?.focus();
+            return;
+        }
+        const next = from + step;
+        if (next < 0 || next >= this.buttons.length) return;
+        this.buttons[next]?.focus();
     }
 
     /** Settle as cancelled, once. */

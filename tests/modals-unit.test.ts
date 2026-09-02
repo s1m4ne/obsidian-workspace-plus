@@ -1,4 +1,4 @@
-import test from 'node:test';
+import test, { afterEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { setupHarness } from './lock/harness/index.ts';
 import type { App } from 'obsidian';
@@ -12,6 +12,26 @@ const { UnsavedSwitchModal } = await import('../src/modals/unsaved-switch-modal.
 const { HistoryModal } = await import('../src/modals/history-modal.ts');
 const { formatRelativeTime } = await import('../src/modals/format-relative-time.ts');
 const { L } = await import('../src/i18n.ts');
+
+/**
+ * Every test leaves the document empty.
+ *
+ * These tests share one jsdom document, and DialogModal attaches its keydown
+ * handler to it in capture phase and removes it in `onClose`. A dialog left
+ * open therefore swallows Escape for every test that runs after it - which is
+ * exactly what happened while this file was being changed: an unrelated
+ * RenameModal test started reporting zero cancels because a ConfirmModal three
+ * tests earlier had never closed. `switch-overlay-behaviour.test.ts` carries a
+ * `clearModals()` helper for the same hazard, and it only removes the elements,
+ * not the listener.
+ */
+afterEach(() => {
+    assert.equal(
+        harness.dom.document.querySelectorAll('.modal-container').length,
+        0,
+        'a test left a modal open, which will swallow Escape for the tests after it',
+    );
+});
 
 test('formatRelativeTime: formats relative timestamps accurately', () => {
     const now = Date.now();
@@ -50,10 +70,22 @@ test('ConfirmModal: handles open, click, keyboard navigation and hint', () => {
     modal2.open();
     const doc = modal2.containerEl.ownerDocument || document;
 
-    // Arrow keys
+    // The arrows move real focus along the row. The first press enters at the
+    // default target wherever focus was, and the ends clamp.
+    const modal2Buttons = [...modal2.contentEl.querySelectorAll<HTMLButtonElement>('.wpp-confirm-buttons button')];
     doc.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowLeft' }));
+    assert.equal(doc.activeElement, modal2Buttons[1], 'enters at the affirmative action');
+    doc.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowLeft' }));
+    assert.equal(doc.activeElement, modal2Buttons[0], 'left reaches cancel');
+    doc.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowLeft' }));
+    assert.equal(doc.activeElement, modal2Buttons[0], 'and clamps there');
     doc.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowRight' }));
-    doc.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter' }));
+    assert.equal(doc.activeElement, modal2Buttons[1], 'right goes back');
+
+    // Enter on a focused button belongs to the browser, which jsdom does not
+    // implement, so the click is driven here. The keyboard half - that this
+    // handler does not take it - is asserted in its own test below.
+    modal2Buttons[1]?.click();
     assert.equal(confirmed, true);
 
     // Escape closes without confirming
@@ -144,7 +176,7 @@ test('UnsavedSwitchModal: handles saveAndSwitch, switchWithoutSaving, and onCanc
 
     // Which action Enter runs is said by the fill, not by a painted ring: one
     // filled button in the row against a plain Cancel.
-    const buttons = [...modal.contentEl.querySelectorAll('.wpp-confirm-buttons button')];
+    const buttons = [...modal.contentEl.querySelectorAll<HTMLButtonElement>('.wpp-confirm-buttons button')];
     assert.equal(buttons[0]?.classList.contains('mod-warning'), true, 'discard is destructive');
     assert.equal(buttons[1]?.classList.contains('mod-cta'), false, 'cancel carries no fill');
     assert.equal(buttons[1]?.classList.contains('mod-warning'), false, 'cancel carries no fill');
@@ -152,12 +184,19 @@ test('UnsavedSwitchModal: handles saveAndSwitch, switchWithoutSaving, and onCanc
 
     const doc = modal.containerEl.ownerDocument || document;
 
-    // Arrow keys no longer move what Enter does. They used to, with nothing on
-    // screen saying where they had left it once the ring was removed.
+    // Two lefts to reach the discard option: the distance is the safety, and
+    // the row clamps rather than wrapping so it is never one key away.
     doc.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowLeft' }));
+    assert.equal(doc.activeElement, buttons[2], 'enters at save and switch');
     doc.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowLeft' }));
-    doc.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter' }));
-    assert.equal(state, 'save', 'Enter runs the affirmative action wherever the arrows went');
+    assert.equal(doc.activeElement, buttons[1], 'then cancel');
+    doc.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowLeft' }));
+    assert.equal(doc.activeElement, buttons[0], 'then the discard option');
+    doc.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowLeft' }));
+    assert.equal(doc.activeElement, buttons[0], 'and no further');
+
+    buttons[0]?.click();
+    assert.equal(state, 'switch');
 
     // Test close triggers cancel if not resolved
     let state2 = '';
@@ -248,6 +287,7 @@ test('HistoryModal: groups entries by date and renders summary and restore butto
     const emptyModal = new HistoryModal(app, mockPlugin, { id: 'sess-2', name: 'Empty', layout: {}, history: [] });
     emptyModal.open();
     assert.ok(emptyModal.contentEl.querySelector('.wpp-history-empty'));
+    emptyModal.close();
 });
 
 test.after(() => harness.restore());
@@ -386,6 +426,78 @@ test('ConfirmModal: the destructive default is the affirmative action, and it is
     // Destructive by colour, affirmative by position: the two are separate
     // decisions, and conflating them put this button on the wrong side.
     assert.equal(buttons[1]?.classList.contains('mod-warning'), true);
+    modal.close();
+});
+
+/**
+ * The dialog chooses what holds focus, and it has to, late.
+ *
+ * Obsidian focuses something of its own when a modal opens - for a
+ * confirmation, the first button in the row, which is Cancel. While nothing
+ * here chose, the delete dialog opened with Cancel focused, so Enter cancelled
+ * the delete instead of running it. The focus is set on a timer for the same
+ * reason SessionManagerModal uses one: setting it during onOpen loses to
+ * Obsidian.
+ */
+test('a dialog with no field focuses the action it was opened for', async () => {
+    const modal = new ConfirmModal(app, 'Delete "Work"?', () => {});
+    modal.open();
+
+    const buttons = [...modal.contentEl.querySelectorAll<HTMLButtonElement>('.wpp-confirm-buttons button')];
+    assert.equal(buttons.length, 2);
+    // Cancel is first in the row, which is what Obsidian would leave focused.
+    assert.equal(buttons[0]?.textContent, String(L.cancel));
+
+    await new Promise((resolve) => setTimeout(resolve, 80));
+
+    const doc = modal.containerEl.ownerDocument || document;
+    assert.equal(doc.activeElement, buttons[1], 'the affirmative action, not cancel');
+    modal.close();
+});
+
+test('a dialog with a field focuses the field, because that is what it was opened for', async () => {
+    const modal = new RenameModal(app, 'Work', () => {});
+    modal.open();
+
+    await new Promise((resolve) => setTimeout(resolve, 80));
+
+    const input = modal.contentEl.querySelector('input');
+    const doc = modal.containerEl.ownerDocument || document;
+    assert.equal(doc.activeElement, input, 'the field holds focus');
+
+    // And the fill still says what Enter does, which is the platform's own
+    // default-button convention: focus is where typing goes, the fill is what
+    // Return runs.
+    const buttons = [...modal.contentEl.querySelectorAll<HTMLButtonElement>('.wpp-confirm-buttons button')];
+    assert.equal(buttons[1]?.classList.contains('mod-cta'), true);
+    modal.close();
+});
+
+test('left and right belong to the caret while the field has focus', async () => {
+    let renamed: string | null = null;
+    const modal = new RenameModal(app, 'Work', (name: string) => { renamed = name; });
+    modal.open();
+
+    await new Promise((resolve) => setTimeout(resolve, 80));
+
+    const input = modal.contentEl.querySelector('input');
+    const doc = modal.containerEl.ownerDocument || document;
+    assert.equal(doc.activeElement, input);
+
+    // Taking these would make a dialog you are typing in jump to a button
+    // mid-word.
+    doc.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowLeft' }));
+    assert.equal(doc.activeElement, input, 'still the field');
+    doc.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowRight' }));
+    assert.equal(doc.activeElement, input, 'still the field');
+
+    // Down leaves the field for the row; up comes back. That pair is the way
+    // out, and it is unchanged.
+    doc.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    doc.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowLeft' }));
+    assert.notEqual(doc.activeElement, input, 'out of the field, the arrows move the row');
+
+    assert.equal(renamed, null);
     modal.close();
 });
 
