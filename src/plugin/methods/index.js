@@ -8,7 +8,6 @@ var attachSessionSyncMethods = require('./session-sync');
 var attachSessionValidationMethods = require('./sessions-validation');
 var attachSessionStatusBarMethods = require('./session-statusbar');
 var attachSessionStartupMethods = require('./session-startup');
-var attachSessionSwitchingMethods = require('./session-switching');
 var attachSessionCommandMethods = require('./session-commands');
 var attachFrontmatterMethods = require('./frontmatter');
 
@@ -21,7 +20,6 @@ function attachPluginMethods(WorkspacePlusPlus) {
     attachSessionValidationMethods(WorkspacePlusPlus);
     attachSessionStatusBarMethods(WorkspacePlusPlus);
     attachSessionStartupMethods(WorkspacePlusPlus);
-    attachSessionSwitchingMethods(WorkspacePlusPlus);
     attachSessionCommandMethods(WorkspacePlusPlus);
     attachFrontmatterMethods(WorkspacePlusPlus);
 }

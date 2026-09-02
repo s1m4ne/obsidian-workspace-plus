@@ -16,8 +16,15 @@ import type { HistoryModalPluginHost } from './history-modal.ts';
 import type { GroupStore } from '../state/group-store.ts';
 import type { SessionSaver } from '../state/session-saver.ts';
 import type { SessionStore } from '../state/session-store.ts';
+import type { SessionSwitcher } from '../state/session-switcher.ts';
 
 export interface SessionManagerModalHost extends GroupTabPluginHost, HistoryModalPluginHost, SettingsContextMenuPluginHost {
+    /**
+     * Owned by SessionSwitcher; naming it keeps one list rather than a
+     * forwarding method per call on the plugin.
+     */
+    getSessionSwitcher(): SessionSwitcher;
+
     /**
      * The session set, its ordering and the CRUD on it are owned by
      * SessionStore. Naming the store rather than restating its methods keeps
@@ -58,7 +65,6 @@ export interface SessionManagerModalHost extends GroupTabPluginHost, HistoryModa
         name: string,
         groupId: string | null
     ): Promise<{ created: boolean; name: string; viewGroupId?: string | null } | null>;
-    switchSession(sessionId: string): Promise<boolean>;
 }
 
 /** Where the keyboard target currently sits. */
@@ -857,7 +863,7 @@ export class SessionManagerModal extends Modal {
 
     onLoad(sessionId: string): void {
         if (sessionId === this.plugin.data.activeSessionId) return;
-        void this.plugin.switchSession(sessionId).then((switched) => {
+        void this.plugin.getSessionSwitcher().switchSession(sessionId).then((switched) => {
             if (switched) this.close();
         });
     }

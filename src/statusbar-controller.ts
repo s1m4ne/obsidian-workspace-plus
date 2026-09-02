@@ -8,6 +8,7 @@ import {
 import type { PluginData } from './storage/default-data.ts';
 import type { SessionSaver } from './state/session-saver.ts';
 import type { SessionStore } from './state/session-store.ts';
+import type { SessionSwitcher } from './state/session-switcher.ts';
 
 export interface StatusBarScrollPresetConfig {
     threshold: number;
@@ -35,6 +36,12 @@ export const STATUS_BAR_SCROLL_PRESETS: Record<string, StatusBarScrollPresetConf
 
 export interface StatusBarControllerHost extends StatusBarActionPluginHost {
     /**
+     * Owned by SessionSwitcher; naming it keeps one list rather than a
+     * forwarding method per call on the plugin.
+     */
+    getSessionSwitcher(): SessionSwitcher;
+
+    /**
      * The session set, its ordering and the CRUD on it are owned by
      * SessionStore. Naming the store rather than restating its methods keeps
      * one list, the way getGroupStore() and getSessionSaver() do.
@@ -51,8 +58,6 @@ export interface StatusBarControllerHost extends StatusBarActionPluginHost {
     data: PluginData;
     statusBarEl?: HTMLElement | null;
     addStatusBarItem(): HTMLElement;
-    switchRelativeFromScroll(direction: number): Promise<boolean>;
-    getSessionSwitcher?(): { isSwitching?: boolean };
     getStatusBarController?(): StatusBarController;
     registerDomEvent?(
         el: HTMLElement,
@@ -244,7 +249,7 @@ export class StatusBarController {
 
         // A scroll gesture that cannot switch is not worth a message; the next
         // notch tries again.
-        void this.host.switchRelativeFromScroll(direction).catch(() => {});
+        void this.host.getSessionSwitcher().switchRelativeFromScroll(direction).catch(() => {});
         return true;
     }
 

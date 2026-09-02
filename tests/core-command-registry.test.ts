@@ -83,8 +83,13 @@ function createMockHost() {
             } as never;
         },
 
-        switchToIndex: async (idx: number) => { calls.push(`switchToIndex:${idx}`); return true; },
-        switchRelativeFromCommand: async (dir: number) => { calls.push(`switchRelative:${dir}`); return true; },
+        // Switching goes through getSessionSwitcher(); this double carries those members itself.
+        getSessionSwitcher(): never {
+            return {
+                switchToIndex: async (idx: number) => { calls.push(`switchToIndex:${idx}`); return true; },
+                switchRelativeFromCommand: async (dir: number) => { calls.push(`switchRelative:${dir}`); return true; },
+            } as never;
+        },
         saveCurrentNoteNameAsSession: async () => { calls.push('saveCurrentNote'); return true; },
         openSearchOverlay: () => { calls.push('openSearchOverlay'); },
         // Version history goes through getHistoryService(); this double carries those members itself.
@@ -107,7 +112,6 @@ function createMockHost() {
                 resolveGroupSelection: async (groupId: string | null) => ({ resolvedGroupId: groupId, switched: true, targetGroupId: groupId, sessions: [] }),
             } as never;
         },
-        switchSessionByIdFromCommand: async (id: string) => { calls.push(`switchById:${id}`); return true; },
         openSessionManagerModal(focusName: boolean) { calls.push(`openSessionManager:${focusName}`); },
         openHistoryModal(session: import('../src/storage/default-data.ts').SessionItem) { calls.push(`openHistory:${session.name}`); },
         openConfirmModal(msg: string, onConfirm: () => void) { calls.push(`openConfirm:${msg}`); onConfirm(); },

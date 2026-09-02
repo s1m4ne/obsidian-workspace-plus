@@ -34,6 +34,7 @@ interface ModalPlugin {
     getGroupStore(): never;
     isGroupFeatureEnabled(): boolean;
     getSessionStore(): never;
+    getSessionSwitcher(): never;
     getOrderedSessionsForGroup(groupId: string | null): Session[];
     getOrderedGroups(): Array<{ id: string; name: string }>;
     getOrderedGroupTabIds(): string[];
@@ -154,6 +155,8 @@ function makePlugin(containerEl: HTMLElement, groupFeatureEnabled = false): Moda
         getSessionSaver(): never { return this as never; },
         saveActiveSession: async (): Promise<void> => {},
         createSessionForViewedGroup: async (name, groupId) => ({ created: Boolean(name), name, viewGroupId: groupId }),
+        // Switching goes through getSessionSwitcher(); this double carries those members itself.
+        getSessionSwitcher(): never { return this as never; },
         switchSession: async (id): Promise<boolean> => {
             plugin.switchedIds.push(id);
             return false;

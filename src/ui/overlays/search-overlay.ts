@@ -16,6 +16,7 @@ import type { HistoryModalPluginHost } from '../../modals/history-modal.ts';
 import type { GroupStore } from '../../state/group-store.ts';
 import type { SessionSaver } from '../../state/session-saver.ts';
 import type { SessionStore } from '../../state/session-store.ts';
+import type { SessionSwitcher } from '../../state/session-switcher.ts';
 
 export interface SearchOverlayPosition {
     left: number;
@@ -241,6 +242,12 @@ function handleSearchOverlaySlashKey(event: KeyboardEvent, options: SearchOverla
 
 export interface SearchOverlayHost extends GroupTabPluginHost, HistoryModalPluginHost, SettingsContextMenuPluginHost {
     /**
+     * Owned by SessionSwitcher; naming it keeps one list rather than a
+     * forwarding method per call on the plugin.
+     */
+    getSessionSwitcher(): SessionSwitcher;
+
+    /**
      * The session set, its ordering and the CRUD on it are owned by
      * SessionStore. Naming the store rather than restating its methods keeps
      * one list, the way getGroupStore() and getSessionSaver() do.
@@ -291,7 +298,6 @@ export interface SearchOverlayHost extends GroupTabPluginHost, HistoryModalPlugi
     hideSearchOverlay(): void;
     createSessionForViewedGroup(name: string, groupId: string | null): Promise<{ created: boolean; name: string; viewGroupId?: string | null }>;
     renameSessionById(sessionId: string, name: string): Promise<boolean>;
-    switchSession(sessionId: string, options: { silent: boolean }): Promise<boolean>;
     persistData(): Promise<unknown>;
 }
 
@@ -883,7 +889,7 @@ export class SearchOverlay {
                 self.hideSearchOverlay();
                 return;
             }
-            void self.switchSession(target.id, { silent: true }).then(function (switched) {
+            void self.getSessionSwitcher().switchSession(target.id, { silent: true }).then(function (switched) {
                 if (switched) self.hideSearchOverlay();
             });
         }

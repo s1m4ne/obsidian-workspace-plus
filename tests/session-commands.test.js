@@ -35,6 +35,8 @@ function createRegistry(initialData) {
         getSessionStore() { return this; },
         getOrderedSessions: () => data.sessionOrder.map((id) => data.sessions[id]).filter(Boolean),
         getOrderedSessionsUnfiltered: () => data.sessionOrder.map((id) => data.sessions[id]).filter(Boolean),
+        // Switching goes through getSessionSwitcher(); this double carries those members itself.
+        getSessionSwitcher() { return this; },
         switchToIndex: function (index) {
         events.switchToIndexCalls.push(index);
         return Promise.resolve(true);

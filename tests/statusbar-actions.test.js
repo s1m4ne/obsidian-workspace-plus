@@ -101,6 +101,8 @@ test('status bar actions delegate new direct actions to plugin methods', async f
             calls.push('duplicateCurrentSession');
             return Promise.resolve(true);
         },
+        // Switching goes through getSessionSwitcher(); this double carries those members itself.
+        getSessionSwitcher() { return this; },
         switchRelativeFromStatusBar: function (offset) {
             calls.push(['switchRelativeFromStatusBar', offset]);
             return Promise.resolve(true);

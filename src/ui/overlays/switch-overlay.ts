@@ -4,8 +4,15 @@ import { isModShiftPressed } from '../../utils.ts';
 import type { SessionItem } from '../../storage/default-data.ts';
 import type { GroupStore } from '../../state/group-store.ts';
 import type { SessionStore } from '../../state/session-store.ts';
+import type { SessionSwitcher } from '../../state/session-switcher.ts';
 
 export interface SwitchOverlayHost {
+    /**
+     * Owned by SessionSwitcher; naming it keeps one list rather than a
+     * forwarding method per call on the plugin.
+     */
+    getSessionSwitcher(): SessionSwitcher;
+
     /**
      * The session set, its ordering and the CRUD on it are owned by
      * SessionStore. Naming the store rather than restating its methods keeps
@@ -28,8 +35,6 @@ export interface SwitchOverlayHost {
         [key: string]: unknown;
     };
     getCommandHotkey(cmd: string, slot?: number): string;
-    switchSession(sessionId: string, options?: { silent?: boolean }): Promise<boolean>;
-    clearSessionSwitchNotice?: (() => void) | undefined;
     hideSearchOverlay?: (() => void) | undefined;
 }
 
@@ -71,9 +76,10 @@ export class SwitchOverlay {
 
     show(ordered: SessionItem[], activeIndex: number, viewGroupId?: string | null, options?: SwitchOverlayOptions): void {
         const opts = options || {};
-        if (this.host.clearSessionSwitchNotice) {
-            this.host.clearSessionSwitchNotice();
-        }
+        // Unconditional: the guard tested the plugin for a forwarder while the
+        // call goes to the switcher, so the notice would have been left on
+        // screen by a plugin that stopped forwarding.
+        this.host.getSessionSwitcher().clearSessionSwitchNotice();
         if (this.host.hideSearchOverlay) {
             this.host.hideSearchOverlay();
         }
@@ -124,7 +130,7 @@ export class SwitchOverlay {
                 this.hide();
                 return;
             }
-            void this.host.switchSession(sessionId, { silent: true }).then((switched) => {
+            void this.host.getSessionSwitcher().switchSession(sessionId, { silent: true }).then((switched) => {
                 if (switched) this.hide();
             });
         };

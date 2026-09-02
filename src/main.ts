@@ -77,7 +77,6 @@ interface AttachedPluginMethods {
     ): void;
     hideSwitchOverlay(): void;
     hideSearchOverlay(): void;
-    clearSessionSwitchNotice(): void;
 }
 
 export class WorkspacePlusPlus extends Plugin {
@@ -376,7 +375,7 @@ export class WorkspacePlusPlus extends Plugin {
         this.getHistoryService().stopHistorySnapshotTimer();
         this.hideSwitchOverlay();
         this.hideSearchOverlay();
-        this.clearSessionSwitchNotice();
+        this.getSessionSwitcher().clearSessionSwitchNotice();
         this.getSessionSwitcher().cleanup();
         // Through the controller, not by assignment: the mirrored counters are
         // getter-only accessors, and writing to one throws in the strict bundle

@@ -216,10 +216,13 @@ test('StatusBarController: wheel accumulation and threshold switching', async ()
         createEmptySession: async () => true,
         toggleAutoSaveOnSwitch: async () => true,
         quickRestoreLatestHistory() {},
-        switchRelativeFromScroll: async (dir) => {
-            switchedDirections.push(dir);
-            return true;
-        },
+        getSessionSwitcher: (): never => ({
+            switchRelativeFromScroll: async (dir: number) => {
+                switchedDirections.push(dir);
+                return true;
+            },
+            isSwitching: false,
+        }) as never,
     };
 
     const controller = new StatusBarController(host);
@@ -266,9 +269,14 @@ test('StatusBarController: wheel accumulation and threshold switching', async ()
     assert.deepEqual(switchedDirections, [1, -1]);
 
     // isSwitching session returns false
-    host.getSessionSwitcher = () => ({ isSwitching: true });
+    // Both members, or the wheel path loses the switch it is meant to make.
+    const switcher = (isSwitching: boolean): never => ({
+        isSwitching,
+        switchRelativeFromScroll: async (dir: number) => { switchedDirections.push(dir); return true; },
+    }) as never;
+    host.getSessionSwitcher = () => switcher(true);
     assert.equal(controller.handleWheel(createEvt(20), 3000), false);
-    host.getSessionSwitcher = () => ({ isSwitching: false });
+    host.getSessionSwitcher = () => switcher(false);
 
     // Disabled mod scroll
     host.data.statusBarModScrollSwitch = false;
@@ -308,6 +316,7 @@ test('StatusBarController: setup and update DOM rendering', () => {
         openHistoryModal() {},
         // Group calls go through the store; this literal supplies just the two
         // members the controller reaches.
+        getSessionSwitcher: (): never => ({ isSwitching: false }) as never,
         getGroupStore(): never {
             return {
                 isGroupFeatureEnabled: () => true,

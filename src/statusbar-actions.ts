@@ -9,9 +9,16 @@ import type { GroupStore } from './state/group-store.ts';
 import type { SessionSaver } from './state/session-saver.ts';
 import type { SessionStore } from './state/session-store.ts';
 import type { HistoryService } from './state/history-service.ts';
+import type { SessionSwitcher } from './state/session-switcher.ts';
 
 
 export interface StatusBarActionPluginHost extends HistoryModalPluginHost, SettingsContextMenuPluginHost {
+    /**
+     * Owned by SessionSwitcher; naming it keeps one list rather than a
+     * forwarding method per call on the plugin.
+     */
+    getSessionSwitcher(): SessionSwitcher;
+
     /**
      * Owned by HistoryService; naming it keeps one list rather than a
      * forwarding method per call on the plugin.
@@ -53,7 +60,6 @@ export interface StatusBarActionPluginHost extends HistoryModalPluginHost, Setti
     openSearchOverlay(anchorEl?: HTMLElement | null): void;
     saveCurrentNoteNameAsSession(): Promise<unknown>;
     renameSessionById(sessionId: string, name: string): Promise<boolean>;
-    switchRelativeFromStatusBar(offset: number): Promise<boolean>;
     openConfirmModal?(
         message: string,
         onConfirm: () => void,
@@ -141,14 +147,14 @@ export const ACTIONS: readonly StatusBarAction[] = [
         id: 'previousSession',
         labelKey: 'cmdPrevious',
         run(plugin) {
-            return plugin.switchRelativeFromStatusBar(-1);
+            return plugin.getSessionSwitcher().switchRelativeFromStatusBar(-1);
         },
     },
     {
         id: 'nextSession',
         labelKey: 'cmdNext',
         run(plugin) {
-            return plugin.switchRelativeFromStatusBar(1);
+            return plugin.getSessionSwitcher().switchRelativeFromStatusBar(1);
         },
     },
     {

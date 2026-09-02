@@ -13,9 +13,16 @@ import type { GroupStore } from '../state/group-store.ts';
 import type { SessionSaver } from '../state/session-saver.ts';
 import type { SessionStore } from '../state/session-store.ts';
 import type { HistoryService } from '../state/history-service.ts';
+import type { SessionSwitcher } from '../state/session-switcher.ts';
 
 
 export interface CommandRegistryHost {
+    /**
+     * Owned by SessionSwitcher; naming it keeps one list rather than a
+     * forwarding method per call on the plugin.
+     */
+    getSessionSwitcher(): SessionSwitcher;
+
     /**
      * Owned by HistoryService; naming it keeps one list rather than a
      * forwarding method per call on the plugin.
@@ -53,14 +60,11 @@ export interface CommandRegistryHost {
     manifest: { id: string };
     addCommand(command: Command): Command;
     removeCommand(id: string): void;
-    switchToIndex(index: number): Promise<boolean> | void;
-    switchRelativeFromCommand(direction: number): Promise<boolean> | void;
     saveCurrentNoteNameAsSession(): Promise<boolean> | void;
     openSearchOverlay(): void;
     exportSessionsSnapshot(): Promise<void>;
     importSessionsFromLatestExport(): Promise<void>;
     showSwitchOverlay(sessions: SessionItem[], activeIndex: number, groupId: string | null): void;
-    switchSessionByIdFromCommand(sessionId: string): Promise<boolean> | void;
 
     switchOverlayEl?: HTMLElement | null;
     switchOverlayViewGroupId?: string | null;
@@ -253,7 +257,7 @@ export class CommandRegistry {
                             const session = ordered[num - 1];
                             if (session && session.id === this.data.activeSessionId) return false;
                         }
-                        if (!checking) void host.switchToIndex(num - 1);
+                        if (!checking) void host.getSessionSwitcher().switchToIndex(num - 1);
                         return true;
                     },
                 });
@@ -269,7 +273,7 @@ export class CommandRegistry {
             'previous-session',
             String(L.cmdPrevious || ''),
             () => {
-                void host.switchRelativeFromCommand(-1);
+                void host.getSessionSwitcher().switchRelativeFromCommand(-1);
             },
             [{ modifiers: ['Mod', 'Shift'], key: ',' }]
         );
@@ -278,7 +282,7 @@ export class CommandRegistry {
             'next-session',
             String(L.cmdNext || ''),
             () => {
-                void host.switchRelativeFromCommand(1);
+                void host.getSessionSwitcher().switchRelativeFromCommand(1);
             },
             [
                 { modifiers: ['Mod', 'Shift'], key: 'Enter' },
@@ -495,7 +499,7 @@ export class CommandRegistry {
                                 return false;
                             }
                         }
-                        if (!checking) void host.switchToIndex(num - 1);
+                        if (!checking) void host.getSessionSwitcher().switchToIndex(num - 1);
                         return true;
                     },
                 });
@@ -521,7 +525,7 @@ export class CommandRegistry {
                     if (!this.data.showActiveSwitchCommand) {
                         if (session.id === this.data.activeSessionId) return false;
                     }
-                    if (!checking) void host.switchSessionByIdFromCommand(session.id);
+                    if (!checking) void host.getSessionSwitcher().switchSessionByIdFromCommand(session.id);
                     return true;
                 },
             });
