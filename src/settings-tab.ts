@@ -758,7 +758,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
         addDangerResetSetting(contentEl, this.app, redraw, {
             name: text(L.settingsResetSettings),
             desc: text(L.settingsResetSettingsDesc),
-            buttonText: text(L.settingsResetSettingsBtn),
+            buttonText: text(L.settingsResetBtn),
             confirmMessage: text(L.confirmResetSettings),
             run: () => this.plugin.resetSettingsToDefault(),
             successNotice: text(L.resetSettingsDone),
@@ -768,7 +768,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
         addDangerResetSetting(contentEl, this.app, redraw, {
             name: text(L.settingsResetSessions),
             desc: text(L.settingsResetSessionsDesc),
-            buttonText: text(L.settingsResetSessionsBtn),
+            buttonText: text(L.settingsResetBtn),
             confirmMessage: text(L.confirmResetSessions),
             confirmHint: text(L.resetSessionsHint),
             run: () => this.plugin.getSessionStore().resetSessionsToDefault(),
@@ -779,7 +779,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
         addDangerResetSetting(contentEl, this.app, redraw, {
             name: text(L.settingsResetBackupsAndHistory),
             desc: text(L.settingsResetBackupsAndHistoryDesc),
-            buttonText: text(L.settingsResetBackupsAndHistoryBtn),
+            buttonText: text(L.settingsResetBtn),
             confirmMessage: text(L.confirmResetBackupsAndHistory),
             confirmHint: text(L.resetBackupsAndHistoryHint),
             run: () => this.plugin.clearBackupsAndVersionHistory(),
