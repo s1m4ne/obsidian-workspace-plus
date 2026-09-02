@@ -1055,6 +1055,24 @@ test('dragging the left edge inward stops at the minimum width', () => {
  * localized strings rather than placeholders - the failure mode is silent, and
  * an icon added without a label breaks nothing a behaviour test can see.
  */
+/**
+ * The accessible name of a container, resolved the way a screen reader does.
+ *
+ * It must come from aria-labelledby rather than aria-label: Obsidian renders
+ * aria-label as a hover tooltip, so an aria-label on a full-size overlay puts a
+ * tooltip across the whole thing. Asserting the absence is the half of this that
+ * stops the tooltip coming back.
+ */
+function accessibleName(el: Element): string {
+    assert.equal(el.getAttribute('aria-label'), null,
+        'a container must not carry aria-label - Obsidian shows it as a tooltip');
+    const id = el.getAttribute('aria-labelledby');
+    assert.ok(id, 'the container names itself with aria-labelledby');
+    const target = el.querySelector('#' + id);
+    assert.ok(target, 'aria-labelledby points at an element that exists');
+    return target.textContent ?? '';
+}
+
 test('every icon-only control in the search overlay has a role and a name', () => {
     const { plugin, searchOverlay } = createTestPlugin();
     clearModals();
@@ -1065,7 +1083,7 @@ test('every icon-only control in the search overlay has a role and a name', () =
 
     assert.equal(overlay.getAttribute('role'), 'dialog');
     assert.equal(overlay.getAttribute('aria-modal'), 'true');
-    assert.equal(overlay.getAttribute('aria-label'), 'Search sessions');
+    assert.equal(accessibleName(overlay), 'Search sessions');
 
     const close = overlay.querySelector('.wpp-search-close');
     assert.equal(close?.getAttribute('role'), 'button');
@@ -1099,6 +1117,6 @@ test('the switch overlay announces itself as a dialog', () => {
     assert.ok(overlay);
 
     assert.equal(overlay.getAttribute('role'), 'dialog');
-    assert.equal(overlay.getAttribute('aria-label'), 'Search sessions');
+    assert.equal(accessibleName(overlay), 'Search sessions');
     switchOverlay.hide();
 });

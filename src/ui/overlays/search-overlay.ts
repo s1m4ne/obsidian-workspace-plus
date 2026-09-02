@@ -449,15 +449,23 @@ export class SearchOverlay {
             });
         }
 
+        // aria-labelledby rather than aria-label - see the switch overlay: an
+        // aria-label on a container this size is a tooltip across all of it.
+        const labelId = 'wpp-search-overlay-label-' + utils.generateId();
         const overlay = overlayDocument.body.createDiv({
             cls: 'wpp-switch-overlay wpp-search-overlay',
             attr: {
                 role: 'dialog',
                 'aria-modal': 'true',
-                'aria-label': localizedString(strings.cmdSearchOverlay),
+                'aria-labelledby': labelId,
             },
         });
         overlay.tabIndex = -1;
+        overlay.createSpan({
+            cls: 'wpp-sr-only',
+            attr: { id: labelId },
+            text: localizedString(strings.cmdSearchOverlay),
+        });
 
         // Resize handles at four corners
         const corners = ['tl', 'tr', 'bl', 'br'];

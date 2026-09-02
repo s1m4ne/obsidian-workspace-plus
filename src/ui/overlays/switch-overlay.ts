@@ -1,6 +1,6 @@
 import { L } from '../../i18n.ts';
 import { deriveSessionPresentation } from '../shared/session-presenter.ts';
-import { isModShiftPressed } from '../../utils.ts';
+import { generateId, isModShiftPressed } from '../../utils.ts';
 import type { SessionItem } from '../../storage/default-data.ts';
 import type { GroupStore } from '../../state/group-store.ts';
 import type { SessionStore } from '../../state/session-store.ts';
@@ -140,13 +140,23 @@ export class SwitchOverlay {
             });
         };
 
+        // aria-labelledby, not aria-label: Obsidian renders aria-label as a
+        // hover tooltip, so naming this container with one put "Search
+        // sessions" over the whole overlay - it appeared whenever the cursor
+        // sat on a part of it with no child underneath.
+        const labelId = 'wpp-switch-overlay-label-' + generateId();
         const overlay = document.body.createDiv({
             cls: 'wpp-switch-overlay',
             attr: {
                 role: 'dialog',
                 'aria-modal': 'true',
-                'aria-label': typeof L.cmdSearchOverlay === 'string' ? L.cmdSearchOverlay : 'Search sessions',
+                'aria-labelledby': labelId,
             },
+        });
+        overlay.createSpan({
+            cls: 'wpp-sr-only',
+            attr: { id: labelId },
+            text: typeof L.cmdSearchOverlay === 'string' ? L.cmdSearchOverlay : 'Search sessions',
         });
 
         // Count
