@@ -16,21 +16,13 @@ import {
     type SettingText,
 } from './settings-ui.ts';
 import type { SessionGroup, StatusBarActions } from './storage/default-data.ts';
+import type { StorageDiagnosticsInfo } from './storage/persistence-service.ts';
 import type { RotationBackupInfo } from './storage/storage-backup.ts';
 import type { SettingsState } from './state/settings-state.ts';
 import type { GroupStore } from './state/group-store.ts';
 import type { SessionSaver } from './state/session-saver.ts';
 import type { SessionStore } from './state/session-store.ts';
 import type { HistoryService } from './state/history-service.ts';
-
-export interface StorageDiagnosticsInfo {
-    syncedByObsidianSync: boolean;
-    sessionsPath: string;
-    sessionsBackupPath: string;
-    historyPath: string;
-    sessionCount: number;
-    updatedAt: number;
-}
 
 export interface SettingsTabHost extends GroupSessionsModalHost {
     /**
@@ -125,7 +117,7 @@ export interface SettingsTabHost extends GroupSessionsModalHost {
     getSessionStorageSize(): Promise<number | null>;
 }
 
-type TabId = 'general' | 'sessions' | 'groups' | 'advanced';
+export type TabId = 'general' | 'sessions' | 'groups' | 'advanced';
 
 // Which locale key names each status-bar click slot. The slots are data, so the
 // labels cannot be written beside them.

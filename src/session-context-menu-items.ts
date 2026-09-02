@@ -2,6 +2,7 @@ import { Menu, type App, type MenuItem } from 'obsidian';
 import { L } from './i18n.ts';
 import * as obsidianInternals from './platform/obsidian-internals.ts';
 import type { SessionItem } from './storage/default-data.ts';
+import type { TabId } from './settings-tab.ts';
 import type { GroupStore } from './state/group-store.ts';
 import type { SessionSaver } from './state/session-saver.ts';
 import type { HistoryService } from './state/history-service.ts';
@@ -51,7 +52,8 @@ export interface SessionContextMenuPluginHost {
         sessionGroups?: Record<string, string[]>;
     };
     manifest: { id: string };
-    settingTab?: { activeTab: string } | undefined;
+    // TabId, not string - see settings-context-menu-items.ts for why.
+    settingTab?: { activeTab: TabId | null } | undefined;
 }
 
 export type SessionContextMenuOptions = SessionContextMenuActions & {

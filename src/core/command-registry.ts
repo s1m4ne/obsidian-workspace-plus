@@ -81,8 +81,11 @@ export interface CommandRegistryHost {
     addCommand(command: Command): Command;
     removeCommand(id: string): void;
     getSearchOverlay(): { open(anchorEl?: HTMLElement): void };
-    exportSessionsSnapshot(): Promise<void>;
-    importSessionsFromLatestExport(): Promise<void>;
+    // `Promise<unknown>`: it resolves with the path it wrote, and the one
+    // caller here hands the promise to runWithFailureNotice without reading it.
+    // Declaring Promise<void> was simply wrong about what it returns.
+    exportSessionsSnapshot(): Promise<unknown>;
+    importSessionsFromLatestExport(): Promise<unknown>;
     getSwitchOverlay(): {
         show(sessions: SessionItem[], activeIndex: number, groupId: string | null): void;
         overlayEl: HTMLElement | null;

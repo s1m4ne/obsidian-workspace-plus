@@ -8,6 +8,21 @@ import { SessionStorage } from './session-storage.ts';
 import { getPersistStamp, hasNonEmptySessions, hasSessionShape, pickKeys, pickSessionPayload, splitSessionHistory } from './session-data.ts';
 
 export type DataRecord = Record<string, unknown>;
+
+/**
+ * What getStorageDiagnosticsInfo() answers. It lived in settings-tab.ts, which
+ * meant the producer returned a loose DataRecord and only the consumer knew the
+ * shape - so the two could drift with nothing to catch it. The producer owns it
+ * now and the settings screen imports it.
+ */
+export interface StorageDiagnosticsInfo {
+    syncedByObsidianSync: boolean;
+    sessionsPath: string;
+    sessionsBackupPath: string;
+    historyPath: string;
+    sessionCount: number;
+    updatedAt: number;
+}
 export type SessionData = DataRecord & {
     activeSessionId?: string | null;
     sessions?: Record<string, SessionItem>;
@@ -43,7 +58,7 @@ export interface PersistenceServiceHost {
     persistData(): Promise<unknown>;
     persistDataImmediate(): Promise<unknown>;
     clearBackupFiles(): Promise<unknown>;
-    readJsonIfExists(path: string): Promise<ReadJsonResult>;
+    readJsonIfExists<T = unknown>(path: string): Promise<ReadJsonResult<T>>;
     getFileMtime(path: string): Promise<number>;
 }
 
@@ -201,7 +216,7 @@ export class PersistenceService {
     ensureDir(path: string): Promise<void> { return this.getJsonStore().ensureDir(path); }
     ensureSessionStorageDir(): Promise<void> { return this.ensureDir(this.getSessionStorageDirPath()); }
     getFileMtime(path: string): Promise<number> { return this.host.getFileMtime(path); }
-    readJsonIfExists(path: string): Promise<ReadJsonResult> { return this.host.readJsonIfExists(path); }
+    readJsonIfExists<T = unknown>(path: string): Promise<ReadJsonResult<T>> { return this.host.readJsonIfExists<T>(path); }
     writeJson(path: string, data: unknown, pretty?: boolean): Promise<void> { return this.getJsonStore().writeJson(path, data, pretty); }
     renameIfExists(fromPath: string, toPath: string): Promise<void> { return this.getJsonStore().renameIfExists(fromPath, toPath); }
     removeIfExists(path: string): Promise<void> { return this.getJsonStore().removeIfExists(path); }
@@ -318,7 +333,7 @@ export class PersistenceService {
         if (this.host.clearVersionHistoryEntries()) await this.host.persistData();
         return this.host.clearBackupFiles();
     }
-    getStorageDiagnosticsInfo(): DataRecord {
+    getStorageDiagnosticsInfo(): StorageDiagnosticsInfo {
         return {
             syncedByObsidianSync: this.isSessionStorageInPluginData(),
             sessionsPath: this.getSessionsPath(),

@@ -237,7 +237,11 @@ export interface StorageRestoreHost {
     updateStatusBar(): void;
     syncSessionCommands(): void;
     persistData(): Promise<unknown>;
-    getActiveSession(): SessionItem | undefined;
+    // `| null`, which is what SessionStore.getActiveSession actually answers.
+    // The consumer below tests it for truthiness so either worked at run time,
+    // and the disagreement only stayed invisible because the plugin reached
+    // this host through a cast.
+    getActiveSession(): SessionItem | null;
     applyWorkspaceLayout(layout: unknown, options?: { catchErrors?: boolean }): Promise<unknown>;
 }
 

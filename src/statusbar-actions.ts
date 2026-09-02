@@ -76,7 +76,11 @@ export interface StatusBarActionPluginHost extends HistoryModalPluginHost, Setti
         onConfirm: () => void,
         options: { confirmText: string; confirmClass: string }
     ): void;
-    [key: string]: unknown;
+
+    // No `[key: string]: unknown`. It let any member access on this host
+    // compile, which is half of why fourteen required members could go missing
+    // unnoticed; the other half was asHost() casting the plugin into shape.
+    // Nothing here indexes the host dynamically, so it costs nothing to drop.
 }
 
 function resolveLabel(lTable: typeof L, labelKey: string): string {

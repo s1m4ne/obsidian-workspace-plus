@@ -2,6 +2,7 @@ import { Menu, Notice, type App } from 'obsidian';
 import { L } from './i18n.ts';
 import * as obsidianInternals from './platform/obsidian-internals.ts';
 import type { SettingsState } from './state/settings-state.ts';
+import type { TabId } from './settings-tab.ts';
 import type { GroupStore } from './state/group-store.ts';
 import type { SessionSaver } from './state/session-saver.ts';
 import type { HistoryService } from './state/history-service.ts';
@@ -47,7 +48,9 @@ export interface SettingsContextMenuPluginHost {
         showFilterInput?: boolean;
     };
     manifest: { id: string; name?: string };
-    settingTab?: { activeTab: string } | undefined;
+    // TabId, not string: the field really is a TabId and writing a bare string
+    // into it only type-checked because the plugin reached here through a cast.
+    settingTab?: { activeTab: TabId | null } | undefined;
     _lastRotationBackupAt: number;
     extractSessionData(data: unknown): Record<string, unknown>;
     prepareRotationBackupData(sessionData: Record<string, unknown>): Record<string, unknown>;

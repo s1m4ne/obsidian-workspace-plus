@@ -296,11 +296,8 @@ export class StatusBarController {
             { passive: false }
         );
 
-        if (typeof this.host.updateStatusBar === 'function') {
-            this.updateStatusBar();
-        } else {
-            this.updateStatusBar();
-        }
+        // Both branches of the guard that used to be here called exactly this.
+        this.updateStatusBar();
         return el;
     }
 
@@ -311,9 +308,15 @@ export class StatusBarController {
         const session = this.host.getSessionStore().getActiveSession();
         const el = this.statusBarEl || this.host.statusBarEl;
         if (!el) return;
-        const showUnsavedHighlight = typeof this.host.shouldShowUnsavedStatusBarHighlight === 'function'
-            ? this.host.getSessionSaver().shouldShowUnsavedStatusBarHighlight()
-            : false;
+        // Unconditional, for the same reason the session-name guard above it
+        // became unconditional: the guard named `host.shouldShowUnsavedStatusBarHighlight`
+        // while the call went to `host.getSessionSaver()`. The plugin has never
+        // had that member, so in Obsidian the guard was always false and the
+        // unsaved highlight never appeared - the one feature the README
+        // describes as "a status bar warning when a manual-save session has
+        // unsaved layout changes". Every test passed because its double put the
+        // method on the plugin itself, which is a shape production never had.
+        const showUnsavedHighlight = this.host.getSessionSaver().shouldShowUnsavedStatusBarHighlight();
 
         if (typeof el.removeClass === 'function') {
             el.removeClass('wpp-status-bar-unsaved');

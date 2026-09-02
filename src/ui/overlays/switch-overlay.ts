@@ -36,7 +36,6 @@ export interface SwitchOverlayHost {
     getGroupStore(): GroupStore;
 
     data: {
-        activeSessionId: string;
         activeGroupId: string | null;
         groups?: Record<string, { id: string; name: string }>;
         [key: string]: unknown;

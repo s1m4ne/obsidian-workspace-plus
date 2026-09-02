@@ -169,7 +169,14 @@ test('StatusBarController: resolves slots and actions', () => {
 
 test('StatusBarController: wheel accumulation and threshold switching', async () => {
     const switchedDirections: number[] = [];
-    const host: import('../src/statusbar-controller.ts').StatusBarControllerHost = {
+    // The host type plus an index signature. This double stands in as its own
+    // SessionStore, SessionSaver and HistoryService - getSessionStore() and its
+    // siblings return `this` - so it carries more members than the host
+    // declares. The host itself no longer has `[key: string]: unknown`, because
+    // there it hid fourteen missing members; the laxness belongs here, in the
+    // double, not in the interface that ships.
+    const host: import('../src/statusbar-controller.ts').StatusBarControllerHost
+        & Record<string, unknown> = {
         ...menuPluginStubs,
         openSessionManagerModal() {},
         openHistoryModal() {},
@@ -321,7 +328,14 @@ test('StatusBarController: setup and update DOM rendering', () => {
     let activeSession: import('../src/storage/default-data.ts').SessionItem | null = { id: 's1', name: 'Work', layout: {} };
     let activeGroup: { id: string; name: string } | null = { id: 'g1', name: 'Main' };
 
-    const host: import('../src/statusbar-controller.ts').StatusBarControllerHost = {
+    // The host type plus an index signature. This double stands in as its own
+    // SessionStore, SessionSaver and HistoryService - getSessionStore() and its
+    // siblings return `this` - so it carries more members than the host
+    // declares. The host itself no longer has `[key: string]: unknown`, because
+    // there it hid fourteen missing members; the laxness belongs here, in the
+    // double, not in the interface that ships.
+    const host: import('../src/statusbar-controller.ts').StatusBarControllerHost
+        & Record<string, unknown> = {
         ...menuPluginStubs,
         openSessionManagerModal() {},
         openHistoryModal() {},

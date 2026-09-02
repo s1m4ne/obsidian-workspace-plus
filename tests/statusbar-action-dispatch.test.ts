@@ -94,7 +94,14 @@ const menuPluginStubs = {
 test('each configurable action performs its own effect and no other', async () => {
     const calls: string[] = [];
 
-    const mockPlugin: import('../src/statusbar-actions.ts').StatusBarActionPluginHost = {
+    // The host type plus an index signature. This double stands in as its own
+    // SessionStore, SessionSaver and HistoryService - getSessionStore() and its
+    // siblings return `this` - so it carries more members than the host
+    // declares. The host itself no longer has `[key: string]: unknown`, because
+    // there it hid fourteen missing members; the laxness belongs here, in the
+    // double, not in the interface that ships.
+    const mockPlugin: import('../src/statusbar-actions.ts').StatusBarActionPluginHost
+        & Record<string, unknown> = {
         ...menuPluginStubs,
         app: {} as import('obsidian').App,
         data: {

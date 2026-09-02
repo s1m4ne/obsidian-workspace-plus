@@ -7,6 +7,7 @@ import { WorkspacePlusPlusSettingTab } from './settings-tab.ts';
 import { DEFAULT_DATA } from './storage/default-data.ts';
 import { setupStatusBar } from './statusbar-controller.ts';
 import { ConfirmModal } from './modals/confirm-modal.ts';
+import type { ConfirmModalOptions } from './modals/confirm-modal.ts';
 import { RenameModal } from './modals/rename-modal.ts';
 import { UnsavedSwitchModal } from './modals/unsaved-switch-modal.ts';
 import { openSettingTab } from './platform/obsidian-internals.ts';
@@ -25,6 +26,7 @@ import { SessionStore } from './state/session-store.ts';
 import type { SessionStoreHost } from './state/session-store.ts';
 import { SessionSwitcher } from './state/session-switcher.ts';
 import type { SessionSwitcherHost } from './state/session-switcher.ts';
+import type { LayoutRestoreOptions } from './state/session-switcher.ts';
 import { SettingsState } from './state/settings-state.ts';
 import type { SettingsStateHost } from './state/settings-state.ts';
 import { PersistenceService } from './storage/persistence-service.ts';
@@ -32,7 +34,7 @@ import type { PersistenceServiceHost } from './storage/persistence-service.ts';
 import type { SessionStorage } from './storage/session-storage.ts';
 import type { SessionStorageLocation } from './storage/paths.ts';
 import type { JsonFileStore, ReadJsonResult } from './storage/json-file-store.ts';
-import type { DataRecord, SessionData } from './storage/persistence-service.ts';
+import type { DataRecord, SessionData, StorageDiagnosticsInfo } from './storage/persistence-service.ts';
 import type { SyncWatcher } from './storage/sync-watcher.ts';
 import {
     getSyncWatcher,
@@ -323,8 +325,13 @@ export class WorkspacePlusPlus extends Plugin {
         return this.getPersistenceService().getFileMtime(path);
     }
 
-    readJsonIfExists(path: string): Promise<ReadJsonResult> {
-        return this.getPersistenceService().readJsonIfExists(path);
+    /**
+     * Generic, like JsonFileStore's own. Non-generic it answered
+     * ReadJsonResult<unknown>, which no host declaring ReadJsonFn accepts -
+     * invisible for as long as asHost() cast the plugin into shape.
+     */
+    readJsonIfExists<T = unknown>(path: string): Promise<ReadJsonResult<T>> {
+        return this.getPersistenceService().readJsonIfExists<T>(path);
     }
 
     writeJson(path: string, data: unknown, pretty?: boolean): Promise<void> {
@@ -347,7 +354,7 @@ export class WorkspacePlusPlus extends Plugin {
         return this.getPersistenceService().clearBackupsAndVersionHistory();
     }
 
-    getStorageDiagnosticsInfo(): DataRecord {
+    getStorageDiagnosticsInfo(): StorageDiagnosticsInfo {
         return this.getPersistenceService().getStorageDiagnosticsInfo();
     }
 
@@ -427,6 +434,87 @@ export class WorkspacePlusPlus extends Plugin {
 
     isSidebarRestoreEnabled(): boolean {
         return this.getSessionSwitcher().isSidebarRestoreEnabled();
+    }
+
+    // ---------------------------------------------------------------------
+    // The members every *Host the plugin is handed to declares as required.
+    //
+    // These fourteen were absent. `asHost<T>()` was `this as unknown as T`, so
+    // no call site checked them, and check:hooks only covers members declared
+    // optional - it treated required ones as the type checker's job, which the
+    // cast had already switched off. Four were dead user-facing paths: the
+    // status bar's left click, restore-latest-history, the vault-only storage
+    // toggle and the version-history Restore button. The rest are the refresh
+    // half of the external-sync and backup-restore paths, which moved the data
+    // and then left the screen showing the old state.
+    //
+    // Each one delegates to the class that owns the behaviour and adds nothing.
+    // ---------------------------------------------------------------------
+
+    openSearchOverlay(anchorEl?: HTMLElement | null): void {
+        this.getSearchOverlay().open(anchorEl ?? undefined);
+    }
+
+    hideSearchOverlay(): void {
+        this.getSearchOverlay().hide();
+    }
+
+    openConfirmModal(
+        message: string,
+        onConfirm: () => void,
+        options?: ConfirmModalOptions
+    ): void {
+        new ConfirmModal(this.app, message, onConfirm, options).open();
+    }
+
+    restoreFromHistoryEntry(sessionId: string, index: number): Promise<boolean> {
+        return this.getHistoryService().restoreFromHistoryEntry(sessionId, index);
+    }
+
+    setSessionStorageLocation(location: string): Promise<boolean> {
+        return this.getPersistenceService().setSessionStorageLocation(location);
+    }
+
+    resetSessionsToDefault(): Promise<boolean> {
+        return this.getSessionStore().resetSessionsToDefault();
+    }
+
+    reloadCurrentSessionWithoutSaving(options?: { silent?: boolean }): Promise<boolean> {
+        return this.getSessionSaver().reloadCurrentSessionWithoutSaving(options);
+    }
+
+    getActiveSession(): SessionItem | null {
+        return this.getSessionStore().getActiveSession();
+    }
+
+    /**
+     * Through SessionSwitcher, so a restore honours the sidebar scope and the
+     * switch bookkeeping. The switcher's own host reaches
+     * `app.workspace.changeLayout` directly for exactly this reason - pointing
+     * both at the switcher is what recursed the first time it was tried.
+     */
+    applyWorkspaceLayout(layout: unknown, options?: LayoutRestoreOptions): Promise<boolean> {
+        return this.getSessionSwitcher().applyWorkspaceLayout(layout, options);
+    }
+
+    syncSessionOrder(): void {
+        this.getSessionStore().syncSessionOrder();
+    }
+
+    notifySessionsChanged(): void {
+        this.getSessionStore().notifySessionsChanged();
+    }
+
+    normalizeGroupFeatureState(): void {
+        this.getGroupStore().normalizeGroupFeatureState();
+    }
+
+    updateStatusBar(): void {
+        this.getStatusBarController().updateStatusBar();
+    }
+
+    syncSessionCommands(): void {
+        this.getCommandRegistry().syncSessionCommands();
     }
 
     openSessionManagerModal(focusName?: boolean): SessionManagerModal {
@@ -535,8 +623,8 @@ export class WorkspacePlusPlus extends Plugin {
      * step. Until then the assertion is here, named, in one place, rather than
      * spread across three call sites.
      */
-    private asHost<T>(): T {
-        return this as unknown as T;
+    private asHost<T>(this: T): T {
+        return this;
     }
 
     /**
