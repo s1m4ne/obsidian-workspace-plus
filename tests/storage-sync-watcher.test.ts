@@ -218,9 +218,20 @@ test('session sync host functions: state recording, info check, and sync watcher
         notifySessionsChanged: () => {
             changedNotified = true;
         },
+        // The owners are named on the host now, so the incoming active
+        // session's layout can reach the screen (#117). This path does not ask
+        // for that, so these are never called here.
+        getSessionStore: (): never => ({
+            getCurrentWorkspaceLayout: () => ({}),
+            layoutsEqualStructural: () => true,
+        }) as never,
+        getSessionSwitcher: (): never => ({
+            isSwitching: false,
+            applyWorkspaceLayout: async () => true,
+        }) as never,
     };
 
-    const applyResult = applySessionDataFromStorage(applyHost, { sessions: { s2: { id: 's2', name: 'S2', layout: {} } } });
+    const applyResult = await applySessionDataFromStorage(applyHost, { sessions: { s2: { id: 's2', name: 'S2', layout: {} } } });
     assert.equal(applyResult, true);
     assert.equal(changedNotified, true);
 

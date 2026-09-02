@@ -396,7 +396,7 @@ export class WorkspacePlusPlus extends Plugin {
         return recordSessionDataStored(this.asHost<RecordSessionDataStoredHost>(), sessionData);
     }
 
-    reloadExternalSessionStorageIfChanged(options?: { mergeLocal?: boolean }): Promise<boolean> {
+    reloadExternalSessionStorageIfChanged(options?: { mergeLocal?: boolean; force?: boolean; applyLayout?: boolean }): Promise<boolean> {
         return reloadExternalSessionStorageIfChanged(this.asHost<ReloadExternalSessionHost>(), options);
     }
 

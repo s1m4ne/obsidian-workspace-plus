@@ -101,6 +101,17 @@ function createPlugin(initialData) {
         data: data,
         counters: counters,
         applySessionDataFromStorage: (sessionData, options) => sessionSync.applySessionDataFromStorage(host, sessionData, options),
+        // The owners are named on the host now, so an incoming layout can reach
+        // the screen (#117). These tests do not ask for that, so nothing here
+        // is called; `tests/session-sync-applies-layout.test.ts` covers it.
+        getSessionStore: () => ({
+            getCurrentWorkspaceLayout: () => ({}),
+            layoutsEqualStructural: () => true,
+        }),
+        getSessionSwitcher: () => ({
+            isSwitching: false,
+            applyWorkspaceLayout: () => Promise.resolve(true),
+        }),
         mergeExternalSessionDataForWrite: (externalData) => sessionSync.mergeExternalSessionDataForHost(host, externalData),
         hasLocalSessionChangesSinceStorage: () => sessionSync.hasLocalSessionChangesSinceStorage(host),
         getSyncWatcher: () => sessionSync.getSyncWatcher(host),
@@ -112,7 +123,7 @@ function createPlugin(initialData) {
     };
 }
 
-test('session sync applies external data without changing the local active session', function () {
+test('session sync applies external data without changing the local active session', async function () {
     const plugin = createPlugin();
     const external = {
         activeSessionId: 'remote',
@@ -127,7 +138,7 @@ test('session sync applies external data without changing the local active sessi
         activeGroupId: null,
     };
 
-    const applied = plugin.applySessionDataFromStorage(external);
+    const applied = await plugin.applySessionDataFromStorage(external);
 
     assert.equal(applied, true);
     assert.equal(plugin.data.activeSessionId, 'local');
@@ -138,11 +149,11 @@ test('session sync applies external data without changing the local active sessi
     assert.equal(plugin.counters.commandSyncs, 1);
     assert.equal(plugin.counters.overlayRefreshes, 1);
 
-    assert.equal(plugin.applySessionDataFromStorage(null), false);
-    assert.equal(plugin.applySessionDataFromStorage(undefined), false);
+    assert.equal(await plugin.applySessionDataFromStorage(null), false);
+    assert.equal(await plugin.applySessionDataFromStorage(undefined), false);
 });
 
-test('session sync falls back when the local active session was deleted externally', function () {
+test('session sync falls back when the local active session was deleted externally', async function () {
     const plugin = createPlugin();
     const external = {
         activeSessionId: 'remote',
@@ -152,7 +163,7 @@ test('session sync falls back when the local active session was deleted external
         },
     };
 
-    plugin.applySessionDataFromStorage(external);
+    await plugin.applySessionDataFromStorage(external);
 
     assert.equal(plugin.data.activeSessionId, 'remote');
     assert.deepEqual(plugin.data.sessionOrder, ['remote']);
@@ -460,7 +471,7 @@ test('session sync: overlay refresh and local changes tracking', async function 
         refreshed = true;
     };
 
-    plugin.applySessionDataFromStorage({
+    await plugin.applySessionDataFromStorage({
         activeSessionId: 'local',
         sessions: { local: { id: 'local', name: 'L' } },
     });

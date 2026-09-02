@@ -63,6 +63,13 @@ Manual-save tools include:
 
 Groups let you organize sessions without deleting or duplicating them. You can switch groups, show all sessions, move sessions between groups, remove sessions from groups, and disable the group feature if you do not need it.
 
+### Session restore scope
+
+By default, switching a session restores the main editor area and both
+sidebars. **Restore sidebars** can be turned off in settings, so that switching
+replaces only the main area and leaves the current sidebars alone. Turn it off
+if your sidebars come back empty after a switch.
+
 ### Version history and backups
 
 Workspace++ keeps per-session version history for layout changes and can restore previous layouts. It also keeps session backup files in the vault and supports manual export/import snapshots from settings or commands.

@@ -1,4 +1,6 @@
 import { SyncWatcher, SESSION_FILE_MTIME_EPSILON_MS } from './sync-watcher.ts';
+import type { SessionStore } from '../state/session-store.ts';
+import type { SessionSwitcher } from '../state/session-switcher.ts';
 import type { PluginData, SessionGroup, SessionItem } from './default-data.ts';
 import type { SessionDataPayload } from './storage-backup.ts';
 import type { ReadJsonResult } from './json-file-store.ts';
@@ -320,18 +322,88 @@ export interface ApplySessionDataHost {
     syncSessionCommands(): void;
     notifySessionsChanged(): void;
     _sessionStorageComparableData?: unknown;
+
+    /**
+     * The owners, named rather than restated (#117). The store answers what is
+     * on screen and whether two layouts differ - it is the one that resolves
+     * the restore scope - and the switcher owns putting a layout up and knows
+     * whether a switch is already in flight.
+     */
+    getSessionStore(): SessionStore;
+    getSessionSwitcher(): SessionSwitcher;
 }
 
-export function applySessionDataFromStorage(
+/**
+ * Put the incoming active session's layout on screen (#117).
+ *
+ * Sessions arriving from another device reached `data.sessions` and stopped
+ * there. The workspace went on showing the old layout, the status bar named a
+ * session whose layout was not up, and the next switch captured the stale
+ * screen back over what had just arrived - auto-save on switch writes the
+ * current layout before leaving. So a session synced from another device was
+ * lost by the next thing the user did.
+ *
+ * The import path has always done this (`storage-backup.ts:271`), and its test
+ * file records the identical defect. The difference is that import is an
+ * explicit "restore this snapshot"; a sync is automatic and can land at any
+ * moment, so it cannot simply take the screen:
+ *
+ * - **Only when the screen was the saved layout.** If the workspace has moved
+ *   since the active session was last saved, that is unsaved work and it is
+ *   the user's. This is the rule an editor uses for a file changed on disk:
+ *   reload it if unmodified, leave it alone if not.
+ * - **Not while a switch is in flight.** Two `changeLayout` calls racing would
+ *   leave the workspace in neither state.
+ * - **Not when it would change nothing**, so a sync that touched other
+ *   sessions does not rebuild the workspace for no reason.
+ */
+async function applyIncomingActiveLayout(
+    host: ApplySessionDataHost,
+    workspaceHeldTheSavedLayout: boolean,
+    layoutOnScreen: unknown
+): Promise<void> {
+    if (!workspaceHeldTheSavedLayout) return;
+    if (host.getSessionSwitcher().isSwitching) return;
+
+    const activeId = host.data.activeSessionId;
+    const active = activeId ? host.data.sessions?.[activeId] : undefined;
+    if (!active || !active.layout) return;
+
+    const store = host.getSessionStore();
+    if (layoutOnScreen && store.layoutsEqualStructural(active.layout, layoutOnScreen)) return;
+
+    await host.getSessionSwitcher().applyWorkspaceLayout(active.layout, { catchErrors: true });
+}
+
+export async function applySessionDataFromStorage(
     host: ApplySessionDataHost,
     sessionData: unknown,
-    options?: { mergeLocal?: boolean }
-): boolean {
+    options?: { mergeLocal?: boolean; applyLayout?: boolean }
+): Promise<boolean> {
     const opts = options || {};
     if (!sessionData) return false;
 
     const localActiveSessionId = host.data && host.data.activeSessionId;
     const localActiveGroupId = host.data && host.data.activeGroupId;
+
+    // Read before the store is replaced: whether the screen is expendable is a
+    // question about the layout the active session held *going in*.
+    let layoutOnScreen: unknown = null;
+    let workspaceHeldTheSavedLayout = false;
+    if (opts.applyLayout) {
+        const localActive = localActiveSessionId ? host.data.sessions?.[localActiveSessionId] : undefined;
+        try {
+            layoutOnScreen = host.getSessionStore().getCurrentWorkspaceLayout();
+        } catch {
+            layoutOnScreen = null;
+        }
+        workspaceHeldTheSavedLayout = Boolean(
+            localActive
+            && localActive.layout
+            && layoutOnScreen
+            && host.getSessionStore().layoutsEqualStructural(localActive.layout, layoutOnScreen)
+        );
+    }
     const next = opts.mergeLocal
         ? (mergeExternalSessionDataForWrite(
             host.extractSessionData(host.data || {}),
@@ -368,6 +440,10 @@ export function applySessionDataFromStorage(
     host.updateStatusBar();
     host.syncSessionCommands();
     host.notifySessionsChanged();
+
+    if (opts.applyLayout) {
+        await applyIncomingActiveLayout(host, workspaceHeldTheSavedLayout, layoutOnScreen);
+    }
     return true;
 }
 
@@ -377,7 +453,7 @@ export interface ReloadExternalSessionHost extends ApplySessionDataHost, Session
 
 export async function reloadExternalSessionStorageIfChanged(
     host: ReloadExternalSessionHost,
-    options?: { force?: boolean; mergeLocal?: boolean }
+    options?: { force?: boolean; mergeLocal?: boolean; applyLayout?: boolean }
 ): Promise<boolean> {
     const opts = options || {};
     try {
@@ -407,7 +483,14 @@ export async function reloadExternalSessionStorageIfChanged(
             host._sessionStorageDataJson = previousComparableJson;
         }
 
-        const applied = applySessionDataFromStorage(host, sessionData, { mergeLocal });
+        const applied = await applySessionDataFromStorage(host, sessionData, {
+            mergeLocal,
+            // Only the watcher's reload may take the screen. The other caller
+            // is persistDataImmediate() reading before it writes, and a save
+            // that changed the workspace out from under the person saving
+            // would be worse than the bug.
+            applyLayout: !!opts.applyLayout,
+        });
 
         if (mergeLocal && externalComparable) {
             host._sessionStorageComparableData = externalComparable;
@@ -422,7 +505,7 @@ export async function reloadExternalSessionStorageIfChanged(
 
 export interface SyncWatcherHost {
     _syncWatcher?: SyncWatcher;
-    reloadExternalSessionStorageIfChanged(options?: { mergeLocal?: boolean; force?: boolean }): Promise<boolean>;
+    reloadExternalSessionStorageIfChanged(options?: { mergeLocal?: boolean; force?: boolean; applyLayout?: boolean }): Promise<boolean>;
     registerDomEvent?(target: unknown, event: string, handler: (e: unknown) => void): void;
     data?: PluginData;
 }
@@ -430,7 +513,7 @@ export interface SyncWatcherHost {
 export function getSyncWatcher(host: SyncWatcherHost): SyncWatcher {
     if (!host._syncWatcher) {
         host._syncWatcher = new SyncWatcher({
-            onReload: () => host.reloadExternalSessionStorageIfChanged({ mergeLocal: false }),
+            onReload: () => host.reloadExternalSessionStorageIfChanged({ mergeLocal: false, applyLayout: true }),
             registerDomEvent: typeof host.registerDomEvent === 'function'
                 ? (target, event, handler) => host.registerDomEvent!(target, event, handler)
                 : undefined,
