@@ -34,6 +34,27 @@ export interface SearchOverlaySize {
  * Both come from the same string as the tooltip; going through one helper is
  * what stops the next icon being added without them.
  */
+/**
+ * Run a quick action, behind a confirmation when the setting asks for one.
+ *
+ * The four quick actions - save and reload, each reachable from a row icon and
+ * from a keypress - each carried this shape: build the closure, branch on
+ * `confirmQuickActions`, either open a ConfirmModal around it or call it. The
+ * branch is one decision and belongs in one place.
+ */
+function runQuickAction(
+    host: SearchOverlayHost,
+    message: string,
+    action: () => void,
+    confirmOptions?: { confirmText?: string; confirmClass?: string }
+): void {
+    if (!host.getSettingsState().confirmQuickActions) {
+        action();
+        return;
+    }
+    new ConfirmModal(host.app, message, action, confirmOptions).open();
+}
+
 function actionButton(parent: HTMLElement, icon: string, label: string): HTMLElement {
     const el = parent.createDiv({
         cls: 'wpp-qs-action-btn',
@@ -628,6 +649,19 @@ export class SearchOverlay {
             renderList();
         }
 
+        // The two quick actions, each reachable from a row icon and from a
+        // keypress. They act on the active session, so neither closure needs
+        // anything from the row it was reached through - which is why the same
+        // body appeared twice.
+        const saveActiveSession = (): void => {
+            void self.getSessionSaver().saveActiveSession().then(function () {
+                refreshOrderedSessions();
+            });
+        };
+        const reloadActiveSession = (): void => {
+            void self.getSessionSaver().reloadCurrentSessionWithoutSaving();
+        };
+
         function renderList() {
             while (list.firstChild) list.removeChild(list.firstChild);
             if (filtered.length === 0) {
@@ -741,16 +775,8 @@ export class SearchOverlay {
                     if (_saveIcon) {
                         overlayEventOwner.registerDomEvent(_saveIcon, 'click', function (e) {
                             e.stopPropagation();
-                            const doSave = function () {
-                                void self.getSessionSaver().saveActiveSession().then(function () {
-                                    refreshOrderedSessions();
-                                });
-                            };
-                            if (self.getSettingsState().confirmQuickActions) {
-                                new ConfirmModal(self.app, formatString(strings.confirmSaveSession, sess.name), doSave, { confirmText: text(strings.save), confirmClass: 'mod-cta' }).open();
-                            } else {
-                                doSave();
-                            }
+                            runQuickAction(self, formatString(strings.confirmSaveSession, sess.name),
+                                saveActiveSession, { confirmText: text(strings.save), confirmClass: 'mod-cta' });
                         });
                     }
 
@@ -758,14 +784,8 @@ export class SearchOverlay {
                     if (_reloadIcon) {
                         overlayEventOwner.registerDomEvent(_reloadIcon, 'click', function (e) {
                             e.stopPropagation();
-                            const doReload = function () {
-                                void self.getSessionSaver().reloadCurrentSessionWithoutSaving();
-                            };
-                            if (self.getSettingsState().confirmQuickActions) {
-                                new ConfirmModal(self.app, formatString(strings.confirmReloadSession, sess.name), doReload, { confirmText: text(strings.switchTo) }).open();
-                            } else {
-                                doReload();
-                            }
+                            runQuickAction(self, formatString(strings.confirmReloadSession, sess.name),
+                                reloadActiveSession, { confirmText: text(strings.switchTo) });
                         });
                     }
 
@@ -908,25 +928,11 @@ export class SearchOverlay {
             if (!target) return;
             if (target.id === self.getSessionStore().getActiveSessionId()) {
                 if (opts.shiftKey) {
-                    const doSave = function () {
-                        void self.getSessionSaver().saveActiveSession().then(function () {
-                            refreshOrderedSessions();
-                        });
-                    };
-                    if (self.getSettingsState().confirmQuickActions) {
-                        new ConfirmModal(self.app, formatString(strings.confirmSaveSession, target.name), doSave, { confirmText: text(strings.save), confirmClass: 'mod-cta' }).open();
-                    } else {
-                        doSave();
-                    }
+                    runQuickAction(self, formatString(strings.confirmSaveSession, target.name),
+                        saveActiveSession, { confirmText: text(strings.save), confirmClass: 'mod-cta' });
                 } else {
-                    const doReload = function () {
-                        void self.getSessionSaver().reloadCurrentSessionWithoutSaving();
-                    };
-                    if (self.getSettingsState().confirmQuickActions) {
-                        new ConfirmModal(self.app, formatString(strings.confirmReloadSession, target.name), doReload, { confirmText: text(strings.switchTo) }).open();
-                    } else {
-                        doReload();
-                    }
+                    runQuickAction(self, formatString(strings.confirmReloadSession, target.name),
+                        reloadActiveSession, { confirmText: text(strings.switchTo) });
                 }
                 hideThisOverlay();
                 return;

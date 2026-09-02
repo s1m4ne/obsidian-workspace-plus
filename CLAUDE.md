@@ -81,7 +81,8 @@ does.
 ```bash
 npm run check        # the gate: typecheck, lint, dual dispatch, hooks,
                      # host conformance, delegation, reachability, readonly,
-                     # imports, i18n, tests, coverage, build
+                     # imports, i18n, dead CSS, duplicated bodies, test-only
+                     # members, tests, coverage, build
 npm run dev          # esbuild watch; hot reload picks it up
 npm run build        # production bundle
 npm run progress     # where the migration landed, measured
@@ -89,9 +90,9 @@ npm run coverage:floors   # per-module coverage floors
 npm run check:i18n   # locale key completeness across 21 locales (also in the gate)
 ```
 
-`npm run check` must pass before every commit. It is thirteen gates, and **CI
+`npm run check` must pass before every commit. It is sixteen gates, and **CI
 runs the same command** - it used to run five of them by hand, which left out
-every gate added because a defect had already shipped. Three are ratchets; six
+every gate added because a defect had already shipped. Three are ratchets; nine
 exist because this migration produced the same failure eight times and none of
 the others could see it.
 
@@ -151,6 +152,34 @@ the others could see it.
   The lesson generalises: **an erasing cast at a boundary switches off every
   check that boundary has.** `as unknown as` in `src/` is four sites, each with
   a stated reason. Adding a fifth needs one.
+
+- **Test-only members** asks the type checker which methods and exported
+  functions nothing in `src/` refers to while `tests/` does.
+  `switchRelativeImmediate` had six passing tests and no production caller at
+  all - the overlay it appeared to serve calls `switchSession` directly - and
+  four of its siblings had no caller anywhere. Every one was typed, linted,
+  reachable through its file and *covered*, because the tests were what covered
+  it. This is the file-level reachability gate one level down, and it needs the
+  type checker rather than the bundler. Twelve are recorded with a reason each;
+  the check also fails when a recorded one stops being test-only, so the
+  reasons cannot go stale.
+
+- **Duplicated bodies** hashes every normalised function body under `src/` and
+  fails on a collision. Four of the eleven relative-switch entry points had
+  bodies identical to a fifth, `formatString` was written eight times,
+  `captureActiveSessionLayoutIfAutoSave` existed twice byte for byte on two
+  classes, and one whole menu item was duplicated between the two context-menu
+  modules. `i18n.ts` is exempt - two locales sharing a word is not duplicated
+  logic - and one allowance is recorded.
+
+- **Dead CSS** checks that every `.wpp-*` class in `styles.css` is applied
+  somewhere in `src/`. Seven rules and 42 lines outlived the settings UI moving
+  from `<details>` to tabs, and `.wpp-session-actions .wpp-btn-focused`
+  outlived the class it matched. CSS is not type-checked, linted here, or
+  covered, so nothing else was looking. Names built by concatenation
+  (`'wpp-resize-corner wpp-resize-' + corners[i]`) are resolved by taking the
+  last token of a quoted string that a `+` follows; zero is the only acceptable
+  count.
 
 - **Unwired hooks** is not a ratchet - zero is the only acceptable count.
   `plugin.openHistoryModal?.(session)` reads like a call, but if nothing defines

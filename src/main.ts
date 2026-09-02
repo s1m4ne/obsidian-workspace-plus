@@ -712,7 +712,7 @@ export function sessionStoreHost(plugin: WorkspacePlusPlus): SessionStoreHost {
             new RenameModal(plugin.app, currentName, onRename, { emptyNotice: text(L.emptyName) }).open();
         },
         openConfirmModal: (message, onConfirm, options) => {
-            new ConfirmModal(plugin.app, message, onConfirm, options).open();
+            plugin.openConfirmModal(message, onConfirm, options);
         },
         openPluginSettings: () => { openSettingTab(plugin.app, plugin.manifest.id); },
     };
@@ -868,7 +868,7 @@ export function sessionSaverHost(plugin: WorkspacePlusPlus): SessionSaverHost {
             new RenameModal(plugin.app, placeholder, onRename, options).open();
         },
         openConfirmModal: (message, onConfirm, options) => {
-            new ConfirmModal(plugin.app, message, onConfirm, options).open();
+            plugin.openConfirmModal(message, onConfirm, options);
         },
     };
 }
