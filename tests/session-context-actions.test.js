@@ -57,12 +57,6 @@ function createPlugin(calls, overrides = {}) {
         isVersionHistoryConfirmRestoreEnabled() {
             return false;
         },
-        extractFilePathsFromLayout() {
-            return [];
-        },
-        countPanesInLayout() {
-            return 0;
-        },
         restoreFromHistoryEntry() {
             return Promise.resolve(true);
         },

@@ -108,13 +108,9 @@ test('HistoryService: container reference reactivity (P1)', () => {
     assert.equal(service.getVersionHistorySnapshotInterval(), 2);
 });
 
-test('HistoryService: layout parsing and compaction', () => {
+test('HistoryService: compaction', () => {
     const { host } = createMockHost();
     const service = new HistoryService(host);
-
-    const layout = host.data.sessions.s1!.layout;
-    assert.deepEqual(service.extractFilePathsFromLayout(layout), ['Doc.md']);
-    assert.equal(service.countPanesInLayout(layout), 1);
 
     const now = Date.now();
     const entries: HistoryEntry[] = [

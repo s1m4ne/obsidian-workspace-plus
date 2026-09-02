@@ -108,62 +108,6 @@ export class HistoryService {
         return this.host.settingsState.versionHistoryConfirmRestore;
     }
 
-    // --- Layout parsing ---
-
-    extractFilePathsFromLayout(layout: unknown): string[] {
-        const paths: string[] = [];
-        function walk(node: unknown): void {
-            if (!node || typeof node !== 'object') return;
-            const obj = node as {
-                type?: string;
-                state?: { state?: { file?: string } };
-                children?: unknown[];
-                main?: unknown;
-                left?: unknown;
-                right?: unknown;
-            };
-            if (obj.type === 'leaf' && obj.state?.state?.file) {
-                paths.push(obj.state.state.file);
-            }
-            if (Array.isArray(obj.children)) {
-                for (let i = 0; i < obj.children.length; i++) {
-                    walk(obj.children[i]);
-                }
-            }
-            if (obj.main) walk(obj.main);
-            if (obj.left) walk(obj.left);
-            if (obj.right) walk(obj.right);
-        }
-        walk(layout);
-        return paths;
-    }
-
-    countPanesInLayout(layout: unknown): number {
-        let count = 0;
-        function walk(node: unknown): void {
-            if (!node || typeof node !== 'object') return;
-            const obj = node as {
-                type?: string;
-                children?: unknown[];
-                main?: unknown;
-            };
-            if (obj.type === 'leaf') {
-                count++;
-                return;
-            }
-            if (Array.isArray(obj.children)) {
-                for (let i = 0; i < obj.children.length; i++) {
-                    walk(obj.children[i]);
-                }
-            }
-            if (obj.main) walk(obj.main);
-        }
-        if (layout && typeof layout === 'object' && 'main' in layout) {
-            walk((layout as { main?: unknown }).main);
-        }
-        return count;
-    }
-
     // --- Compaction ---
 
     compactHistory(history: HistoryEntry[]): HistoryEntry[] {

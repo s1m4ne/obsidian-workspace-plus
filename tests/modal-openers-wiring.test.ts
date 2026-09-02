@@ -81,8 +81,6 @@ function createPlugin(): TestPlugin {
         // Version history goes through getHistoryService(); this double carries those members itself.
         getHistoryService(): never { return this as never; },
         isVersionHistoryConfirmRestoreEnabled: () => false,
-        extractFilePathsFromLayout: () => [],
-        countPanesInLayout: () => 1,
         restoreFromHistoryEntry: async () => true,
     });
     return plugin;

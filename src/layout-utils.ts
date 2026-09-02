@@ -137,3 +137,70 @@ export function layoutsEqualStructural(a: unknown, b: unknown, options: LayoutCo
         return layoutsEqual(a, b);
     }
 }
+
+export interface LayoutSummary {
+    /** Leaves in the main area, `empty` ones included - Obsidian shows those. */
+    readonly paneCount: number;
+
+    /** Vault-relative paths, in main-area order, each listed once. */
+    readonly filePaths: readonly string[];
+}
+
+/**
+ * DESCRIBE: what a person would say was on screen, for a layout that is no
+ * longer on screen - a version-history entry.
+ *
+ * **The main area only, and that is not a preference.** Obsidian defines the
+ * region itself: `Workspace.iterateRootLeaves` is documented as "Iterate
+ * through all leaves in the main area of the workspace", as against
+ * `iterateAllLeaves`, which adds the sidebars and pop-outs. And there is no
+ * alternative rule available: a leaf's `state.state.file` is written by
+ * whatever `getState()` the view implements, and `backlink`, `outline` and
+ * `outgoing-link` write the file they are *pointing at* into exactly the field
+ * a `markdown` leaf writes the file it is *showing*. Nothing in the JSON tells
+ * the two apart, so the region has to.
+ *
+ * Walking the sidebars is what made a history entry claim `A13 尺取り法.md`
+ * was open when the main area held two empty tabs and that path was the
+ * backlink pane's subject. Listing it once rather than three times is the same
+ * defect from the other end: three sidebar panes referenced two files.
+ *
+ * A live workspace would be read through `iterateRootLeaves` and
+ * `leaf.view instanceof FileView`, which are typed and need no JSON walking.
+ * That is not available here - a history entry is a snapshot, so this walks
+ * the tree Obsidian handed us.
+ */
+export function describeLayout(layout: unknown): LayoutSummary {
+    const filePaths: string[] = [];
+    const seen = new Set<string>();
+    let paneCount = 0;
+
+    function walk(node: unknown): void {
+        if (!node || typeof node !== 'object') return;
+        const obj = node as {
+            type?: string;
+            state?: { state?: { file?: unknown } };
+            children?: unknown[];
+        };
+
+        if (obj.type === 'leaf') {
+            paneCount++;
+            const file = obj.state?.state?.file;
+            if (typeof file === 'string' && file && !seen.has(file)) {
+                seen.add(file);
+                filePaths.push(file);
+            }
+            return;
+        }
+
+        if (Array.isArray(obj.children)) {
+            for (const child of obj.children) walk(child);
+        }
+    }
+
+    if (layout && typeof layout === 'object') {
+        walk((layout as { main?: unknown }).main);
+    }
+
+    return { paneCount, filePaths };
+}

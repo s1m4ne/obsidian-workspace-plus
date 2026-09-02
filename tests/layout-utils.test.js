@@ -185,3 +185,119 @@ test('layout utils full structural comparison keeps sidebar branches but ignores
     assert.equal(layoutUtils.layoutsEqualStructural({ layout: 'saved' }, { layout: 'saved', left: 10, top: 20 }, { restoreScope: 'full' }), true);
     assert.equal(layoutUtils.layoutsEqualStructural({ layout: 'saved', left: 10 }, sameContentWithNumericLeft, { restoreScope: 'full' }), false);
 });
+
+// A layout in the shape Obsidian actually produces: the main area is a split of
+// tabs holding markdown leaves, and the right sidebar holds reference views that
+// write the file they are *pointing at* into the same `state.state.file` field a
+// markdown leaf writes the file it is *showing*.
+//
+// The fixtures this replaced were synthetic - a root `split` carrying both
+// `children` and a `main`, which Obsidian never emits - and that is precisely
+// what let the two walkers disagree without any test noticing: one read
+// `children`, the other read `main`, and both found something.
+function realisticLayout() {
+    return {
+        main: {
+            id: 'main-split',
+            type: 'split',
+            direction: 'vertical',
+            children: [{
+                id: 'main-tabs',
+                type: 'tabs',
+                currentTab: 1,
+                children: [
+                    {
+                        id: 'leaf-a',
+                        type: 'leaf',
+                        state: { type: 'markdown', state: { file: 'Notes/A.md', mode: 'source' } },
+                    },
+                    {
+                        id: 'leaf-b',
+                        type: 'leaf',
+                        state: { type: 'markdown', state: { file: 'Notes/B.md', mode: 'source' } },
+                    },
+                ],
+            }],
+        },
+        left: {
+            id: 'left-split',
+            type: 'split',
+            direction: 'horizontal',
+            width: 300,
+            children: [{
+                id: 'left-tabs',
+                type: 'tabs',
+                children: [
+                    { id: 'leaf-fe', type: 'leaf', state: { type: 'file-explorer', state: {} } },
+                ],
+            }],
+        },
+        right: {
+            id: 'right-split',
+            type: 'split',
+            direction: 'horizontal',
+            width: 300,
+            children: [{
+                id: 'right-tabs',
+                type: 'tabs',
+                currentTab: 0,
+                children: [
+                    { id: 'leaf-bl', type: 'leaf', state: { type: 'backlink', state: { file: 'Archive/Old.md' } } },
+                    { id: 'leaf-ol', type: 'leaf', state: { type: 'outline', state: { file: 'Archive/Old.md' } } },
+                    { id: 'leaf-og', type: 'leaf', state: { type: 'outgoing-link', state: { file: 'Notes/A.md' } } },
+                    { id: 'leaf-tag', type: 'leaf', state: { type: 'tag', state: {} } },
+                ],
+            }],
+        },
+        active: 'leaf-b',
+        lastOpenFiles: ['Notes/A.md', 'Notes/B.md'],
+    };
+}
+
+test('describeLayout names the files the main area was showing', function () {
+    const summary = layoutUtils.describeLayout(realisticLayout());
+
+    assert.equal(summary.paneCount, 2);
+    assert.deepEqual(summary.filePaths, ['Notes/A.md', 'Notes/B.md']);
+});
+
+test('describeLayout does not report a sidebar reference pane as an open file', function () {
+    const summary = layoutUtils.describeLayout(realisticLayout());
+
+    // backlink, outline and outgoing-link all carry state.state.file. Reading
+    // them is what made a history row claim a file was open that never was.
+    assert.equal(summary.filePaths.includes('Archive/Old.md'), false);
+    // ...and the sidebars must not reach the pane count either, or the count
+    // and the file list describe different trees.
+    assert.equal(summary.paneCount, 2);
+});
+
+test('describeLayout counts empty main panes and lists no file for them', function () {
+    // The shape behind the reported bug: two empty tabs in the main area, with
+    // every name in the summary coming from the sidebars.
+    const layout = realisticLayout();
+    layout.main.children[0].children = [
+        { id: 'leaf-e1', type: 'leaf', state: { type: 'empty', state: {} } },
+        { id: 'leaf-e2', type: 'leaf', state: { type: 'empty', state: {} } },
+    ];
+
+    const summary = layoutUtils.describeLayout(layout);
+
+    assert.equal(summary.paneCount, 2);
+    assert.deepEqual(summary.filePaths, []);
+});
+
+test('describeLayout lists a file open in two main panes once', function () {
+    const layout = realisticLayout();
+    layout.main.children[0].children[1].state.state.file = 'Notes/A.md';
+
+    const summary = layoutUtils.describeLayout(layout);
+
+    assert.equal(summary.paneCount, 2);
+    assert.deepEqual(summary.filePaths, ['Notes/A.md']);
+});
+
+test('describeLayout reports nothing for a layout with no main area', function () {
+    assert.deepEqual(layoutUtils.describeLayout(null), { paneCount: 0, filePaths: [] });
+    assert.deepEqual(layoutUtils.describeLayout({}), { paneCount: 0, filePaths: [] });
+});

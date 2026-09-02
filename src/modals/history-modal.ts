@@ -1,6 +1,7 @@
 import { type App, Modal, Notice } from 'obsidian';
 import { L } from '../i18n.ts';
 import { ConfirmModal } from './confirm-modal.ts';
+import { describeLayout } from '../layout-utils.ts';
 import type { SessionHistoryEntry, SessionItem } from '../storage/default-data.ts';
 import type { HistoryService } from '../state/history-service.ts';
 
@@ -70,10 +71,14 @@ export class HistoryModal extends Modal {
         const timeStr = time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         infoEl.createDiv({ text: timeStr, cls: 'wpp-history-time' });
 
-        const filePaths = this.plugin.getHistoryService().extractFilePathsFromLayout(entry.layout);
-        const paneCount = this.plugin.getHistoryService().countPanesInLayout(entry.layout);
-        const fileNames = filePaths.map((p) => {
-            const parts = p.split('/');
+        // A pure function of the layout, so it is read from layout-utils rather
+        // than through HistoryService. It was two service methods that walked
+        // two different trees - the file list included the sidebars, the pane
+        // count did not - which is how one row could read "2 panes" and then
+        // name three files that were not in those two panes.
+        const { paneCount, filePaths } = describeLayout(entry.layout);
+        const fileNames = filePaths.map((path) => {
+            const parts = path.split('/');
             return parts[parts.length - 1]!;
         });
 

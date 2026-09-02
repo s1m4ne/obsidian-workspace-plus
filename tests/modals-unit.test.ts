@@ -186,8 +186,6 @@ test('HistoryModal: groups entries by date and renders summary and restore butto
         app,
         // Version history goes through getHistoryService(); this double carries those members itself.
         getHistoryService(): never { return this as never; },
-        extractFilePathsFromLayout: () => ['notes/A.md', 'notes/B.md'],
-        countPanesInLayout: () => 2,
         restoreFromHistoryEntry: async (id: string, idx: number) => {
             restoredSessionId = id;
             restoredIndex = idx;
@@ -196,15 +194,38 @@ test('HistoryModal: groups entries by date and renders summary and restore butto
         isVersionHistoryConfirmRestoreEnabled: () => false,
     };
 
+    // A real layout rather than `{}`: the row summary comes from describeLayout
+    // now, so the entry has to carry something for it to describe. The right
+    // sidebar's backlink pane names a file that is not open, which is the case
+    // that used to reach the screen.
+    const entryLayout = {
+        main: {
+            id: 'm',
+            type: 'tabs',
+            currentTab: 0,
+            children: [
+                { id: 'l1', type: 'leaf', state: { type: 'markdown', state: { file: 'notes/A.md' } } },
+                { id: 'l2', type: 'leaf', state: { type: 'markdown', state: { file: 'notes/B.md' } } },
+            ],
+        },
+        right: {
+            id: 'r',
+            type: 'tabs',
+            children: [
+                { id: 'r1', type: 'leaf', state: { type: 'backlink', state: { file: 'archive/Old.md' } } },
+            ],
+        },
+    };
+
     const session = {
         id: 'sess-1',
         name: 'My Workspace',
-        layout: {},
+        layout: entryLayout,
         history: [
-            { savedAt: now - 1000, layout: {} },
-            { savedAt: now - 86400000, layout: {} },
-            { savedAt: now - 3 * 86400000, layout: {} },
-            { savedAt: now - 30 * 86400000, layout: {} },
+            { savedAt: now - 1000, layout: entryLayout },
+            { savedAt: now - 86400000, layout: entryLayout },
+            { savedAt: now - 3 * 86400000, layout: entryLayout },
+            { savedAt: now - 30 * 86400000, layout: entryLayout },
         ],
     };
 
@@ -213,6 +234,10 @@ test('HistoryModal: groups entries by date and renders summary and restore butto
 
     const dateLabels = modal.contentEl.querySelectorAll('.wpp-history-date-label');
     assert.ok(dateLabels.length >= 3);
+
+    const summaries = modal.contentEl.querySelectorAll('.wpp-history-summary');
+    assert.equal(summaries.length, 4);
+    assert.equal(summaries[0]!.textContent, '2 panes \u00b7 A.md, B.md');
 
     const restoreBtns = modal.contentEl.querySelectorAll('.wpp-history-restore-btn');
     assert.equal(restoreBtns.length, 4);

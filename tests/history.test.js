@@ -19,12 +19,14 @@ function createService(initialData) {
                 id: 's1',
                 name: 'Session 1',
                 layout: {
-                    type: 'split',
-                    children: [
-                        { type: 'leaf', state: { state: { file: 'Note 1.md' } } },
-                        { type: 'leaf', state: { state: { file: 'Note 2.md' } } },
-                    ],
-                    main: { type: 'leaf' },
+                    main: {
+                        type: 'tabs',
+                        currentTab: 0,
+                        children: [
+                            { type: 'leaf', state: { type: 'markdown', state: { file: 'Note 1.md' } } },
+                            { type: 'leaf', state: { type: 'markdown', state: { file: 'Note 2.md' } } },
+                        ],
+                    },
                 },
                 history: [],
             },
@@ -61,19 +63,12 @@ function createService(initialData) {
     return { service, data, events };
 }
 
-test('history: settings accessors and layout parsing', function () {
-    const { service, data } = createService();
+test('history: settings accessors', function () {
+    const { service } = createService();
 
     assert.equal(service.isVersionHistoryEnabled(), true);
     assert.equal(service.getVersionHistorySnapshotInterval(), 5);
     assert.equal(service.isVersionHistoryConfirmRestoreEnabled(), true);
-
-    const layout = data.sessions.s1.layout;
-    const paths = service.extractFilePathsFromLayout(layout);
-    assert.deepEqual(paths, ['Note 1.md', 'Note 2.md']);
-
-    const panes = service.countPanesInLayout(layout);
-    assert.equal(panes, 1);
 });
 
 test('history: compactHistory tiers and limits', function () {
