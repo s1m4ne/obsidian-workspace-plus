@@ -132,6 +132,11 @@ export function attachGroupTabDrag(
             e.stopPropagation();
         }
 
+        // P13. Same reasoning as session-drag: one document for the whole
+        // gesture, so the move/up pair comes off what it went on and the clone
+        // lands in the window being dragged in.
+        const dragDoc = tabEl.ownerDocument;
+
         const startX = e.clientX;
         let dragStarted = false;
         let cloneEl: (HTMLElement & { _offsetX?: number }) | null = null;
@@ -147,7 +152,7 @@ export function attachGroupTabDrag(
                 top: `${rect.top}px`,
                 left: `${ev.clientX - (startX - rect.left)}px`,
             });
-            document.body.appendChild(clone);
+            dragDoc.body.appendChild(clone);
             tabEl.classList.add('is-dragging');
             clone._offsetX = startX - rect.left;
             cloneEl = clone;
@@ -186,8 +191,8 @@ export function attachGroupTabDrag(
         }
 
         function onUp(): void {
-            document.removeEventListener('mousemove', onMove);
-            document.removeEventListener('mouseup', onUp);
+            dragDoc.removeEventListener('mousemove', onMove);
+            dragDoc.removeEventListener('mouseup', onUp);
             if (!dragStarted || !cloneEl) return;
             cloneEl.remove();
             tabEl.classList.remove('is-dragging');
@@ -205,8 +210,8 @@ export function attachGroupTabDrag(
             }
         }
 
-        document.addEventListener('mousemove', onMove);
-        document.addEventListener('mouseup', onUp);
+        dragDoc.addEventListener('mousemove', onMove);
+        dragDoc.addEventListener('mouseup', onUp);
     });
 }
 

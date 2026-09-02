@@ -83,6 +83,12 @@ export function attachSessionDrag(options: SessionDragOptions): void {
             e.stopPropagation();
         }
 
+        // P13. The document that owns the row being dragged, captured once for
+        // the whole gesture: the mousemove/mouseup pair has to come off the
+        // same document it went on, and the clone and the body class belong to
+        // the window the user is dragging in.
+        const dragDoc = itemEl.ownerDocument;
+
         const startX = e.clientX;
         const startY = e.clientY;
         let dragStarted = false;
@@ -93,7 +99,7 @@ export function attachSessionDrag(options: SessionDragOptions): void {
         function startDrag(ev: MouseEvent): void {
             dragStarted = true;
             if (bodyDraggingClass) {
-                document.body.classList.add(bodyDraggingClass);
+                dragDoc.body.classList.add(bodyDraggingClass);
             }
             const rect = itemEl.getBoundingClientRect();
             offsetX = startX - rect.left;
@@ -106,7 +112,7 @@ export function attachSessionDrag(options: SessionDragOptions): void {
                 top: `${ev.clientY - offsetY}px`,
                 left: `${ev.clientX - offsetX}px`,
             });
-            document.body.appendChild(clone);
+            dragDoc.body.appendChild(clone);
             itemEl.classList.add('is-dragging');
             cloneEl = clone;
         }
@@ -150,11 +156,11 @@ export function attachSessionDrag(options: SessionDragOptions): void {
         }
 
         function onMouseUp(ev: MouseEvent): void {
-            document.removeEventListener('mousemove', onMouseMove);
-            document.removeEventListener('mouseup', onMouseUp);
+            dragDoc.removeEventListener('mousemove', onMouseMove);
+            dragDoc.removeEventListener('mouseup', onMouseUp);
 
             if (bodyDraggingClass) {
-                document.body.classList.remove(bodyDraggingClass);
+                dragDoc.body.classList.remove(bodyDraggingClass);
             }
 
             if (!dragStarted) return;
@@ -196,7 +202,7 @@ export function attachSessionDrag(options: SessionDragOptions): void {
             }
         }
 
-        document.addEventListener('mousemove', onMouseMove);
-        document.addEventListener('mouseup', onMouseUp);
+        dragDoc.addEventListener('mousemove', onMouseMove);
+        dragDoc.addEventListener('mouseup', onMouseUp);
     });
 }

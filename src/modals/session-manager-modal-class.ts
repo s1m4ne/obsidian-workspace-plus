@@ -143,6 +143,14 @@ export class SessionManagerModal extends Modal {
     private modalKeyHandler: ((event: KeyboardEvent) => void) | null = null;
     private contentFocusHandler: ((event: FocusEvent) => void) | null = null;
 
+    /**
+     * P13. The document that owns this modal, captured when the listener goes
+     * on so that onClose takes it off the same one. Reading the owning document
+     * again at close time would be a different object if the modal had moved,
+     * and the listener would stay attached with nothing left to remove it.
+     */
+    private listenerDoc: Document | null = null;
+
     constructor(app: App, plugin: SessionManagerModalHost) {
         super(app);
         this.plugin = plugin;
@@ -252,11 +260,12 @@ export class SessionManagerModal extends Modal {
 
         // Keyboard handling: Enter activation plus directional arrow traversal.
         this.modalKeyHandler = (e: KeyboardEvent): void => {
-            if (document.querySelector('.wpp-confirm-buttons')) return;
-            if (document.querySelector('.wpp-switch-overlay')) return;
+            const doc = this.containerEl.ownerDocument;
+            if (doc.querySelector('.wpp-confirm-buttons')) return;
+            if (doc.querySelector('.wpp-switch-overlay')) return;
 
-            const activeEl = document.activeElement;
-            if (activeEl && activeEl !== document.body && !this.contentEl.contains(activeEl)) return;
+            const activeEl = doc.activeElement;
+            if (activeEl && activeEl !== doc.body && !this.contentEl.contains(activeEl)) return;
             const controlEl = navigationUtils.getScopedControlEl(
                 this.contentEl,
                 activeEl instanceof HTMLElement ? activeEl : null,
@@ -278,7 +287,8 @@ export class SessionManagerModal extends Modal {
             if (e.key !== 'Enter') return;
             this.handleEnterKey(e, controlEl ?? null);
         };
-        document.addEventListener('keydown', this.modalKeyHandler, true);
+        this.listenerDoc = this.containerEl.ownerDocument;
+        this.listenerDoc.addEventListener('keydown', this.modalKeyHandler, true);
 
         // Obsidian auto-focuses the first input, so the configured focus target
         // has to be applied after that has happened.
@@ -642,7 +652,7 @@ export class SessionManagerModal extends Modal {
     }
 
     blurFocusedControl(): void {
-        const activeEl = document.activeElement;
+        const activeEl = this.containerEl.ownerDocument.activeElement;
         if (activeEl instanceof HTMLElement && this.contentEl.contains(activeEl)) {
             activeEl.blur();
         }
@@ -991,10 +1001,12 @@ export class SessionManagerModal extends Modal {
     }
 
     override onClose(): void {
-        document.body.classList.remove('wpp-session-list-dragging');
+        this.containerEl.ownerDocument.body.classList.remove('wpp-session-list-dragging');
         if (this.modalKeyHandler) {
-            document.removeEventListener('keydown', this.modalKeyHandler, true);
+            (this.listenerDoc ?? this.containerEl.ownerDocument)
+                .removeEventListener('keydown', this.modalKeyHandler, true);
             this.modalKeyHandler = null;
+            this.listenerDoc = null;
         }
         if (this.contentFocusHandler) {
             this.contentEl.removeEventListener('focusin', this.contentFocusHandler, true);

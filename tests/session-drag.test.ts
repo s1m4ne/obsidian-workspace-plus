@@ -215,4 +215,59 @@ test('session-drag: attachSessionDrag drop on group and All tabs', () => {
     assert.equal(droppedAllSession, 's1');
 });
 
+/**
+ * P13. The drag used to add its mousemove/mouseup on the global `document` and
+ * write the body class there too, whichever window the row was actually in.
+ * A second document is the only way to tell the two apart: the gesture has to
+ * be driven entirely through the document that owns the row, and the global
+ * one must see nothing.
+ */
+test('a drag is driven by the document that owns the row, not the global one', () => {
+    const otherDoc = document.implementation.createHTMLDocument('popout');
+
+    const listEl = otherDoc.createElement('div');
+    const item1 = otherDoc.createElement('div');
+    item1.className = 'wpp-session-item';
+    item1.dataset['sessionId'] = 's1';
+    const item2 = otherDoc.createElement('div');
+    item2.className = 'wpp-session-item';
+    item2.dataset['sessionId'] = 's2';
+    for (const el of [item1, item2]) {
+        el.getBoundingClientRect = () => ({
+            left: 0, right: 100, top: 0, bottom: 30, width: 100, height: 30,
+            x: 0, y: 0, toJSON: () => {},
+        });
+    }
+    listEl.appendChild(item1);
+    listEl.appendChild(item2);
+    otherDoc.body.appendChild(listEl);
+
+    let committedOrder: string[] | null = null;
+    attachSessionDrag({
+        itemEl: item1,
+        listEl,
+        itemSelector: '.wpp-session-item',
+        bodyDraggingClass: 'wpp-session-list-dragging',
+        onReorder: (order) => { committedOrder = order; },
+    });
+
+    item1.dispatchEvent(new window.MouseEvent('mousedown', { button: 0, clientX: 10, clientY: 10 }));
+
+    // The global document is not the one that owns the row, so driving the
+    // gesture through it must do nothing at all.
+    document.dispatchEvent(new window.MouseEvent('mousemove', { clientX: 10, clientY: 80 }));
+    assert.equal(item1.classList.contains('is-dragging'), false, 'the global document does not drive this drag');
+
+    otherDoc.dispatchEvent(new window.MouseEvent('mousemove', { clientX: 10, clientY: 80 }));
+    assert.equal(item1.classList.contains('is-dragging'), true, 'the owning document does');
+    assert.equal(otherDoc.body.classList.contains('wpp-session-list-dragging'), true, 'the body class lands in the owning document');
+    assert.equal(document.body.classList.contains('wpp-session-list-dragging'), false, 'and not in the global one');
+    assert.ok(otherDoc.querySelector('.wpp-drag-clone'), 'the clone is appended to the owning document');
+
+    otherDoc.dispatchEvent(new window.MouseEvent('mouseup', { clientX: 10, clientY: 80 }));
+    assert.equal(item1.classList.contains('is-dragging'), false);
+    assert.equal(otherDoc.body.classList.contains('wpp-session-list-dragging'), false);
+    assert.ok(committedOrder, 'the reorder still commits');
+});
+
 test.after(() => harness.restore());
