@@ -233,12 +233,6 @@ body.wpp-session-list-dragging * {
     margin-top: 16px;
 }
 
-.wpp-confirm-buttons button.wpp-btn-focused,
-.wpp-session-actions .wpp-btn-focused {
-    outline: 2px solid var(--interactive-accent);
-    outline-offset: 2px;
-}
-
 /* Confirm modal hint */
 .wpp-confirm-hint {
     font-size: var(--font-ui-small);

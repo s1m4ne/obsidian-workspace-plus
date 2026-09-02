@@ -17,10 +17,19 @@ import { L } from '../i18n.ts';
  *   target. Apple's own save dialog is `Don't Save … Cancel  Save` for this
  *   reason: putting "discard" next to the default is how one arrow key plus
  *   Enter loses work.
- * - **Enter always fires the ring target, and the ring is always visible.** The
- *   ring starts on the affirmative action even when a text field holds real
- *   focus, so what Enter will do is never a guess. Not painting it is what made
- *   rename look broken while `mod-cta` merely looked selected.
+ * - **Enter fires the affirmative action, unless a button holds real focus.**
+ *   Then it is that button's, and the browser fires it. Which action is the
+ *   affirmative one is already visible: it is the only filled button in the
+ *   row, `mod-cta` or `mod-warning` against a plain Cancel, exactly as
+ *   Obsidian's own dialogs read.
+ *
+ *   This replaced a painted ring - `.wpp-btn-focused`, a 2px
+ *   `--interactive-accent` outline - that moved with the arrow keys. It said
+ *   the same thing the fill already said, and on a red `mod-warning` button the
+ *   accent outline is a different colour from the fill, so it read as "this row
+ *   is selected" rather than "this is what Enter does". Removing it also fixed
+ *   a live defect: the handler clicked `buttons[ringIndex]` unconditionally, so
+ *   tabbing to Cancel and pressing Enter ran the affirmative action.
  * - **Enter goes through `click()`**, never a re-implementation, so the mouse
  *   and the keyboard cannot drift apart.
  * - **Cancel settles exactly once, however the dialog goes away** - button,
@@ -30,10 +39,10 @@ import { L } from '../i18n.ts';
  * - **`isComposing` guards everything**, whether or not the dialog has a field
  *   today. An IME commit arrives as Enter and belongs to the field.
  *
- * Focus stays *simulated* for buttons: the ring is a class and keys are read
- * from a document-level capture listener. Real focus plus that listener is what
- * lets the two disagree, and the one dialog that needs real focus - the session
- * manager, which is a list - is not one of these.
+ * Moving between the buttons is Tab's job, and the focus ring that appears is
+ * Obsidian's own: these are real `<button>` elements, so they get it for free.
+ * The plugin's `:focus-visible` rules exist for the controls it builds out of
+ * divs, which inherit nothing.
  *
  * `kind` and `tone` are separate on purpose. They were one field in the first
  * draft, which broke the commonest dialog of the three: a delete confirmation's
@@ -73,7 +82,9 @@ export abstract class DialogModal extends Modal {
     private readonly dialogOptions: DialogModalOptions;
 
     private buttons: HTMLButtonElement[] = [];
-    private ringIndex = 0;
+
+    /** The button Enter fires when focus is not on one of them. */
+    private affirmativeBtn: HTMLButtonElement | null = null;
 
     /** Set by a subclass that has a text field, so real focus can start there. */
     protected inputEl: HTMLInputElement | null = null;
@@ -138,10 +149,8 @@ export abstract class DialogModal extends Modal {
         cancelBtn.addEventListener('click', () => { this.cancel(); });
         this.buttons.push(cancelBtn);
 
-        this.ringIndex = this.buttons.length;
-        this.addButton(btns, affirmative[0]!);
+        this.affirmativeBtn = this.addButton(btns, affirmative[0]!);
 
-        this.paintRing();
         this.renderFooter(contentEl);
 
         this.keyHandler = (event: KeyboardEvent): void => { this.onKeyDown(event); };
@@ -157,7 +166,7 @@ export abstract class DialogModal extends Modal {
         }
     }
 
-    private addButton(parent: HTMLElement, action: DialogAction): void {
+    private addButton(parent: HTMLElement, action: DialogAction): HTMLButtonElement {
         // Position comes from `kind`, colour from `tone`. A delete confirmation
         // is affirmative and destructive at once.
         const cls = action.tone === 'destructive'
@@ -179,6 +188,7 @@ export abstract class DialogModal extends Modal {
             this.close();
         });
         this.buttons.push(btn);
+        return btn;
     }
 
     private onKeyDown(event: KeyboardEvent): void {
@@ -193,29 +203,25 @@ export abstract class DialogModal extends Modal {
         }
 
         if (event.key === 'Enter') {
+            // A button the user tabbed to owns its own Enter. Taking it here is
+            // what made Tab-to-Cancel-then-Enter run the affirmative action.
+            // Identity against the buttons this dialog built, rather than an
+            // `instanceof HTMLButtonElement`: that constructor is not a global
+            // in every environment this runs in, and a ReferenceError here
+            // would silently swallow Enter.
+            const active = this.containerEl.ownerDocument.activeElement;
+            if (active && this.buttons.some((btn) => btn === active)) return;
+
             event.preventDefault();
             event.stopPropagation();
             // Through click(), so Enter and the mouse run the same handler.
-            this.buttons[this.ringIndex]?.click();
-            return;
-        }
-
-        if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
-            event.preventDefault();
-            // Clamped, not wrapped: wrapping puts the discard choice one key
-            // from the default, which is what the ordering above avoids.
-            const next = this.ringIndex + (event.key === 'ArrowLeft' ? -1 : 1);
-            if (next >= 0 && next < this.buttons.length) {
-                this.ringIndex = next;
-                this.paintRing();
-            }
+            this.affirmativeBtn?.click();
             return;
         }
 
         if (!this.inputEl) return;
 
-        // With a field, up and down move real focus in and out of it. The ring
-        // does not move: Enter means the same thing either way.
+        // With a field, up and down move real focus in and out of it.
         if (event.key === 'ArrowUp') {
             event.preventDefault();
             this.inputEl.focus();
@@ -223,12 +229,6 @@ export abstract class DialogModal extends Modal {
             event.preventDefault();
             this.inputEl.blur();
         }
-    }
-
-    private paintRing(): void {
-        this.buttons.forEach((btn, i) => {
-            btn.classList.toggle('wpp-btn-focused', i === this.ringIndex);
-        });
     }
 
     /** Settle as cancelled, once. */

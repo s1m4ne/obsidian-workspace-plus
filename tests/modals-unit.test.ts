@@ -142,26 +142,22 @@ test('UnsavedSwitchModal: handles saveAndSwitch, switchWithoutSaving, and onCanc
         String(L.saveAndSwitch),
     ]);
 
+    // Which action Enter runs is said by the fill, not by a painted ring: one
+    // filled button in the row against a plain Cancel.
     const buttons = [...modal.contentEl.querySelectorAll('.wpp-confirm-buttons button')];
     assert.equal(buttons[0]?.classList.contains('mod-warning'), true, 'discard is destructive');
+    assert.equal(buttons[1]?.classList.contains('mod-cta'), false, 'cancel carries no fill');
+    assert.equal(buttons[1]?.classList.contains('mod-warning'), false, 'cancel carries no fill');
     assert.equal(buttons[2]?.classList.contains('mod-cta'), true, 'the affirmative action is the cta');
-
-    // The ring starts on the affirmative action, and it is painted - what Enter
-    // does must never be a guess.
-    assert.equal(buttons[2]?.classList.contains('wpp-btn-focused'), true);
 
     const doc = modal.containerEl.ownerDocument || document;
 
-    // Right is clamped at the affirmative end rather than wrapping round to the
-    // discard button.
-    doc.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowRight' }));
-    assert.equal(buttons[2]?.classList.contains('wpp-btn-focused'), true);
-
-    // Two lefts to reach the discard option: the distance is the safety.
+    // Arrow keys no longer move what Enter does. They used to, with nothing on
+    // screen saying where they had left it once the ring was removed.
     doc.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowLeft' }));
     doc.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowLeft' }));
     doc.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter' }));
-    assert.equal(state, 'switch');
+    assert.equal(state, 'save', 'Enter runs the affirmative action wherever the arrows went');
 
     // Test close triggers cancel if not resolved
     let state2 = '';
@@ -282,18 +278,18 @@ test('RenameModal: Enter with the name untouched closes and reports nothing', ()
     );
 });
 
-test('RenameModal: the ring is on the confirm button while the field has focus', () => {
+test('RenameModal: the confirm button is the only filled one, so Enter is not a guess', () => {
     const modal = new RenameModal(app, 'Work', () => {});
     modal.open();
 
     const buttons = [...modal.contentEl.querySelectorAll('.wpp-confirm-buttons button')];
     assert.deepEqual(buttons.map((b) => b.textContent), [String(L.cancel), String(L.rename)]);
 
-    // Painted from the start. RenameModal was the one dialog that never called
-    // its own ring update, so nothing was marked and `mod-cta` merely looked
-    // selected - which is what "the button is selected but Enter does nothing"
-    // was describing.
-    assert.equal(buttons[1]?.classList.contains('wpp-btn-focused'), true);
+    // The filled button is the one Enter runs, and it is the only fill in the
+    // row. This used to carry a painted accent outline on top of the fill.
+    assert.equal(buttons[1]?.classList.contains('mod-cta'), true);
+    assert.equal(buttons[0]?.classList.contains('mod-cta'), false, 'cancel carries no fill');
+    assert.equal(buttons[0]?.classList.contains('mod-warning'), false, 'cancel carries no fill');
     modal.close();
 });
 
@@ -390,8 +386,36 @@ test('ConfirmModal: the destructive default is the affirmative action, and it is
     // Destructive by colour, affirmative by position: the two are separate
     // decisions, and conflating them put this button on the wrong side.
     assert.equal(buttons[1]?.classList.contains('mod-warning'), true);
-    assert.equal(buttons[1]?.classList.contains('wpp-btn-focused'), true);
     modal.close();
+});
+
+test('a button the user tabbed to owns its own Enter', () => {
+    let confirmed = false;
+    let cancelled = false;
+    const modal = new ConfirmModal(app, 'Delete "Work"?', () => { confirmed = true; }, {
+        onCancel: () => { cancelled = true; },
+    });
+    modal.open();
+
+    const buttons = [...modal.contentEl.querySelectorAll<HTMLButtonElement>('.wpp-confirm-buttons button')];
+    const cancelBtn = buttons[0];
+    assert.ok(cancelBtn);
+    assert.equal(cancelBtn.textContent, String(L.cancel));
+
+    // Real focus, as Tab would leave it.
+    cancelBtn.focus();
+
+    const doc = modal.containerEl.ownerDocument || document;
+    doc.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter' }));
+
+    // The handler used to click buttons[ringIndex] unconditionally, so this
+    // deleted the session instead of cancelling. Now it does not intercept at
+    // all, and the browser fires the focused button.
+    assert.equal(confirmed, false, 'Enter must not run the affirmative action');
+
+    cancelBtn.click();
+    assert.equal(cancelled, true);
+    assert.equal(confirmed, false);
 });
 
 test('ConfirmModal: a reversible action is the cta instead', () => {
