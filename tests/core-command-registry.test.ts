@@ -91,17 +91,21 @@ function createMockHost() {
             } as never;
         },
         saveCurrentNoteNameAsSession: async () => { calls.push('saveCurrentNote'); return true; },
-        openSearchOverlay: () => { calls.push('openSearchOverlay'); },
+        getSearchOverlay: (): never => ({ open: () => { calls.push('openSearchOverlay'); } }) as never,
         // Version history goes through getHistoryService(); this double carries those members itself.
         getHistoryService(): never {
             return { isVersionHistoryEnabled: () => true, quickRestoreLatestHistory: async () => true } as never;
         },
         exportSessionsSnapshot: async () => { calls.push('exportSnapshot'); },
         importSessionsFromLatestExport: async () => { calls.push('importSnapshot'); },
-        showSwitchOverlay(_ordered: unknown, activeIndex: number) {
-            calls.push('showSwitchOverlay');
-            shownActiveIndexes.push(activeIndex);
-        },
+        getSwitchOverlay: (): never => ({
+            show: (_ordered: unknown, activeIndex: number) => {
+                calls.push('showSwitchOverlay');
+                shownActiveIndexes.push(activeIndex);
+            },
+            overlayEl: null,
+            viewGroupId: null,
+        }) as never,
         // The group members the registry reaches now come through the store.
         getGroupStore(): never {
             return {

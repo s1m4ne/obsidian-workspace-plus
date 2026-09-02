@@ -35,7 +35,7 @@ export interface SwitchOverlayHost {
         [key: string]: unknown;
     };
     getCommandHotkey(cmd: string, slot?: number): string;
-    hideSearchOverlay?: (() => void) | undefined;
+    getSearchOverlay(): { hide(): void };
 }
 
 export interface SwitchOverlayOptions {
@@ -80,9 +80,9 @@ export class SwitchOverlay {
         // call goes to the switcher, so the notice would have been left on
         // screen by a plugin that stopped forwarding.
         this.host.getSessionSwitcher().clearSessionSwitchNotice();
-        if (this.host.hideSearchOverlay) {
-            this.host.hideSearchOverlay();
-        }
+        // Unconditional, like the notice above it: the guard tested the plugin
+        // for a forwarder while the call goes to the search overlay.
+        this.host.getSearchOverlay().hide();
 
         // Clean up existing overlay and listeners
         this.cleanupListeners();

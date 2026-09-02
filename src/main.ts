@@ -67,16 +67,6 @@ interface AttachedPluginMethods {
     scheduleStartupFlush(): void;
 
 
-    switchOverlayEl: HTMLElement | null;
-    showSwitchPreviewOverlay(ordered: SessionItem[], index: number, viewGroupId?: string | null): void;
-    showSwitchFeedbackOverlay(
-        ordered: SessionItem[],
-        index: number,
-        viewGroupId?: string | null,
-        overlayOptions?: unknown,
-    ): void;
-    hideSwitchOverlay(): void;
-    hideSearchOverlay(): void;
 }
 
 export class WorkspacePlusPlus extends Plugin {
@@ -373,8 +363,8 @@ export class WorkspacePlusPlus extends Plugin {
 
     override onunload(): void {
         this.getHistoryService().stopHistorySnapshotTimer();
-        this.hideSwitchOverlay();
-        this.hideSearchOverlay();
+        this.getSwitchOverlay().hide();
+        this.getSearchOverlay().hide();
         this.getSessionSwitcher().clearSessionSwitchNotice();
         this.getSessionSwitcher().cleanup();
         // Through the controller, not by assignment: the mirrored counters are
@@ -426,7 +416,7 @@ export function sessionStoreHost(plugin: WorkspacePlusPlus): SessionStoreHost {
         persistData: () => plugin.persistData(),
         updateStatusBar: () => { plugin.updateStatusBar(); },
         syncSessionCommands: () => { plugin.syncSessionCommands(); },
-        hideSwitchOverlay: () => { plugin.hideSwitchOverlay(); },
+        hideSwitchOverlay: () => { plugin.getSwitchOverlay().hide(); },
         captureActiveSessionLayoutIfAutoSave: () => {
             plugin.getSessionSaver().captureActiveSessionLayoutIfAutoSave();
         },
@@ -457,7 +447,7 @@ export function sessionSwitcherHost(plugin: WorkspacePlusPlus): SessionSwitcherH
     return {
         get data() { return plugin.data; },
         get app() { return plugin.app; },
-        get switchOverlayEl() { return plugin.switchOverlayEl; },
+        getSwitchOverlay: () => plugin.getSwitchOverlay(),
         get settingsState() { return plugin.getSettingsState(); },
         get sessionStore() { return plugin.getSessionStore(); },
         get historyService() { return plugin.getHistoryService(); },
@@ -483,10 +473,10 @@ export function sessionSwitcherHost(plugin: WorkspacePlusPlus): SessionSwitcherH
         persistData: () => plugin.persistData(),
         updateStatusBar: () => { plugin.updateStatusBar(); },
         showSwitchPreviewOverlay: (ordered, index, viewGroupId) => {
-            plugin.showSwitchPreviewOverlay(ordered, index, viewGroupId);
+            plugin.getSwitchOverlay().showPreview(ordered, index, viewGroupId);
         },
         showSwitchFeedbackOverlay: (ordered, index, viewGroupId, overlayOptions) => {
-            plugin.showSwitchFeedbackOverlay(ordered, index, viewGroupId, overlayOptions);
+            plugin.getSwitchOverlay().showFeedback(ordered, index, viewGroupId, overlayOptions);
         },
         openUnsavedSwitchModal: (message, onSaveAndSwitch, onSwitchWithoutSaving, onCancel) => {
             new UnsavedSwitchModal(plugin.app, message, onSaveAndSwitch, onSwitchWithoutSaving, onCancel).open();
@@ -520,8 +510,8 @@ export function groupStoreHost(plugin: WorkspacePlusPlus): GroupStoreHost {
         persistData: () => plugin.persistData(),
         updateStatusBar: () => { plugin.updateStatusBar(); },
         syncSessionCommands: () => { plugin.syncSessionCommands(); },
-        hideSwitchOverlay: () => { plugin.hideSwitchOverlay(); },
-        hideSearchOverlay: () => { plugin.hideSearchOverlay(); },
+        hideSwitchOverlay: () => { plugin.getSwitchOverlay().hide(); },
+        hideSearchOverlay: () => { plugin.getSearchOverlay().hide(); },
         switchSession: (sessionId) => plugin.getSessionSwitcher().switchSession(sessionId),
         getOrderedSessionsUnfiltered: () => plugin.getSessionStore().getOrderedSessionsUnfiltered(),
         getOrderedSessionsForGroup: (groupId) => plugin.getSessionStore().getOrderedSessionsForGroup(groupId),

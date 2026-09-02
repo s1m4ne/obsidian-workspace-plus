@@ -1,6 +1,5 @@
 'use strict';
 
-var attachOverlayMethods = require('./overlays');
 var attachPersistenceMethods = require('./persistence');
 var attachStorageBackupMethods = require('./storage-backup');
 var attachStorageTransferMethods = require('./storage-transfer');
@@ -11,7 +10,6 @@ var attachSessionCommandMethods = require('./session-commands');
 var attachFrontmatterMethods = require('./frontmatter');
 
 function attachPluginMethods(WorkspacePlusPlus) {
-    attachOverlayMethods(WorkspacePlusPlus);
     attachPersistenceMethods(WorkspacePlusPlus);
     attachStorageBackupMethods(WorkspacePlusPlus);
     attachStorageTransferMethods(WorkspacePlusPlus);

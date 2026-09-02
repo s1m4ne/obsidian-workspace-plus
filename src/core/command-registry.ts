@@ -61,13 +61,15 @@ export interface CommandRegistryHost {
     addCommand(command: Command): Command;
     removeCommand(id: string): void;
     saveCurrentNoteNameAsSession(): Promise<boolean> | void;
-    openSearchOverlay(): void;
+    getSearchOverlay(): { open(anchorEl?: HTMLElement): void };
     exportSessionsSnapshot(): Promise<void>;
     importSessionsFromLatestExport(): Promise<void>;
-    showSwitchOverlay(sessions: SessionItem[], activeIndex: number, groupId: string | null): void;
+    getSwitchOverlay(): {
+        show(sessions: SessionItem[], activeIndex: number, groupId: string | null): void;
+        overlayEl: HTMLElement | null;
+        viewGroupId: string | null;
+    };
 
-    switchOverlayEl?: HTMLElement | null;
-    switchOverlayViewGroupId?: string | null;
     searchOverlayEl?: HTMLElement | null;
     searchOverlayViewGroupId?: string | null;
 
@@ -356,7 +358,7 @@ export class CommandRegistry {
         });
 
         addSimpleCommand('search-session-overlay', String(L.cmdSearchOverlay || ''), () => {
-            host.openSearchOverlay();
+            host.getSearchOverlay().open();
         });
 
         host.addCommand({
@@ -398,7 +400,8 @@ export class CommandRegistry {
         // --- Group commands ---
 
         const getCurrentGroupViewId = (): string | null => {
-            if (host.switchOverlayEl) return host.switchOverlayViewGroupId || null;
+            const overlay = host.getSwitchOverlay();
+            if (overlay.overlayEl) return overlay.viewGroupId || null;
             if (host.searchOverlayEl) return host.searchOverlayViewGroupId || null;
             return this.data.activeGroupId || null;
         };
@@ -406,7 +409,7 @@ export class CommandRegistry {
         const showSwitchOverlayForGroup = (groupId: string | null) => {
             const ordered = host.getSessionStore().getOrderedSessionsForGroup(groupId || null);
             const activeIndex = host.getSessionStore().findActiveSessionIndex(ordered);
-            host.showSwitchOverlay(ordered, activeIndex, groupId || null);
+            host.getSwitchOverlay().show(ordered, activeIndex, groupId || null);
         };
 
         const switchGroupAndShowOverlay = (step: number) => {

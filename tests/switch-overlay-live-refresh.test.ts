@@ -61,6 +61,8 @@ function createOverlay(): { overlay: Overlay; sessions: Session[]; announce: () 
         switchSession: async (): Promise<boolean> => true,
         // The overlay clears any switch notice through the switcher on show.
         getSessionSwitcher: (): never => ({ clearSessionSwitchNotice: (): void => {} }) as never,
+        // The switch overlay hides the search overlay on show; there is none here.
+        getSearchOverlay: (): never => ({ hide: (): void => {} }) as never,
         getRelativeGroupId: (): undefined => undefined,
         onSessionsChanged: (listener: () => void): (() => void) => {
             listeners.add(listener);

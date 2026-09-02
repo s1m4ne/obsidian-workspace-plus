@@ -66,9 +66,7 @@ function createPlugin(): { plugin: ReturnType<typeof createRealPlugin>; calls: C
     plugin.persistData = async (): Promise<boolean> => { calls.push('plugin.persistData'); return true; };
     plugin.updateStatusBar = (): void => { calls.push('plugin.updateStatusBar'); };
     plugin.syncSessionCommands = (): void => { calls.push('plugin.syncSessionCommands'); };
-    plugin.hideSwitchOverlay = (): void => { calls.push('plugin.hideSwitchOverlay'); };
-    plugin.showSwitchPreviewOverlay = (): void => { calls.push('plugin.showSwitchPreviewOverlay'); };
-    plugin.showSwitchFeedbackOverlay = (): void => { calls.push('plugin.showSwitchFeedbackOverlay'); };
+    plugin.getSwitchOverlay = (): unknown => recorder('switchOverlay', calls);
 
     return { plugin, calls };
 }
@@ -97,7 +95,7 @@ test('the SessionStore host reaches the collaborator each member names', () => {
         'plugin.persistData',
         'plugin.updateStatusBar',
         'plugin.syncSessionCommands',
-        'plugin.hideSwitchOverlay',
+        'switchOverlay.hide',
         'sessionSaver.captureActiveSessionLayoutIfAutoSave',
         'sessionSwitcher.applyWorkspaceLayout',
         'sessionSwitcher.getWorkspaceRestoreScope',
@@ -162,8 +160,8 @@ test('the SessionSwitcher host reaches the collaborator each member names', () =
         'sessionSaver.isWarnOnUnsavedSwitchEnabled',
         'plugin.persistData',
         'plugin.updateStatusBar',
-        'plugin.showSwitchPreviewOverlay',
-        'plugin.showSwitchFeedbackOverlay',
+        'switchOverlay.showPreview',
+        'switchOverlay.showFeedback',
     ]);
 });
 
@@ -188,7 +186,7 @@ test('the SettingsState host reaches the collaborator each member names', () => 
 
 test('the GroupStore host reaches the collaborator each member names', () => {
     const { plugin, calls } = createPlugin();
-    plugin.hideSearchOverlay = (): void => { calls.push('plugin.hideSearchOverlay'); };
+    plugin.getSearchOverlay = (): unknown => recorder('searchOverlay', calls);
     const host = groupStoreHost(asPlugin(plugin));
 
     void host.persistData();
@@ -204,8 +202,8 @@ test('the GroupStore host reaches the collaborator each member names', () => {
         'plugin.persistData',
         'plugin.updateStatusBar',
         'plugin.syncSessionCommands',
-        'plugin.hideSwitchOverlay',
-        'plugin.hideSearchOverlay',
+        'switchOverlay.hide',
+        'searchOverlay.hide',
         'sessionSwitcher.switchSession',
         'sessionStore.getOrderedSessionsUnfiltered',
         'sessionStore.getOrderedSessionsForGroup',
@@ -309,7 +307,7 @@ test('every host reads its live collaborator fields from the plugin', () => {
     const switcher = sessionSwitcherHost(asPlugin(plugin));
     note('switcher.data', switcher.data);
     note('switcher.app', switcher.app);
-    note('switcher.switchOverlayEl', switcher.switchOverlayEl);
+    note('switcher.getSwitchOverlay', switcher.getSwitchOverlay?.());
     note('switcher.settingsState', switcher.settingsState);
     note('switcher.sessionStore', switcher.sessionStore);
     note('switcher.historyService', switcher.historyService);

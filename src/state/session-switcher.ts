@@ -6,6 +6,7 @@ import type { SettingsState } from './settings-state.ts';
 import type { SessionStore } from './session-store.ts';
 import type { HistoryService } from './history-service.ts';
 import type { SessionSaver } from './session-saver.ts';
+import type { SwitchOverlayOptions } from '../ui/overlays/switch-overlay.ts';
 
 export interface RelativeSwitchContext {
     ordered: SessionItem[];
@@ -21,7 +22,7 @@ export interface SessionSwitchOptions {
     skipUnsavedWarning?: boolean;
     overlayMode?: 'preview' | 'feedback' | 'none';
     viewGroupId?: string | null;
-    overlayOptions?: unknown;
+    overlayOptions?: SwitchOverlayOptions;
 }
 
 export interface LayoutRestoreOptions {
@@ -37,7 +38,7 @@ export interface SwitchRequest {
 export interface SessionSwitcherHost {
     data: PluginData;
     app?: App;
-    switchOverlayEl?: unknown;
+    getSwitchOverlay?: () => { overlayEl: HTMLElement | null };
     settingsState?: SettingsState;
     sessionStore?: SessionStore;
     historyService?: HistoryService;
@@ -55,7 +56,7 @@ export interface SessionSwitcherHost {
     isAutoSaveOnSwitchEnabled: () => boolean;
     updateStatusBar?: () => void;
     showSwitchPreviewOverlay?: (ordered: SessionItem[], index: number, viewGroupId?: string | null) => void;
-    showSwitchFeedbackOverlay?: (ordered: SessionItem[], index: number, viewGroupId?: string | null, overlayOptions?: unknown) => void;
+    showSwitchFeedbackOverlay?: (ordered: SessionItem[], index: number, viewGroupId?: string | null, overlayOptions?: SwitchOverlayOptions) => void;
     showSessionSwitchNotice?: (sessionName: string, options?: { durationMs?: number }) => Notice | undefined;
     openUnsavedSwitchModal?: (
         message: string,
@@ -409,7 +410,7 @@ export class SessionSwitcher {
     }
 
     hasBlockingSwitchUi(): boolean {
-        const switchOverlayEl = this.host.switchOverlayEl as HTMLElement | null | undefined;
+        const switchOverlayEl = this.host.getSwitchOverlay?.().overlayEl;
         const isSwitchOverlayVisible = Boolean(
             switchOverlayEl && switchOverlayEl.classList.contains('is-visible')
         );
@@ -564,7 +565,7 @@ export class SessionSwitcher {
         const previewEnabled = offset > 0
             ? (this.host.settingsState ? this.host.settingsState.previewNext : (this.data && this.data.previewNext))
             : (this.host.settingsState ? this.host.settingsState.previewPrevious : (this.data && this.data.previewPrevious));
-        const hasOverlay = Boolean(this.host.switchOverlayEl);
+        const hasOverlay = Boolean(this.host.getSwitchOverlay?.().overlayEl);
         if (previewEnabled && !hasOverlay) {
             this.host.showSwitchPreviewOverlay?.(context.ordered, context.currentIndex);
             return Promise.resolve(false);
@@ -628,7 +629,7 @@ export class SessionSwitcher {
         return this.switchRelativeFromCommand(offset);
     }
 
-    switchRelativeImmediate(offset: number, options?: { showOverlay?: boolean; overlayOptions?: unknown }): Promise<boolean> {
+    switchRelativeImmediate(offset: number, options?: { showOverlay?: boolean; overlayOptions?: SwitchOverlayOptions }): Promise<boolean> {
         const opts: SessionSwitchOptions = {
             overlayMode: options?.showOverlay === false ? 'none' : 'feedback',
             silent: true,

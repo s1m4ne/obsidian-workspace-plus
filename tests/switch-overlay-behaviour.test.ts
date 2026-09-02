@@ -221,6 +221,13 @@ function createTestPlugin() {
     const switchOverlay = new SwitchOverlay(asSwitchHost(plugin));
     const searchOverlay = new SearchOverlay(asSearchHost(plugin));
 
+    // Each overlay reaches the other through the plugin, so the fixture hands
+    // back the instances it just built rather than a copy of their behaviour.
+    Object.assign(plugin, {
+        getSwitchOverlay: () => switchOverlay,
+        getSearchOverlay: () => searchOverlay,
+    });
+
     return { plugin, switchOverlay, searchOverlay, setSavedPosition };
 }
 

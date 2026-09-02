@@ -210,7 +210,7 @@ function createSearchOverlayKeyHandler(options: SearchOverlayKeyboardOptions): (
         if (event.key === 'Escape') {
             event.preventDefault();
             event.stopImmediatePropagation();
-            plugin.hideSearchOverlay();
+            plugin.getSearchOverlay().hide();
             return;
         }
 
@@ -293,9 +293,8 @@ export interface SearchOverlayHost extends GroupTabPluginHost, HistoryModalPlugi
     searchOverlayClickOutsideHandler?: ((event: MouseEvent) => void) | null;
     _cachedBarHeight?: number;
     _cachedAnchorCenterX?: number;
-    filterSessionsByQuery(sessions: SessionItem[], query: string): SessionItem[];
-    hideSwitchOverlay(): void;
-    hideSearchOverlay(): void;
+    getSwitchOverlay(): { hide(): void };
+    getSearchOverlay(): { hide(): void };
     persistData(): Promise<unknown>;
 }
 
@@ -362,6 +361,12 @@ export class SearchOverlay {
     open(anchorEl?: HTMLElement | null): void {
         const strings = L;
         const self = this.host;
+        // Some of what open() does is its own work, and it used to reach for it
+        // through a plugin shim that forwarded straight back here. Bound as
+        // arrows rather than aliasing `this`, which the lint ratchet counts.
+        const hideThisOverlay = (): void => { this.hide(); };
+        const filterByQuery = (sessions: SessionItem[], query: string): SessionItem[] =>
+            this.filterSessionsByQuery(sessions, query);
         const createInteractionEventOwner = (): Component => this.createInteractionEventOwner();
         const releaseInteractionEventOwner = (owner: Component): void => this.releaseInteractionEventOwner(owner);
         let overlayGroupId = self.getGroupStore().isGroupFeatureEnabled()
@@ -371,8 +376,8 @@ export class SearchOverlay {
         let ordered = self.getSessionStore().getOrderedSessionsForGroup(overlayGroupId);
         const focusTarget = self.data.overlayDefaultFocus || 'current-session';
 
-        self.hideSwitchOverlay();
-        self.hideSearchOverlay();
+        self.getSwitchOverlay().hide();
+        hideThisOverlay();
 
         const overlayDocument = document;
         const overlayEventOwner = new Component();
@@ -438,7 +443,7 @@ export class SearchOverlay {
         setIcon(closeBtn, 'x');
         overlayEventOwner.registerDomEvent(closeBtn, 'click', function (e) {
             e.stopPropagation();
-            self.hideSearchOverlay();
+            hideThisOverlay();
         });
 
         // Save section (same as main modal)
@@ -574,7 +579,9 @@ export class SearchOverlay {
 
         function refreshOrderedSessions() {
             ordered = self.getSessionStore().getOrderedSessionsForGroup(getOverlayGroupId());
-            filtered = self.filterSessionsByQuery(ordered, searchInput.value);
+            // Its own method. This used to go out to a plugin shim that
+            // forwarded straight back here.
+            filtered = filterByQuery(ordered, searchInput.value);
             syncSelectedIndexToActive({ preserveWhenMissing: true });
             renderList();
         }
@@ -884,16 +891,18 @@ export class SearchOverlay {
                         doReload();
                     }
                 }
-                self.hideSearchOverlay();
+                hideThisOverlay();
                 return;
             }
             void self.getSessionSwitcher().switchSession(target.id, { silent: true }).then(function (switched) {
-                if (switched) self.hideSearchOverlay();
+                if (switched) hideThisOverlay();
             });
         }
 
         self.searchOverlayInputHandler = function () {
-            filtered = self.filterSessionsByQuery(ordered, searchInput.value);
+            // Its own method. This used to go out to a plugin shim that
+            // forwarded straight back here.
+            filtered = filterByQuery(ordered, searchInput.value);
             syncSelectedIndexToActive();
             renderList();
         }
@@ -926,7 +935,7 @@ export class SearchOverlay {
             // Let status bar handle its own toggle
             if (self.statusBarEl && containsTarget(self.statusBarEl, e.target)) return;
             if (!containsTarget(self.searchOverlayEl, e.target)) {
-                self.hideSearchOverlay();
+                hideThisOverlay();
             }
         };
 
