@@ -432,10 +432,6 @@ export class WorkspacePlusPlus extends Plugin {
         return restoreFromRotationBackup(this.asHost<StorageRestoreHost>(), generation);
     }
 
-    isSidebarRestoreEnabled(): boolean {
-        return this.getSessionSwitcher().isSidebarRestoreEnabled();
-    }
-
     // ---------------------------------------------------------------------
     // The members every *Host the plugin is handed to declares as required.
     //

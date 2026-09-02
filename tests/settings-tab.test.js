@@ -59,7 +59,6 @@ function createPlugin(overrides = {}) {
         isAutoSaveOnSwitchEnabled() { return data.autoSaveOnSwitch; },
         isWarnOnUnsavedSwitchEnabled() { return data.warnOnUnsavedSwitch; },
         isUnsavedStatusBarHighlightEnabled() { return false; },
-        isSidebarRestoreEnabled() { return false; },
         // Version history goes through getHistoryService(); this double carries those members itself.
         getHistoryService() { return this; },
         isVersionHistoryEnabled() { return data.versionHistoryEnabled; },

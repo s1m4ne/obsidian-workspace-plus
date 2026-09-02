@@ -99,8 +99,6 @@ export interface SettingsTabHost {
     _lastRotationBackupAt?: number;
 
 
-    isSidebarRestoreEnabled(): boolean;
-
 
 
 
@@ -315,7 +313,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
         addToggleSetting(contentEl, {
             name: text(L.settingsRestoreSidebars),
             desc: text(L.settingsRestoreSidebarsDesc),
-            value: this.plugin.isSidebarRestoreEnabled(),
+            value: this.plugin.getSettingsState().restoreSidebars,
             onChange: (value) => { void this.plugin.getSettingsState().setRestoreSidebars(value); },
         });
 

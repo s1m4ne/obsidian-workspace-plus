@@ -325,19 +325,30 @@ export class SessionSwitcher {
 
     // --- Layout Restore ---
 
-    isSidebarRestoreEnabled(): boolean {
-        return this.data?.restoreSidebars !== false;
-    }
-
+    /**
+     * The one place the `restoreSidebars` setting turns into a scope.
+     *
+     * It used to be read three times in three shapes - `!== false` for
+     * isSidebarRestoreEnabled, `=== false` for the scope, and `=== false`
+     * again inline in buildLayoutForRestore - all of them against `this.data`
+     * while SettingsState already owned the setting and its default.
+     */
     getWorkspaceRestoreScope(): RestoreScope {
-        return this.data?.restoreSidebars === false ? 'main-only' : 'full';
+        const restoreSidebars = this.host.settingsState
+            ? this.host.settingsState.restoreSidebars
+            : this.data?.restoreSidebars !== false;
+        return restoreSidebars ? 'full' : 'main-only';
     }
 
+    /**
+     * Sidebars off means keeping the ones on screen and swapping `main`
+     * underneath them: `changeLayout` with sidebars included empties them on
+     * Windows (#92), which is what the setting exists to avoid.
+     */
     buildLayoutForRestore(layout: unknown): unknown {
         if (!layout || typeof layout !== 'object') return layout;
-        if (this.data?.restoreSidebars === false) {
-            const currentLayout = this.host.getCurrentWorkspaceLayout();
-            return mergeMainLayoutIntoCurrent(layout, currentLayout);
+        if (this.getWorkspaceRestoreScope() === 'main-only') {
+            return mergeMainLayoutIntoCurrent(layout, this.host.getCurrentWorkspaceLayout());
         }
         return layout;
     }

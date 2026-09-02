@@ -112,7 +112,6 @@ test('SessionSwitcher: layout restore scope and building', async () => {
     const { host } = createMockHost({ restoreSidebars: false });
     const switcher = new SessionSwitcher(host);
 
-    assert.equal(switcher.isSidebarRestoreEnabled(), false);
     assert.equal(switcher.getWorkspaceRestoreScope(), 'main-only');
 
     const layout = { main: { leaf: 1 } };
