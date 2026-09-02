@@ -2,15 +2,19 @@ import { type App, Modal, Notice } from 'obsidian';
 import { L } from '../i18n.ts';
 import { ConfirmModal } from './confirm-modal.ts';
 import type { SessionHistoryEntry, SessionItem } from '../storage/default-data.ts';
+import type { HistoryService } from '../state/history-service.ts';
 
 const DAY = 86400000;
 
 export interface HistoryModalPluginHost {
+    /**
+     * Owned by HistoryService; naming it keeps one list rather than a
+     * forwarding method per call on the plugin.
+     */
+    getHistoryService(): HistoryService;
+
     app: App;
-    extractFilePathsFromLayout(layout: unknown): string[];
-    countPanesInLayout(layout: unknown): number;
     restoreFromHistoryEntry(sessionId: string, index: number): Promise<boolean>;
-    isVersionHistoryConfirmRestoreEnabled(): boolean;
 }
 
 export interface HistoryDateGroup {
@@ -66,8 +70,8 @@ export class HistoryModal extends Modal {
         const timeStr = time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         infoEl.createDiv({ text: timeStr, cls: 'wpp-history-time' });
 
-        const filePaths = this.plugin.extractFilePathsFromLayout(entry.layout);
-        const paneCount = this.plugin.countPanesInLayout(entry.layout);
+        const filePaths = this.plugin.getHistoryService().extractFilePathsFromLayout(entry.layout);
+        const paneCount = this.plugin.getHistoryService().countPanesInLayout(entry.layout);
         const fileNames = filePaths.map((p) => {
             const parts = p.split('/');
             return parts[parts.length - 1]!;
@@ -100,7 +104,7 @@ export class HistoryModal extends Modal {
                     });
             };
 
-            if (this.plugin.isVersionHistoryConfirmRestoreEnabled()) {
+            if (this.plugin.getHistoryService().isVersionHistoryConfirmRestoreEnabled()) {
                 new ConfirmModal(
                     this.app,
                     (L.historyRestoreConfirm as (name: string, time: string) => string)(

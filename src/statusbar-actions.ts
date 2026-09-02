@@ -8,9 +8,16 @@ import type { HistoryModalPluginHost } from './modals/history-modal.ts';
 import type { GroupStore } from './state/group-store.ts';
 import type { SessionSaver } from './state/session-saver.ts';
 import type { SessionStore } from './state/session-store.ts';
+import type { HistoryService } from './state/history-service.ts';
 
 
 export interface StatusBarActionPluginHost extends HistoryModalPluginHost, SettingsContextMenuPluginHost {
+    /**
+     * Owned by HistoryService; naming it keeps one list rather than a
+     * forwarding method per call on the plugin.
+     */
+    getHistoryService(): HistoryService;
+
     /**
      * The session set, its ordering and the CRUD on it are owned by
      * SessionStore. Naming the store rather than restating its methods keeps
@@ -41,15 +48,12 @@ export interface StatusBarActionPluginHost extends HistoryModalPluginHost, Setti
     data: PluginData;
     searchOverlayEl?: HTMLElement | null;
     statusBarEl?: HTMLElement | null;
-    isVersionHistoryEnabled(): boolean;
-    isVersionHistoryConfirmRestoreEnabled(): boolean;
     updateStatusBar(): void;
     hideSearchOverlay(): void;
     openSearchOverlay(anchorEl?: HTMLElement | null): void;
     saveCurrentNoteNameAsSession(): Promise<unknown>;
     renameSessionById(sessionId: string, name: string): Promise<boolean>;
     switchRelativeFromStatusBar(offset: number): Promise<boolean>;
-    quickRestoreLatestHistory(): void;
     openConfirmModal?(
         message: string,
         onConfirm: () => void,
@@ -175,7 +179,7 @@ export const ACTIONS: readonly StatusBarAction[] = [
         id: 'restoreLatestHistory',
         labelKey: 'statusBarActionRestoreLatestHistory',
         run(plugin) {
-            if (!plugin.isVersionHistoryEnabled()) {
+            if (!plugin.getHistoryService().isVersionHistoryEnabled()) {
                 new Notice(String(L.historyNoEntries || ''));
                 return;
             }
@@ -184,7 +188,7 @@ export const ACTIONS: readonly StatusBarAction[] = [
                 new Notice(String(L.historyNoEntries || ''));
                 return;
             }
-            if (plugin.isVersionHistoryConfirmRestoreEnabled()) {
+            if (plugin.getHistoryService().isVersionHistoryConfirmRestoreEnabled()) {
                 const historyEntries = activeSession.history;
                 const latestSavedAt = historyEntries?.[0]?.savedAt ?? 0;
                 const latestTime = new Date(latestSavedAt)
@@ -193,11 +197,11 @@ export const ACTIONS: readonly StatusBarAction[] = [
                 const message = (L.historyRestoreConfirm as (name: string, time: string) => string)(sessionName, latestTime);
                 plugin.openConfirmModal?.(
                     message,
-                    () => { plugin.quickRestoreLatestHistory(); },
+                    () => { void plugin.getHistoryService().quickRestoreLatestHistory(); },
                     { confirmText: String(L.historyRestore || 'Restore'), confirmClass: 'mod-cta' }
                 );
             } else {
-                plugin.quickRestoreLatestHistory();
+                void plugin.getHistoryService().quickRestoreLatestHistory();
             }
         },
     },

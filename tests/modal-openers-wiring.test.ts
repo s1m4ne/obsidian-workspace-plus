@@ -52,6 +52,8 @@ function createPlugin(): TestPlugin {
         // members itself, so it stands in as its own saver.
         getSessionSaver(): never { return this as never; },
         isAutoSaveOnSwitchEnabled: () => true,
+        // Version history goes through getHistoryService(); this double carries those members itself.
+        getHistoryService(): never { return this as never; },
         isVersionHistoryConfirmRestoreEnabled: () => false,
         extractFilePathsFromLayout: () => [],
         countPanesInLayout: () => 1,

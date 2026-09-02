@@ -49,6 +49,8 @@ function createPlugin(calls, overrides = {}) {
         isAutoSaveOnSwitchEnabled() {
             return true;
         },
+        // Version history goes through getHistoryService(); this double carries those members itself.
+        getHistoryService() { return this; },
         isVersionHistoryEnabled() {
             return true;
         },

@@ -87,7 +87,10 @@ function createMockHost() {
         switchRelativeFromCommand: async (dir: number) => { calls.push(`switchRelative:${dir}`); return true; },
         saveCurrentNoteNameAsSession: async () => { calls.push('saveCurrentNote'); return true; },
         openSearchOverlay: () => { calls.push('openSearchOverlay'); },
-        isVersionHistoryEnabled: () => true,
+        // Version history goes through getHistoryService(); this double carries those members itself.
+        getHistoryService(): never {
+            return { isVersionHistoryEnabled: () => true, quickRestoreLatestHistory: async () => true } as never;
+        },
         exportSessionsSnapshot: async () => { calls.push('exportSnapshot'); },
         importSessionsFromLatestExport: async () => { calls.push('importSnapshot'); },
         showSwitchOverlay(_ordered: unknown, activeIndex: number) {

@@ -4,11 +4,18 @@ import * as obsidianInternals from './platform/obsidian-internals.ts';
 import type { SettingsState } from './state/settings-state.ts';
 import type { GroupStore } from './state/group-store.ts';
 import type { SessionSaver } from './state/session-saver.ts';
+import type { HistoryService } from './state/history-service.ts';
 
 type SettingsMenuCallbackName = 'onResetOverlay' | 'onChanged';
 type SettingsMenuCallbacks = Partial<Record<SettingsMenuCallbackName, () => void>>;
 
 export interface SettingsContextMenuPluginHost {
+    /**
+     * Owned by HistoryService; naming it keeps one list rather than a
+     * forwarding method per call on the plugin.
+     */
+    getHistoryService(): HistoryService;
+
     /**
      * Saving and the auto-save flags are owned by SessionSaver. Naming it here
      * rather than restating its methods keeps one list, the way getGroupStore()
@@ -42,7 +49,6 @@ export interface SettingsContextMenuPluginHost {
     manifest: { id: string; name?: string };
     settingTab?: { activeTab: string } | undefined;
     _lastRotationBackupAt: number;
-    isVersionHistoryEnabled(): boolean;
     extractSessionData(data: unknown): Record<string, unknown>;
     prepareRotationBackupData(sessionData: Record<string, unknown>): Record<string, unknown>;
     ensureDir(path: string): Promise<unknown>;
@@ -140,9 +146,9 @@ export function openSettingsContextMenu(initialOptions?: SettingsContextMenuOpti
     menu.addItem((mi) => {
         mi.setTitle(text(L.settingsVersionHistoryEnabled));
         mi.setIcon('history');
-        if (plugin.isVersionHistoryEnabled()) mi.setChecked(true);
+        if (plugin.getHistoryService().isVersionHistoryEnabled()) mi.setChecked(true);
         mi.onClick(() => {
-            const next = !plugin.isVersionHistoryEnabled();
+            const next = !plugin.getHistoryService().isVersionHistoryEnabled();
             void plugin.getSettingsState().setVersionHistoryEnabled(next).then(() => {
                 call(options.onChanged);
             });

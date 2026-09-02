@@ -12,9 +12,16 @@ import { isMacPlatform } from '../utils.ts';
 import type { GroupStore } from '../state/group-store.ts';
 import type { SessionSaver } from '../state/session-saver.ts';
 import type { SessionStore } from '../state/session-store.ts';
+import type { HistoryService } from '../state/history-service.ts';
 
 
 export interface CommandRegistryHost {
+    /**
+     * Owned by HistoryService; naming it keeps one list rather than a
+     * forwarding method per call on the plugin.
+     */
+    getHistoryService(): HistoryService;
+
     /**
      * The session set, its ordering and the CRUD on it are owned by
      * SessionStore. Naming the store rather than restating its methods keeps
@@ -50,7 +57,6 @@ export interface CommandRegistryHost {
     switchRelativeFromCommand(direction: number): Promise<boolean> | void;
     saveCurrentNoteNameAsSession(): Promise<boolean> | void;
     openSearchOverlay(): void;
-    isVersionHistoryEnabled(): boolean;
     exportSessionsSnapshot(): Promise<void>;
     importSessionsFromLatestExport(): Promise<void>;
     showSwitchOverlay(sessions: SessionItem[], activeIndex: number, groupId: string | null): void;
@@ -353,7 +359,7 @@ export class CommandRegistry {
             id: 'version-history',
             name: String(L.cmdVersionHistory || ''),
             checkCallback: (checking) => {
-                if (!host.isVersionHistoryEnabled()) return false;
+                if (!host.getHistoryService().isVersionHistoryEnabled()) return false;
                 const session = host.getSessionStore().getActiveSession();
                 if (!session) return false;
                 if (!checking) host.openHistoryModal(session);

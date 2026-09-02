@@ -122,6 +122,8 @@ function createTestPlugin() {
         getCurrentWorkspaceLayout: () => ({ layout: 'current' }),
         layoutsEqualStructural: (a: unknown, b: unknown): boolean => JSON.stringify(a) === JSON.stringify(b),
         getDefaultSessionName: () => sessionStore.getDefaultSessionName(),
+        // Version history goes through getHistoryService(); this double carries those members itself.
+        getHistoryService(): never { return this as never; },
         pushLayoutToHistory: (): void => {},
         createSessionRecord: (id: string, name: string, layout: unknown) => sessionStore.createSessionRecord(id, name, layout),
         insertSessionAndActivate: (session: SessionItem) => sessionStore.insertSessionAndActivate(session),

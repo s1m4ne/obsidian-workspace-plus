@@ -49,6 +49,8 @@ const menuPluginStubs = {
     // members itself, so it stands in as its own saver.
     getSessionSaver(): never { return this as never; },
     isAutoSaveOnSwitchEnabled: () => false,
+    // Version history goes through getHistoryService(); this double carries those members itself.
+    getHistoryService(): never { return this as never; },
     isVersionHistoryEnabled: () => false,
     isWarnOnUnsavedSwitchEnabled: () => false,
     moveSessionToGroupExclusive: async () => false,

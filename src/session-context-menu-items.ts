@@ -4,6 +4,7 @@ import * as obsidianInternals from './platform/obsidian-internals.ts';
 import type { SessionItem } from './storage/default-data.ts';
 import type { GroupStore } from './state/group-store.ts';
 import type { SessionSaver } from './state/session-saver.ts';
+import type { HistoryService } from './state/history-service.ts';
 
 type Action = () => unknown;
 type MoveToGroupAction = (groupId: string) => unknown;
@@ -22,6 +23,12 @@ type SessionContextMenuActionName =
 type SessionContextMenuActions = Partial<Record<SessionContextMenuActionName, Action | MoveToGroupAction | undefined>>;
 
 export interface SessionContextMenuPluginHost {
+    /**
+     * Owned by HistoryService; naming it keeps one list rather than a
+     * forwarding method per call on the plugin.
+     */
+    getHistoryService(): HistoryService;
+
     /**
      * Saving and the auto-save flags are owned by SessionSaver. Naming it here
      * rather than restating its methods keeps one list, the way getGroupStore()
@@ -45,7 +52,6 @@ export interface SessionContextMenuPluginHost {
     };
     manifest: { id: string };
     settingTab?: { activeTab: string } | undefined;
-    isVersionHistoryEnabled(): boolean;
 }
 
 export type SessionContextMenuOptions = SessionContextMenuActions & {
@@ -185,7 +191,7 @@ export function openSessionContextMenu(initialOptions?: SessionContextMenuOption
     });
 
     // Version history
-    if (plugin.isVersionHistoryEnabled()) {
+    if (plugin.getHistoryService().isVersionHistoryEnabled()) {
         menu.addItem((mi) => {
             mi.setTitle(text(L.contextVersionHistory));
             mi.setIcon('history');

@@ -66,8 +66,6 @@ interface AttachedPluginMethods {
     updateStatusBar(): void;
     scheduleStartupFlush(): void;
 
-    startHistorySnapshotTimer(): void;
-    stopHistorySnapshotTimer(): void;
 
     switchOverlayEl: HTMLElement | null;
     showSwitchPreviewOverlay(ordered: SessionItem[], index: number, viewGroupId?: string | null): void;
@@ -156,7 +154,7 @@ export class WorkspacePlusPlus extends Plugin {
             this.getSessionStore().ensureDefaultSession();
             this.syncSessionCommands();
             this.scheduleStartupFlush();
-            this.startHistorySnapshotTimer();
+            this.getHistoryService().startHistorySnapshotTimer();
             void initRotationBackupTimestampForHost(this.asHost<RotationBackupTimestampHost>());
             this.getFrontmatterLinker().registerFrontmatterListeners();
             this.getSyncWatcher().scheduleStartupChecks();
@@ -375,7 +373,7 @@ export class WorkspacePlusPlus extends Plugin {
     }
 
     override onunload(): void {
-        this.stopHistorySnapshotTimer();
+        this.getHistoryService().stopHistorySnapshotTimer();
         this.hideSwitchOverlay();
         this.hideSearchOverlay();
         this.clearSessionSwitchNotice();
@@ -504,8 +502,8 @@ export function settingsStateHost(plugin: WorkspacePlusPlus): SettingsStateHost 
         persistData: () => plugin.persistData(),
         updateStatusBar: () => { plugin.updateStatusBar(); },
         syncSessionCommands: () => { plugin.syncSessionCommands(); },
-        startHistorySnapshotTimer: () => { plugin.startHistorySnapshotTimer(); },
-        stopHistorySnapshotTimer: () => { plugin.stopHistorySnapshotTimer(); },
+        startHistorySnapshotTimer: () => { plugin.getHistoryService().startHistorySnapshotTimer(); },
+        stopHistorySnapshotTimer: () => { plugin.getHistoryService().stopHistorySnapshotTimer(); },
     };
 }
 
@@ -583,8 +581,8 @@ export function sessionSaverHost(plugin: WorkspacePlusPlus): SessionSaverHost {
         createSessionRecord: (id, name, layout, options) =>
             plugin.getSessionStore().createSessionRecord(id, name, layout, options),
         insertSessionAndActivate: (session) => { plugin.getSessionStore().insertSessionAndActivate(session); },
-        startHistorySnapshotTimer: () => { plugin.startHistorySnapshotTimer(); },
-        stopHistorySnapshotTimer: () => { plugin.stopHistorySnapshotTimer(); },
+        startHistorySnapshotTimer: () => { plugin.getHistoryService().startHistorySnapshotTimer(); },
+        stopHistorySnapshotTimer: () => { plugin.getHistoryService().stopHistorySnapshotTimer(); },
         applyWorkspaceLayout: (layout) => plugin.getSessionSwitcher().applyWorkspaceLayout(layout),
         getOrderedSessionsUnfiltered: () => plugin.getSessionStore().getOrderedSessionsUnfiltered(),
         getOrderedGroupTabIds: () => plugin.getGroupStore().getOrderedGroupTabIds(),

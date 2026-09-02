@@ -66,6 +66,8 @@ function createPlugin(overrides = {}) {
         getSessionSaver() { return this; },
         isAutoSaveOnSwitchEnabled() { return this.data.autoSaveOnSwitch; },
         isWarnOnUnsavedSwitchEnabled() { return this.data.warnOnUnsavedSwitch; },
+        // Version history goes through getHistoryService(); this double carries those members itself.
+        getHistoryService() { return this; },
         isVersionHistoryEnabled() { return this.data.versionHistoryEnabled; },
         // Group calls go through plugin.getGroupStore() now. This double records
         // the group methods itself, so it is its own group store and every

@@ -169,8 +169,6 @@ test('the SessionSwitcher host reaches the collaborator each member names', () =
 
 test('the SettingsState host reaches the collaborator each member names', () => {
     const { plugin, calls } = createPlugin();
-    plugin.startHistorySnapshotTimer = (): void => { calls.push('plugin.startHistorySnapshotTimer'); };
-    plugin.stopHistorySnapshotTimer = (): void => { calls.push('plugin.stopHistorySnapshotTimer'); };
     const host = settingsStateHost(asPlugin(plugin));
 
     void host.persistData();
@@ -183,8 +181,8 @@ test('the SettingsState host reaches the collaborator each member names', () => 
         'plugin.persistData',
         'plugin.updateStatusBar',
         'plugin.syncSessionCommands',
-        'plugin.startHistorySnapshotTimer',
-        'plugin.stopHistorySnapshotTimer',
+        'historyService.startHistorySnapshotTimer',
+        'historyService.stopHistorySnapshotTimer',
     ]);
 });
 
@@ -241,8 +239,6 @@ test('the HistoryService host reaches the collaborator each member names', () =>
 
 test('the SessionSaver host reaches the collaborator each member names', () => {
     const { plugin, calls } = createPlugin();
-    plugin.startHistorySnapshotTimer = (): void => { calls.push('plugin.startHistorySnapshotTimer'); };
-    plugin.stopHistorySnapshotTimer = (): void => { calls.push('plugin.stopHistorySnapshotTimer'); };
     const host = sessionSaverHost(asPlugin(plugin));
 
     host.getActiveSession();
@@ -273,8 +269,8 @@ test('the SessionSaver host reaches the collaborator each member names', () => {
         'plugin.persistData',
         'sessionStore.createSessionRecord',
         'sessionStore.insertSessionAndActivate',
-        'plugin.startHistorySnapshotTimer',
-        'plugin.stopHistorySnapshotTimer',
+        'historyService.startHistorySnapshotTimer',
+        'historyService.stopHistorySnapshotTimer',
         'sessionSwitcher.applyWorkspaceLayout',
         'sessionStore.getOrderedSessionsUnfiltered',
         'groupStore.getOrderedGroupTabIds',

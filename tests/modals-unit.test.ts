@@ -157,6 +157,8 @@ test('HistoryModal: groups entries by date and renders summary and restore butto
 
     const mockPlugin = {
         app,
+        // Version history goes through getHistoryService(); this double carries those members itself.
+        getHistoryService(): never { return this as never; },
         extractFilePathsFromLayout: () => ['notes/A.md', 'notes/B.md'],
         countPanesInLayout: () => 2,
         restoreFromHistoryEntry: async (id: string, idx: number) => {

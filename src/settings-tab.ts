@@ -21,6 +21,7 @@ import type { SettingsState } from './state/settings-state.ts';
 import type { GroupStore } from './state/group-store.ts';
 import type { SessionSaver } from './state/session-saver.ts';
 import type { SessionStore } from './state/session-store.ts';
+import type { HistoryService } from './state/history-service.ts';
 
 export interface StorageDiagnosticsInfo {
     syncedByObsidianSync: boolean;
@@ -32,6 +33,12 @@ export interface StorageDiagnosticsInfo {
 }
 
 export interface SettingsTabHost extends GroupSessionsModalHost {
+    /**
+     * Owned by HistoryService; naming it keeps one list rather than a
+     * forwarding method per call on the plugin.
+     */
+    getHistoryService(): HistoryService;
+
     /**
      * The session set, its ordering and the CRUD on it are owned by
      * SessionStore. Naming the store rather than restating its methods keeps
@@ -92,9 +99,6 @@ export interface SettingsTabHost extends GroupSessionsModalHost {
 
 
 
-    isVersionHistoryEnabled(): boolean;
-    getVersionHistorySnapshotInterval(): number;
-    isVersionHistoryConfirmRestoreEnabled(): boolean;
 
     extractSessionData(data: unknown): Record<string, unknown>;
     prepareRotationBackupData(sessionData: unknown): Record<string, unknown>;
@@ -499,7 +503,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
     private displayVersionHistory(contentEl: HTMLElement): void {
         this.addSection(contentEl, L.historyTitle);
 
-        const versionHistoryEnabled = this.plugin.isVersionHistoryEnabled();
+        const versionHistoryEnabled = this.plugin.getHistoryService().isVersionHistoryEnabled();
         const vhMasterSetting = new Setting(contentEl)
             .setName(text(L.settingsVersionHistoryEnabled))
             .setDesc(text(L.settingsVersionHistoryEnabledDesc))
@@ -523,7 +527,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
                     for (const minutes of ['1', '2', '5', '10', '15', '30']) {
                         dropdown.addOption(minutes, minutes);
                     }
-                    dropdown.setValue(String(this.plugin.getVersionHistorySnapshotInterval()));
+                    dropdown.setValue(String(this.plugin.getHistoryService().getVersionHistorySnapshotInterval()));
                     if (!versionHistoryEnabled) dropdown.setDisabled(true);
                     dropdown.onChange((value) => { void this.plugin.getSettingsState().setVersionHistorySnapshotInterval(value); });
                 });
@@ -532,7 +536,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
         addToggleSetting(vhNestedDiv, {
             name: text(L.settingsVersionHistoryConfirmRestore),
             desc: text(L.settingsVersionHistoryConfirmRestoreDesc),
-            value: this.plugin.isVersionHistoryConfirmRestoreEnabled(),
+            value: this.plugin.getHistoryService().isVersionHistoryConfirmRestoreEnabled(),
             disabled: !versionHistoryEnabled,
             onChange: (value) => { void this.plugin.getSettingsState().setVersionHistoryConfirmRestore(value); },
         });

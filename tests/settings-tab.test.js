@@ -60,6 +60,8 @@ function createPlugin(overrides = {}) {
         isWarnOnUnsavedSwitchEnabled() { return data.warnOnUnsavedSwitch; },
         isUnsavedStatusBarHighlightEnabled() { return false; },
         isSidebarRestoreEnabled() { return false; },
+        // Version history goes through getHistoryService(); this double carries those members itself.
+        getHistoryService() { return this; },
         isVersionHistoryEnabled() { return data.versionHistoryEnabled; },
         isVersionHistoryConfirmRestoreEnabled() { return data.versionHistoryConfirmRestore; },
         // Group calls go through plugin.getGroupStore() now. This double records
