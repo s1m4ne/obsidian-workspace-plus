@@ -926,10 +926,10 @@ body.wpp-session-list-dragging * {
     padding: 24px 0;
 }
 
-/* Two classes rather than `!important`. The element carries both, so this is a
-   0,2,0 selector and beats any single-class rule a theme might set - which is
-   what the `!important` was defending against. It has to hold: the clone is
-   measured with offsetWidth and a theme making it visible would flash it on
+/* Two classes rather than a forced override. The element carries both, so this
+   is a 0,2,0 selector and beats any single-class rule a theme might set, which
+   is what the forced version was defending against. It has to hold: the clone
+   is measured with offsetWidth and a theme making it visible would flash it on
    screen. */
 .wpp-switch-overlay.wpp-measure-overlay {
     visibility: hidden;
