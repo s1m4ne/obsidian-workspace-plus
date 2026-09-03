@@ -1346,3 +1346,21 @@ test('the doors are in the order the maintainer set, and the count is last on it
         assert.equal(names[names.length - 1], L.settingsBackupGenerations);
     } finally { await settle(); h.restore(); }
 });
+
+test('the language dropdown offers auto first, then the languages by ISO code', async () => {
+    const h = setupHarness();
+    try {
+        const { tab, L } = makeTab(h);
+        const row = rowNamed(tab.getSettingDefinitions(), L.settingsLanguage);
+        const codes = Object.keys(row.control.options);
+
+        assert.equal(codes[0], 'auto');
+        const languages = codes.slice(1);
+        // Obsidian's own list is Object.keys(languages).sort() shown by
+        // endonym; matching it means one rule and no guessing about where a
+        // new language goes.
+        assert.deepEqual(languages, [...languages].sort());
+        assert.equal(languages.length, 21);
+        assert.equal(row.control.options.ja, '日本語');
+    } finally { await settle(); h.restore(); }
+});

@@ -7250,32 +7250,40 @@ for (const sessionStorageLang of Object.keys(STRINGS)) {
     }
 }
 
+/**
+ * The languages, by ISO code.
+ *
+ * Obsidian's own list is `Object.keys(languages).sort()` displayed by endonym,
+ * so this matches it: one rule, and no argument about where a new language
+ * goes. It replaced an order with no stated rule - English, then CJK, then
+ * Europe - which nobody could extend without guessing.
+ */
 export const LANG_OPTIONS: Record<string, string> = {
+    ar: 'العربية',
+    bn: 'বাংলা',
+    de: 'Deutsch',
     en: 'English',
-    zh: '简体中文',
-    'zh-TW': '繁體中文',
+    es: 'Español',
+    fa: 'فارسی',
+    fr: 'Français',
+    hi: 'हिन्दी',
+    id: 'Bahasa Indonesia',
+    it: 'Italiano',
     ja: '日本語',
     ko: '한국어',
-    es: 'Español',
-    fr: 'Français',
-    ar: 'العربية',
-    pt: 'Português',
-    ru: 'Русский',
-    de: 'Deutsch',
-    it: 'Italiano',
-    tr: 'Türkçe',
-    id: 'Bahasa Indonesia',
-    vi: 'Tiếng Việt',
-    th: 'ไทย',
-    hi: 'हिन्दी',
-    bn: 'বাংলা',
-    fa: 'فارسی',
     ms: 'Bahasa Melayu',
     pl: 'Polski',
+    pt: 'Português',
+    ru: 'Русский',
+    th: 'ไทย',
+    tr: 'Türkçe',
+    vi: 'Tiếng Việt',
+    zh: '简体中文',
+    'zh-TW': '繁體中文',
 };
-
 export const LANG_ORDER: string[] = [
-    'en', 'zh', 'zh-TW', 'ja', 'ko', 'es', 'fr', 'ar', 'pt', 'ru', 'de', 'it', 'tr', 'id', 'vi', 'th', 'hi', 'bn', 'fa', 'ms', 'pl'
+    'ar', 'bn', 'de', 'en', 'es', 'fa', 'fr', 'hi', 'id', 'it', 'ja',
+    'ko', 'ms', 'pl', 'pt', 'ru', 'th', 'tr', 'vi', 'zh', 'zh-TW',
 ];
 
 export { STRINGS, ruPlural, arPlural, platformLabel, modifiedClickLabel };

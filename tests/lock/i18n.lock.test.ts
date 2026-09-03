@@ -14,9 +14,16 @@ import assert from 'node:assert/strict';
 import { setupHarness } from './harness/index.ts';
 import { PLATFORM } from './harness/dom.ts';
 
+// Reordered with the maintainer's authorization, to ISO code order - which is
+// what Obsidian's own language list is: `Object.keys(languages).sort()`,
+// displayed by endonym. The previous order had no stated rule (English, then
+// CJK, then Europe, then the rest), so nobody could place a new language
+// without guessing. The set is unchanged and so is every value; this lock
+// pinned the order, which is why it is edited here rather than in the values
+// lock.
 const EXPECTED_LOCALES = [
-    'en', 'zh', 'zh-TW', 'ja', 'ko', 'es', 'fr', 'ar', 'pt', 'ru',
-    'de', 'it', 'tr', 'id', 'vi', 'th', 'hi', 'bn', 'fa', 'ms', 'pl',
+    'ar', 'bn', 'de', 'en', 'es', 'fa', 'fr', 'hi', 'id', 'it', 'ja',
+    'ko', 'ms', 'pl', 'pt', 'ru', 'th', 'tr', 'vi', 'zh', 'zh-TW',
 ] as const;
 
 // 318 -> 319 -> 321 -> 316 with the maintainer's authorization: a description
