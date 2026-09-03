@@ -1,8 +1,8 @@
 // Behavior Lock: i18n
 //
 // Locks the resolved i18n fixed point after all 6 string tables and 5 merge
-// loops have executed. Captures all 319 keys across all 21 locales, calling
-// all 63 function-valued keys with representative arguments (including Russian
+// loops have executed. Captures all 310 keys across all 21 locales, calling
+// all 62 function-valued keys with representative arguments (including Russian
 // 3-form and Arabic 4-form plurals) and under both Mac and Windows platforms.
 //
 // Also locks the language resolution logic and the P15 language-switch path.
@@ -29,10 +29,14 @@ const EXPECTED_LOCALES = [
 // 318 -> 319 -> 321 -> 316 with the maintainer's authorization: a description
 // for the status-bar page, the two keys the backup pool's generation count
 // needs, the five belonging to the overlay focus setting that was dropped, and
-// then three for the settings wording pass.
+// then three for the settings wording pass, and finally nine removed - the
+// keys nothing referred to once the tab bar, the storage read-out and the
+// diagnostics card were gone.
 // See the notes in i18n-values.lock.test.ts, which carry the reasons.
-const EXPECTED_KEY_COUNT = 319;
-const EXPECTED_FUNCTION_KEY_COUNT = 63;
+const EXPECTED_KEY_COUNT = 310;
+// 63 -> 62: settingsSessionStorageLocationDesc took a path and is one of the
+// nine keys the wording pass deleted.
+const EXPECTED_FUNCTION_KEY_COUNT = 62;
 
 interface I18nModule {
     LANG_OPTIONS: Record<string, string>;
@@ -64,7 +68,7 @@ test('i18n exposes all 21 supported locales in LANG_ORDER and LANG_OPTIONS', asy
     }
 });
 
-test('every locale contains exactly all 319 keys and matches English keys', async () => {
+test('every locale contains exactly all 310 keys and matches English keys', async () => {
     const h = setupHarness();
     try {
         const i18n = await loadI18n();
@@ -255,7 +259,7 @@ test('plural rules execute correctly across representative values in Russian, Ar
     }
 });
 
-test('all 63 function keys evaluate without errors across all 21 locales with representative arguments', async () => {
+test('all 62 function keys evaluate without errors across all 21 locales with representative arguments', async () => {
     const h = setupHarness();
     try {
         const i18n = await loadI18n();
@@ -388,16 +392,17 @@ test('precedence and table merge consistency across all 6 string tables', async 
         assert.equal((en.savedCurrentNoteNameAsSession as (n: string) => string)('MyNote'), 'Saved current note as session "MyNote"');
 
         // From RESET_STRINGS
-        assert.equal(en.settingsResetBackupsAndHistory, 'Delete backups and version history');
+        assert.equal(en.settingsResetBackupsAndHistory, 'Delete backups and history');
         assert.equal(en.settingsResetSessionsAndSettings, 'Reset all');
 
         // From RESTORE_STRINGS
         assert.equal(en.settingsSubsectionSessionRestore, 'Session restore');
-        assert.equal(en.settingsRestoreSidebars, 'Restore sidebars');
+        assert.equal(en.settingsRestoreSidebars, 'Save the sidebar state');
 
-        // From SESSION_STORAGE_STRINGS
-        assert.equal(en.settingsSessionStorageLocation, 'Session storage location');
-        assert.equal(en.settingsVaultOnlySessions, 'Keep sessions in this vault only');
+        // From SESSION_STORAGE_STRINGS. The location read-out that used to be
+        // probed here is one of the nine keys deleted in the wording pass, so
+        // the toggle is what proves this table still wins.
+        assert.equal(en.settingsVaultOnlySessions, 'Store sessions inside the vault');
         assert.equal((en.sessionStorageMoved as (p: string) => string)('path/to/sessions.json'), 'Workspace++: Session storage moved to path/to/sessions.json');
     } finally {
         h.restore();
