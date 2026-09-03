@@ -88,36 +88,18 @@ test('SessionStorage: history write, read and attach round-trip', async () => {
     assert.deepEqual(attached.sessions.s1?.history, [{ timestamp: 1234, layout: {} }]);
 });
 
-test('storage backup functions: prepare data and rotate backups', async () => {
-    const {
-        getBackupPlatformLabel,
-        prepareRotationBackupData,
-        initRotationBackupTimestamp,
-        rotateBackupIfNeeded,
-        getRotationBackupInfo,
-    } = await import('../src/storage/storage-backup.ts');
+test('storage backup functions: platform label and payload preparation', async () => {
+    const { getBackupPlatformLabel, prepareRotationBackupData } =
+        await import('../src/storage/storage-backup.ts');
 
-    const adapter = new MemoryStorageAdapter();
-    const store = new JsonFileStore(adapter);
-
-    const platformLabel = getBackupPlatformLabel();
-    assert.equal(typeof platformLabel, 'string');
+    assert.equal(typeof getBackupPlatformLabel(), 'string');
 
     const data = prepareRotationBackupData({ sessions: { s1: {} } });
     assert.ok('sessions' in data);
-
-    const getBackupPath = (gen: number) => `backups/sessions.${gen}.json`;
-
-    adapter.files.set(getBackupPath(1), JSON.stringify({ _wppSavedAt: 5000 }));
-    const stamp = await initRotationBackupTimestamp(store, getBackupPath(1));
-    assert.equal(stamp, 5000);
-
-    const now = 10000000;
-    const newStamp = await rotateBackupIfNeeded(store, 'backups', getBackupPath, stamp, { sessions: { s1: {} } }, now);
-    assert.equal(newStamp, now);
-
-    const info = await getRotationBackupInfo(store, getBackupPath);
-    assert.ok(info.length >= 1);
+    // The label is what tells two machines' backups apart in the list. It is
+    // absent rather than empty when the platform cannot be named.
+    const label = getBackupPlatformLabel();
+    assert.equal(data._wppBackupPlatform ?? '', label);
 });
 
 test('storage transfer functions: formatting, payload creation and latest file search', async () => {

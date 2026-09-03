@@ -54,7 +54,7 @@ function backupRow(ctx: SettingsContext, backup: RotationBackupInfo, now: number
                         // is deliberately not awaited - the screen is re-read
                         // when it lands.
                         () => {
-                            void ctx.plugin.restoreFromRotationBackup(backup.generation).then((ok) => {
+                            void ctx.plugin.restoreFromRotationBackup(backup.path).then((ok) => {
                                 if (ok) ctx.update();
                             });
                         },
@@ -125,6 +125,10 @@ export function backupPage(
     return {
         type: 'page',
         name: text(L.rotationBackupSectionTitle),
+        // NOTE: `rotationBackupDesc` still says "hourly, up to 3 generations"
+        // in all 21 locales. The count is a setting now and defaults to 5, and
+        // the schedule is a ladder rather than an hourly ring, so this string
+        // is wrong. Left for the wording pass, which owns every locale change.
         desc: text(L.rotationBackupDesc),
         // When the newest backup was taken. The one summary worth keeping on a
         // door: it answers "am I covered?" without opening it. Three

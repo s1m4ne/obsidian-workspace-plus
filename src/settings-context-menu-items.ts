@@ -55,8 +55,12 @@ export interface SettingsContextMenuPluginHost {
     prepareRotationBackupData(sessionData: Record<string, unknown>): Record<string, unknown>;
     ensureDir(path: string): Promise<unknown>;
     getBackupsDirPath(): string;
-    copyFileIfExists(sourcePath: string, destinationPath: string): Promise<unknown>;
     getRotationBackupPath(generation: number): string;
+    getBackupGenerations(): number;
+    removeIfExists(path: string): Promise<void>;
+    listDir(path: string): Promise<{ files: string[] } | null>;
+    statSize(path: string): Promise<number | null>;
+    copyFileIfExists(sourcePath: string, destinationPath: string): Promise<unknown>;
     writeJson(path: string, data: unknown): Promise<unknown>;
     readJsonIfExists<T = unknown>(path: string): Promise<ReadJsonResult<T>>;
 }

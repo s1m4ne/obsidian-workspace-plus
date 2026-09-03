@@ -3,8 +3,10 @@ import { L, resolveLocale, type StringValue } from '../i18n.ts';
 import { DEFAULT_DATA, SESSION_KEYS, SETTINGS_KEYS, type PluginData, type SessionGroup, type SessionItem } from './default-data.ts';
 import { JsonFileStore, type ReadJsonResult, type StorageAdapter } from './json-file-store.ts';
 import * as migrations from './migrations.ts';
-import { normalizeSessionStorageLocation, type SessionStorageLocation } from './paths.ts';
+import { normalizeSessionStorageLocation, SESSION_STORAGE_PLUGIN, SESSION_STORAGE_VAULT, type SessionStorageLocation } from './paths.ts';
 import { SessionStorage } from './session-storage.ts';
+import { BACKUP_GENERATION_CHOICES, DEFAULT_BACKUP_GENERATIONS } from './backup-pool.ts';
+import { removeAllRotationBackups } from './backup-store.ts';
 import { getPersistStamp, hasNonEmptySessions, hasSessionShape, pickKeys, pickSessionPayload, splitSessionHistory } from './session-data.ts';
 
 export type DataRecord = Record<string, unknown>;
@@ -36,6 +38,9 @@ export type SessionData = DataRecord & {
 
 interface VaultAdapter extends StorageAdapter {
     stat(normalizedPath: string): Promise<{ mtime: number; size?: number } | null>;
+    // The backup pool is a directory rather than three known names, so it has
+    // to be read to be known.
+    list(normalizedPath: string): Promise<{ files: string[]; folders: string[] }>;
 }
 
 export interface PersistenceServiceHost {
@@ -143,10 +148,34 @@ export class PersistenceService {
     attachSessionHistory(sessionData: unknown): Promise<unknown> { return this.getSessionStorage().attachSessionHistory(sessionData); }
     getExportDirPath(): string { return this.getSessionStorage().getExportDirPath(); }
     getBackupsDirPath(): string { return this.getSessionStorage().getBackupsDirPath(); }
+    getBackupsDirPathForLocation(location?: unknown): string { return this.getSessionStorage().getBackupsDirPathForLocation(location); }
     getRotationBackupPath(generation: number): string { return this.getSessionStorage().getRotationBackupPath(generation); }
     getRotationBackupPathForLocation(location: unknown, generation: number): string { return this.getSessionStorage().getRotationBackupPathForLocation(location, generation); }
     getSessionBackupFilePathsForLocation(location?: unknown): string[] { return this.getSessionStorage().getSessionBackupFilePathsForLocation(location); }
     getBackupFilePaths(): string[] { return this.getSessionStorage().getBackupFilePaths(); }
+
+    /** How many rotating backups to keep. @see backup-pool.ts */
+    getBackupGenerations(): number {
+        const stored = (this.data as Record<string, unknown>).rotationBackupGenerations;
+        return BACKUP_GENERATION_CHOICES.includes(Number(stored))
+            ? Number(stored)
+            : DEFAULT_BACKUP_GENERATIONS;
+    }
+
+    async listDir(path: string): Promise<{ files: string[] } | null> {
+        try {
+            const adapter = this.host.app.vault.adapter;
+            if (!(await adapter.exists(path))) return null;
+            return await adapter.list(path);
+        } catch { return null; }
+    }
+
+    async statSize(path: string): Promise<number | null> {
+        try {
+            const stat = await this.host.app.vault.adapter.stat(path);
+            return stat && typeof stat.size === 'number' ? stat.size : null;
+        } catch { return null; }
+    }
 
     getDefaultSettingsData(): DataRecord { return pickKeys(DEFAULT_DATA, SETTINGS_KEYS); }
     getDefaultSessionData(): DataRecord { return pickKeys(DEFAULT_DATA, SESSION_KEYS); }
@@ -325,6 +354,12 @@ export class PersistenceService {
         return this.host.clearBackupFiles();
     }
     async clearBackupFiles(): Promise<boolean> {
+        // The rotating backups are a directory now, so they are listed rather
+        // than named - and for both locations, the way getBackupFilePaths()
+        // names both: a reset has to clear what an earlier storage mode left.
+        for (const location of [SESSION_STORAGE_VAULT, SESSION_STORAGE_PLUGIN]) {
+            await removeAllRotationBackups(this, this.getBackupsDirPathForLocation(location));
+        }
         await Promise.all(this.getBackupFilePaths().map((path) => this.removeIfExists(path)));
         this.lastRotationBackupAt = 0;
         return true;

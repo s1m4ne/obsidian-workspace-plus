@@ -85,6 +85,8 @@ export interface PluginData {
     activeGroupId: string | null;
     versionHistoryEnabled: boolean;
     versionHistorySnapshotInterval: number;
+    /** How many rotating backups to keep. @see storage/backup-pool.ts */
+    rotationBackupGenerations: number;
     versionHistoryCtrlRmbRestore: boolean;
     versionHistoryConfirmRestore: boolean;
     statusBarModScrollSwitch: boolean;
@@ -131,6 +133,7 @@ export const DEFAULT_DATA: PluginData = {
     activeGroupId: null,
     versionHistoryEnabled: true,
     versionHistorySnapshotInterval: 5,
+    rotationBackupGenerations: 5,
     versionHistoryCtrlRmbRestore: true,
     versionHistoryConfirmRestore: true,
     statusBarModScrollSwitch: false,
@@ -173,6 +176,7 @@ export const SETTINGS_KEYS: readonly string[] = [
     'searchOverlaySize',
     'versionHistoryEnabled',
     'versionHistorySnapshotInterval',
+    'rotationBackupGenerations',
     'versionHistoryCtrlRmbRestore',
     'versionHistoryConfirmRestore',
     'statusBarScrollPreset',

@@ -93,6 +93,10 @@ const menuPluginStubs = {
     getRotationBackupPath: (generation: number) => `backups/sessions.${generation}.json`,
     writeJson: async () => {},
     readJsonIfExists: async () => ({ exists: false, data: null, error: null }),
+    getBackupGenerations: () => 5,
+    removeIfExists: async () => {},
+    listDir: async () => null,
+    statSize: async () => null,
 };
 
 test('StatusBarController: preset configs and normalization', () => {

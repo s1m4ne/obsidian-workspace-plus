@@ -69,6 +69,12 @@ function createPlugin(initialData) {
         readJsonIfExists: (path) => persistenceService.getJsonStore().readJsonIfExists(path),
         getFileMtime: (path) => persistenceService.getJsonStore().getFileMtime(path),
         getRotationBackupPath: (generation) => persistenceService.getRotationBackupPath(generation),
+        // The backup pool is a directory, so it needs a listing and a size.
+        getBackupsDirPath: () => persistenceService.getBackupsDirPath(),
+        getBackupGenerations: () => persistenceService.getBackupGenerations(),
+        removeIfExists: (path) => persistenceService.removeIfExists(path),
+        listDir: (path) => persistenceService.listDir(path),
+        statSize: (path) => persistenceService.statSize(path),
         loadSessionDataFromStorage: () => persistenceService.loadSessionDataFromStorage(),
         recordSessionStorageState: function (stamp, mtime, sessionData) {
             return sessionSync.recordSessionStorageState(host, stamp, mtime, sessionData);
@@ -120,6 +126,7 @@ function createPlugin(initialData) {
         clearSessionStorageSyncTimers: () => sessionSync.clearSessionStorageSyncTimers(host),
         onExternalSettingsChange: () => sessionSync.onExternalSettingsChange(host),
         getRotationBackupInfo: () => storageBackup.getRotationBackupInfoForHost(host),
+        getBackupsDirPath: () => persistenceService.getBackupsDirPath(),
     };
 }
 
@@ -299,13 +306,15 @@ test('rotation backup data records the current platform label', function () {
     assert.equal(sessionData._wppBackupPlatform, undefined);
 });
 
-test('rotation backup info includes saved platform labels', async function () {
+test('rotation backup info carries the platform that took each backup', async function () {
     const plugin = createPlugin();
-    plugin.host.getRotationBackupPath = function (generation) {
-        return 'sessions.' + generation + '.json';
+    const dir = plugin.getBackupsDirPath();
+    plugin.host.app.vault.adapter.list = function () {
+        return Promise.resolve({ files: [dir + '/sessions.123.json'], folders: [] });
     };
+    plugin.host.app.vault.adapter.exists = function () { return Promise.resolve(true); };
     plugin.host.readJsonIfExists = function (path) {
-        if (path === 'sessions.1.json') {
+        if (path === dir + '/sessions.123.json') {
             return Promise.resolve({
                 exists: true,
                 data: {
@@ -324,12 +333,15 @@ test('rotation backup info includes saved platform labels', async function () {
 
     const backups = await plugin.getRotationBackupInfo();
 
-    assert.deepEqual(backups, [{
-        generation: 1,
-        savedAt: 123,
-        sessionCount: 2,
-        backupPlatform: 'Windows',
-    }]);
+    // The label is what tells one machine's backups from another's once they
+    // meet in a synced folder.
+    assert.equal(backups.length, 1);
+    assert.equal(backups[0].generation, 1);
+    assert.equal(backups[0].savedAt, 123);
+    assert.equal(backups[0].sessionCount, 2);
+    assert.equal(backups[0].backupPlatform, 'Windows');
+    assert.equal(backups[0].manual, false);
+    assert.equal(backups[0].path, dir + '/sessions.123.json');
 });
 
 test('session storage defaults new installs to the Obsidian plugin folder', async function () {

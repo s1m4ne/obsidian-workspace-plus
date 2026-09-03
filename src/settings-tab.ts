@@ -104,6 +104,11 @@ export interface SettingsTabHost {
     prepareRotationBackupData(sessionData: unknown): Record<string, unknown>;
     ensureDir(path: string): Promise<unknown>;
     getBackupsDirPath(): string;
+    getRotationBackupPath(generation: number): string;
+    getBackupGenerations(): number;
+    removeIfExists(path: string): Promise<void>;
+    listDir(path: string): Promise<{ files: string[] } | null>;
+    statSize(path: string): Promise<number | null>;
     copyFileIfExists(from: string, to: string): Promise<unknown>;
     getRotationBackupPath(generation: number): string;
     writeJson(path: string, data: unknown): Promise<unknown>;
@@ -111,7 +116,7 @@ export interface SettingsTabHost {
     // rotates a generation off the end.
     readJsonIfExists<T = unknown>(path: string): Promise<ReadJsonResult<T>>;
     getRotationBackupInfo(): Promise<RotationBackupInfo[]>;
-    restoreFromRotationBackup(generation: number): Promise<boolean>;
+    restoreFromRotationBackup(path: string): Promise<boolean>;
 
 
     getSessionsPath(): string;

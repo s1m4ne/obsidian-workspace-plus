@@ -301,6 +301,23 @@ export class WorkspacePlusPlus extends Plugin {
         return this.getPersistenceService().getRotationBackupPath(generation);
     }
 
+    /** @see backup-pool.ts */
+    getBackupGenerations(): number {
+        return this.getPersistenceService().getBackupGenerations();
+    }
+
+    removeIfExists(path: string): Promise<void> {
+        return this.getPersistenceService().removeIfExists(path);
+    }
+
+    listDir(path: string): Promise<{ files: string[] } | null> {
+        return this.getPersistenceService().listDir(path);
+    }
+
+    statSize(path: string): Promise<number | null> {
+        return this.getPersistenceService().statSize(path);
+    }
+
     extractSessionData(data: unknown): SessionData {
         return this.getPersistenceService().extractSessionData(data);
     }
@@ -428,8 +445,8 @@ export class WorkspacePlusPlus extends Plugin {
         return getRotationBackupInfoForHost(this.asHost<RotationBackupTimestampHost>());
     }
 
-    restoreFromRotationBackup(generation: number): Promise<boolean> {
-        return restoreFromRotationBackup(this.asHost<StorageRestoreHost>(), generation);
+    restoreFromRotationBackup(path: string): Promise<boolean> {
+        return restoreFromRotationBackup(this.asHost<StorageRestoreHost>(), path);
     }
 
     // ---------------------------------------------------------------------

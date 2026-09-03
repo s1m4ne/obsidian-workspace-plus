@@ -1,16 +1,28 @@
 import { Notice, Platform } from 'obsidian';
 import { L, formatString } from '../i18n.ts';
-import { getPersistStamp, hasSessionShape, hasNonEmptySessions } from './session-data.ts';
-import type { JsonFileStore, ReadJsonResult } from './json-file-store.ts';
+import { hasSessionShape, hasNonEmptySessions } from './session-data.ts';
+import type { ReadJsonResult } from './json-file-store.ts';
+import {
+    listRotationBackups,
+    newestBackupStamp,
+    writeRotationBackup,
+    type BackupStoreHost,
+} from './backup-store.ts';
 import type { PluginData, SessionGroup, SessionItem } from './default-data.ts';
 
 export const BACKUP_ROTATION_INTERVAL = 3600000; // 1 hour
 
 export interface RotationBackupInfo {
+    /** Display position, newest first. Not an identity - the pool renumbers. */
     generation: number;
+    /** The identity: a backup is its file. */
+    path: string;
     savedAt: number;
     sessionCount: number;
     backupPlatform: string;
+    /** Asked for by the user rather than taken on a timer. */
+    manual: boolean;
+    size?: number | undefined;
 }
 
 export type ReadJsonFn = <T = unknown>(path: string) => Promise<ReadJsonResult<T>>;
@@ -34,110 +46,13 @@ export function prepareRotationBackupData(sessionData: unknown): Record<string, 
     return backupData;
 }
 
-export async function initRotationBackupTimestamp(
-    reader: ReadJsonFn | JsonFileStore,
-    path: string
-): Promise<number> {
-    try {
-        const readFn = typeof reader === 'function' ? reader : (p: string) => reader.readJsonIfExists(p);
-        const res = await readFn(path);
-        if (res.exists && res.data) {
-            return getPersistStamp(res.data) || 0;
-        }
-        return 0;
-    } catch {
-        return 0;
-    }
-}
-
-export async function rotateBackupIfNeeded(
-    store: JsonFileStore,
-    backupsDir: string,
-    getBackupPath: (generation: number) => string,
-    lastBackupAt: number,
-    sessionData: unknown,
-    now: number = Date.now()
-): Promise<number> {
-    if (now - (lastBackupAt || 0) < BACKUP_ROTATION_INTERVAL) {
-        return lastBackupAt;
-    }
-
-    try {
-        await store.ensureDir(backupsDir);
-
-        // Shift generations: 2 -> 3, 1 -> 2
-        const p2 = getBackupPath(2);
-        const p3 = getBackupPath(3);
-        const res2 = await store.readJsonIfExists(p2);
-        if (res2.exists && res2.data !== null) {
-            await store.writeJson(p3, res2.data);
-        }
-
-        const p1 = getBackupPath(1);
-        const res1 = await store.readJsonIfExists(p1);
-        if (res1.exists && res1.data !== null) {
-            await store.writeJson(p2, res1.data);
-        }
-
-        // Write current data as generation 1
-        await store.writeJson(p1, prepareRotationBackupData(sessionData));
-        return now;
-    } catch {
-        return lastBackupAt;
-    }
-}
-
-export async function getRotationBackupInfo(
-    reader: ReadJsonFn | JsonFileStore,
-    getBackupPath: (generation: number) => string
-): Promise<RotationBackupInfo[]> {
-    const results: RotationBackupInfo[] = [];
-    const readFn = typeof reader === 'function' ? reader : (p: string) => reader.readJsonIfExists(p);
-
-    async function readGeneration(n: number): Promise<RotationBackupInfo | null> {
-        try {
-            const res = await readFn(getBackupPath(n));
-            if (!res.exists || !res.data) return null;
-            const data = res.data as Record<string, unknown>;
-            const stamp = getPersistStamp(data);
-            const sessions = data.sessions;
-            const count = (sessions && typeof sessions === 'object')
-                ? Object.keys(sessions).length : 0;
-            const platform = typeof data._wppBackupPlatform === 'string'
-                ? data._wppBackupPlatform
-                : '';
-            return {
-                generation: n,
-                savedAt: stamp,
-                sessionCount: count,
-                backupPlatform: platform,
-            };
-        } catch {
-            return null;
-        }
-    }
-
-    const items = await Promise.all([
-        readGeneration(1),
-        readGeneration(2),
-        readGeneration(3),
-    ]);
-
-    for (let i = 0; i < items.length; i++) {
-        const item = items[i];
-        if (item) results.push(item);
-    }
-    return results;
-}
-
 export async function readAndValidateRotationBackup(
-    reader: ReadJsonFn | JsonFileStore,
+    reader: ReadJsonFn,
     path: string,
     normalizeSessionData: (data: unknown) => unknown
 ): Promise<unknown> {
     try {
-        const readFn = typeof reader === 'function' ? reader : (p: string) => reader.readJsonIfExists(p);
-        const res = await readFn(path);
+        const res = await reader(path);
         if (!res.exists || res.error || !res.data) {
             return null;
         }
@@ -165,50 +80,6 @@ export async function copyFileIfExists(
     await adapter.write(dstPath, raw);
 }
 
-export interface RotationBackupTimestampHost {
-    readJsonIfExists: ReadJsonFn;
-    getRotationBackupPath(generation: number): string;
-    _lastRotationBackupAt?: number;
-}
-
-export async function initRotationBackupTimestampForHost(host: RotationBackupTimestampHost): Promise<void> {
-    const stamp = await initRotationBackupTimestamp(
-        (p: string) => host.readJsonIfExists(p),
-        host.getRotationBackupPath(1)
-    );
-    host._lastRotationBackupAt = stamp;
-}
-
-export interface RotateBackupHost extends RotationBackupTimestampHost {
-    getJsonStore(): JsonFileStore;
-    getBackupsDirPath(): string;
-}
-
-export async function rotateBackupIfNeededForHost(
-    host: RotateBackupHost,
-    sessionData: unknown
-): Promise<void> {
-    const lastBackupAt = host._lastRotationBackupAt || 0;
-    const newStamp = await rotateBackupIfNeeded(
-        host.getJsonStore(),
-        host.getBackupsDirPath(),
-        (gen: number) => host.getRotationBackupPath(gen),
-        lastBackupAt,
-        sessionData
-    );
-    host._lastRotationBackupAt = newStamp;
-}
-
-export async function getRotationBackupInfoForHost(host: {
-    readJsonIfExists: ReadJsonFn;
-    getRotationBackupPath(generation: number): string;
-}): Promise<RotationBackupInfo[]> {
-    return getRotationBackupInfo(
-        (p: string) => host.readJsonIfExists(p),
-        (gen: number) => host.getRotationBackupPath(gen)
-    );
-}
-
 export interface SessionDataPayload {
     activeSessionId?: string | null;
     sessions?: Record<string, SessionItem>;
@@ -223,7 +94,6 @@ export interface SessionDataPayload {
 export interface StorageRestoreHost {
     data: PluginData;
     readJsonIfExists: ReadJsonFn;
-    getRotationBackupPath(generation: number): string;
     normalizeSessionData(data: unknown): SessionDataPayload;
     normalizeGroupTabOrder?(order: string[]): string[];
     syncSessionOrder(): void;
@@ -238,14 +108,21 @@ export interface StorageRestoreHost {
     applyWorkspaceLayout(layout: unknown, options?: { catchErrors?: boolean }): Promise<unknown>;
 }
 
+/**
+ * Put a backup back.
+ *
+ * Named by its path rather than by a generation number: the pool renumbers on
+ * every prune, so a number is a position in a list that may already have moved
+ * by the time the confirmation is answered.
+ */
 export async function restoreFromRotationBackup(
     host: StorageRestoreHost,
-    generation: number
+    path: string
 ): Promise<boolean> {
     try {
         const imported = (await readAndValidateRotationBackup(
             (p: string) => host.readJsonIfExists(p),
-            host.getRotationBackupPath(generation),
+            path,
             (d: unknown) => host.normalizeSessionData(d)
         )) as SessionDataPayload | null;
 
@@ -281,94 +158,54 @@ export async function restoreFromRotationBackup(
 }
 
 
-export interface ManualRotationBackupHost {
-    // Not RotationBackupTimestampHost: that one reads through the JSON store,
-    // which this path does not touch. Only the stamp is shared.
-    _lastRotationBackupAt?: number;
-    getRotationBackupPath(generation: number): string;
-    getBackupsDirPath(): string;
+export interface RotationBackupTimestampHost extends BackupStoreHost {
     readJsonIfExists: ReadJsonFn;
-    ensureDir(path: string): Promise<unknown>;
-    copyFileIfExists(sourcePath: string, destinationPath: string): Promise<unknown>;
-    writeJson(path: string, data: unknown): Promise<unknown>;
 }
 
 /**
- * `unchanged` means generation 1 already holds these sessions, so nothing was
- * written and no generation moved.
- */
-export type ManualRotationBackupResult = 'created' | 'unchanged';
-
-/**
- * The fields that differ between two backups of the same sessions.
+ * Seed the hourly gate from what is already on disk.
  *
- * `_wppSavedAt` is stamped at the moment of the backup, so it differs on every
- * press by construction; `_wppBackupPlatform` names the machine, and a backup
- * that arrived by sync from another one holds the same sessions under a
- * different label.
+ * Without this a reload would take a backup immediately, however recently the
+ * last one was written.
  */
-const VOLATILE_BACKUP_FIELDS = ['_wppSavedAt', '_wppBackupPlatform'];
-
-/**
- * A backup's contents as a string, with key order removed.
- *
- * `JSON.stringify` preserves insertion order, and the two sides here are built
- * differently - one is parsed from a file, the other assembled from live state -
- * so a plain stringify would report two identical backups as different.
- */
-function contentKey(value: unknown, top: boolean): string {
-    if (value === null || typeof value !== 'object') return JSON.stringify(value) ?? 'null';
-    if (Array.isArray(value)) return `[${value.map((item) => contentKey(item, false)).join(',')}]`;
-
-    const entries = Object.entries(value as Record<string, unknown>)
-        .filter(([key]) => !(top && VOLATILE_BACKUP_FIELDS.includes(key)))
-        .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
-    return `{${entries.map(([key, item]) => `${JSON.stringify(key)}:${contentKey(item, false)}`).join(',')}}`;
+export async function initRotationBackupTimestampForHost(host: RotationBackupTimestampHost): Promise<void> {
+    host._lastRotationBackupAt = await newestBackupStamp(host);
 }
 
-/** True when generation 1 already holds exactly these sessions. */
-async function matchesNewestGeneration(
-    host: ManualRotationBackupHost,
-    backupData: Record<string, unknown>
-): Promise<boolean> {
+/**
+ * What the automatic path needs, which is what the pool needs.
+ *
+ * Its own name rather than the timestamp host's, because `asHost<>()` in
+ * main.ts names it and the host-conformance check resolves required members
+ * through `extends` - an alias is a name that check cannot read.
+ */
+export interface RotateBackupHost extends RotationBackupTimestampHost {
+    getBackupsDirPath(): string;
+}
+
+/**
+ * The automatic path: at most one backup an hour, taken after a save.
+ *
+ * The gate is a clock; what to keep afterwards is the ladder's business, so
+ * this adds a file and lets `writeRotationBackup` prune. An unchanged save
+ * writes nothing at all, which is why a vault sitting idle does not fill the
+ * pool with copies of one moment.
+ */
+export async function rotateBackupIfNeededForHost(
+    host: RotateBackupHost,
+    sessionData: unknown,
+    now: number = Date.now()
+): Promise<void> {
+    const lastBackupAt = host._lastRotationBackupAt || 0;
+    if (now - lastBackupAt < BACKUP_ROTATION_INTERVAL) return;
+
     try {
-        const existing = await host.readJsonIfExists(host.getRotationBackupPath(1));
-        if (!existing.exists || !existing.data) return false;
-        return contentKey(existing.data, true) === contentKey(backupData, true);
+        await writeRotationBackup(host, prepareRotationBackupData(sessionData), { manual: false, now });
     } catch {
-        // A backup that cannot be read is not proof that one is unnecessary.
-        return false;
+        // A failed backup must not fail the save it followed.
     }
 }
 
-/**
- * Take a rotating backup now, on the user's say-so.
- *
- * The automatic path is `rotateBackupIfNeeded`, which is gated on the hour and
- * moves generations by reading and rewriting through the JSON store. This one
- * is asked for, so it has no clock behind it, and it copies files - which is
- * what both manual entry points did, byte for byte, in two places.
- *
- * It is gated on the *contents* instead, and that is not a nicety: there are
- * three generations, and rotating writes the live state into generation 1 while
- * pushing generation 3 off the end. Pressing the button four times in a row
- * with nothing changed in between would leave three copies of one moment and
- * destroy every older one - the opposite of what the button is for. So an
- * unchanged press does nothing at all and says so.
- *
- * Generations shift oldest-first, so nothing is overwritten before it has been
- * copied forward.
- */
-export async function createRotationBackupNow(
-    host: ManualRotationBackupHost,
-    backupData: Record<string, unknown>
-): Promise<ManualRotationBackupResult> {
-    if (await matchesNewestGeneration(host, backupData)) return 'unchanged';
-
-    await host.ensureDir(host.getBackupsDirPath());
-    await host.copyFileIfExists(host.getRotationBackupPath(2), host.getRotationBackupPath(3));
-    await host.copyFileIfExists(host.getRotationBackupPath(1), host.getRotationBackupPath(2));
-    await host.writeJson(host.getRotationBackupPath(1), backupData);
-    host._lastRotationBackupAt = Date.now();
-    return 'created';
+export function getRotationBackupInfoForHost(host: BackupStoreHost): Promise<RotationBackupInfo[]> {
+    return listRotationBackups(host);
 }
