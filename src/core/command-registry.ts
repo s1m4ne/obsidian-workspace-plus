@@ -171,6 +171,21 @@ export class CommandRegistry {
         return parts.join('+');
     }
 
+    /**
+     * The hotkeys Obsidian has registered for one of this plugin's commands.
+     *
+     * The live bindings, not the defaults this class declares: somebody who
+     * rebound a command in Obsidian's own settings expects their key, and a
+     * hard-coded chord would work for nobody else. Used by SessionManagerModal
+     * to put those keys on its own scope (#119).
+     */
+    getCommandHotkeyBindings(commandId: string): readonly Hotkey[] {
+        return obsidianInternals.getCommandHotkeys(
+            this.host.app,
+            `${this.host.manifest.id}:${commandId}`
+        ) ?? [];
+    }
+
     /** The hotkey Obsidian has registered for one of this plugin's commands, formatted. */
     getCommandHotkey(commandId: string, index = 0): string {
         const hotkeys = obsidianInternals.getCommandHotkeys(this.host.app, `${this.host.manifest.id}:${commandId}`);

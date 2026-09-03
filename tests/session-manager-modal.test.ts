@@ -49,6 +49,15 @@ interface ModalPlugin {
     getOrderedGroups(): Array<{ id: string; name: string }>;
     getOrderedGroupTabIds(): string[];
     getCommandHotkey(command: string): string;
+    getCommandHotkeyBindings(command: string): readonly { modifiers: string[]; key: string }[];
+    /** What the scoped hotkeys reached (#119). */
+    calls: string[];
+    saveAsSession(): Promise<void>;
+    reloadCurrentSessionWithoutSaving(): Promise<void>;
+    toggleAutoSaveOnSwitch(options?: { notify?: boolean }): Promise<void>;
+    renameCurrentSession(): void;
+    duplicateCurrentSession(): Promise<void>;
+    deleteCurrentSession(): void;
     findActiveSessionIndex(sessions: Session[]): number;
     getDefaultSessionName(): string;
     getSessionSaver(): never;
@@ -117,6 +126,24 @@ function makeRect(left: number, top: number, width: number, height: number): DOM
     };
 }
 
+/** One binding per scoped command, so a test can tell which one fired. */
+const SCOPED_TEST_KEYS: Record<string, string | undefined> = {
+    'save-current-session': 'S',
+    'save-as-session': 'A',
+    'reload-current-session-without-saving': 'L',
+    'rename-session': 'R',
+    'duplicate-session': 'M',
+    'delete-session': 'Backspace',
+    'toggle-auto-save-on-switch': 'O',
+};
+
+/** Listeners the fixture's store hands out, so a test can fire a change. */
+const sessionListeners = new Set<() => void>();
+
+function notifySessionsChanged(): void {
+    for (const listener of [...sessionListeners]) listener();
+}
+
 function makePlugin(containerEl: HTMLElement, groupFeatureEnabled = false): ModalPlugin {
     const data = {
         activeSessionId: 's1',
@@ -180,6 +207,13 @@ function makePlugin(containerEl: HTMLElement, groupFeatureEnabled = false): Moda
                 getActiveGroupId: (): string | null => (bag['activeGroupId'] ?? null) as string | null,
                 findGroup: (id: string | null) => (id ? groups()[id] ?? null : null),
                 getGroupMap: () => groups(),
+                // A real subscription, not a stub: the modal follows the
+                // session set while it is open now, and firing this is the only
+                // way a test reaches that path.
+                onSessionsChanged: (listener: () => void): (() => void) => {
+                    sessionListeners.add(listener);
+                    return (): void => { sessionListeners.delete(listener); };
+                },
             }) as never;
         },
         // A real SettingsState over this fixture's own data: showFilterInput
@@ -195,9 +229,28 @@ function makePlugin(containerEl: HTMLElement, groupFeatureEnabled = false): Moda
         // Commands go through getCommandRegistry(); this double carries those members itself.
         getCommandRegistry(): never { return this as never; },
         getCommandHotkey: (command): string => command.startsWith('switch-to-') ? 'Mod+1' : 'Mod+]',
+        // What Obsidian has registered, which is what the modal puts on its
+        // own scope (#119). One binding per command, distinct keys, so a test
+        // can tell which one fired.
+        getCommandHotkeyBindings: (command): readonly { modifiers: string[]; key: string }[] => {
+            const key = SCOPED_TEST_KEYS[command];
+            return key ? [{ modifiers: ['Mod', 'Shift'], key }] : [];
+        },
         findActiveSessionIndex: (sessions): number => sessions.findIndex((session) => session.id === plugin.data.activeSessionId),
         getDefaultSessionName: (): string => 'Workspace',
         isAutoSaveOnSwitchEnabled: (): boolean => false,
+        // Reached only through the scope this modal registers (#119); the rows
+        // have their own buttons and those are covered above.
+        calls: [] as string[],
+        saveAsSession(): Promise<void> { this.calls.push('saveAsSession'); return Promise.resolve(); },
+        reloadCurrentSessionWithoutSaving(): Promise<void> {
+            this.calls.push('reloadCurrentSessionWithoutSaving');
+            return Promise.resolve();
+        },
+        toggleAutoSaveOnSwitch(): Promise<void> { this.calls.push('toggleAutoSaveOnSwitch'); return Promise.resolve(); },
+        renameCurrentSession(): void { this.calls.push('renameCurrentSession'); },
+        duplicateCurrentSession(): Promise<void> { this.calls.push('duplicateCurrentSession'); return Promise.resolve(); },
+        deleteCurrentSession(): void { this.calls.push('deleteCurrentSession'); },
         // Saving goes through getSessionSaver(). This double carries the save
         // members itself, so it stands in as its own saver.
         getSessionSaver(): never { return this as never; },
@@ -240,6 +293,7 @@ async function openModal(
 ): Promise<{ h: ReturnType<typeof setupHarness>; plugin: ModalPlugin; modal: SessionManagerModalInstance }> {
     const h = setupHarness();
     clearModals(h.dom.document);
+    sessionListeners.clear();
     const i18n = await import('../src/i18n.ts');
     i18n.resolveLocale('en');
     ({ SettingsState } = await import('../src/state/settings-state.ts'));
@@ -418,6 +472,141 @@ test('the row action icons carry a name, not just a tooltip (P12)', async () => 
 
         const del = modal.listEl.querySelector('[data-action-key="delete"]');
         assert.equal(del?.getAttribute('aria-label'), 'Delete');
+    } finally {
+        modal.close();
+        h.restore();
+    }
+});
+
+/**
+ * The modal follows the session set while it is open, and keeps the keyboard.
+ *
+ * #118 fixed this for the switch overlay and the search overlay already had it;
+ * this modal had neither, so a session arriving from another device - or created
+ * by anything but its own rows - did not appear until it was reopened.
+ *
+ * The reason it was not a three-line subscription: `renderList()` empties the
+ * list and rebuilds every row, so real DOM focus dies with the element it was
+ * on. Of its ten call sites exactly one follows it with a focus call. Dropping
+ * the keyboard out from under someone mid-navigation would be worse than not
+ * refreshing.
+ */
+test('a session created under the open modal appears in it at once', async () => {
+    const { h, plugin, modal } = await openModal();
+    try {
+        const names = (): string[] => [...modal.contentEl.querySelectorAll('.wpp-session-name')]
+            .map((el) => el.textContent ?? '');
+        assert.deepEqual(names(), ['Work', 'Personal', 'Reading']);
+
+        plugin.data.sessions['s4'] = { id: 's4', name: 'Arrived', modified: 4, layout: {} };
+        plugin.data.sessionOrder.push('s4');
+        notifySessionsChanged();
+
+        assert.deepEqual(names(), ['Work', 'Personal', 'Reading', 'Arrived']);
+    } finally {
+        modal.close();
+        h.restore();
+    }
+});
+
+test('an external change does not drop the keyboard focus', async () => {
+    const { h, plugin, modal } = await openModal();
+    try {
+        const doc = h.dom.document;
+        const rows = (): HTMLElement[] => [...modal.contentEl.querySelectorAll<HTMLElement>('.wpp-session-item')];
+
+        // Put focus on the second row's switch button, the way an arrow key
+        // would leave it.
+        const before = rows()[1]?.querySelector<HTMLElement>('[data-action-key="load"]');
+        assert.ok(before);
+        before.focus();
+        assert.equal(doc.activeElement, before);
+
+        // Rows created *during* the refresh need a box too, and `makeVisible`
+        // only patches the elements that exist when it runs. The modal filters
+        // its keyboard targets by `getClientRects()`, so without this the new
+        // button is invisible to `focusSessionTarget` and the assertion below
+        // would fail for a reason that is jsdom's, not the modal's.
+        const proto = (h.dom.document.defaultView as unknown as { HTMLElement: { prototype: HTMLElement } }).HTMLElement.prototype;
+        const original = Object.getOwnPropertyDescriptor(proto, 'getClientRects');
+        proto.getClientRects = function (this: HTMLElement): DOMRectList {
+            return [makeRect(0, 0, 100, 20)] as unknown as DOMRectList;
+        };
+
+        plugin.data.sessions['s4'] = { id: 's4', name: 'Arrived', modified: 4, layout: {} };
+        plugin.data.sessionOrder.push('s4');
+        notifySessionsChanged();
+        if (original) Object.defineProperty(proto, 'getClientRects', original);
+
+        // The element it was on is gone - renderList rebuilt the list - so this
+        // has to be the *new* button in the same position, not the old one.
+        const after = rows()[1]?.querySelector<HTMLElement>('[data-action-key="load"]');
+        assert.ok(after);
+        assert.notEqual(after, before, 'the row really was rebuilt');
+        assert.equal(doc.activeElement, after, 'and focus came back to the same place');
+    } finally {
+        modal.close();
+        h.restore();
+    }
+});
+
+test('closing the modal stops it listening', async () => {
+    const { h, modal } = await openModal();
+    try {
+        // The subscription itself, not its effect: after close the list element
+        // is detached, so a leaked listener would render into nothing and a
+        // count of the rows on screen cannot tell the two apart.
+        assert.equal(sessionListeners.size, 1, 'it subscribed while open');
+
+        modal.close();
+
+        assert.equal(sessionListeners.size, 0, 'and let go on the way out');
+    } finally {
+        h.restore();
+    }
+});
+
+/**
+ * The plugin's own hotkeys reach the modal (#119).
+ *
+ * An Obsidian `Modal` owns a `Scope` and captures key input before the global
+ * keymap sees it, so the plugin's hotkeys did nothing while the session manager
+ * was open - while the search overlay, a plain div on the body, passed them
+ * through. `Cmd+Shift+M` duplicated a session in one and not the other.
+ *
+ * The bindings come from Obsidian rather than from the defaults the registry
+ * declares, so a rebound command keeps working. The fixture hands out one key
+ * per command so a test can tell which handler fired.
+ */
+function scopeHandlers(modal: SessionManagerModalInstance): Map<string, (e: KeyboardEvent) => unknown> {
+    return (modal as unknown as { scope: { handlers: Map<string, (e: KeyboardEvent) => unknown> } })
+        .scope.handlers;
+}
+
+test('the commands whose subject is the current session reach the open modal', async () => {
+    const { h, plugin, modal } = await openModal();
+    try {
+        const handlers = scopeHandlers(modal);
+        assert.deepEqual([...handlers.keys()].sort(), [
+            'Mod+Shift+A', 'Mod+Shift+Backspace', 'Mod+Shift+L',
+            'Mod+Shift+M', 'Mod+Shift+O', 'Mod+Shift+R', 'Mod+Shift+S',
+        ], 'seven commands, and switching is not among them - the rows do that');
+
+        const evt = new h.dom.window.KeyboardEvent('keydown', { key: 'M' });
+        handlers.get('Mod+Shift+M')?.(evt);
+        assert.ok(plugin.calls.includes('duplicateCurrentSession'), 'the duplicate command ran');
+    } finally {
+        modal.close();
+        h.restore();
+    }
+});
+
+test('a command with no binding registers nothing', async () => {
+    const { h, modal } = await openModal();
+    try {
+        // Every scoped command has a binding in this fixture; `next-session`
+        // is not scoped at all, so no key of its own can appear.
+        assert.equal(scopeHandlers(modal).has('Mod+Shift+Enter'), false);
     } finally {
         modal.close();
         h.restore();

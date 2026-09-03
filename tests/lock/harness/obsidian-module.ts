@@ -164,7 +164,18 @@ function ModalConstructorFn(this: unknown, app: unknown): Modal {
     self.contentEl = doc.createElement('div');
     self.modalEl.append(self.titleEl, self.contentEl);
     self.containerEl.appendChild(self.modalEl);
-    self.scope = { register: (): void => {} };
+    // Records what a modal registers, so a test can fire one. Obsidian's own
+    // Scope captures key input before the global keymap; the plugin puts its
+    // command hotkeys here (#119) and the only way to reach them is to hold
+    // the handlers.
+    const handlers = new Map<string, (event: KeyboardEvent) => unknown>();
+    self.scope = {
+        handlers,
+        register: (modifiers: string[] | null, key: string | null, func: (event: KeyboardEvent) => unknown) => {
+            handlers.set([...(modifiers ?? []), key ?? ''].join('+'), func);
+            return {};
+        },
+    } as unknown as Modal['scope'];
     self.isOpen = false;
     return self;
 }

@@ -59,6 +59,10 @@ function createPlugin(): TestPlugin {
                 getActiveGroupId: (): string | null => (bag['activeGroupId'] ?? null) as string | null,
                 findGroup: (id: string | null) => (id ? groups()[id] ?? null : null),
                 getGroupMap: () => groups(),
+                // The session manager follows the session set while it is open
+                // now (#118's shape). This test opens it and checks it reached
+                // the screen, so the subscription only has to exist.
+                onSessionsChanged: (): (() => void) => (): void => {},
             }) as never;
         },
         // The modal reads showFilterInput and overlayDefaultFocus through the
@@ -69,6 +73,9 @@ function createPlugin(): TestPlugin {
         // Commands go through getCommandRegistry(); this double carries those members itself.
         getCommandRegistry(): never { return this as never; },
         getCommandHotkey: () => '',
+        // The modal puts the plugin's command hotkeys on its own scope (#119).
+        // Nothing is bound in this fixture, so nothing is registered.
+        getCommandHotkeyBindings: () => [],
         getDefaultSessionName: () => 'Session',
         // Group calls go through getGroupStore(). This double carries the group
         // members itself, so it stands in as its own group store.

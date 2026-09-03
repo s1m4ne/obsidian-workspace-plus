@@ -110,6 +110,44 @@ function closest(target: EventTarget | null, selector: string): HTMLElement | nu
     return found instanceof HTMLElement ? found : null;
 }
 
+/**
+ * The commands this modal lets through to its own scope (#119).
+ *
+ * An Obsidian `Modal` owns a `Scope` and captures key input before the global
+ * keymap sees it, which is what a modal is for - so the plugin's own hotkeys
+ * did nothing while the session manager was open, while the search overlay (a
+ * plain div on the body) passed them through. `Cmd+Shift+M` duplicated a
+ * session in one and not the other.
+ *
+ * Registered here: every command whose subject is *the current session*, or no
+ * session at all. Each names its subject - "Duplicate **current** session" -
+ * so inside the modal it still means the active session, unambiguously, and
+ * the row buttons remain the way to act on a different one. The two have
+ * different subjects and the names say which.
+ *
+ * Not registered: next and previous session. The modal is the place you switch
+ * from, its rows do it, and the preview overlay those commands can open would
+ * land on top of the modal.
+ */
+const SCOPED_COMMAND_ACTIONS: readonly {
+    readonly id: string;
+    readonly run: (plugin: SessionManagerModalHost) => void;
+}[] = [
+    { id: 'save-current-session', run: (p) => { void p.getSessionSaver().saveActiveSession(); } },
+    { id: 'save-as-session', run: (p) => { void p.getSessionSaver().saveAsSession(); } },
+    {
+        id: 'reload-current-session-without-saving',
+        run: (p) => { void p.getSessionSaver().reloadCurrentSessionWithoutSaving(); },
+    },
+    { id: 'rename-session', run: (p) => { p.getSessionStore().renameCurrentSession(); } },
+    { id: 'duplicate-session', run: (p) => { void p.getSessionStore().duplicateCurrentSession(); } },
+    { id: 'delete-session', run: (p) => { p.getSessionStore().deleteCurrentSession(); } },
+    {
+        id: 'toggle-auto-save-on-switch',
+        run: (p) => { void p.getSessionSaver().toggleAutoSaveOnSwitch({ notify: true }); },
+    },
+];
+
 function visibleElements(root: ParentNode, selector: string): HTMLElement[] {
     return Array.from(root.querySelectorAll<HTMLElement>(selector)).filter(isElementVisible);
 }
@@ -141,6 +179,7 @@ export class SessionManagerModal extends Modal {
      * and the listener would stay attached with nothing left to remove it.
      */
     private listenerDoc: Document | null = null;
+    private unsubscribeSessions: (() => void) | null = null;
 
     constructor(app: App, plugin: SessionManagerModalHost) {
         super(app);
@@ -219,6 +258,16 @@ export class SessionManagerModal extends Modal {
         };
         contentEl.addEventListener('focusin', this.contentFocusHandler, true);
 
+        // #118's fix went to the switch overlay, and the search overlay already
+        // had one; this modal had neither, so a session arriving from another
+        // device - or created by anything but its own rows - did not appear
+        // while it was open.
+        this.unsubscribeSessions = this.plugin.getSessionStore().onSessionsChanged(() => {
+            this.refreshFromSessionChange();
+        });
+
+        this.registerCommandHotkeys();
+
         const nextKey = this.plugin.getCommandRegistry().getCommandHotkey('next-session');
         const footer = contentEl.createDiv({ cls: 'wpp-modal-footer' });
         if (nextKey) {
@@ -292,6 +341,54 @@ export class SessionManagerModal extends Modal {
                     this.focusSessionTarget(this.getDefaultSessionTarget());
                 }
             }, 50);
+        }
+    }
+
+    /**
+     * Put the plugin's own hotkeys on this modal's scope (#119).
+     *
+     * The bindings come from Obsidian, so a rebound command keeps working. A
+     * command with no binding registers nothing - there is no key to catch.
+     */
+    private registerCommandHotkeys(): void {
+        const registry = this.plugin.getCommandRegistry();
+        for (const command of SCOPED_COMMAND_ACTIONS) {
+            for (const hotkey of registry.getCommandHotkeyBindings(command.id)) {
+                if (!hotkey || !hotkey.key) continue;
+                this.scope.register(hotkey.modifiers ?? [], hotkey.key, (event) => {
+                    event.preventDefault();
+                    command.run(this.plugin);
+                    return false;
+                });
+            }
+        }
+    }
+
+    /**
+     * Redraw because the session set changed under the modal, and put keyboard
+     * focus back where it was.
+     *
+     * `renderList()` empties the list and rebuilds every row, so real DOM focus
+     * dies with the element it was on. Of its ten call sites exactly one - the
+     * initial open - follows it with a focus call, because the other nine are
+     * reached from a user action where losing focus is expected. An external
+     * change is not one of those: dropping the keyboard out from under someone
+     * mid-navigation would be worse than not refreshing at all.
+     *
+     * The tracked target survives the render and `renderList()` already clamps
+     * it through `normalizeKeyboardTargetAfterRender`, so it is what focus goes
+     * back to. Focus in the filter or the create box needs nothing: those
+     * elements live outside `listEl` and the render does not touch them, which
+     * is why this only restores the row zone.
+     */
+    private refreshFromSessionChange(): void {
+        const activeEl = this.containerEl.ownerDocument.activeElement;
+        const hadFocusInside = activeEl instanceof HTMLElement && this.contentEl.contains(activeEl);
+
+        this.renderList();
+
+        if (hadFocusInside && this.keyboardTarget.zone === 'session-action') {
+            this.focusSessionTarget(this.keyboardTarget);
         }
     }
 
@@ -1011,6 +1108,10 @@ export class SessionManagerModal extends Modal {
         if (this.contentFocusHandler) {
             this.contentEl.removeEventListener('focusin', this.contentFocusHandler, true);
             this.contentFocusHandler = null;
+        }
+        if (this.unsubscribeSessions) {
+            this.unsubscribeSessions();
+            this.unsubscribeSessions = null;
         }
         this.contentEl.empty();
     }
