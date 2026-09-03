@@ -1,7 +1,4 @@
 {
-    "total": 19,
-    "rules": {
-        "@typescript-eslint/no-deprecated": 18,
-        "obsidianmd/settings-tab/prefer-setting-definitions": 1
-    }
+    "total": 0,
+    "rules": {}
 }

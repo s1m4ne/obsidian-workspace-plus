@@ -117,6 +117,7 @@ export class DropdownStub extends ComponentBase {
 
 export class ButtonStub extends ComponentBase {
     clickHandler: Handler<MouseEvent | undefined> | null = null;
+    disabled = false;
 
     setButtonText(text: string): this {
         this.log.record(this.name, 'setButtonText', text);
@@ -142,7 +143,12 @@ export class ButtonStub extends ComponentBase {
         this.log.record(this.name, 'setWarning');
         return this;
     }
+    setDestructive(): this {
+        this.log.record(this.name, 'setDestructive');
+        return this;
+    }
     setDisabled(disabled: boolean): this {
+        this.disabled = disabled;
         this.log.record(this.name, 'setDisabled', disabled);
         return this;
     }
@@ -150,7 +156,15 @@ export class ButtonStub extends ComponentBase {
         this.clickHandler = handler;
         return this;
     }
+    /**
+     * A disabled button does nothing, the way the real one does not.
+     *
+     * It used to fire regardless, which made every guard that works by
+     * disabling itself for the duration of a write untestable: the second
+     * press went through and the test saw the work done twice.
+     */
     trigger(): unknown {
+        if (this.disabled) return undefined;
         return this.clickHandler ? this.clickHandler(undefined) : undefined;
     }
 }

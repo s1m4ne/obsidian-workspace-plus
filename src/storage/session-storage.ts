@@ -127,6 +127,11 @@ export class SessionStorage {
         return joinPath(this.getSessionStorageDirPath(), EXPORT_DIR_NAME);
     }
 
+    getBackupsDirPathForLocation(location?: unknown): string {
+        const normalized = normalizeSessionStorageLocation(location) || this.location;
+        return joinPath(this.getSessionStorageDirPathForLocation(normalized), BACKUPS_DIR_NAME);
+    }
+
     getBackupsDirPath(): string {
         return joinPath(this.getSessionStorageDirPath(), BACKUPS_DIR_NAME);
     }

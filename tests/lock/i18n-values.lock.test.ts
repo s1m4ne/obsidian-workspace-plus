@@ -1,6 +1,6 @@
 // Behavior Lock: what every i18n key actually resolves to.
 //
-// The other i18n lock proves the shape holds - 318 keys in all 21 locales, the
+// The other i18n lock proves the shape holds - 310 keys in all 21 locales, the
 // right types, plurals picking the right form. It does not prove the values are
 //
 // Edited deliberately, with the maintainer's authorization, at the commit that
@@ -57,6 +57,93 @@
 // exactly that, twenty times, and it is right. The folder is now named by what
 // it is rather than by its default path. One value per locale; 318 keys,
 // unchanged.
+//
+// And once more, same authorization, for one *added* key. The status-bar click
+// actions became a navigable page when the settings screen was rebuilt on the
+// declarative API, and a page entry shows a description; that section had never
+// had one, because a heading needs no explaining when the rows are right below
+// it. `settingsSectionStatusBarDesc` is that description.
+//
+// Unlike every edit above, its 21 values could not be recovered from git: the
+// string is new, so there is no translator's wording to preserve. They were
+// written for this commit and should be treated as a first pass - a native
+// speaker's correction to any of them is a value change the maintainer can
+// authorise the same way. 318 keys -> 319.
+//
+// And again, same authorization, for the rotating backups becoming a pool.
+// Two keys added and one value corrected in all 21 locales:
+//
+//   + settingsBackupGenerations       the count, which is a setting now
+//   + settingsBackupGenerationsDesc   what raising and lowering it does
+//   ~ rotationBackupDesc              said "hourly, up to 3 generations"
+//
+// The third is a correction rather than a rewording: three generations was the
+// old fixed scheme, the count defaults to five and is chosen by the user, and
+// the schedule is a ladder of target ages rather than an hourly ring. The
+// sentence was false in every locale.
+//
+// As with settingsSectionStatusBarDesc, these values were written for this
+// commit rather than recovered from git - there is no translator's wording for
+// a string that did not exist, and the corrected one could not keep wording
+// that named a number that is gone. Treat all three as a first pass.
+// 319 keys -> 321.
+//
+// And again, same authorization, for a setting the maintainer decided to drop
+// rather than reword: where the session overlay puts the keyboard when it
+// opens. It had three answers - the current session, the filter box, the name
+// field - and the latter two are one keystroke from the first. The behaviour is
+// now always the current session, which was the default.
+//
+//   - settingsOverlayDefaultFocus, ...Desc
+//   - settingsOverlayFocusCurrentSession, ...SessionFilter, ...SessionCreate
+//
+// The stored value goes with them, so an install that had chosen one of the
+// other two loses that choice. 321 keys -> 316.
+//
+// And again, same authorization, for the settings wording the maintainer went
+// through row by row. Japanese only - the other twenty locales still carry the
+// old text and are the next pass, which is how the maintainer asked for it:
+// settle the Japanese, then translate it in one go.
+//
+// Three keys added, in all 21 locales because a key must exist to be rendered:
+//
+//   + settingsHotkeysDesc          the row said "Hotkeys" and had a button
+//   + settingsSectionStorage       the page was called "Advanced"
+//   + settingsSectionStorageDesc
+//
+// Seventeen Japanese values rewritten. Two rules came out of it and are worth
+// recording, because the next pass should follow them in every language:
+//
+//   a toggle's name says what it does, not that it enables something
+//     "ステータスバーでセッション切り替えを有効にする" -> "...を切り替える"
+//   a description that names the toggle's state writes it ON / OFF
+//     "自動保存が無効で" / "自動保存がオフのとき" -> "自動保存が OFF で"
+//
+// Command names and notices keep 有効化 / 無効化: those are actions, not
+// states. 316 keys -> 319.
+//
+// And again, same authorization: the translation pass the Japanese wording was
+// settled for. Thirty values in each of the twenty other locales, written from
+// the Japanese meaning rather than word by word, and from a glossary pulled out
+// of each locale's own existing strings - session, sidebar, backup, vault,
+// command palette, session manager, workspace - so no locale acquired a second
+// word for something it already names.
+//
+// That glossary caught two of mine: Spanish calls a vault "bóveda" and
+// Portuguese "cofre", and I had written "vault" in both.
+//
+// Nine keys are also deleted. Nothing referred to them once the tab bar
+// (settingsSectionGeneral, settingsTabSessions), the storage read-out
+// (settingsSessionStorageLocation and its description) and the diagnostics card
+// (settingsStorageDiagnostics and its description) were gone, and three more
+// lost their callers to the declarative rows: settingsExportSessionsBtn,
+// settingsGroupCreateDesc, settingsGroupDelete.
+//
+// Two rules carried over from the Japanese, in every language: a toggle's name
+// says what it does rather than that it enables something, and a description
+// that names the toggle's state uses one word for it throughout - which in
+// Japanese is the Latin ON / OFF and in every other locale is that locale's own
+// word. 319 keys -> 310.
 //
 // RULE: Behavior Lock tests are NEVER edited during the refactor. If this fails,
 // a translation changed. Regenerating the fixture is only correct when the change
@@ -153,11 +240,11 @@ test('the fixture covers every locale and key, so the comparison is not vacuous'
 
     assert.equal(locales.length, 21);
     for (const locale of locales) {
-        assert.equal(Object.keys(expected[locale] ?? {}).length, 318, `locale ${locale}`);
+        assert.equal(Object.keys(expected[locale] ?? {}).length, 310, `locale ${locale}`);
     }
 
-    // 63 of the 318 are functions, recorded from their output rather than their
+    // 62 of the 310 are functions, recorded from their output rather than their
     // source, so a rewritten implementation with the same output still passes.
     const functionEntries = Object.values(expected.en ?? {}).filter((v) => v.startsWith('fn:'));
-    assert.equal(functionEntries.length, 63);
+    assert.equal(functionEntries.length, 62);
 });

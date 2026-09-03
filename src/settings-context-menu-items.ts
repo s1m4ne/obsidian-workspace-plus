@@ -1,9 +1,10 @@
-import { Menu, Notice, type App } from 'obsidian';
-import { addCustomizeClicksItem, call, showAtMouseEvent } from './context-menu-shared.ts';
+import { Menu, type App } from 'obsidian';
+import { createManualBackup } from './manual-backup.ts';
+import type { ReadJsonResult } from './storage/json-file-store.ts';
+import { addOpenSettingsItem, call, showAtMouseEvent } from './context-menu-shared.ts';
 import { L, text } from './i18n.ts';
 import * as obsidianInternals from './platform/obsidian-internals.ts';
 import type { SettingsState } from './state/settings-state.ts';
-import type { TabId } from './settings-tab.ts';
 import type { GroupStore } from './state/group-store.ts';
 import type { SessionSaver } from './state/session-saver.ts';
 import type { HistoryService } from './state/history-service.ts';
@@ -49,17 +50,19 @@ export interface SettingsContextMenuPluginHost {
         showFilterInput?: boolean;
     };
     manifest: { id: string; name?: string };
-    // TabId, not string: the field really is a TabId and writing a bare string
-    // into it only type-checked because the plugin reached here through a cast.
-    settingTab?: { activeTab: TabId | null } | undefined;
     _lastRotationBackupAt: number;
     extractSessionData(data: unknown): Record<string, unknown>;
     prepareRotationBackupData(sessionData: Record<string, unknown>): Record<string, unknown>;
     ensureDir(path: string): Promise<unknown>;
     getBackupsDirPath(): string;
-    copyFileIfExists(sourcePath: string, destinationPath: string): Promise<unknown>;
     getRotationBackupPath(generation: number): string;
+    getBackupGenerations(): number;
+    removeIfExists(path: string): Promise<void>;
+    listDir(path: string): Promise<{ files: string[] } | null>;
+    statSize(path: string): Promise<number | null>;
+    copyFileIfExists(sourcePath: string, destinationPath: string): Promise<unknown>;
     writeJson(path: string, data: unknown): Promise<unknown>;
+    readJsonIfExists<T = unknown>(path: string): Promise<ReadJsonResult<T>>;
 }
 
 export type SettingsContextMenuOptions = SettingsMenuCallbacks & {
@@ -170,28 +173,7 @@ export function openSettingsContextMenu(initialOptions?: SettingsContextMenuOpti
     menu.addItem((mi) => {
         mi.setTitle(text(L.rotationBackupCreate));
         mi.setIcon('archive');
-        mi.onClick(() => {
-            const sessionData = plugin.extractSessionData(plugin.data);
-            sessionData._wppSavedAt = Date.now();
-            const backupData = plugin.prepareRotationBackupData(sessionData);
-            void plugin.ensureDir(plugin.getBackupsDirPath())
-                .then(() => plugin.copyFileIfExists(
-                    plugin.getRotationBackupPath(2),
-                    plugin.getRotationBackupPath(3)
-                ))
-                .then(() => plugin.copyFileIfExists(
-                    plugin.getRotationBackupPath(1),
-                    plugin.getRotationBackupPath(2)
-                ))
-                .then(() => plugin.writeJson(plugin.getRotationBackupPath(1), backupData))
-                .then(() => {
-                    plugin._lastRotationBackupAt = Date.now();
-                    new Notice(text(L.rotationBackupCreated));
-                })
-                .catch(() => {
-                    new Notice(text(L.rotationBackupFailed));
-                });
-        });
+        mi.onClick(() => { void createManualBackup(plugin); });
     });
 
     menu.addItem((mi) => {
@@ -205,14 +187,9 @@ export function openSettingsContextMenu(initialOptions?: SettingsContextMenuOpti
         });
     });
 
-    addCustomizeClicksItem(menu, app, plugin);
-
-    menu.addItem((mi) => {
-        mi.setTitle(text(L.contextOpenSettings));
-        mi.setIcon('settings');
-        mi.onClick(() => {
-            obsidianInternals.openSettingTab(app, plugin.manifest.id);
-        });
+    addOpenSettingsItem(menu, app, plugin, {
+        title: text(L.contextOpenSettings),
+        icon: 'settings',
     });
 
     // --- Quick Switcher only: Reset position ---

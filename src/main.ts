@@ -50,6 +50,7 @@ import type {
     RecordSessionDataStoredHost,
     ReloadExternalSessionHost,
 } from './storage/session-sync.ts';
+import { pruneRotationBackups } from './storage/backup-store.ts';
 import {
     initRotationBackupTimestampForHost,
     prepareRotationBackupData,
@@ -301,6 +302,23 @@ export class WorkspacePlusPlus extends Plugin {
         return this.getPersistenceService().getRotationBackupPath(generation);
     }
 
+    /** @see backup-pool.ts */
+    getBackupGenerations(): number {
+        return this.getPersistenceService().getBackupGenerations();
+    }
+
+    removeIfExists(path: string): Promise<void> {
+        return this.getPersistenceService().removeIfExists(path);
+    }
+
+    listDir(path: string): Promise<{ files: string[] } | null> {
+        return this.getPersistenceService().listDir(path);
+    }
+
+    statSize(path: string): Promise<number | null> {
+        return this.getPersistenceService().statSize(path);
+    }
+
     extractSessionData(data: unknown): SessionData {
         return this.getPersistenceService().extractSessionData(data);
     }
@@ -424,12 +442,16 @@ export class WorkspacePlusPlus extends Plugin {
         return copyFileIfExists(this.app.vault.adapter, srcPath, dstPath);
     }
 
+    pruneRotationBackups(): Promise<number> {
+        return pruneRotationBackups(this.asHost<RotateBackupHost>());
+    }
+
     getRotationBackupInfo(): Promise<RotationBackupInfo[]> {
         return getRotationBackupInfoForHost(this.asHost<RotationBackupTimestampHost>());
     }
 
-    restoreFromRotationBackup(generation: number): Promise<boolean> {
-        return restoreFromRotationBackup(this.asHost<StorageRestoreHost>(), generation);
+    restoreFromRotationBackup(path: string): Promise<boolean> {
+        return restoreFromRotationBackup(this.asHost<StorageRestoreHost>(), path);
     }
 
     // ---------------------------------------------------------------------
@@ -610,9 +632,9 @@ export class WorkspacePlusPlus extends Plugin {
      * Three collaborators take the plugin as a structural host, and it does
      * satisfy all of them - plugin/methods/ attaches every member they name.
      * It cannot satisfy them as one *type*: the interfaces were written at
-     * different commits and disagree on two members (`settingTab.activeTab` is
-     * nullable in one, and `reloadCurrentSessionWithoutSaving` returns a promise
-     * in one and not the other), so they cannot be merged onto the class.
+     * different commits and disagree on a member
+     * (`reloadCurrentSessionWithoutSaving` returns a promise in one and not the
+     * other), so they cannot be merged onto the class.
      *
      * Reconciling those two is worth doing, and is not this commit's job -
      * commit 34b passes the real classes and deletes this along with the attach

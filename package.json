@@ -1,6 +1,6 @@
 {
     "name": "obsidian-workspace-plus",
-    "version": "0.9.0",
+    "version": "0.10.0",
     "description": "Workspace session manager for Obsidian",
     "main": "main.js",
     "scripts": {
@@ -11,7 +11,7 @@
         "lint": "eslint src scripts tests",
         "lint:fix": "eslint src scripts tests --fix",
         "typecheck": "tsc --noEmit",
-        "check": "npm run typecheck && npm run lint:ratchet && npm run check:dual-dispatch && npm run check:hooks && npm run check:host-conformance && npm run check:delegation && npm run check:reachability && npm run check:readonly && npm run check:imports && npm run check:i18n && npm run check:dead-css && npm run check:duplicate-bodies && npm run check:test-only && npm test && npm run coverage && npm run build",
+        "check": "npm run typecheck && npm run lint:ratchet && npm run check:dual-dispatch && npm run check:hooks && npm run check:host-conformance && npm run check:delegation && npm run check:reachability && npm run check:readonly && npm run check:imports && npm run check:i18n && npm run check:locale-builders && npm run check:dead-css && npm run check:duplicate-bodies && npm run check:test-only && npm test && npm run coverage && npm run build",
         "lint:ratchet": "node scripts/lint-ratchet.js",
         "check:dual-dispatch": "node scripts/dual-dispatch-ratchet.js",
         "check:hooks": "node scripts/check-unwired-hooks.js",
@@ -24,6 +24,7 @@
         "snapshot:i18n": "node scripts/snapshot-i18n.js",
         "coverage:floors": "node scripts/coverage-ratchet.js --floors",
         "check:host-conformance": "node scripts/check-host-conformance.js",
+        "check:locale-builders": "node scripts/check-locale-builders.js",
         "check:dead-css": "node scripts/check-dead-css.js",
         "check:duplicate-bodies": "node scripts/check-duplicate-bodies.js",
         "check:test-only": "node scripts/check-test-only.js"

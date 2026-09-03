@@ -56,15 +56,28 @@ export class ConfirmModal extends DialogModal {
     }
 
     protected override renderFooter(contentEl: HTMLElement): void {
-        if (!this.options.hint) return;
+        const hint = this.options.hint;
+        if (!hint) return;
         // Below the buttons, where it was: it offers a way out rather than a
         // third answer, so it is not one of the actions.
         const hintEl = contentEl.createDiv({ cls: 'wpp-confirm-hint' });
-        const hintLink = hintEl.createEl('a', { text: this.options.hint });
+
+        // A link only when there is somewhere to go. Every hint was an `<a>`
+        // whose click cancelled the dialog, and only one of the three callers
+        // passes an `onHintClick`: the other two are sentences explaining what
+        // the confirmation will leave behind, and reading one dismissed the
+        // dialog it was explaining.
+        const onHintClick = this.options.onHintClick;
+        if (!onHintClick) {
+            hintEl.setText(hint);
+            return;
+        }
+
+        const hintLink = hintEl.createEl('a', { text: hint });
         hintLink.addEventListener('click', (e) => {
             e.preventDefault();
             this.cancel();
-            this.options.onHintClick?.();
+            onHintClick();
         });
     }
 }

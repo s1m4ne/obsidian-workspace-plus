@@ -41,6 +41,28 @@ test('formatRelativeTime: formats relative timestamps accurately', () => {
     assert.equal(formatRelativeTime(now - 2 * 86400000), (L.modifiedDays as (n: number) => string)(2));
 });
 
+test('ConfirmModal: a hint with nowhere to go is text, not a link that dismisses', () => {
+    let confirmed = false;
+    // No onHintClick. Every hint used to be an `<a>` whose click cancelled, and
+    // two of the three callers pass a sentence explaining what the
+    // confirmation leaves behind - so reading it dismissed the dialog it was
+    // explaining.
+    const modal = new ConfirmModal(app, 'Delete?', () => { confirmed = true; }, {
+        hint: 'Saved sessions are all deleted.',
+    });
+    modal.open();
+
+    const hintEl = modal.contentEl.querySelector('.wpp-confirm-hint');
+    assert.ok(hintEl);
+    assert.equal(hintEl?.querySelector('a'), null);
+    assert.equal(hintEl?.textContent, 'Saved sessions are all deleted.');
+
+    hintEl?.dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
+    assert.equal(modal.containerEl.isConnected, true, 'reading the hint closed the dialog');
+    assert.equal(confirmed, false);
+    modal.close();
+});
+
 test('ConfirmModal: handles open, click, keyboard navigation and hint', () => {
     let confirmed = false;
     let hintClicked = false;

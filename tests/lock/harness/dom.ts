@@ -49,12 +49,13 @@ function applyInfo(el: HTMLElement, info: DomElementInfo | string | undefined): 
 }
 
 function makeChild(
-    parent: HTMLElement,
+    parent: HTMLElement | DocumentFragment,
     tag: string,
     info?: DomElementInfo | string,
     callback?: (el: HTMLElement) => void,
 ): HTMLElement {
-    const el = parent.ownerDocument.createElement(tag);
+    const doc = parent.ownerDocument ?? (parent as unknown as Document);
+    const el = doc.createElement(tag);
     applyInfo(el, info);
     parent.appendChild(el);
     if (callback) callback(el);
@@ -62,6 +63,18 @@ function makeChild(
 }
 
 function patchElementPrototype(window: Window & typeof globalThis): void {
+    // A DocumentFragment carries the same createEl/appendText helpers in
+    // Obsidian, and `desc` on a setting definition may be one.
+    for (const target of [window.HTMLElement.prototype, window.DocumentFragment.prototype]) {
+        const fragProto = target as unknown as Record<string, unknown>;
+        fragProto.createEl = function (this: HTMLElement, tag: string, info?: DomElementInfo | string, callback?: (el: HTMLElement) => void) {
+            return makeChild(this, tag, info, callback);
+        };
+        fragProto.appendText = function (this: HTMLElement, value: string): void {
+            this.appendChild(this.ownerDocument.createTextNode(value));
+        };
+    }
+
     const proto = window.HTMLElement.prototype as unknown as Record<string, unknown>;
 
     proto.createEl = function (this: HTMLElement, tag: string, info?: DomElementInfo | string, callback?: (el: HTMLElement) => void) {
@@ -152,6 +165,14 @@ export function setupDom(): DomHarness {
     install('Node', window.Node);
     install('Event', window.Event);
     install('MouseEvent', window.MouseEvent);
+    install('DocumentFragment', window.DocumentFragment);
+    // Obsidian's own global. `desc` on a setting definition takes a fragment,
+    // which is how a description carries a link.
+    install('createFragment', (callback?: (frag: DocumentFragment) => void): DocumentFragment => {
+        const frag = window.document.createDocumentFragment();
+        if (callback) callback(frag);
+        return frag;
+    });
     install('KeyboardEvent', window.KeyboardEvent);
 
     // jsdom does not implement scrollIntoView; provide a no-op stub for UI components

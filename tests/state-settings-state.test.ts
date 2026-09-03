@@ -75,7 +75,6 @@ test('SettingsState: default fallback resolution for all settings (P5)', () => {
     assert.equal(state.previewNext, DEFAULT_DATA.previewNext);
     assert.equal(state.previewPrevious, DEFAULT_DATA.previewPrevious);
     assert.equal(state.showFilterInput, DEFAULT_DATA.showFilterInput);
-    assert.equal(state.overlayDefaultFocus, DEFAULT_DATA.overlayDefaultFocus);
     assert.equal(state.confirmDeleteByHotkey, DEFAULT_DATA.confirmDeleteByHotkey);
     assert.equal(state.versionHistoryEnabled, DEFAULT_DATA.versionHistoryEnabled);
     assert.equal(state.versionHistorySnapshotInterval, DEFAULT_DATA.versionHistorySnapshotInterval);

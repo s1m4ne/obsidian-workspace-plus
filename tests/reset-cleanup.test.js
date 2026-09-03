@@ -49,12 +49,34 @@ function createPlugin(options) {
             vault: {
                 adapter: {
                     exists: function (path) {
-                        return Promise.resolve(existingFiles.has(path));
+                        // A directory exists when something is in it, which is
+                        // what a vault adapter reports and what listing the
+                        // backup pool depends on.
+                        if (existingFiles.has(path)) return Promise.resolve(true);
+                        const prefix = path + '/';
+                        return Promise.resolve([...existingFiles].some((f) => f.startsWith(prefix)));
                     },
                     remove: function (path) {
                         removedFiles.push(path);
                         existingFiles.delete(path);
                         return Promise.resolve();
+                    },
+                    // The rotating backups are a directory now, so clearing
+                    // them means listing it.
+                    list: function (path) {
+                        const prefix = path + '/';
+                        return Promise.resolve({
+                            files: [...existingFiles].filter((f) => f.startsWith(prefix)),
+                            folders: [],
+                        });
+                    },
+                    read: function (path) {
+                        return existingFiles.has(path)
+                            ? Promise.resolve(JSON.stringify({ _wppSavedAt: 1, sessions: {} }))
+                            : Promise.reject(new Error('missing'));
+                    },
+                    stat: function (path) {
+                        return Promise.resolve(existingFiles.has(path) ? { mtime: 1, size: 10 } : null);
                     },
                 },
             },
@@ -71,6 +93,9 @@ function createPlugin(options) {
         },
         clearBackupFiles: function () {
             return persistenceService.clearBackupFiles();
+        },
+        readJsonIfExists: function (path) {
+            return persistenceService.getJsonStore().readJsonIfExists(path);
         },
     };
     persistenceService = new PersistenceService(host);
@@ -94,9 +119,9 @@ function createPlugin(options) {
 test('clearBackupsAndVersionHistory removes backup files and session history', async function () {
     const files = [
         '.workspace-plus-plus/sessions.backup.json',
-        '.workspace-plus-plus/backups/sessions.1.json',
-        '.workspace-plus-plus/backups/sessions.2.json',
-        '.workspace-plus-plus/backups/sessions.3.json',
+        '.workspace-plus-plus/backups/sessions.1700000000000.json',
+        '.workspace-plus-plus/backups/sessions.1700003600000.json',
+        '.workspace-plus-plus/backups/sessions.1700007200000.json',
         '.obsidian/plugins/workspace-plus-plus/data.backup.json',
         '.workspace-plus-plus/exports/sessions-keep.json',
     ];
@@ -114,9 +139,9 @@ test('clearBackupsAndVersionHistory removes backup files and session history', a
     const removed = plugin.getRemovedFiles().sort();
     assert.deepEqual(removed, [
         '.obsidian/plugins/workspace-plus-plus/data.backup.json',
-        '.workspace-plus-plus/backups/sessions.1.json',
-        '.workspace-plus-plus/backups/sessions.2.json',
-        '.workspace-plus-plus/backups/sessions.3.json',
+        '.workspace-plus-plus/backups/sessions.1700000000000.json',
+        '.workspace-plus-plus/backups/sessions.1700003600000.json',
+        '.workspace-plus-plus/backups/sessions.1700007200000.json',
         '.workspace-plus-plus/sessions.backup.json',
     ]);
     assert.equal(plugin.hasFile('.workspace-plus-plus/exports/sessions-keep.json'), true);

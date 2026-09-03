@@ -1,8 +1,8 @@
 {
     "id": "workspace-plus-plus",
     "name": "Workspace++",
-    "version": "0.9.0",
-    "minAppVersion": "1.11.0",
+    "version": "0.10.0",
+    "minAppVersion": "1.13.0",
     "description": "Workspace session manager with a native-feeling UI/UX.",
     "author": "s1m4ne",
     "isDesktopOnly": false

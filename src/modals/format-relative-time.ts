@@ -1,7 +1,16 @@
 import { L } from '../i18n.ts';
 
-export function formatRelativeTime(timestamp: number): string {
-    const diff = Date.now() - timestamp;
+/**
+ * How long ago `timestamp` was, in words.
+ *
+ * `now` is the instant to measure from, and it exists so that several times
+ * rendered together are measured from one moment. Reading the clock per call
+ * let one screen disagree with itself: the settings' backup entry and the rows
+ * inside it are built a few statements apart, which is enough to straddle a
+ * minute boundary and print "3 minutes ago" above "2 minutes ago".
+ */
+export function formatRelativeTime(timestamp: number, now: number = Date.now()): string {
+    const diff = now - timestamp;
     const minutes = Math.floor(diff / 60000);
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);

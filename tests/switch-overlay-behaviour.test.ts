@@ -69,7 +69,6 @@ function createTestPlugin() {
         autoSaveOnSwitch: false,
         warnOnUnsavedSwitch: false,
         showFilterInput: true,
-        overlayDefaultFocus: 'current-session',
     });
 
     /** The saved overlay position, under the shape the overlay actually uses. */
@@ -568,10 +567,10 @@ test('the search overlay filters as you type and offers per-row actions', async 
     plugin.hideSearchOverlay();
     assert.equal(plugin.searchOverlayEl, null);
 
-    // The knob the overlay actually reads. This line used to set
-    // searchOverlayFocusTarget, which nothing in src reads, so the test took the
-    // focusTarget !== 'session-create' branch - the opposite of what it names.
-    plugin.data.overlayDefaultFocus = 'session-create';
+    // Typing a name and pressing Enter creates a session. The field no longer
+    // takes the opening focus - where the overlay lands was a setting with
+    // three answers and is now always the current session - so this reaches it
+    // by writing to the field directly, the way a click on it would.
     searchOverlay.open();
     const saveInputEl = (plugin.searchOverlayEl as HTMLElement | null)?.querySelector<HTMLInputElement>('.wpp-save-input');
     if (saveInputEl) {

@@ -151,3 +151,129 @@ test('HistoryService: timer start and stop', () => {
 
     harness.restore();
 });
+
+// --- Compaction over time ------------------------------------------------
+//
+// Compaction runs on every push, so what it does to one list says almost
+// nothing. What matters is the shape it converges on after thousands of
+// passes, which is what these three measure.
+
+const MINUTE = 60000;
+const TEST_HOUR = 60 * MINUTE;
+const TEST_DAY = 24 * TEST_HOUR;
+
+/** Snapshot every `intervalMin` for `days`, compacting each time, as production does. */
+function runHistory(intervalMin: number, days: number): {
+    history: SessionHistoryEntry[];
+    now: number;
+} {
+    const { host } = createMockHost();
+    const service = new HistoryService(host);
+    const realNow = Date.now;
+    const start = 1_700_000_000_000;
+    let history: SessionHistoryEntry[] = [];
+    let at = start;
+
+    try {
+        const ticks = Math.floor((days * TEST_DAY) / (intervalMin * MINUTE));
+        for (let i = 0; i <= ticks; i++) {
+            at = start + i * intervalMin * MINUTE;
+            Date.now = () => at;
+            history.unshift({ layout: { i }, savedAt: at });
+            history = service.compactHistory(history);
+        }
+    } finally {
+        Date.now = realNow;
+    }
+    return { history, now: at };
+}
+
+interface AgeBands {
+    recent: number;
+    hourly: number;
+    daily: number;
+    weekly: number;
+    stale: number;
+}
+
+function ageBands(history: readonly SessionHistoryEntry[], now: number): AgeBands {
+    const bands = { recent: 0, hourly: 0, daily: 0, weekly: 0, stale: 0 };
+    for (const entry of history) {
+        const age = now - (entry.savedAt ?? 0);
+        if (age <= TEST_HOUR) bands.recent += 1;
+        else if (age <= TEST_DAY) bands.hourly += 1;
+        else if (age <= 7 * TEST_DAY) bands.daily += 1;
+        else if (age <= 30 * TEST_DAY) bands.weekly += 1;
+        else bands.stale += 1;
+    }
+    return bands;
+}
+
+test('HistoryService: a day of snapshots leaves history older than an hour', () => {
+    const { history, now } = runHistory(2, 1);
+    const oldest = history[history.length - 1];
+    assert.ok(oldest, 'the history is not empty');
+
+    // The buckets were keyed on age, which is a window that slides: an entry
+    // sat in `h1` for an hour while every newer entry crossed the same line
+    // into `h1` and won, so nothing ever reached `h2`. This ran for
+    // twenty-four hours and kept sixty-two minutes.
+    const oldestAgeHours = (now - (oldest.savedAt ?? 0)) / TEST_HOUR;
+    assert.ok(oldestAgeHours > 20, `oldest entry is only ${oldestAgeHours.toFixed(1)}h old`);
+    assert.ok(ageBands(history, now).hourly >= 20, JSON.stringify(ageBands(history, now)));
+});
+
+test('HistoryService: a month of snapshots keeps a month, thinned by band', () => {
+    for (const interval of [1, 5, 30]) {
+        const { history, now } = runHistory(interval, 40);
+        const bands = ageBands(history, now);
+        const oldestEntry = history[history.length - 1];
+        const oldestDays = (now - (oldestEntry?.savedAt ?? 0)) / TEST_DAY;
+
+        // Not a fixed figure: the weekly bucket is `floor(savedAt / WEEK)`,
+        // aligned to the epoch, so where the oldest surviving week falls
+        // inside the 30-day window depends on the phase of the run.
+        assert.ok(oldestDays > 24, `interval ${interval}: oldest is ${oldestDays.toFixed(1)} days`);
+        assert.ok(bands.hourly >= 22, `interval ${interval}: ${bands.hourly} hourly`);
+        assert.ok(bands.daily >= 6, `interval ${interval}: ${bands.daily} daily`);
+        assert.ok(bands.weekly >= 3, `interval ${interval}: ${bands.weekly} weekly`);
+        assert.equal(bands.stale, 0, `interval ${interval}: kept something over 30 days old`);
+
+        // A one-minute interval produces sixty entries an hour. The surplus
+        // has to fall through into its hour's bucket rather than be dropped,
+        // or the tail stays empty for a second reason.
+        assert.ok(history.length <= 60, `interval ${interval}: ${history.length} entries`);
+    }
+});
+
+test('HistoryService: heavy editing in one hour does not evict the older bands', () => {
+    const { history, now } = runHistory(1, 40);
+    const bands = ageBands(history, now);
+    // 15 fine-grained entries from the last hour, and the tail intact beside
+    // them. Capping only the total let an hour of churn push every daily and
+    // weekly entry out of a 45-entry list.
+    assert.ok(bands.recent <= 20, `${bands.recent} entries inside the hour`);
+    assert.ok(bands.daily + bands.weekly >= 9, JSON.stringify(bands));
+});
+
+test('HistoryService: one entry survives per clock hour, not per hour of age', () => {
+    const { host } = createMockHost();
+    const service = new HistoryService(host);
+    const realNow = Date.now;
+    // Two entries taken in the same clock hour, both older than an hour.
+    const base = 1_700_000_000_000 - (1_700_000_000_000 % TEST_HOUR);
+    try {
+        Date.now = () => base + 3 * TEST_HOUR;
+        const compacted = service.compactHistory([
+            { layout: { keep: true }, savedAt: base + 50 * MINUTE },
+            { layout: { drop: true }, savedAt: base + 10 * MINUTE },
+            { layout: { otherHour: true }, savedAt: base - 30 * MINUTE },
+        ]);
+        assert.deepEqual(
+            compacted.map((entry) => Object.keys(entry.layout as object)[0]),
+            ['keep', 'otherHour'],
+        );
+    } finally {
+        Date.now = realNow;
+    }
+});

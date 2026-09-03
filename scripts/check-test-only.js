@@ -41,6 +41,15 @@ const ALLOWED = new Map([
     ['src/core/command-registry.ts syncSessionCommands', 'Same as registerCommands.'],
     ['src/statusbar-controller.ts handleStatusBarWheel', 'The free-function form of the controller method, kept for the wheel-gesture tests.'],
     ['src/storage/session-sync.ts isSessionStorageInfoNewerForHost', 'The comparison on its own; production reaches it inside mergeExternalSessionData.'],
+
+    // Obsidian is the caller. These three are the whole of the declarative
+    // settings contract: it renders getSettingDefinitions() and reads and
+    // writes every control through the other two. Nothing in src/ calls them
+    // and nothing should - display(), which used to, went when minAppVersion
+    // reached 1.13.0 and the imperative renderer with it.
+    ['src/settings-tab.ts getSettingDefinitions', 'PluginSettingTab override. Obsidian calls it to render the screen and to build the settings search index.'],
+    ['src/settings-tab.ts getControlValue', 'PluginSettingTab override. Obsidian calls it on every render of a `control` definition.'],
+    ['src/settings-tab.ts setControlValue', 'PluginSettingTab override. Obsidian calls it when a control changes.'],
 ]);
 
 function loadService() {

@@ -1,8 +1,7 @@
 import { Menu, type App, type MenuItem } from 'obsidian';
-import { addCustomizeClicksItem, call, showAtMouseEvent } from './context-menu-shared.ts';
+import { addOpenSettingsItem, call, showAtMouseEvent } from './context-menu-shared.ts';
 import { L, text } from './i18n.ts';
 import type { SessionItem } from './storage/default-data.ts';
-import type { TabId } from './settings-tab.ts';
 import type { GroupStore } from './state/group-store.ts';
 import type { SessionSaver } from './state/session-saver.ts';
 import type { HistoryService } from './state/history-service.ts';
@@ -52,8 +51,6 @@ export interface SessionContextMenuPluginHost {
         sessionGroups?: Record<string, string[]>;
     };
     manifest: { id: string };
-    // TabId, not string - see settings-context-menu-items.ts for why.
-    settingTab?: { activeTab: TabId | null } | undefined;
 }
 
 export type SessionContextMenuOptions = SessionContextMenuActions & {
@@ -231,7 +228,10 @@ export function openSessionContextMenu(initialOptions?: SessionContextMenuOption
     // --- Customize click actions (status bar only) ---
     if (options.showCustomizeClicks) {
         menu.addSeparator();
-        addCustomizeClicksItem(menu, app, plugin);
+        addOpenSettingsItem(menu, app, plugin, {
+            title: text(L.contextCustomizeClicks),
+            icon: 'mouse-pointer-click',
+        });
     }
 
     // --- Danger group ---

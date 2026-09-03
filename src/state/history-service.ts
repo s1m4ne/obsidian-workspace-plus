@@ -28,7 +28,19 @@ export interface HistoryServiceHost {
 export const HOUR = 3600000;
 export const DAY = 86400000;
 export const WEEK = 7 * DAY;
-export const MAX_HISTORY = 45;
+/**
+ * How many snapshots of the last hour to keep.
+ *
+ * The thinned tail below is bounded by construction - one entry per hour for
+ * 23 hours, per day for 6, per week for 4 - so roughly 33 entries. Capping the
+ * total alone let an hour of heavy editing fill the list and push every daily
+ * and weekly entry out, which is the opposite of what thinning is for. The
+ * recent band is capped instead, and the tail is never spent on it.
+ */
+export const MAX_RECENT_HISTORY = 15;
+
+/** The last line of defence, above the ~48 the bands can produce. */
+export const MAX_HISTORY = 60;
 
 function getEntryTime(entry: SessionHistoryEntry): number {
     return entry.savedAt ?? entry.timestamp ?? 0;
@@ -96,6 +108,26 @@ export class HistoryService {
 
     // --- Compaction ---
 
+    /**
+     * Thin a session's history: everything from the last hour, then one entry
+     * per hour for a day, per day for a week, per week for a month.
+     *
+     * **The buckets are keyed on when an entry was taken, not on how old it
+     * is.** That is the whole of this function's history. Keyed on age, a
+     * bucket is a window that slides: an entry landed in `h1` when it passed
+     * sixty minutes and stayed there for an hour, and every newer entry that
+     * crossed the same line landed in `h1` too and won, being newer. So
+     * nothing ever graduated to `h2`, and nothing ever reached a day or a week.
+     * Measured: two-minute snapshots for twenty-four hours left thirty-two
+     * entries whose oldest was sixty-two minutes old. The feature offered a
+     * month of history and held the last hour.
+     *
+     * An absolute key does not move. An entry is the representative of the
+     * hour it was taken in, and when that hour drops out of the day it becomes
+     * a candidate for its day, and then for its week. Iterating newest-first
+     * keeps the newest of each bucket, which is stable because the bucket no
+     * longer changes underneath it.
+     */
     compactHistory(history: SessionHistoryEntry[]): SessionHistoryEntry[] {
         if (!history || history.length === 0) return [];
         const now = Date.now();
@@ -104,41 +136,36 @@ export class HistoryService {
         const sorted = history.slice().sort((a, b) => getEntryTime(b) - getEntryTime(a));
 
         const result: SessionHistoryEntry[] = [];
-        const buckets: Record<string, boolean> = {};
+        const buckets = new Set<string>();
+        let recent = 0;
 
-        for (let i = 0; i < sorted.length; i++) {
-            const entry = sorted[i];
-            if (!entry) continue;
+        for (const entry of sorted) {
             const savedAt = getEntryTime(entry);
             const age = now - savedAt;
-            let key: string | null = null;
 
-            if (age <= HOUR) {
-                // Last 1 hour: keep all
+            // The newest few are kept exactly as they are, however close
+            // together they were taken. Everything past the cap falls through
+            // to the buckets rather than being dropped: at a one-minute
+            // interval the surplus is sixty entries an hour, and discarding it
+            // discarded the entry that would have become that hour's
+            // representative - which left the tail empty again, for a second
+            // reason, after the keys were fixed.
+            if (recent < MAX_RECENT_HISTORY && age <= HOUR) {
+                recent += 1;
                 result.push(entry);
-            } else if (age <= DAY) {
-                // 1-24 hours: 1 per hour (keep newest in each bucket)
-                key = 'h' + Math.floor(age / HOUR);
-                if (!buckets[key]) {
-                    buckets[key] = true;
-                    result.push(entry);
-                }
-            } else if (age <= WEEK) {
-                // 1-7 days: 1 per day
-                key = 'd' + Math.floor(age / DAY);
-                if (!buckets[key]) {
-                    buckets[key] = true;
-                    result.push(entry);
-                }
-            } else if (age <= 30 * DAY) {
-                // 7-30 days: 1 per week
-                key = 'w' + Math.floor(age / WEEK);
-                if (!buckets[key]) {
-                    buckets[key] = true;
-                    result.push(entry);
-                }
+                continue;
             }
+
+            let key: string;
+            if (age <= DAY) key = `h${Math.floor(savedAt / HOUR)}`;
+            else if (age <= WEEK) key = `d${Math.floor(savedAt / DAY)}`;
+            else if (age <= 30 * DAY) key = `w${Math.floor(savedAt / WEEK)}`;
             // Older than 30 days: drop
+            else continue;
+
+            if (buckets.has(key)) continue;
+            buckets.add(key);
+            result.push(entry);
         }
 
         if (result.length > MAX_HISTORY) {
