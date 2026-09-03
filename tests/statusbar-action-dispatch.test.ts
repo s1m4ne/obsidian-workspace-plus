@@ -175,7 +175,7 @@ test('each configurable action performs its own effect and no other', async () =
         },
         // Switching goes through getSessionSwitcher(); this double carries those members itself.
         getSessionSwitcher(): never { return this as never; },
-        switchRelativeFromStatusBar: async (offset: number) => {
+        switchRelativeImmediately: async (offset: number) => {
             calls.push(`switchRelative:${offset}`);
             return true;
         },

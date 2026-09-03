@@ -563,7 +563,7 @@ test('a status-bar switch skips the preview step, shows no overlay and replaces 
         return Promise.resolve(true);
     };
 
-    const switched = await switcher.switchRelativeFromStatusBar(1);
+    const switched = await switcher.switchRelativeImmediately(1);
 
     assert.equal(switched, true);
     assert.equal(previewCalled, false);

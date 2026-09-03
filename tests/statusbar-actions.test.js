@@ -105,8 +105,8 @@ test('status bar actions delegate new direct actions to plugin methods', async f
         },
         // Switching goes through getSessionSwitcher(); this double carries those members itself.
         getSessionSwitcher() { return this; },
-        switchRelativeFromStatusBar: function (offset) {
-            calls.push(['switchRelativeFromStatusBar', offset]);
+        switchRelativeImmediately: function (offset) {
+            calls.push(['switchRelativeImmediately', offset]);
             return Promise.resolve(true);
         },
         createEmptySession: function () {
@@ -136,8 +136,8 @@ test('status bar actions delegate new direct actions to plugin methods', async f
         'saveCurrentNoteNameAsSession',
         'renameCurrentSession',
         'duplicateCurrentSession',
-        ['switchRelativeFromStatusBar', -1],
-        ['switchRelativeFromStatusBar', 1],
+        ['switchRelativeImmediately', -1],
+        ['switchRelativeImmediately', 1],
         'createEmptySession',
         ['toggleAutoSaveOnSwitch', { notify: true }],
     ]);

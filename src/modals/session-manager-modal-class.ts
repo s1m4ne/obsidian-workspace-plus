@@ -110,44 +110,6 @@ function closest(target: EventTarget | null, selector: string): HTMLElement | nu
     return found instanceof HTMLElement ? found : null;
 }
 
-/**
- * The commands this modal lets through to its own scope (#119).
- *
- * An Obsidian `Modal` owns a `Scope` and captures key input before the global
- * keymap sees it, which is what a modal is for - so the plugin's own hotkeys
- * did nothing while the session manager was open, while the search overlay (a
- * plain div on the body) passed them through. `Cmd+Shift+M` duplicated a
- * session in one and not the other.
- *
- * Registered here: every command whose subject is *the current session*, or no
- * session at all. Each names its subject - "Duplicate **current** session" -
- * so inside the modal it still means the active session, unambiguously, and
- * the row buttons remain the way to act on a different one. The two have
- * different subjects and the names say which.
- *
- * Not registered: next and previous session. The modal is the place you switch
- * from, its rows do it, and the preview overlay those commands can open would
- * land on top of the modal.
- */
-const SCOPED_COMMAND_ACTIONS: readonly {
-    readonly id: string;
-    readonly run: (plugin: SessionManagerModalHost) => void;
-}[] = [
-    { id: 'save-current-session', run: (p) => { void p.getSessionSaver().saveActiveSession(); } },
-    { id: 'save-as-session', run: (p) => { void p.getSessionSaver().saveAsSession(); } },
-    {
-        id: 'reload-current-session-without-saving',
-        run: (p) => { void p.getSessionSaver().reloadCurrentSessionWithoutSaving(); },
-    },
-    { id: 'rename-session', run: (p) => { p.getSessionStore().renameCurrentSession(); } },
-    { id: 'duplicate-session', run: (p) => { void p.getSessionStore().duplicateCurrentSession(); } },
-    { id: 'delete-session', run: (p) => { p.getSessionStore().deleteCurrentSession(); } },
-    {
-        id: 'toggle-auto-save-on-switch',
-        run: (p) => { void p.getSessionSaver().toggleAutoSaveOnSwitch({ notify: true }); },
-    },
-];
-
 function visibleElements(root: ParentNode, selector: string): HTMLElement[] {
     return Array.from(root.querySelectorAll<HTMLElement>(selector)).filter(isElementVisible);
 }
@@ -324,7 +286,12 @@ export class SessionManagerModal extends Modal {
                 return;
             }
 
+            // Plain Enter activates the focused control. Enter with a modifier
+            // belongs to a command hotkey, and this handler taking it is why
+            // Cmd+Shift+Enter switched to the *focused row* while the footer
+            // below advertised it as "next session".
             if (e.key !== 'Enter') return;
+            if (e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
             this.handleEnterKey(e, controlEl ?? null);
         };
         this.listenerDoc = this.containerEl.ownerDocument;
@@ -350,14 +317,74 @@ export class SessionManagerModal extends Modal {
      * The bindings come from Obsidian, so a rebound command keeps working. A
      * command with no binding registers nothing - there is no key to catch.
      */
+    /**
+     * The commands this modal lets through to its own scope (#119).
+     *
+     * An Obsidian `Modal` owns a `Scope` and captures key input before the
+     * global keymap sees it, which is what a modal is for - so the plugin's own
+     * hotkeys did nothing here while the search overlay, a plain div on the
+     * body, passed them through. `Cmd+Shift+M` duplicated a session in one and
+     * not the other.
+     *
+     * Everything whose subject is *the current session*, or no session at all.
+     * Each names its subject - "Duplicate **current** session" - so inside the
+     * modal it still means the active session, unambiguously, and the row
+     * buttons remain the way to act on a different one.
+     *
+     * Next and previous are here too, and switch *in place*: this modal's own
+     * footer renders the next-session hotkey, so the key has to do what the
+     * footer says. The overlay those commands normally open would land on top
+     * of the modal, which is not what someone reading a list of sessions
+     * asked for.
+     *
+     * A method rather than a module constant because the closures need `this`.
+     */
+    private scopedCommands(): readonly { readonly id: string; readonly run: () => void }[] {
+        const plugin = this.plugin;
+        return [
+            { id: 'save-current-session', run: () => { void plugin.getSessionSaver().saveActiveSession(); } },
+            { id: 'save-as-session', run: () => { void plugin.getSessionSaver().saveAsSession(); } },
+            {
+                id: 'reload-current-session-without-saving',
+                run: () => { void plugin.getSessionSaver().reloadCurrentSessionWithoutSaving(); },
+            },
+            { id: 'rename-session', run: () => { plugin.getSessionStore().renameCurrentSession(); } },
+            { id: 'duplicate-session', run: () => { void plugin.getSessionStore().duplicateCurrentSession(); } },
+            { id: 'delete-session', run: () => { plugin.getSessionStore().deleteCurrentSession(); } },
+            {
+                id: 'toggle-auto-save-on-switch',
+                run: () => { void plugin.getSessionSaver().toggleAutoSaveOnSwitch({ notify: true }); },
+            },
+            { id: 'next-session', run: () => { this.switchRelativeInPlace(1); } },
+            { id: 'previous-session', run: () => { this.switchRelativeInPlace(-1); } },
+        ];
+    }
+
+    /**
+     * Switch without leaving the modal, and move the active row to match.
+     *
+     * Switching changes `activeSessionId` and nothing else, so it does not
+     * reach `onSessionsChanged` - the list has to be told, or the highlight
+     * stays on the session that was active when the key was pressed.
+     */
+    private switchRelativeInPlace(offset: number): void {
+        void this.plugin.getSessionSwitcher().switchRelativeImmediately(offset).then(() => {
+            // The switch is asynchronous and the modal may be gone by the time
+            // it settles - Escape, or a click outside. Rendering into a
+            // detached element would be pointless; focusing one is worse.
+            if (!this.containerEl.isConnected) return;
+            this.refreshFromSessionChange();
+        });
+    }
+
     private registerCommandHotkeys(): void {
         const registry = this.plugin.getCommandRegistry();
-        for (const command of SCOPED_COMMAND_ACTIONS) {
+        for (const command of this.scopedCommands()) {
             for (const hotkey of registry.getCommandHotkeyBindings(command.id)) {
                 if (!hotkey || !hotkey.key) continue;
                 this.scope.register(hotkey.modifiers ?? [], hotkey.key, (event) => {
                     event.preventDefault();
-                    command.run(this.plugin);
+                    command.run();
                     return false;
                 });
             }

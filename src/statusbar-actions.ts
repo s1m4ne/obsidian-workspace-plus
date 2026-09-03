@@ -162,14 +162,14 @@ export const ACTIONS: readonly StatusBarAction[] = [
         id: 'previousSession',
         labelKey: 'cmdPrevious',
         run(plugin) {
-            return plugin.getSessionSwitcher().switchRelativeFromStatusBar(-1);
+            return plugin.getSessionSwitcher().switchRelativeImmediately(-1);
         },
     },
     {
         id: 'nextSession',
         labelKey: 'cmdNext',
         run(plugin) {
-            return plugin.getSessionSwitcher().switchRelativeFromStatusBar(1);
+            return plugin.getSessionSwitcher().switchRelativeImmediately(1);
         },
     },
     {

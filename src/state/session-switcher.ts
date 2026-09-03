@@ -558,13 +558,17 @@ export class SessionSwitcher {
     }
 
     /**
-     * Both status-bar gestures - clicking a next/previous action and scrolling
-     * over the bar - switch on the spot: no overlay, and a notice that replaces
-     * the previous one rather than stacking. They were two methods with
-     * identical bodies, which asserted a difference in policy that has never
-     * existed.
+     * Switch on the spot: no overlay, and a notice that replaces the previous
+     * one rather than stacking.
+     *
+     * Named for the policy rather than the gesture. It was
+     * `switchRelativeFromStatusBar`, alongside an identical
+     * `switchRelativeFromScroll`, when both callers were the status bar; the
+     * session manager needs the same policy from a modal, and a name that
+     * depends on the caller's vantage point is the thing `changeWorkspaceLayout`
+     * was renamed to avoid.
      */
-    switchRelativeFromStatusBar(offset: number): Promise<boolean> {
+    switchRelativeImmediately(offset: number): Promise<boolean> {
         return this.switchRelativeDirect(offset, {
             overlayMode: 'none',
             switchNoticeMode: 'replace',

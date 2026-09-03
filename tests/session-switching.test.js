@@ -173,12 +173,12 @@ test('session-switching prototype methods: notices and direct switches', async (
     await p4;
     assert.equal(data.activeSessionId, 'c');
 
-    const p5 = switcher.switchRelativeFromStatusBar(1);
+    const p5 = switcher.switchRelativeImmediately(1);
     await releaseLayouts();
     await p5;
     assert.equal(data.activeSessionId, 'd');
 
-    const p6 = switcher.switchRelativeFromStatusBar(-1);
+    const p6 = switcher.switchRelativeImmediately(-1);
     await releaseLayouts();
     await p6;
     assert.equal(data.activeSessionId, 'c');

@@ -65,6 +65,7 @@ interface ModalPlugin {
     saveActiveSession(): Promise<void>;
     createSessionForViewedGroup(name: string, groupId: string | null): Promise<{ created: boolean; name: string; viewGroupId: string | null }>;
     switchSession(id: string): Promise<boolean>;
+    switchRelativeImmediately(offset: number): Promise<boolean>;
     resolveGroupSelection(groupId: string | null): Promise<{ resolvedGroupId: string | null; switched: boolean }>;
     deleteSession(id: string): Promise<boolean>;
     moveSessionToGroupExclusive(sessionId: string, groupId: string): Promise<void>;
@@ -135,6 +136,8 @@ const SCOPED_TEST_KEYS: Record<string, string | undefined> = {
     'duplicate-session': 'M',
     'delete-session': 'Backspace',
     'toggle-auto-save-on-switch': 'O',
+    'next-session': 'Enter',
+    'previous-session': 'Comma',
 };
 
 /** Listeners the fixture's store hands out, so a test can fire a change. */
@@ -261,6 +264,12 @@ function makePlugin(containerEl: HTMLElement, groupFeatureEnabled = false): Moda
         switchSession: async (id): Promise<boolean> => {
             plugin.switchedIds.push(id);
             return false;
+        },
+        // The modal's next/previous hotkeys switch in place (#119), so the
+        // offset is recorded rather than a session id.
+        switchRelativeImmediately(offset: number): Promise<boolean> {
+            this.calls.push(`switchRelativeImmediately:${offset}`);
+            return Promise.resolve(true);
         },
         resolveGroupSelection: async (groupId) => ({ resolvedGroupId: groupId, switched: false }),
         deleteSession: async (id): Promise<boolean> => {
@@ -588,9 +597,10 @@ test('the commands whose subject is the current session reach the open modal', a
     try {
         const handlers = scopeHandlers(modal);
         assert.deepEqual([...handlers.keys()].sort(), [
-            'Mod+Shift+A', 'Mod+Shift+Backspace', 'Mod+Shift+L',
-            'Mod+Shift+M', 'Mod+Shift+O', 'Mod+Shift+R', 'Mod+Shift+S',
-        ], 'seven commands, and switching is not among them - the rows do that');
+            'Mod+Shift+A', 'Mod+Shift+Backspace', 'Mod+Shift+Comma',
+            'Mod+Shift+Enter', 'Mod+Shift+L', 'Mod+Shift+M', 'Mod+Shift+O',
+            'Mod+Shift+R', 'Mod+Shift+S',
+        ], 'nine, including the next/previous the footer advertises');
 
         const evt = new h.dom.window.KeyboardEvent('keydown', { key: 'M' });
         handlers.get('Mod+Shift+M')?.(evt);
@@ -604,9 +614,55 @@ test('the commands whose subject is the current session reach the open modal', a
 test('a command with no binding registers nothing', async () => {
     const { h, modal } = await openModal();
     try {
-        // Every scoped command has a binding in this fixture; `next-session`
-        // is not scoped at all, so no key of its own can appear.
-        assert.equal(scopeHandlers(modal).has('Mod+Shift+Enter'), false);
+        // `manage-sessions` is not in the scoped set, so no key of its own can
+        // appear however it is bound.
+        assert.equal(scopeHandlers(modal).has('Mod+Shift+X'), false);
+    } finally {
+        modal.close();
+        h.restore();
+    }
+});
+
+/**
+ * The footer renders the next-session hotkey, so the key has to do what the
+ * footer says - and switch without leaving the modal, because the overlay those
+ * commands normally open would land on top of the list being read.
+ *
+ * Before this the modal's own Enter handler took `Cmd+Shift+Enter` (it checked
+ * the key and not the modifiers), so the advertised "next session" switched to
+ * the *focused row* instead.
+ */
+test('the next-session hotkey switches inside the modal and moves the active row', async () => {
+    const { h, plugin, modal } = await openModal();
+    try {
+        const handlers = scopeHandlers(modal);
+        const evt = new h.dom.window.KeyboardEvent('keydown', { key: 'Enter', metaKey: true, shiftKey: true });
+        handlers.get('Mod+Shift+Enter')?.(evt);
+
+        assert.ok(plugin.calls.includes('switchRelativeImmediately:1'), 'it switched on the spot');
+        // The redraw that moves the active row runs when the switch settles.
+        await Promise.resolve();
+        assert.ok(modal.contentEl.querySelector('.wpp-session-item'), 'and stayed open');
+    } finally {
+        modal.close();
+        h.restore();
+    }
+});
+
+test('Enter with a modifier is not the modal activating a control', async () => {
+    const { h, plugin, modal } = await openModal();
+    try {
+        const rows = [...modal.contentEl.querySelectorAll<HTMLElement>('.wpp-session-item')];
+        rows[1]?.querySelector<HTMLElement>('[data-action-key="load"]')?.focus();
+
+        const doc = h.dom.document;
+        doc.dispatchEvent(new h.dom.window.KeyboardEvent('keydown', {
+            key: 'Enter', metaKey: true, shiftKey: true, bubbles: true,
+        }));
+
+        // onLoad goes to switchSession, which this fixture records by id.
+        assert.deepEqual(plugin.switchedIds, [],
+            'the focused row must not be loaded by a command hotkey');
     } finally {
         modal.close();
         h.restore();

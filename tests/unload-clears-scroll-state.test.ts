@@ -22,7 +22,7 @@ async function createController(): Promise<import('../src/statusbar-controller.t
         getActiveSession: () => null,
         getActiveGroup: () => null,
         shouldShowUnsavedStatusBarHighlight: () => false,
-        switchRelativeFromStatusBar: async () => true,
+        switchRelativeImmediately: async () => true,
     };
     return new StatusBarController(host as unknown as StatusBarControllerHost);
 }
