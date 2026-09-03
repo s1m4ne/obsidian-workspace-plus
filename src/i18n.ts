@@ -2186,7 +2186,7 @@ const STRINGS: StringTables = {
         filterPlaceholder: 'セッションを絞り込み...',
         settingsShowFilterInput: '名前で絞り込む欄を表示',
         settingsShowFilterInputDesc: 'セッションマネージャーで名前を入力して絞り込めるようにします。',
-        settingsSectionSessionListSearch: 'セッション一覧と検索',
+        settingsSectionSessionListSearch: 'セッションの検索',
         settingsShowActiveSwitchCommand: '現在のセッションもコマンドパレットに表示',
         settingsShowActiveSwitchCommandDesc: 'すでに開いているセッションへの切り替えコマンドも一覧に残します。',
         settingsNumberedSwitchCommands: '1〜9番のセッションに切り替えるコマンド',

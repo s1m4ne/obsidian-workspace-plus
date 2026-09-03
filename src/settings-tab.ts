@@ -325,9 +325,9 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
         const pages: SettingGroupItem[] = [
             statusBarPage(),
             scrollSwitchPage(ctx),
+            groupsPage(ctx),
             historyPage(ctx),
             backupPage(ctx, this.backups),
-            groupsPage(ctx),
             dataPage(ctx, this.storageSize),
         ];
 

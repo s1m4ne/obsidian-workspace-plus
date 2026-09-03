@@ -81,18 +81,9 @@ function createBackup(ctx: SettingsContext, button: { setDisabled(disabled: bool
 }
 
 function createGroup(ctx: SettingsContext): SettingDefinitionItem {
-    const generationOptions: Record<string, string> = {};
-    for (const choice of BACKUP_GENERATION_CHOICES) {
-        generationOptions[String(choice)] = String(choice);
-    }
-
     return {
         type: 'group',
         items: [{
-            name: text(L.settingsBackupGenerations),
-            desc: text(L.settingsBackupGenerationsDesc),
-            control: { type: 'dropdown', key: 'rotationBackupGenerations', options: generationOptions },
-        }, {
             name: text(L.rotationBackupCreate),
             desc: text(L.rotationBackupDesc),
             render: (setting: Setting) => {
@@ -123,6 +114,29 @@ function generationsGroup(
     };
 }
 
+/**
+ * How many to keep.
+ *
+ * At the foot of the page, under the list it governs: the reader wants to see
+ * what is there before deciding how much of it to keep, and lowering the
+ * number takes effect on that list immediately.
+ */
+function generationCountGroup(): SettingDefinitionItem {
+    const generationOptions: Record<string, string> = {};
+    for (const choice of BACKUP_GENERATION_CHOICES) {
+        generationOptions[String(choice)] = String(choice);
+    }
+
+    return {
+        type: 'group',
+        items: [{
+            name: text(L.settingsBackupGenerations),
+            desc: text(L.settingsBackupGenerationsDesc),
+            control: { type: 'dropdown', key: 'rotationBackupGenerations', options: generationOptions },
+        }],
+    };
+}
+
 export function backupPage(
     ctx: SettingsContext,
     backups: readonly RotationBackupInfo[] | null
@@ -140,6 +154,6 @@ export function backupPage(
         // door: it answers "am I covered?" without opening it. Three
         // generations is the fixed maximum, so a count would say nothing.
         displayValue: () => (newest ? formatRelativeTime(newest.savedAt, now) : ''),
-        items: [createGroup(ctx), generationsGroup(ctx, backups, now)],
+        items: [createGroup(ctx), generationsGroup(ctx, backups, now), generationCountGroup()],
     };
 }

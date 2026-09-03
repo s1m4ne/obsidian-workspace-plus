@@ -1325,3 +1325,29 @@ test('the storage group is the one toggle, and the path is named once on the pag
         assert.equal(pathRows[0].name, L.settingsStorageFieldSessions);
     } finally { await settle(); h.restore(); }
 });
+
+test('the doors are in the order the maintainer set, and the count is last on its page', async () => {
+    const h = setupHarness();
+    try {
+        const { tab, plugin, L } = makeTab(h);
+        tab.plugin = plugin;
+        const items = tab.getSettingDefinitions();
+
+        assert.deepEqual(pages(items).filter((page) => items.some((group) => group.items?.includes(page)))
+            .map((page) => page.name), [
+            L.settingsSectionStatusBar,
+            L.settingsSubsectionScrollSwitch,
+            L.settingsSectionGroups,
+            L.historyTitle,
+            L.rotationBackupSectionTitle,
+            L.settingsSectionStorage,
+        ]);
+
+        // The count sits under the list it governs: what is there is what
+        // decides how much of it to keep.
+        const backupPage = pageNamed(items, L.rotationBackupSectionTitle);
+        const names = rows([backupPage]).map((row) => row.name);
+        assert.equal(names[0], L.rotationBackupCreate);
+        assert.equal(names[names.length - 1], L.settingsBackupGenerations);
+    } finally { await settle(); h.restore(); }
+});
