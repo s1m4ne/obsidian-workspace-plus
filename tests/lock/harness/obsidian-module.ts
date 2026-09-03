@@ -288,6 +288,7 @@ export interface PluginSettingTab {
      */
     update(): void;
     refreshDomState(): void;
+    hide(): void;
 }
 
 export interface PluginSettingTabConstructor {
@@ -331,6 +332,7 @@ const PluginSettingTabProto = {
         if (typeof read === 'function') this.settingItems = (read as () => unknown).call(this);
     },
     refreshDomState(): void {},
+    hide(): void {},
 };
 
 function PluginSettingTabConstructorFn(this: unknown, app: unknown, plugin: unknown): PluginSettingTab {

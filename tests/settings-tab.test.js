@@ -490,20 +490,31 @@ test('a write inside the preview group rebuilds the rows, because it moves the o
     } finally { await settle(); h.restore(); }
 });
 
-test('the scroll rows stay hidden until scroll switching is on', async () => {
+test('the scroll tuning is one group, and it goes as a whole when the feature is off', async () => {
     const h = setupHarness();
     try {
         const { tab, plugin, L } = makeTab(h);
         const page = () => pageNamed(tab.getSettingDefinitions(), L.settingsSubsectionScrollSwitch);
-        const preset = () => rowNamed([page()], L.settingsStatusBarScrollPreset);
+        const tuning = () => groupsIn([page()]).find((group) => group.heading === L.settingsSectionAdvanced);
 
         plugin.data.statusBarModScrollSwitch = true;
-        assert.equal(resolve(preset().visible), true);
+        assert.ok(tuning(), 'the tuning group is missing');
+        assert.equal(resolve(tuning().visible), true);
         plugin.data.statusBarModScrollSwitch = false;
-        assert.equal(resolve(preset().visible), false);
+        assert.equal(resolve(tuning().visible), false);
+
+        // The master and the direction are what the page is about, and they
+        // sit in the group above, with no heading of their own.
+        const first = page().items[0];
+        assert.equal(first.heading, undefined);
+        assert.deepEqual(
+            first.items.map((row) => row.control.key),
+            ['statusBarModScrollSwitch', 'statusBarScrollInvert'],
+        );
 
         // The master itself is never hidden, or there would be no way back.
-        assert.equal(resolve(rowNamed([page()], L.settingsStatusBarModScrollSwitch).visible), undefined);
+        assert.equal(resolve(first.items[0].visible), undefined);
+        assert.equal(resolve(first.items[1].visible), false);
     } finally { await settle(); h.restore(); }
 });
 
@@ -511,8 +522,11 @@ test('the three custom numbers are greyed rather than hidden when a preset owns 
     const h = setupHarness();
     try {
         const { tab, plugin, L } = makeTab(h);
-        const page = () => pageNamed(tab.getSettingDefinitions(), L.settingsSubsectionScrollSwitch);
-        const threshold = () => rowNamed([page()], L.settingsStatusBarScrollThreshold);
+        plugin.data.statusBarModScrollSwitch = true;
+        const threshold = () => rowNamed(
+            [pageNamed(tab.getSettingDefinitions(), L.settingsSubsectionScrollSwitch)],
+            L.settingsStatusBarScrollThreshold,
+        );
 
         plugin.data.statusBarScrollPreset = 'custom';
         assert.equal(resolve(threshold().control.disabled), false);
@@ -520,7 +534,7 @@ test('the three custom numbers are greyed rather than hidden when a preset owns 
         assert.equal(resolve(threshold().control.disabled), true);
         // Still on screen: the preset sets these, and their values are worth
         // reading even when they cannot be changed.
-        assert.equal(resolve(threshold().visible), true);
+        assert.equal(resolve(threshold().visible), undefined);
     } finally { await settle(); h.restore(); }
 });
 
@@ -1100,4 +1114,79 @@ test('the rename button on a group row asks for the new name', async () => {
         buttons[buttons.length - 1].click();
         assert.deepEqual(renamed, [['a', 'Renamed']]);
     } finally { await settle(); h.restore(); }
+});
+
+// --- the clock ----------------------------------------------------------
+
+test('the backup entry and the row it summarises are measured from one instant', async () => {
+    const h = setupHarness();
+    try {
+        const savedAt = 1_700_000_000_000;
+        const realNow = Date.now;
+        // A minute per reading, so any two readings land in different minutes.
+        // Whether the screen agrees with itself then depends entirely on
+        // whether it reads the clock once or twice.
+        let clock = savedAt;
+        Date.now = () => { clock += 60000; return clock; };
+
+        const { tab, L } = makeTab(h, {
+            plugin: {
+                getRotationBackupInfo() {
+                    return Promise.resolve([{ generation: 1, savedAt, sessionCount: 1 }]);
+                },
+            },
+        });
+        try {
+            tab.getSettingDefinitions();
+            await settle();
+            const page = pageNamed(tab.getSettingDefinitions(), L.rotationBackupSectionTitle);
+            const row = rows([page]).find((entry) => entry.name.startsWith('1.'));
+
+            const summary = resolve(page.displayValue);
+            assert.ok(summary, 'the entry says nothing at all');
+            assert.ok(row.desc.startsWith(summary), `entry says "${summary}", row says "${row.desc}"`);
+        } finally {
+            Date.now = realNow;
+            tab.hide();
+        }
+    } finally { await settle(); h.restore(); }
+});
+
+test('an open settings screen keeps its clock running, and stops on the way out', async () => {
+    let tab;
+    const h = setupHarness();
+    try {
+        ({ tab } = makeTab(h));
+        let rebuilds = 0;
+        tab.update = () => { rebuilds += 1; };
+
+        tab.getSettingDefinitions();
+        // Nothing redraws a definition on its own, so "2 minutes ago" would
+        // stay on screen until something else happened to rebuild the row.
+        assert.notEqual(tab.clockTick, null, 'the tab is not watching the clock');
+
+        tab.hide();
+        assert.equal(tab.clockTick, null, 'the timer outlived the screen');
+        assert.equal(rebuilds, 0, 'nothing should have ticked yet');
+    } finally { tab.hide(); await settle(); h.restore(); }
+});
+
+test('a screen whose container is gone stops ticking rather than rebuilding for nobody', async () => {
+    let tab;
+    const h = setupHarness();
+    try {
+        ({ tab } = makeTab(h));
+        let rebuilds = 0;
+        tab.update = () => { rebuilds += 1; };
+
+        tab.getSettingDefinitions();
+        assert.notEqual(tab.clockTick, null);
+
+        // The plugin being disabled with the settings open: the container goes
+        // and `hide()` never runs.
+        tab.containerEl.detach();
+        tab.tick();
+        assert.equal(tab.clockTick, null);
+        assert.equal(rebuilds, 0);
+    } finally { tab.hide(); await settle(); h.restore(); }
 });

@@ -155,6 +155,9 @@ export interface SettingsContext {
     refresh(): void;
 }
 
+/** How often an open settings screen re-reads the clock. @see startClockTick */
+const CLOCK_TICK_MS = 30000;
+
 /**
  * Whether two readings of the backup directory describe the same generations.
  *
@@ -206,6 +209,9 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
     private backups: readonly RotationBackupInfo[] | null = null;
     private storageSize: number | null | undefined = undefined;
 
+    /** @see startClockTick */
+    private clockTick: ReturnType<typeof setInterval> | null = null;
+
     constructor(app: App, plugin: SettingsTabHost) {
         // At run time this *is* the plugin. The parameter is typed structurally
         // so a test can supply the sixty-odd members this tab actually uses
@@ -222,6 +228,56 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
             update: () => { this.update(); },
             refresh: () => { this.refreshDomState(); },
         };
+    }
+
+    /**
+     * Keep the times on the screen from going stale.
+     *
+     * Several rows say how long ago something happened, and a definition is
+     * built once: "2 minutes ago" is correct when the screen is drawn and wrong
+     * a minute later, which is what leaves the backup entry claiming a time in
+     * the past. Nothing in the declarative API redraws on its own, so this ticks
+     * and calls `update()`, which rebuilds the definitions and re-reads the
+     * backups - so a backup taken in another window shows up too.
+     *
+     * Thirty seconds, which is fine grained enough for a display whose smallest
+     * unit is a minute. `getSettingDefinitions()` starts it, so it begins when
+     * the tab is opened; `hide()` stops it, which Obsidian calls when the tab is
+     * closed or another one is opened.
+     */
+    private startClockTick(): void {
+        if (this.clockTick !== null) return;
+        // The window's timer rather than the global one, so it dies with the
+        // window it draws into - the same reason HistoryService takes this
+        // route. A bare setInterval outlives the document.
+        const setTimer = typeof window !== 'undefined' && typeof window.setInterval === 'function'
+            ? window.setInterval.bind(window)
+            : setInterval;
+        this.clockTick = setTimer(() => { this.tick(); }, CLOCK_TICK_MS);
+    }
+
+    private tick(): void {
+        // The tab can be gone without `hide()` having run - the plugin being
+        // disabled with the settings open, say.
+        if (!this.containerEl.isConnected) {
+            this.stopClockTick();
+            return;
+        }
+        this.update();
+    }
+
+    private stopClockTick(): void {
+        if (this.clockTick === null) return;
+        const clearTimer = typeof window !== 'undefined' && typeof window.clearInterval === 'function'
+            ? window.clearInterval.bind(window)
+            : clearInterval;
+        clearTimer(this.clockTick);
+        this.clockTick = null;
+    }
+
+    override hide(): void {
+        this.stopClockTick();
+        super.hide();
     }
 
     /**
@@ -255,6 +311,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
      * grouped by page and navigate to the row.
      */
     override getSettingDefinitions(): SettingDefinitionItem[] {
+        this.startClockTick();
         this.requestAsyncReadings();
         const ctx = this.context();
 

@@ -29,10 +29,10 @@ import { absoluteTime } from './format.ts';
  * and the platform when the file records one, which is what tells two machines'
  * backups apart.
  */
-function backupRow(ctx: SettingsContext, backup: RotationBackupInfo): SettingGroupItem {
+function backupRow(ctx: SettingsContext, backup: RotationBackupInfo, now: number): SettingGroupItem {
     const savedAtText = absoluteTime(backup.savedAt);
     const summary = [
-        formatRelativeTime(backup.savedAt),
+        formatRelativeTime(backup.savedAt, now),
         formatString(L.rotationBackupGeneration, backup.sessionCount),
     ];
     if (backup.backupPlatform) summary.push(backup.backupPlatform);
@@ -98,9 +98,10 @@ function createGroup(ctx: SettingsContext): SettingDefinitionItem {
 
 function generationsGroup(
     ctx: SettingsContext,
-    backups: readonly RotationBackupInfo[] | null
+    backups: readonly RotationBackupInfo[] | null,
+    now: number
 ): SettingDefinitionItem {
-    const rows = (backups ?? []).map((backup) => backupRow(ctx, backup));
+    const rows = (backups ?? []).map((backup) => backupRow(ctx, backup, now));
     return {
         type: 'group',
         // A row rather than a list's `emptyState`, so the section is never a
@@ -117,6 +118,9 @@ export function backupPage(
     backups: readonly RotationBackupInfo[] | null
 ): SettingDefinitionPage {
     const newest = backups?.[0];
+    // One instant for the whole page, so the entry and the row it summarises
+    // cannot land on either side of a minute boundary and disagree.
+    const now = Date.now();
 
     return {
         type: 'page',
@@ -125,7 +129,7 @@ export function backupPage(
         // When the newest backup was taken. The one summary worth keeping on a
         // door: it answers "am I covered?" without opening it. Three
         // generations is the fixed maximum, so a count would say nothing.
-        displayValue: () => (newest ? formatRelativeTime(newest.savedAt) : ''),
-        items: [createGroup(ctx), generationsGroup(ctx, backups)],
+        displayValue: () => (newest ? formatRelativeTime(newest.savedAt, now) : ''),
+        items: [createGroup(ctx), generationsGroup(ctx, backups, now)],
     };
 }
