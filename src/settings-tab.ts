@@ -12,6 +12,7 @@ import { dataPage } from './settings/data-page.ts';
 import type { StatusBarActions } from './storage/default-data.ts';
 import type { StorageDiagnosticsInfo } from './storage/persistence-service.ts';
 import type { RotationBackupInfo } from './storage/storage-backup.ts';
+import type { ReadJsonResult } from './storage/json-file-store.ts';
 import type { SettingsState } from './state/settings-state.ts';
 import type { GroupStore } from './state/group-store.ts';
 import type { SessionSaver } from './state/session-saver.ts';
@@ -105,6 +106,9 @@ export interface SettingsTabHost {
     copyFileIfExists(from: string, to: string): Promise<unknown>;
     getRotationBackupPath(generation: number): string;
     writeJson(path: string, data: unknown): Promise<unknown>;
+    // Read back so a manual backup can tell whether anything changed before it
+    // rotates a generation off the end.
+    readJsonIfExists<T = unknown>(path: string): Promise<ReadJsonResult<T>>;
     getRotationBackupInfo(): Promise<RotationBackupInfo[]>;
     restoreFromRotationBackup(generation: number): Promise<boolean>;
 

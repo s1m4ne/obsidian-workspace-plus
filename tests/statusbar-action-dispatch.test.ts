@@ -87,6 +87,7 @@ const menuPluginStubs = {
     copyFileIfExists: async () => {},
     getRotationBackupPath: (generation: number) => `backups/sessions.${generation}.json`,
     writeJson: async () => {},
+    readJsonIfExists: async () => ({ exists: false, data: null, error: null }),
 };
 
 test('each configurable action performs its own effect and no other', async () => {

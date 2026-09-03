@@ -3,7 +3,8 @@ import type { SettingDefinitionItem, SettingDefinitionPage, SettingGroupItem } f
 import { L, formatString, text } from '../i18n.ts';
 import { ConfirmModal } from '../modals/confirm-modal.ts';
 import { formatRelativeTime } from '../modals/format-relative-time.ts';
-import { createRotationBackupNow, type RotationBackupInfo } from '../storage/storage-backup.ts';
+import type { RotationBackupInfo } from '../storage/storage-backup.ts';
+import { createManualBackup } from '../manual-backup.ts';
 import type { SettingsContext } from '../settings-tab.ts';
 import { absoluteTime } from './format.ts';
 
@@ -65,21 +66,17 @@ function backupRow(ctx: SettingsContext, backup: RotationBackupInfo): SettingGro
     };
 }
 
-/** Copy the live sessions into generation 1, shifting the older two down. */
+/**
+ * Back up now.
+ *
+ * Disabled for the round trip, and re-enabled by the re-read that follows it:
+ * `update()` rebuilds this row, so the button that comes back is a new one.
+ * Without that, a press landing while the copies are in flight would rotate the
+ * generations a second time and push the one being written off the end.
+ */
 function createBackup(ctx: SettingsContext, button: { setDisabled(disabled: boolean): unknown }): void {
-    const plugin = ctx.plugin;
-    const sessionData = plugin.extractSessionData(plugin.data);
-    sessionData._wppSavedAt = Date.now();
-
-    // Disabled for the write, or a second click would shift the generations
-    // again and push the one just taken out of the window.
     button.setDisabled(true);
-    void createRotationBackupNow(plugin, plugin.prepareRotationBackupData(sessionData))
-        .then(() => { ctx.update(); })
-        .catch(() => {
-            button.setDisabled(false);
-            ctx.update();
-        });
+    void createManualBackup(ctx.plugin).then(() => { ctx.update(); });
 }
 
 function createGroup(ctx: SettingsContext): SettingDefinitionItem {

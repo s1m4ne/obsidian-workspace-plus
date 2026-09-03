@@ -1,5 +1,6 @@
-import { Menu, Notice, type App } from 'obsidian';
-import { createRotationBackupNow } from './storage/storage-backup.ts';
+import { Menu, type App } from 'obsidian';
+import { createManualBackup } from './manual-backup.ts';
+import type { ReadJsonResult } from './storage/json-file-store.ts';
 import { addOpenSettingsItem, call, showAtMouseEvent } from './context-menu-shared.ts';
 import { L, text } from './i18n.ts';
 import * as obsidianInternals from './platform/obsidian-internals.ts';
@@ -57,6 +58,7 @@ export interface SettingsContextMenuPluginHost {
     copyFileIfExists(sourcePath: string, destinationPath: string): Promise<unknown>;
     getRotationBackupPath(generation: number): string;
     writeJson(path: string, data: unknown): Promise<unknown>;
+    readJsonIfExists<T = unknown>(path: string): Promise<ReadJsonResult<T>>;
 }
 
 export type SettingsContextMenuOptions = SettingsMenuCallbacks & {
@@ -167,13 +169,7 @@ export function openSettingsContextMenu(initialOptions?: SettingsContextMenuOpti
     menu.addItem((mi) => {
         mi.setTitle(text(L.rotationBackupCreate));
         mi.setIcon('archive');
-        mi.onClick(() => {
-            const sessionData = plugin.extractSessionData(plugin.data);
-            sessionData._wppSavedAt = Date.now();
-            void createRotationBackupNow(plugin, plugin.prepareRotationBackupData(sessionData))
-                .then(() => { new Notice(text(L.rotationBackupCreated)); })
-                .catch(() => { new Notice(text(L.rotationBackupFailed)); });
-        });
+        mi.onClick(() => { void createManualBackup(plugin); });
     });
 
     menu.addItem((mi) => {

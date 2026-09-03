@@ -59,6 +59,14 @@ function createPlugin(overrides = {}) {
         deleteGroup: promiseCall('deleteGroup'),
         getVersionHistorySnapshotInterval() { return 5; },
         getRotationBackupInfo() { return Promise.resolve([{ generation: 1, savedAt: 0, sessionCount: 1 }]); },
+        // What generation 1 already holds. `null` data means "no backup
+        // there", which is what makes a manual backup rotate.
+        readJsonIfExists(path) {
+            calls.push(['readJson', path]);
+            return Promise.resolve(overrides.generationOne
+                ? { exists: true, data: overrides.generationOne, error: null }
+                : { exists: false, data: null, error: null });
+        },
         getOrderedGroups() { return []; },
         getGroupSessionIds() { return []; },
         getSessionsPath() { return 'sessions.json'; },
@@ -536,6 +544,108 @@ test('a manual backup shifts the generations oldest-first so none is overwritten
         const copies = calls.filter((entry) => entry[0] === 'copy').map((entry) => entry.slice(1));
         assert.deepEqual(copies, [['backup-2', 'backup-3'], ['backup-1', 'backup-2']]);
         assert.ok(calls.some((entry) => entry[0] === 'writeJson' && entry[1] === 'backup-1'));
+    } finally { await settle(); h.restore(); }
+});
+
+test('a press that would back up nothing new moves no generation, and says so', async () => {
+    const h = setupHarness();
+    try {
+        // extractSessionData returns {} for this double, so generation 1
+        // holding {} - under any stamp, from any machine - is the same backup.
+        const { tab, calls, L } = makeTab(h, {
+            generationOne: { _wppSavedAt: 111, _wppBackupPlatform: 'Windows' },
+        });
+        const create = rowNamed(
+            [pageNamed(tab.getSettingDefinitions(), L.rotationBackupSectionTitle)],
+            L.rotationBackupCreate,
+        );
+        const button = buttonOf(renderRow(h, create), L.rotationBackupCreate);
+
+        button.trigger();
+        await settle();
+
+        assert.deepEqual(calls.filter((entry) => entry[0] === 'copy'), []);
+        assert.deepEqual(calls.filter((entry) => entry[0] === 'writeJson'), []);
+        assert.deepEqual(h.obsidian.notices.map((notice) => notice.message), [L.noChanges]);
+    } finally { await settle(); h.restore(); }
+});
+
+test('key order in the stored backup does not read as a change', async () => {
+    const h = setupHarness();
+    try {
+        const { tab, calls, L } = makeTab(h, {
+            generationOne: { sessions: { b: 2, a: 1 }, _wppSavedAt: 5 },
+            plugin: { extractSessionData() { return { sessions: { a: 1, b: 2 } }; } },
+        });
+        const create = rowNamed(
+            [pageNamed(tab.getSettingDefinitions(), L.rotationBackupSectionTitle)],
+            L.rotationBackupCreate,
+        );
+
+        buttonOf(renderRow(h, create), L.rotationBackupCreate).trigger();
+        await settle();
+
+        // One side is parsed from a file and the other assembled from live
+        // state, so their key order differs by construction.
+        assert.deepEqual(calls.filter((entry) => entry[0] === 'copy'), []);
+        assert.deepEqual(h.obsidian.notices.map((notice) => notice.message), [L.noChanges]);
+    } finally { await settle(); h.restore(); }
+});
+
+test('a press that has something new to record backs it up and says so', async () => {
+    const h = setupHarness();
+    try {
+        const { tab, calls, L } = makeTab(h, {
+            generationOne: { sessions: { a: 1 } },
+            plugin: { extractSessionData() { return { sessions: { a: 1, b: 2 } }; } },
+        });
+        const create = rowNamed(
+            [pageNamed(tab.getSettingDefinitions(), L.rotationBackupSectionTitle)],
+            L.rotationBackupCreate,
+        );
+
+        buttonOf(renderRow(h, create), L.rotationBackupCreate).trigger();
+        await settle();
+
+        assert.equal(calls.filter((entry) => entry[0] === 'copy').length, 2);
+        assert.deepEqual(h.obsidian.notices.map((notice) => notice.message), [L.rotationBackupCreated]);
+    } finally { await settle(); h.restore(); }
+});
+
+test('a backup that cannot be read is not taken as a reason to skip one', async () => {
+    const h = setupHarness();
+    try {
+        const { tab, calls, L } = makeTab(h, {
+            plugin: { readJsonIfExists() { return Promise.reject(new Error('unreadable')); } },
+        });
+        const create = rowNamed(
+            [pageNamed(tab.getSettingDefinitions(), L.rotationBackupSectionTitle)],
+            L.rotationBackupCreate,
+        );
+
+        buttonOf(renderRow(h, create), L.rotationBackupCreate).trigger();
+        await settle();
+
+        assert.equal(calls.filter((entry) => entry[0] === 'copy').length, 2);
+        assert.deepEqual(h.obsidian.notices.map((notice) => notice.message), [L.rotationBackupCreated]);
+    } finally { await settle(); h.restore(); }
+});
+
+test('a write that fails says so rather than reporting a backup that is not there', async () => {
+    const h = setupHarness();
+    try {
+        const { tab, L } = makeTab(h, {
+            plugin: { writeJson() { return Promise.reject(new Error('disk full')); } },
+        });
+        const create = rowNamed(
+            [pageNamed(tab.getSettingDefinitions(), L.rotationBackupSectionTitle)],
+            L.rotationBackupCreate,
+        );
+
+        buttonOf(renderRow(h, create), L.rotationBackupCreate).trigger();
+        await settle();
+
+        assert.deepEqual(h.obsidian.notices.map((notice) => notice.message), [L.rotationBackupFailed]);
     } finally { await settle(); h.restore(); }
 });
 

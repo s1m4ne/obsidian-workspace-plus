@@ -287,9 +287,58 @@ export interface ManualRotationBackupHost {
     _lastRotationBackupAt?: number;
     getRotationBackupPath(generation: number): string;
     getBackupsDirPath(): string;
+    readJsonIfExists: ReadJsonFn;
     ensureDir(path: string): Promise<unknown>;
     copyFileIfExists(sourcePath: string, destinationPath: string): Promise<unknown>;
     writeJson(path: string, data: unknown): Promise<unknown>;
+}
+
+/**
+ * `unchanged` means generation 1 already holds these sessions, so nothing was
+ * written and no generation moved.
+ */
+export type ManualRotationBackupResult = 'created' | 'unchanged';
+
+/**
+ * The fields that differ between two backups of the same sessions.
+ *
+ * `_wppSavedAt` is stamped at the moment of the backup, so it differs on every
+ * press by construction; `_wppBackupPlatform` names the machine, and a backup
+ * that arrived by sync from another one holds the same sessions under a
+ * different label.
+ */
+const VOLATILE_BACKUP_FIELDS = ['_wppSavedAt', '_wppBackupPlatform'];
+
+/**
+ * A backup's contents as a string, with key order removed.
+ *
+ * `JSON.stringify` preserves insertion order, and the two sides here are built
+ * differently - one is parsed from a file, the other assembled from live state -
+ * so a plain stringify would report two identical backups as different.
+ */
+function contentKey(value: unknown, top: boolean): string {
+    if (value === null || typeof value !== 'object') return JSON.stringify(value) ?? 'null';
+    if (Array.isArray(value)) return `[${value.map((item) => contentKey(item, false)).join(',')}]`;
+
+    const entries = Object.entries(value as Record<string, unknown>)
+        .filter(([key]) => !(top && VOLATILE_BACKUP_FIELDS.includes(key)))
+        .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
+    return `{${entries.map(([key, item]) => `${JSON.stringify(key)}:${contentKey(item, false)}`).join(',')}}`;
+}
+
+/** True when generation 1 already holds exactly these sessions. */
+async function matchesNewestGeneration(
+    host: ManualRotationBackupHost,
+    backupData: Record<string, unknown>
+): Promise<boolean> {
+    try {
+        const existing = await host.readJsonIfExists(host.getRotationBackupPath(1));
+        if (!existing.exists || !existing.data) return false;
+        return contentKey(existing.data, true) === contentKey(backupData, true);
+    } catch {
+        // A backup that cannot be read is not proof that one is unnecessary.
+        return false;
+    }
 }
 
 /**
@@ -297,9 +346,15 @@ export interface ManualRotationBackupHost {
  *
  * The automatic path is `rotateBackupIfNeeded`, which is gated on the hour and
  * moves generations by reading and rewriting through the JSON store. This one
- * is asked for, so it has no gate, and it copies files - which is what both
- * manual entry points did, byte for byte, in two places: the settings screen
- * and the settings context menu.
+ * is asked for, so it has no clock behind it, and it copies files - which is
+ * what both manual entry points did, byte for byte, in two places.
+ *
+ * It is gated on the *contents* instead, and that is not a nicety: there are
+ * three generations, and rotating writes the live state into generation 1 while
+ * pushing generation 3 off the end. Pressing the button four times in a row
+ * with nothing changed in between would leave three copies of one moment and
+ * destroy every older one - the opposite of what the button is for. So an
+ * unchanged press does nothing at all and says so.
  *
  * Generations shift oldest-first, so nothing is overwritten before it has been
  * copied forward.
@@ -307,10 +362,13 @@ export interface ManualRotationBackupHost {
 export async function createRotationBackupNow(
     host: ManualRotationBackupHost,
     backupData: Record<string, unknown>
-): Promise<void> {
+): Promise<ManualRotationBackupResult> {
+    if (await matchesNewestGeneration(host, backupData)) return 'unchanged';
+
     await host.ensureDir(host.getBackupsDirPath());
     await host.copyFileIfExists(host.getRotationBackupPath(2), host.getRotationBackupPath(3));
     await host.copyFileIfExists(host.getRotationBackupPath(1), host.getRotationBackupPath(2));
     await host.writeJson(host.getRotationBackupPath(1), backupData);
     host._lastRotationBackupAt = Date.now();
+    return 'created';
 }
