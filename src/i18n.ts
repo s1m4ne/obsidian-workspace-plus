@@ -2290,7 +2290,7 @@ const STRINGS: StringTables = {
         settingsSubsectionScrollSwitch: 'セッション切り替えのスクロール操作',
         settingsSubsectionSwitchPreview: 'セッション切り替え前プレビュー',
         settingsSectionDeletion: 'セッションの削除',
-        settingsSectionAdvanced: '詳細',
+        settingsSectionAdvanced: '詳細設定',
         settingsSectionReset: 'リセット',
         settingsStatusBarModScrollSwitch: 'ステータスバーでセッションを切り替える',
         settingsStatusBarModScrollSwitchDesc: 'ステータスバーの上で縦スクロールしてセッションを切り替えます。',

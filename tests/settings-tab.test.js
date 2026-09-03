@@ -539,23 +539,29 @@ test('the scroll tuning is one group, and it goes as a whole when the feature is
     } finally { await settle(); h.restore(); }
 });
 
-test('the three custom numbers are greyed rather than hidden when a preset owns them', async () => {
+test('the three custom numbers are there only while the custom preset is', async () => {
     const h = setupHarness();
     try {
         const { tab, plugin, L } = makeTab(h);
         plugin.data.statusBarModScrollSwitch = true;
-        const threshold = () => rowNamed(
-            [pageNamed(tab.getSettingDefinitions(), L.settingsSubsectionScrollSwitch)],
+        const tuning = () => rows([pageNamed(tab.getSettingDefinitions(), L.settingsSubsectionScrollSwitch)]);
+        const numbers = () => [
             L.settingsStatusBarScrollThreshold,
-        );
+            L.settingsStatusBarScrollCooldown,
+            L.settingsStatusBarScrollResetWindow,
+        ].map((name) => resolve(tuning().find((row) => row.name === name).visible));
 
         plugin.data.statusBarScrollPreset = 'custom';
-        assert.equal(resolve(threshold().control.disabled), false);
+        assert.deepEqual(numbers(), [true, true, true]);
+
+        // They were greyed rather than absent, on the grounds that the values
+        // a preset chose were worth reading. Three inert dropdowns are worse
+        // than three absent ones.
         plugin.data.statusBarScrollPreset = 'trackpad';
-        assert.equal(resolve(threshold().control.disabled), true);
-        // Still on screen: the preset sets these, and their values are worth
-        // reading even when they cannot be changed.
-        assert.equal(resolve(threshold().visible), undefined);
+        assert.deepEqual(numbers(), [false, false, false]);
+
+        // The preset and the modifier stay: those are what the page is for.
+        assert.equal(resolve(tuning().find((row) => row.name === L.settingsStatusBarScrollPreset).visible), undefined);
     } finally { await settle(); h.restore(); }
 });
 

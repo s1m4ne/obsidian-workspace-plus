@@ -34,9 +34,11 @@ export function scrollSwitchPage(ctx: SettingsContext): SettingDefinitionPage {
         ctx.plugin.getSettingsState();
 
     const whenEnabled = (): boolean => settingsState().statusBarModScrollSwitch;
-    // The three numbers below belong to the custom preset; the other presets
-    // set them, so they are shown greyed rather than hidden.
-    const notCustom = (): boolean => settingsState().statusBarScrollPreset !== 'custom';
+    // The three numbers below belong to the custom preset. They used to be
+    // shown greyed under the other presets, on the grounds that their values
+    // were worth reading; three inert dropdowns is worse than three absent
+    // ones, so they are absent.
+    const whenCustom = (): boolean => settingsState().statusBarScrollPreset === 'custom';
 
     return {
         type: 'page',
@@ -90,30 +92,30 @@ export function scrollSwitchPage(ctx: SettingsContext): SettingDefinitionPage {
                     {
                         name: text(L.settingsStatusBarScrollThreshold),
                         desc: text(L.settingsStatusBarScrollThresholdDesc),
+                        visible: whenCustom,
                         control: {
                             type: 'dropdown',
                             key: 'statusBarScrollThreshold',
-                            disabled: notCustom,
                             options: { '12': '12', '16': '16', '24': '24', '30': '30', '40': '40', '60': '60', '90': '90' },
                         },
                     },
                     {
                         name: text(L.settingsStatusBarScrollCooldown),
                         desc: text(L.settingsStatusBarScrollCooldownDesc),
+                        visible: whenCustom,
                         control: {
                             type: 'dropdown',
                             key: 'statusBarScrollCooldown',
-                            disabled: notCustom,
                             options: { '200': '200 ms', '350': '350 ms', '500': '500 ms', '750': '750 ms', '1000': '1000 ms' },
                         },
                     },
                     {
                         name: text(L.settingsStatusBarScrollResetWindow),
                         desc: text(L.settingsStatusBarScrollResetWindowDesc),
+                        visible: whenCustom,
                         control: {
                             type: 'dropdown',
                             key: 'statusBarScrollResetWindow',
-                            disabled: notCustom,
                             options: { '150': '150 ms', '250': '250 ms', '400': '400 ms', '600': '600 ms' },
                         },
                     },
