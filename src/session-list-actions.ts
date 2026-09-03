@@ -1,0 +1,138 @@
+import { Notice, type App } from 'obsidian';
+import { L, formatString, text } from './i18n.ts';
+import { ConfirmModal, type ConfirmModalOptions } from './modals/confirm-modal.ts';
+import { RenameModal, type RenameModalOptions } from './modals/rename-modal.ts';
+import type { SessionItem } from './storage/default-data.ts';
+import type { SessionStore } from './state/session-store.ts';
+import type { SettingsState } from './state/settings-state.ts';
+
+export interface SessionRenameActionsHost {
+    /**
+     * The session set, its ordering and the CRUD on it are owned by
+     * SessionStore. Naming the store rather than restating its methods keeps
+     * one list, the way getGroupStore() and getSessionSaver() do.
+     */
+    getSessionStore(): SessionStore;
+
+    app: App;
+}
+
+export interface SessionDeleteActionsHost {
+    /**
+     * Deleting is owned by SessionStore; naming the store keeps one list.
+     */
+    getSessionStore(): SessionStore;
+
+    /**
+     * The confirmation flag and its default are owned by SettingsState. This
+     * was `data.confirmDeleteByHotkey !== false` here, one of the five places
+     * that re-derived the same default - P5's defect, in P1's contract stage.
+     */
+    getSettingsState(): SettingsState;
+
+    app: App;
+    data: {
+        sessions: Record<string, SessionItem>;
+    };
+}
+
+export interface SessionListActionsHost extends SessionRenameActionsHost, SessionDeleteActionsHost {}
+
+export interface RenameSessionWithPromptOptions {
+    app?: App | undefined;
+    plugin?: SessionRenameActionsHost | undefined;
+    session?: SessionItem | undefined;
+    modalOptions?: RenameModalOptions | undefined;
+    onRenamed?: ((session: SessionItem, newName: string) => void) | undefined;
+}
+
+export interface DeleteSessionWithPromptOptions {
+    app?: App | undefined;
+    plugin?: SessionDeleteActionsHost | undefined;
+    session?: SessionItem | undefined;
+    confirmMessage?: string | undefined;
+    isActive?: boolean | undefined;
+    forceConfirm?: boolean | undefined;
+    notifyCannotDelete?: boolean | undefined;
+    notifyDeleted?: boolean | undefined;
+    confirmOptions?: ConfirmModalOptions | undefined;
+    onDeleted?: ((session: SessionItem) => void) | undefined;
+}
+
+function resolveApp(options: {
+    app?: App | undefined;
+    plugin?: { app: App } | undefined;
+}): App | null {
+    if (options.app) return options.app;
+    if (options.plugin?.app) return options.plugin.app;
+    return null;
+}
+
+export function renameSessionWithPrompt(options: RenameSessionWithPromptOptions = {}): void {
+    const app = resolveApp(options);
+    const plugin = options.plugin;
+    const session = options.session;
+    if (!app || !plugin || !session) return;
+
+    const modalOptions: RenameModalOptions = {
+        emptyNotice: text(L.emptyName),
+        ...options.modalOptions,
+    };
+
+    new RenameModal(app, session.name, (newName) => {
+        void plugin.getSessionStore().renameSessionById(session.id, newName).then((renamed) => {
+            if (!renamed) return;
+            options.onRenamed?.(session, newName);
+        });
+    }, modalOptions).open();
+}
+
+function getDeleteConfirmMessage(
+    session: SessionItem,
+    options: DeleteSessionWithPromptOptions
+): string {
+    if (options.confirmMessage) return options.confirmMessage;
+    return options.isActive
+        ? formatString(L.confirmDeleteActive, session.name)
+        : formatString(L.confirmDelete, session.name);
+}
+
+export function deleteSessionWithPrompt(
+    options: DeleteSessionWithPromptOptions = {}
+): Promise<boolean> {
+    const app = resolveApp(options);
+    const plugin = options.plugin;
+    const session = options.session;
+    if (!app || !plugin || !session) return Promise.resolve(false);
+
+    if (Object.keys(plugin.data.sessions || {}).length <= 1) {
+        if (options.notifyCannotDelete !== false) {
+            new Notice(text(L.cannotDeleteLast));
+        }
+        return Promise.resolve(false);
+    }
+
+    const doDelete = (): Promise<boolean> => {
+        return plugin.getSessionStore().deleteSession(session.id).then((deleted) => {
+            if (!deleted) return false;
+            if (options.notifyDeleted !== false) {
+                new Notice(formatString(L.deleted, session.name));
+            }
+            options.onDeleted?.(session);
+            return true;
+        });
+    };
+
+    const shouldConfirm = !!options.forceConfirm || plugin.getSettingsState().confirmDeleteByHotkey;
+    if (shouldConfirm) {
+        new ConfirmModal(
+            app,
+            getDeleteConfirmMessage(session, options),
+            () => { void doDelete(); },
+            options.confirmOptions || {}
+        ).open();
+        return Promise.resolve(true);
+    }
+
+    return doDelete();
+}

@@ -1,0 +1,43 @@
+{
+    "compilerOptions": {
+        "target": "ES2018",
+        "module": "ESNext",
+        "moduleResolution": "bundler",
+        "lib": ["DOM", "DOM.Iterable", "ES2018"],
+        "types": ["node"],
+
+        // Node strips types rather than compiling them, so anything that would
+        // emit runtime code is a hard error at run time. erasableSyntaxOnly
+        // turns that into a compile error instead: no enum, namespace,
+        // parameter properties or decorators.
+        "erasableSyntaxOnly": true,
+        "verbatimModuleSyntax": true,
+        "allowImportingTsExtensions": true,
+        "isolatedModules": true,
+
+        "strict": true,
+        "noUncheckedIndexedAccess": true,
+        "exactOptionalPropertyTypes": true,
+        "noImplicitOverride": true,
+        "noFallthroughCasesInSwitch": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noImplicitReturns": true,
+        "strictBuiltinIteratorReturn": true,
+        "allowUnreachableCode": false,
+        "allowUnusedLabels": false,
+
+        // src/ holds no JavaScript any more, so every file that ships is
+        // type-checked under the settings above. These two remain for the .js
+        // under scripts/ and tests/, which run in Node and are not shipped.
+        // Turning checkJs on there reports 925 errors and is its own piece of
+        // work; noPropertyAccessFromIndexSignature reports 744, nearly all of
+        // them the `plugin.data.x` reads P1 has still to finish.
+        "allowJs": true,
+        "checkJs": false,
+
+        "noEmit": true,
+        "skipLibCheck": true
+    },
+    "include": ["src/**/*", "tests/**/*", "scripts/**/*"]
+}

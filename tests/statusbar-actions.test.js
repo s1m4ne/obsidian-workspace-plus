@@ -1,5 +1,7 @@
 'use strict';
 
+require('./lock/harness/index.ts').installObsidianStub();
+
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const Module = require('module');
@@ -40,22 +42,18 @@ function loadStatusBarActions() {
     const sessionContextActionsStub = {
         openSessionContextMenu: function () {},
     };
-    const settingsContextMenuStub = {
-        openSettingsContextMenu: function () {},
-    };
 
     const originalLoad = Module._load;
     Module._load = function (request, parent, isMain) {
         if (request === 'obsidian') return obsidianStub;
-        if (request === './i18n') return i18nStub;
+        if (request === './i18n' || request === './i18n.ts') return i18nStub;
         if (request === './modals') return modalsStub;
-        if (request === './session-context-actions') return sessionContextActionsStub;
-        if (request === './settings-context-menu') return settingsContextMenuStub;
+        if (request === './session-context-actions' || request === './session-context-actions.ts') return sessionContextActionsStub;
         return originalLoad(request, parent, isMain);
     };
 
     try {
-        const modulePath = require.resolve('../src/statusbar-actions');
+        const modulePath = require.resolve('../src/statusbar-actions.ts');
         delete require.cache[modulePath];
         return require(modulePath);
     } finally {
@@ -90,10 +88,14 @@ test('status bar actions delegate new direct actions to plugin methods', async f
             calls.push('saveAsSession');
             return Promise.resolve(true);
         },
+        // Front matter goes through getFrontmatterLinker(); this double carries those members itself.
+        getFrontmatterLinker() { return this; },
         saveCurrentNoteNameAsSession: function () {
             calls.push('saveCurrentNoteNameAsSession');
             return Promise.resolve(true);
         },
+        // Session state goes through getSessionStore(); this double carries those members itself.
+        getSessionStore() { return this; },
         renameCurrentSession: function () {
             calls.push('renameCurrentSession');
         },
@@ -101,14 +103,19 @@ test('status bar actions delegate new direct actions to plugin methods', async f
             calls.push('duplicateCurrentSession');
             return Promise.resolve(true);
         },
-        switchRelativeFromStatusBar: function (offset) {
-            calls.push(['switchRelativeFromStatusBar', offset]);
+        // Switching goes through getSessionSwitcher(); this double carries those members itself.
+        getSessionSwitcher() { return this; },
+        switchRelativeImmediately: function (offset) {
+            calls.push(['switchRelativeImmediately', offset]);
             return Promise.resolve(true);
         },
         createEmptySession: function () {
             calls.push('createEmptySession');
             return Promise.resolve(true);
         },
+        // Saving goes through plugin.getSessionSaver(). This double records the
+        // save methods itself, so it stands in as its own saver.
+        getSessionSaver() { return this; },
         toggleAutoSaveOnSwitch: function (options) {
             calls.push(['toggleAutoSaveOnSwitch', options]);
             return Promise.resolve(true);
@@ -129,8 +136,8 @@ test('status bar actions delegate new direct actions to plugin methods', async f
         'saveCurrentNoteNameAsSession',
         'renameCurrentSession',
         'duplicateCurrentSession',
-        ['switchRelativeFromStatusBar', -1],
-        ['switchRelativeFromStatusBar', 1],
+        ['switchRelativeImmediately', -1],
+        ['switchRelativeImmediately', 1],
         'createEmptySession',
         ['toggleAutoSaveOnSwitch', { notify: true }],
     ]);

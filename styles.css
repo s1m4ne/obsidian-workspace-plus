@@ -136,6 +136,13 @@
     border-radius: 6px;
 }
 
+/* Both bars are laid out with display:flex, so hiding them needs the
+   compound selector to win on specificity rather than an inline style. */
+.wpp-bulk-actions.wpp-is-hidden,
+.wpp-group-tabs-row.wpp-is-hidden {
+    display: none;
+}
+
 .wpp-session-item.is-dragging {
     visibility: hidden;
 }
@@ -146,6 +153,9 @@ body.wpp-session-list-dragging * {
 }
 
 .wpp-drag-clone {
+    position: fixed;
+    z-index: 10000;
+    pointer-events: none;
     opacity: 0.85;
     box-shadow: var(--shadow-l);
     background: var(--background-primary);
@@ -221,12 +231,6 @@ body.wpp-session-list-dragging * {
     justify-content: flex-end;
     gap: 8px;
     margin-top: 16px;
-}
-
-.wpp-confirm-buttons button.wpp-btn-focused,
-.wpp-session-actions .wpp-btn-focused {
-    outline: 2px solid var(--interactive-accent);
-    outline-offset: 2px;
 }
 
 /* Confirm modal hint */
@@ -412,6 +416,20 @@ body.wpp-session-list-dragging * {
     cursor: grabbing;
 }
 
+.wpp-search-overlay.is-positioned {
+    right: auto;
+    top: auto;
+}
+
+.wpp-search-overlay.is-resized {
+    min-width: 0;
+    max-width: none;
+}
+
+.wpp-search-overlay.is-resized .wpp-search-list {
+    max-height: none;
+}
+
 .wpp-search-overlay .wpp-search-input,
 .wpp-search-overlay .wpp-save-input,
 .wpp-search-overlay .wpp-save-btn,
@@ -467,6 +485,12 @@ body.wpp-session-list-dragging * {
 
 .wpp-search-row {
     width: 100%;
+}
+
+.wpp-search-row.is-hidden,
+.wpp-group-tabs.is-hidden,
+.wpp-search-list.is-hidden {
+    display: none;
 }
 
 .wpp-search-input {
@@ -633,6 +657,10 @@ body.wpp-session-list-dragging * {
     justify-content: center;
 }
 
+.wpp-search-empty.is-visible {
+    display: flex;
+}
+
 /* Group tabs */
 .wpp-group-tabs {
     display: flex;
@@ -785,48 +813,6 @@ body.wpp-session-list-dragging * {
     margin-top: 0;
 }
 
-.wpp-advanced-details {
-    margin: 18px 0 10px;
-    border-top: 1px solid var(--background-modifier-border);
-    padding-top: 12px;
-}
-
-.wpp-advanced-summary {
-    cursor: pointer;
-    color: var(--text-normal);
-    font-size: var(--font-ui-large, 1.05rem);
-    font-weight: 700;
-}
-
-.wpp-advanced-body {
-    margin-top: 10px;
-}
-
-.wpp-advanced-subsection-title {
-    margin-top: 16px;
-}
-
-.wpp-advanced-subsection-title:first-child {
-    margin-top: 0;
-}
-
-.wpp-dev-details {
-    margin-top: 18px;
-    border-top: 1px solid var(--background-modifier-border);
-    padding-top: 12px;
-}
-
-.wpp-dev-summary {
-    cursor: pointer;
-    color: var(--text-normal);
-    font-size: var(--font-ui-large, 1.05rem);
-    font-weight: 700;
-}
-
-.wpp-dev-body {
-    margin-top: 10px;
-}
-
 .wpp-dev-card {
     border: 1px solid var(--background-modifier-border);
     border-radius: 10px;
@@ -940,3 +926,122 @@ body.wpp-session-list-dragging * {
     text-align: center;
     padding: 24px 0;
 }
+
+.wpp-measure-overlay {
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+/* The confirm and unsaved-switch modals are opened from on top of the switch
+   overlay and have to stack above it. Obsidian's own --layer-modal already
+   clears --layer-popover; the explicit value is kept as it was so the stacking
+   order does not change with this conversion, and a theme can now reach it.
+   The class is repeated to outweigh core's own single-class .modal-container
+   rule: pairing it with .modal-container instead would silently stop applying
+   if Obsidian ever renamed that element's class. */
+.wpp-modal-above-overlay.wpp-modal-above-overlay {
+    z-index: 10001;
+}
+
+.wpp-backup-generation-num {
+    color: var(--text-accent);
+    margin-right: 6px;
+}
+
+.wpp-settings-footer {
+    font-size: 12px;
+    color: var(--text-faint);
+    margin-top: 24px;
+}
+
+.wpp-settings-footer-help {
+    margin: 0 0 4px;
+}
+
+/* ---------------------------------------------------------------------------
+   Accessibility (P12)
+   --------------------------------------------------------------------------- */
+
+/* Available to a screen reader, invisible on screen, and out of the normal flow
+   so a flex parent's `gap` does not reserve space for it.
+   
+   This exists because Obsidian renders `aria-label` as a hover tooltip. Naming
+   a full-size container with `aria-label` therefore puts a tooltip over the
+   whole thing: the two overlays did that, and hovering any part of them with no
+   child under the cursor - the padding along the bottom edge, say - popped up
+   "Search sessions". `aria-labelledby` pointing here gives the same accessible
+   name with no tooltip. */
+.wpp-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Every custom control the plugin builds is a div, so none of them inherit a
+   focus ring. :focus-visible rather than :focus so the ring appears for
+   keyboard focus and not on click. */
+.wpp-qs-action-btn:focus-visible,
+.wpp-search-close:focus-visible,
+.wpp-group-add-btn:focus-visible,
+.wpp-group-tab:focus-visible,
+.wpp-switch-item:focus-visible,
+.wpp-session-item:focus-visible {
+    outline: 2px solid var(--interactive-accent);
+    outline-offset: 2px;
+}
+
+/* One ring in a dialog's button row, and it means "this is what Enter does".
+   
+   Driven by a class DialogModal keeps in step with real focus, not by `:focus`.
+   Two reasons CSS alone could not do it:
+   
+   - The rename dialog's focus is in the text field, so no button matches
+     `:focus` while the affirmative button is still Enter's target. Nothing was
+     marked at all - which is why delete showed a ring and rename did not.
+   - `:focus-visible` does not match a programmatic `.focus()` unless the
+     element that held focus immediately before matched too, and when a modal
+     opens Obsidian focuses something of its own programmatically. So the ring
+     appeared only when the dialog happened to be opened from a keyboard-focused
+     control: "sometimes".
+   
+   `--background-modifier-border-focus`, not `--interactive-accent`: the
+   affirmative button is filled - accent for `mod-cta`, red for `mod-warning` -
+   and an accent ring on a red fill is the colour clash that made the first
+   painted ring read as "selected" rather than "focused".
+   
+   Where focus is on a button the target *is* that button, so this doubles as
+   the focus indicator and the row never shows two rings. `outline: none` keeps
+   Obsidian's own ring from adding a second one in that case. */
+.wpp-confirm-buttons button.wpp-dialog-enter-target {
+    box-shadow: 0 0 0 3px var(--background-modifier-border-focus);
+}
+
+.wpp-confirm-buttons button:focus {
+    outline: none;
+}
+
+/* Inputs follow Obsidian's focus box-shadow pattern instead of an outline. */
+.wpp-search-input:focus-visible,
+.wpp-save-input:focus-visible {
+    box-shadow: 0 0 0 3px var(--background-modifier-border-focus);
+    border-radius: var(--input-radius);
+}
+
+/* The icon controls are 20-28px, which is a comfortable mouse target and too
+   small for a finger. The minimum is raised on mobile only: applying it
+   everywhere would loosen the dense desktop rows this plugin is built around,
+   and the manifest is not desktop-only, so mobile is a real target. */
+.is-mobile .wpp-qs-action-btn,
+.is-mobile .wpp-search-close,
+.is-mobile .wpp-group-add-btn,
+.is-mobile .wpp-icon-btn {
+    min-width: 44px;
+    min-height: 44px;
+}
+

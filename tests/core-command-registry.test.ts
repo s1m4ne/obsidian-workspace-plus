@@ -1,0 +1,362 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { setupHarness } from './lock/harness/index.ts';
+import { DEFAULT_DATA } from '../src/storage/default-data.ts';
+
+const harness = setupHarness();
+const {
+    CommandRegistry,
+    registerCommands,
+    syncSessionCommands,
+} = await import('../src/core/command-registry.ts');
+// Dynamically, after setupHarness: a static import is resolved while the module
+// graph links, before the hooks that point `obsidian` at the stubs exist.
+const { SettingsState } = await import('../src/state/settings-state.ts');
+
+function createMockHost() {
+    const commands: import('obsidian').Command[] = [];
+    const calls: string[] = [];
+    const shownActiveIndexes: number[] = [];
+
+    const sessionsMap: Record<string, import('../src/storage/default-data.ts').SessionItem> = {
+        s1: { id: 's1', name: 'Session 1', layout: {} },
+        s2: { id: 's2', name: 'Session 2', layout: {} },
+        s3: { id: 's3', name: 'Session 3', layout: {} },
+    };
+
+    // The registry's host no longer carries `data` - it asks the three owners
+    // instead - so the fixture holds it here and builds the store doubles from
+    // it, which is what the plugin does too.
+    const data = {
+            ...DEFAULT_DATA,
+            numberedSwitchCommands: true,
+            showActiveSwitchCommand: false,
+            activeSessionId: 's1',
+            activeGroupId: 'g1',
+            sessions: sessionsMap,
+            sessionOrder: ['s1', 's2', 's3'],
+            groups: {
+                g1: { id: 'g1', name: 'Group 1', sessionIds: ['s1'] },
+            },
+            groupOrder: ['g1'],
+            sessionGroups: { s1: ['g1'] },
+    };
+
+    const host: import('../src/core/command-registry.ts').CommandRegistryHost = {
+        manifest: { id: 'workspace-plus-plus' },
+        app: {} as import('obsidian').App,
+        _dynamicSessionCommandIds: [] as string[],
+        addCommand(command: import('obsidian').Command) {
+            commands.push(command);
+            return command;
+        },
+        removeCommand(id: string) {
+            calls.push(`remove:${id}`);
+            const idx = commands.findIndex((c) => c.id === id);
+            if (idx >= 0) commands.splice(idx, 1);
+        },
+        // Session state goes through the store, so the double answers from its
+        // own data there rather than carrying the members twice.
+        getSessionStore(): never {
+            const ordered = (): unknown[] =>
+                data.sessionOrder.map((id: string) => data.sessions[id]).filter(Boolean);
+            return {
+                getOrderedSessions: ordered,
+                getOrderedSessionsUnfiltered: ordered,
+                getOrderedSessionsForGroup: ordered,
+                // Answers from the data, so a caller that hard-codes an index -
+                // or reintroduces the "not found means the first one"
+                // substitution P9 removed - is visible here.
+                findActiveSessionIndex: (sessions: Array<{ id: string }>) =>
+                    sessions.findIndex((x) => x.id === data.activeSessionId),
+                renameCurrentSession: () => { calls.push('rename'); },
+                deleteCurrentSession: () => { calls.push('delete'); },
+                createEmptySession: async () => { calls.push('createEmpty'); return true; },
+                duplicateCurrentSession: async () => { calls.push('duplicate'); return true; },
+                getActiveSession: () =>
+                    (data.activeSessionId && data.sessions[data.activeSessionId]) || null,
+                // The active id is the store's answer now.
+                getActiveSessionId: () => data.activeSessionId ?? null,
+            } as never;
+        },
+        // The saver members the registry reaches now come through the saver.
+        getSessionSaver(): never {
+            return {
+                confirmOverwriteSessionWithCurrentLayout: (id: string) => { calls.push(`overwrite:${id}`); },
+                saveActiveSession: async () => { calls.push('saveActive'); return true; },
+                saveAsSession: async () => { calls.push('saveAs'); return true; },
+                reloadCurrentSessionWithoutSaving: async () => { calls.push('reloadWithoutSaving'); return true; },
+                toggleAutoSaveOnSwitch: async () => { calls.push('toggleAutoSave'); return true; },
+                isAutoSaveOnSwitchEnabled: () => false,
+                setAutoSaveOnSwitch: (val: boolean) => { calls.push(`setAutoSave:${val}`); },
+            } as never;
+        },
+
+        // Switching goes through getSessionSwitcher(); this double carries those members itself.
+        getSessionSwitcher(): never {
+            return {
+                switchToIndex: async (idx: number) => { calls.push(`switchToIndex:${idx}`); return true; },
+                switchRelativeFromCommand: async (dir: number) => { calls.push(`switchRelative:${dir}`); return true; },
+            } as never;
+        },
+        getFrontmatterLinker: (): never => ({
+            saveCurrentNoteNameAsSession: async () => { calls.push('saveCurrentNote'); return true; },
+        }) as never,
+        getSearchOverlay: (): never => ({ open: () => { calls.push('openSearchOverlay'); } }) as never,
+        // Version history goes through getHistoryService(); this double carries those members itself.
+        getHistoryService(): never {
+            return { isVersionHistoryEnabled: () => true, quickRestoreLatestHistory: async () => true } as never;
+        },
+        exportSessionsSnapshot: async () => { calls.push('exportSnapshot'); },
+        importSessionsFromLatestExport: async () => { calls.push('importSnapshot'); },
+        getSwitchOverlay: (): never => ({
+            show: (_ordered: unknown, activeIndex: number) => {
+                calls.push('showSwitchOverlay');
+                shownActiveIndexes.push(activeIndex);
+            },
+            overlayEl: null,
+            viewGroupId: null,
+        }) as never,
+        // The group members the registry reaches now come through the store.
+        getGroupStore(): never {
+            return {
+                getRelativeGroupId: (_current: string | null, step: number) => (step > 0 ? 'g1' : undefined),
+                exitGroup: () => { calls.push('exitGroup'); },
+                switchGroupRelative: (step: number) => { calls.push(`switchGroupRelative:${step}`); },
+                // Reads the fixture's own data rather than answering `true`,
+                // so a test that turns the feature off reaches the branches
+                // under it instead of a frozen answer.
+                isGroupFeatureEnabled: () => data.groupFeatureEnabled !== false,
+                // The registry asks the store for the active group id now,
+                // answered from the fixture's own data so the test at the
+                // bottom that sets it still steers the overlay.
+                getActiveGroupId: () => data.activeGroupId ?? null,
+                resolveGroupSelection: async (groupId: string | null) => ({ resolvedGroupId: groupId, switched: true, targetGroupId: groupId, sessions: [] }),
+            } as never;
+        },
+        openSessionManagerModal(focusName: boolean) { calls.push(`openSessionManager:${focusName}`); },
+        openHistoryModal(session: import('../src/storage/default-data.ts').SessionItem) { calls.push(`openHistory:${session.name}`); },
+        openConfirmModal(msg: string, onConfirm: () => void) { calls.push(`openConfirm:${msg}`); onConfirm(); },
+        // A real SettingsState over this fixture's own data, not a stub. The
+        // registry reads numberedSwitchCommands and showActiveSwitchCommand
+        // through the owner now, and a stub returning fixed answers would stop
+        // the two values set in `data` above from reaching the branches under
+        // test while every assertion still passed.
+        getSettingsState: () => settingsState,
+    };
+
+    const settingsState = new SettingsState({
+        data,
+        persistData: async () => true,
+    });
+
+    return { host, data, commands, calls, shownActiveIndexes };
+}
+
+test('CommandRegistry: registers all core commands and handles callbacks', async () => {
+    const { host, commands, calls } = createMockHost();
+    const registry = new CommandRegistry(host);
+
+    registry.registerCommands();
+    assert.ok(commands.length >= 20);
+
+    const cmdMap = new Map(commands.map((c) => [c.id, c]));
+
+    // Check simple callbacks
+    cmdMap.get('manage-sessions')?.callback?.();
+    assert.ok(calls.includes('openSessionManager:false'));
+
+    cmdMap.get('create-session')?.callback?.();
+    assert.ok(calls.includes('openSessionManager:true'));
+
+    cmdMap.get('rename-session')?.callback?.();
+    assert.ok(calls.includes('rename'));
+
+    cmdMap.get('delete-session')?.callback?.();
+    assert.ok(calls.includes('delete'));
+
+    cmdMap.get('new-empty-session')?.callback?.();
+    assert.ok(calls.includes('createEmpty'));
+
+    cmdMap.get('duplicate-session')?.callback?.();
+    assert.ok(calls.includes('duplicate'));
+
+    cmdMap.get('previous-session')?.callback?.();
+    assert.ok(calls.includes('switchRelative:-1'));
+
+    cmdMap.get('next-session')?.callback?.();
+    assert.ok(calls.includes('switchRelative:1'));
+
+    cmdMap.get('save-current-session')?.callback?.();
+    assert.ok(calls.includes('saveActive'));
+
+    cmdMap.get('save-as-session')?.callback?.();
+    assert.ok(calls.includes('saveAs'));
+
+    cmdMap.get('save-current-note-name-as-session')?.callback?.();
+    assert.ok(calls.includes('saveCurrentNote'));
+
+    cmdMap.get('reload-current-session-without-saving')?.callback?.();
+    assert.ok(calls.includes('reloadWithoutSaving'));
+
+    cmdMap.get('toggle-auto-save-on-switch')?.callback?.();
+    assert.ok(calls.includes('toggleAutoSave'));
+
+    // A checkCallback now: the command follows the session-filter setting, so
+    // it reports whether it is available before it runs.
+    const searchOverlay = cmdMap.get('search-session-overlay');
+    assert.equal(searchOverlay?.checkCallback?.(true), true, 'available while the filter is on');
+    searchOverlay?.checkCallback?.(false);
+    assert.ok(calls.includes('openSearchOverlay'));
+
+    cmdMap.get('export-sessions-snapshot')?.callback?.();
+    assert.ok(calls.includes('exportSnapshot'));
+
+    cmdMap.get('import-latest-sessions-snapshot')?.callback?.();
+    assert.ok(calls.includes('importSnapshot'));
+
+    // All four group commands are checkCallbacks now, so they follow the
+    // group-feature setting instead of staying listed while it is off.
+    const switchGroup = cmdMap.get('switch-group');
+    assert.equal(switchGroup?.checkCallback?.(true), true);
+    switchGroup?.checkCallback?.(false);
+    // Wait for resolveGroupSelection promise
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    assert.ok(calls.includes('showSwitchOverlay'));
+
+    const nextGroup = cmdMap.get('next-group');
+    assert.equal(nextGroup?.checkCallback?.(true), true);
+    nextGroup?.checkCallback?.(false);
+    await new Promise((resolve) => setTimeout(resolve, 10));
+
+    const previousGroup = cmdMap.get('previous-group');
+    assert.equal(previousGroup?.checkCallback?.(true), true);
+    previousGroup?.checkCallback?.(false);
+    assert.ok(calls.includes('switchGroupRelative:-1'));
+
+    // Check checkCallbacks
+    const enableAutoSave = cmdMap.get('enable-auto-save-on-switch');
+    assert.equal(enableAutoSave?.checkCallback?.(true), true);
+    enableAutoSave?.checkCallback?.(false);
+    assert.ok(calls.includes('setAutoSave:true'));
+
+    const disableAutoSave = cmdMap.get('disable-auto-save-on-switch');
+    assert.equal(disableAutoSave?.checkCallback?.(true), false);
+
+    const versionHistory = cmdMap.get('version-history');
+    assert.equal(versionHistory?.checkCallback?.(true), true);
+    versionHistory?.checkCallback?.(false);
+    assert.ok(calls.includes('openHistory:Session 1'));
+
+    const exitGroup = cmdMap.get('exit-group');
+    assert.equal(exitGroup?.checkCallback?.(true), true);
+    exitGroup?.checkCallback?.(false);
+    assert.ok(calls.includes('exitGroup'));
+});
+
+test('CommandRegistry: syncSessionCommands manages numbered and dynamic named commands', () => {
+    const { host, data, commands } = createMockHost();
+    const registry = new CommandRegistry(host);
+
+    registry.syncSessionCommands();
+
+    const ids = commands.map((c) => c.id);
+    assert.ok(ids.includes('switch-to-1'));
+    assert.ok(ids.includes('switch-to-9'));
+
+    // Switch to 1 checkCallback
+    const switchTo1 = commands.find((c) => c.id === 'switch-to-1');
+    assert.equal(switchTo1?.checkCallback?.(true), false); // s1 is activeSessionId and showActiveSwitchCommand is false
+
+    const switchTo2 = commands.find((c) => c.id === 'switch-to-2');
+    assert.equal(switchTo2?.checkCallback?.(true), true); // s2 is not active
+
+    // Now test with numberedSwitchCommands disabled and dynamic commands from 0 onward
+    data.numberedSwitchCommands = false;
+    registry.syncSessionCommands();
+
+    const newIds = commands.map((c) => c.id);
+    assert.equal(newIds.includes('switch-to-1'), false);
+    assert.ok(newIds.includes('switch-to-named-s1'));
+    assert.ok(newIds.includes('switch-to-named-s2'));
+    assert.ok(newIds.includes('switch-to-named-s3'));
+
+    // Standalone functions
+    registerCommands(host);
+    syncSessionCommands(host);
+});
+
+/**
+ * The reported fault: with the session filter off, "Search sessions" opened an
+ * overlay whose filter row is `display: none`, so the command could not do the
+ * one thing its name promises. It reports itself unavailable now, the way
+ * version-history does when history is off.
+ */
+test('the search command is absent while the session filter is off', () => {
+    const { host, data, commands } = createMockHost();
+    const registry = new CommandRegistry(host);
+    registry.registerCommands();
+
+    const cmdMap = new Map(commands.map((c) => [c.id, c]));
+    const search = cmdMap.get('search-session-overlay');
+    assert.ok(search, 'the command is always registered');
+
+    data.showFilterInput = true;
+    assert.equal(search?.checkCallback?.(true), true);
+
+    data.showFilterInput = false;
+    assert.equal(search?.checkCallback?.(true), false, 'and hides itself when it cannot search');
+});
+
+test.after(() => harness.restore());
+
+test('opening another group offers no active row when the active session is not in it', async () => {
+    const { commands, data, shownActiveIndexes, host } = createMockHost();
+    new CommandRegistry(host).registerCommands();
+    const cmdMap = new Map(commands.map((c) => [c.id, c]));
+
+    // The active session belongs somewhere else, which is the ordinary state
+    // once groups are in use. Before P9 the overlay was handed 0 and highlighted
+    // the first row of a group the active session is not in.
+    data.activeSessionId = 'not-in-any-group';
+
+    cmdMap.get('switch-group')?.checkCallback?.(false);
+    await new Promise((resolve) => setTimeout(resolve, 10));
+
+    assert.equal(
+        shownActiveIndexes[shownActiveIndexes.length - 1],
+        -1,
+        'the overlay must be told there is no active row, not handed the first one',
+    );
+});
+
+test('turning the group feature off withdraws every group command', () => {
+    const { commands, data, host } = createMockHost();
+    new CommandRegistry(host).registerCommands();
+    const cmdMap = new Map(commands.map((c) => [c.id, c]));
+
+    const groupCommands = ['switch-group', 'exit-group', 'next-group', 'previous-group'];
+
+    data.groupFeatureEnabled = false;
+
+    for (const id of groupCommands) {
+        const command = cmdMap.get(id);
+        assert.ok(command, `${id} is registered`);
+        assert.equal(
+            command.checkCallback?.(true),
+            false,
+            `${id} must report itself unavailable while the group feature is off`,
+        );
+    }
+
+    // next-group carries Cmd+Shift+Tab by default, which is Obsidian's own
+    // reverse tab switch. Holding it while doing nothing is the reason this
+    // matters beyond a tidy command palette.
+    assert.ok(
+        cmdMap.get('next-group')?.hotkeys?.some((h) => h.key === 'Tab'),
+        'next-group is the one holding Cmd+Shift+Tab',
+    );
+
+    data.groupFeatureEnabled = true;
+    assert.equal(cmdMap.get('switch-group')?.checkCallback?.(true), true, 'and they come back');
+});

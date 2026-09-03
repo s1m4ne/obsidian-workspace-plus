@@ -1,5 +1,7 @@
 'use strict';
 
+require('./lock/harness/index.ts').installObsidianStub();
+
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const Module = require('module');
@@ -22,13 +24,13 @@ function loadStatusBarController(calls) {
 
     const originalLoad = Module._load;
     Module._load = function (request, parent, isMain) {
-        if (request === './utils') return utilsStub;
-        if (request === './statusbar-actions') return statusBarActionsStub;
+        if (request === './utils' || request === './utils.ts') return utilsStub;
+        if (request === './statusbar-actions' || request === './statusbar-actions.ts') return statusBarActionsStub;
         return originalLoad(request, parent, isMain);
     };
 
     try {
-        const modulePath = require.resolve('../src/statusbar-controller');
+        const modulePath = require.resolve('../src/statusbar-controller.ts');
         delete require.cache[modulePath];
         return require(modulePath);
     } finally {
@@ -100,9 +102,9 @@ test('status bar controller resolves modified click slots', function () {
 
     assert.equal(controller.getClickSlot(createEvent()), 'click');
     assert.equal(controller.getClickSlot(createEvent({ shiftKey: true })), 'shiftClick');
-    assert.equal(controller.getClickSlot(createEvent({ ctrlKey: true })), 'modClick');
+    assert.equal(controller.getClickSlot(createEvent({ ctrlKey: true, metaKey: true })), 'modClick');
     assert.equal(controller.getClickSlot(createEvent({ altKey: true, ctrlKey: true })), 'altClick');
-    assert.equal(controller.getMiddleClickSlot(createEvent({ ctrlKey: true })), 'modMiddleClick');
+    assert.equal(controller.getMiddleClickSlot(createEvent({ ctrlKey: true, metaKey: true })), 'modMiddleClick');
     assert.equal(controller.getRightClickSlot(createEvent({ altKey: true })), 'altRightClick');
 });
 
@@ -120,10 +122,9 @@ test('status bar controller accumulates wheel delta and switches after threshold
             statusBarScrollInvert: false,
         },
         isSwitchingSession: false,
-        statusBarScrollDelta: 0,
-        statusBarScrollEventAt: 0,
-        statusBarScrollSwitchAt: 0,
-        switchRelativeFromScroll: function (direction) {
+        // Switching goes through getSessionSwitcher(); this double carries those members itself.
+        getSessionSwitcher() { return this; },
+        switchRelativeImmediately: function (direction) {
             calls.push(direction);
             return Promise.resolve(true);
         },
@@ -132,14 +133,22 @@ test('status bar controller accumulates wheel delta and switches after threshold
     const first = createEvent({ type: 'wheel', deltaY: 10 });
     const second = createEvent({ type: 'wheel', deltaY: 25 });
 
+    const wheelController = new controller.StatusBarController(plugin);
+    plugin.getStatusBarController = function () { return wheelController; };
+
+    // Read from the controller, which is where the counters live. They used to
+    // be mirrored onto the plugin as plain properties and asserted there, a
+    // shape the running plugin has not had since it stopped carrying them: the
+    // mirror only ever wrote when the host already had the property, so in
+    // Obsidian it wrote nothing and only this double kept it alive.
     assert.equal(controller.handleStatusBarWheel(plugin, first, 1000), false);
-    assert.equal(plugin.statusBarScrollDelta, 10);
+    assert.equal(wheelController.scrollDelta, 10);
     assert.equal(first.prevented, 1);
     assert.equal(first.stopped, 1);
 
     assert.equal(controller.handleStatusBarWheel(plugin, second, 1050), true);
-    assert.equal(plugin.statusBarScrollDelta, 0);
-    assert.equal(plugin.statusBarScrollSwitchAt, 1050);
+    assert.equal(wheelController.scrollDelta, 0);
+    assert.equal(wheelController.scrollSwitchAt, 1050);
     assert.deepEqual(calls, [1]);
 });
 
@@ -166,8 +175,21 @@ test('status bar controller setup wires basic click handling', function () {
         updateStatusBar: function () {
             calls.push(['update']);
         },
+        openSearchOverlay: function () {
+            calls.push(['action', 'quickSwitcher', 'click']);
+        },
     };
 
+    // The module-level helper reaches the plugin's controller, so the double
+    // hands back a real one built from itself.
+    plugin.getSessionStore = function () { return { getActiveSession: function () { return null; } }; };
+    plugin.getGroupStore = function () {
+        return { isGroupFeatureEnabled: function () { return false; }, getActiveGroup: function () { return null; } };
+    };
+    plugin.getSessionSaver = function () { return { shouldShowUnsavedStatusBarHighlight: function () { return false; } }; };
+    plugin.getStatusBarController = function () {
+        return new controller.StatusBarController(plugin);
+    };
     controller.setupStatusBar(plugin);
     const event = createEvent({ type: 'click' });
     listeners.click(event);
@@ -175,9 +197,11 @@ test('status bar controller setup wires basic click handling', function () {
     assert.equal(plugin.statusBarEl !== undefined, true);
     assert.equal(event.prevented, 1);
     assert.equal(event.stopped, 1);
+    // No ['update'] entry: setup redraws through the controller's own
+    // updateStatusBar rather than asking the plugin to forward back into it.
+    // The redraw still happens - the status bar element exists and is classed.
     assert.deepEqual(calls, [
         ['class', 'wpp-status-bar'],
-        ['update'],
         ['action', 'quickSwitcher', 'click'],
     ]);
 });

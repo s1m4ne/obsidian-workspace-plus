@@ -63,6 +63,13 @@ Manual-save tools include:
 
 Groups let you organize sessions without deleting or duplicating them. You can switch groups, show all sessions, move sessions between groups, remove sessions from groups, and disable the group feature if you do not need it.
 
+### Session restore scope
+
+By default, switching a session restores the main editor area and both
+sidebars. **Restore sidebars** can be turned off in settings, so that switching
+replaces only the main area and leaves the current sidebars alone. Turn it off
+if your sidebars come back empty after a switch.
+
 ### Version history and backups
 
 Workspace++ keeps per-session version history for layout changes and can restore previous layouts. It also keeps session backup files in the vault and supports manual export/import snapshots from settings or commands.
@@ -114,6 +121,10 @@ https://github.com/s1m4ne/obsidian-workspace-plus
 
 All commands can be assigned custom hotkeys in **Settings** > **Hotkeys**.
 
+Some commands follow a setting and are hidden when it is off: the group
+commands need **Session groups**, and **Search sessions** needs **Show session
+filter**.
+
 | Command | Default hotkey |
 | --- | --- |
 | Manage sessions | - |
@@ -129,7 +140,7 @@ All commands can be assigned custom hotkeys in **Settings** > **Hotkeys**.
 | Save current session as... | - |
 | Save current note name as session | - |
 | Save current layout to session... | - |
-| Reload current session without saving | - |
+| Reload current session (without saving) | - |
 | Toggle auto-save on switch | - |
 | Enable auto-save on switch | - |
 | Disable auto-save on switch | - |
@@ -138,8 +149,8 @@ All commands can be assigned custom hotkeys in **Settings** > **Hotkeys**.
 | Export sessions snapshot | - |
 | Import latest sessions snapshot | - |
 | Switch group | - |
-| Show all sessions / exit group | - |
-| Next group | `Cmd/Ctrl+Shift+Tab` |
+| Show all sessions (exit group) | - |
+| Next group | `Cmd/Ctrl+Shift+Tab`, `Cmd/Ctrl+Shift+G` |
 | Previous group | - |
 
 ## Sync and storage

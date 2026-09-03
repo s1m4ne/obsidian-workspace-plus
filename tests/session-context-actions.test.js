@@ -2,152 +2,142 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const Module = require('module');
+const { setupHarness } = require('./lock/harness/index.ts');
 
-function loadSessionContextActions(hooks) {
-    hooks = hooks || {};
-    const notices = hooks.notices || [];
-    const menuOpens = hooks.menuOpens || [];
-    const actionCalls = hooks.actionCalls || [];
+const harness = setupHarness();
+const actions = require('../src/session-context-actions.ts');
+const { L } = require('../src/i18n.ts');
 
-    const obsidianStub = {
-        Notice: class {
-            constructor(message) {
-                notices.push(message);
-            }
-        },
-    };
-    const i18nStub = {
-        L: {
-            groupRemovedSession: function (sessionName, groupName) {
-                return 'removed ' + sessionName + ' from ' + groupName;
-            },
-            groupAddedSession: function (sessionName, groupName) {
-                return 'added ' + sessionName + ' to ' + groupName;
-            },
-            confirmDeleteActive: function (sessionName) {
-                return 'delete active ' + sessionName;
-            },
-            confirmDelete: function (sessionName) {
-                return 'delete ' + sessionName;
-            },
-        },
-    };
-    const HistoryModalStub = class {
-        constructor(_app, _plugin, session) {
-            this.session = session;
-        }
-        open() {
-            actionCalls.push(['history', this.session.id]);
-        }
-    };
-    const sessionContextMenuStub = {
-        openSessionContextMenu: function (options) {
-            menuOpens.push(options);
-        },
-    };
-    const sessionListActionsStub = {
-        renameSessionWithPrompt: function (options) {
-            actionCalls.push(['rename', options.session.id]);
-            if (options.onRenamed) options.onRenamed();
-        },
-        deleteSessionWithPrompt: function (options) {
-            actionCalls.push([
-                'delete',
-                options.session.id,
-                options.forceConfirm,
-                options.confirmMessage,
-                options.notifyDeleted,
-            ]);
-            if (options.onDeleted) options.onDeleted();
-            return Promise.resolve(true);
-        },
-    };
-
-    const originalLoad = Module._load;
-    Module._load = function (request, parent, isMain) {
-        if (request === 'obsidian') return obsidianStub;
-        if (request === './i18n') return i18nStub;
-        if (request === './modals/history-modal') return HistoryModalStub;
-        if (request === './session-context-menu') return sessionContextMenuStub;
-        if (request === './session-list-actions') return sessionListActionsStub;
-        return originalLoad(request, parent, isMain);
-    };
-
-    try {
-        const modulePath = require.resolve('../src/session-context-actions');
-        delete require.cache[modulePath];
-        return require(modulePath);
-    } finally {
-        Module._load = originalLoad;
-    }
+function resetHarness() {
+    harness.dom.document.querySelectorAll('.modal-container').forEach((el) => el.remove());
+    harness.obsidian.notices.length = 0;
+    harness.obsidian.menus.length = 0;
 }
 
-function createPlugin(calls) {
-    return {
+async function flushPromises() {
+    await Promise.resolve();
+    await Promise.resolve();
+}
+
+function createPlugin(calls, overrides = {}) {
+    return Object.assign({
         app: {},
         data: {
             activeSessionId: 'a',
+            confirmDeleteByHotkey: true,
+            sessions: {
+                a: { id: 'a', name: 'Alpha', layout: {} },
+                b: { id: 'b', name: 'Beta', layout: {} },
+            },
             groups: {
                 g1: { id: 'g1', name: 'Group 1' },
             },
         },
-        isGroupFeatureEnabled: function () {
+        // Group calls go through plugin.getGroupStore() now. This double records
+        // the group methods itself, so it is its own group store and every
+        // assertion below still names the same calls.
+        getGroupStore() { return this; },
+        isGroupFeatureEnabled() {
             return true;
         },
-        getOrderedGroups: function () {
+        getOrderedGroups() {
             return [{ id: 'g1', name: 'Group 1' }];
         },
-        saveActiveSession: function () {
+        // Saving goes through plugin.getSessionSaver(). This double records the
+        // save methods itself, so it stands in as its own saver.
+        getSessionSaver() { return this; },
+        isAutoSaveOnSwitchEnabled() {
+            return true;
+        },
+        // Version history goes through getHistoryService(); this double carries those members itself.
+        getHistoryService() { return this; },
+        isVersionHistoryEnabled() {
+            return true;
+        },
+        isVersionHistoryConfirmRestoreEnabled() {
+            return false;
+        },
+        restoreFromHistoryEntry() {
+            return Promise.resolve(true);
+        },
+        saveActiveSession() {
             calls.push('save');
             return Promise.resolve(true);
         },
-        reloadCurrentSessionWithoutSaving: function () {
+        reloadCurrentSessionWithoutSaving() {
             calls.push('reload');
             return Promise.resolve(true);
         },
-        saveAsSession: function () {
+        saveAsSession() {
             calls.push('saveAs');
             return Promise.resolve(true);
         },
-        confirmOverwriteSessionWithCurrentLayout: function (sessionId, options) {
+        confirmOverwriteSessionWithCurrentLayout(sessionId, options) {
             calls.push(['overwrite', sessionId]);
             if (options && options.onSaved) options.onSaved();
             return true;
         },
-        duplicateSession: function (sessionId) {
+        renameSessionById(sessionId, name) {
+            calls.push(['rename', sessionId, name]);
+            return Promise.resolve(true);
+        },
+        // Session state goes through getSessionStore(); this double carries those members itself.
+        getSessionStore() {
+            // The double still carries the store members; these five are the
+            // ones P1's contract stage moved onto the owners, answered from
+            // this fixture's own data.
+            const data = this.data;
+            return Object.assign(Object.create(this), {
+                getActiveSessionId() { return data.activeSessionId ?? null; },
+                getSessionCount() { return Object.keys(data.sessions || {}).length; },
+                getActiveGroupId() { return data.activeGroupId ?? null; },
+                findGroup(id) { return id ? (data.groups || {})[id] || null : null; },
+                getGroupMap() { return data.groups || {}; },
+            });
+        },
+        // P1's contract stage: the code under test asks the owners for these
+        // rather than reading `data` itself. Answered from this double's own
+        // data so a test that changes it still steers the path.
+        getActiveSessionId() { return this.data.activeSessionId ?? null; },
+        getSessionCount() { return Object.keys(this.data.sessions || {}).length; },
+        getActiveGroupId() { return this.data.activeGroupId ?? null; },
+        findGroup(id) { return id ? (this.data.groups || {})[id] || null : null; },
+        getGroupMap() { return this.data.groups || {}; },
+        duplicateSession(sessionId) {
             calls.push(['duplicate', sessionId]);
             return Promise.resolve(true);
         },
-        removeSessionFromGroup: function (sessionId, groupId) {
+        deleteSession(sessionId) {
+            calls.push(['delete', sessionId]);
+            return Promise.resolve(true);
+        },
+        removeSessionFromGroup(sessionId, groupId) {
             calls.push(['removeGroup', sessionId, groupId]);
             return Promise.resolve(true);
         },
-        moveSessionToGroupExclusive: function (sessionId, groupId) {
+        moveSessionToGroupExclusive(sessionId, groupId) {
             calls.push(['moveGroup', sessionId, groupId]);
             return Promise.resolve(true);
         },
-    };
+    }, overrides);
 }
 
-test('session context action builder wires shared defaults and refresh callbacks', async function () {
+test('session context action builder wires shared defaults and refresh callbacks', async () => {
+    resetHarness();
     const calls = [];
-    const notices = [];
-    const actionCalls = [];
-    const actions = loadSessionContextActions({ notices, actionCalls });
     const plugin = createPlugin(calls);
-    const session = { id: 'b', name: 'Beta' };
+    const session = { id: 'b', name: 'Beta', layout: {} };
 
     const menuOptions = actions.createSessionContextMenuOptions({
-        plugin: plugin,
-        session: session,
-        getViewGroupId: function () {
+        plugin,
+        session,
+        getViewGroupId() {
             return 'g1';
         },
-        onGroupsChanged: function () {
+        onGroupsChanged() {
             calls.push('groupsChanged');
         },
-        onSessionsChanged: function () {
+        onSessionsChanged() {
             calls.push('sessionsChanged');
         },
     });
@@ -161,6 +151,13 @@ test('session context action builder wires shared defaults and refresh callbacks
     await menuOptions.onRemoveFromGroup();
     await menuOptions.onMoveToGroup('g1');
     menuOptions.onRename();
+    const input = harness.dom.document.querySelector('.wpp-rename-input');
+    assert.ok(input);
+    input.value = 'Renamed';
+    const rename = harness.dom.document.querySelector('.wpp-confirm-buttons .mod-cta');
+    assert.ok(rename);
+    rename.click();
+    await flushPromises();
     menuOptions.onVersionHistory();
 
     assert.deepEqual(calls, [
@@ -176,59 +173,108 @@ test('session context action builder wires shared defaults and refresh callbacks
         ['moveGroup', 'b', 'g1'],
         'groupsChanged',
         'sessionsChanged',
+        ['rename', 'b', 'Renamed'],
         'sessionsChanged',
     ]);
-    assert.deepEqual(notices, [
-        'removed Beta from Group 1',
-        'added Beta to Group 1',
-    ]);
-    assert.deepEqual(actionCalls, [
-        ['rename', 'b'],
-        ['history', 'b'],
-    ]);
+    assert.deepEqual(
+        harness.obsidian.notices.map((notice) => notice.message),
+        [
+            L.groupRemovedSession(session.name, 'Group 1'),
+            L.groupAddedSession(session.name, 'Group 1'),
+        ]
+    );
+    assert.ok(harness.dom.document.querySelector('.wpp-history-empty'));
 });
 
-test('session context action builder preserves delete confirmation options', async function () {
+test('session context action builder preserves delete confirmation options', async () => {
+    resetHarness();
     const calls = [];
-    const actionCalls = [];
-    const actions = loadSessionContextActions({ actionCalls });
-    const plugin = createPlugin(calls);
-    const session = { id: 'a', name: 'Alpha' };
+    // confirm-on-hotkey is off, so forceDeleteConfirm is the only thing that can
+    // put the dialog on screen. With it on, this test passes whether or not the
+    // option is carried through at all.
+    const plugin = createPlugin(calls, { data: Object.assign(createPlugin([]).data, { confirmDeleteByHotkey: false }) });
+    const session = { id: 'a', name: 'Alpha', layout: {} };
 
     const menuOptions = actions.createSessionContextMenuOptions({
-        plugin: plugin,
-        session: session,
+        plugin,
+        session,
         isActive: true,
         forceDeleteConfirm: true,
         notifyDeleted: false,
         deleteConfirmMessage: 'custom delete',
-        onSessionsChanged: function () {
+        onSessionsChanged() {
             calls.push('sessionsChanged');
         },
     });
 
     await menuOptions.onDelete();
+    assert.equal(harness.dom.document.querySelector('.modal-container p')?.textContent, 'custom delete');
+    assert.deepEqual(calls, []);
+    const confirm = harness.dom.document.querySelector('.wpp-confirm-buttons .mod-warning');
+    assert.ok(confirm);
+    confirm.click();
+    await flushPromises();
 
-    assert.deepEqual(actionCalls, [
-        ['delete', 'a', true, 'custom delete', false],
-    ]);
-    assert.deepEqual(calls, ['sessionsChanged']);
+    assert.deepEqual(calls, [['delete', 'a'], 'sessionsChanged']);
 });
 
-test('openSessionContextMenu delegates generated options to the menu renderer', function () {
-    const menuOpens = [];
-    const actions = loadSessionContextActions({ menuOpens });
+test('openSessionContextMenu delegates generated options to the menu renderer', () => {
+    resetHarness();
     const plugin = createPlugin([]);
-    const session = { id: 'b', name: 'Beta' };
+    const session = { id: 'b', name: 'Beta', layout: {} };
 
     actions.openSessionContextMenu({
-        plugin: plugin,
-        session: session,
+        plugin,
+        session,
         event: { type: 'contextmenu' },
         showSwitch: true,
     });
 
-    assert.equal(menuOpens.length, 1);
-    assert.equal(menuOpens[0].session, session);
-    assert.equal(menuOpens[0].showSwitch, true);
+    assert.equal(harness.obsidian.menus.length, 1);
+    assert.ok(harness.obsidian.menus[0].item(L.contextSwitchSession));
 });
+
+test('the switch item is offered only when the caller asks for it', () => {
+    resetHarness();
+    const plugin = createPlugin([]);
+    const session = { id: 'b', name: 'Beta', layout: {} };
+
+    // The session manager modal wants it; the status bar menu, which is already
+    // on the active session, does not.
+    actions.openSessionContextMenu({ plugin, session, event: { type: 'contextmenu' } });
+    assert.equal(harness.obsidian.menus.length, 1);
+    assert.equal(
+        harness.obsidian.menus[0].item(L.contextSwitchSession),
+        undefined,
+        'no switch entry unless showSwitch was passed',
+    );
+
+    actions.openSessionContextMenu({ plugin, session, event: { type: 'contextmenu' }, showSwitch: true });
+    assert.ok(harness.obsidian.menus[1].item(L.contextSwitchSession));
+});
+
+test('a group move the plugin refuses is not announced as done', async () => {
+    resetHarness();
+    const calls = [];
+    const plugin = createPlugin(calls, {
+        moveSessionToGroupExclusive(sessionId, groupId) {
+            calls.push(['moveGroup', sessionId, groupId]);
+            return Promise.resolve(false);
+        },
+    });
+
+    const menuOptions = actions.createSessionContextMenuOptions({
+        plugin,
+        session: { id: 'b', name: 'Beta', layout: {} },
+        onGroupsChanged() { calls.push('groupsChanged'); },
+        onSessionsChanged() { calls.push('sessionsChanged'); },
+    });
+
+    const moved = await menuOptions.onMoveToGroup('g1');
+
+    assert.equal(moved, false);
+    assert.deepEqual(calls, [['moveGroup', 'b', 'g1']], 'no refresh follows a move that did not happen');
+    assert.deepEqual(harness.obsidian.notices, [], 'and the user is not told it worked');
+});
+
+test.after(() => harness.restore());

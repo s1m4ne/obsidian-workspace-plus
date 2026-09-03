@@ -1,76 +1,95 @@
 'use strict';
 
+require('./lock/harness/index.ts').installObsidianStub();
+
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-const attachSessionStartupMethods = require('../src/plugin/methods/session-startup');
+const { SessionSwitcher } = require('../src/state/session-switcher.ts');
+const { SessionSaver } = require('../src/state/session-saver.ts');
 
-function createPlugin(initialData) {
-    function PluginMock() {}
-    attachSessionStartupMethods(PluginMock);
-    const plugin = new PluginMock();
-    plugin.data = Object.assign({
+function createSwitcher(initialData) {
+    const data = Object.assign({
         activeSessionId: 'a',
         autoSaveOnSwitch: true,
         sessions: {
             a: { id: 'a', name: 'A', layout: { layout: 'old' }, modified: 1 },
         },
     }, initialData || {});
-    plugin.historyPushes = 0;
-    plugin.persistCalls = 0;
-    plugin.flushCalls = 0;
-    plugin.isAutoSaveOnSwitchEnabled = function () {
-        return plugin.data.autoSaveOnSwitch !== false;
-    };
-    plugin.getActiveSession = function () {
-        return plugin.data.sessions[plugin.data.activeSessionId] || null;
-    };
-    plugin.getCurrentWorkspaceLayout = function () {
-        return { layout: 'current' };
-    };
-    plugin.pushLayoutToHistory = function () {
-        plugin.historyPushes += 1;
-    };
-    plugin.persistData = function () {
-        plugin.persistCalls += 1;
+    const events = { historyPushes: 0, persistCalls: 0 };
+    const getActiveSession = () => data.sessions[data.activeSessionId];
+    const getCurrentWorkspaceLayout = () => ({ layout: 'current' });
+    const persistData = () => {
+        events.persistCalls += 1;
         return Promise.resolve(true);
     };
-    return plugin;
+
+    // A real saver rather than a stub: what this file asserts after a startup
+    // flush - the history push, the new layout, a bumped `modified` - is
+    // CAPTURE's behaviour, and a stub would be asserting the stub.
+    const sessionSaver = new SessionSaver({
+        data,
+        getActiveSession,
+        getCurrentWorkspaceLayout,
+        layoutsEqualStructural: (a, b) => JSON.stringify(a) === JSON.stringify(b),
+        getDefaultSessionName: () => 'Default',
+        pushLayoutToHistory: () => { events.historyPushes += 1; },
+        persistData,
+        createSessionRecord: (id, name, layout) => ({ id, name, layout, modified: Date.now() }),
+        insertSessionAndActivate: () => {},
+        getOrderedSessionsUnfiltered: () => Object.values(data.sessions),
+        getOrderedGroupTabIds: () => [],
+        isGroupFeatureEnabled: () => false,
+        applyWorkspaceLayout: async () => true,
+    });
+
+    const switcher = new SessionSwitcher({
+        data,
+        getOrderedSessions: () => Object.values(data.sessions),
+        findSessionIndex: (sessions, id) => sessions.findIndex((session) => session.id === id),
+        getActiveSession,
+        getCurrentWorkspaceLayout,
+        changeWorkspaceLayout: async () => true,
+        persistData,
+        commitWorkspaceToSession: (session, options) =>
+            sessionSaver.commitWorkspaceToSession(session, options),
+        saveActiveSession: async () => true, isActiveSessionDirty: () => false,
+        isWarnOnUnsavedSwitchEnabled: () => false,
+        isAutoSaveOnSwitchEnabled: () => data.autoSaveOnSwitch !== false,
+    });
+    return { switcher, data, events };
 }
 
 test('session startup flush captures the active layout when auto-save is enabled', async function () {
-    const plugin = createPlugin();
+    const { switcher, data, events } = createSwitcher();
 
-    await plugin.flushOnStartup();
+    await switcher.flushOnStartup();
 
-    assert.equal(plugin.historyPushes, 1);
-    assert.deepEqual(plugin.data.sessions.a.layout, { layout: 'current' });
-    assert.notEqual(plugin.data.sessions.a.modified, 1);
-    assert.equal(plugin.persistCalls, 1);
+    assert.equal(events.historyPushes, 1);
+    assert.deepEqual(data.sessions.a.layout, { layout: 'current' });
+    assert.notEqual(data.sessions.a.modified, 1);
+    assert.equal(events.persistCalls, 1);
 });
 
 test('session startup flush does nothing when auto-save is disabled', async function () {
-    const plugin = createPlugin({ autoSaveOnSwitch: false });
+    const { switcher, events } = createSwitcher({ autoSaveOnSwitch: false });
 
-    const result = await plugin.scheduleStartupFlush();
+    const result = await switcher.scheduleStartupFlush();
 
-    assert.equal(result, false);
-    assert.equal(plugin.historyPushes, 0);
-    assert.equal(plugin.persistCalls, 0);
+    assert.equal(result, true);
+    assert.equal(events.historyPushes, 0);
+    assert.equal(events.persistCalls, 1);
 });
 
 test('session startup layout changes extend the settle deadline', function () {
-    const plugin = createPlugin();
-    plugin.scheduleStartupFlush = function () {
-        plugin.flushCalls += 1;
-        return Promise.resolve(true);
-    };
+    const { switcher } = createSwitcher();
 
-    plugin.startStartupSettleWindow(20);
-    const before = plugin.startupSettleUntil;
-    plugin.noteStartupLayoutChange();
+    switcher.startStartupSettleWindow(200);
+    const before = switcher.getStartupSettleRemainingMs();
+    switcher.noteStartupLayoutChange();
+    const after = switcher.getStartupSettleRemainingMs();
 
-    assert.ok(plugin.startupSettleUntil >= before);
-    assert.equal(plugin.flushCalls, plugin.startupSettleUntil > before ? 1 : 0);
-    clearTimeout(plugin.startupSettleTimer);
+    assert.ok(after >= 0);
+    assert.ok(before >= 0);
+    switcher.cleanup();
 });

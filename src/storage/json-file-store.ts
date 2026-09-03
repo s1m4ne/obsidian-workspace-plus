@@ -1,0 +1,114 @@
+export interface StorageAdapter {
+    exists(normalizedPath: string): Promise<boolean>;
+    read(normalizedPath: string): Promise<string>;
+    write(normalizedPath: string, data: string): Promise<void>;
+    remove(normalizedPath: string): Promise<void>;
+    rename(normalizedPath: string, normalizedNewPath: string): Promise<void>;
+    mkdir?(normalizedPath: string): Promise<void>;
+    stat(normalizedPath: string): Promise<{ mtime: number } | null>;
+}
+
+export interface ReadJsonResult<T = unknown> {
+    exists: boolean;
+    data: T | null;
+    error: Error | null;
+}
+
+export type AdapterProvider = StorageAdapter | (() => StorageAdapter | null | undefined);
+
+export class JsonFileStore {
+    private readonly getAdapter: () => StorageAdapter | null | undefined;
+
+    constructor(adapterProvider: AdapterProvider) {
+        if (typeof adapterProvider === 'function') {
+            this.getAdapter = adapterProvider;
+        } else {
+            this.getAdapter = () => adapterProvider;
+        }
+    }
+
+    private resolveAdapter(): StorageAdapter {
+        const adapter = this.getAdapter();
+        if (!adapter) {
+            throw new Error('Storage adapter not available');
+        }
+        return adapter;
+    }
+
+    async readJsonIfExists<T = unknown>(path: string): Promise<ReadJsonResult<T>> {
+        try {
+            const adapter = this.resolveAdapter();
+            const exists = await adapter.exists(path);
+            if (!exists) {
+                return { exists: false, data: null, error: null };
+            }
+            const raw = await adapter.read(path);
+            try {
+                return { exists: true, data: JSON.parse(raw) as T, error: null };
+            } catch (parseError) {
+                const err = parseError instanceof Error ? parseError : new Error(String(parseError));
+                return { exists: true, data: null, error: err };
+            }
+        } catch (readError) {
+            const err = readError instanceof Error ? readError : new Error(String(readError));
+            return { exists: true, data: null, error: err };
+        }
+    }
+
+    async writeJson(path: string, data: unknown, pretty = false): Promise<void> {
+        const adapter = this.resolveAdapter();
+        const json = pretty ? JSON.stringify(data, null, 2) : JSON.stringify(data);
+        await adapter.write(path, json);
+    }
+
+    async ensureDir(path: string): Promise<void> {
+        try {
+            const adapter = this.resolveAdapter();
+            const exists = await adapter.exists(path);
+            if (!exists && typeof adapter.mkdir === 'function') {
+                // A concurrent writer may have created it already, and Obsidian
+                // rejects mkdir on an existing folder. The write that follows
+                // reports a directory that genuinely could not be made.
+                await adapter.mkdir(path).catch(() => {});
+            }
+        } catch {
+            // Ignore error if already exists or adapter fails
+        }
+    }
+
+    async getFileMtime(path: string): Promise<number> {
+        try {
+            const adapter = this.resolveAdapter();
+            const stat = await adapter.stat(path);
+            if (!stat || typeof stat.mtime !== 'number') return 0;
+            return stat.mtime;
+        } catch {
+            return 0;
+        }
+    }
+
+    async removeIfExists(path: string): Promise<void> {
+        try {
+            const adapter = this.resolveAdapter();
+            const exists = await adapter.exists(path);
+            if (!exists) return;
+            // Removing what is already gone is the outcome the caller wanted.
+            await adapter.remove(path).catch(() => {});
+        } catch {
+            // Ignore
+        }
+    }
+
+    async renameIfExists(fromPath: string, toPath: string): Promise<void> {
+        try {
+            const adapter = this.resolveAdapter();
+            const exists = await adapter.exists(fromPath);
+            if (!exists) return;
+            // Rotation is best-effort: losing one backup slot must not stop the
+            // write it is making room for.
+            await adapter.rename(fromPath, toPath).catch(() => {});
+        } catch {
+            // Ignore
+        }
+    }
+}

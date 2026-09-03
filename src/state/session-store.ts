@@ -1,0 +1,706 @@
+import { Notice, type App, type WorkspaceLeaf } from 'obsidian';
+import { persistIfNeeded, type PersistOption } from './persist-option.ts';
+import { L, formatString } from '../i18n.ts';
+import { generateId } from '../utils.ts';
+import { layoutsEqualStructural, cloneLayout } from '../layout-utils.ts';
+import type { RestoreScope } from '../layout-utils.ts';
+import type { PluginData, SessionItem } from '../storage/default-data.ts';
+import type { GroupStore } from './group-store.ts';
+import type { SettingsState } from './settings-state.ts';
+
+export interface SessionStoreHost {
+    data: PluginData;
+    app?: App;
+    manifestId?: string;
+    groupStore: GroupStore;
+    settingsState?: SettingsState;
+    getCurrentWorkspaceLayout: () => unknown;
+    createSessionValidated?: (name: string, options?: SessionPersistOption) => Promise<SessionValidationResult>;
+    moveSessionToGroupExclusive: (sessionId: string, groupId: string) => Promise<boolean>;
+    resolveGroupSelection: (groupId: string | null) => Promise<{ resolvedGroupId: string | null }>;
+    attachSessionToActiveGroup: (sessionId: string) => void;
+    persistData: () => Promise<boolean>;
+    updateStatusBar?: () => void;
+    syncSessionCommands?: () => void;
+    hideSwitchOverlay?: () => void;
+    captureActiveSessionLayoutIfAutoSave?: () => void;
+    applyWorkspaceLayout: (layout: unknown) => Promise<boolean>;
+    getWorkspaceRestoreScope: () => RestoreScope;
+    openRenameModal?: (currentName: string, onRename: (newName: string) => void) => void;
+    openConfirmModal?: (message: string, onConfirm: () => void, options?: { hint?: string; onHintClick?: () => void }) => void;
+    openPluginSettings?: () => void;
+}
+
+export interface SessionValidationResult {
+    created: boolean;
+    reason: 'duplicate' | 'empty' | '';
+    name: string;
+    sessionId: string | null;
+    viewGroupId?: string | null;
+}
+
+export interface CreateSessionRecordOptions {
+    modified?: number;
+    isDefault?: boolean;
+}
+
+/** The only one of the three that is genuinely wider than PersistOption. */
+export interface SessionPersistOption extends PersistOption {
+    notify?: boolean;
+    syncCommands?: boolean;
+}
+
+export class SessionStore {
+    private readonly sessionListeners = new Set<() => void>();
+    private readonly hostProvider: () => SessionStoreHost;
+
+    constructor(hostOrProvider: SessionStoreHost | (() => SessionStoreHost)) {
+        if (typeof hostOrProvider === 'function') {
+            this.hostProvider = hostOrProvider;
+        } else {
+            this.hostProvider = () => hostOrProvider;
+        }
+    }
+
+    private get host(): SessionStoreHost {
+        return this.hostProvider();
+    }
+
+    private get data(): PluginData {
+        return this.host.data;
+    }
+
+    private get sessions(): Record<string, SessionItem> {
+        if (!this.data.sessions) this.data.sessions = {};
+        return this.data.sessions;
+    }
+
+    private get sessionOrder(): string[] {
+        if (!this.data.sessionOrder) this.data.sessionOrder = [];
+        return this.data.sessionOrder;
+    }
+
+    private persistIfNeeded(options?: SessionPersistOption): Promise<boolean> {
+        return persistIfNeeded(() => this.host.persistData(), options);
+    }
+
+    // --- Query & Lookup (P10) ---
+
+    findSession(id: string): SessionItem | null {
+        return this.sessions[id] || null;
+    }
+
+    getSession(id: string): SessionItem {
+        const session = this.sessions[id];
+        if (!session) {
+            throw new Error(`Session with id "${id}" not found.`);
+        }
+        return session;
+    }
+
+    getActiveSession(): SessionItem | null {
+        if (!this.data.activeSessionId) return null;
+        return this.sessions[this.data.activeSessionId] || null;
+    }
+
+    /**
+     * The active id on its own, for the callers that only compare it. They read
+     * `data.activeSessionId` directly, which is P1's contract stage: the id is
+     * this store's to answer, and reaching past it is what gave changing the
+     * shape of session state a blast radius of twenty-three files.
+     */
+    getActiveSessionId(): string | null {
+        return this.data.activeSessionId ?? null;
+    }
+
+    /**
+     * How many sessions exist. Three callers wrote
+     * `Object.keys(data.sessions).length` to decide whether deleting is
+     * allowed at all - there has to be one session left.
+     */
+    getSessionCount(): number {
+        return Object.keys(this.sessions).length;
+    }
+
+    findSessionIndex(sessions: SessionItem[], sessionId: string | null | undefined): number {
+        if (!sessions || sessions.length === 0 || !sessionId) return -1;
+        for (let i = 0; i < sessions.length; i++) {
+            if (sessions[i]?.id === sessionId) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    findActiveSessionIndex(sessions: SessionItem[]): number {
+        return this.findSessionIndex(sessions, this.data.activeSessionId);
+    }
+
+    // --- Ordering ---
+
+    syncSessionOrder(): void {
+        const sessions = this.sessions;
+        const order = this.sessionOrder;
+        this.data.sessionOrder = order.filter((id) => !!sessions[id]);
+
+        const inOrder: Record<string, boolean> = {};
+        for (let i = 0; i < this.data.sessionOrder.length; i++) {
+            const id = this.data.sessionOrder[i];
+            if (id) inOrder[id] = true;
+        }
+
+        const missing = Object.keys(sessions).filter((id) => !inOrder[id]);
+        missing.sort((a, b) => {
+            if (sessions[a]?.isDefault) return -1;
+            if (sessions[b]?.isDefault) return 1;
+            return (sessions[a]?.name || '').localeCompare(sessions[b]?.name || '');
+        });
+
+        for (let j = 0; j < missing.length; j++) {
+            const id = missing[j];
+            if (!id) continue;
+            if (sessions[id]?.isDefault) {
+                this.data.sessionOrder.unshift(id);
+            } else {
+                this.data.sessionOrder.push(id);
+            }
+        }
+    }
+
+    getOrderedSessionsUnfiltered(): SessionItem[] {
+        const sessions = this.sessions;
+        return this.sessionOrder
+            .map((id) => sessions[id])
+            .filter((s): s is SessionItem => !!s);
+    }
+
+    getOrderedSessionsForGroup(groupId: string | null): SessionItem[] {
+        const all = this.getOrderedSessionsUnfiltered();
+        const groupsEnabled = this.host.groupStore.isGroupFeatureEnabled();
+        if (!groupsEnabled) {
+            return all;
+        }
+        if (!groupId) return all;
+
+        const sessionGroups = this.data.sessionGroups || {};
+        return all.filter((s) => {
+            const groups = sessionGroups[s.id];
+            return groups && groups.includes(groupId);
+        });
+    }
+
+    getOrderedSessions(): SessionItem[] {
+        const groupsEnabled = this.host.groupStore.isGroupFeatureEnabled();
+        if (!groupsEnabled) {
+            return this.getOrderedSessionsUnfiltered();
+        }
+        return this.getOrderedSessionsForGroup(this.data.activeGroupId);
+    }
+
+    mergeVisibleSessionOrder(visibleOrder: string[]): string[] {
+        const fullOrder = Array.isArray(this.data.sessionOrder) ? this.data.sessionOrder : [];
+        const visible = Array.isArray(visibleOrder) ? visibleOrder : [];
+        const visibleSet: Record<string, boolean> = {};
+        for (let i = 0; i < visible.length; i++) {
+            const id = visible[i];
+            if (id) visibleSet[id] = true;
+        }
+
+        let visibleIdx = 0;
+        const merged: string[] = [];
+        for (let fi = 0; fi < fullOrder.length; fi++) {
+            const id = fullOrder[fi];
+            if (id && visibleSet[id]) {
+                const nextVisible = visible[visibleIdx++];
+                if (nextVisible) merged.push(nextVisible);
+            } else if (id) {
+                merged.push(id);
+            }
+        }
+        while (visibleIdx < visible.length) {
+            const nextVisible = visible[visibleIdx++];
+            if (nextVisible) merged.push(nextVisible);
+        }
+        return merged;
+    }
+
+    async setSessionOrderFromVisible(visibleOrder: string[], options?: SessionPersistOption): Promise<boolean> {
+        const prev = Array.isArray(this.data.sessionOrder) ? this.data.sessionOrder : [];
+        const merged = this.mergeVisibleSessionOrder(visibleOrder);
+        let changed = prev.length !== merged.length;
+        if (!changed) {
+            for (let i = 0; i < prev.length; i++) {
+                if (prev[i] !== merged[i]) {
+                    changed = true;
+                    break;
+                }
+            }
+        }
+
+        this.data.sessionOrder = merged;
+        if (options?.syncCommands !== false) {
+            this.host.syncSessionCommands?.();
+            // Inside the same guard deliberately, and indented to say so: the
+            // line read as a mis-nested typo and is not one. The only caller
+            // that passes `syncCommands: false` is the session manager's
+            // drag-reorder, which is mid-gesture - it has already moved the row
+            // and renumbered the list itself, and announcing would have the
+            // modal rebuild that list under the pointer, destroying the element
+            // being dragged. Inert until the modal started listening (#119);
+            // load-bearing now.
+            this.announceSessionsChanged();
+        }
+        if (options?.persist === false) return changed;
+        if (!changed) return false;
+        await this.persistIfNeeded();
+        return true;
+    }
+
+    // --- Validation ---
+
+    isSessionNameTaken(name: string, excludeSessionId?: string): boolean {
+        const sessions = this.sessions;
+        const keys = Object.keys(sessions);
+        for (let i = 0; i < keys.length; i++) {
+            const id = keys[i];
+            if (!id || (excludeSessionId && id === excludeSessionId)) continue;
+            if (sessions[id]?.name === name) return true;
+        }
+        return false;
+    }
+
+    isGroupNameTaken(name: string, excludeGroupId?: string): boolean {
+        const groups = this.data.groups || {};
+        const keys = Object.keys(groups);
+        for (let i = 0; i < keys.length; i++) {
+            const id = keys[i];
+            if (!id || (excludeGroupId && id === excludeGroupId)) continue;
+            if (groups[id]?.name === name) return true;
+        }
+        return false;
+    }
+
+    getDefaultSessionName(): string {
+        return typeof L.defaultSessionName === 'string' ? L.defaultSessionName : 'Default';
+    }
+
+    getAutoSessionName(n: number): string {
+        return formatString(L.sessionAutoName, n);
+    }
+
+    getNextSessionName(): string {
+        const sessions = this.sessions;
+        const existing: Record<string, boolean> = {};
+        const keys = Object.keys(sessions);
+        for (let i = 0; i < keys.length; i++) {
+            const id = keys[i];
+            const session = id ? sessions[id] : undefined;
+            if (session) {
+                existing[session.name] = true;
+            }
+        }
+        let n = 1;
+        while (existing[this.getAutoSessionName(n)]) {
+            n++;
+        }
+        return this.getAutoSessionName(n);
+    }
+
+    // --- CRUD ---
+
+    createSessionRecord(id: string, name: string, layout: unknown, options?: CreateSessionRecordOptions): SessionItem {
+        const record: SessionItem = {
+            id,
+            name,
+            modified: typeof options?.modified === 'number' ? options.modified : Date.now(),
+            layout,
+        };
+        if (options?.isDefault) {
+            record.isDefault = true;
+        }
+        return record;
+    }
+
+    // Anything showing the session list needs to know when the set changes -
+    // the held-open switch overlay above all, since a person can create or
+    // delete a session under it without ever letting go of the modifiers
+    // (issue #118). Publishing once here beats asking each of the seven
+    // commands that can change the set to remember to refresh, which is a
+    // responsibility the eighth command would forget.
+    onSessionsChanged(listener: () => void): () => void {
+        this.sessionListeners.add(listener);
+        return () => {
+            this.sessionListeners.delete(listener);
+        };
+    }
+
+    // For code that replaces the session data behind the store's back - the sync
+    // watcher takes another device's file and assigns the whole slice - and so
+    // has to say so itself.
+    notifySessionsChanged(): void {
+        this.announceSessionsChanged();
+    }
+
+    private announceSessionsChanged(): void {
+        for (const listener of [...this.sessionListeners]) {
+            listener();
+        }
+    }
+
+    insertSessionAndActivate(session: SessionItem): void {
+        this.sessions[session.id] = session;
+        this.sessionOrder.push(session.id);
+        this.data.activeSessionId = session.id;
+        this.host.attachSessionToActiveGroup(session.id);
+    }
+
+    async createSession(name: string): Promise<boolean> {
+        const id = generateId();
+        const layout = this.getCurrentWorkspaceLayout();
+
+        this.insertSessionAndActivate(this.createSessionRecord(id, name, layout));
+
+        this.host.updateStatusBar?.();
+        this.host.syncSessionCommands?.();
+        this.announceSessionsChanged();
+        await this.persistIfNeeded();
+        return true;
+    }
+
+    async createSessionValidated(name: string, options?: SessionPersistOption): Promise<SessionValidationResult> {
+        const rawName = typeof name === 'string' ? name : '';
+        let finalName = rawName.trim();
+        if (!finalName) {
+            // An empty box means "name it for me"; a box holding only spaces
+            // means the user typed something they did not intend, so it is
+            // rejected rather than silently auto-named.
+            if (rawName.length > 0) {
+                if (options?.notify !== false) {
+                    new Notice(formatString(L.emptyName));
+                }
+                return {
+                    created: false,
+                    reason: 'empty',
+                    name: '',
+                    sessionId: null,
+                };
+            }
+            finalName = this.getNextSessionName();
+        }
+
+        if (this.isSessionNameTaken(finalName)) {
+            if (options?.notify !== false) {
+                new Notice(formatString(L.duplicateName));
+            }
+            return {
+                created: false,
+                reason: 'duplicate',
+                name: finalName,
+                sessionId: null,
+            };
+        }
+
+        await this.createSession(finalName);
+        return {
+            created: true,
+            reason: '',
+            name: finalName,
+            sessionId: this.data.activeSessionId,
+        };
+    }
+
+    async createSessionForViewedGroup(name: string, viewedGroupId: string | null, options?: SessionPersistOption): Promise<SessionValidationResult> {
+        const groupsEnabled = this.host.groupStore.isGroupFeatureEnabled();
+        const targetGroupId = groupsEnabled ? (viewedGroupId || null) : null;
+        const beforeActiveGroupId = groupsEnabled ? (this.data.activeGroupId || null) : null;
+
+        let result: SessionValidationResult | undefined;
+        if (typeof this.host.createSessionValidated === 'function') {
+            result = await this.host.createSessionValidated(name, options);
+        }
+        if (!result) {
+            result = await this.createSessionValidated(name, options);
+        }
+        if (!result || !result.created) return result || { created: false, reason: 'failed', name };
+
+        if (!groupsEnabled) {
+            result.viewGroupId = null;
+            return result;
+        }
+
+        const createdSessionId = result.sessionId;
+        // Creating from a group the user is only viewing moves the session in
+        // exclusively, so it does not also stay in the group that is active.
+        if (targetGroupId && targetGroupId !== beforeActiveGroupId && createdSessionId) {
+            await this.host.moveSessionToGroupExclusive(createdSessionId, targetGroupId);
+            const selection = await this.host.resolveGroupSelection(targetGroupId);
+            result.viewGroupId = selection.resolvedGroupId || null;
+            return result;
+        }
+
+        result.viewGroupId = this.data.activeGroupId || null;
+        return result;
+    }
+
+    async renameSessionById(sessionId: string, newName: string, options?: SessionPersistOption): Promise<boolean> {
+        const session = this.sessions[sessionId];
+        if (!session) return false;
+
+        const normalized = typeof newName === 'string' ? newName.trim() : '';
+        if (!normalized) {
+            if (options?.notify !== false) {
+                new Notice(formatString(L.emptyName));
+            }
+            return false;
+        }
+        if (normalized === session.name) return false;
+
+        if (this.isSessionNameTaken(normalized, sessionId)) {
+            if (options?.notify !== false) {
+                new Notice(formatString(L.duplicateName));
+            }
+            return false;
+        }
+
+        const oldName = session.name;
+        session.name = normalized;
+        session.modified = Date.now();
+        this.host.updateStatusBar?.();
+        this.host.syncSessionCommands?.();
+        this.announceSessionsChanged();
+
+        await this.persistIfNeeded();
+        if (options?.notify !== false) {
+            new Notice(formatString(L.renamed, oldName, normalized));
+        }
+        return true;
+    }
+
+    renameCurrentSession(): void {
+        const session = this.getActiveSession();
+        if (!session) {
+            new Notice(formatString(L.noSession));
+            return;
+        }
+
+        this.host.openRenameModal?.(session.name, (newName) => {
+            void this.renameSessionById(session.id, newName);
+        });
+    }
+
+    deleteCurrentSession(): void {
+        const session = this.getActiveSession();
+        if (!session) {
+            new Notice(formatString(L.noSession));
+            return;
+        }
+        if (Object.keys(this.data.sessions).length <= 1) {
+            new Notice(formatString(L.cannotDeleteLast));
+            return;
+        }
+
+        const doDelete = (): Promise<void> => this.deleteSession(session.id).then((deleted) => {
+            if (!deleted) return;
+            new Notice(formatString(L.deleted, session.name));
+        });
+
+        // This setting has historically treated a missing value as disabled.
+        // Keep that distinction rather than using a default-data fallback here.
+        if (!this.data.confirmDeleteByHotkey) {
+            void doDelete();
+            return;
+        }
+
+        this.host.openConfirmModal?.(formatString(L.confirmDeleteActive, session.name), () => {
+            void doDelete();
+        }, {
+            hint: formatString(L.confirmDeleteSettingsHint),
+            onHintClick: () => {
+                this.host.openPluginSettings?.();
+            },
+        });
+    }
+
+    async deleteSession(sessionId: string): Promise<boolean> {
+        const session = this.sessions[sessionId];
+        if (!session || Object.keys(this.sessions).length <= 1) return false;
+
+        const wasActive = this.data.activeSessionId === sessionId;
+        let nextActiveId: string | null = null;
+
+        delete this.sessions[sessionId];
+        const orderIdx = this.sessionOrder.indexOf(sessionId);
+        if (orderIdx !== -1) this.sessionOrder.splice(orderIdx, 1);
+
+        if (this.data.sessionGroups && this.data.sessionGroups[sessionId]) {
+            delete this.data.sessionGroups[sessionId];
+        }
+
+        if (wasActive) {
+            // Stay at the same position in the list so the selection does not
+            // jump; deleting the last entry falls back one place instead.
+            const fallbackIdx = Math.min(orderIdx, this.sessionOrder.length - 1);
+            const remaining = this.sessionOrder[fallbackIdx] || Object.keys(this.sessions)[0];
+            nextActiveId = remaining || null;
+            this.data.activeSessionId = nextActiveId;
+        }
+
+        if (wasActive && nextActiveId) {
+            const nextSession = this.sessions[nextActiveId];
+            if (nextSession && nextSession.layout) {
+                await this.host.applyWorkspaceLayout(nextSession.layout);
+            }
+        }
+
+        this.host.updateStatusBar?.();
+        this.host.syncSessionCommands?.();
+        this.announceSessionsChanged();
+        await this.persistIfNeeded();
+        return true;
+    }
+
+    async deleteAllInactiveSessions(): Promise<number> {
+        const activeId = this.data.activeSessionId;
+        const ids = Object.keys(this.sessions).filter((id) => id !== activeId);
+
+        let deletedCount = 0;
+        for (let i = 0; i < ids.length; i++) {
+            const id = ids[i];
+            if (id && await this.deleteSession(id)) {
+                deletedCount++;
+            }
+        }
+        return deletedCount;
+    }
+
+    async resetSessionsToDefault(): Promise<boolean> {
+        const id = generateId();
+        this.host.hideSwitchOverlay?.();
+        this.data.sessions = {};
+        this.data.sessionOrder = [];
+        this.data.activeSessionId = null;
+        this.data.groups = {};
+        this.data.groupOrder = [];
+        this.data.sessionGroups = {};
+        this.data.activeGroupId = null;
+
+        this.sessions[id] = this.createSessionRecord(
+            id,
+            this.getDefaultSessionName(),
+            this.getCurrentWorkspaceLayout(),
+            { isDefault: true }
+        );
+        this.sessionOrder.push(id);
+        this.data.activeSessionId = id;
+
+        this.host.updateStatusBar?.();
+        this.host.syncSessionCommands?.();
+        this.announceSessionsChanged();
+        await this.persistIfNeeded();
+        return true;
+    }
+
+    async createEmptySession(): Promise<boolean> {
+        const name = this.getNextSessionName();
+        this.host.captureActiveSessionLayoutIfAutoSave?.();
+
+        const id = generateId();
+        const session = this.createSessionRecord(id, name, null);
+        this.insertSessionAndActivate(session);
+
+        // `iterateRootLeaves` is public - obsidian.d.ts declares it on Workspace -
+        // so neither the cast nor the `typeof` guard that used to be here bought
+        // anything. They read as an undocumented API being approached carefully,
+        // which is what platform/obsidian-internals.ts exists for; this is not
+        // one of those.
+        //
+        // Collected first, detached after: detaching inside the iteration
+        // mutates what is being walked.
+        const workspace = this.host.app?.workspace;
+        if (workspace) {
+            const leaves: WorkspaceLeaf[] = [];
+            workspace.iterateRootLeaves((leaf) => { leaves.push(leaf); });
+            for (const leaf of leaves) leaf.detach();
+        }
+
+        session.layout = this.getCurrentWorkspaceLayout();
+
+        this.host.updateStatusBar?.();
+        this.host.syncSessionCommands?.();
+        this.announceSessionsChanged();
+        new Notice(formatString(L.created, name));
+        await this.persistIfNeeded();
+        return true;
+    }
+
+    async duplicateCurrentSession(): Promise<boolean> {
+        const name = this.getNextSessionName();
+        this.host.captureActiveSessionLayoutIfAutoSave?.();
+
+        const id = generateId();
+        this.insertSessionAndActivate(this.createSessionRecord(id, name, this.getCurrentWorkspaceLayout()));
+
+        this.host.updateStatusBar?.();
+        this.host.syncSessionCommands?.();
+        this.announceSessionsChanged();
+        new Notice(formatString(L.duplicated, name));
+        await this.persistIfNeeded();
+        return true;
+    }
+
+    async duplicateSession(sessionId: string): Promise<boolean> {
+        const source = this.sessions[sessionId];
+        if (!source) return false;
+
+        const name = this.getNextSessionName();
+        const newId = generateId();
+        this.sessions[newId] = this.createSessionRecord(
+            newId,
+            name,
+            cloneLayout(source.layout)
+        );
+        this.sessionOrder.push(newId);
+
+        const groups = this.data.sessionGroups?.[sessionId];
+        if (groups && groups.length > 0) {
+            if (!this.data.sessionGroups) this.data.sessionGroups = {};
+            this.data.sessionGroups[newId] = groups.slice();
+        }
+
+        this.host.syncSessionCommands?.();
+        this.announceSessionsChanged();
+        new Notice(formatString(L.duplicated, name));
+        await this.persistIfNeeded();
+        return true;
+    }
+
+    ensureDefaultSession(): void {
+        const hasDefault = Object.values(this.sessions).some((s) => s.isDefault);
+        if (hasDefault) return;
+
+        const id = generateId();
+        this.sessions[id] = this.createSessionRecord(
+            id,
+            this.getDefaultSessionName(),
+            this.getCurrentWorkspaceLayout(),
+            { isDefault: true }
+        );
+        this.sessionOrder.unshift(id);
+        this.data.activeSessionId = id;
+        this.host.updateStatusBar?.();
+        this.host.syncSessionCommands?.();
+        this.announceSessionsChanged();
+        void this.persistIfNeeded();
+    }
+
+    // --- Layout & Workspace helpers ---
+
+    getCurrentWorkspaceLayout(): unknown {
+        return this.host.getCurrentWorkspaceLayout();
+    }
+
+    layoutsEqualStructural(a: unknown, b: unknown): boolean {
+        const restoreScope = this.host.getWorkspaceRestoreScope();
+        return layoutsEqualStructural(a, b, { restoreScope });
+    }
+}

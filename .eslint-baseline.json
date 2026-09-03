@@ -1,0 +1,9 @@
+{
+    "total": 40,
+    "rules": {
+        "@typescript-eslint/no-deprecated": 18,
+        "obsidianmd/hardcoded-config-path": 20,
+        "obsidianmd/settings-tab/no-manual-html-headings": 1,
+        "obsidianmd/settings-tab/prefer-setting-definitions": 1
+    }
+}

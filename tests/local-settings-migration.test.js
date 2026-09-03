@@ -2,10 +2,14 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { loadPluginMethods } = require('./helpers');
+const { installObsidianStub } = require('./lock/harness/index.ts');
 
+installObsidianStub();
 
-const { persistence: attachPersistenceMethods } = loadPluginMethods(['persistence']);
+const i18n = require('../src/i18n.ts');
+i18n.resolveLocale('en');
+
+const { PersistenceService } = require('../src/storage/persistence-service.ts');
 
 const LEGACY_PATH = '.workspace-plus-plus/settings.local.json';
 const MIGRATED_PATH = '.workspace-plus-plus/settings.local.json.migrated';
@@ -14,16 +18,12 @@ const DATA_PATH = '.obsidian/plugins/workspace-plus-plus/data.json';
 function createPlugin(options) {
     options = options || {};
 
-    function PluginMock() {}
-    attachPersistenceMethods(PluginMock);
+    const manifest = { id: 'workspace-plus-plus', dir: '.obsidian/plugins/workspace-plus-plus' };
+    const files = Object.assign({}, options.files);
+    const renames = [];
+    let savedData = null;
 
-    const plugin = new PluginMock();
-    plugin.manifest = { id: 'workspace-plus-plus', dir: '.obsidian/plugins/workspace-plus-plus' };
-    plugin.files = Object.assign({}, options.files);
-    plugin.renames = [];
-    plugin.savedData = null;
-
-    plugin.data = {
+    const data = {
         sessions: {},
         sessionOrder: [],
         groups: {},
@@ -33,31 +33,31 @@ function createPlugin(options) {
         activeGroupId: null,
     };
 
-    plugin.app = {
+    const app = {
         vault: {
             adapter: {
                 exists: (path) => Promise.resolve(
-                    Object.prototype.hasOwnProperty.call(plugin.files, path)
-                    || path === plugin.manifest.dir
+                    Object.prototype.hasOwnProperty.call(files, path)
+                    || path === manifest.dir
                 ),
                 mkdir: () => Promise.resolve(),
                 read: (path) => (
-                    Object.prototype.hasOwnProperty.call(plugin.files, path)
-                        ? Promise.resolve(plugin.files[path])
+                    Object.prototype.hasOwnProperty.call(files, path)
+                        ? Promise.resolve(files[path])
                         : Promise.reject(new Error('missing ' + path))
                 ),
                 write: (path, raw) => {
-                    plugin.files[path] = raw;
+                    files[path] = raw;
                     return Promise.resolve();
                 },
                 remove: (path) => {
-                    delete plugin.files[path];
+                    delete files[path];
                     return Promise.resolve();
                 },
                 rename: (from, to) => {
-                    plugin.renames.push([from, to]);
-                    plugin.files[to] = plugin.files[from];
-                    delete plugin.files[from];
+                    renames.push([from, to]);
+                    files[to] = files[from];
+                    delete files[from];
                     return Promise.resolve();
                 },
                 stat: () => Promise.resolve({ mtime: 1000 }),
@@ -65,22 +65,46 @@ function createPlugin(options) {
         },
     };
 
-    plugin.saveData = (data) => {
-        plugin.savedData = data;
-        plugin.files[DATA_PATH] = JSON.stringify(data);
-        return Promise.resolve();
+    let persistenceService;
+    const host = {
+        data: data,
+        manifest: manifest,
+        app: app,
+        loadData: () => Promise.resolve(
+            Object.prototype.hasOwnProperty.call(files, DATA_PATH)
+                ? JSON.parse(files[DATA_PATH])
+                : null
+        ),
+        saveData: (savedValue) => {
+            savedData = savedValue;
+            files[DATA_PATH] = JSON.stringify(savedValue);
+            return Promise.resolve();
+        },
+        reloadExternalSessionStorageIfChanged: () => Promise.resolve(false),
+        recordSessionDataStored: () => Promise.resolve(true),
+        recordSessionStorageState: () => {},
+        rotateBackupIfNeeded: () => Promise.resolve(),
+        clearVersionHistoryEntries: () => false,
+        resetSessionsToDefault: () => Promise.resolve(false),
+        persistData: () => persistenceService.persistData(),
+        persistDataImmediate: () => persistenceService.persistDataImmediate(),
+        clearBackupFiles: () => persistenceService.clearBackupFiles(),
+        readJsonIfExists: (path) => persistenceService.getJsonStore().readJsonIfExists(path),
+        getFileMtime: (path) => persistenceService.getJsonStore().getFileMtime(path),
     };
-    plugin.loadData = () => Promise.resolve(
-        Object.prototype.hasOwnProperty.call(plugin.files, DATA_PATH)
-            ? JSON.parse(plugin.files[DATA_PATH])
-            : null
-    );
-    plugin.updateStatusBar = () => {};
-    plugin.syncSessionCommands = () => {};
-    plugin.syncSessionOrder = () => {};
-    plugin.normalizeGroupFeatureState = () => {};
+    persistenceService = new PersistenceService(host);
 
-    return plugin;
+    return {
+        persistenceService: persistenceService,
+        data: data,
+        files: files,
+        getRenames: function () {
+            return renames.slice();
+        },
+        getSavedData: function () {
+            return savedData;
+        },
+    };
 }
 
 test('legacy vault-local settings are folded into data.json and the file is renamed', async function () {
@@ -91,12 +115,12 @@ test('legacy vault-local settings are folded into data.json and the file is rena
         },
     });
 
-    const loaded = await plugin.loadWithBackup();
+    const loaded = await plugin.persistenceService.loadWithBackup();
 
     assert.equal(loaded.language, 'ja', 'the vault-local value is what the user actually saw');
     assert.equal(loaded.autoSaveOnSwitch, false);
 
-    assert.deepEqual(plugin.renames, [[LEGACY_PATH, MIGRATED_PATH]], 'the old file is renamed, not deleted');
+    assert.deepEqual(plugin.getRenames(), [[LEGACY_PATH, MIGRATED_PATH]], 'the old file is renamed, not deleted');
     assert.equal(plugin.files[LEGACY_PATH], undefined);
     assert.ok(plugin.files[MIGRATED_PATH], 'the migrated copy is kept as a safety net');
 
@@ -113,7 +137,7 @@ test('settings absent from the legacy file keep their data.json value', async fu
         },
     });
 
-    const loaded = await plugin.loadWithBackup();
+    const loaded = await plugin.persistenceService.loadWithBackup();
 
     assert.equal(loaded.language, 'ja');
     assert.equal(loaded.numberedSwitchCommands, false, 'untouched keys must not be reset to the default');
@@ -124,10 +148,10 @@ test('loading is a no-op when no legacy file exists', async function () {
         files: { [DATA_PATH]: JSON.stringify({ language: 'ja' }) },
     });
 
-    const loaded = await plugin.loadWithBackup();
+    const loaded = await plugin.persistenceService.loadWithBackup();
 
     assert.equal(loaded.language, 'ja');
-    assert.deepEqual(plugin.renames, []);
+    assert.deepEqual(plugin.getRenames(), []);
 });
 
 test('an unreadable legacy file is left alone instead of dropping settings', async function () {
@@ -138,10 +162,10 @@ test('an unreadable legacy file is left alone instead of dropping settings', asy
         },
     });
 
-    const loaded = await plugin.loadWithBackup();
+    const loaded = await plugin.persistenceService.loadWithBackup();
 
     assert.equal(loaded.language, 'ja', 'existing settings survive');
-    assert.deepEqual(plugin.renames, [], 'the file stays put so it can be recovered by hand');
+    assert.deepEqual(plugin.getRenames(), [], 'the file stays put so it can be recovered by hand');
     assert.ok(plugin.files[LEGACY_PATH], 'and is not destroyed');
 });
 
@@ -156,14 +180,14 @@ test('the vault-local settings API is gone', function () {
         'getLocalSettingsPath',
         'loadLocalSettingsData',
     ]) {
-        assert.equal(typeof plugin[name], 'undefined', name + ' should no longer exist');
+        assert.equal(typeof plugin.persistenceService[name], 'undefined', name + ' should no longer exist');
     }
 });
 
 test('storage diagnostics no longer advertise a settings file at all', function () {
     const plugin = createPlugin();
 
-    const info = plugin.getStorageDiagnosticsInfo();
+    const info = plugin.persistenceService.getStorageDiagnosticsInfo();
 
     // There is only one settings file now, and it is the same data.json the
     // sessions row already points at, so neither row carries information.

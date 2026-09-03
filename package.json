@@ -1,16 +1,42 @@
 {
     "name": "obsidian-workspace-plus",
-    "version": "0.8.0",
+    "version": "0.9.0",
     "description": "Workspace session manager for Obsidian",
     "main": "main.js",
     "scripts": {
         "dev": "node esbuild.config.mjs",
         "build": "node esbuild.config.mjs production",
         "check:i18n": "node scripts/check-i18n.js",
-        "test": "node --test tests/*.test.js"
+        "test": "node --test \"tests/**/*.test.{js,ts}\"",
+        "lint": "eslint src scripts tests",
+        "lint:fix": "eslint src scripts tests --fix",
+        "typecheck": "tsc --noEmit",
+        "check": "npm run typecheck && npm run lint:ratchet && npm run check:dual-dispatch && npm run check:hooks && npm run check:host-conformance && npm run check:delegation && npm run check:reachability && npm run check:readonly && npm run check:imports && npm run check:i18n && npm run check:dead-css && npm run check:duplicate-bodies && npm run check:test-only && npm test && npm run coverage && npm run build",
+        "lint:ratchet": "node scripts/lint-ratchet.js",
+        "check:dual-dispatch": "node scripts/dual-dispatch-ratchet.js",
+        "check:hooks": "node scripts/check-unwired-hooks.js",
+        "check:delegation": "node scripts/check-delegation.js",
+        "check:reachability": "node scripts/check-reachability.js",
+        "check:readonly": "node scripts/check-readonly-writes.js",
+        "coverage": "node scripts/coverage-ratchet.js",
+        "check:imports": "node scripts/check-import-extensions.js",
+        "progress": "node scripts/progress.js",
+        "snapshot:i18n": "node scripts/snapshot-i18n.js",
+        "coverage:floors": "node scripts/coverage-ratchet.js --floors",
+        "check:host-conformance": "node scripts/check-host-conformance.js",
+        "check:dead-css": "node scripts/check-dead-css.js",
+        "check:duplicate-bodies": "node scripts/check-duplicate-bodies.js",
+        "check:test-only": "node scripts/check-test-only.js"
     },
     "devDependencies": {
-        "esbuild": "^0.24.0",
-        "obsidian": "latest"
+        "@types/jsdom": "^30.0.0",
+        "@types/node": "^26.4.0",
+        "esbuild": "^0.28.2",
+        "eslint": "^9.39.5",
+        "eslint-plugin-obsidianmd": "^0.4.2",
+        "jsdom": "^30.0.1",
+        "obsidian": "^1.13.1",
+        "typescript": "~5.9",
+        "typescript-eslint": "^8.68.0"
     }
 }
