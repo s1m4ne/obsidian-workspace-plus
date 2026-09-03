@@ -341,6 +341,58 @@ test('the twelve status-bar slots are all there, each bound to its own key', asy
     } finally { await settle(); h.restore(); }
 });
 
+test('the twelve slots are named, including the nine whose label depends on the platform', async () => {
+    const h = setupHarness();
+    try {
+        const { tab, L } = makeTab(h);
+        const page = pageNamed(tab.getSettingDefinitions(), L.settingsSectionStatusBar);
+
+        for (const row of rows([page])) {
+            assert.notEqual(row.name, '', `${row.control.key} has no label`);
+        }
+
+        // Nine of the twelve are builders: the modifier is a glyph on macOS and
+        // a word elsewhere, so the label cannot be a stored string. `text()`
+        // renders a builder as '', which left these rows nameless.
+        const names = rows([page]).map((row) => row.name);
+        assert.ok(
+            names.some((name) => /\+/.test(name)),
+            `no modifier label was built: ${JSON.stringify(names)}`,
+        );
+    } finally { await settle(); h.restore(); }
+});
+
+test('the modifier dropdown offers four named options, not three blanks', async () => {
+    const h = setupHarness();
+    try {
+        const { tab, plugin, L } = makeTab(h);
+        plugin.data.statusBarModScrollSwitch = true;
+        const row = rowNamed(
+            [pageNamed(tab.getSettingDefinitions(), L.settingsSubsectionScrollSwitch)],
+            L.settingsStatusBarScrollModifier,
+        );
+
+        const labels = Object.values(row.control.options);
+        assert.equal(labels.length, 4);
+        for (const label of labels) assert.notEqual(label, '');
+    } finally { await settle(); h.restore(); }
+});
+
+test('the switch-command group sits below the deletion group', async () => {
+    const h = setupHarness();
+    try {
+        const { tab, L } = makeTab(h);
+        const headings = tab.getSettingDefinitions()
+            .filter((item) => item.type === 'group')
+            .map((item) => item.heading);
+
+        const deletion = headings.indexOf(L.settingsSectionDeletion);
+        const commands = headings.indexOf(L.settingsSubsectionSwitchCommands);
+        assert.ok(deletion >= 0 && commands >= 0, JSON.stringify(headings));
+        assert.ok(commands > deletion, `commands at ${commands}, deletion at ${deletion}`);
+    } finally { await settle(); h.restore(); }
+});
+
 // --- visible and disabled -----------------------------------------------
 
 test('the unsaved-switch warnings are hidden while switching saves by itself', async () => {
@@ -694,6 +746,77 @@ test('each generation gets its own row, with the time that identifies it', async
         // The platform is only in the summary when the file recorded one.
         assert.ok(backupRows[0].desc.includes('macOS'));
         assert.ok(!backupRows[1].desc.includes('macOS'));
+    } finally { await settle(); h.restore(); }
+});
+
+test('the list below the button shows the backup the button just took', async () => {
+    const h = setupHarness();
+    try {
+        // The directory as it is before the press, and as it is after.
+        let generations = [{ generation: 1, savedAt: 1000, sessionCount: 1 }];
+        const { tab, L } = makeTab(h, {
+            plugin: {
+                getRotationBackupInfo() { return Promise.resolve(generations); },
+                writeJson() {
+                    generations = [
+                        { generation: 1, savedAt: 9000, sessionCount: 2 },
+                        { generation: 2, savedAt: 1000, sessionCount: 1 },
+                    ];
+                    return Promise.resolve(true);
+                },
+                extractSessionData() { return { sessions: { a: 1, b: 2 } }; },
+            },
+            generationOne: { sessions: { a: 1 } },
+        });
+
+        tab.getSettingDefinitions();
+        await settle();
+        const before = rows([pageNamed(tab.getSettingDefinitions(), L.rotationBackupSectionTitle)])
+            .filter((row) => row.name !== L.rotationBackupCreate);
+        assert.equal(before.length, 1);
+
+        const create = rowNamed(
+            [pageNamed(tab.getSettingDefinitions(), L.rotationBackupSectionTitle)],
+            L.rotationBackupCreate,
+        );
+        buttonOf(renderRow(h, create), L.rotationBackupCreate).trigger();
+        await settle();
+        await settle();
+
+        // The reading is cached, and the cache used to be filled once per
+        // screen - so the press wrote a generation and the list under it went
+        // on showing the two that were there before.
+        const after = rows([pageNamed(tab.getSettingDefinitions(), L.rotationBackupSectionTitle)])
+            .filter((row) => row.name !== L.rotationBackupCreate);
+        assert.equal(after.length, 2);
+        assert.ok(after[0].name.startsWith('1.'));
+        assert.ok(after[1].name.startsWith('2.'));
+    } finally { await settle(); h.restore(); }
+});
+
+test('a reading that has not moved does not send the screen round again', async () => {
+    const h = setupHarness();
+    try {
+        let reads = 0;
+        const { tab } = makeTab(h, {
+            plugin: {
+                getRotationBackupInfo() {
+                    reads += 1;
+                    // A fresh array every call, the way the real one builds it.
+                    return Promise.resolve([{ generation: 1, savedAt: 1000, sessionCount: 1 }]);
+                },
+            },
+        });
+
+        tab.getSettingDefinitions();
+        await settle();
+        await settle();
+        await settle();
+
+        // One read for the first pass, one for the pass its result caused, and
+        // then it settles: the comparison is what closes the loop.
+        assert.ok(reads <= 3, `the screen kept re-reading: ${reads} reads`);
+        assert.ok(reads >= 2, `the reading was never refreshed: ${reads} reads`);
     } finally { await settle(); h.restore(); }
 });
 

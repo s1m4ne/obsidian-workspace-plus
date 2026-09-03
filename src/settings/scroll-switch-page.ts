@@ -1,5 +1,5 @@
 import type { SettingDefinitionPage } from 'obsidian';
-import { L, text } from '../i18n.ts';
+import { L, formatString, text } from '../i18n.ts';
 import type { SettingsContext } from '../settings-tab.ts';
 
 /**
@@ -17,10 +17,14 @@ const PRESET_LABEL_KEYS: Record<string, string> = {
     custom: 'settingsStatusBarScrollPresetCustom',
 };
 
+// `formatString` rather than `text` throughout this file: three of the modifier
+// labels are builders, for the same reason the status-bar slots are - the
+// modifier is a glyph on macOS and a word elsewhere. `text` renders a builder
+// as the empty string.
 function presetOptions(): Record<string, string> {
     const options: Record<string, string> = {};
     for (const [value, key] of Object.entries(PRESET_LABEL_KEYS)) {
-        options[value] = text((L as Record<string, unknown>)[key]);
+        options[value] = formatString((L as Record<string, unknown>)[key]);
     }
     return options;
 }
@@ -65,10 +69,10 @@ export function scrollSwitchPage(ctx: SettingsContext): SettingDefinitionPage {
                         type: 'dropdown',
                         key: 'statusBarScrollModifier',
                         options: {
-                            none: text(L.settingsStatusBarScrollModifierNone),
-                            modOnly: text(L.settingsStatusBarScrollModifierModOnly),
-                            altOnly: text(L.settingsStatusBarScrollModifierAltOnly),
-                            modOrAlt: text(L.settingsStatusBarScrollModifierModOrAlt),
+                            none: formatString(L.settingsStatusBarScrollModifierNone),
+                            modOnly: formatString(L.settingsStatusBarScrollModifierModOnly),
+                            altOnly: formatString(L.settingsStatusBarScrollModifierAltOnly),
+                            modOrAlt: formatString(L.settingsStatusBarScrollModifierModOrAlt),
                         },
                     },
                 },

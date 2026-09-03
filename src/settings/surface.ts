@@ -202,9 +202,12 @@ export function surfaceGroups(ctx: SettingsContext): SettingDefinitionItem[] {
         generalGroup(ctx),
         savingGroup(ctx),
         restoreGroup(),
-        switchCommandsGroup(),
         switchPreviewGroup(ctx),
         overlayGroup(),
         confirmationsGroup(ctx),
+        // Below the deletion group, at the maintainer's request: these two
+        // change which commands the palette and the hotkey screen offer, which
+        // is a different question from how switching behaves.
+        switchCommandsGroup(),
     ];
 }

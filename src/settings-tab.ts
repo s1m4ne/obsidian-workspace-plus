@@ -156,6 +156,29 @@ export interface SettingsContext {
 }
 
 /**
+ * Whether two readings of the backup directory describe the same generations.
+ *
+ * Field by field rather than by identity: `getRotationBackupInfo` builds a
+ * fresh array every call, so an identity check would report a change on every
+ * pass and never settle.
+ */
+function sameBackups(
+    a: readonly RotationBackupInfo[] | null,
+    b: readonly RotationBackupInfo[] | null
+): boolean {
+    if (a === null || b === null) return a === b;
+    if (a.length !== b.length) return false;
+    return a.every((left, index) => {
+        const right = b[index];
+        return right !== undefined
+            && left.generation === right.generation
+            && left.savedAt === right.savedAt
+            && left.sessionCount === right.sessionCount
+            && left.backupPlatform === right.backupPlatform;
+    });
+}
+
+/**
  * The settings screen.
  *
  * This class assembles; it draws nothing. Every row lives in `settings/` as a
@@ -181,9 +204,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
      * `null` is "no backups", `undefined` is "not yet known".
      */
     private backups: readonly RotationBackupInfo[] | null = null;
-    private backupsRequested = false;
     private storageSize: number | null | undefined = undefined;
-    private storageSizeRequested = false;
 
     constructor(app: App, plugin: SettingsTabHost) {
         // At run time this *is* the plugin. The parameter is typed structurally
@@ -204,27 +225,28 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
     }
 
     /**
-     * Start the two reads, once per screen.
+     * Read the two things that live on disk, on every pass over the
+     * definitions, and re-read the definitions if either has moved.
      *
-     * Called from `getSettingDefinitions()`, which `update()` calls, so each
-     * read is guarded by its own flag: without them the completion handler's
-     * `update()` would start the read again.
+     * The loop this looks like is closed by the comparison, not by a flag: an
+     * unchanged reading returns without calling `update()`, so the second pass
+     * is always the last. A flag was the first attempt and it was wrong in a
+     * way a test would not notice - "read once per screen" is not the rule,
+     * because taking a backup and restoring one both change what is on disk
+     * while the screen is open. Pressing "Back up now" left the list below it
+     * showing the generations from before the press.
      */
     private requestAsyncReadings(): void {
-        if (!this.backupsRequested) {
-            this.backupsRequested = true;
-            void this.plugin.getRotationBackupInfo().then((backups) => {
-                this.backups = backups;
-                this.context().update();
-            });
-        }
-        if (!this.storageSizeRequested) {
-            this.storageSizeRequested = true;
-            void this.plugin.getSessionStorageSize().then((size) => {
-                this.storageSize = size;
-                this.context().update();
-            });
-        }
+        void this.plugin.getRotationBackupInfo().then((backups) => {
+            if (sameBackups(this.backups, backups)) return;
+            this.backups = backups;
+            this.update();
+        });
+        void this.plugin.getSessionStorageSize().then((size) => {
+            if (this.storageSize === size) return;
+            this.storageSize = size;
+            this.update();
+        });
     }
 
     /**

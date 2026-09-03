@@ -1,5 +1,5 @@
 import type { SettingDefinitionPage, SettingGroupItem } from 'obsidian';
-import { L, text } from '../i18n.ts';
+import { L, formatString, text } from '../i18n.ts';
 import * as statusBarActions from '../statusbar-actions.ts';
 
 /**
@@ -25,10 +25,19 @@ const SLOT_LABEL_KEYS: Record<string, string> = {
     shiftRightClick: 'statusBarSlotShiftRightClick',
 };
 
+/**
+ * What the slot is called, in this locale, on this platform.
+ *
+ * `formatString`, not `text`: nine of the twelve are builders, because the
+ * label has to name the key the user actually has - Obsidian's own settings
+ * write the modifier as a glyph on macOS and as a word elsewhere, so the string
+ * cannot be a constant. `text` returns '' for a function, which is what left
+ * nine of these twelve rows nameless.
+ */
 function slotLabel(slotKey: string): string {
     const labelKey = SLOT_LABEL_KEYS[slotKey];
     if (!labelKey) return slotKey;
-    return text((L as Record<string, unknown>)[labelKey]);
+    return formatString((L as Record<string, unknown>)[labelKey]) || slotKey;
 }
 
 export function statusBarPage(): SettingDefinitionPage {

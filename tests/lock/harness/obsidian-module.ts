@@ -301,8 +301,35 @@ interface PluginSettingTabInternal extends PluginSettingTab {
     containerEl: HTMLElement;
 }
 
+/**
+ * `update()` re-reads the definitions, the way Obsidian's own body does
+ * (`this.settingItems = this.getSettingDefinitions()`).
+ *
+ * A no-op here would hide the whole class of bug where a tab caches something
+ * it read from disk and `update()` hands back the stale copy: the tab under
+ * test calls `update()` after a write, and only a real re-read shows whether
+ * the screen changed.
+ *
+ * The cap turns a tab that never settles - one whose asynchronous readings
+ * report a change on every pass - into a named failure rather than a hung test
+ * run. The re-entry is asynchronous, through a promise, so it is a count and
+ * not a depth.
+ */
+const UPDATE_LIMIT = 50;
+
 const PluginSettingTabProto = {
-    update(): void {},
+    update(this: Record<string, unknown>): void {
+        const count = ((this._updateCount as number | undefined) ?? 0) + 1;
+        this._updateCount = count;
+        if (count > UPDATE_LIMIT) {
+            throw new Error(
+                `SettingTab.update() ran ${count} times: getSettingDefinitions() keeps `
+                + 'reporting a change, so the screen never settles.',
+            );
+        }
+        const read = this.getSettingDefinitions;
+        if (typeof read === 'function') this.settingItems = (read as () => unknown).call(this);
+    },
     refreshDomState(): void {},
 };
 
