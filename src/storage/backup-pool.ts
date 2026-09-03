@@ -100,22 +100,30 @@ export function selectBackupsToKeep<T extends BackupPoolEntry>(
     const sorted = entries.slice().sort(byNewestFirst);
     if (sorted.length === 0) return { keep: [], drop: [] };
 
-    const targets = BACKUP_TARGET_AGES.slice(0, Math.max(1, generations));
+    const limit = Math.max(1, generations);
+    const targets = BACKUP_TARGET_AGES.slice(0, limit);
     const remaining = new Set(sorted);
     const kept: T[] = [];
 
     const claim = (entry: T | undefined): void => {
         if (!entry || !remaining.has(entry)) return;
+        if (kept.length >= limit) return;
         remaining.delete(entry);
         kept.push(entry);
     };
 
-    // Protected: the newest, and the newest one taken by hand.
+    // The newest and the newest one taken by hand are kept first, and they
+    // spend two of the slots rather than sitting outside them. Counting them
+    // separately is what made a pool of five hold six files: the newest is
+    // target zero, so claiming it before the loop had the ladder fill five
+    // more places on top of it.
     claim(sorted[0]);
     claim(sorted.find((entry) => entry.manual));
 
+    // The cap lives in `claim`, which every path goes through; this is only an
+    // early exit once the slots are spent.
     for (const target of targets) {
-        if (remaining.size === 0) break;
+        if (kept.length >= limit || remaining.size === 0) break;
         let best: T | undefined;
         let bestDistance = Infinity;
         for (const entry of remaining) {
@@ -128,8 +136,8 @@ export function selectBackupsToKeep<T extends BackupPoolEntry>(
         claim(best);
     }
 
-    // More kept than asked for is possible - the protected pair can fall
-    // outside the ladder - but never fewer.
+    // Exactly `generations` files survive, unless there were fewer to begin
+    // with. The number on the settings screen is a number of backups.
     return {
         keep: kept.sort(byNewestFirst),
         drop: [...remaining].sort(byNewestFirst),

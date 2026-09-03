@@ -170,7 +170,9 @@ test('storage backup: the pool keeps a spread and deletes what no target wants',
     await pruneRotationBackups(plugin, now);
     const kept = await listRotationBackups(plugin);
 
-    assert.ok(kept.length <= 6, `${kept.length} kept`);
+    // The number on the settings screen is a number of backups: five means
+    // five files, not five rungs of the ladder plus whatever was protected.
+    assert.equal(kept.length, 5);
     // A spread, not a cluster: the oldest survives rather than being crowded
     // out by its neighbours.
     const ages = kept.map((entry) => Math.round((now - entry.savedAt) / HOUR));
@@ -178,23 +180,19 @@ test('storage backup: the pool keeps a spread and deletes what no target wants',
     assert.ok(Math.min(...ages) <= 1, `newest kept is ${Math.min(...ages)}h: ${ages}`);
 });
 
-test('storage backup: raising the generation count keeps more of them', async () => {
+test('storage backup: the generation count is the number of files that survive', async () => {
     const { pruneRotationBackups, listRotationBackups } =
         await import('../src/storage/backup-store.ts');
     const now = 1000 * HOUR;
 
-    const counts = [];
     for (const generations of [3, 5, 8, 12]) {
         const { plugin, files } = createHost();
         for (let i = 1; i <= 30; i++) seed(plugin, files, now - i * HOUR, { i });
         plugin.generations = generations;
         await pruneRotationBackups(plugin, now);
-        counts.push((await listRotationBackups(plugin)).length);
-    }
-
-    // Monotonic, which is the whole promise of the setting.
-    for (let i = 1; i < counts.length; i++) {
-        assert.ok(counts[i] > counts[i - 1], `generations gave ${counts}`);
+        const kept = await listRotationBackups(plugin);
+        // Thirty files, and exactly as many survive as the setting says.
+        assert.equal(kept.length, generations, `${generations} generations kept ${kept.length}`);
     }
 });
 

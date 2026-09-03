@@ -823,7 +823,9 @@ test('the pool thins itself, keeping a spread rather than the newest few', async
         const kept = poolFiles(tab)
             .map((path) => Number(/sessions\.(\d+)\.json/.exec(path)[1]))
             .sort((a, b) => b - a);
-        assert.ok(kept.length <= 7, `${kept.length} kept of 13`);
+        // Five means five files. A pool of five held six while the newest was
+        // claimed outside the ladder and the ladder then filled five more.
+        assert.equal(kept.length, 5, `${kept.length} kept of 13`);
         // The oldest survives: five generations means five points in time, not
         // the five most recent files.
         assert.ok(Math.min(...kept) <= now - 11 * POOL_HOUR, `oldest kept ${Math.min(...kept)}`);
