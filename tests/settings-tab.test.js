@@ -1366,3 +1366,125 @@ test('the language dropdown offers auto first, then the languages by ISO code', 
         assert.equal(row.control.options.ja, '日本語');
     } finally { await settle(); h.restore(); }
 });
+
+test('the version-history rows are greyed while the history itself is off', async () => {
+    const h = setupHarness();
+    try {
+        const { tab, plugin, L } = makeTab(h);
+        plugin.data.autoSaveOnSwitch = true;
+        const page = () => pageNamed(tab.getSettingDefinitions(), L.historyTitle);
+        const row = (name) => rowNamed([page()], name);
+
+        plugin.data.versionHistoryEnabled = true;
+        assert.equal(resolve(row(L.settingsVersionHistoryInterval).control.disabled), false);
+        assert.equal(resolve(row(L.settingsVersionHistoryConfirmRestore).control.disabled), false);
+
+        // Greyed rather than absent: what they hold is still worth reading, and
+        // the row above is what turns the feature back on.
+        plugin.data.versionHistoryEnabled = false;
+        assert.equal(resolve(row(L.settingsVersionHistoryInterval).control.disabled), true);
+        assert.equal(resolve(row(L.settingsVersionHistoryConfirmRestore).control.disabled), true);
+        assert.equal(resolve(row(L.settingsVersionHistoryEnabled).control.disabled), undefined);
+    } finally { await settle(); h.restore(); }
+});
+
+test('the diagnostics name the three files, and the sync hint only when synced', async () => {
+    const h = setupHarness();
+    try {
+        const info = {
+            updatedAt: 0, sessionsPath: 'a.json', sessionsBackupPath: 'b.json',
+            historyPath: 'c.json', sessionCount: 4, syncedByObsidianSync: false,
+        };
+        const { tab, L } = makeTab(h, {
+            plugin: { getStorageDiagnosticsInfo() { return info; } },
+        });
+        const rowsOf = () => rows([pageNamed(tab.getSettingDefinitions(), L.settingsSectionStorage)]);
+
+        const paths = rowsOf().filter((row) => ['a.json', 'b.json', 'c.json'].includes(row.desc));
+        assert.equal(paths.length, 3);
+        assert.equal(rowNamed(rowsOf(), L.settingsStorageFieldSessionCount).desc, '4');
+        assert.ok(!rowsOf().some((row) => row.desc === L.settingsStorageSyncHint));
+
+        // Only in plugin-folder mode, which is the mode Obsidian Sync carries.
+        info.syncedByObsidianSync = true;
+        assert.ok(rowsOf().some((row) => row.desc === L.settingsStorageSyncHint));
+    } finally { await settle(); h.restore(); }
+});
+
+test('a destructive button ignores a second press while the first is still running', async () => {
+    const h = setupHarness();
+    try {
+        let resolveReset = () => {};
+        let runs = 0;
+        const { tab, L } = makeTab(h, {
+            plugin: {
+                resetSessionsToDefault() {
+                    runs += 1;
+                    return new Promise((done) => { resolveReset = () => done(true); });
+                },
+            },
+        });
+        const row = rowNamed(tab.getSettingDefinitions(), L.settingsResetSessions);
+        const button = buttonOf(renderRow(h, row), L.settingsResetSessions);
+
+        button.trigger();
+        confirmOrCancel(h, 1);
+        await settle();
+        assert.equal(runs, 1);
+
+        // A second delete while the first is in flight would run against the
+        // state the first left, so the guard is per button rather than per row.
+        button.trigger();
+        assert.equal(h.dom.document.querySelectorAll('.modal-container').length, 0,
+            'the confirmation should not even open');
+        assert.equal(runs, 1);
+
+        resolveReset();
+        await settle();
+    } finally { await settle(); h.restore(); }
+});
+
+test('an export or import that fails says so, rather than failing silently', async () => {
+    const h = setupHarness();
+    try {
+        const { tab, L } = makeTab(h, {
+            plugin: {
+                exportSessionsSnapshot() { return Promise.reject(new Error('disk full')); },
+                importSessionsFromLatestExport() { return Promise.reject(new Error('bad json')); },
+            },
+        });
+        const items = tab.getSettingDefinitions();
+
+        rowNamed(items, L.settingsExportSessions).action(h.dom.container(), 0);
+        await settle();
+        assert.deepEqual(h.obsidian.notices.map((n) => n.message), [L.exportSessionsFailed]);
+
+        rowNamed(items, L.settingsImportSessions).action(h.dom.container(), 0);
+        confirmOrCancel(h, 1);
+        await settle();
+        assert.deepEqual(
+            h.obsidian.notices.map((n) => n.message),
+            [L.exportSessionsFailed, L.importSessionsFailed],
+        );
+    } finally { await settle(); h.restore(); }
+});
+
+test('a reset that fails says so, and hands the button back', async () => {
+    const h = setupHarness();
+    try {
+        const { tab, L } = makeTab(h, {
+            plugin: { resetSessionsToDefault() { return Promise.reject(new Error('locked')); } },
+        });
+        const row = rowNamed(tab.getSettingDefinitions(), L.settingsResetSessions);
+        const button = buttonOf(renderRow(h, row), L.settingsResetSessions);
+
+        button.trigger();
+        confirmOrCancel(h, 1);
+        await settle();
+
+        assert.deepEqual(h.obsidian.notices.map((n) => n.message), [L.resetSessionsFailed]);
+        // The guard releases on failure too, or one failed reset would leave the
+        // row dead until the screen was rebuilt.
+        assert.equal(button.disabled, false);
+    } finally { await settle(); h.restore(); }
+});
