@@ -1,6 +1,6 @@
 // Behavior Lock: what every i18n key actually resolves to.
 //
-// The other i18n lock proves the shape holds - 318 keys in all 21 locales, the
+// The other i18n lock proves the shape holds - 319 keys in all 21 locales, the
 // right types, plurals picking the right form. It does not prove the values are
 //
 // Edited deliberately, with the maintainer's authorization, at the commit that
@@ -57,6 +57,18 @@
 // exactly that, twenty times, and it is right. The folder is now named by what
 // it is rather than by its default path. One value per locale; 318 keys,
 // unchanged.
+//
+// And once more, same authorization, for one *added* key. The status-bar click
+// actions became a navigable page when the settings screen was rebuilt on the
+// declarative API, and a page entry shows a description; that section had never
+// had one, because a heading needs no explaining when the rows are right below
+// it. `settingsSectionStatusBarDesc` is that description.
+//
+// Unlike every edit above, its 21 values could not be recovered from git: the
+// string is new, so there is no translator's wording to preserve. They were
+// written for this commit and should be treated as a first pass - a native
+// speaker's correction to any of them is a value change the maintainer can
+// authorise the same way. 318 keys -> 319.
 //
 // RULE: Behavior Lock tests are NEVER edited during the refactor. If this fails,
 // a translation changed. Regenerating the fixture is only correct when the change
@@ -153,10 +165,10 @@ test('the fixture covers every locale and key, so the comparison is not vacuous'
 
     assert.equal(locales.length, 21);
     for (const locale of locales) {
-        assert.equal(Object.keys(expected[locale] ?? {}).length, 318, `locale ${locale}`);
+        assert.equal(Object.keys(expected[locale] ?? {}).length, 319, `locale ${locale}`);
     }
 
-    // 63 of the 318 are functions, recorded from their output rather than their
+    // 63 of the 319 are functions, recorded from their output rather than their
     // source, so a rewritten implementation with the same output still passes.
     const functionEntries = Object.values(expected.en ?? {}).filter((v) => v.startsWith('fn:'));
     assert.equal(functionEntries.length, 63);

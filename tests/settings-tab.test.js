@@ -4,18 +4,6 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { setupHarness } = require('./lock/harness/index.ts');
 
-function componentFor(h, name, kind) {
-    const setting = h.obsidian.settings.find((entry) => entry.nameEl.textContent === name);
-    assert.ok(setting, `missing setting: ${name}`);
-    const component = setting.components.find((entry) => entry.constructor.name === kind);
-    assert.ok(component, `missing ${kind} for ${name}`);
-    return component;
-}
-
-function buttonFor(h, name) {
-    return componentFor(h, name, 'ButtonStub');
-}
-
 function confirmOrCancel(h, index) {
     const buttons = h.dom.document.querySelectorAll('.modal-container button');
     assert.equal(buttons.length, 2, 'confirmation modal has cancel and confirm controls');
@@ -221,6 +209,26 @@ function settle() {
     return new Promise((done) => setTimeout(done, 0));
 }
 
+/**
+ * Draw one `render` row and hand back its recorded components.
+ *
+ * Obsidian calls `render` with a real `Setting`; the four resets, the backup
+ * buttons and the group rename button all reach their button that way, so a
+ * test that wants to press one has to render the row rather than read it.
+ */
+function renderRow(h, row) {
+    const { Setting } = require('obsidian');
+    const setting = new Setting(h.dom.container());
+    row.render(setting);
+    return setting;
+}
+
+function buttonOf(setting, text) {
+    const button = setting.components.find((entry) => entry.constructor.name === 'ButtonStub');
+    assert.ok(button, `no button on the row${text ? ` for ${text}` : ''}`);
+    return button;
+}
+
 function makeTab(h, overrides) {
     const { WorkspacePlusPlusSettingTab, L } = load(h);
     const { plugin, calls } = createPlugin(overrides);
@@ -271,26 +279,45 @@ test('there is no tab bar: no row draws its own DOM at the top of the screen', a
     } finally { await settle(); h.restore(); }
 });
 
-test('a page row summarises what is behind it', async () => {
+test('only the backup door carries a summary; the others carry a description', async () => {
     const h = setupHarness();
     try {
-        const { tab, plugin, L } = makeTab(h);
-        const items = () => tab.getSettingDefinitions();
+        const { tab, L } = makeTab(h);
+        tab.getSettingDefinitions();
+        await settle();
+        const items = tab.getSettingDefinitions();
 
-        const statusBar = pageNamed(items(), L.settingsSectionStatusBar);
-        assert.equal(resolve(statusBar.displayValue), '0 / 12');
+        // A summary has to answer a question the reader has before opening the
+        // page. "How many of the twelve slots are spoken for", "which interval
+        // is set", "how many groups exist" are not those questions, and they
+        // were noise on the surface. When the last backup was taken is.
+        // The scroll page keeps one, and so does this: both name the value in
+        // force, the way Obsidian's font pages show the font. What went were
+        // the three that showed a count.
+        for (const name of [
+            L.settingsSectionStatusBar,
+            L.historyTitle,
+            L.settingsSectionGroups,
+        ]) {
+            const page = pageNamed(items, name);
+            assert.equal(page.displayValue, undefined, `${name} still shows a summary`);
+            assert.ok(page.desc, `${name} has no description`);
+        }
 
-        plugin.data.statusBarActions = { click: 'next-session', rightClick: 'prev-session' };
-        assert.equal(resolve(pageNamed(items(), L.settingsSectionStatusBar).displayValue), '2 / 12');
+        for (const name of [L.rotationBackupSectionTitle, L.settingsSubsectionScrollSwitch]) {
+            const page = pageNamed(items, name);
+            assert.notEqual(resolve(page.displayValue), '', `${name} shows no value`);
+        }
+    } finally { await settle(); h.restore(); }
+});
 
-        // Off means nothing to say rather than a value that would read as live.
-        plugin.data.statusBarModScrollSwitch = false;
-        assert.equal(resolve(pageNamed(items(), L.settingsSubsectionScrollSwitch).displayValue), '');
-        plugin.data.statusBarModScrollSwitch = true;
-        assert.equal(
-            resolve(pageNamed(items(), L.settingsSubsectionScrollSwitch).displayValue),
-            L.settingsStatusBarScrollPresetCustom,
-        );
+test('the status-bar page explains itself, in the locale', async () => {
+    const h = setupHarness();
+    try {
+        const { tab, L } = makeTab(h);
+        const page = pageNamed(tab.getSettingDefinitions(), L.settingsSectionStatusBar);
+        assert.equal(page.desc, L.settingsSectionStatusBarDesc);
+        assert.ok(page.desc.length > 0);
     } finally { await settle(); h.restore(); }
 });
 
@@ -318,6 +345,46 @@ test('the unsaved-switch warnings are hidden while switching saves by itself', a
         assert.equal(resolve(warning().visible), true);
         plugin.data.autoSaveOnSwitch = true;
         assert.equal(resolve(warning().visible), false);
+    } finally { await settle(); h.restore(); }
+});
+
+test('the two preview directions are absent while the preview is off', async () => {
+    const h = setupHarness();
+    try {
+        const { tab, plugin, L } = makeTab(h);
+        const direction = (name) => rowNamed(tab.getSettingDefinitions(), name);
+        const both = () => [
+            resolve(direction(L.settingsPreviewNext).visible),
+            resolve(direction(L.settingsPreviewPrevious).visible),
+        ];
+
+        plugin.data.previewNext = false;
+        plugin.data.previewPrevious = false;
+        assert.deepEqual(both(), [false, false]);
+
+        plugin.data.previewNext = true;
+        plugin.data.previewPrevious = true;
+        assert.deepEqual(both(), [true, true]);
+
+        // One direction on is still the feature being on, so the rows stay.
+        // The master reads `next || previous` for exactly this: with `&&` the
+        // row you would need to get back to one-direction-only is the row that
+        // disappears.
+        plugin.data.previewPrevious = false;
+        assert.deepEqual(both(), [true, true]);
+        assert.equal(tab.getControlValue('switchPreviewEnabled'), true);
+
+        plugin.data.previewNext = false;
+        assert.equal(tab.getControlValue('switchPreviewEnabled'), false);
+    } finally { await settle(); h.restore(); }
+});
+
+test('turning the preview master on sets both directions, so it leaves no half state', async () => {
+    const h = setupHarness();
+    try {
+        const { tab, calls } = makeTab(h);
+        await tab.setControlValue('switchPreviewEnabled', true);
+        assert.deepEqual(calls.filter((entry) => entry[0] === 'preview'), [['preview', true]]);
     } finally { await settle(); h.restore(); }
 });
 
@@ -460,9 +527,10 @@ test('a manual backup shifts the generations oldest-first so none is overwritten
     const h = setupHarness();
     try {
         const { tab, calls, L } = makeTab(h);
-        const list = listIn([pageNamed(tab.getSettingDefinitions(), L.rotationBackupSectionTitle)]);
+        const page = pageNamed(tab.getSettingDefinitions(), L.rotationBackupSectionTitle);
+        const create = rowNamed([page], L.rotationBackupCreate);
 
-        list.addItem.action(h.dom.container());
+        buttonOf(renderRow(h, create), L.rotationBackupCreate).trigger();
         await settle();
 
         const copies = calls.filter((entry) => entry[0] === 'copy').map((entry) => entry.slice(1));
@@ -471,30 +539,78 @@ test('a manual backup shifts the generations oldest-first so none is overwritten
     } finally { await settle(); h.restore(); }
 });
 
-test('restoring a backup asks first, and restores the generation that was named', async () => {
+test('a second click on create cannot rotate the generations twice', async () => {
     const h = setupHarness();
     try {
         const { tab, calls, L } = makeTab(h);
-        // The read starts on the first ask, so the second ask is the one that
-        // has the backups.
+        const create = rowNamed(
+            [pageNamed(tab.getSettingDefinitions(), L.rotationBackupSectionTitle)],
+            L.rotationBackupCreate,
+        );
+        const button = buttonOf(renderRow(h, create), L.rotationBackupCreate);
+
+        button.trigger();
+        button.trigger();
+        await settle();
+
+        // Two rotations would push the backup just taken straight out of the
+        // three-generation window.
+        assert.equal(calls.filter((entry) => entry[0] === 'copy').length, 2);
+    } finally { await settle(); h.restore(); }
+});
+
+test('each generation gets its own row, with the time that identifies it', async () => {
+    const h = setupHarness();
+    try {
+        const { tab, L } = makeTab(h, {
+            plugin: {
+                getRotationBackupInfo() {
+                    return Promise.resolve([
+                        { generation: 1, savedAt: 1000, sessionCount: 3, backupPlatform: 'macOS' },
+                        { generation: 2, savedAt: 500, sessionCount: 2 },
+                    ]);
+                },
+            },
+        });
         tab.getSettingDefinitions();
         await settle();
 
         const page = pageNamed(tab.getSettingDefinitions(), L.rotationBackupSectionTitle);
-        const backupRows = rows([page]);
-        assert.equal(backupRows.length, 1, 'the one backup the double reports');
+        // The create row, plus one row per generation.
+        const backupRows = rows([page]).filter((row) => row.name !== L.rotationBackupCreate);
+        assert.equal(backupRows.length, 2);
+        assert.ok(backupRows[0].name.startsWith('1.'), backupRows[0].name);
+        assert.ok(backupRows[1].name.startsWith('2.'), backupRows[1].name);
+        // The platform is only in the summary when the file recorded one.
+        assert.ok(backupRows[0].desc.includes('macOS'));
+        assert.ok(!backupRows[1].desc.includes('macOS'));
+    } finally { await settle(); h.restore(); }
+});
 
-        backupRows[0].action(h.dom.container(), 0);
+test('restoring a backup asks first, and restores the generation that was named', async () => {
+    const h = setupHarness();
+    try {
+        const { tab, calls, L } = makeTab(h);
+        tab.getSettingDefinitions();
+        await settle();
+
+        const page = pageNamed(tab.getSettingDefinitions(), L.rotationBackupSectionTitle);
+        const backupRow = rows([page]).find((row) => row.name.startsWith('1.'));
+        assert.ok(backupRow, 'the one backup the double reports');
+
+        const restore = () => buttonOf(renderRow(h, backupRow), L.rotationBackupRestore);
+
+        restore().trigger();
         confirmOrCancel(h, 0);
         assert.deepEqual(calls.filter((entry) => entry[0] === 'restore'), []);
 
-        backupRows[0].action(h.dom.container(), 0);
+        restore().trigger();
         confirmOrCancel(h, 1);
         assert.deepEqual(calls.filter((entry) => entry[0] === 'restore'), [['restore', 1]]);
     } finally { await settle(); h.restore(); }
 });
 
-test('the backup list says so when there is nothing in it', async () => {
+test('the backup page says so when there is nothing in it, rather than showing a bare heading', async () => {
     const h = setupHarness();
     try {
         const { tab, L } = makeTab(h, {
@@ -503,9 +619,10 @@ test('the backup list says so when there is nothing in it', async () => {
         tab.getSettingDefinitions();
         await settle();
 
-        const list = listIn([pageNamed(tab.getSettingDefinitions(), L.rotationBackupSectionTitle)]);
-        assert.deepEqual(list.items, []);
-        assert.equal(list.emptyState, L.rotationBackupNone);
+        const page = pageNamed(tab.getSettingDefinitions(), L.rotationBackupSectionTitle);
+        const names = rows([page]).map((row) => row.name);
+        assert.ok(names.includes(L.rotationBackupNone));
+        assert.equal(resolve(page.displayValue), '', 'and the door says nothing either');
     } finally { await settle(); h.restore(); }
 });
 
@@ -615,7 +732,7 @@ test('each reset keeps its own target', async () => {
     const h = setupHarness();
     try {
         const { tab, calls, L } = makeTab(h);
-        tab.display();
+        const items = tab.getSettingDefinitions();
 
         for (const [name, expected] of [
             [L.settingsResetSettings, 'resetSettings'],
@@ -624,7 +741,7 @@ test('each reset keeps its own target', async () => {
             [L.settingsResetSessionsAndSettings, 'resetEverything'],
         ]) {
             calls.length = 0;
-            buttonFor(h, name).trigger();
+            buttonOf(renderRow(h, rowNamed(items, name)), name).trigger();
             confirmOrCancel(h, 1);
             await settle();
             assert.ok(
@@ -639,9 +756,9 @@ test('a reset that is cancelled runs nothing', async () => {
     const h = setupHarness();
     try {
         const { tab, calls, L } = makeTab(h);
-        tab.display();
+        const row = rowNamed(tab.getSettingDefinitions(), L.settingsResetSessions);
         calls.length = 0;
-        buttonFor(h, L.settingsResetSessions).trigger();
+        buttonOf(renderRow(h, row), L.settingsResetSessions).trigger();
         confirmOrCancel(h, 0);
         await settle();
         assert.deepEqual(calls.filter((entry) => entry[0] === 'resetSessions'), []);
@@ -680,62 +797,32 @@ test('the diagnostics show a placeholder until the size arrives, then the size',
     } finally { await settle(); h.restore(); }
 });
 
-// --- Obsidian before 1.13 ----------------------------------------------
+// --- the group rename button --------------------------------------------
 
-test('display() puts the pages on screen inline, since there is nothing to navigate with', async () => {
+test('the rename button on a group row asks for the new name', async () => {
     const h = setupHarness();
     try {
-        const { tab, L } = makeTab(h);
-        tab.display();
-
-        const names = h.obsidian.settings.map((entry) => entry.nameEl.textContent);
-        // The page name becomes a heading, and its rows follow it.
-        assert.ok(names.includes(L.settingsSectionStatusBar));
-        assert.ok(names.includes(L.statusBarSlotClick), 'a row from inside a page reaches the screen');
-        assert.ok(names.includes(L.settingsResetSessions), 'so does a row two pages deep');
-    } finally { await settle(); h.restore(); }
-});
-
-test("display() renders a list's add affordance and a delete button per row", async () => {
-    const h = setupHarness();
-    try {
-        const { tab, calls, L } = makeTab(h, {
+        const renamed = [];
+        const { tab, L } = makeTab(h, {
             plugin: {
                 isGroupFeatureEnabled() { return true; },
                 getOrderedGroups() { return [{ id: 'a', name: 'Alpha' }]; },
-                deleteGroup(id) { calls.push(['deleteGroup', id]); return Promise.resolve(true); },
+                renameGroupValidated(id, name) { renamed.push([id, name]); return Promise.resolve(true); },
             },
         });
-        tab.display();
+        const row = rowNamed([pageNamed(tab.getSettingDefinitions(), L.settingsSectionGroups)], 'Alpha');
 
-        const groupRow = h.obsidian.settings.find((entry) => entry.nameEl.textContent === 'Alpha');
-        assert.ok(groupRow, 'the group reaches the screen');
-        // Rename is the row's own; delete is the list's.
-        const buttons = groupRow.components.filter((entry) => entry.constructor.name === 'ButtonStub');
-        assert.equal(buttons.length, 2);
+        renderRow(h, row);
+        const rename = h.obsidian.settings
+            .flatMap((setting) => setting.components)
+            .find((component) => component.constructor.name === 'ButtonStub');
+        rename.trigger();
 
-        buttonFor(h, L.settingsGroupCreate).trigger();
-        assert.ok(h.dom.document.querySelector('.modal-container .wpp-rename-input'));
-    } finally { await settle(); h.restore(); }
-});
-
-test('display() flattens a page that sits at the top level too, not only one inside a group', async () => {
-    const h = setupHarness();
-    try {
-        const { renderDefinitions } = require('../src/settings-imperative.ts');
-        const containerEl = h.dom.container();
-        const access = { read: () => undefined, write: () => {} };
-
-        // This screen puts its pages in a group, so the top-level branch is
-        // reached only by a definition array shaped like this one - which the
-        // API permits, and which nothing else here would exercise.
-        renderDefinitions(containerEl, [{
-            type: 'page',
-            name: 'Outer',
-            items: [{ type: 'group', items: [{ name: 'Inner row' }] }],
-        }], access);
-
-        const names = h.obsidian.settings.map((entry) => entry.nameEl.textContent);
-        assert.deepEqual(names, ['Outer', 'Inner row']);
+        const input = h.dom.document.querySelector('.modal-container .wpp-rename-input');
+        assert.ok(input, 'the name dialog is what asks');
+        input.value = 'Renamed';
+        const buttons = h.dom.document.querySelectorAll('.modal-container button');
+        buttons[buttons.length - 1].click();
+        assert.deepEqual(renamed, [['a', 'Renamed']]);
     } finally { await settle(); h.restore(); }
 });

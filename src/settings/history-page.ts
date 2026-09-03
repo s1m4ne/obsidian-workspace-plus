@@ -24,12 +24,6 @@ export function historyPage(ctx: SettingsContext): SettingDefinitionPage {
         type: 'page',
         name: text(L.historyTitle),
         desc: text(L.settingsVersionHistoryEnabledDesc),
-        // The interval, in the same bare minutes the dropdown itself shows.
-        // Nothing while it is off, and nothing while the interval does not
-        // apply, rather than a number that would be read as in force.
-        displayValue: () => (enabled() && onInterval()
-            ? String(ctx.plugin.getHistoryService().getVersionHistorySnapshotInterval())
-            : ''),
         items: [{
             type: 'group',
             items: [

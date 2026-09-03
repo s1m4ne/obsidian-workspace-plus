@@ -70,9 +70,6 @@ export function groupsPage(ctx: SettingsContext): SettingDefinitionPage {
         type: 'page',
         name: text(L.settingsSectionGroups),
         desc: text(L.settingsSectionGroupsDesc),
-        // How many groups there are, and nothing at all while the feature is
-        // off - which is the state the row needs to convey most.
-        displayValue: () => (enabled ? String(groups.length) : ''),
         items: [
             {
                 type: 'group',

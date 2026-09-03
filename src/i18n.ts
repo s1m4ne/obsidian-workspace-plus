@@ -208,6 +208,7 @@ const STRINGS: StringTables = {
 
         contextCustomizeClicks: 'Customize click actions',
         settingsSectionStatusBar: 'Status bar click actions',
+        settingsSectionStatusBarDesc: 'Choose what each click on the status bar item does.',
         statusBarSlotClick: 'Click',
         statusBarSlotAltClick: function () { return (isMacPlatform() ? '\u2325' : 'Alt') + ' + Click'; },
         statusBarSlotModClick: function () { return (isMacPlatform() ? '\u2318' : 'Ctrl') + ' + Click'; },
@@ -463,6 +464,7 @@ const STRINGS: StringTables = {
 
         contextCustomizeClicks: '\u81ea\u5b9a\u4e49\u70b9\u51fb\u64cd\u4f5c',
         settingsSectionStatusBar: '\u72b6\u6001\u680f\u70b9\u51fb\u64cd\u4f5c',
+        settingsSectionStatusBarDesc: '为状态栏项目上的每种点击方式指定操作。',
         statusBarSlotClick: '\u70b9\u51fb',
         statusBarSlotAltClick: function () { return (isMacPlatform() ? '\u2325' : 'Alt') + ' + \u70b9\u51fb'; },
         statusBarSlotModClick: function () { return (isMacPlatform() ? '\u2318' : 'Ctrl') + ' + \u70b9\u51fb'; },
@@ -690,6 +692,7 @@ const STRINGS: StringTables = {
 
         contextCustomizeClicks: '\u81ea\u8a02\u9ede\u64ca\u64cd\u4f5c',
         settingsSectionStatusBar: '\u72c0\u614b\u5217\u9ede\u64ca\u64cd\u4f5c',
+        settingsSectionStatusBarDesc: '為狀態列項目上的每種點擊方式指定操作。',
         statusBarSlotClick: '\u9ede\u64ca',
         statusBarSlotAltClick: function () { return (isMacPlatform() ? '\u2325' : 'Alt') + ' + \u9ede\u64ca'; },
         statusBarSlotModClick: function () { return (isMacPlatform() ? '\u2318' : 'Ctrl') + ' + \u9ede\u64ca'; },
@@ -917,6 +920,7 @@ const STRINGS: StringTables = {
 
         contextCustomizeClicks: 'Personalizar acciones de clic',
         settingsSectionStatusBar: 'Acciones de clic en la barra de estado',
+        settingsSectionStatusBarDesc: 'Elige qué hace cada tipo de clic en el elemento de la barra de estado.',
         statusBarSlotClick: 'Clic',
         statusBarSlotAltClick: function () { return (isMacPlatform() ? '\u2325' : 'Alt') + ' + Clic'; },
         statusBarSlotModClick: function () { return (isMacPlatform() ? '\u2318' : 'Ctrl') + ' + Clic'; },
@@ -1144,6 +1148,7 @@ const STRINGS: StringTables = {
 
         contextCustomizeClicks: 'Personnaliser les actions de clic',
         settingsSectionStatusBar: 'Actions de clic de la barre d\u2019\u00e9tat',
+        settingsSectionStatusBarDesc: 'Choisissez l’action de chaque type de clic sur l’élément de la barre d’état.',
         statusBarSlotClick: 'Clic',
         statusBarSlotAltClick: function () { return (isMacPlatform() ? '\u2325' : 'Alt') + ' + Clic'; },
         statusBarSlotModClick: function () { return (isMacPlatform() ? '\u2318' : 'Ctrl') + ' + Clic'; },
@@ -1371,6 +1376,7 @@ const STRINGS: StringTables = {
 
         contextCustomizeClicks: '\u062a\u062e\u0635\u064a\u0635 \u0625\u062c\u0631\u0627\u0621\u0627\u062a \u0627\u0644\u0646\u0642\u0631',
         settingsSectionStatusBar: '\u0625\u062c\u0631\u0627\u0621\u0627\u062a \u0627\u0644\u0646\u0642\u0631 \u0639\u0644\u0649 \u0634\u0631\u064a\u0637 \u0627\u0644\u062d\u0627\u0644\u0629',
+        settingsSectionStatusBarDesc: 'اختر ما يفعله كل نوع من النقر على عنصر شريط الحالة.',
         statusBarSlotClick: '\u0646\u0642\u0631',
         statusBarSlotAltClick: function () { return (isMacPlatform() ? '\u2325' : 'Alt') + ' + \u0646\u0642\u0631'; },
         statusBarSlotModClick: function () { return (isMacPlatform() ? '\u2318' : 'Ctrl') + ' + \u0646\u0642\u0631'; },
@@ -1597,6 +1603,7 @@ const STRINGS: StringTables = {
 
         contextCustomizeClicks: 'Personalizar a\u00e7\u00f5es de clique',
         settingsSectionStatusBar: 'A\u00e7\u00f5es de clique na barra de status',
+        settingsSectionStatusBarDesc: 'Escolha o que cada tipo de clique no item da barra de status faz.',
         statusBarSlotClick: 'Clique',
         statusBarSlotAltClick: function () { return (isMacPlatform() ? '\u2325' : 'Alt') + ' + Clique'; },
         statusBarSlotModClick: function () { return (isMacPlatform() ? '\u2318' : 'Ctrl') + ' + Clique'; },
@@ -1824,6 +1831,7 @@ const STRINGS: StringTables = {
 
         contextCustomizeClicks: '\u041d\u0430\u0441\u0442\u0440\u043e\u0438\u0442\u044c \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u044f \u043a\u043b\u0438\u043a\u043e\u0432',
         settingsSectionStatusBar: '\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u044f \u043a\u043b\u0438\u043a\u043e\u0432 \u043d\u0430 \u0441\u0442\u0440\u043e\u043a\u0435 \u0441\u043e\u0441\u0442\u043e\u044f\u043d\u0438\u044f',
+        settingsSectionStatusBarDesc: 'Выберите, что делает каждый вид щелчка по элементу строки состояния.',
         statusBarSlotClick: '\u041a\u043b\u0438\u043a',
         statusBarSlotAltClick: function () { return (isMacPlatform() ? '\u2325' : 'Alt') + ' + \u041a\u043b\u0438\u043a'; },
         statusBarSlotModClick: function () { return (isMacPlatform() ? '\u2318' : 'Ctrl') + ' + \u041a\u043b\u0438\u043a'; },
@@ -2050,6 +2058,7 @@ const STRINGS: StringTables = {
 
         contextCustomizeClicks: 'Klickaktionen anpassen',
         settingsSectionStatusBar: 'Klickaktionen der Statusleiste',
+        settingsSectionStatusBarDesc: 'Legen Sie fest, was jeder Klick auf das Statusleisten-Element bewirkt.',
         statusBarSlotClick: 'Klick',
         statusBarSlotAltClick: function () { return (isMacPlatform() ? '\u2325' : 'Alt') + ' + Klick'; },
         statusBarSlotModClick: function () { return (isMacPlatform() ? '\u2318' : 'Strg') + ' + Klick'; },
@@ -2335,6 +2344,7 @@ const STRINGS: StringTables = {
 
         contextCustomizeClicks: '\u30af\u30ea\u30c3\u30af\u64cd\u4f5c\u3092\u30ab\u30b9\u30bf\u30de\u30a4\u30ba',
         settingsSectionStatusBar: '\u30b9\u30c6\u30fc\u30bf\u30b9\u30d0\u30fc\u306e\u30af\u30ea\u30c3\u30af\u64cd\u4f5c',
+        settingsSectionStatusBarDesc: 'ステータスバーの項目をクリックしたときの動作を、操作ごとに設定します。',
         statusBarSlotClick: '\u30af\u30ea\u30c3\u30af',
         statusBarSlotAltClick: function () { return (isMacPlatform() ? '\u2325' : 'Alt') + ' + \u30af\u30ea\u30c3\u30af'; },
         statusBarSlotModClick: function () { return (isMacPlatform() ? '\u2318' : 'Ctrl') + ' + \u30af\u30ea\u30c3\u30af'; },
@@ -2590,6 +2600,7 @@ const STRINGS: StringTables = {
 
         contextCustomizeClicks: '\ud074\ub9ad \ub3d9\uc791 \uc0ac\uc6a9\uc790 \uc9c0\uc815',
         settingsSectionStatusBar: '\uc0c1\ud0dc \ud45c\uc2dc\uc904 \ud074\ub9ad \ub3d9\uc791',
+        settingsSectionStatusBarDesc: '상태 바 항목을 클릭할 때 실행할 동작을 클릭 방식별로 설정합니다.',
         statusBarSlotClick: '\ud074\ub9ad',
         statusBarSlotAltClick: function () { return (isMacPlatform() ? '\u2325' : 'Alt') + ' + \ud074\ub9ad'; },
         statusBarSlotModClick: function () { return (isMacPlatform() ? '\u2318' : 'Ctrl') + ' + \ud074\ub9ad'; },
@@ -2817,6 +2828,7 @@ const STRINGS: StringTables = {
 
         contextCustomizeClicks: 'Personalizza azioni clic',
         settingsSectionStatusBar: 'Azioni clic barra di stato',
+        settingsSectionStatusBarDesc: 'Scegli cosa fa ogni tipo di clic sull’elemento della barra di stato.',
         statusBarSlotClick: 'Clic',
         statusBarSlotAltClick: function () { return (isMacPlatform() ? '\u2325' : 'Alt') + ' + Clic'; },
         statusBarSlotModClick: function () { return (isMacPlatform() ? '\u2318' : 'Ctrl') + ' + Clic'; },
@@ -3044,6 +3056,7 @@ const STRINGS: StringTables = {
 
         contextCustomizeClicks: 'T\u0131klama eylemlerini \u00f6zelle\u015ftir',
         settingsSectionStatusBar: 'Durum \u00e7ubu\u011fu t\u0131klama eylemleri',
+        settingsSectionStatusBarDesc: 'Durum çubuğu ögesine yapılan her tıklama türünün ne yapacağını seçin.',
         statusBarSlotClick: 'T\u0131klama',
         statusBarSlotAltClick: function () { return (isMacPlatform() ? '\u2325' : 'Alt') + ' + T\u0131klama'; },
         statusBarSlotModClick: function () { return (isMacPlatform() ? '\u2318' : 'Ctrl') + ' + T\u0131klama'; },
@@ -3270,6 +3283,7 @@ const STRINGS: StringTables = {
 
         contextCustomizeClicks: 'Sesuaikan tindakan klik',
         settingsSectionStatusBar: 'Tindakan klik bilah status',
+        settingsSectionStatusBarDesc: 'Pilih tindakan untuk setiap jenis klik pada item bilah status.',
         statusBarSlotClick: 'Klik',
         statusBarSlotAltClick: function () { return (isMacPlatform() ? '\u2325' : 'Alt') + ' + Klik'; },
         statusBarSlotModClick: function () { return (isMacPlatform() ? '\u2318' : 'Ctrl') + ' + Klik'; },
@@ -3543,6 +3557,7 @@ const STRINGS: StringTables = {
         contextOpenSettings: 'Mở cài đặt',
         contextCustomizeClicks: 'Tùy chỉnh thao tác nhấp',
         settingsSectionStatusBar: 'Thao tác nhấp trên thanh trạng thái',
+        settingsSectionStatusBarDesc: 'Chọn hành động cho từng kiểu nhấp vào mục trên thanh trạng thái.',
         statusBarSlotClick: 'Nhấp',
         statusBarSlotAltClick: function () { return (isMacPlatform() ? '⌥' : 'Alt') + ' + Nhấp'; },
         statusBarSlotModClick: function () { return (isMacPlatform() ? '⌘' : 'Ctrl') + ' + Nhấp'; },
@@ -3842,6 +3857,7 @@ const STRINGS: StringTables = {
         contextOpenSettings: 'เปิดการตั้งค่า',
         contextCustomizeClicks: 'ปรับแต่งการคลิก',
         settingsSectionStatusBar: 'การคลิกบนแถบสถานะ',
+        settingsSectionStatusBarDesc: 'เลือกการทำงานของการคลิกแต่ละแบบบนรายการในแถบสถานะ',
         statusBarSlotClick: 'คลิก',
         statusBarSlotAltClick: function () { return (isMacPlatform() ? '⌥' : 'Alt') + ' + คลิก'; },
         statusBarSlotModClick: function () { return (isMacPlatform() ? '⌘' : 'Ctrl') + ' + คลิก'; },
@@ -4141,6 +4157,7 @@ const STRINGS: StringTables = {
         contextOpenSettings: 'सेटिंग खोलें',
         contextCustomizeClicks: 'क्लिक क्रियाएँ अनुकूलित करें',
         settingsSectionStatusBar: 'स्टेटस बार क्लिक क्रियाएँ',
+        settingsSectionStatusBarDesc: 'स्टेटस बार आइटम पर हर तरह के क्लिक से क्या हो, यह चुनें।',
         statusBarSlotClick: 'क्लिक',
         statusBarSlotAltClick: function () { return (isMacPlatform() ? '⌥' : 'Alt') + ' + क्लिक'; },
         statusBarSlotModClick: function () { return (isMacPlatform() ? '⌘' : 'Ctrl') + ' + क्लिक'; },
@@ -4440,6 +4457,7 @@ const STRINGS: StringTables = {
         contextOpenSettings: 'সেটিং খুলুন',
         contextCustomizeClicks: 'ক্লিক অ্যাকশন কাস্টমাইজ করুন',
         settingsSectionStatusBar: 'স্টেটাস বার ক্লিক অ্যাকশন',
+        settingsSectionStatusBarDesc: 'স্টেটাস বারের আইটেমে প্রতিটি ক্লিকে কী হবে তা বেছে নিন।',
         statusBarSlotClick: 'ক্লিক',
         statusBarSlotAltClick: function () { return (isMacPlatform() ? '⌥' : 'Alt') + ' + ক্লিক'; },
         statusBarSlotModClick: function () { return (isMacPlatform() ? '⌘' : 'Ctrl') + ' + ক্লিক'; },
@@ -4739,6 +4757,7 @@ const STRINGS: StringTables = {
         contextOpenSettings: 'باز کردن تنظیمات',
         contextCustomizeClicks: 'سفارشی کردن کنش‌های کلیک',
         settingsSectionStatusBar: 'کنش‌های کلیک نوار وضعیت',
+        settingsSectionStatusBarDesc: 'انتخاب کنید هر نوع کلیک روی مورد نوار وضعیت چه کاری انجام دهد.',
         statusBarSlotClick: 'کلیک',
         statusBarSlotAltClick: function () { return (isMacPlatform() ? '⌥' : 'Alt') + ' + کلیک'; },
         statusBarSlotModClick: function () { return (isMacPlatform() ? '⌘' : 'Ctrl') + ' + کلیک'; },
@@ -5038,6 +5057,7 @@ const STRINGS: StringTables = {
         contextOpenSettings: 'Buka tetapan',
         contextCustomizeClicks: 'Sesuaikan tindakan klik',
         settingsSectionStatusBar: 'Tindakan klik bar status',
+        settingsSectionStatusBarDesc: 'Pilih tindakan bagi setiap jenis klik pada item bar status.',
         statusBarSlotClick: 'Klik',
         statusBarSlotAltClick: function () { return (isMacPlatform() ? '⌥' : 'Alt') + ' + Klik'; },
         statusBarSlotModClick: function () { return (isMacPlatform() ? '⌘' : 'Ctrl') + ' + Klik'; },
@@ -5337,6 +5357,7 @@ const STRINGS: StringTables = {
         contextOpenSettings: 'Otwórz ustawienia',
         contextCustomizeClicks: 'Dostosuj akcje kliknięć',
         settingsSectionStatusBar: 'Akcje kliknięć paska stanu',
+        settingsSectionStatusBarDesc: 'Wybierz, co robi każdy rodzaj kliknięcia elementu paska stanu.',
         statusBarSlotClick: 'Kliknięcie',
         statusBarSlotAltClick: function () { return (isMacPlatform() ? '⌥' : 'Alt') + ' + kliknięcie'; },
         statusBarSlotModClick: function () { return (isMacPlatform() ? '⌘' : 'Ctrl') + ' + kliknięcie'; },

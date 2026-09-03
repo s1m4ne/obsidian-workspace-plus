@@ -14,23 +14,6 @@ export interface DangerRowOptions {
     run(): Promise<unknown>;
 }
 
-/** Obsidian's button handle, plus the pre-1.12 fallback this code still allows for. */
-interface WarnableButton {
-    setWarning?: () => unknown;
-    buttonEl?: HTMLElement;
-}
-
-// setWarning() is the documented way to mark a destructive button, but it has
-// not always existed; the class it adds is the same one, so an older Obsidian
-// still gets the red button rather than an unstyled one.
-function applyWarningStyle(btn: WarnableButton): void {
-    if (typeof btn.setWarning === 'function') {
-        btn.setWarning();
-        return;
-    }
-    btn.buttonEl?.addClass('mod-warning');
-}
-
 /**
  * A destructive row: red button, confirmation, notice either way.
  *
@@ -49,7 +32,10 @@ export function dangerRow(ctx: SettingsContext, options: DangerRowOptions): Sett
                 // and they must not disable each other.
                 let isRunning = false;
                 btn.setButtonText(options.buttonText);
-                applyWarningStyle(btn);
+                // Destructive, not primary: red, but not the button the eye
+                // lands on first. `setWarning` is the 1.12 spelling and is
+                // deprecated from 1.13.
+                btn.setDestructive();
                 btn.onClick(() => {
                     // A second click while the first is still running would
                     // delete twice, and the second run sees the state the first

@@ -280,6 +280,14 @@ export interface PluginSettingTab {
     readonly app: unknown;
     readonly plugin: unknown;
     readonly containerEl: HTMLElement;
+    /**
+     * The two redraws `SettingTab` has had since 1.13. Obsidian's own bodies
+     * re-read `getSettingDefinitions()` and re-evaluate the rendered rows; a
+     * test that wants to observe either overrides it on the instance, and one
+     * that does not needs them to exist rather than to be guarded against.
+     */
+    update(): void;
+    refreshDomState(): void;
 }
 
 export interface PluginSettingTabConstructor {
@@ -293,14 +301,21 @@ interface PluginSettingTabInternal extends PluginSettingTab {
     containerEl: HTMLElement;
 }
 
+const PluginSettingTabProto = {
+    update(): void {},
+    refreshDomState(): void {},
+};
+
 function PluginSettingTabConstructorFn(this: unknown, app: unknown, plugin: unknown): PluginSettingTab {
     const isInstance = this instanceof PluginSettingTabConstructorFn;
-    const self = (isInstance ? this : Object.create(PluginSettingTabConstructorFn.prototype as object)) as PluginSettingTabInternal;
+    const self = (isInstance ? this : Object.create(PluginSettingTabConstructorFn.prototype)) as PluginSettingTabInternal;
     self.app = app;
     self.plugin = plugin;
     self.containerEl = ownerDocument().createElement('div');
     return self;
 }
+
+PluginSettingTabConstructorFn.prototype = PluginSettingTabProto;
 
 export const PluginSettingTab = PluginSettingTabConstructorFn as unknown as PluginSettingTabConstructor;
 

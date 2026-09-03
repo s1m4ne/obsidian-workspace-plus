@@ -69,10 +69,17 @@ export const CONTROL_BINDINGS: Record<string, ControlBinding> = {
         read: (plugin) => state(plugin).numberedSwitchCommands,
         write: (plugin, value) => state(plugin).setNumberedSwitchCommands(value === true),
     },
-    // On only when both directions are, so turning it on cannot leave a
-    // half-enabled state behind. Its two children follow underneath.
+    /**
+     * On when either direction previews, which is what makes it a master.
+     *
+     * It used to read `next && previous`, so turning one direction off read as
+     * the whole feature being off. That was harmless while the two children
+     * were always on screen; now that they are hidden when the master is off,
+     * `&&` would hide the row you would need to get back to one-direction-only.
+     * Turning the master on still sets both, so it cannot leave a half state.
+     */
     switchPreviewEnabled: {
-        read: (plugin) => state(plugin).previewNext && state(plugin).previewPrevious,
+        read: (plugin) => state(plugin).previewNext || state(plugin).previewPrevious,
         write: (plugin, value) => state(plugin).setSwitchPreviewEnabled(value === true),
     },
     previewNext: {

@@ -1,6 +1,5 @@
 import { PluginSettingTab, type App, type Plugin } from 'obsidian';
 import type { SettingDefinitionItem, SettingGroupItem } from 'obsidian';
-import { renderDefinitions, type ControlValueAccess } from './settings-imperative.ts';
 import { L, text } from './i18n.ts';
 import { CONTROL_BINDINGS } from './settings/control-bindings.ts';
 import { pagesGroup, surfaceGroups } from './settings/surface.ts';
@@ -156,9 +155,10 @@ export interface SettingsContext {
  * The settings screen.
  *
  * This class assembles; it draws nothing. Every row lives in `settings/` as a
- * definition, and Obsidian renders the tree from 1.13 on. `display()` is the
- * same tree through `settings-imperative.ts`, for the two supported versions
- * that predate the API.
+ * definition, and Obsidian renders the tree. `display()` is not overridden at
+ * all: it is deprecated from 1.13, it is not called while
+ * `getSettingDefinitions()` returns anything, and `minAppVersion` is 1.13.0, so
+ * there is no version left that would reach it.
  *
  * The four horizontal tabs are gone. They were a `render` row holding buttons
  * that toggled `visible` on seven groups, which put arbitrary DOM inside a
@@ -194,16 +194,8 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
         return {
             plugin: this.plugin,
             app: this.app,
-            update: () => {
-                // `update()` is Obsidian's; before 1.13 there is nothing to
-                // re-read and display() is what puts it on screen.
-                if (this.update) this.update();
-                else this.display();
-            },
-            refresh: () => {
-                if (this.refreshDomState) this.refreshDomState();
-                else this.display();
-            },
+            update: () => { this.update(); },
+            refresh: () => { this.refreshDomState(); },
         };
     }
 
@@ -241,7 +233,7 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
         const ctx = this.context();
 
         const pages: SettingGroupItem[] = [
-            statusBarPage(ctx),
+            statusBarPage(),
             scrollSwitchPage(ctx),
             historyPage(ctx),
             backupPage(ctx, this.backups),
@@ -274,25 +266,6 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
         });
 
         return { type: 'group', items: [{ name: '', desc, searchable: false }] };
-    }
-
-    /**
-     * Obsidian before 1.13 ignores `getSettingDefinitions()`, so the same tree
-     * is walked here. Deleted with `settings-imperative.ts` when
-     * `minAppVersion` reaches 1.13.0.
-     */
-    override display(): void {
-        const containerEl = this.containerEl;
-        containerEl.empty();
-        renderDefinitions(containerEl, this.getSettingDefinitions(), this.controlAccess());
-    }
-
-    /** How a control's `key` reaches this plugin's own storage. */
-    private controlAccess(): ControlValueAccess {
-        return {
-            read: (key) => this.getControlValue(key),
-            write: (key, value) => this.setControlValue(key, value),
-        };
     }
 
     override getControlValue(key: string): unknown {

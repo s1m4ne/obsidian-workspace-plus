@@ -112,10 +112,16 @@ function switchCommandsGroup(): SettingDefinitionItem {
  * The preview master and its two directions.
  *
  * The two direction rows used to sit in a nested block inside the master row.
- * A definition is one row, so they are siblings now: the master still writes
- * both, and turning it on cannot leave a half-enabled state behind.
+ * A definition is one row, so they are siblings now, and they are there only
+ * while the master is on - the same shape the auto-save warnings have, where a
+ * setting that cannot apply is absent rather than present and inert.
  */
-function switchPreviewGroup(): SettingDefinitionItem {
+function switchPreviewGroup(ctx: SettingsContext): SettingDefinitionItem {
+    const previewing = (): boolean => {
+        const settingsState = ctx.plugin.getSettingsState();
+        return settingsState.previewNext || settingsState.previewPrevious;
+    };
+
     return {
         type: 'group',
         heading: text(L.settingsSubsectionSwitchPreview),
@@ -125,8 +131,16 @@ function switchPreviewGroup(): SettingDefinitionItem {
                 desc: text(L.settingsPreviewDesc),
                 control: { type: 'toggle', key: 'switchPreviewEnabled' },
             },
-            { name: text(L.settingsPreviewNext), control: { type: 'toggle', key: 'previewNext' } },
-            { name: text(L.settingsPreviewPrevious), control: { type: 'toggle', key: 'previewPrevious' } },
+            {
+                name: text(L.settingsPreviewNext),
+                visible: previewing,
+                control: { type: 'toggle', key: 'previewNext' },
+            },
+            {
+                name: text(L.settingsPreviewPrevious),
+                visible: previewing,
+                control: { type: 'toggle', key: 'previewPrevious' },
+            },
         ],
     };
 }
@@ -189,7 +203,7 @@ export function surfaceGroups(ctx: SettingsContext): SettingDefinitionItem[] {
         savingGroup(ctx),
         restoreGroup(),
         switchCommandsGroup(),
-        switchPreviewGroup(),
+        switchPreviewGroup(ctx),
         overlayGroup(),
         confirmationsGroup(ctx),
     ];

@@ -1,7 +1,6 @@
 import type { SettingDefinitionPage, SettingGroupItem } from 'obsidian';
 import { L, text } from '../i18n.ts';
 import * as statusBarActions from '../statusbar-actions.ts';
-import type { SettingsContext } from '../settings-tab.ts';
 
 /**
  * The twelve status-bar slots.
@@ -32,14 +31,7 @@ function slotLabel(slotKey: string): string {
     return text((L as Record<string, unknown>)[labelKey]);
 }
 
-function assignedSlotCount(ctx: SettingsContext): number {
-    const assigned = ctx.plugin.getSettingsState().statusBarActions;
-    return statusBarActions.SLOT_KEYS
-        .filter((slotKey) => (assigned[slotKey] || 'none') !== 'none')
-        .length;
-}
-
-export function statusBarPage(ctx: SettingsContext): SettingDefinitionPage {
+export function statusBarPage(): SettingDefinitionPage {
     const actionOptions: Record<string, string> = {};
     for (const actionId of statusBarActions.ACTION_IDS) {
         actionOptions[actionId] = statusBarActions.getActionLabel(L, actionId);
@@ -53,9 +45,9 @@ export function statusBarPage(ctx: SettingsContext): SettingDefinitionPage {
     return {
         type: 'page',
         name: text(L.settingsSectionStatusBar),
-        // Two numbers rather than a sentence: it needs no locale key, and
-        // "5 / 12" says the same thing in every language this plugin ships.
-        displayValue: () => `${assignedSlotCount(ctx)} / ${statusBarActions.SLOT_KEYS.length}`,
+        desc: text(L.settingsSectionStatusBarDesc),
+        // No summary. "5 / 12" was accurate and told the reader nothing they
+        // wanted: how many slots are spoken for is not why anyone opens this.
         items: [{ type: 'group', items: slots }],
     };
 }

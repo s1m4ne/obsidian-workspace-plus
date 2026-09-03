@@ -1,7 +1,4 @@
 {
-    "total": 6,
-    "rules": {
-        "@typescript-eslint/no-deprecated": 2,
-        "obsidianmd/no-unsupported-api": 4
-    }
+    "total": 0,
+    "rules": {}
 }
