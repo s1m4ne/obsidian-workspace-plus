@@ -373,7 +373,16 @@ export class SessionManagerModal extends Modal {
             // it settles - Escape, or a click outside. Rendering into a
             // detached element would be pointless; focusing one is worse.
             if (!this.containerEl.isConnected) return;
-            this.refreshFromSessionChange();
+
+            this.renderList();
+            // The selection follows the session, not the row it was sitting on.
+            // `refreshFromSessionChange` puts focus back where it was, which is
+            // right for a change that arrived from elsewhere and wrong here:
+            // this key asked for the next session, so leaving the focus behind
+            // would split the active highlight from the selected row.
+            // getDefaultSessionTarget is the active session's switch button,
+            // which is also where the modal focuses when it opens.
+            this.focusSessionTarget(this.getDefaultSessionTarget());
         });
     }
 

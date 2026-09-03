@@ -269,6 +269,12 @@ function makePlugin(containerEl: HTMLElement, groupFeatureEnabled = false): Moda
         // offset is recorded rather than a session id.
         switchRelativeImmediately(offset: number): Promise<boolean> {
             this.calls.push(`switchRelativeImmediately:${offset}`);
+            // Really moves the active session, so a test can ask where the
+            // selection ended up rather than only whether the call happened.
+            const order = plugin.data.sessionOrder;
+            const from = order.indexOf(plugin.data.activeSessionId ?? '');
+            const next = order[(from + offset + order.length) % order.length];
+            if (next) plugin.data.activeSessionId = next;
             return Promise.resolve(true);
         },
         resolveGroupSelection: async (groupId) => ({ resolvedGroupId: groupId, switched: false }),
@@ -643,6 +649,45 @@ test('the next-session hotkey switches inside the modal and moves the active row
         // The redraw that moves the active row runs when the switch settles.
         await Promise.resolve();
         assert.ok(modal.contentEl.querySelector('.wpp-session-item'), 'and stayed open');
+        assert.equal(plugin.data.activeSessionId, 's2', 'the next session is active');
+    } finally {
+        modal.close();
+        h.restore();
+    }
+});
+
+test('the selection follows the session the hotkey switched to', async () => {
+    const { h, plugin, modal } = await openModal();
+    try {
+        const doc = h.dom.document;
+        const loadOf = (index: number): HTMLElement | null | undefined =>
+            [...modal.contentEl.querySelectorAll<HTMLElement>('.wpp-session-item')][index]
+                ?.querySelector<HTMLElement>('[data-action-key="load"]');
+
+        // Focus starts on the active session's switch button, row 0.
+        loadOf(0)?.focus();
+        assert.equal(doc.activeElement, loadOf(0));
+
+        // Rows built during the redraw need a box, or the modal's keyboard
+        // targets - filtered by getClientRects() - cannot see the new button.
+        const proto = (doc.defaultView as unknown as { HTMLElement: { prototype: HTMLElement } }).HTMLElement.prototype;
+        const original = Object.getOwnPropertyDescriptor(proto, 'getClientRects');
+        proto.getClientRects = function (this: HTMLElement): DOMRectList {
+            return [makeRect(0, 0, 100, 20)] as unknown as DOMRectList;
+        };
+        try {
+            scopeHandlers(modal).get('Mod+Shift+Enter')?.(
+                new h.dom.window.KeyboardEvent('keydown', { key: 'Enter', metaKey: true, shiftKey: true })
+            );
+            await Promise.resolve();
+
+            assert.equal(plugin.data.activeSessionId, 's2');
+            // Not row 0 any more: leaving the focus behind would split the
+            // active highlight from the selected row.
+            assert.equal(doc.activeElement, loadOf(1), 'the selection moved with the session');
+        } finally {
+            if (original) Object.defineProperty(proto, 'getClientRects', original);
+        }
     } finally {
         modal.close();
         h.restore();
