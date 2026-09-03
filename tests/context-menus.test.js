@@ -288,17 +288,19 @@ test('overwriting an inactive session with the current layout is offered only wh
     assert.equal(onActive.item(L.contextSaveCurrentLayoutToThisSession), undefined);
 });
 
-test('customize clicks opens the plugin settings on the General tab', () => {
+test('customize clicks opens the plugin settings', () => {
     resetHarness();
     const { plugin } = createPlugin();
-    plugin.settingTab = { activeTab: 'advanced' };
+    const opened = [];
+    plugin.app = { setting: { open() {}, openTabById(id) { opened.push(id); } } };
     const created = openSessionMenu(plugin, { showCustomizeClicks: true });
 
     created.item(L.contextCustomizeClicks).trigger();
 
-    // The entry is on the status bar menu, where the useful landing place is
-    // the tab holding the click actions - not wherever the user last was.
-    assert.equal(plugin.settingTab.activeTab, 'general');
+    // The status-bar menu's only route into the settings. It used to preselect
+    // the General tab; the tabs are gone, and the click actions are behind the
+    // status-bar page now.
+    assert.deepEqual(opened, [plugin.manifest.id]);
 });
 
 test('settings menu checks every toggle according to the current setting', () => {

@@ -280,3 +280,37 @@ export async function restoreFromRotationBackup(
     }
 }
 
+
+export interface ManualRotationBackupHost {
+    // Not RotationBackupTimestampHost: that one reads through the JSON store,
+    // which this path does not touch. Only the stamp is shared.
+    _lastRotationBackupAt?: number;
+    getRotationBackupPath(generation: number): string;
+    getBackupsDirPath(): string;
+    ensureDir(path: string): Promise<unknown>;
+    copyFileIfExists(sourcePath: string, destinationPath: string): Promise<unknown>;
+    writeJson(path: string, data: unknown): Promise<unknown>;
+}
+
+/**
+ * Take a rotating backup now, on the user's say-so.
+ *
+ * The automatic path is `rotateBackupIfNeeded`, which is gated on the hour and
+ * moves generations by reading and rewriting through the JSON store. This one
+ * is asked for, so it has no gate, and it copies files - which is what both
+ * manual entry points did, byte for byte, in two places: the settings screen
+ * and the settings context menu.
+ *
+ * Generations shift oldest-first, so nothing is overwritten before it has been
+ * copied forward.
+ */
+export async function createRotationBackupNow(
+    host: ManualRotationBackupHost,
+    backupData: Record<string, unknown>
+): Promise<void> {
+    await host.ensureDir(host.getBackupsDirPath());
+    await host.copyFileIfExists(host.getRotationBackupPath(2), host.getRotationBackupPath(3));
+    await host.copyFileIfExists(host.getRotationBackupPath(1), host.getRotationBackupPath(2));
+    await host.writeJson(host.getRotationBackupPath(1), backupData);
+    host._lastRotationBackupAt = Date.now();
+}

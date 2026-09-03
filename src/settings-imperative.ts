@@ -3,6 +3,7 @@ import type {
     SettingDefinition,
     SettingDefinitionGroup,
     SettingDefinitionItem,
+    SettingDefinitionList,
     SettingDefinitionPage,
 } from 'obsidian';
 
@@ -116,7 +117,7 @@ function renderDefinition(
     containerEl: HTMLElement,
     definition: SettingDefinition,
     access: ControlValueAccess
-): void {
+): Setting {
     const setting = new Setting(containerEl);
     setting.setName(definition.name);
     if (definition.desc !== undefined) setting.setDesc(definition.desc);
@@ -128,7 +129,7 @@ function renderDefinition(
         // file stands in for.
         const draw = definition.render as unknown as (row: Setting) => void;
         draw(setting);
-        return;
+        return setting;
     }
 
     if (definition.action) {
@@ -138,10 +139,67 @@ function renderDefinition(
             button.setDisabled(isDisabled(definition));
             button.onClick(() => { action(setting.settingEl, 0); });
         });
-        return;
+        return setting;
     }
 
     renderControl(setting, definition, access);
+    return setting;
+}
+
+/**
+ * A group or a list.
+ *
+ * A `list`'s three affordances are rendered by hand here because before 1.13
+ * nothing renders them: the `+` becomes an extra button on the heading row,
+ * `onDelete` a trash button per row, and `emptyState` a row of its own.
+ * `onReorder` is not rendered - dragging needs the list's own machinery - so
+ * on Obsidian before 1.13 the order is whatever it already is.
+ */
+function renderGroup(
+    containerEl: HTMLElement,
+    group: SettingDefinitionGroup,
+    access: ControlValueAccess
+): void {
+    const isList = group.type === 'list';
+    const addItem = isList ? (group as SettingDefinitionList).addItem : undefined;
+    const onDelete = isList ? (group as SettingDefinitionList).onDelete : undefined;
+    const emptyState = isList ? (group as SettingDefinitionList).emptyState : undefined;
+
+    if (group.heading || addItem) {
+        const heading = new Setting(containerEl).setName(group.heading ?? '').setHeading();
+        if (group.cls) heading.settingEl.addClass(group.cls);
+        if (addItem) {
+            heading.addButton((button) => {
+                button.setButtonText(addItem.name);
+                button.onClick(() => { addItem.action(heading.settingEl); });
+            });
+        }
+    }
+
+    const children = (group.items ?? []).filter((child) => isVisible(child));
+    if (children.length === 0 && emptyState !== undefined) {
+        new Setting(containerEl).setName(emptyState);
+        return;
+    }
+
+    let index = 0;
+    for (const child of children) {
+        if (isPage(child)) {
+            new Setting(containerEl).setName(child.name).setHeading();
+            if (child.items) renderDefinitions(containerEl, child.items, access);
+            index += 1;
+            continue;
+        }
+        const row = renderDefinition(containerEl, child, access);
+        if (onDelete) {
+            const position = index;
+            row.addExtraButton((button) => {
+                button.setIcon('trash-2');
+                button.onClick(() => { onDelete(position); });
+            });
+        }
+        index += 1;
+    }
 }
 
 /**
@@ -162,24 +220,17 @@ export function renderDefinitions(
         if (!isVisible(item)) continue;
 
         if (isPage(item)) {
-            // A navigable sub-page has no equivalent before 1.13. Nothing here
-            // declares one; if something does, its name is rendered so the gap
-            // is visible.
+            // There is no navigation before 1.13, so a page is flattened: its
+            // name becomes a heading and its contents follow inline. The screen
+            // is longer than 1.13's, and everything on it is reachable, which
+            // is the property that matters.
             new Setting(containerEl).setName(item.name).setHeading();
+            if (item.items) renderDefinitions(containerEl, item.items, access);
             continue;
         }
 
         if (isGroup(item)) {
-            const group = item;
-            if (group.heading) {
-                const heading = new Setting(containerEl).setName(group.heading).setHeading();
-                if (group.cls) heading.settingEl.addClass(group.cls);
-            }
-            for (const child of group.items ?? []) {
-                if (!isVisible(child)) continue;
-                if (isPage(child)) continue;
-                renderDefinition(containerEl, child, access);
-            }
+            renderGroup(containerEl, item, access);
             continue;
         }
 

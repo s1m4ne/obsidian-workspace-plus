@@ -610,9 +610,9 @@ export class WorkspacePlusPlus extends Plugin {
      * Three collaborators take the plugin as a structural host, and it does
      * satisfy all of them - plugin/methods/ attaches every member they name.
      * It cannot satisfy them as one *type*: the interfaces were written at
-     * different commits and disagree on two members (`settingTab.activeTab` is
-     * nullable in one, and `reloadCurrentSessionWithoutSaving` returns a promise
-     * in one and not the other), so they cannot be merged onto the class.
+     * different commits and disagree on a member
+     * (`reloadCurrentSessionWithoutSaving` returns a promise in one and not the
+     * other), so they cannot be merged onto the class.
      *
      * Reconciling those two is worth doing, and is not this commit's job -
      * commit 34b passes the real classes and deletes this along with the attach

@@ -1,9 +1,9 @@
 import { Menu, Notice, type App } from 'obsidian';
-import { addCustomizeClicksItem, call, showAtMouseEvent } from './context-menu-shared.ts';
+import { createRotationBackupNow } from './storage/storage-backup.ts';
+import { addOpenSettingsItem, call, showAtMouseEvent } from './context-menu-shared.ts';
 import { L, text } from './i18n.ts';
 import * as obsidianInternals from './platform/obsidian-internals.ts';
 import type { SettingsState } from './state/settings-state.ts';
-import type { TabId } from './settings-tab.ts';
 import type { GroupStore } from './state/group-store.ts';
 import type { SessionSaver } from './state/session-saver.ts';
 import type { HistoryService } from './state/history-service.ts';
@@ -49,9 +49,6 @@ export interface SettingsContextMenuPluginHost {
         showFilterInput?: boolean;
     };
     manifest: { id: string; name?: string };
-    // TabId, not string: the field really is a TabId and writing a bare string
-    // into it only type-checked because the plugin reached here through a cast.
-    settingTab?: { activeTab: TabId | null } | undefined;
     _lastRotationBackupAt: number;
     extractSessionData(data: unknown): Record<string, unknown>;
     prepareRotationBackupData(sessionData: Record<string, unknown>): Record<string, unknown>;
@@ -173,24 +170,9 @@ export function openSettingsContextMenu(initialOptions?: SettingsContextMenuOpti
         mi.onClick(() => {
             const sessionData = plugin.extractSessionData(plugin.data);
             sessionData._wppSavedAt = Date.now();
-            const backupData = plugin.prepareRotationBackupData(sessionData);
-            void plugin.ensureDir(plugin.getBackupsDirPath())
-                .then(() => plugin.copyFileIfExists(
-                    plugin.getRotationBackupPath(2),
-                    plugin.getRotationBackupPath(3)
-                ))
-                .then(() => plugin.copyFileIfExists(
-                    plugin.getRotationBackupPath(1),
-                    plugin.getRotationBackupPath(2)
-                ))
-                .then(() => plugin.writeJson(plugin.getRotationBackupPath(1), backupData))
-                .then(() => {
-                    plugin._lastRotationBackupAt = Date.now();
-                    new Notice(text(L.rotationBackupCreated));
-                })
-                .catch(() => {
-                    new Notice(text(L.rotationBackupFailed));
-                });
+            void createRotationBackupNow(plugin, plugin.prepareRotationBackupData(sessionData))
+                .then(() => { new Notice(text(L.rotationBackupCreated)); })
+                .catch(() => { new Notice(text(L.rotationBackupFailed)); });
         });
     });
 
@@ -205,14 +187,9 @@ export function openSettingsContextMenu(initialOptions?: SettingsContextMenuOpti
         });
     });
 
-    addCustomizeClicksItem(menu, app, plugin);
-
-    menu.addItem((mi) => {
-        mi.setTitle(text(L.contextOpenSettings));
-        mi.setIcon('settings');
-        mi.onClick(() => {
-            obsidianInternals.openSettingTab(app, plugin.manifest.id);
-        });
+    addOpenSettingsItem(menu, app, plugin, {
+        title: text(L.contextOpenSettings),
+        icon: 'settings',
     });
 
     // --- Quick Switcher only: Reset position ---

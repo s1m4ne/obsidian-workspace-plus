@@ -1,7 +1,5 @@
 import { type App, type Menu } from 'obsidian';
-import { L, text } from './i18n.ts';
 import * as obsidianInternals from './platform/obsidian-internals.ts';
-import type { TabId } from './settings-tab.ts';
 
 /**
  * What the two context-menu modules - one for a session row, one for the empty
@@ -10,7 +8,6 @@ import type { TabId } from './settings-tab.ts';
 
 /** Anything that can be asked to open this plugin's own settings tab. */
 export interface SettingTabHost {
-    settingTab?: { activeTab: TabId | null } | undefined;
     manifest: { id: string };
 }
 
@@ -30,19 +27,31 @@ export function call(value: unknown): void {
     if (typeof value === 'function') (value as () => void)();
 }
 
+export interface OpenSettingsItemOptions {
+    readonly title: string;
+    readonly icon: string;
+}
+
 /**
- * "Customize click actions", which lands on the General tab.
+ * A menu item that opens this plugin's settings.
  *
- * Both menus offer it, identically, and *which tab* is the decision worth
- * keeping in one place: changing it in one copy would have left the two menus
- * opening different screens from the same wording.
+ * One body, two labels. The status-bar menu calls it "Customize click
+ * actions", because that is what the person right-clicking the status bar is
+ * after; the settings menu calls it "Open settings". Those used to be two
+ * items with two identical bodies, and for a while the settings menu carried
+ * both of them - the customize item preselected the General tab, and once the
+ * tabs were gone the two were the same item twice.
  */
-export function addCustomizeClicksItem(menu: Menu, app: App, plugin: SettingTabHost): void {
+export function addOpenSettingsItem(
+    menu: Menu,
+    app: App,
+    plugin: SettingTabHost,
+    options: OpenSettingsItemOptions
+): void {
     menu.addItem((mi) => {
-        mi.setTitle(text(L.contextCustomizeClicks));
-        mi.setIcon('mouse-pointer-click');
+        mi.setTitle(options.title);
+        mi.setIcon(options.icon);
         mi.onClick(() => {
-            if (plugin.settingTab) plugin.settingTab.activeTab = 'general';
             obsidianInternals.openSettingTab(app, plugin.manifest.id);
         });
     });
