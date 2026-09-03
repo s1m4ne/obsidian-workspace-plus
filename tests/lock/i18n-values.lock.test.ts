@@ -1,6 +1,6 @@
 // Behavior Lock: what every i18n key actually resolves to.
 //
-// The other i18n lock proves the shape holds - 319 keys in all 21 locales, the
+// The other i18n lock proves the shape holds - 321 keys in all 21 locales, the
 // right types, plurals picking the right form. It does not prove the values are
 //
 // Edited deliberately, with the maintainer's authorization, at the commit that
@@ -69,6 +69,24 @@
 // written for this commit and should be treated as a first pass - a native
 // speaker's correction to any of them is a value change the maintainer can
 // authorise the same way. 318 keys -> 319.
+//
+// And again, same authorization, for the rotating backups becoming a pool.
+// Two keys added and one value corrected in all 21 locales:
+//
+//   + settingsBackupGenerations       the count, which is a setting now
+//   + settingsBackupGenerationsDesc   what raising and lowering it does
+//   ~ rotationBackupDesc              said "hourly, up to 3 generations"
+//
+// The third is a correction rather than a rewording: three generations was the
+// old fixed scheme, the count defaults to five and is chosen by the user, and
+// the schedule is a ladder of target ages rather than an hourly ring. The
+// sentence was false in every locale.
+//
+// As with settingsSectionStatusBarDesc, these values were written for this
+// commit rather than recovered from git - there is no translator's wording for
+// a string that did not exist, and the corrected one could not keep wording
+// that named a number that is gone. Treat all three as a first pass.
+// 319 keys -> 321.
 //
 // RULE: Behavior Lock tests are NEVER edited during the refactor. If this fails,
 // a translation changed. Regenerating the fixture is only correct when the change
@@ -165,10 +183,10 @@ test('the fixture covers every locale and key, so the comparison is not vacuous'
 
     assert.equal(locales.length, 21);
     for (const locale of locales) {
-        assert.equal(Object.keys(expected[locale] ?? {}).length, 319, `locale ${locale}`);
+        assert.equal(Object.keys(expected[locale] ?? {}).length, 321, `locale ${locale}`);
     }
 
-    // 63 of the 319 are functions, recorded from their output rather than their
+    // 63 of the 321 are functions, recorded from their output rather than their
     // source, so a rewritten implementation with the same output still passes.
     const functionEntries = Object.values(expected.en ?? {}).filter((v) => v.startsWith('fn:'));
     assert.equal(functionEntries.length, 63);

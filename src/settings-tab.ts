@@ -116,6 +116,8 @@ export interface SettingsTabHost {
     // rotates a generation off the end.
     readJsonIfExists<T = unknown>(path: string): Promise<ReadJsonResult<T>>;
     getRotationBackupInfo(): Promise<RotationBackupInfo[]>;
+    /** Apply the generation count now, so a lower one takes effect at once. */
+    pruneRotationBackups(): Promise<number>;
     restoreFromRotationBackup(path: string): Promise<boolean>;
 
 

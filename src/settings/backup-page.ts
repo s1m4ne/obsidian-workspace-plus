@@ -6,6 +6,7 @@ import { formatRelativeTime } from '../modals/format-relative-time.ts';
 import type { RotationBackupInfo } from '../storage/storage-backup.ts';
 import { createManualBackup } from '../manual-backup.ts';
 import type { SettingsContext } from '../settings-tab.ts';
+import { BACKUP_GENERATION_CHOICES } from '../storage/backup-pool.ts';
 import { absoluteTime } from './format.ts';
 
 /**
@@ -80,9 +81,18 @@ function createBackup(ctx: SettingsContext, button: { setDisabled(disabled: bool
 }
 
 function createGroup(ctx: SettingsContext): SettingDefinitionItem {
+    const generationOptions: Record<string, string> = {};
+    for (const choice of BACKUP_GENERATION_CHOICES) {
+        generationOptions[String(choice)] = String(choice);
+    }
+
     return {
         type: 'group',
         items: [{
+            name: text(L.settingsBackupGenerations),
+            desc: text(L.settingsBackupGenerationsDesc),
+            control: { type: 'dropdown', key: 'rotationBackupGenerations', options: generationOptions },
+        }, {
             name: text(L.rotationBackupCreate),
             desc: text(L.rotationBackupDesc),
             render: (setting: Setting) => {
@@ -125,10 +135,6 @@ export function backupPage(
     return {
         type: 'page',
         name: text(L.rotationBackupSectionTitle),
-        // NOTE: `rotationBackupDesc` still says "hourly, up to 3 generations"
-        // in all 21 locales. The count is a setting now and defaults to 5, and
-        // the schedule is a ladder rather than an hourly ring, so this string
-        // is wrong. Left for the wording pass, which owns every locale change.
         desc: text(L.rotationBackupDesc),
         // When the newest backup was taken. The one summary worth keeping on a
         // door: it answers "am I covered?" without opening it. Three

@@ -66,7 +66,7 @@ function createPlugin(overrides = {}) {
         ]]),
         getBackupsDirPath() { return 'backups'; },
         getRotationBackupPath(generation) { return `backups/sessions.${generation}.json`; },
-        getBackupGenerations() { return 5; },
+        getBackupGenerations() { return this.getSettingsState().rotationBackupGenerations; },
         removeIfExists(path) { calls.push(['remove', path]); this.backupFiles.delete(path); return Promise.resolve(); },
         listDir(dir) {
             const prefix = `${dir}/`;
@@ -88,6 +88,10 @@ function createPlugin(overrides = {}) {
         getRotationBackupInfo() {
             const { listRotationBackups } = require('../src/storage/backup-store.ts');
             return listRotationBackups(plugin);
+        },
+        pruneRotationBackups() {
+            const { pruneRotationBackups } = require('../src/storage/backup-store.ts');
+            return pruneRotationBackups(plugin);
         },
         // What generation 1 already holds. `null` data means "no backup
         // there", which is what makes a manual backup rotate.
@@ -675,9 +679,11 @@ function poolFiles(tab) {
     return [...tab.plugin.backupFiles.keys()].filter((path) => path.startsWith(`${BACKUP_DIR}/`));
 }
 
+/** The generation rows: the ones named for a moment rather than an action. */
 function backupRowsOf(tab, L) {
+    void L;
     return rows([pageNamed(tab.getSettingDefinitions(), L.rotationBackupSectionTitle)])
-        .filter((row) => row.name !== L.rotationBackupCreate);
+        .filter((row) => /^\d+\./.test(row.name));
 }
 
 function pressCreate(h, tab, L) {
@@ -879,8 +885,7 @@ test('the list below the button shows the backup the button just took', async ()
 
         tab.getSettingDefinitions();
         await settle();
-        const before = rows([pageNamed(tab.getSettingDefinitions(), L.rotationBackupSectionTitle)])
-            .filter((row) => row.name !== L.rotationBackupCreate);
+        const before = backupRowsOf(tab, L);
         assert.equal(before.length, 1);
 
         const create = rowNamed(
@@ -894,8 +899,7 @@ test('the list below the button shows the backup the button just took', async ()
         // The reading is cached, and the cache used to be filled once per
         // screen - so the press wrote a generation and the list under it went
         // on showing the two that were there before.
-        const after = rows([pageNamed(tab.getSettingDefinitions(), L.rotationBackupSectionTitle)])
-            .filter((row) => row.name !== L.rotationBackupCreate);
+        const after = backupRowsOf(tab, L);
         assert.equal(after.length, 2);
         assert.ok(after[0].name.startsWith('1.'));
         assert.ok(after[1].name.startsWith('2.'));
@@ -1257,5 +1261,50 @@ test('the advanced page is about the files, and nothing else', async () => {
             L.settingsAdvancedTransferSubsection,
             L.settingsDeveloperSection,
         ]);
+    } finally { await settle(); h.restore(); }
+});
+
+test('the generation count is a setting, and lowering it prunes there and then', async () => {
+    const h = setupHarness();
+    try {
+        const { BACKUP_GENERATION_CHOICES } = require('../src/storage/backup-pool.ts');
+        const now = Date.now();
+        const seeded = [];
+        for (let i = 1; i <= 20; i++) {
+            const savedAt = now - i * 3600000;
+            seeded.push([`backups/sessions.${savedAt}.json`, { _wppSavedAt: savedAt, i }]);
+        }
+        const { tab, plugin, L } = makeTab(h, { backupFiles: seeded });
+        tab.plugin = plugin;
+
+        const row = rowNamed(
+            [pageNamed(tab.getSettingDefinitions(), L.rotationBackupSectionTitle)],
+            L.settingsBackupGenerations,
+        );
+        assert.deepEqual(
+            Object.keys(row.control.options).map(Number),
+            [...BACKUP_GENERATION_CHOICES],
+        );
+        assert.equal(tab.getControlValue('rotationBackupGenerations'), '5');
+
+        await tab.setControlValue('rotationBackupGenerations', '12');
+        const atTwelve = poolFiles(tab).length;
+
+        await tab.setControlValue('rotationBackupGenerations', '3');
+        const atThree = poolFiles(tab).length;
+
+        // Applied on the write rather than at the next backup: otherwise the
+        // list below would go on showing files the setting says are gone.
+        assert.ok(atThree < atTwelve, `12 kept ${atTwelve}, 3 kept ${atThree}`);
+        assert.equal(tab.getControlValue('rotationBackupGenerations'), '3');
+    } finally { await settle(); h.restore(); }
+});
+
+test('a generation count the ladder does not offer falls back to the default', async () => {
+    const h = setupHarness();
+    try {
+        const { tab } = makeTab(h);
+        await tab.setControlValue('rotationBackupGenerations', '999');
+        assert.equal(tab.getControlValue('rotationBackupGenerations'), '5');
     } finally { await settle(); h.restore(); }
 });

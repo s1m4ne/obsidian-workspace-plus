@@ -176,6 +176,21 @@ export const CONTROL_BINDINGS: Record<string, ControlBinding> = {
         write: (plugin, value) => state(plugin).setVersionHistoryConfirmRestore(value === true),
     },
 
+    /**
+     * How many rotating backups to keep.
+     *
+     * The prune runs on the write, so lowering the count deletes what is no
+     * longer kept there and then. The alternative - waiting for the next
+     * backup - leaves the list below showing files the setting says are gone.
+     */
+    rotationBackupGenerations: {
+        read: (plugin) => String(state(plugin).rotationBackupGenerations),
+        write: (plugin, value) => state(plugin)
+            .setRotationBackupGenerations(value)
+            .then(() => plugin.pruneRotationBackups()),
+        rereadDefinitions: true,
+    },
+
     // --- Groups --------------------------------------------------------
     groupFeatureEnabled: {
         read: (plugin) => plugin.getGroupStore().isGroupFeatureEnabled(),

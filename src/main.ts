@@ -50,6 +50,7 @@ import type {
     RecordSessionDataStoredHost,
     ReloadExternalSessionHost,
 } from './storage/session-sync.ts';
+import { pruneRotationBackups } from './storage/backup-store.ts';
 import {
     initRotationBackupTimestampForHost,
     prepareRotationBackupData,
@@ -439,6 +440,10 @@ export class WorkspacePlusPlus extends Plugin {
 
     copyFileIfExists(srcPath: string, dstPath: string): Promise<void> {
         return copyFileIfExists(this.app.vault.adapter, srcPath, dstPath);
+    }
+
+    pruneRotationBackups(): Promise<number> {
+        return pruneRotationBackups(this.asHost<RotateBackupHost>());
     }
 
     getRotationBackupInfo(): Promise<RotationBackupInfo[]> {

@@ -1,6 +1,7 @@
 import { DEFAULT_DATA, type PluginData, type StatusBarActions, type StatusBarSlotKey } from '../storage/default-data.ts';
 import { persistIfNeeded, type PersistOption } from './persist-option.ts';
 import { resolveLocale } from '../i18n.ts';
+import { BACKUP_GENERATION_CHOICES, DEFAULT_BACKUP_GENERATIONS } from '../storage/backup-pool.ts';
 
 export interface SettingsStateHost {
     data: PluginData;
@@ -296,6 +297,23 @@ export class SettingsState {
             this.host.stopHistorySnapshotTimer?.();
         }
         return this.persistIfNeeded(options);
+    }
+
+    /**
+     * How many rotating backups to keep. The value is one of the choices the
+     * ladder offers; anything else falls back to the default rather than
+     * becoming a count nothing on the ladder matches.
+     */
+    async setRotationBackupGenerations(value: unknown, options?: SetOption): Promise<boolean> {
+        const parsed = Number(value);
+        this.data.rotationBackupGenerations = BACKUP_GENERATION_CHOICES.includes(parsed)
+            ? parsed
+            : DEFAULT_BACKUP_GENERATIONS;
+        return this.persistIfNeeded(options);
+    }
+
+    get rotationBackupGenerations(): number {
+        return this.data.rotationBackupGenerations ?? DEFAULT_DATA.rotationBackupGenerations;
     }
 
     async setVersionHistorySnapshotInterval(value: unknown, options?: SetOption): Promise<boolean> {
