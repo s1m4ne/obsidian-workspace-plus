@@ -1,7 +1,7 @@
 {
-    "total": 19,
+    "total": 22,
     "rules": {
         "@typescript-eslint/no-deprecated": 18,
-        "obsidianmd/settings-tab/prefer-setting-definitions": 1
+        "obsidianmd/no-unsupported-api": 4
     }
 }

@@ -1,4 +1,6 @@
 import { Notice, PluginSettingTab, Setting, type App, type Plugin } from 'obsidian';
+import type { SettingDefinitionItem, SettingGroupItem } from 'obsidian';
+import { renderDefinitions, type ControlValueAccess } from './settings-imperative.ts';
 import { L, LANG_OPTIONS, LANG_ORDER, formatString, text } from './i18n.ts';
 import { openHotkeysSetting } from './platform/obsidian-internals.ts';
 import { ConfirmModal } from './modals/confirm-modal.ts';
@@ -170,6 +172,38 @@ function absoluteTime(savedAt: number): string {
     }
 }
 
+/**
+ * Where a declarative control's `key` reads and writes.
+ *
+ * A `control` definition carries only a `key`; the tab resolves it. Obsidian's
+ * defaults read and write `plugin.settings`, which this plugin does not have -
+ * settings live on `SettingsState`, and a few on other owners - so every key is
+ * spelled out.
+ *
+ * A table rather than deriving `setLanguageSetting` from `language`:
+ * string-built method names are what this repository has gates against, the
+ * status-bar slots are entries in one record rather than fields of their own,
+ * and `autoSaveOnSwitch` belongs to the saver. The pattern would not hold.
+ */
+interface ControlBinding {
+    readonly read: (plugin: SettingsTabHost) => unknown;
+    readonly write: (plugin: SettingsTabHost, value: unknown) => Promise<unknown> | void;
+}
+
+const CONTROL_BINDINGS: Record<string, ControlBinding> = {
+    language: {
+        read: (plugin) => plugin.getSettingsState().language,
+        write: (plugin, value) => plugin.getSettingsState().setLanguageSetting(String(value)),
+    },
+};
+
+for (const slotKey of statusBarActions.SLOT_KEYS) {
+    CONTROL_BINDINGS[`statusBarActions.${slotKey}`] = {
+        read: (plugin) => plugin.getSettingsState().statusBarActions[slotKey] || 'none',
+        write: (plugin, value) => plugin.getSettingsState().setStatusBarAction(slotKey, String(value)),
+    };
+}
+
 export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
     private readonly plugin: SettingsTabHost;
     activeTab: TabId | null = null;
@@ -182,38 +216,171 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
         this.plugin = plugin;
     }
 
-    override display(): void {
-        const containerEl = this.containerEl;
-        containerEl.empty();
-
-        if (!this.activeTab) this.activeTab = 'general';
-
-        const tabs: { id: TabId; label: unknown }[] = [
+    /** The tabs, and their order. */
+    private tabs(): { id: TabId; label: unknown }[] {
+        return [
             { id: 'general', label: L.settingsSectionGeneral },
             { id: 'sessions', label: L.settingsTabSessions },
             { id: 'groups', label: L.settingsSectionGroups },
             { id: 'advanced', label: L.settingsSectionAdvanced },
         ];
-        const tabBarEl = containerEl.createDiv({ cls: 'wpp-settings-tab-bar' });
-        for (const tab of tabs) {
+    }
+
+    /**
+     * The tab bar, drawn into a row of the settings list.
+     *
+     * A `render` definition is how the declarative API admits arbitrary DOM,
+     * and this is the one place this screen needs it: Obsidian's own navigation
+     * is a list of pages, and four horizontal tabs are not that. The rest of
+     * the screen is data.
+     *
+     * Switching a tab calls `refreshDomState()` rather than re-rendering. It
+     * re-evaluates every `visible` predicate and toggles CSS in place, which is
+     * what makes a tab bar cheap: the other tabs' rows are already built.
+     */
+    private renderTabBar(rowEl: HTMLElement): void {
+        rowEl.addClass('wpp-settings-tab-bar-row');
+        const tabBarEl = rowEl.createDiv({ cls: 'wpp-settings-tab-bar' });
+        for (const tab of this.tabs()) {
             const btn = tabBarEl.createEl('button', {
                 text: text(tab.label),
                 cls: `wpp-settings-tab${tab.id === this.activeTab ? ' is-active' : ''}`,
             });
             btn.addEventListener('click', () => {
                 this.activeTab = tab.id;
-                this.display();
+                if (this.refreshDomState) {
+                    // 1.13+: the rows for every tab are on screen already.
+                    this.refreshDomState();
+                    for (const el of tabBarEl.querySelectorAll('.wpp-settings-tab')) {
+                        el.classList.toggle('is-active', el.textContent === text(tab.label));
+                    }
+                } else {
+                    this.display();
+                }
             });
         }
+    }
 
+    /** True while `tab` is the one on screen. Every group carries one of these. */
+    private onTab(tab: TabId): () => boolean {
+        return () => this.activeTab === tab;
+    }
+
+    override display(): void {
+        const containerEl = this.containerEl;
+        containerEl.empty();
+
+        if (!this.activeTab) this.activeTab = 'general';
+
+        // The same array Obsidian would render from 1.13 on, rendered here for
+        // the versions that cannot. One description, two renderers - see
+        // settings-imperative.ts, which goes when minAppVersion reaches 1.13.0.
+        renderDefinitions(containerEl, this.getSettingDefinitions(), this.controlAccess());
+
+        // Not yet described as data: the tabs whose conversion is still to come
+        // reach the screen the way they always did.
         const contentEl = containerEl.createDiv({ cls: 'wpp-settings-tab-content' });
-
-        if (this.activeTab === 'general') this.displayGeneral(contentEl);
         if (this.activeTab === 'sessions') this.displaySessions(contentEl);
         if (this.activeTab === 'groups') this.displayGroups(contentEl);
         if (this.activeTab === 'advanced') this.displayAdvanced(contentEl);
 
         this.displayFooter(containerEl);
+    }
+
+    /**
+     * The settings as data. Obsidian 1.13 renders from this, and its settings
+     * search indexes it - the index is built from what this returns, once when
+     * the tab is added to the modal.
+     *
+     * The tab bar is one `render` row; every section is a top-level group with a
+     * `visible` predicate naming its tab. Groups cannot nest - a group's items
+     * are definitions or pages - so the sections that were subsection headings
+     * are groups of their own, which is the shape they already had.
+     */
+    override getSettingDefinitions(): SettingDefinitionItem[] {
+        if (!this.activeTab) this.activeTab = 'general';
+        return [
+            { name: '', render: (setting: Setting) => { this.renderTabBar(setting.settingEl); } },
+            ...this.generalDefinitions(),
+        ];
+    }
+
+    /** How a control's `key` reaches this plugin's own storage. */
+    private controlAccess(): ControlValueAccess {
+        return {
+            read: (key) => this.getControlValue(key),
+            write: (key, value) => this.setControlValue(key, value),
+        };
+    }
+
+    override getControlValue(key: string): unknown {
+        const binding = CONTROL_BINDINGS[key];
+        return binding ? binding.read(this.plugin) : undefined;
+    }
+
+    override setControlValue(key: string, value: unknown): void | Promise<void> {
+        const binding = CONTROL_BINDINGS[key];
+        if (!binding) return;
+        const written = binding.write(this.plugin, value);
+        if (!written) return;
+        // A language change alters every label. `update()` re-reads the
+        // definitions, which is how the declarative API says the data moved;
+        // before 1.13 there is nothing to re-read and display() does it.
+        return written.then(() => {
+            if (this.update) this.update();
+            else this.display();
+        });
+    }
+
+    /** The General tab, as data. */
+    private generalDefinitions(): SettingDefinitionItem[] {
+        const languageOptions: Record<string, string> = { auto: text(L.settingsLangAuto) };
+        for (const code of LANG_ORDER) {
+            languageOptions[code] = LANG_OPTIONS[code] ?? code;
+        }
+
+        const actionOptions: Record<string, string> = {};
+        for (const actionId of statusBarActions.ACTION_IDS) {
+            actionOptions[actionId] = statusBarActions.getActionLabel(L, actionId);
+        }
+
+        const slots: SettingGroupItem[] = [];
+        for (const slotKey of statusBarActions.SLOT_KEYS) {
+            const labelKey = SLOT_LABEL_KEYS[slotKey];
+            slots.push({
+                name: labelKey ? resolveSettingText(localeEntry(labelKey)) : slotKey,
+                control: { type: 'dropdown', key: `statusBarActions.${slotKey}`, options: actionOptions },
+            });
+        }
+
+        return [
+            {
+                type: 'group',
+                visible: this.onTab('general'),
+                items: [
+                    {
+                        name: text(L.settingsLanguage),
+                        desc: text(L.settingsLanguageDesc),
+                        control: { type: 'dropdown', key: 'language', options: languageOptions },
+                    },
+                    {
+                        name: text(L.settingsHotkeys),
+                        action: () => { this.openPluginHotkeys(); },
+                    },
+                ],
+            },
+            {
+                type: 'group',
+                heading: text(L.settingsSectionStatusBar),
+                visible: this.onTab('general'),
+                items: slots,
+            },
+        ];
+    }
+
+    /** Obsidian's own hotkeys screen, filtered to this plugin. */
+    private openPluginHotkeys(): void {
+        openHotkeysSetting(this.app, this.plugin.manifest?.name || 'Workspace++');
     }
 
     /**
@@ -226,46 +393,6 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
      */
     private addSection(contentEl: HTMLElement, title: unknown): void {
         new Setting(contentEl).setName(text(title)).setHeading();
-    }
-
-    private displayGeneral(contentEl: HTMLElement): void {
-        new Setting(contentEl)
-            .setName(text(L.settingsLanguage))
-            .setDesc(text(L.settingsLanguageDesc))
-            .addDropdown((dropdown) => {
-                dropdown.addOption('auto', text(L.settingsLangAuto));
-                for (const code of LANG_ORDER) {
-                    dropdown.addOption(code, LANG_OPTIONS[code] ?? code);
-                }
-                dropdown.setValue(this.plugin.getSettingsState().language);
-                dropdown.onChange((value) => {
-                    void this.plugin.getSettingsState().setLanguageSetting(value).then(() => { this.display(); });
-                });
-            });
-
-        new Setting(contentEl)
-            .setName(text(L.settingsHotkeys))
-            .addButton((btn) => {
-                btn.setButtonText(text(L.settingsHotkeysBtn));
-                btn.onClick(() => {
-                    openHotkeysSetting(this.app, this.plugin.manifest?.name || 'Workspace++');
-                });
-            });
-
-        this.addSection(contentEl, L.settingsSectionStatusBar);
-
-        for (const slotKey of statusBarActions.SLOT_KEYS) {
-            const labelKey = SLOT_LABEL_KEYS[slotKey];
-            new Setting(contentEl)
-                .setName(labelKey ? resolveSettingText(localeEntry(labelKey)) : slotKey)
-                .addDropdown((dropdown) => {
-                    for (const actionId of statusBarActions.ACTION_IDS) {
-                        dropdown.addOption(actionId, statusBarActions.getActionLabel(L, actionId));
-                    }
-                    dropdown.setValue(this.plugin.getSettingsState().statusBarActions[slotKey] || 'none');
-                    dropdown.onChange((value) => { void this.plugin.getSettingsState().setStatusBarAction(slotKey, value); });
-                });
-        }
     }
 
     private displaySessions(contentEl: HTMLElement): void {

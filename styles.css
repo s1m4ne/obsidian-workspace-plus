@@ -753,6 +753,19 @@ body.wpp-session-list-dragging * {
 }
 
 /* Settings: tab bar */
+/* The tab bar lives in a settings row now, because a `render` definition is
+   how the declarative API admits arbitrary DOM. Obsidian's row chrome - the
+   name column, the border, the vertical padding - has nothing to hold here. */
+.wpp-settings-tab-bar-row {
+    display: block;
+    border-top: none;
+    padding-top: 0;
+}
+
+.wpp-settings-tab-bar-row .setting-item-info {
+    display: none;
+}
+
 .wpp-settings-tab-bar {
     display: flex;
     gap: 4px;

@@ -364,3 +364,155 @@ test('settings controls exercise both session layouts and the enabled group layo
         assert.ok(h.obsidian.settings.some((setting) => setting.nameEl.textContent === 'Focus'));
     } finally { h.restore(); }
 });
+
+/**
+ * The settings are described once and rendered twice.
+ *
+ * `getSettingDefinitions()` is what Obsidian 1.13 renders and what its settings
+ * search indexes - the index is built from what it returns. `display()` walks
+ * the same array through `settings-imperative.ts`, because `minAppVersion` is
+ * 1.11.0 and the API arrived in 1.13.0. Two descriptions of one screen is the
+ * thing to avoid; one description with a fallback renderer is not that.
+ */
+test('the General tab is described as data, and the tab bar is one row of it', () => {
+    const h = setupHarness();
+    try {
+        const { WorkspacePlusPlusSettingTab, L } = load(h);
+        const { plugin } = createPlugin();
+        const tab = new WorkspacePlusPlusSettingTab(plugin.app, plugin);
+        tab.activeTab = 'general';
+
+        const items = tab.getSettingDefinitions();
+
+        // The bar is a `render` row - the one place this screen needs arbitrary
+        // DOM, because Obsidian's own navigation is a list of pages.
+        assert.equal(typeof items[0].render, 'function');
+
+        // Everything else is a group carrying a `visible` predicate for its tab.
+        const groups = items.slice(1);
+        assert.ok(groups.length > 0);
+        for (const group of groups) {
+            assert.equal(group.type, 'group');
+            assert.equal(typeof group.visible, 'function');
+        }
+
+        const named = groups.flatMap((group) => group.items.map((item) => item.name));
+        assert.ok(named.includes(String(L.settingsLanguage)));
+        assert.ok(named.includes(String(L.settingsHotkeys)));
+    } finally { h.restore(); }
+});
+
+test('a group belongs to one tab, and says so through visible', () => {
+    const h = setupHarness();
+    try {
+        const { WorkspacePlusPlusSettingTab } = load(h);
+        const { plugin } = createPlugin();
+        const tab = new WorkspacePlusPlusSettingTab(plugin.app, plugin);
+
+        tab.activeTab = 'general';
+        const onGeneral = tab.getSettingDefinitions().slice(1);
+        assert.ok(onGeneral.every((group) => group.visible() === true));
+
+        // Switching the tab hides them without rebuilding anything, which is
+        // what refreshDomState() applies on 1.13.
+        tab.activeTab = 'groups';
+        assert.ok(onGeneral.every((group) => group.visible() === false));
+    } finally { h.restore(); }
+});
+
+test('the General rows reach the screen through display() as well', () => {
+    const h = setupHarness();
+    try {
+        const { WorkspacePlusPlusSettingTab, L } = load(h);
+        const { plugin } = createPlugin();
+        const tab = new WorkspacePlusPlusSettingTab(plugin.app, plugin);
+        tab.activeTab = 'general';
+        tab.display();
+
+        // Rendered from the definitions, not from an imperative copy of them.
+        const names = h.obsidian.settings.map((setting) => setting.nameEl.textContent);
+        assert.ok(names.includes(String(L.settingsLanguage)), 'the language row');
+        assert.ok(names.includes(String(L.settingsSectionStatusBar)), 'the status bar heading');
+        assert.ok(
+            tab.containerEl.querySelector('.wpp-settings-tab-bar'),
+            'and the tab bar the render row draws'
+        );
+    } finally { h.restore(); }
+});
+
+test('the rows of a tab that is not showing stay off the screen', async () => {
+    const h = setupHarness();
+    try {
+        const { WorkspacePlusPlusSettingTab, L } = load(h);
+        const { plugin } = createPlugin();
+        const tab = new WorkspacePlusPlusSettingTab(plugin.app, plugin);
+
+        // Every group is on screen for Obsidian 1.13, which hides the inactive
+        // ones by predicate. Before 1.13 the fallback renderer has to honour
+        // the same predicate, or every tab's rows appear at once.
+        tab.activeTab = 'groups';
+        tab.display();
+
+        const names = h.obsidian.settings.map((setting) => setting.nameEl.textContent);
+        assert.equal(names.includes(String(L.settingsLanguage)), false, 'the General rows are absent');
+        assert.equal(names.includes(String(L.settingsSectionStatusBar)), false);
+    } finally { h.restore(); }
+});
+
+test('a control key reads and writes through the owner that holds it', async () => {
+    const h = setupHarness();
+    try {
+        const { WorkspacePlusPlusSettingTab } = load(h);
+        const { plugin, calls } = createPlugin();
+        const tab = new WorkspacePlusPlusSettingTab(plugin.app, plugin);
+
+        assert.equal(tab.getControlValue('language'), plugin.data.language);
+        // An unset slot reads as 'none' rather than undefined: a dropdown's
+        // value has to be one of its options.
+        assert.equal(plugin.data.statusBarActions.click, undefined);
+        assert.equal(tab.getControlValue('statusBarActions.click'), 'none');
+
+        // `calls` records [setterName, ...args], so the slot is checked too - a
+        // binding that reached the right setter with the wrong slot is the
+        // defect worth catching.
+        await tab.setControlValue('statusBarActions.click', 'sessionManager');
+        assert.deepEqual(calls[0], ['statusAction', 'click', 'sessionManager']);
+
+        await tab.setControlValue('language', 'ja');
+        assert.deepEqual(calls[1], ['language', 'ja']);
+    } finally { h.restore(); }
+});
+
+test('an unbound control key writes nothing', async () => {
+    const h = setupHarness();
+    try {
+        const { WorkspacePlusPlusSettingTab } = load(h);
+        const { plugin, calls } = createPlugin();
+        const tab = new WorkspacePlusPlusSettingTab(plugin.app, plugin);
+
+        assert.equal(tab.getControlValue('notABinding'), undefined);
+        await tab.setControlValue('notABinding', 'anything');
+
+        assert.deepEqual(calls, [], 'no setter was reached');
+    } finally { h.restore(); }
+});
+
+test('changing a control redraws the screen even without 1.13 to re-read it', async () => {
+    const h = setupHarness();
+    try {
+        const { WorkspacePlusPlusSettingTab } = load(h);
+        const { plugin } = createPlugin();
+        const tab = new WorkspacePlusPlusSettingTab(plugin.app, plugin);
+        tab.activeTab = 'general';
+        tab.display();
+
+        // The harness models a pre-1.13 Obsidian in this respect: no update().
+        let redraws = 0;
+        const realDisplay = tab.display.bind(tab);
+        tab.display = () => { redraws += 1; realDisplay(); };
+        tab.update = undefined;
+
+        await tab.setControlValue('language', 'de');
+        assert.equal(redraws, 1, 'display() stands in for update()');
+    } finally { h.restore(); }
+});
