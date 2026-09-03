@@ -126,9 +126,6 @@ export class SettingsState {
         return this.data.showFilterInput ?? DEFAULT_DATA.showFilterInput;
     }
 
-    get overlayDefaultFocus(): string {
-        return this.data.overlayDefaultFocus ?? DEFAULT_DATA.overlayDefaultFocus;
-    }
 
     get confirmDeleteByHotkey(): boolean {
         return this.data.confirmDeleteByHotkey ?? DEFAULT_DATA.confirmDeleteByHotkey;
@@ -279,10 +276,6 @@ export class SettingsState {
         return this.persistIfNeeded(options);
     }
 
-    async setOverlayDefaultFocus(value: string, options?: SetOption): Promise<boolean> {
-        this.data.overlayDefaultFocus = value || 'current-session';
-        return this.persistIfNeeded(options);
-    }
 
     async setConfirmDeleteByHotkey(enabled: boolean, options?: SetOption): Promise<boolean> {
         this.data.confirmDeleteByHotkey = !!enabled;

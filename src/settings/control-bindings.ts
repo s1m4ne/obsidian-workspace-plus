@@ -113,10 +113,6 @@ export const CONTROL_BINDINGS: Record<string, ControlBinding> = {
         read: (plugin) => state(plugin).showFilterInput,
         write: (plugin, value) => state(plugin).setShowFilterInput(value === true),
     },
-    overlayDefaultFocus: {
-        read: (plugin) => state(plugin).overlayDefaultFocus,
-        write: (plugin, value) => state(plugin).setOverlayDefaultFocus(String(value)),
-    },
 
     // --- Confirmations -------------------------------------------------
     confirmQuickActions: {

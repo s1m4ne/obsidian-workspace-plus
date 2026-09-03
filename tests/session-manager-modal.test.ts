@@ -29,7 +29,6 @@ interface ModalPlugin {
         activeGroupId: string | null;
         groupFeatureEnabled: boolean;
         showFilterInput: boolean;
-        overlayDefaultFocus: string;
         [key: string]: unknown;
     };
     switchedIds: string[];
@@ -162,7 +161,6 @@ function makePlugin(containerEl: HTMLElement, groupFeatureEnabled = false): Moda
         activeGroupId: null,
         groupFeatureEnabled,
         showFilterInput: true,
-        overlayDefaultFocus: 'session-create',
     };
     // The fixture data is the modal-relevant slice, not a whole PluginData;
     // SettingsState reads its own keys off it and falls back to DEFAULT_DATA.
@@ -220,8 +218,8 @@ function makePlugin(containerEl: HTMLElement, groupFeatureEnabled = false): Moda
             }) as never;
         },
         // A real SettingsState over this fixture's own data: showFilterInput
-        // and overlayDefaultFocus are read through the owner now, and both are
-        // set above precisely to steer the tests below.
+        // is read through the owner now, and is set above precisely to steer
+        // the tests below.
         getSettingsState(): never { return settingsState as never; },
         getOrderedSessionsForGroup: (groupId): Session[] => plugin.data.sessionOrder
             .map((id) => plugin.data.sessions[id])

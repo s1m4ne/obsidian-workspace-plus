@@ -70,7 +70,6 @@ export interface PluginData {
     statusBarQuickSwitcher: boolean;
     groupFeatureEnabled: boolean;
     showFilterInput: boolean;
-    overlayDefaultFocus: string;
     showActiveSwitchCommand: boolean;
     numberedSwitchCommands: boolean;
     // Written and read as left/bottom - see search-overlay.ts, which anchors
@@ -122,7 +121,6 @@ export const DEFAULT_DATA: PluginData = {
     // lists would never have appeared. Installs that already carry a value keep
     // it; this only changes what a new one starts with.
     showFilterInput: true,
-    overlayDefaultFocus: 'current-session',
     showActiveSwitchCommand: false,
     numberedSwitchCommands: true,
     searchOverlayPosition: null,
@@ -171,7 +169,6 @@ export const SETTINGS_KEYS: readonly string[] = [
     'statusBarQuickSwitcher',
     'statusBarModScrollSwitch',
     'groupFeatureEnabled',
-    'overlayDefaultFocus',
     'searchOverlayPosition',
     'searchOverlaySize',
     'versionHistoryEnabled',

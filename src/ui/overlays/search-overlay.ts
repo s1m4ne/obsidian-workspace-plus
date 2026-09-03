@@ -318,7 +318,6 @@ export interface SearchOverlayHost extends GroupTabPluginHost, HistoryModalPlugi
         groups: Record<string, SessionGroup>;
         sessions: Record<string, SessionItem>;
         showFilterInput: boolean;
-        overlayDefaultFocus: string;
         searchOverlayPosition: SearchOverlayPosition | null;
         searchOverlaySize: SearchOverlaySize | null;
         confirmQuickActions: boolean;
@@ -415,7 +414,6 @@ export class SearchOverlay {
             : null;
         self.searchOverlayViewGroupId = overlayGroupId;
         let ordered = self.getSessionStore().getOrderedSessionsForGroup(overlayGroupId);
-        const focusTarget = self.getSettingsState().overlayDefaultFocus;
 
         self.getSwitchOverlay().hide();
         hideThisOverlay();
@@ -987,7 +985,10 @@ export class SearchOverlay {
         overlayEventOwner.registerDomEvent(overlayDocument, 'mousedown', self.searchOverlayClickOutsideHandler, true);
 
         self.searchOverlayEl = overlay;
-        setKeyboardNavState(focusTarget === 'current-session');
+        // Opening on the current session is what this overlay is for, so the
+        // keyboard starts on it. It was a setting with three answers; the other
+        // two were the filter box and the name field, both a keystroke away.
+        setKeyboardNavState(true);
         renderList();
 
         // Position overlay relative to anchor (status bar button)
@@ -1251,38 +1252,29 @@ export class SearchOverlay {
             dragEventOwner.registerDomEvent(overlayDocument, 'mouseup', onUp);
         });
 
-        if (focusTarget !== 'session-create') {
-            const guardHandler = function (e: FocusEvent): void {
-                if (e.target === saveInput) {
-                    e.preventDefault();
-                    e.stopImmediatePropagation();
-                    if (focusTarget === 'session-filter' && self.getSettingsState().showFilterInput) {
-                        searchInput.focus();
-                    } else {
-                        overlay.focus();
-                    }
-                }
-            };
-            const focusGuardEventOwner = new Component();
-            focusGuardEventOwner.load();
-            this.focusGuardEventOwner = focusGuardEventOwner;
-            focusGuardEventOwner.registerDomEvent(overlay, 'focusin', guardHandler, true);
-            overlayWindow.setTimeout(() => {
-                if (this.focusGuardEventOwner === focusGuardEventOwner) {
-                    focusGuardEventOwner.unload();
-                    this.focusGuardEventOwner = null;
-                }
-            }, 300);
-        }
-
-        overlayWindow.setTimeout(function () {
-            if (focusTarget === 'session-filter' && self.getSettingsState().showFilterInput) {
-                navigationUtils.focusTextInputSelect(searchInput);
-            } else if (focusTarget === 'session-create') {
-                saveInput.focus();
-            } else {
+        // The name field must not steal the opening focus. Obsidian focuses the
+        // first field in a container, and that is the field that creates a
+        // session - so an overlay opened to switch would open ready to name.
+        const guardHandler = function (e: FocusEvent): void {
+            if (e.target === saveInput) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
                 overlay.focus();
             }
+        };
+        const focusGuardEventOwner = new Component();
+        focusGuardEventOwner.load();
+        this.focusGuardEventOwner = focusGuardEventOwner;
+        focusGuardEventOwner.registerDomEvent(overlay, 'focusin', guardHandler, true);
+        overlayWindow.setTimeout(() => {
+            if (this.focusGuardEventOwner === focusGuardEventOwner) {
+                focusGuardEventOwner.unload();
+                this.focusGuardEventOwner = null;
+            }
+        }, 300);
+
+        overlayWindow.setTimeout(function () {
+            overlay.focus();
         }, 20);
     }
 }

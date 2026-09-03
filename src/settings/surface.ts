@@ -155,19 +155,6 @@ function overlayGroup(): SettingDefinitionItem {
                 desc: text(L.settingsShowFilterInputDesc),
                 control: { type: 'toggle', key: 'showFilterInput' },
             },
-            {
-                name: text(L.settingsOverlayDefaultFocus),
-                desc: text(L.settingsOverlayDefaultFocusDesc),
-                control: {
-                    type: 'dropdown',
-                    key: 'overlayDefaultFocus',
-                    options: {
-                        'current-session': text(L.settingsOverlayFocusCurrentSession),
-                        'session-filter': text(L.settingsOverlayFocusSessionFilter),
-                        'session-create': text(L.settingsOverlayFocusSessionCreate),
-                    },
-                },
-            },
         ],
     };
 }

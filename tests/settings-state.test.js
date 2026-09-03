@@ -148,11 +148,6 @@ test('settings state covers all remaining setters and fallback logic', async fun
     await state.setShowFilterInput(true);
     assert.equal(data.showFilterInput, true);
 
-    await state.setOverlayDefaultFocus('search');
-    assert.equal(data.overlayDefaultFocus, 'search');
-    await state.setOverlayDefaultFocus('');
-    assert.equal(data.overlayDefaultFocus, 'current-session');
-
     await state.setConfirmDeleteByHotkey(true);
     assert.equal(data.confirmDeleteByHotkey, true);
 

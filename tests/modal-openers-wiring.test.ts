@@ -65,7 +65,7 @@ function createPlugin(): TestPlugin {
                 onSessionsChanged: (): (() => void) => (): void => {},
             }) as never;
         },
-        // The modal reads showFilterInput and overlayDefaultFocus through the
+        // The modal reads showFilterInput through the
         // owner, so it gets a real one over this fixture's own data.
         getSettingsState: () => settingsState,
         getOrderedSessionsForGroup: () => [SESSION],

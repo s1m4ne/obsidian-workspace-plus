@@ -89,7 +89,6 @@ export interface SettingsTabHost {
         previewNext?: boolean;
         previewPrevious?: boolean;
         showFilterInput?: boolean;
-        overlayDefaultFocus?: string;
         confirmDeleteByHotkey?: boolean;
         [key: string]: unknown;
     };

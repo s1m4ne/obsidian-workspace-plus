@@ -63,7 +63,6 @@ export interface SessionManagerModalHost extends GroupTabPluginHost, HistoryModa
         sessions: Record<string, SessionItem>;
         confirmDeleteByHotkey: boolean;
         showFilterInput: boolean;
-        overlayDefaultFocus: string;
         [key: string]: unknown;
     };
 }
@@ -297,18 +296,13 @@ export class SessionManagerModal extends Modal {
         this.listenerDoc = this.containerEl.ownerDocument;
         this.listenerDoc.addEventListener('keydown', this.modalKeyHandler, true);
 
-        // Obsidian auto-focuses the first input, so the configured focus target
-        // has to be applied after that has happened.
-        const focusTarget = this.plugin.getSettingsState().overlayDefaultFocus;
-        if (focusTarget !== 'session-create') {
-            this.ownerWindow().setTimeout(() => {
-                if (focusTarget === 'session-filter' && this.filterInput) {
-                    this.focusFilterInput();
-                } else {
-                    this.focusSessionTarget(this.getDefaultSessionTarget());
-                }
-            }, 50);
-        }
+        // Obsidian auto-focuses the first input, which here is the field that
+        // names a new session, so the session this modal opened on has to take
+        // the focus back after that has happened. Where it lands was a setting
+        // with three answers; the other two were a keystroke away.
+        this.ownerWindow().setTimeout(() => {
+            this.focusSessionTarget(this.getDefaultSessionTarget());
+        }, 50);
     }
 
     /**
