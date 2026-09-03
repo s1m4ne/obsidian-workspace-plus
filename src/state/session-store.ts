@@ -240,7 +240,15 @@ export class SessionStore {
         this.data.sessionOrder = merged;
         if (options?.syncCommands !== false) {
             this.host.syncSessionCommands?.();
-        this.announceSessionsChanged();
+            // Inside the same guard deliberately, and indented to say so: the
+            // line read as a mis-nested typo and is not one. The only caller
+            // that passes `syncCommands: false` is the session manager's
+            // drag-reorder, which is mid-gesture - it has already moved the row
+            // and renumbered the list itself, and announcing would have the
+            // modal rebuild that list under the pointer, destroying the element
+            // being dragged. Inert until the modal started listening (#119);
+            // load-bearing now.
+            this.announceSessionsChanged();
         }
         if (options?.persist === false) return changed;
         if (!changed) return false;
