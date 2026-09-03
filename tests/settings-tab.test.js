@@ -97,7 +97,10 @@ function createPlugin(overrides = {}) {
         setStatusBarScrollModifierMode: promiseCall('modifier'), setStatusBarScrollThreshold: promiseCall('threshold'),
         setStatusBarScrollCooldownMs: promiseCall('cooldown'), setStatusBarScrollResetMs: promiseCall('resetWindow'),
         setStatusBarScrollInvert: promiseCall('invert'), setShowActiveSwitchCommand: promiseCall('activeCommand'),
-        setNumberedSwitchCommands: promiseCall('numbered'), setSwitchPreviewEnabled: promiseCall('preview'),
+        setNumberedSwitchCommands: promiseCall('numbered'), setSwitchPreviewEnabled: promiseCall('preview', (value) => {
+            data.previewNext = value;
+            data.previewPrevious = value;
+        }),
         setPreviewNext: promiseCall('previewNext'), setPreviewPrevious: promiseCall('previewPrevious'),
         setShowFilterInput: promiseCall('filter'), setOverlayDefaultFocus: promiseCall('focus'),
         setConfirmDeleteByHotkey: promiseCall('confirmDelete'), setVersionHistoryEnabled: promiseCall('history'),
@@ -439,12 +442,51 @@ test('the two preview directions are absent while the preview is off', async () 
     } finally { await settle(); h.restore(); }
 });
 
-test('turning the preview master on sets both directions, so it leaves no half state', async () => {
+test('turning the preview master on sets both directions, every time', async () => {
     const h = setupHarness();
     try {
-        const { tab, calls } = makeTab(h);
+        const { tab, plugin, calls } = makeTab(h);
+
+        // Left in a one-direction state, which is what makes the press
+        // interesting: it has to land on both-on regardless.
+        plugin.data.previewNext = true;
+        plugin.data.previewPrevious = false;
         await tab.setControlValue('switchPreviewEnabled', true);
+
         assert.deepEqual(calls.filter((entry) => entry[0] === 'preview'), [['preview', true]]);
+        assert.equal(plugin.data.previewNext, true);
+        assert.equal(plugin.data.previewPrevious, true);
+    } finally { await settle(); h.restore(); }
+});
+
+test('both directions preview by default', async () => {
+    const h = setupHarness();
+    try {
+        const { DEFAULT_DATA } = require('../src/storage/default-data.ts');
+        assert.equal(DEFAULT_DATA.previewNext, true);
+        assert.equal(DEFAULT_DATA.previewPrevious, true);
+        // And the master reads on from them, so a fresh install shows the two
+        // direction rows rather than hiding them.
+        const { tab } = makeTab(h, { data: { previewNext: undefined, previewPrevious: undefined } });
+        assert.equal(tab.getControlValue('switchPreviewEnabled'), true);
+    } finally { await settle(); h.restore(); }
+});
+
+test('a write inside the preview group rebuilds the rows, because it moves the others', async () => {
+    const h = setupHarness();
+    try {
+        const { tab } = makeTab(h);
+        let reads = 0;
+        tab.update = () => { reads += 1; };
+
+        // refreshDomState re-runs `visible` and `disabled` and nothing else, so
+        // without a rebuild the master would keep showing off after the two
+        // directions came on, and vice versa.
+        for (const key of ['switchPreviewEnabled', 'previewNext', 'previewPrevious']) {
+            reads = 0;
+            await tab.setControlValue(key, true);
+            assert.equal(reads, 1, `${key} did not rebuild the rows`);
+        }
     } finally { await settle(); h.restore(); }
 });
 

@@ -22,9 +22,18 @@ export interface ControlBinding {
     readonly write: (plugin: SettingsTabHost, value: unknown) => Promise<unknown> | void;
 
     /**
-     * The write changed which items exist, so the definitions have to be read
-     * again rather than re-evaluated. Obsidian re-evaluates on its own after
-     * every write; only a changed *set* needs this.
+     * The write changed something other than this control's own value, so the
+     * definitions have to be read again rather than re-evaluated.
+     *
+     * Obsidian re-evaluates after every write, but `refreshDomState` only
+     * re-runs each row's `visible` and `disabled`:
+     *
+     *     function X2(e) { ... e.settingEl.toggle(i) ... setting.setDisabled(...) }
+     *
+     * It does not re-read a `control`'s value. So a write that moves another
+     * row's stored value leaves that row showing the old one until the
+     * definitions are rebuilt, which is what this asks for. A changed set of
+     * items needs it for the same reason.
      */
     readonly rereadDefinitions?: boolean;
 }
@@ -76,19 +85,27 @@ export const CONTROL_BINDINGS: Record<string, ControlBinding> = {
      * the whole feature being off. That was harmless while the two children
      * were always on screen; now that they are hidden when the master is off,
      * `&&` would hide the row you would need to get back to one-direction-only.
-     * Turning the master on still sets both, so it cannot leave a half state.
+     *
+     * Turning it on sets *both* directions on, every time - so a press always
+     * lands in the same state, whatever the two were left at before. That is
+     * why all three of these ask for a re-read: this write moves the two rows
+     * below it, and those two move this one, and `refreshDomState` alone would
+     * leave whichever row it was not told about showing its previous value.
      */
     switchPreviewEnabled: {
         read: (plugin) => state(plugin).previewNext || state(plugin).previewPrevious,
         write: (plugin, value) => state(plugin).setSwitchPreviewEnabled(value === true),
+        rereadDefinitions: true,
     },
     previewNext: {
         read: (plugin) => state(plugin).previewNext,
         write: (plugin, value) => state(plugin).setPreviewNext(value === true),
+        rereadDefinitions: true,
     },
     previewPrevious: {
         read: (plugin) => state(plugin).previewPrevious,
         write: (plugin, value) => state(plugin).setPreviewPrevious(value === true),
+        rereadDefinitions: true,
     },
 
     // --- Overlay -------------------------------------------------------
