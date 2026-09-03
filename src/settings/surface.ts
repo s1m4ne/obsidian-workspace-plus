@@ -36,9 +36,11 @@ function generalGroup(ctx: SettingsContext): SettingDefinitionItem {
                 control: { type: 'dropdown', key: 'language', options: languageOptions() },
             },
             {
-                // No description: there is no `settingsHotkeysDesc` key, and
-                // adding one would fail the i18n value lock.
+                // An action row, so the whole row is the affordance: it has no
+                // control, and a button beside a name that says nothing about
+                // what it opens was the least legible row on the screen.
                 name: text(L.settingsHotkeys),
+                desc: text(L.settingsHotkeysDesc),
                 action: () => {
                     openHotkeysSetting(ctx.app, ctx.plugin.manifest?.name || 'Workspace++');
                 },

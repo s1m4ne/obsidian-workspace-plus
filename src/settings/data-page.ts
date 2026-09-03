@@ -113,8 +113,8 @@ export function dataPage(
 ): SettingDefinitionPage {
     return {
         type: 'page',
-        name: text(L.settingsSectionAdvanced),
-        desc: text(L.settingsStorageDiagnosticsDesc),
+        name: text(L.settingsSectionStorage),
+        desc: text(L.settingsSectionStorageDesc),
         items: [
             storageGroup(),
             transferGroup(ctx),

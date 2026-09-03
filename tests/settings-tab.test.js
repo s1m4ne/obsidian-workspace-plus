@@ -303,7 +303,7 @@ test('the whole screen is data, and the six pages are part of it', async () => {
             L.historyTitle,
             L.rotationBackupSectionTitle,
             L.settingsSectionGroups,
-            L.settingsSectionAdvanced,
+            L.settingsSectionStorage,
         ]) {
             assert.ok(names.includes(expected), `missing page: ${expected}`);
         }
@@ -1248,11 +1248,11 @@ test('the resets are on the surface, at the foot of it, and not behind a door', 
     } finally { await settle(); h.restore(); }
 });
 
-test('the advanced page is about the files, and nothing else', async () => {
+test('the storage page is about the files, and nothing else', async () => {
     const h = setupHarness();
     try {
         const { tab, L } = makeTab(h);
-        const page = pageNamed(tab.getSettingDefinitions(), L.settingsSectionAdvanced);
+        const page = pageNamed(tab.getSettingDefinitions(), L.settingsSectionStorage);
         const headings = groupsIn([page]).map((group) => group.heading);
 
         assert.deepEqual(headings, [
@@ -1312,7 +1312,7 @@ test('the storage group is the one toggle, and the path is named once on the pag
     const h = setupHarness();
     try {
         const { tab, L } = makeTab(h);
-        const page = pageNamed(tab.getSettingDefinitions(), L.settingsSectionAdvanced);
+        const page = pageNamed(tab.getSettingDefinitions(), L.settingsSectionStorage);
 
         const storage = groupsIn([page])
             .find((group) => group.heading === L.settingsAdvancedStorageSubsection);

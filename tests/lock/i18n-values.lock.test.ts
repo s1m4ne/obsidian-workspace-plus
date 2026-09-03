@@ -1,6 +1,6 @@
 // Behavior Lock: what every i18n key actually resolves to.
 //
-// The other i18n lock proves the shape holds - 316 keys in all 21 locales, the
+// The other i18n lock proves the shape holds - 319 keys in all 21 locales, the
 // right types, plurals picking the right form. It does not prove the values are
 //
 // Edited deliberately, with the maintainer's authorization, at the commit that
@@ -100,6 +100,28 @@
 // The stored value goes with them, so an install that had chosen one of the
 // other two loses that choice. 321 keys -> 316.
 //
+// And again, same authorization, for the settings wording the maintainer went
+// through row by row. Japanese only - the other twenty locales still carry the
+// old text and are the next pass, which is how the maintainer asked for it:
+// settle the Japanese, then translate it in one go.
+//
+// Three keys added, in all 21 locales because a key must exist to be rendered:
+//
+//   + settingsHotkeysDesc          the row said "Hotkeys" and had a button
+//   + settingsSectionStorage       the page was called "Advanced"
+//   + settingsSectionStorageDesc
+//
+// Seventeen Japanese values rewritten. Two rules came out of it and are worth
+// recording, because the next pass should follow them in every language:
+//
+//   a toggle's name says what it does, not that it enables something
+//     "ステータスバーでセッション切り替えを有効にする" -> "...を切り替える"
+//   a description that names the toggle's state writes it ON / OFF
+//     "自動保存が無効で" / "自動保存がオフのとき" -> "自動保存が OFF で"
+//
+// Command names and notices keep 有効化 / 無効化: those are actions, not
+// states. 316 keys -> 319.
+//
 // RULE: Behavior Lock tests are NEVER edited during the refactor. If this fails,
 // a translation changed. Regenerating the fixture is only correct when the change
 // was intended and the maintainer has said so.
@@ -195,10 +217,10 @@ test('the fixture covers every locale and key, so the comparison is not vacuous'
 
     assert.equal(locales.length, 21);
     for (const locale of locales) {
-        assert.equal(Object.keys(expected[locale] ?? {}).length, 316, `locale ${locale}`);
+        assert.equal(Object.keys(expected[locale] ?? {}).length, 319, `locale ${locale}`);
     }
 
-    // 63 of the 316 are functions, recorded from their output rather than their
+    // 63 of the 319 are functions, recorded from their output rather than their
     // source, so a rewritten implementation with the same output still passes.
     const functionEntries = Object.values(expected.en ?? {}).filter((v) => v.startsWith('fn:'));
     assert.equal(functionEntries.length, 63);
