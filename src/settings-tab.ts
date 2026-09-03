@@ -361,6 +361,16 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
         return { type: 'group', items: [{ name: '', desc, searchable: false }] };
     }
 
+    /** Give up the focus if it is inside this screen, and nowhere else. */
+    private blurWithinScreen(): void {
+        const active = this.containerEl.ownerDocument.activeElement;
+        if (!active || !this.containerEl.contains(active)) return;
+        // Duck-typed rather than `instanceof`: the settings screen can be in a
+        // second window, where HTMLElement is a different constructor.
+        const blur = (active as { blur?: () => void }).blur;
+        if (typeof blur === 'function') blur.call(active);
+    }
+
     override getControlValue(key: string): unknown {
         const binding = CONTROL_BINDINGS[key];
         return binding ? binding.read(this.plugin) : undefined;
@@ -369,6 +379,13 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
     override setControlValue(key: string, value: unknown): void | Promise<void> {
         const binding = CONTROL_BINDINGS[key];
         if (!binding) return;
+
+        // A row that relabels itself has to let go of the focus before the
+        // rebuild: Obsidian keeps a focused control as it is, so the language
+        // dropdown was left showing the language it had a moment ago while the
+        // rest of the screen changed.
+        if (binding.relabelsItself) this.blurWithinScreen();
+
         const written = binding.write(this.plugin, value);
         if (!binding.rereadDefinitions) {
             // Obsidian re-evaluates `visible` and `disabled` itself after every

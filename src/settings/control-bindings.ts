@@ -36,6 +36,16 @@ export interface ControlBinding {
      * items needs it for the same reason.
      */
     readonly rereadDefinitions?: boolean;
+
+    /**
+     * The write changes this row's *own* name, description or options.
+     *
+     * Obsidian's diff renderer will not rebuild a row whose control holds the
+     * focus - it is preserving what you are typing - so a row that relabels
+     * itself has to give the focus up first, or it keeps the old text while
+     * every other row on the screen changes.
+     */
+    readonly relabelsItself?: boolean;
 }
 
 function state(plugin: SettingsTabHost) {
@@ -47,8 +57,10 @@ export const CONTROL_BINDINGS: Record<string, ControlBinding> = {
     language: {
         read: (plugin) => state(plugin).language,
         write: (plugin, value) => state(plugin).setLanguageSetting(String(value)),
-        // Every label on the screen is built from the locale.
+        // Every label on the screen is built from the locale, including this
+        // row's own - and this is the only setting of which that is true.
         rereadDefinitions: true,
+        relabelsItself: true,
     },
 
     // --- Saving --------------------------------------------------------

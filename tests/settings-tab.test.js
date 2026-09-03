@@ -1488,3 +1488,25 @@ test('a reset that fails says so, and hands the button back', async () => {
         assert.equal(button.disabled, false);
     } finally { await settle(); h.restore(); }
 });
+
+test('the language row lets go of the focus, so it relabels itself with the rest', async () => {
+    const h = setupHarness();
+    try {
+        const { tab } = makeTab(h);
+        const select = tab.containerEl.createEl('select');
+        select.focus();
+        assert.equal(h.dom.document.activeElement, select);
+
+        // Obsidian keeps a focused control exactly as it is - it is preserving
+        // what you are typing - so the one row whose own labels change with the
+        // write has to give the focus up first. Without this the dropdown kept
+        // the language it had a moment ago while every other row changed.
+        await tab.setControlValue('language', 'ja');
+        assert.notEqual(h.dom.document.activeElement, select);
+
+        // And a write that does not relabel its own row leaves the focus alone.
+        select.focus();
+        await tab.setControlValue('statusBarScrollInvert', true);
+        assert.equal(h.dom.document.activeElement, select);
+    } finally { await settle(); h.restore(); }
+});
