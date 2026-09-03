@@ -4,27 +4,28 @@ A session manager for Obsidian workspaces, published in the community plugin
 directory. `src/` is TypeScript with owned state and real classes, bundled by
 esbuild into `main.js` (which is generated, not tracked).
 
-## Issue #111 is code-complete, and hand-checked except for one point
+## Where the plugin stands
 
-Issue #111 rewrote `src/` from 18k lines of ES5 CommonJS. All five phases are
-committed, and the maintainer has exercised the plugin in Obsidian across
-switching, saving, version history, sidebar restore, the dialogs and the
-settings screen. Six of the plan's seven verification points are signed off.
+Issue #111 rewrote `src/` from 18k lines of ES5 CommonJS, and shipped as 0.9.0.
+0.10.0 then rebuilt the settings screen on Obsidian's declarative settings API,
+raised `minAppVersion` to 1.13.0, replaced the three fixed backup slots with a
+pool, and fixed a version-history defect that had kept one hour where it
+promised a month. Both are hand-checked in Obsidian by the maintainer.
 
-**What is still unverified is verify 5: the search overlay's key handler** -
-Escape, Tab, the horizontal and vertical arrows, Enter, Delete/Backspace, and
-`/` to reach the filter. That is commit 27's P4 split of a ~1,000-line
-function, and switching *from* the overlay having been checked is not the same
-as its keyboard contract having been checked.
+**What is still unverified from #111 is verify 5: the search overlay's key
+handler** - Escape, Tab, the horizontal and vertical arrows, Enter,
+Delete/Backspace, and `/` to reach the filter. That is commit 27's P4 split of a
+~1,000-line function, and switching *from* the overlay having been checked is
+not the same as its keyboard contract having been checked.
 
-Where it landed, measured rather than claimed:
+Where it stands, measured rather than claimed (`npm run progress`):
 
 ```
-TypeScript                48 / 48 files          prototype methods    0  (from 309)
-CommonJS requires         0                      lint                40  (from 255)
-plugin.data reads         225, 189 of them inside an owner
-... from outside an owner 36  (from ~145)        coverage            93% (from 22%)
-447 tests, 16 gates green
+TypeScript                61 / 61 files          prototype methods    0  (from 309)
+CommonJS requires         0                      lint                 0  (from 255)
+plugin.data reads         228, 192 of them inside an owner
+... from outside an owner 36  (from ~145)        coverage            92.5% (from 22%)
+516 tests, 17 gates green
 ```
 
 The constraint was that **observable behaviour must not change** apart from the
@@ -88,26 +89,28 @@ does.
 ```bash
 npm run check        # the gate: typecheck, lint, dual dispatch, hooks,
                      # host conformance, delegation, reachability, readonly,
-                     # imports, i18n, dead CSS, duplicated bodies, test-only
-                     # members, tests, coverage, build
+                     # imports, i18n, locale builders, dead CSS, duplicated
+                     # bodies, test-only members, tests, coverage, build
 npm run dev          # esbuild watch; hot reload picks it up
 npm run build        # production bundle
 npm run progress     # where the migration landed, measured
 npm run coverage:floors   # per-module coverage floors
 npm run check:i18n   # locale key completeness across 21 locales (also in the gate)
+npm run check:locale-builders   # text() on a function-valued key (also in the gate)
 ```
 
-`npm run check` must pass before every commit. It is sixteen gates, and **CI
+`npm run check` must pass before every commit. It is seventeen gates, and **CI
 runs the same command** - it used to run five of them by hand, which left out
 every gate added because a defect had already shipped. Three are ratchets; nine
 exist because this migration produced the same failure eight times and none of
 the others could see it.
 
 - **Lint** compares per-rule counts against `.eslint-baseline.json`, and the
-  gate fails only when a count *rises*. It began at 255 and is now 40 - all of
-  them recorded suppressions with a reason in issue #111, so any new violation
-  is a real one. The ratchet stays because a suppression is not a licence: it
-  keeps forty from quietly becoming forty-one.
+  gate fails only when a count *rises*. It began at 255, sat at 40 recorded
+  suppressions through #111, and is **0** since `minAppVersion` reached 1.13.0 -
+  every one of the forty was either the deprecated `display()` path or an
+  `obsidianmd/no-unsupported-api` warning about using 1.13 API on an 1.11 floor.
+  The ratchet stays because zero is a state worth keeping.
 - **Coverage** compares project-wide function coverage against
   `.coverage-baseline.json`. It started at 22% and is now 92%. The figures come
   from V8's own dump (`NODE_V8_COVERAGE`), not from the table
@@ -190,6 +193,18 @@ the others could see it.
   last token of a quoted string that a `+` follows; zero is the only acceptable
   count.
 
+- **Locale builders** asks whether any `text(L.x)` names a key that is a
+  *function* in the locale tables. Sixty of the 310 keys are builders, because
+  their text depends on the platform or on a count, and `text()` returns `''`
+  for anything that is not a string. Nine of the twelve status-bar slot labels
+  are builders - the modifier is a glyph on macOS and a word elsewhere - so nine
+  rows shipped with a dropdown and no name at all, and nothing else could see
+  it: `L` is a dictionary of `unknown` so the types agree, the key exists so the
+  i18n check passes, and the tests looked the rows up by the same empty string.
+  `formatString` is the one that calls a builder. The check also refuses
+  `text(L[expr])` outright, because a key it cannot resolve is the shape this
+  bug had. Zero is the only acceptable count.
+
 - **Unwired hooks** is not a ratchet - zero is the only acceptable count.
   `plugin.openHistoryModal?.(session)` reads like a call, but if nothing defines
   the method it does nothing, and neither the type checker nor the tests object.
@@ -244,14 +259,20 @@ part of a task.
 `tests/` holds ordinary unit tests. `tests/lock/` holds what is left of the
 Behavior Lock - the harness, and the two i18n locks - after 34b retired the nine
 suites whose job was to prove Phase 3 changed no behaviour. The two that remain
-are permanent: they pin all 320 keys in all 21 locales, by value.
+are permanent: they pin all 310 keys in all 21 locales, by value.
 
-**The i18n locks make adding a UI string a two-step job.**
-`i18n-values.lock.test.ts` reports an *added* key as a change and fails, and a
-lock may not be edited. So a new string needs the maintainer's decision, not a
-fixture update. There is one place this bites today: the search overlay's close
-button carries the English literal `Close` because there is no `close` key and
-adding one would fail that lock. It is marked in the file.
+**The i18n locks make adding or changing a UI string a two-step job.**
+`i18n-values.lock.test.ts` reports an added key, a removed key or a moved value
+as a change and fails, and a lock may not be edited on the strength of a
+refactor. So a string decision needs the maintainer's, not a fixture update.
+
+0.10.0 went through that door repeatedly - three keys added, nine removed,
+thirty values rewritten in all 21 locales - and every edit is recorded in the
+values lock's header with its reason. Follow that form: say what changed, why
+it is a decision rather than drift, and whether the values were recovered from
+git or written fresh. Two rules came out of it and hold for every locale: a
+toggle's name says what it *does* rather than that it enables something, and a
+description that names a toggle's state uses one word for it throughout.
 
 **A test double stands in for a real owner only when it cannot be one.** Where a
 fixture needs settings or session state, it builds a real `SettingsState` or

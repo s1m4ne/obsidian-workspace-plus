@@ -219,18 +219,14 @@ Do not claim the refactor is verified before the user has confirmed these.
 Features, UI changes, and bug fixes. Also removing default hotkeys, kept
 deliberately — `Cmd+Shift+Enter` is core UX.
 
-The declarative settings API: **attempted in `aaaa42b`, reverted in `4f86cbe`,
-and settled.** `getSettingDefinitions()` exists in `obsidian` 1.13.1, so the
-types were never the obstacle — the layout was. It renders Obsidian's screen
-from our data, and a `page` definition becomes one entry in a vertical list of
-collapsible sections; this plugin's settings are four horizontal tabs with a
-custom bar, and the rows inside them came out wrong too. Adopting it was not a
-change of rendering path but a different settings screen. Found by checking it
-in Obsidian, which is what verify 6 was for.
+The declarative settings API: **done in 0.10.0.** It was attempted in `aaaa42b`
+and reverted in `4f86cbe`, and the note here used to say it was settled as
+out of scope, because a `page` definition turns the screen into a vertical list
+and this plugin's settings were four horizontal tabs. That reasoning was wrong
+in one respect: `render` admits arbitrary DOM and `refreshDomState()` toggles
+`visible` in place, so the tab bar *could* have been kept. It was dropped
+anyway, on the maintainer's call - a card carrying tab buttons looked like what
+it was - and the screen is groups plus six `page` doors now. `display()` is
+gone, `minAppVersion` is 1.13.0, and the twenty lint suppressions that layout
+cost are gone with it.
 
-`display()` is the only renderer and stays. The twenty lint violations this
-would have cleared are the price of the layout and are recorded suppressions:
-eighteen `no-deprecated`, one `prefer-setting-definitions`, one
-`no-manual-html-headings`. The real cost is that the settings do not appear in
-Obsidian's settings search — a feature request, not migration work. Anything
-revisiting this answers the layout question first, not the API question.
