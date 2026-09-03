@@ -323,35 +323,23 @@ test('there is no tab bar: no row draws its own DOM at the top of the screen', a
     } finally { await settle(); h.restore(); }
 });
 
-test('only the backup door carries a summary; the others carry a description', async () => {
+test('no door carries a summary; every one carries a description', async () => {
     const h = setupHarness();
     try {
-        const { tab, L } = makeTab(h);
+        const { tab, plugin } = makeTab(h);
+        tab.plugin = plugin;
         tab.getSettingDefinitions();
         await settle();
         const items = tab.getSettingDefinitions();
 
-        // A summary has to answer a question the reader has before opening the
-        // page. "How many of the twelve slots are spoken for", "which interval
-        // is set", "how many groups exist" are not those questions, and they
-        // were noise on the surface. When the last backup was taken is.
-        // The scroll page keeps one, and so does this: both name the value in
-        // force, the way Obsidian's font pages show the font. What went were
-        // the three that showed a count.
-        for (const name of [
-            L.settingsSectionStatusBar,
-            L.historyTitle,
-            L.settingsSectionGroups,
-        ]) {
-            const page = pageNamed(items, name);
-            assert.equal(page.displayValue, undefined, `${name} still shows a summary`);
-            assert.ok(page.desc, `${name} has no description`);
+        // A figure on a door reads as something to act on, and none of them
+        // were: how many of twelve slots are spoken for, which interval is set,
+        // how many groups exist, when the last backup was taken.
+        for (const page of pages(items)) {
+            assert.equal(page.displayValue, undefined, `${page.name} still shows a summary`);
+            assert.ok(page.desc, `${page.name} has no description`);
         }
-
-        for (const name of [L.rotationBackupSectionTitle, L.settingsSubsectionScrollSwitch]) {
-            const page = pageNamed(items, name);
-            assert.notEqual(resolve(page.displayValue), '', `${name} shows no value`);
-        }
+        assert.equal(pages(items).length, 6, 'the six doors, and nothing nested behind them');
     } finally { await settle(); h.restore(); }
 });
 
@@ -941,7 +929,6 @@ test('the backup page says so when there is nothing in it, rather than showing a
         const page = pageNamed(tab.getSettingDefinitions(), L.rotationBackupSectionTitle);
         const names = rows([page]).map((row) => row.name);
         assert.ok(names.includes(L.rotationBackupNone));
-        assert.equal(resolve(page.displayValue), '', 'and the door says nothing either');
     } finally { await settle(); h.restore(); }
 });
 
@@ -1148,33 +1135,35 @@ test('the rename button on a group row asks for the new name', async () => {
 
 // --- the clock ----------------------------------------------------------
 
-test('the backup entry and the row it summarises are measured from one instant', async () => {
+test('two rows on the backup page are measured from one instant', async () => {
     const h = setupHarness();
     try {
         const savedAt = 1_700_000_000_000;
         const realNow = Date.now;
         // A minute per reading, so any two readings land in different minutes.
-        // Whether the screen agrees with itself then depends entirely on
-        // whether it reads the clock once or twice.
+        // Whether the page agrees with itself then depends entirely on whether
+        // it reads the clock once or once per row.
         let clock = savedAt;
         Date.now = () => { clock += 60000; return clock; };
 
-        const { tab, L } = makeTab(h, {
-            plugin: {
-                getRotationBackupInfo() {
-                    return Promise.resolve([{ generation: 1, savedAt, sessionCount: 1 }]);
-                },
-            },
+        const { tab, plugin, L } = makeTab(h, {
+            backupFiles: [
+                [`backups/sessions.${savedAt}.json`, { _wppSavedAt: savedAt, sessions: { a: 1 } }],
+                [`backups/sessions.${savedAt - 60000}.json`, { _wppSavedAt: savedAt - 60000, sessions: { b: 2 } }],
+            ],
         });
+        tab.plugin = plugin;
         try {
             tab.getSettingDefinitions();
             await settle();
             const page = pageNamed(tab.getSettingDefinitions(), L.rotationBackupSectionTitle);
-            const row = rows([page]).find((entry) => entry.name.startsWith('1.'));
+            const generations = rows([page]).filter((row) => /^\d+\./.test(row.name));
+            assert.equal(generations.length, 2);
 
-            const summary = resolve(page.displayValue);
-            assert.ok(summary, 'the entry says nothing at all');
-            assert.ok(row.desc.startsWith(summary), `entry says "${summary}", row says "${row.desc}"`);
+            // A minute apart in the file names, so a minute apart in the
+            // readings - and no more, which a second clock read would add.
+            const ages = generations.map((row) => Number(/(\d+)/.exec(row.desc)[1]));
+            assert.equal(ages[1] - ages[0], 1, `ages were ${ages}`);
         } finally {
             Date.now = realNow;
             tab.hide();

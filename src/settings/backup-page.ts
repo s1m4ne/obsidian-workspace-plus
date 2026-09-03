@@ -141,8 +141,7 @@ export function backupPage(
     ctx: SettingsContext,
     backups: readonly RotationBackupInfo[] | null
 ): SettingDefinitionPage {
-    const newest = backups?.[0];
-    // One instant for the whole page, so the entry and the row it summarises
+    // One instant for the whole page, so two rows a few statements apart
     // cannot land on either side of a minute boundary and disagree.
     const now = Date.now();
 
@@ -150,10 +149,9 @@ export function backupPage(
         type: 'page',
         name: text(L.rotationBackupSectionTitle),
         desc: text(L.rotationBackupDesc),
-        // When the newest backup was taken. The one summary worth keeping on a
-        // door: it answers "am I covered?" without opening it. Three
-        // generations is the fixed maximum, so a count would say nothing.
-        displayValue: () => (newest ? formatRelativeTime(newest.savedAt, now) : ''),
+        // No summary. This was the last door carrying one; the rest lost theirs
+        // for the same reason - a figure on a door is read as something to act
+        // on, and none of them were.
         items: [createGroup(ctx), generationsGroup(ctx, backups, now), generationCountGroup()],
     };
 }
