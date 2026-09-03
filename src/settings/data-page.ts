@@ -1,6 +1,6 @@
 import { Notice } from 'obsidian';
 import type { SettingDefinitionItem, SettingDefinitionPage, SettingGroupItem } from 'obsidian';
-import { L, formatString, text } from '../i18n.ts';
+import { L, text } from '../i18n.ts';
 import { ConfirmModal } from '../modals/confirm-modal.ts';
 import type { SettingsContext } from '../settings-tab.ts';
 import { absoluteTime, formatByteSize } from './format.ts';
@@ -14,22 +14,23 @@ import { absoluteTime, formatByteSize } from './format.ts';
  * too and are on the surface now - see reset-group.ts.
  */
 
-function storageGroup(ctx: SettingsContext): SettingDefinitionItem {
+/**
+ * Where the sessions live: the one control that moves them.
+ *
+ * The path used to be spelled out above the toggle, as a row that read out
+ * `getSessionsPath()`. It is on this same page already - the diagnostics group
+ * names it, along with the two files beside it - so the row said a second time
+ * what one screen only needs to say once.
+ */
+function storageGroup(): SettingDefinitionItem {
     return {
         type: 'group',
         heading: text(L.settingsAdvancedStorageSubsection),
-        items: [
-            {
-                // A read-out, not a setting: the toggle below is what moves it.
-                name: text(L.settingsSessionStorageLocation),
-                desc: formatString(L.settingsSessionStorageLocationDesc, ctx.plugin.getSessionsPath()),
-            },
-            {
-                name: text(L.settingsVaultOnlySessions),
-                desc: text(L.settingsVaultOnlySessionsDesc),
-                control: { type: 'toggle', key: 'vaultOnlySessions' },
-            },
-        ],
+        items: [{
+            name: text(L.settingsVaultOnlySessions),
+            desc: text(L.settingsVaultOnlySessionsDesc),
+            control: { type: 'toggle', key: 'vaultOnlySessions' },
+        }],
     };
 }
 
@@ -115,7 +116,7 @@ export function dataPage(
         name: text(L.settingsSectionAdvanced),
         desc: text(L.settingsStorageDiagnosticsDesc),
         items: [
-            storageGroup(ctx),
+            storageGroup(),
             transferGroup(ctx),
             diagnosticsGroup(ctx, storageSize),
         ],

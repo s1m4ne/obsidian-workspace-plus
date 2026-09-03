@@ -1308,3 +1308,21 @@ test('a generation count the ladder does not offer falls back to the default', a
         assert.equal(tab.getControlValue('rotationBackupGenerations'), '5');
     } finally { await settle(); h.restore(); }
 });
+
+test('the storage group is the one toggle, and the path is named once on the page', async () => {
+    const h = setupHarness();
+    try {
+        const { tab, L } = makeTab(h);
+        const page = pageNamed(tab.getSettingDefinitions(), L.settingsSectionAdvanced);
+
+        const storage = groupsIn([page])
+            .find((group) => group.heading === L.settingsAdvancedStorageSubsection);
+        assert.deepEqual(storage.items.map((row) => row.name), [L.settingsVaultOnlySessions]);
+
+        // Still on the page, once: the diagnostics name it along with the two
+        // files beside it, which is where a path belongs.
+        const pathRows = rows([page]).filter((row) => row.desc === 's');
+        assert.equal(pathRows.length, 1);
+        assert.equal(pathRows[0].name, L.settingsStorageFieldSessions);
+    } finally { await settle(); h.restore(); }
+});
