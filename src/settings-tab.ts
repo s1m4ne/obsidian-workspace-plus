@@ -9,6 +9,7 @@ import { historyPage } from './settings/history-page.ts';
 import { backupPage } from './settings/backup-page.ts';
 import { groupsPage } from './settings/groups-page.ts';
 import { dataPage } from './settings/data-page.ts';
+import { resetGroup } from './settings/reset-group.ts';
 import type { StatusBarActions } from './storage/default-data.ts';
 import type { StorageDiagnosticsInfo } from './storage/persistence-service.ts';
 import type { RotationBackupInfo } from './storage/storage-backup.ts';
@@ -327,6 +328,9 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
         return [
             ...surfaceGroups(ctx),
             pagesGroup(pages),
+            // Last, under the doors: four things that cannot be undone are the
+            // end of a settings screen, not the middle of one.
+            resetGroup(ctx),
             this.footerGroup(),
         ];
     }

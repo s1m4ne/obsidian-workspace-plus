@@ -3,15 +3,15 @@ import type { SettingDefinitionItem, SettingDefinitionPage, SettingGroupItem } f
 import { L, formatString, text } from '../i18n.ts';
 import { ConfirmModal } from '../modals/confirm-modal.ts';
 import type { SettingsContext } from '../settings-tab.ts';
-import { dangerRow } from './danger-row.ts';
 import { absoluteTime, formatByteSize } from './format.ts';
 
 /**
- * Where the sessions live, moving them in and out, wiping them, and what the
- * plugin can say about its own files.
+ * Where the sessions live, moving them in and out, and what the plugin can say
+ * about its own files.
  *
- * All of it behind one door. Nothing here is set twice, three of the rows
- * cannot be undone, and the diagnostics are a read-out rather than a setting.
+ * One door, one subject: the files. Nothing here is set twice, and the
+ * diagnostics are a read-out rather than a setting. The resets used to be here
+ * too and are on the surface now - see reset-group.ts.
  */
 
 function storageGroup(ctx: SettingsContext): SettingDefinitionItem {
@@ -60,55 +60,6 @@ function transferGroup(ctx: SettingsContext): SettingDefinitionItem {
                     }, { confirmText: text(L.settingsImportSessionsBtn) }).open();
                 },
             },
-        ],
-    };
-}
-
-function resetGroup(ctx: SettingsContext): SettingDefinitionItem {
-    return {
-        type: 'group',
-        heading: text(L.settingsSectionReset),
-        items: [
-            dangerRow(ctx, {
-                name: text(L.settingsResetSettings),
-                desc: text(L.settingsResetSettingsDesc),
-                buttonText: text(L.settingsResetBtn),
-                confirmMessage: text(L.confirmResetSettings),
-                run: () => ctx.plugin.resetSettingsToDefault(),
-                successNotice: text(L.resetSettingsDone),
-                failureNotice: text(L.resetSettingsFailed),
-            }),
-            dangerRow(ctx, {
-                name: text(L.settingsResetSessions),
-                desc: text(L.settingsResetSessionsDesc),
-                buttonText: text(L.settingsResetBtn),
-                confirmMessage: text(L.confirmResetSessions),
-                confirmHint: text(L.resetSessionsHint),
-                run: () => ctx.plugin.getSessionStore().resetSessionsToDefault(),
-                successNotice: text(L.resetSessionsDone),
-                failureNotice: text(L.resetSessionsFailed),
-            }),
-            dangerRow(ctx, {
-                name: text(L.settingsResetBackupsAndHistory),
-                desc: text(L.settingsResetBackupsAndHistoryDesc),
-                // Its own verb, not the shared reset one: this row deletes, and
-                // the button has to say what the row says.
-                buttonText: text(L.settingsResetBackupsAndHistoryBtn),
-                confirmMessage: text(L.confirmResetBackupsAndHistory),
-                confirmHint: text(L.resetBackupsAndHistoryHint),
-                run: () => ctx.plugin.clearBackupsAndVersionHistory(),
-                successNotice: text(L.resetBackupsAndHistoryDone),
-                failureNotice: text(L.resetBackupsAndHistoryFailed),
-            }),
-            dangerRow(ctx, {
-                name: text(L.settingsResetSessionsAndSettings),
-                desc: text(L.settingsResetSessionsAndSettingsDesc),
-                buttonText: text(L.settingsResetSessionsAndSettingsBtn),
-                confirmMessage: text(L.confirmResetSessionsAndSettings),
-                run: () => ctx.plugin.resetSessionsAndSettingsToDefault(),
-                successNotice: text(L.resetSessionsAndSettingsDone),
-                failureNotice: text(L.resetSessionsAndSettingsFailed),
-            }),
         ],
     };
 }
@@ -166,7 +117,6 @@ export function dataPage(
         items: [
             storageGroup(ctx),
             transferGroup(ctx),
-            resetGroup(ctx),
             diagnosticsGroup(ctx, storageSize),
         ],
     };

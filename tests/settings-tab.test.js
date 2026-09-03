@@ -1190,3 +1190,45 @@ test('a screen whose container is gone stops ticking rather than rebuilding for 
         assert.equal(rebuilds, 0);
     } finally { tab.hide(); await settle(); h.restore(); }
 });
+
+test('the resets are on the surface, at the foot of it, and not behind a door', async () => {
+    const h = setupHarness();
+    try {
+        const { tab, L } = makeTab(h);
+        const items = tab.getSettingDefinitions();
+
+        const resets = items.filter((item) => item.heading === L.settingsSectionReset);
+        assert.equal(resets.length, 1, 'the reset group is not at the top level');
+        assert.deepEqual(resets[0].items.map((row) => row.name), [
+            L.settingsResetSettings,
+            L.settingsResetSessions,
+            L.settingsResetBackupsAndHistory,
+            L.settingsResetSessionsAndSettings,
+        ]);
+
+        // Nothing but the footer below them.
+        const index = items.indexOf(resets[0]);
+        assert.equal(index, items.length - 2, `reset group at ${index} of ${items.length}`);
+
+        // And no reset is left inside a page.
+        for (const page of pages(items)) {
+            const names = rows([page]).map((row) => row.name);
+            assert.ok(!names.includes(L.settingsResetSessions), `${page.name} still holds a reset`);
+        }
+    } finally { await settle(); h.restore(); }
+});
+
+test('the advanced page is about the files, and nothing else', async () => {
+    const h = setupHarness();
+    try {
+        const { tab, L } = makeTab(h);
+        const page = pageNamed(tab.getSettingDefinitions(), L.settingsSectionAdvanced);
+        const headings = groupsIn([page]).map((group) => group.heading);
+
+        assert.deepEqual(headings, [
+            L.settingsAdvancedStorageSubsection,
+            L.settingsAdvancedTransferSubsection,
+            L.settingsDeveloperSection,
+        ]);
+    } finally { await settle(); h.restore(); }
+});
