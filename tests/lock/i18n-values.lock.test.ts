@@ -51,6 +51,13 @@
 // configuration as the behaviour. The modifier is optional, and the new text
 // says so. 318 keys, unchanged; one value per locale.
 //
+// And again, for one description that named Obsidian's configuration folder as
+// `.obsidian` in all 21 locales. The folder is renameable, so the sentence was
+// wrong for anyone who had renamed it - Obsidian's own review scanner reports
+// exactly that, twenty times, and it is right. The folder is now named by what
+// it is rather than by its default path. One value per locale; 318 keys,
+// unchanged.
+//
 // RULE: Behavior Lock tests are NEVER edited during the refactor. If this fails,
 // a translation changed. Regenerating the fixture is only correct when the change
 // was intended and the maintainer has said so.

@@ -804,13 +804,12 @@ body.wpp-session-list-dragging * {
     color: var(--text-muted);
 }
 
-.wpp-settings-section-title {
-    margin: 20px 0 8px;
-    font-size: var(--font-ui-medium);
-}
-
-.wpp-settings-section-title:first-child {
-    margin-top: 0;
+/* The section and subsection headings are Obsidian `Setting` rows with
+   `setHeading()` now, not raw h3/h4 elements, so their type comes from the
+   settings screen. Only the leading gap is ours: Obsidian's heading row has no
+   top margin, and without one the sections run together. */
+.wpp-settings-subsection {
+    margin-top: 12px;
 }
 
 .wpp-dev-card {
@@ -927,9 +926,14 @@ body.wpp-session-list-dragging * {
     padding: 24px 0;
 }
 
-.wpp-measure-overlay {
-    visibility: hidden !important;
-    pointer-events: none !important;
+/* Two classes rather than `!important`. The element carries both, so this is a
+   0,2,0 selector and beats any single-class rule a theme might set - which is
+   what the `!important` was defending against. It has to hold: the clone is
+   measured with offsetWidth and a theme making it visible would flash it on
+   screen. */
+.wpp-switch-overlay.wpp-measure-overlay {
+    visibility: hidden;
+    pointer-events: none;
 }
 
 /* The confirm and unsaved-switch modals are opened from on top of the switch
@@ -970,7 +974,13 @@ body.wpp-session-list-dragging * {
    whole thing: the two overlays did that, and hovering any part of them with no
    child under the cursor - the padding along the bottom edge, say - popped up
    "Search sessions". `aria-labelledby` pointing here gives the same accessible
-   name with no tooltip. */
+   name with no tooltip.
+
+   No `clip` or `clip-path`: the classic recipe carries one for browsers where
+   `overflow: hidden` did not clip an absolutely positioned *descendant*, and
+   this span holds a text node and nothing else. A 1px box with overflow hidden
+   is enough, and Obsidian's review scanner reports `clip-path` as only
+   partially supported. */
 .wpp-sr-only {
     position: absolute;
     width: 1px;
@@ -978,7 +988,6 @@ body.wpp-session-list-dragging * {
     margin: -1px;
     padding: 0;
     overflow: hidden;
-    clip-path: inset(50%);
     white-space: nowrap;
     border: 0;
 }
