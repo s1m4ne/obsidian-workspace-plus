@@ -42,11 +42,6 @@ export function scrollSwitchPage(ctx: SettingsContext): SettingDefinitionPage {
         type: 'page',
         name: text(L.settingsSubsectionScrollSwitch),
         desc: text(L.settingsStatusBarModScrollSwitchDesc),
-        // The preset is the one thing worth reading from outside; when the
-        // feature is off there is nothing to say, and `null` shows nothing.
-        displayValue: () => (whenEnabled()
-            ? (presetOptions()[settingsState().statusBarScrollPreset] ?? '')
-            : ''),
         items: [{
             type: 'group',
             items: [
