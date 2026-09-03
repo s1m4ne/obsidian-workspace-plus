@@ -86,10 +86,20 @@ export function addDropdownSetting(parentEl: HTMLElement, options: DropdownSetti
     return setting;
 }
 
+/**
+ * A subsection heading, through Obsidian's own `setHeading()`.
+ *
+ * Same reason as `addSection`: a raw `<h4>` is a heading element the settings
+ * screen did not style. The scanner flagged only the `<h3>`, but both are the
+ * same mistake and the pair should not disagree.
+ *
+ * Returns the row element for callers that want to nest inside it - the switch
+ * preview block hangs its two per-direction toggles off the master row.
+ */
 export function addSubsection(parentEl: HTMLElement, title: SettingText): HTMLElement {
-    const headingEl = parentEl.createEl('h4', { text: resolveSettingText(title) });
-    headingEl.addClass('wpp-settings-subsection');
-    return headingEl;
+    const setting = new Setting(parentEl).setName(resolveSettingText(title)).setHeading();
+    setting.settingEl.addClass('wpp-settings-subsection');
+    return setting.settingEl;
 }
 
 export function addDangerResetSetting(

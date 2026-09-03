@@ -216,8 +216,16 @@ export class WorkspacePlusPlusSettingTab extends PluginSettingTab {
         this.displayFooter(containerEl);
     }
 
+    /**
+     * A section heading, through Obsidian's own `setHeading()`.
+     *
+     * It built an `<h3>` directly, which Obsidian's review scanner reports as
+     * an error: a plugin's headings have to look like the app's, and a raw
+     * heading element does not pick up the settings screen's own type scale or
+     * spacing. `setHeading()` renders a `Setting` row styled as a heading.
+     */
     private addSection(contentEl: HTMLElement, title: unknown): void {
-        contentEl.createEl('h3', { text: text(title), cls: 'wpp-settings-section-title' });
+        new Setting(contentEl).setName(text(title)).setHeading();
     }
 
     private displayGeneral(contentEl: HTMLElement): void {
