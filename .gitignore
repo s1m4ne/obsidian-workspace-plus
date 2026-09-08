@@ -16,8 +16,16 @@ exports/
 # V8's coverage dump, written by scripts/coverage-ratchet.js on every run. Two
 # of these files were tracked; the directory is 3.7 MB of regenerated JSON.
 coverage/
-.claude/*
-!.claude/skills/
+# Assistant instructions and skills. They live in the working copy - every
+# assistant reads them - but they are not part of the plugin, and a repository
+# that ships three files to Obsidian has no reason to publish 118 KB of
+# guidance on how to work on it.
+.claude/
+.agents/
+CLAUDE.md
+AGENTS.md
+GEMINI.md
+
 .workspace-plus-plus/
 .hotreload
 memo.md
