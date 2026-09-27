@@ -157,14 +157,9 @@ test('SessionStore: ordering and visible order merges', async () => {
 });
 
 /**
- * A drag-reorder must not announce, and that is not a typo.
- *
- * `syncCommands: false` has one caller - the session manager's drag handler,
- * which has already moved the row and renumbered the list itself, mid-gesture.
- * Announcing would have the modal rebuild that list under the pointer and
- * destroy the element being dragged. The line sits inside the same guard and
- * reads like a mis-nested one, so it is pinned here: it was inert until the
- * modal started listening (#119) and is load-bearing now.
+ * A caller can still skip command syncing and announcements together while
+ * batching a reorder. The manager instead uses `announce: false` so numbered
+ * command names refresh without rebuilding its in-place drag list.
  */
 test('SessionStore: a reorder that skips the command sync also stays quiet', async () => {
     const { host } = createMockHost();
@@ -178,6 +173,21 @@ test('SessionStore: a reorder that skips the command sync also stays quiet', asy
 
     await store.setSessionOrderFromVisible(['s1', 's2']);
     assert.equal(announced, 1, 'and every other reorder is');
+});
+
+test('SessionStore: an in-place reorder refreshes command names without announcing', async () => {
+    const { host, events } = createMockHost({ activeGroupId: null });
+    const store = new SessionStore(host);
+
+    let announced = 0;
+    store.onSessionsChanged(() => { announced += 1; });
+
+    const changed = await store.setSessionOrderFromVisible(['s2', 's1'], { announce: false });
+
+    assert.equal(changed, true);
+    assert.deepEqual(store.getOrderedSessionsUnfiltered().map((session) => session.id), ['s2', 's1']);
+    assert.equal(events.commandSyncs, 1, 'numbered command labels follow the new order');
+    assert.equal(announced, 0, 'the manager does not redraw its manually reordered list');
 });
 
 test('SessionStore: validation and name generation', () => {
