@@ -990,7 +990,9 @@ export class SessionManagerModal extends Modal {
                     item.classList.add('wpp-just-moved');
                     this.ownerWindow().setTimeout(() => { item.classList.remove('wpp-just-moved'); }, 600);
 
-                    void this.plugin.getSessionStore().setSessionOrderFromVisible(newVisibleOrder, { syncCommands: false });
+                    // The drop has finished: refresh Obsidian's numbered
+                    // command names, but keep this list intact during reorder.
+                    void this.plugin.getSessionStore().setSessionOrderFromVisible(newVisibleOrder, { announce: false });
                 },
             });
         });
@@ -1165,4 +1167,3 @@ export function openSessionManagerModal(
     }
     return modal;
 }
-
