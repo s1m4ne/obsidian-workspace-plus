@@ -606,3 +606,32 @@ test('session sync: a file holding a session and its deletion loads without it',
     assert.deepEqual(Object.keys(normalized.sessions), ['keep']);
     assert.deepEqual(normalized.sessionOrder, ['keep']);
 });
+
+test('session sync: a file stamped before this device\'s last save is still merged in', async function () {
+    // The phone saved at 2, the desktop at 3 before the phone's file arrived.
+    // The sync then delivered the phone's file still stamped 2. Only newer
+    // files used to be read, so the phone's session never reached the desktop.
+    const plugin = createPlugin({
+        activeSessionId: 'base',
+        sessionOrder: ['base'],
+        sessions: { base: { id: 'base', name: 'Base', modified: 100, layout: { base: true } } },
+        groups: {},
+        groupOrder: [],
+        sessionGroups: {},
+        activeGroupId: null,
+    });
+    plugin.host.recordSessionStorageState(3, 3000, plugin.data);
+    plugin.host.readJsonIfExists = () => Promise.resolve({ exists: true, error: null, data: {
+        _wppSavedAt: 2,
+        activeSessionId: 'base',
+        sessionOrder: ['base', 'fromPhone'],
+        sessions: {
+            base: { id: 'base', name: 'Base', modified: 100, layout: { base: true } },
+            fromPhone: { id: 'fromPhone', name: 'From phone', modified: 200, layout: null },
+        },
+    } });
+    plugin.host.getFileMtime = () => Promise.resolve(2000);
+
+    assert.equal(await plugin.host.reloadExternalSessionStorageIfChanged({ mergeLocal: true }), true);
+    assert.equal(plugin.data.sessions.fromPhone?.name, 'From phone');
+});

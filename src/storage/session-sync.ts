@@ -160,6 +160,17 @@ function mergeDeletions(a: unknown, b: unknown): Record<string, number> {
     return out;
 }
 
+/** Not the file this device last read or wrote, whichever is newer. */
+export function isSessionStorageInfoChanged(
+    info: { valid?: boolean; stamp?: number; mtime?: number } | null | undefined,
+    currentStamp: number,
+    currentMtime: number
+): boolean {
+    if (!info || !info.valid) return false;
+    return (info.stamp || 0) !== currentStamp
+        || Math.abs((info.mtime || 0) - currentMtime) > SESSION_FILE_MTIME_EPSILON_MS;
+}
+
 export function mergeExternalSessionDataForWrite(
     localData: Record<string, unknown>,
     externalData: Record<string, unknown>,
@@ -538,14 +549,21 @@ export async function reloadExternalSessionStorageIfChanged(
         const info = await getSessionStorageInfo(host);
         const currentStamp = host._sessionStorageStamp || 0;
         const currentMtime = host._sessionStorageMtime || 0;
-        if (!opts.force && !isSessionStorageInfoNewer(info, currentStamp, currentMtime)) {
-            return false;
-        }
 
         // Whenever there is a baseline, not only when this device has unsaved
         // changes: a session this device created and already saved is not a
         // change any more, and a file written without it would still remove it.
         const mergeLocal = !!opts.mergeLocal && !!host._sessionStorageComparableData;
+
+        // A merge also takes a file older than this device's last save. A sync
+        // delivers files late and keeps the time they were written, so the
+        // other device's change can arrive stamped before ours; only a
+        // wholesale replace needs the file to be newer.
+        const worthReading = isSessionStorageInfoNewer(info, currentStamp, currentMtime)
+            || (mergeLocal && isSessionStorageInfoChanged(info, currentStamp, currentMtime));
+        if (!opts.force && !worthReading) {
+            return false;
+        }
         const previousComparable = host._sessionStorageComparableData
             ? cloneJson(host._sessionStorageComparableData)
             : null;
