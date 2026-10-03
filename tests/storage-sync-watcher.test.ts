@@ -248,6 +248,8 @@ test('session sync host functions: state recording, info check, and sync watcher
     const watcherHost: import('../src/storage/session-sync.ts').SyncWatcherHost = {
         reloadExternalSessionStorageIfChanged: async () => true,
         data: applyHost.data,
+        normalizeSessionData: (d) => d as never,
+        persistData: async () => true,
     };
     const watcher = getSyncWatcher(watcherHost);
     assert.ok(watcher);

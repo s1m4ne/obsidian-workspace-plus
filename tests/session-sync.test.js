@@ -546,3 +546,46 @@ test('session sync: reload debounce and focus callbacks', async function () {
         harness.restore();
     }
 });
+
+test('session sync: a file written before this device\'s save arrived does not undo it', async function () {
+    // What happened on a phone and a desktop sharing an iCloud vault: the
+    // phone created a session and saved; the desktop, not yet having received
+    // that, saved too; the desktop's file reached the phone and the session
+    // vanished from both.
+    const plugin = createPlugin({
+        activeSessionId: 'base',
+        sessionOrder: ['base', 'hello'],
+        sessions: {
+            base: { id: 'base', name: 'Base', modified: 100, layout: { base: true } },
+            hello: { id: 'hello', name: 'hello', modified: 200, layout: { hello: true } },
+        },
+        groups: {},
+        groupOrder: [],
+        sessionGroups: {},
+        activeGroupId: null,
+    });
+    // This device's own save is the baseline: nothing here is unsaved.
+    plugin.host.recordSessionStorageState(1, 1000, plugin.data);
+
+    plugin.host.readJsonIfExists = () => Promise.resolve({ exists: true, error: null, data: {
+        _wppSavedAt: 2,
+        activeSessionId: 'base',
+        sessionOrder: ['base'],
+        sessions: { base: { id: 'base', name: 'Base', modified: 150, layout: { base: true } } },
+    } });
+    plugin.host.getFileMtime = () => Promise.resolve(2000);
+    let writes = 0;
+    plugin.host.persistData = () => { writes += 1; return Promise.resolve(true); };
+    // The watcher's reload may put a layout up, so it asks the owners.
+    plugin.host.getSessionStore = () => ({
+        getCurrentWorkspaceLayout: () => ({ base: true }),
+        layoutsEqualStructural: (a, b) => JSON.stringify(a) === JSON.stringify(b),
+        getSavedLayout: (session) => session.layout,
+    });
+    plugin.host.getSessionSwitcher = plugin.getSessionSwitcher;
+
+    await sessionSync.reloadFromOtherDevice(plugin.host);
+
+    assert.equal(plugin.data.sessions.hello?.name, 'hello', 'the session is still here');
+    assert.equal(writes, 1, 'and is written back, or the other device never receives it');
+});

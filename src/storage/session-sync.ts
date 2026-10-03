@@ -371,7 +371,7 @@ export async function getSessionStorageInfo(
 }
 
 export function hasLocalSessionChangesSinceStorage(
-    host: SessionStorageStateHost & { data: PluginData }
+    host: SessionStorageStateHost & { data?: PluginData | undefined }
 ): boolean {
     if (!host._sessionStorageDataJson) return false;
     return getComparableSessionDataJson((d) => host.normalizeSessionData(d), host.data || {}) !== host._sessionStorageDataJson;
@@ -536,7 +536,10 @@ export async function reloadExternalSessionStorageIfChanged(
             return false;
         }
 
-        const mergeLocal = !!opts.mergeLocal && hasLocalSessionChangesSinceStorage(host);
+        // Whenever there is a baseline, not only when this device has unsaved
+        // changes: a session this device created and already saved is not a
+        // change any more, and a file written without it would still remove it.
+        const mergeLocal = !!opts.mergeLocal && !!host._sessionStorageComparableData;
         const previousComparable = host._sessionStorageComparableData
             ? cloneJson(host._sessionStorageComparableData)
             : null;
@@ -575,17 +578,32 @@ export async function reloadExternalSessionStorageIfChanged(
     }
 }
 
-export interface SyncWatcherHost {
+export interface SyncWatcherHost extends SessionStorageStateHost {
     _syncWatcher?: SyncWatcher;
     reloadExternalSessionStorageIfChanged(options?: { mergeLocal?: boolean; force?: boolean; applyLayout?: boolean }): Promise<boolean>;
     registerDomEvent?(target: unknown, event: string, handler: (e: unknown) => void): void;
     data?: PluginData;
+    persistData(): Promise<unknown>;
+}
+
+/**
+ * Take in what another device wrote, keeping what only this device has.
+ *
+ * This used to replace the data with the file outright. The file can have been
+ * written by a device that had not yet received this one's last save - a sync
+ * like iCloud delivers whole files up to a minute late - so a session created
+ * here vanished here as well. Whatever the merge kept that the file lacks is
+ * written back, or the other device would never receive it.
+ */
+export async function reloadFromOtherDevice(host: SyncWatcherHost): Promise<void> {
+    const applied = await host.reloadExternalSessionStorageIfChanged({ mergeLocal: true, applyLayout: true });
+    if (applied && hasLocalSessionChangesSinceStorage(host)) await host.persistData();
 }
 
 export function getSyncWatcher(host: SyncWatcherHost): SyncWatcher {
     if (!host._syncWatcher) {
         host._syncWatcher = new SyncWatcher({
-            onReload: () => host.reloadExternalSessionStorageIfChanged({ mergeLocal: false, applyLayout: true }),
+            onReload: () => reloadFromOtherDevice(host),
             registerDomEvent: typeof host.registerDomEvent === 'function'
                 ? (target, event, handler) => host.registerDomEvent!(target, event, handler)
                 : undefined,
