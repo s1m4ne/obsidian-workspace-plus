@@ -1,4 +1,5 @@
 import { Platform } from 'obsidian';
+import type { LayoutSlot } from './layout-utils.ts';
 
 // Utility functions for Workspace++
 //
@@ -16,6 +17,11 @@ export function generateId(): string {
 
 export function isMacPlatform(): boolean {
     return Platform.isMacOS;
+}
+
+/** The same question Obsidian asks to choose workspace-mobile.json. */
+export function currentLayoutSlot(): LayoutSlot {
+    return Platform.isMobile ? 'mobile' : 'desktop';
 }
 
 export function isModPressed(e: ModifierEvent | null | undefined): boolean {

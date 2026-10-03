@@ -367,12 +367,16 @@ async function applyIncomingActiveLayout(
 
     const activeId = host.data.activeSessionId;
     const active = activeId ? host.data.sessions?.[activeId] : undefined;
-    if (!active || !active.layout) return;
-
+    // This device's own layout only. One the other kind of device saved is not
+    // a change to what this screen shows; a sync that put it up anyway is what
+    // emptied a desktop's sidebars (#124).
     const store = host.getSessionStore();
-    if (layoutOnScreen && store.layoutsEqualStructural(active.layout, layoutOnScreen)) return;
+    const layout = active ? store.getSavedLayout(active) : null;
+    if (!layout) return;
 
-    await host.getSessionSwitcher().applyWorkspaceLayout(active.layout, { catchErrors: true });
+    if (layoutOnScreen && store.layoutsEqualStructural(layout, layoutOnScreen)) return;
+
+    await host.getSessionSwitcher().applyWorkspaceLayout(layout, { catchErrors: true });
 }
 
 export async function applySessionDataFromStorage(
@@ -392,16 +396,16 @@ export async function applySessionDataFromStorage(
     let workspaceHeldTheSavedLayout = false;
     if (opts.applyLayout) {
         const localActive = localActiveSessionId ? host.data.sessions?.[localActiveSessionId] : undefined;
+        const savedLayout = localActive ? host.getSessionStore().getSavedLayout(localActive) : null;
         try {
             layoutOnScreen = host.getSessionStore().getCurrentWorkspaceLayout();
         } catch {
             layoutOnScreen = null;
         }
         workspaceHeldTheSavedLayout = Boolean(
-            localActive
-            && localActive.layout
+            savedLayout
             && layoutOnScreen
-            && host.getSessionStore().layoutsEqualStructural(localActive.layout, layoutOnScreen)
+            && host.getSessionStore().layoutsEqualStructural(savedLayout, layoutOnScreen)
         );
     }
     const next = opts.mergeLocal

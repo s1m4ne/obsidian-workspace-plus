@@ -36,7 +36,9 @@ export interface SessionHistoryEntry {
 export interface SessionItem {
     id: string;
     name: string;
+    /** The desktop layout. Phones and tablets keep theirs in `mobileLayout`. */
     layout: unknown;
+    mobileLayout?: unknown;
     created?: number;
     modified?: number;
     history?: SessionHistoryEntry[];

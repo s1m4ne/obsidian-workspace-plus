@@ -1,6 +1,7 @@
 import { Notice, type App } from 'obsidian';
 import { L, formatString } from '../i18n.ts';
-import { mergeMainLayoutIntoCurrent } from '../layout-utils.ts';
+import { layoutSlotOf, mergeMainLayoutIntoCurrent, sessionLayoutToApply } from '../layout-utils.ts';
+import { currentLayoutSlot } from '../utils.ts';
 import type { RestoreScope } from '../layout-utils.ts';
 import type { PluginData, SessionItem } from '../storage/default-data.ts';
 import type { SettingsState } from './settings-state.ts';
@@ -347,7 +348,11 @@ export class SessionSwitcher {
      */
     buildLayoutForRestore(layout: unknown): unknown {
         if (!layout || typeof layout !== 'object') return layout;
-        if (this.getWorkspaceRestoreScope() === 'main-only') {
+        // A layout from the other kind of device keeps the sidebars on screen
+        // whatever the setting: a phone's drawers restored on a desktop come
+        // back as two empty sidebars (#124), and a desktop's sidebars are not
+        // a phone's either.
+        if (this.getWorkspaceRestoreScope() === 'main-only' || layoutSlotOf(layout) !== currentLayoutSlot()) {
             return mergeMainLayoutIntoCurrent(layout, this.host.getCurrentWorkspaceLayout());
         }
         return layout;
@@ -716,8 +721,9 @@ export class SessionSwitcher {
             }
 
             // 3. Apply target layout
-            const applyLayout = target.layout
-                ? this.applyWorkspaceLayout(target.layout)
+            const targetLayout = sessionLayoutToApply(target, currentLayoutSlot());
+            const applyLayout = targetLayout
+                ? this.applyWorkspaceLayout(targetLayout)
                 : Promise.resolve(true);
 
             await applyLayout;

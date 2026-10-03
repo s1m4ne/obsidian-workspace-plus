@@ -9,6 +9,8 @@ import {
     type BackupStoreHost,
 } from './backup-store.ts';
 import type { PluginData, SessionGroup, SessionItem } from './default-data.ts';
+import { sessionLayoutToApply } from '../layout-utils.ts';
+import { currentLayoutSlot } from '../utils.ts';
 
 export const BACKUP_ROTATION_INTERVAL = 3600000; // 1 hour
 
@@ -148,8 +150,9 @@ export async function restoreFromRotationBackup(
 
         await host.persistData();
         const active = host.getActiveSession();
-        if (active && active.layout) {
-            await host.applyWorkspaceLayout(active.layout, { catchErrors: false });
+        const layout = active ? sessionLayoutToApply(active, currentLayoutSlot()) : null;
+        if (layout) {
+            await host.applyWorkspaceLayout(layout, { catchErrors: false });
         }
         new Notice(formatString(L.rotationBackupRestored));
         return true;
