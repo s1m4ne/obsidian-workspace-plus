@@ -377,6 +377,56 @@ test('storage backup: a restored backup reaches the screen, not just the data', 
     }
 });
 
+test('storage backup: a restore keeps the version history this device holds', async () => {
+    // Backups are written without history, like sessions.json. Restoring one
+    // used to drop every session's history, and the next save emptied
+    // history.json - the record that could have undone the restore.
+    const harness = setupHarness();
+    try {
+        const { plugin, files } = createHost();
+        const history = [{ savedAt: 1, layout: { root: 'earlier' } }];
+        plugin.data.sessions.s1.history = history;
+        const path = seed(plugin, files, 7000);
+        files.set(path, JSON.stringify({
+            activeSessionId: 's1',
+            sessions: { s1: { id: 's1', name: 'Restored', layout: { root: 'restored' } } },
+            sessionOrder: ['s1'],
+        }));
+
+        assert.equal(await backup.restoreFromRotationBackup(plugin, path), true);
+
+        assert.deepEqual(plugin.data.sessions.s1.history, history);
+    } finally {
+        harness.restore();
+    }
+});
+
+test('storage backup: a restore propagates as deletions and revivals, not as a sync conflict', async () => {
+    // Without this, a session the restore brought back was still recorded as
+    // deleted, and the next sync with a device that had seen the deletion
+    // removed it again. The sessions the restore left out are deletions too.
+    const harness = setupHarness();
+    try {
+        const { plugin, files } = createHost();
+        const deletedAt = Date.now() - 1000;
+        plugin.data.deletedSessions = { gone: deletedAt };
+        const path = seed(plugin, files, 8000);
+        files.set(path, JSON.stringify({
+            activeSessionId: 'gone',
+            sessions: { gone: { id: 'gone', name: 'Back', layout: { root: 'back' }, modified: 100 } },
+            sessionOrder: ['gone'],
+        }));
+
+        assert.equal(await backup.restoreFromRotationBackup(plugin, path), true);
+
+        assert.equal(plugin.data.deletedSessions.gone, undefined, 'the revived session is no longer deleted');
+        assert.ok(plugin.data.sessions.gone.restoredAt > deletedAt, 'and is marked as restored after it');
+        assert.equal(typeof plugin.data.deletedSessions.s1, 'number', 'what the backup left out is deleted');
+    } finally {
+        harness.restore();
+    }
+});
+
 test('storage backup: getBackupPlatformLabel checks platform flags', () => {
     const harness = setupHarness();
     try {

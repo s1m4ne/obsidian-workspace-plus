@@ -1,10 +1,11 @@
 import { Notice, type App, type WorkspaceLeaf } from 'obsidian';
 import { persistIfNeeded, type PersistOption } from './persist-option.ts';
 import { L, formatString } from '../i18n.ts';
-import { generateId } from '../utils.ts';
-import { layoutsEqualStructural, cloneLayout } from '../layout-utils.ts';
+import { currentLayoutSlot, generateId } from '../utils.ts';
+import { layoutsEqualStructural, cloneLayout, readSessionLayout, sessionLayoutToApply, writeSessionLayout } from '../layout-utils.ts';
 import type { RestoreScope } from '../layout-utils.ts';
 import type { PluginData, SessionItem } from '../storage/default-data.ts';
+import { recordSessionDeletions } from '../storage/session-data.ts';
 import type { GroupStore } from './group-store.ts';
 import type { SettingsState } from './settings-state.ts';
 
@@ -310,8 +311,9 @@ export class SessionStore {
             id,
             name,
             modified: typeof options?.modified === 'number' ? options.modified : Date.now(),
-            layout,
+            layout: null,
         };
+        writeSessionLayout(record, layout, currentLayoutSlot());
         if (options?.isDefault) {
             record.isDefault = true;
         }
@@ -526,6 +528,7 @@ export class SessionStore {
         let nextActiveId: string | null = null;
 
         delete this.sessions[sessionId];
+        this.data.deletedSessions = recordSessionDeletions(this.data.deletedSessions, [sessionId], Date.now());
         const orderIdx = this.sessionOrder.indexOf(sessionId);
         if (orderIdx !== -1) this.sessionOrder.splice(orderIdx, 1);
 
@@ -544,8 +547,9 @@ export class SessionStore {
 
         if (wasActive && nextActiveId) {
             const nextSession = this.sessions[nextActiveId];
-            if (nextSession && nextSession.layout) {
-                await this.host.applyWorkspaceLayout(nextSession.layout);
+            const layout = nextSession ? sessionLayoutToApply(nextSession, currentLayoutSlot()) : null;
+            if (layout) {
+                await this.host.applyWorkspaceLayout(layout);
             }
         }
 
@@ -573,6 +577,8 @@ export class SessionStore {
     async resetSessionsToDefault(): Promise<boolean> {
         const id = generateId();
         this.host.hideSwitchOverlay?.();
+        // Recorded, or another device's next sync would bring every one back.
+        this.data.deletedSessions = recordSessionDeletions(this.data.deletedSessions, Object.keys(this.data.sessions || {}), Date.now());
         this.data.sessions = {};
         this.data.sessionOrder = [];
         this.data.activeSessionId = null;
@@ -620,7 +626,7 @@ export class SessionStore {
             for (const leaf of leaves) leaf.detach();
         }
 
-        session.layout = this.getCurrentWorkspaceLayout();
+        writeSessionLayout(session, this.getCurrentWorkspaceLayout(), currentLayoutSlot());
 
         this.host.updateStatusBar?.();
         this.host.syncSessionCommands?.();
@@ -651,11 +657,12 @@ export class SessionStore {
 
         const name = this.getNextSessionName();
         const newId = generateId();
-        this.sessions[newId] = this.createSessionRecord(
-            newId,
-            name,
-            cloneLayout(source.layout)
-        );
+        // A copy of both kinds' layouts, not of this device's alone: the
+        // duplicate is the same session to a phone as it is to a desktop.
+        const copy = this.createSessionRecord(newId, name, null);
+        copy.layout = cloneLayout(source.layout);
+        if (source.mobileLayout !== undefined) copy.mobileLayout = cloneLayout(source.mobileLayout);
+        this.sessions[newId] = copy;
         this.sessionOrder.push(newId);
 
         const groups = this.data.sessionGroups?.[sessionId];
@@ -694,6 +701,11 @@ export class SessionStore {
 
     getCurrentWorkspaceLayout(): unknown {
         return this.host.getCurrentWorkspaceLayout();
+    }
+
+    /** The layout this kind of device saved for the session, or null. */
+    getSavedLayout(session: SessionItem): unknown {
+        return readSessionLayout(session, currentLayoutSlot());
     }
 
     layoutsEqualStructural(a: unknown, b: unknown): boolean {

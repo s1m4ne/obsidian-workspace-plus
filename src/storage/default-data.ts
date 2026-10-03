@@ -36,7 +36,13 @@ export interface SessionHistoryEntry {
 export interface SessionItem {
     id: string;
     name: string;
+    /** The desktop layout. Phones and tablets keep theirs in `mobileLayout`. */
     layout: unknown;
+    mobileLayout?: unknown;
+    layoutSavedAt?: number;
+    mobileLayoutSavedAt?: number;
+    /** When a backup restore or an import brought it back after a deletion. */
+    restoredAt?: number;
     created?: number;
     modified?: number;
     history?: SessionHistoryEntry[];
@@ -82,6 +88,13 @@ export interface PluginData {
     groupOrder: string[];
     sessionGroups: Record<string, string[]>;
     activeGroupId: string | null;
+    /**
+     * When each deleted session was deleted, by id. A file synced from another
+     * device that lacks a session cannot otherwise say whether that device
+     * deleted it or had not yet received it - and treating the second as the
+     * first is how a session created on one device vanished from both.
+     */
+    deletedSessions: Record<string, number>;
     versionHistoryEnabled: boolean;
     versionHistorySnapshotInterval: number;
     /** How many rotating backups to keep. @see storage/backup-pool.ts */
@@ -129,6 +142,7 @@ export const DEFAULT_DATA: PluginData = {
     groupOrder: [],
     sessionGroups: {},
     activeGroupId: null,
+    deletedSessions: {},
     versionHistoryEnabled: true,
     versionHistorySnapshotInterval: 5,
     rotationBackupGenerations: 5,
@@ -197,4 +211,5 @@ export const SESSION_KEYS: readonly string[] = [
     'groupOrder',
     'sessionGroups',
     'activeGroupId',
+    'deletedSessions',
 ] as const;

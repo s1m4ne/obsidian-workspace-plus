@@ -31,6 +31,81 @@ export function layoutsEqual(a: unknown, b: unknown): boolean {
     return serializeLayout(a) === serializeLayout(b);
 }
 
+/**
+ * Which kind of device a layout belongs to.
+ *
+ * Obsidian keeps two workspaces, workspace.json and workspace-mobile.json, and
+ * picks between them on `Platform.isMobile`. A phone's layout is not one a
+ * desktop can show - its sidebars are drawers, which a desktop drops, leaving
+ * both sidebars empty (#124). So a session keeps one layout per kind: `layout`
+ * for desktops, which is what every earlier release wrote, and `mobileLayout`
+ * for phones and tablets.
+ */
+export type LayoutSlot = 'desktop' | 'mobile';
+
+export interface SlottedLayouts {
+    layout: unknown;
+    mobileLayout?: unknown;
+    /**
+     * When each was last written. A session's `modified` moves whenever either
+     * kind saves, so it cannot say which copy of the *other* kind's layout is
+     * the newer one when two devices' files are merged.
+     */
+    layoutSavedAt?: number;
+    mobileLayoutSavedAt?: number;
+}
+
+function isDrawer(value: unknown): boolean {
+    return !!value && typeof value === 'object' && (value as { type?: unknown }).type === 'mobile-drawer';
+}
+
+export function isMobileLayout(layout: unknown): boolean {
+    if (!layout || typeof layout !== 'object') return false;
+    const regions = layout as Record<string, unknown>;
+    return isDrawer(regions.left) || isDrawer(regions.right);
+}
+
+export function layoutSlotOf(layout: unknown): LayoutSlot {
+    return isMobileLayout(layout) ? 'mobile' : 'desktop';
+}
+
+export function otherLayoutSlot(slot: LayoutSlot): LayoutSlot {
+    return slot === 'mobile' ? 'desktop' : 'mobile';
+}
+
+/**
+ * The layout this kind of device saved, or null.
+ *
+ * A release before the split, running on a phone, wrote the phone's layout into
+ * `layout`. Its drawers say whose it is, so no migration has to guess.
+ */
+export function readSessionLayout(session: SlottedLayouts, slot: LayoutSlot): unknown {
+    if (slot === 'mobile') {
+        return session.mobileLayout ?? (isMobileLayout(session.layout) ? session.layout : null);
+    }
+    return isMobileLayout(session.layout) ? null : (session.layout ?? null);
+}
+
+export function writeSessionLayout(session: SlottedLayouts, layout: unknown, slot: LayoutSlot): void {
+    if (slot === 'mobile') {
+        session.mobileLayout = layout;
+        session.mobileLayoutSavedAt = Date.now();
+    } else {
+        session.layout = layout;
+        session.layoutSavedAt = Date.now();
+    }
+}
+
+/**
+ * What to put on screen: this device's own layout, or failing that the other
+ * kind's. A session first opened on a phone has only a desktop layout; showing
+ * its notes beats showing nothing, and the restore takes `main` alone from a
+ * layout of the other kind, so the phone keeps its own drawers.
+ */
+export function sessionLayoutToApply(session: SlottedLayouts, slot: LayoutSlot): unknown {
+    return readSessionLayout(session, slot) ?? readSessionLayout(session, otherLayoutSlot(slot));
+}
+
 // The layout is JSON on disk; cloning it is the general operation under a
 // name that says what it is used for here.
 export const cloneLayout = cloneJson;

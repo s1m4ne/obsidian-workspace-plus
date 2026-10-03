@@ -1,6 +1,7 @@
 import { Notice, type App } from 'obsidian';
 import { L, formatString } from '../i18n.ts';
-import { generateId } from '../utils.ts';
+import { currentLayoutSlot, generateId } from '../utils.ts';
+import { readSessionLayout, sessionLayoutToApply, writeSessionLayout } from '../layout-utils.ts';
 import type { PluginData, SessionItem } from '../storage/default-data.ts';
 import type { SettingsState } from './settings-state.ts';
 import type { SessionStore } from './session-store.ts';
@@ -215,11 +216,12 @@ export class SessionSaver {
      * opportunity for them to differ in a third.
      */
     commitLayoutToSession(session: SessionItem, layout: unknown, options?: CommitWorkspaceOptions): boolean {
-        const changed = !this.checkLayoutsEqual(session.layout, layout);
+        const slot = currentLayoutSlot();
+        const changed = !this.checkLayoutsEqual(readSessionLayout(session, slot), layout);
         if (!options?.skipHistory) {
             this.pushLayoutToHistory(session);
         }
-        session.layout = layout;
+        writeSessionLayout(session, layout, slot);
         if (changed || options?.touchModified) {
             session.modified = Date.now();
         }
@@ -246,7 +248,7 @@ export class SessionSaver {
         } catch {
             return false;
         }
-        return !this.checkLayoutsEqual(session.layout, currentLayout);
+        return !this.checkLayoutsEqual(readSessionLayout(session, currentLayoutSlot()), currentLayout);
     }
 
     shouldShowUnsavedStatusBarHighlight(): boolean {
@@ -473,8 +475,9 @@ export class SessionSaver {
         }
 
         let applyLayout: Promise<unknown> = Promise.resolve(true);
-        if (session.layout) {
-            applyLayout = this.host.applyWorkspaceLayout(session.layout);
+        const layout = sessionLayoutToApply(session, currentLayoutSlot());
+        if (layout) {
+            applyLayout = this.host.applyWorkspaceLayout(layout);
         }
 
         const name = session.name;

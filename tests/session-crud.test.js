@@ -236,12 +236,14 @@ test('createSessionRecord: constructs a normalized session record object with ti
 
     const record = store.createSessionRecord('rec-1', 'Rec Name', { type: 'root' }, { modified: 12345 });
 
-    assert.deepEqual(record, {
+    const { layoutSavedAt, ...rest } = record;
+    assert.deepEqual(rest, {
         id: 'rec-1',
         name: 'Rec Name',
         layout: { type: 'root' },
         modified: 12345,
     });
+    assert.equal(typeof layoutSavedAt, 'number', 'the desktop layout records when it was saved');
 });
 
 // 落ちる条件: deleteSession, deleteAllInactiveSessions, ensureDefaultSession, getNextSessionName の基本操作が壊れた場合に落ちる
@@ -265,14 +267,34 @@ test('session crud: deleteSession, deleteAllInactiveSessions, ensureDefaultSessi
     assert.equal(deleted, true);
     assert.equal(data.sessions.b, undefined);
     assert.deepEqual(data.sessionOrder, ['a', 'c']);
+    // Recorded, so a device that still has it learns it was deleted rather
+    // than reading its absence as "not received yet".
+    assert.equal(typeof data.deletedSessions.b, 'number');
 
     // deleteAllInactiveSessions
     const count = await store.deleteAllInactiveSessions();
     assert.equal(count, 1);
     assert.equal(data.sessions.c, undefined);
     assert.equal(Object.keys(data.sessions).length, 1);
+    assert.deepEqual(Object.keys(data.deletedSessions).sort(), ['b', 'c']);
 
     // ensureDefaultSession
     store.ensureDefaultSession();
     assert.equal(Object.keys(data.sessions).length, 2);
+});
+
+test('session crud: a reset records every session it removed as deleted', async function () {
+    const { store, data } = createStores({
+        sessions: {
+            a: { id: 'a', name: 'A', layout: { layout: 'a' } },
+            b: { id: 'b', name: 'B', layout: { layout: 'b' } },
+        },
+        sessionOrder: ['a', 'b'],
+        activeSessionId: 'a',
+    });
+
+    await store.resetSessionsToDefault();
+
+    // Otherwise another device's next sync brings every one of them back.
+    assert.deepEqual(Object.keys(data.deletedSessions).sort(), ['a', 'b']);
 });

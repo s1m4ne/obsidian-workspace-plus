@@ -180,6 +180,40 @@ test('importing a snapshot applies the imported layout to the workspace', async 
     }
 });
 
+test('an import keeps the version history this device holds', async () => {
+    // An export carries no history. Replacing the sessions with it used to
+    // drop every session's history, and the next save emptied history.json.
+    const harness = setupHarness();
+    try {
+        const host = await createHost({ pane: 'two' }, { pane: 'one' });
+        const history = [{ savedAt: 1, layout: { pane: 'earlier' } }];
+        const before = host.data.sessions.a;
+        assert.ok(before, 'the fixture starts with session a');
+        before.history = history;
+
+        assert.equal(await host.importSessionsFromLatestExport(), true);
+
+        assert.deepEqual(host.data.sessions.a?.history, history);
+    } finally {
+        harness.restore();
+    }
+});
+
+test('an import brings back a session this device had deleted', async () => {
+    // Otherwise the deletion still on record removes it again at the next sync.
+    const harness = setupHarness();
+    try {
+        const host = await createHost({ pane: 'two' }, { pane: 'one' });
+        host.data.deletedSessions = { a: Date.now() - 1000 };
+
+        assert.equal(await host.importSessionsFromLatestExport(), true);
+
+        assert.equal(host.data.deletedSessions['a'], undefined);
+    } finally {
+        harness.restore();
+    }
+});
+
 test('a failed import leaves the workspace untouched', async () => {
     const harness = setupHarness();
     try {

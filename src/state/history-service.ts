@@ -1,6 +1,7 @@
 import { Notice } from 'obsidian';
 import { L, formatString } from '../i18n.ts';
-import { cloneLayout } from '../layout-utils.ts';
+import { cloneLayout, layoutSlotOf, readSessionLayout, writeSessionLayout } from '../layout-utils.ts';
+import { currentLayoutSlot } from '../utils.ts';
 import type { PluginData, SessionItem, SessionHistoryEntry } from '../storage/default-data.ts';
 import type { SettingsState } from './settings-state.ts';
 import type { SessionStore } from './session-store.ts';
@@ -182,18 +183,19 @@ export class HistoryService {
 
     pushLayoutToHistory(session: SessionItem): void {
         if (!this.isVersionHistoryEnabled()) return;
-        if (!session || !session.layout) return;
+        const layout = session ? readSessionLayout(session, currentLayoutSlot()) : null;
+        if (!session || !layout) return;
 
         if (!session.history) session.history = [];
 
         // Skip if structurally identical to most recent entry
         const lastEntry = session.history.length > 0 ? session.history[0] : null;
-        if (lastEntry && this.checkLayoutsEqualStructural(session.layout, lastEntry.layout)) {
+        if (lastEntry && this.checkLayoutsEqualStructural(layout, lastEntry.layout)) {
             return;
         }
 
         session.history.unshift({
-            layout: cloneLayout(session.layout),
+            layout: cloneLayout(layout),
             savedAt: Date.now(),
         });
 
@@ -214,12 +216,15 @@ export class HistoryService {
         this.pushLayoutToHistory(session);
 
         // Apply historical layout
-        session.layout = cloneLayout(entry.layout);
+        // Back into the slot it came from: a history shared through a synced
+        // folder can hold the other kind of device's entries.
+        const restored = cloneLayout(entry.layout);
+        writeSessionLayout(session, restored, layoutSlotOf(restored));
         session.modified = Date.now();
 
         const isActive = session.id === this.host.getSessionStore().getActiveSessionId();
-        if (isActive && session.layout) {
-            await this.host.applyWorkspaceLayout(session.layout);
+        if (isActive && restored) {
+            await this.host.applyWorkspaceLayout(restored);
         }
 
         this.host.updateStatusBar?.();
@@ -300,7 +305,7 @@ export class HistoryService {
             // timer's own decision, and the answer is no - so the check stays
             // here and CAPTURE is only reached once it has passed.
             const currentLayout = this.host.getCurrentWorkspaceLayout();
-            if (!currentLayout || this.checkLayoutsEqualStructural(session.layout, currentLayout)) return;
+            if (!currentLayout || this.checkLayoutsEqualStructural(readSessionLayout(session, currentLayoutSlot()), currentLayout)) return;
 
             this.host.commitLayoutToSession(session, currentLayout, { touchModified: true });
             void this.host.persistData();

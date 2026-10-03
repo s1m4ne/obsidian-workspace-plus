@@ -66,6 +66,7 @@ function createHost(options: {
         getSessionStore: (): never => ({
             getCurrentWorkspaceLayout: () => options.layoutOnScreen,
             layoutsEqualStructural: (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b),
+            getSavedLayout: (session: { layout: unknown }) => session.layout,
         }) as never,
         getSessionSwitcher: (): never => ({
             isSwitching: !!options.isSwitching,

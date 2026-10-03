@@ -1,6 +1,6 @@
 import { Notice, Platform } from 'obsidian';
 import { L, formatString } from '../i18n.ts';
-import { hasSessionShape, hasNonEmptySessions } from './session-data.ts';
+import { carryOverSessionHistory, hasSessionShape, hasNonEmptySessions, recordReplacementDeletions } from './session-data.ts';
 import type { ReadJsonResult } from './json-file-store.ts';
 import {
     listRotationBackups,
@@ -9,6 +9,8 @@ import {
     type BackupStoreHost,
 } from './backup-store.ts';
 import type { PluginData, SessionGroup, SessionItem } from './default-data.ts';
+import { sessionLayoutToApply } from '../layout-utils.ts';
+import { currentLayoutSlot } from '../utils.ts';
 
 export const BACKUP_ROTATION_INTERVAL = 3600000; // 1 hour
 
@@ -88,6 +90,7 @@ export interface SessionDataPayload {
     groupOrder?: string[];
     sessionGroups?: Record<string, string[]>;
     activeGroupId?: string | null;
+    deletedSessions?: Record<string, number>;
     _wppSavedAt?: number;
 }
 
@@ -132,7 +135,10 @@ export async function restoreFromRotationBackup(
         }
 
         host.data.activeSessionId = imported.activeSessionId ?? null;
-        host.data.sessions = imported.sessions || {};
+        const importedSessions = imported.sessions || {};
+        carryOverSessionHistory(host.data.sessions || {}, importedSessions);
+        host.data.deletedSessions = recordReplacementDeletions(host.data.sessions || {}, importedSessions, host.data.deletedSessions, Date.now());
+        host.data.sessions = importedSessions;
         host.data.sessionOrder = imported.sessionOrder || [];
         host.data.groups = imported.groups || {};
         host.data.groupOrder = typeof host.normalizeGroupTabOrder === 'function'
@@ -146,8 +152,9 @@ export async function restoreFromRotationBackup(
 
         await host.persistData();
         const active = host.getActiveSession();
-        if (active && active.layout) {
-            await host.applyWorkspaceLayout(active.layout, { catchErrors: false });
+        const layout = active ? sessionLayoutToApply(active, currentLayoutSlot()) : null;
+        if (layout) {
+            await host.applyWorkspaceLayout(layout, { catchErrors: false });
         }
         new Notice(formatString(L.rotationBackupRestored));
         return true;
