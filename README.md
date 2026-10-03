@@ -183,9 +183,15 @@ If you share `.obsidian` across several vaults, for example with Settings Profil
 
 Each vault then keeps its own sessions. Obsidian Sync cannot carry that file -- it excludes dot-folders -- so this trades device sync for vault separation. Third-party tools that sync the whole vault, such as Syncthing, still work.
 
-### Concurrent edits
+### Phones and desktops
 
-Workspace++ watches the session store and merges external changes when it can, but this is not a conflict-free merge system. If you use Obsidian Sync, Syncthing, Dropbox, iCloud, or another sync tool, let sync finish before editing sessions on another device. Backups help recover from corrupted session data; they do not resolve simultaneous edits.
+Like Obsidian, which keeps `workspace.json` and `workspace-mobile.json` apart, each session keeps one layout for desktops and one for phones and tablets. The two share the session's name, place in the list and group; neither overwrites the other. Opening a session on a device that has never saved it shows the notes from the other kind of device and keeps that device's own sidebars.
+
+### Edits on more than one device
+
+Sync tools such as iCloud, Dropbox and Syncthing move whole files, sometimes a minute late, so two devices can each save without having seen the other's change. Workspace++ merges rather than overwrites: a session created on one device is kept even if the other device saves before it arrives, each kind of layout keeps whichever was saved last, and a deleted session stays deleted even if the other device used it in the meantime. Deletions are remembered for thirty days.
+
+It checks the session file every few seconds, so a change appears shortly after your sync tool delivers it. How long that delivery takes is up to the sync tool.
 
 ## Languages
 
