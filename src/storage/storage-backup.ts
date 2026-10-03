@@ -1,6 +1,6 @@
 import { Notice, Platform } from 'obsidian';
 import { L, formatString } from '../i18n.ts';
-import { carryOverSessionHistory, hasSessionShape, hasNonEmptySessions } from './session-data.ts';
+import { carryOverSessionHistory, hasSessionShape, hasNonEmptySessions, recordReplacementDeletions } from './session-data.ts';
 import type { ReadJsonResult } from './json-file-store.ts';
 import {
     listRotationBackups,
@@ -90,6 +90,7 @@ export interface SessionDataPayload {
     groupOrder?: string[];
     sessionGroups?: Record<string, string[]>;
     activeGroupId?: string | null;
+    deletedSessions?: Record<string, number>;
     _wppSavedAt?: number;
 }
 
@@ -136,6 +137,7 @@ export async function restoreFromRotationBackup(
         host.data.activeSessionId = imported.activeSessionId ?? null;
         const importedSessions = imported.sessions || {};
         carryOverSessionHistory(host.data.sessions || {}, importedSessions);
+        host.data.deletedSessions = recordReplacementDeletions(host.data.sessions || {}, importedSessions, host.data.deletedSessions, Date.now());
         host.data.sessions = importedSessions;
         host.data.sessionOrder = imported.sessionOrder || [];
         host.data.groups = imported.groups || {};

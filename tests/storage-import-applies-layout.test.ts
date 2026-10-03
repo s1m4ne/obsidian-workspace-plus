@@ -199,6 +199,21 @@ test('an import keeps the version history this device holds', async () => {
     }
 });
 
+test('an import brings back a session this device had deleted', async () => {
+    // Otherwise the deletion still on record removes it again at the next sync.
+    const harness = setupHarness();
+    try {
+        const host = await createHost({ pane: 'two' }, { pane: 'one' });
+        host.data.deletedSessions = { a: Date.now() - 1000 };
+
+        assert.equal(await host.importSessionsFromLatestExport(), true);
+
+        assert.equal(host.data.deletedSessions['a'], undefined);
+    } finally {
+        harness.restore();
+    }
+});
+
 test('a failed import leaves the workspace untouched', async () => {
     const harness = setupHarness();
     try {

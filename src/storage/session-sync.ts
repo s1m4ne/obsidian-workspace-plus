@@ -4,7 +4,7 @@ import type { SessionSwitcher } from '../state/session-switcher.ts';
 import type { PluginData, SessionGroup, SessionItem } from './default-data.ts';
 import type { SessionDataPayload } from './storage-backup.ts';
 import type { ReadJsonResult } from './json-file-store.ts';
-import { carryOverSessionHistory, getPersistStamp, hasSessionShape } from './session-data.ts';
+import { carryOverSessionHistory, getPersistStamp, hasSessionShape, readDeletedSessions } from './session-data.ts';
 import { cloneJson } from '../clone-json.ts';
 
 // Re-exported so the .js callers that still require this module keep working.
@@ -92,6 +92,72 @@ export function isSessionStorageInfoNewer(
     return nextMtime > currentMtime + SESSION_FILE_MTIME_EPSILON_MS;
 }
 
+/** The layout fields, merged by their own save times rather than by `modified`. */
+const LAYOUT_FIELDS = [
+    { layout: 'layout', savedAt: 'layoutSavedAt' },
+    { layout: 'mobileLayout', savedAt: 'mobileLayoutSavedAt' },
+] as const;
+
+/** Merged separately, or not at all: history is this device's alone. */
+const UNMERGED_FIELDS: ReadonlySet<string> = new Set([
+    'history', 'modified',
+    ...LAYOUT_FIELDS.flatMap((f) => [f.layout, f.savedAt]),
+]);
+
+function sameJson(a: unknown, b: unknown): boolean {
+    return JSON.stringify(a) === JSON.stringify(b);
+}
+
+function layoutSavedAt(session: SessionItem, field: typeof LAYOUT_FIELDS[number]): number {
+    const at = session[field.savedAt];
+    // Saved before layouts had their own times: `modified` is the best there is.
+    return typeof at === 'number' && Number.isFinite(at) ? at : getSessionModified(session);
+}
+
+/**
+ * One session that both devices hold.
+ *
+ * The baseline - what this device last read or wrote - says which side changed
+ * a field, so a rename on one device survives a layout save on the other. It is
+ * no help with a file that arrives late, written by a device that had not yet
+ * seen this one's changes: that file differs from the baseline in everything
+ * this device did. The layouts are where that matters, because both devices
+ * write them constantly, so they are settled by their own save times instead.
+ */
+function mergeSession(local: SessionItem, external: SessionItem, baseline: SessionItem | undefined): SessionItem {
+    const newer = getSessionModified(external) > getSessionModified(local) ? external : local;
+    // id and name are overwritten below; they are here for the type.
+    const merged: SessionItem = { id: local.id, name: local.name, layout: null };
+    const keys = new Set([...Object.keys(local), ...Object.keys(external)]);
+    for (const key of keys) {
+        if (UNMERGED_FIELDS.has(key)) continue;
+        const mine = local[key];
+        const theirs = external[key];
+        let value: unknown;
+        if (sameJson(mine, theirs)) value = mine;
+        else if (baseline && sameJson(mine, baseline[key])) value = theirs;
+        else if (baseline && sameJson(theirs, baseline[key])) value = mine;
+        else value = newer[key];
+        if (value !== undefined) merged[key] = cloneJson(value);
+    }
+    for (const field of LAYOUT_FIELDS) {
+        const source = layoutSavedAt(external, field) > layoutSavedAt(local, field) ? external : local;
+        if (source[field.layout] !== undefined) merged[field.layout] = cloneJson(source[field.layout]);
+        const savedAt = source[field.savedAt];
+        if (typeof savedAt === 'number') merged[field.savedAt] = savedAt;
+    }
+    merged.modified = Math.max(getSessionModified(local), getSessionModified(external));
+    if (local.history) merged.history = local.history;
+    return merged;
+}
+
+function mergeDeletions(a: unknown, b: unknown): Record<string, number> {
+    const out = readDeletedSessions(a);
+    const other = readDeletedSessions(b);
+    for (const id of Object.keys(other)) out[id] = Math.max(out[id] ?? 0, other[id]!);
+    return out;
+}
+
 export function mergeExternalSessionDataForWrite(
     localData: Record<string, unknown>,
     externalData: Record<string, unknown>,
@@ -107,31 +173,27 @@ export function mergeExternalSessionDataForWrite(
         ? (local.sessions as Record<string, SessionItem>) : {};
     const externalSessions = (external.sessions && typeof external.sessions === 'object')
         ? (external.sessions as Record<string, SessionItem>) : {};
+    const deletedSessions = mergeDeletions(local.deletedSessions, external.deletedSessions);
     const mergedSessions: Record<string, SessionItem> = {};
 
-    const externalIds = Object.keys(externalSessions);
-    for (let i = 0; i < externalIds.length; i++) {
-        const id = externalIds[i]!;
-        if (
-            baselineSessions[id]
-            && !localSessions[id]
-            && getSessionModified(externalSessions[id]) <= getSessionModified(baselineSessions[id])
-        ) {
-            continue;
-        }
-        mergedSessions[id] = cloneJson(externalSessions[id])!;
-    }
-
-    const localIds = Object.keys(localSessions);
-    for (let i = 0; i < localIds.length; i++) {
-        const id = localIds[i]!;
-        if (!mergedSessions[id]) {
-            mergedSessions[id] = cloneJson(localSessions[id])!;
-            continue;
-        }
-        if (getSessionModified(localSessions[id]) >= getSessionModified(mergedSessions[id])) {
-            mergedSessions[id] = cloneJson(localSessions[id])!;
-        }
+    // A session one side lacks is kept: absent can mean "not received yet" as
+    // easily as "deleted". A recorded deletion newer than the session's last
+    // change removes it, and so does this device having held the session at
+    // its last read and dropped it since - the baseline is this device's own,
+    // so it does speak for this device's deletions.
+    const ids = new Set([...Object.keys(externalSessions), ...Object.keys(localSessions)]);
+    for (const id of ids) {
+        const mine = localSessions[id];
+        const theirs = externalSessions[id];
+        const held = baselineSessions[id];
+        if (!mine && theirs && held && getSessionModified(theirs) <= getSessionModified(held)) continue;
+        const session = mine && theirs
+            ? mergeSession(mine, theirs, baselineSessions[id])
+            : cloneJson(mine ?? theirs);
+        if (!session) continue;
+        const deletedAt = deletedSessions[id];
+        if (deletedAt !== undefined && getSessionModified(session) <= deletedAt) continue;
+        mergedSessions[id] = session;
     }
 
     const groups = mergeObjectWithLocalDeletes(
@@ -153,6 +215,7 @@ export function mergeExternalSessionDataForWrite(
         groupOrder: mergeOrder(external.groupOrder as string[], local.groupOrder as string[], groups),
         sessionGroups: sessionGroups,
         activeGroupId: (local.activeGroupId as string | undefined) || (external.activeGroupId as string | undefined),
+        deletedSessions,
     });
 }
 
@@ -165,6 +228,7 @@ export function getComparableSessionData(
     groups: Record<string, SessionGroup>;
     groupOrder: string[];
     sessionGroups: Record<string, string[]>;
+    deletedSessions: Record<string, number>;
 } {
     const normalized = normalizeSessionData(data || {});
     return {
@@ -173,6 +237,7 @@ export function getComparableSessionData(
         groups: normalized.groups || {},
         groupOrder: normalized.groupOrder || [],
         sessionGroups: normalized.sessionGroups || {},
+        deletedSessions: normalized.deletedSessions || {},
     };
 }
 
@@ -424,6 +489,7 @@ export async function applySessionDataFromStorage(
     host.data.groups = next.groups || {};
     host.data.groupOrder = next.groupOrder || [];
     host.data.sessionGroups = next.sessionGroups || {};
+    host.data.deletedSessions = next.deletedSessions || {};
 
     if (localActiveSessionId && host.data.sessions[localActiveSessionId]) {
         host.data.activeSessionId = localActiveSessionId;

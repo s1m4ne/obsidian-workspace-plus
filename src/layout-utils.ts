@@ -46,6 +46,13 @@ export type LayoutSlot = 'desktop' | 'mobile';
 export interface SlottedLayouts {
     layout: unknown;
     mobileLayout?: unknown;
+    /**
+     * When each was last written. A session's `modified` moves whenever either
+     * kind saves, so it cannot say which copy of the *other* kind's layout is
+     * the newer one when two devices' files are merged.
+     */
+    layoutSavedAt?: number;
+    mobileLayoutSavedAt?: number;
 }
 
 function isDrawer(value: unknown): boolean {
@@ -80,8 +87,13 @@ export function readSessionLayout(session: SlottedLayouts, slot: LayoutSlot): un
 }
 
 export function writeSessionLayout(session: SlottedLayouts, layout: unknown, slot: LayoutSlot): void {
-    if (slot === 'mobile') session.mobileLayout = layout;
-    else session.layout = layout;
+    if (slot === 'mobile') {
+        session.mobileLayout = layout;
+        session.mobileLayoutSavedAt = Date.now();
+    } else {
+        session.layout = layout;
+        session.layoutSavedAt = Date.now();
+    }
 }
 
 /**

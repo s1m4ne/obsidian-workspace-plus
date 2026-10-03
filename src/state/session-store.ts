@@ -5,6 +5,7 @@ import { currentLayoutSlot, generateId } from '../utils.ts';
 import { layoutsEqualStructural, cloneLayout, readSessionLayout, sessionLayoutToApply, writeSessionLayout } from '../layout-utils.ts';
 import type { RestoreScope } from '../layout-utils.ts';
 import type { PluginData, SessionItem } from '../storage/default-data.ts';
+import { recordSessionDeletions } from '../storage/session-data.ts';
 import type { GroupStore } from './group-store.ts';
 import type { SettingsState } from './settings-state.ts';
 
@@ -527,6 +528,7 @@ export class SessionStore {
         let nextActiveId: string | null = null;
 
         delete this.sessions[sessionId];
+        this.data.deletedSessions = recordSessionDeletions(this.data.deletedSessions, [sessionId], Date.now());
         const orderIdx = this.sessionOrder.indexOf(sessionId);
         if (orderIdx !== -1) this.sessionOrder.splice(orderIdx, 1);
 
@@ -575,6 +577,8 @@ export class SessionStore {
     async resetSessionsToDefault(): Promise<boolean> {
         const id = generateId();
         this.host.hideSwitchOverlay?.();
+        // Recorded, or another device's next sync would bring every one back.
+        this.data.deletedSessions = recordSessionDeletions(this.data.deletedSessions, Object.keys(this.data.sessions || {}), Date.now());
         this.data.sessions = {};
         this.data.sessionOrder = [];
         this.data.activeSessionId = null;

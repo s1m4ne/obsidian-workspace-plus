@@ -401,6 +401,32 @@ test('storage backup: a restore keeps the version history this device holds', as
     }
 });
 
+test('storage backup: a restore propagates as deletions and revivals, not as a sync conflict', async () => {
+    // Without this, a session the restore brought back was still recorded as
+    // deleted, and the next sync with a device that had seen the deletion
+    // removed it again. The sessions the restore left out are deletions too.
+    const harness = setupHarness();
+    try {
+        const { plugin, files } = createHost();
+        const deletedAt = Date.now() - 1000;
+        plugin.data.deletedSessions = { gone: deletedAt };
+        const path = seed(plugin, files, 8000);
+        files.set(path, JSON.stringify({
+            activeSessionId: 'gone',
+            sessions: { gone: { id: 'gone', name: 'Back', layout: { root: 'back' }, modified: 100 } },
+            sessionOrder: ['gone'],
+        }));
+
+        assert.equal(await backup.restoreFromRotationBackup(plugin, path), true);
+
+        assert.equal(plugin.data.deletedSessions.gone, undefined, 'the revived session is no longer deleted');
+        assert.ok(plugin.data.sessions.gone.modified > deletedAt, 'and is newer than its deletion');
+        assert.equal(typeof plugin.data.deletedSessions.s1, 'number', 'what the backup left out is deleted');
+    } finally {
+        harness.restore();
+    }
+});
+
 test('storage backup: getBackupPlatformLabel checks platform flags', () => {
     const harness = setupHarness();
     try {

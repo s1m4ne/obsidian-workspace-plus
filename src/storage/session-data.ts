@@ -107,6 +107,67 @@ export function carryOverSessionHistory(
     }
 }
 
+/**
+ * How long a deletion is remembered. Long enough for a device that was off to
+ * come back and sync; a copy of the session older than that would return.
+ */
+export const DELETION_RECORD_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+
+export function readDeletedSessions(raw: unknown): Record<string, number> {
+    const out: Record<string, number> = {};
+    if (!raw || typeof raw !== 'object') return out;
+    const record = raw as Record<string, unknown>;
+    const ids = Object.keys(record);
+    for (let i = 0; i < ids.length; i++) {
+        const id = ids[i]!;
+        const at = record[id];
+        if (typeof at === 'number' && Number.isFinite(at)) out[id] = at;
+    }
+    return out;
+}
+
+/** Remember that `ids` were deleted now, and forget deletions past their time. */
+export function recordSessionDeletions(
+    deleted: Record<string, number> | undefined,
+    ids: readonly string[],
+    now: number
+): Record<string, number> {
+    const out: Record<string, number> = {};
+    const known = deleted || {};
+    const kept = Object.keys(known);
+    for (let i = 0; i < kept.length; i++) {
+        const id = kept[i]!;
+        const at = known[id]!;
+        if (now - at < DELETION_RECORD_TTL_MS) out[id] = at;
+    }
+    for (let i = 0; i < ids.length; i++) out[ids[i]!] = now;
+    return out;
+}
+
+/**
+ * A restore or an import replaces every session at once.
+ *
+ * The sessions it leaves out are deletions like any other, and are recorded so
+ * the other devices drop them too. The ones it brings back that had been
+ * deleted are now newer than that deletion; without saying so, the next sync
+ * with a device that saw the deletion would remove them again.
+ */
+export function recordReplacementDeletions(
+    previous: Readonly<Record<string, SessionItem>>,
+    next: Record<string, SessionItem>,
+    deleted: Record<string, number> | undefined,
+    now: number
+): Record<string, number> {
+    const removed = Object.keys(previous).filter((id) => !next[id]);
+    const out = recordSessionDeletions(deleted, removed, now);
+    for (const [id, session] of Object.entries(next)) {
+        if (out[id] === undefined) continue;
+        delete out[id];
+        session.modified = now;
+    }
+    return out;
+}
+
 export function hasInlineSessionHistory(sessionData: unknown): boolean {
     if (!sessionData || typeof sessionData !== 'object') return false;
     const rawData = sessionData as Record<string, unknown>;
@@ -175,6 +236,9 @@ const defaultExport = {
     splitSessionHistory,
     mergeSessionHistory,
     carryOverSessionHistory,
+    readDeletedSessions,
+    recordSessionDeletions,
+    recordReplacementDeletions,
     hasInlineSessionHistory,
     pickSessionPayload,
     pickKeys,

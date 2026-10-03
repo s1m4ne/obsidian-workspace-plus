@@ -7,7 +7,7 @@ import { normalizeSessionStorageLocation, SESSION_STORAGE_PLUGIN, SESSION_STORAG
 import { SessionStorage } from './session-storage.ts';
 import { BACKUP_GENERATION_CHOICES, DEFAULT_BACKUP_GENERATIONS } from './backup-pool.ts';
 import { removeAllRotationBackups } from './backup-store.ts';
-import { getPersistStamp, hasNonEmptySessions, hasSessionShape, pickKeys, pickSessionPayload, splitSessionHistory } from './session-data.ts';
+import { getPersistStamp, hasNonEmptySessions, hasSessionShape, pickKeys, pickSessionPayload, readDeletedSessions, splitSessionHistory } from './session-data.ts';
 
 export type DataRecord = Record<string, unknown>;
 
@@ -33,6 +33,7 @@ export type SessionData = DataRecord & {
     groupOrder?: string[];
     sessionGroups?: Record<string, string[]>;
     activeGroupId?: string | null;
+    deletedSessions?: Record<string, number>;
     _wppSavedAt?: number;
 };
 
@@ -235,7 +236,8 @@ export class PersistenceService {
         }
         const activeGroupId = typeof record.activeGroupId === 'string' && groups[record.activeGroupId]
             ? record.activeGroupId : null;
-        return { activeSessionId: active, sessions, sessionOrder: order, groups, groupOrder, sessionGroups: cleaned, activeGroupId };
+        const deletedSessions = readDeletedSessions(record.deletedSessions);
+        return { activeSessionId: active, sessions, sessionOrder: order, groups, groupOrder, sessionGroups: cleaned, activeGroupId, deletedSessions };
     }
 
     getJsonStore(): JsonFileStore {
