@@ -149,8 +149,9 @@ export function recordSessionDeletions(
  *
  * The sessions it leaves out are deletions like any other, and are recorded so
  * the other devices drop them too. The ones it brings back that had been
- * deleted are now newer than that deletion; without saying so, the next sync
- * with a device that saw the deletion would remove them again.
+ * deleted are marked as restored: a deletion outranks every other change, so
+ * without saying so the next sync with a device that saw the deletion would
+ * remove them again.
  */
 export function recordReplacementDeletions(
     previous: Readonly<Record<string, SessionItem>>,
@@ -163,7 +164,7 @@ export function recordReplacementDeletions(
     for (const [id, session] of Object.entries(next)) {
         if (out[id] === undefined) continue;
         delete out[id];
-        session.modified = now;
+        session.restoredAt = now;
     }
     return out;
 }

@@ -420,7 +420,7 @@ test('storage backup: a restore propagates as deletions and revivals, not as a s
         assert.equal(await backup.restoreFromRotationBackup(plugin, path), true);
 
         assert.equal(plugin.data.deletedSessions.gone, undefined, 'the revived session is no longer deleted');
-        assert.ok(plugin.data.sessions.gone.modified > deletedAt, 'and is newer than its deletion');
+        assert.ok(plugin.data.sessions.gone.restoredAt > deletedAt, 'and is marked as restored after it');
         assert.equal(typeof plugin.data.deletedSessions.s1, 'number', 'what the backup left out is deleted');
     } finally {
         harness.restore();

@@ -44,14 +44,26 @@ test('a deletion the other device recorded removes the session here', () => {
     assert.equal(merged['b'], undefined);
 });
 
-test('a session changed after it was deleted elsewhere is kept', () => {
+test('a deletion outranks changes the other device made without knowing of it', () => {
+    // A desktop cycling through its sessions saves each one it leaves. That
+    // brought back a session a phone had deleted a minute earlier.
     const merged = merge(
-        payload({ a, b: { id: 'b', name: 'B renamed', layout: null, modified: 300 } }),
+        payload({ a, b: { id: 'b', name: 'B', layout: { pane: 'saved-on-switch' }, modified: 300 } }),
+        payload({ a }, { deletedSessions: { b: 150 } }),
+        payload({ a, b: { id: 'b', name: 'B', layout: null, modified: 100 } }),
+    );
+
+    assert.equal(merged['b'], undefined);
+});
+
+test('a restore that brings a session back outranks the deletion', () => {
+    const merged = merge(
+        payload({ a, b: { id: 'b', name: 'B', layout: null, modified: 100, restoredAt: 200 } }),
         payload({ a }, { deletedSessions: { b: 150 } }),
         payload({ a }),
     );
 
-    assert.equal(merged['b']?.name, 'B renamed');
+    assert.equal(merged['b']?.name, 'B');
 });
 
 test('each kind of layout is taken from whichever device saved it last', () => {

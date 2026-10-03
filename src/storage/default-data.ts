@@ -41,6 +41,8 @@ export interface SessionItem {
     mobileLayout?: unknown;
     layoutSavedAt?: number;
     mobileLayoutSavedAt?: number;
+    /** When a backup restore or an import brought it back after a deletion. */
+    restoredAt?: number;
     created?: number;
     modified?: number;
     history?: SessionHistoryEntry[];

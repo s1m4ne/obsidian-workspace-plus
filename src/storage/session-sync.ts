@@ -100,7 +100,7 @@ const LAYOUT_FIELDS = [
 
 /** Merged separately, or not at all: history is this device's alone. */
 const UNMERGED_FIELDS: ReadonlySet<string> = new Set([
-    'history', 'modified',
+    'history', 'modified', 'restoredAt',
     ...LAYOUT_FIELDS.flatMap((f) => [f.layout, f.savedAt]),
 ]);
 
@@ -147,6 +147,8 @@ function mergeSession(local: SessionItem, external: SessionItem, baseline: Sessi
         if (typeof savedAt === 'number') merged[field.savedAt] = savedAt;
     }
     merged.modified = Math.max(getSessionModified(local), getSessionModified(external));
+    const restoredAt = Math.max(local.restoredAt ?? 0, external.restoredAt ?? 0);
+    if (restoredAt > 0) merged.restoredAt = restoredAt;
     if (local.history) merged.history = local.history;
     return merged;
 }
@@ -177,10 +179,15 @@ export function mergeExternalSessionDataForWrite(
     const mergedSessions: Record<string, SessionItem> = {};
 
     // A session one side lacks is kept: absent can mean "not received yet" as
-    // easily as "deleted". A recorded deletion newer than the session's last
-    // change removes it, and so does this device having held the session at
-    // its last read and dropped it since - the baseline is this device's own,
-    // so it does speak for this device's deletions.
+    // easily as "deleted". A recorded deletion removes it, and so does this
+    // device having held the session at its last read and dropped it since -
+    // the baseline is this device's own, so it does speak for its deletions.
+    //
+    // A deletion outranks any change the other device made, because that
+    // device made it without knowing: switching sessions saves the one being
+    // left, so a desktop that cycled through its sessions brought back one a
+    // phone had just deleted. Only a restore or an import, which bring a
+    // session back on purpose, outrank the deletion.
     const ids = new Set([...Object.keys(externalSessions), ...Object.keys(localSessions)]);
     for (const id of ids) {
         const mine = localSessions[id];
@@ -192,7 +199,7 @@ export function mergeExternalSessionDataForWrite(
             : cloneJson(mine ?? theirs);
         if (!session) continue;
         const deletedAt = deletedSessions[id];
-        if (deletedAt !== undefined && getSessionModified(session) <= deletedAt) continue;
+        if (deletedAt !== undefined && deletedAt >= (session.restoredAt ?? 0)) continue;
         mergedSessions[id] = session;
     }
 
