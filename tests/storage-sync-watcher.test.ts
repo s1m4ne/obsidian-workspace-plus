@@ -250,6 +250,8 @@ test('session sync host functions: state recording, info check, and sync watcher
         data: applyHost.data,
         normalizeSessionData: (d) => d as never,
         persistData: async () => true,
+        getSessionsPath: () => 'sessions.json',
+        getFileMtime: async () => 0,
     };
     const watcher = getSyncWatcher(watcherHost);
     assert.ok(watcher);
@@ -264,4 +266,78 @@ test('session sync host functions: state recording, info check, and sync watcher
     assert.equal(scheduledReload, true);
 
     clearSessionStorageSyncTimers(watcherHost);
+});
+
+test('SyncWatcher: a sessions file another device wrote is noticed without a focus or a settings change', async () => {
+    // Obsidian reports nothing for a file in a dot folder written by a sync, so
+    // a delivered sessions file waited for data.json to arrive as well - 25 and
+    // 56 seconds on an iCloud vault (#124).
+    const harness = setupHarness();
+    const ticks: Array<() => void> = [];
+    const realSetInterval = window.setInterval.bind(window);
+    window.setInterval = ((handler: () => void) => { ticks.push(handler); return 1; }) as typeof window.setInterval;
+    try {
+        let changed = false;
+        let registered = 0;
+        const watcher = new SyncWatcher({
+            onReload: () => {},
+            isFileChanged: async () => changed,
+            registerInterval: (id) => { registered += 1; return id; },
+        });
+        watcher.registerListeners();
+        assert.equal(ticks.length, 1, 'one poll, started with the listeners');
+        assert.equal(registered, 1, 'and handed to Obsidian to clear on unload');
+        const tick = ticks[0]!;
+
+        tick();
+        await new Promise((resolve) => window.setTimeout(resolve, 0));
+        assert.equal(watcher.hasActiveTimers(), false, 'an unchanged file is not read');
+
+        changed = true;
+        tick();
+        await new Promise((resolve) => window.setTimeout(resolve, 0));
+        assert.equal(watcher.hasActiveTimers(), true, 'a changed file schedules a reload');
+
+        watcher.clearTimers();
+    } finally {
+        window.setInterval = realSetInterval;
+        harness.restore();
+    }
+});
+
+test('session sync: the poll compares the file time with the one this device last recorded', async () => {
+    const harness = setupHarness();
+    const ticks: Array<() => void> = [];
+    const realSetInterval = window.setInterval.bind(window);
+    window.setInterval = ((handler: () => void) => { ticks.push(handler); return 1; }) as typeof window.setInterval;
+    try {
+        const { getSyncWatcher } = await import('../src/storage/session-sync.ts');
+        let fileTime = 1000;
+        const host: import('../src/storage/session-sync.ts').SyncWatcherHost = {
+            reloadExternalSessionStorageIfChanged: async () => true,
+            normalizeSessionData: (d) => d as never,
+            persistData: async () => true,
+            getSessionsPath: () => 'sessions.json',
+            getFileMtime: async () => fileTime,
+            _sessionStorageMtime: 1000,
+        };
+        const watcher = getSyncWatcher(host);
+        watcher.registerListeners();
+        const tick = ticks[0]!;
+
+        tick();
+        await new Promise((resolve) => window.setTimeout(resolve, 0));
+        assert.equal(watcher.hasActiveTimers(), false, 'the file this device last saw');
+
+        // Earlier, not only later: a sync keeps the time the other device wrote.
+        fileTime = 900;
+        tick();
+        await new Promise((resolve) => window.setTimeout(resolve, 0));
+        assert.equal(watcher.hasActiveTimers(), true, 'a different file, even one stamped earlier');
+
+        watcher.clearTimers();
+    } finally {
+        window.setInterval = realSetInterval;
+        harness.restore();
+    }
 });

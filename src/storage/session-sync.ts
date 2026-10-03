@@ -604,6 +604,9 @@ export async function reloadExternalSessionStorageIfChanged(
 
 export interface SyncWatcherHost extends SessionStorageStateHost {
     _syncWatcher?: SyncWatcher;
+    getSessionsPath(): string;
+    getFileMtime(path: string): Promise<number>;
+    registerInterval?(id: number): number;
     reloadExternalSessionStorageIfChanged(options?: { mergeLocal?: boolean; force?: boolean; applyLayout?: boolean }): Promise<boolean>;
     registerDomEvent?(target: unknown, event: string, handler: (e: unknown) => void): void;
     data?: PluginData;
@@ -630,6 +633,13 @@ export function getSyncWatcher(host: SyncWatcherHost): SyncWatcher {
             onReload: () => reloadFromOtherDevice(host),
             registerDomEvent: typeof host.registerDomEvent === 'function'
                 ? (target, event, handler) => host.registerDomEvent!(target, event, handler)
+                : undefined,
+            isFileChanged: async () => {
+                const mtime = await host.getFileMtime(host.getSessionsPath());
+                return mtime > 0 && Math.abs(mtime - (host._sessionStorageMtime || 0)) > SESSION_FILE_MTIME_EPSILON_MS;
+            },
+            registerInterval: typeof host.registerInterval === 'function'
+                ? (id) => host.registerInterval!(id)
                 : undefined,
         });
     }
