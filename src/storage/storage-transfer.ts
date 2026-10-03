@@ -1,6 +1,6 @@
 import { Notice } from 'obsidian';
 import { L, formatString } from '../i18n.ts';
-import { splitSessionHistory, hasSessionShape, hasNonEmptySessions } from './session-data.ts';
+import { carryOverSessionHistory, splitSessionHistory, hasSessionShape, hasNonEmptySessions } from './session-data.ts';
 import type { PluginData } from './default-data.ts';
 import type { SessionDataPayload } from './storage-backup.ts';
 
@@ -124,7 +124,9 @@ export async function importSessionsFromLatestExport(host: StorageImportHost): P
         }
 
         host.data.activeSessionId = imported.activeSessionId ?? null;
-        host.data.sessions = imported.sessions || {};
+        const importedSessions = imported.sessions || {};
+        carryOverSessionHistory(host.data.sessions || {}, importedSessions);
+        host.data.sessions = importedSessions;
         host.data.sessionOrder = imported.sessionOrder || [];
         host.data.groups = imported.groups || {};
         host.data.groupOrder = typeof host.normalizeGroupTabOrder === 'function'

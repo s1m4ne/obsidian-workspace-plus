@@ -88,6 +88,25 @@ export function mergeSessionHistory(
     return sessionData;
 }
 
+/**
+ * Version history never travels with sessions - sessions.json is written
+ * without it - so a session replaced by one read from disk has to be given its
+ * history back. Otherwise the next save writes history.json without it.
+ */
+export function carryOverSessionHistory(
+    from: Readonly<Record<string, SessionItem>>,
+    to: Record<string, SessionItem>
+): void {
+    const ids = Object.keys(to);
+    for (let i = 0; i < ids.length; i++) {
+        const id = ids[i]!;
+        const target = to[id];
+        const history = from[id]?.history;
+        if (!target || target.history || !Array.isArray(history) || history.length === 0) continue;
+        target.history = history;
+    }
+}
+
 export function hasInlineSessionHistory(sessionData: unknown): boolean {
     if (!sessionData || typeof sessionData !== 'object') return false;
     const rawData = sessionData as Record<string, unknown>;
@@ -155,6 +174,7 @@ const defaultExport = {
     readHistoryMap,
     splitSessionHistory,
     mergeSessionHistory,
+    carryOverSessionHistory,
     hasInlineSessionHistory,
     pickSessionPayload,
     pickKeys,

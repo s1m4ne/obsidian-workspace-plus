@@ -377,6 +377,30 @@ test('storage backup: a restored backup reaches the screen, not just the data', 
     }
 });
 
+test('storage backup: a restore keeps the version history this device holds', async () => {
+    // Backups are written without history, like sessions.json. Restoring one
+    // used to drop every session's history, and the next save emptied
+    // history.json - the record that could have undone the restore.
+    const harness = setupHarness();
+    try {
+        const { plugin, files } = createHost();
+        const history = [{ savedAt: 1, layout: { root: 'earlier' } }];
+        plugin.data.sessions.s1.history = history;
+        const path = seed(plugin, files, 7000);
+        files.set(path, JSON.stringify({
+            activeSessionId: 's1',
+            sessions: { s1: { id: 's1', name: 'Restored', layout: { root: 'restored' } } },
+            sessionOrder: ['s1'],
+        }));
+
+        assert.equal(await backup.restoreFromRotationBackup(plugin, path), true);
+
+        assert.deepEqual(plugin.data.sessions.s1.history, history);
+    } finally {
+        harness.restore();
+    }
+});
+
 test('storage backup: getBackupPlatformLabel checks platform flags', () => {
     const harness = setupHarness();
     try {

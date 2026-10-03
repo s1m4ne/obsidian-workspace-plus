@@ -4,7 +4,7 @@ import type { SessionSwitcher } from '../state/session-switcher.ts';
 import type { PluginData, SessionGroup, SessionItem } from './default-data.ts';
 import type { SessionDataPayload } from './storage-backup.ts';
 import type { ReadJsonResult } from './json-file-store.ts';
-import { getPersistStamp, hasSessionShape } from './session-data.ts';
+import { carryOverSessionHistory, getPersistStamp, hasSessionShape } from './session-data.ts';
 import { cloneJson } from '../clone-json.ts';
 
 // Re-exported so the .js callers that still require this module keep working.
@@ -413,7 +413,9 @@ export async function applySessionDataFromStorage(
         ) as SessionDataPayload)
         : host.normalizeSessionData(sessionData);
 
-    host.data.sessions = next.sessions || {};
+    const incomingSessions = next.sessions || {};
+    carryOverSessionHistory(host.data.sessions || {}, incomingSessions);
+    host.data.sessions = incomingSessions;
     host.data.sessionOrder = next.sessionOrder || [];
     host.data.groups = next.groups || {};
     host.data.groupOrder = next.groupOrder || [];
