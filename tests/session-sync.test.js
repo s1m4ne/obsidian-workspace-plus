@@ -589,3 +589,20 @@ test('session sync: a file written before this device\'s save arrived does not u
     assert.equal(plugin.data.sessions.hello?.name, 'hello', 'the session is still here');
     assert.equal(writes, 1, 'and is written back, or the other device never receives it');
 });
+
+test('session sync: a file holding a session and its deletion loads without it', function () {
+    // Written by a device the deletion had not reached yet, merged before a
+    // deletion outranked other changes - or by an earlier release.
+    const plugin = createPlugin();
+    const normalized = plugin.persistenceService.normalizeSessionData({
+        sessionOrder: ['keep', 'gone'],
+        sessions: {
+            keep: { id: 'keep', name: 'Keep', modified: 100, layout: null },
+            gone: { id: 'gone', name: 'Gone', modified: 300, layout: null },
+        },
+        deletedSessions: { gone: 200 },
+    });
+
+    assert.deepEqual(Object.keys(normalized.sessions), ['keep']);
+    assert.deepEqual(normalized.sessionOrder, ['keep']);
+});

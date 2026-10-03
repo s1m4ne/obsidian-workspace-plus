@@ -126,6 +126,15 @@ export function readDeletedSessions(raw: unknown): Record<string, number> {
     return out;
 }
 
+/**
+ * Whether a recorded deletion removes the session. It outranks any other change
+ * - those were made by a device that did not know of it - except a restore or
+ * an import made after it, which bring the session back on purpose.
+ */
+export function isSessionDeleted(session: SessionItem, deletedAt: number | undefined): boolean {
+    return deletedAt !== undefined && deletedAt >= (session.restoredAt ?? 0);
+}
+
 /** Remember that `ids` were deleted now, and forget deletions past their time. */
 export function recordSessionDeletions(
     deleted: Record<string, number> | undefined,
@@ -238,6 +247,7 @@ const defaultExport = {
     mergeSessionHistory,
     carryOverSessionHistory,
     readDeletedSessions,
+    isSessionDeleted,
     recordSessionDeletions,
     recordReplacementDeletions,
     hasInlineSessionHistory,

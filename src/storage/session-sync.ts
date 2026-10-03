@@ -4,7 +4,7 @@ import type { SessionSwitcher } from '../state/session-switcher.ts';
 import type { PluginData, SessionGroup, SessionItem } from './default-data.ts';
 import type { SessionDataPayload } from './storage-backup.ts';
 import type { ReadJsonResult } from './json-file-store.ts';
-import { carryOverSessionHistory, getPersistStamp, hasSessionShape, readDeletedSessions } from './session-data.ts';
+import { carryOverSessionHistory, getPersistStamp, hasSessionShape, isSessionDeleted, readDeletedSessions } from './session-data.ts';
 import { cloneJson } from '../clone-json.ts';
 
 // Re-exported so the .js callers that still require this module keep working.
@@ -198,8 +198,7 @@ export function mergeExternalSessionDataForWrite(
             ? mergeSession(mine, theirs, baselineSessions[id])
             : cloneJson(mine ?? theirs);
         if (!session) continue;
-        const deletedAt = deletedSessions[id];
-        if (deletedAt !== undefined && deletedAt >= (session.restoredAt ?? 0)) continue;
+        if (isSessionDeleted(session, deletedSessions[id])) continue;
         mergedSessions[id] = session;
     }
 

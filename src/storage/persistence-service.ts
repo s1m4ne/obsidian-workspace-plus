@@ -7,7 +7,7 @@ import { normalizeSessionStorageLocation, SESSION_STORAGE_PLUGIN, SESSION_STORAG
 import { SessionStorage } from './session-storage.ts';
 import { BACKUP_GENERATION_CHOICES, DEFAULT_BACKUP_GENERATIONS } from './backup-pool.ts';
 import { removeAllRotationBackups } from './backup-store.ts';
-import { getPersistStamp, hasNonEmptySessions, hasSessionShape, pickKeys, pickSessionPayload, readDeletedSessions, splitSessionHistory } from './session-data.ts';
+import { getPersistStamp, hasNonEmptySessions, hasSessionShape, isSessionDeleted, pickKeys, pickSessionPayload, readDeletedSessions, splitSessionHistory } from './session-data.ts';
 
 export type DataRecord = Record<string, unknown>;
 
@@ -190,7 +190,14 @@ export class PersistenceService {
 
     normalizeSessionData(raw: unknown): SessionData {
         const record = isRecord(raw) ? raw : {};
-        const sessions = isRecord(record.sessions) ? record.sessions as Record<string, SessionItem> : {};
+        const deletedSessions = readDeletedSessions(record.deletedSessions);
+        // A file can carry a session and its deletion both, when it was written
+        // before the deletion reached the device that wrote it.
+        const listed = isRecord(record.sessions) ? record.sessions as Record<string, SessionItem> : {};
+        const sessions: Record<string, SessionItem> = {};
+        for (const [id, session] of Object.entries(listed)) {
+            if (!isSessionDeleted(session, deletedSessions[id])) sessions[id] = session;
+        }
         const rawOrder = Array.isArray(record.sessionOrder) ? record.sessionOrder : Object.keys(sessions);
         const seen: Record<string, boolean> = {};
         const order: string[] = [];
@@ -236,7 +243,6 @@ export class PersistenceService {
         }
         const activeGroupId = typeof record.activeGroupId === 'string' && groups[record.activeGroupId]
             ? record.activeGroupId : null;
-        const deletedSessions = readDeletedSessions(record.deletedSessions);
         return { activeSessionId: active, sessions, sessionOrder: order, groups, groupOrder, sessionGroups: cleaned, activeGroupId, deletedSessions };
     }
 
