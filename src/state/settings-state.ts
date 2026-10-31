@@ -1,4 +1,4 @@
-import { DEFAULT_DATA, type PluginData, type StatusBarActions, type StatusBarSlotKey } from '../storage/default-data.ts';
+import { DEFAULT_DATA, type OverlayFocus, type PluginData, type StatusBarActions, type StatusBarSlotKey } from '../storage/default-data.ts';
 import { persistIfNeeded, type PersistOption } from './persist-option.ts';
 import { resolveLocale } from '../i18n.ts';
 import { BACKUP_GENERATION_CHOICES, DEFAULT_BACKUP_GENERATIONS } from '../storage/backup-pool.ts';
@@ -126,6 +126,20 @@ export class SettingsState {
         return this.data.showFilterInput ?? DEFAULT_DATA.showFilterInput;
     }
 
+    /**
+     * Where the search overlay and the session manager put the cursor when
+     * they open - what they will actually do, not only what was chosen. The
+     * filter box is not there when the filter is hidden, so that choice opens
+     * on the current session; it stays stored, and comes back with the filter.
+     * The settings row reads this too, so it never shows an answer that does
+     * nothing.
+     */
+    get overlayDefaultFocus(): OverlayFocus {
+        const stored = this.data.overlayDefaultFocus ?? DEFAULT_DATA.overlayDefaultFocus;
+        if (stored === 'session-create') return stored;
+        if (stored === 'session-filter' && this.showFilterInput) return stored;
+        return 'current-session';
+    }
 
     get confirmDeleteByHotkey(): boolean {
         return this.data.confirmDeleteByHotkey ?? DEFAULT_DATA.confirmDeleteByHotkey;
@@ -276,6 +290,10 @@ export class SettingsState {
         return this.persistIfNeeded(options);
     }
 
+    async setOverlayDefaultFocus(value: string, options?: SetOption): Promise<boolean> {
+        this.data.overlayDefaultFocus = value || 'current-session';
+        return this.persistIfNeeded(options);
+    }
 
     async setConfirmDeleteByHotkey(enabled: boolean, options?: SetOption): Promise<boolean> {
         this.data.confirmDeleteByHotkey = !!enabled;

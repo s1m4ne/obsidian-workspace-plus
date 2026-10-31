@@ -32,8 +32,9 @@ const EXPECTED_LOCALES = [
 // then three for the settings wording pass, and finally nine removed - the
 // keys nothing referred to once the tab bar, the storage read-out and the
 // diagnostics card were gone.
+// 310 -> 315: the overlay focus setting came back for issue #128.
 // See the notes in i18n-values.lock.test.ts, which carry the reasons.
-const EXPECTED_KEY_COUNT = 310;
+const EXPECTED_KEY_COUNT = 315;
 // 63 -> 62: settingsSessionStorageLocationDesc took a path and is one of the
 // nine keys the wording pass deleted.
 const EXPECTED_FUNCTION_KEY_COUNT = 62;

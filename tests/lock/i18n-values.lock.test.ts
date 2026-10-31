@@ -1,6 +1,6 @@
 // Behavior Lock: what every i18n key actually resolves to.
 //
-// The other i18n lock proves the shape holds - 310 keys in all 21 locales, the
+// The other i18n lock proves the shape holds - 315 keys in all 21 locales, the
 // right types, plurals picking the right form. It does not prove the values are
 //
 // Edited deliberately, with the maintainer's authorization, at the commit that
@@ -145,6 +145,22 @@
 // Japanese is the Latin ON / OFF and in every other locale is that locale's own
 // word. 319 keys -> 310.
 //
+// And again, same authorization, restoring the five keys dropped at 316 above.
+// Issue #128: the person who had chosen the filter box lost it at 0.10.0, and
+// the keystroke it saved was the point - "one keystroke away" was paid on every
+// opening. The setting comes back with its three answers.
+//
+//   + settingsOverlayDefaultFocus, ...Desc
+//   + settingsOverlayFocusCurrentSession, ...SessionFilter, ...SessionCreate
+//
+// The key names are the old ones; the values are not recovered from git. The
+// old ones predate the wording pass - "Default overlay focus" named a mechanism
+// rather than what the row decides, and the description said it applied to the
+// session manager when it applies to the quick switcher as well. These were
+// written fresh, from the Japanese, with each locale's own words for quick
+// switcher, session manager and filter. Treat them as a first pass.
+// 310 keys -> 315.
+//
 // RULE: Behavior Lock tests are NEVER edited during the refactor. If this fails,
 // a translation changed. Regenerating the fixture is only correct when the change
 // was intended and the maintainer has said so.
@@ -240,10 +256,10 @@ test('the fixture covers every locale and key, so the comparison is not vacuous'
 
     assert.equal(locales.length, 21);
     for (const locale of locales) {
-        assert.equal(Object.keys(expected[locale] ?? {}).length, 310, `locale ${locale}`);
+        assert.equal(Object.keys(expected[locale] ?? {}).length, 315, `locale ${locale}`);
     }
 
-    // 62 of the 310 are functions, recorded from their output rather than their
+    // 62 of the 315 are functions, recorded from their output rather than their
     // source, so a rewritten implementation with the same output still passes.
     const functionEntries = Object.values(expected.en ?? {}).filter((v) => v.startsWith('fn:'));
     assert.equal(functionEntries.length, 62);

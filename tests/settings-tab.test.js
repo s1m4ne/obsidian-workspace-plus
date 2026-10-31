@@ -20,7 +20,7 @@ function createPlugin(overrides = {}) {
         statusBarScrollCooldownMs: 500, statusBarScrollResetMs: 250,
         statusBarScrollInvert: false, showActiveSwitchCommand: false,
         numberedSwitchCommands: false, previewNext: false, previewPrevious: false,
-        showFilterInput: false,
+        showFilterInput: false, overlayDefaultFocus: 'current-session',
         confirmDeleteByHotkey: true, versionHistoryEnabled: true,
         versionHistoryConfirmRestore: false,
         ...overrides.data,
@@ -511,6 +511,47 @@ test('a write inside the preview group rebuilds the rows, because it moves the o
     } finally { await settle(); h.restore(); }
 });
 
+test('the opening focus offers the filter box only while there is one', async () => {
+    const h = setupHarness();
+    try {
+        const { tab, plugin, L } = makeTab(h);
+        const options = () => Object.keys(rowNamed(tab.getSettingDefinitions(), L.settingsOverlayDefaultFocus).control.options);
+
+        plugin.data.showFilterInput = true;
+        assert.deepEqual(options(), ['current-session', 'session-filter', 'session-create']);
+        plugin.data.showFilterInput = false;
+        assert.deepEqual(options(), ['current-session', 'session-create']);
+    } finally { await settle(); h.restore(); }
+});
+
+test('a filter choice shows as the current session while the filter is hidden, and comes back with it', async () => {
+    const h = setupHarness();
+    try {
+        const { tab, plugin } = makeTab(h, { data: { showFilterInput: true, overlayDefaultFocus: 'session-filter' } });
+        assert.equal(tab.getControlValue('overlayDefaultFocus'), 'session-filter');
+
+        // The row shows what opening will do, and the dropdown has no
+        // filter entry to show anyway - but the choice is not overwritten.
+        plugin.data.showFilterInput = false;
+        assert.equal(tab.getControlValue('overlayDefaultFocus'), 'current-session');
+        assert.equal(plugin.data.overlayDefaultFocus, 'session-filter');
+
+        plugin.data.showFilterInput = true;
+        assert.equal(tab.getControlValue('overlayDefaultFocus'), 'session-filter');
+    } finally { await settle(); h.restore(); }
+});
+
+test('showing or hiding the filter rebuilds the rows, because it changes the focus row', async () => {
+    const h = setupHarness();
+    try {
+        const { tab } = makeTab(h);
+        let reads = 0;
+        tab.update = () => { reads += 1; };
+        await tab.setControlValue('showFilterInput', false);
+        assert.equal(reads, 1);
+    } finally { await settle(); h.restore(); }
+});
+
 test('the scroll tuning is one group, and it goes as a whole when the feature is off', async () => {
     const h = setupHarness();
     try {
@@ -599,6 +640,7 @@ test('each control key reads and writes through the owner that holds it', async 
             ['previewNext', true, 'previewNext'],
             ['previewPrevious', true, 'previewPrevious'],
             ['showFilterInput', true, 'filter'],
+            ['overlayDefaultFocus', 'session-filter', 'focus'],
             ['confirmQuickActions', true, 'confirmQuick'],
             ['confirmDeleteByHotkey', false, 'confirmDelete'],
             ['statusBarModScrollSwitch', true, 'modScroll'],
