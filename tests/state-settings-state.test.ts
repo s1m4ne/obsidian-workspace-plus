@@ -75,6 +75,7 @@ test('SettingsState: default fallback resolution for all settings (P5)', () => {
     assert.equal(state.previewNext, DEFAULT_DATA.previewNext);
     assert.equal(state.previewPrevious, DEFAULT_DATA.previewPrevious);
     assert.equal(state.showFilterInput, DEFAULT_DATA.showFilterInput);
+    assert.equal(state.overlayDefaultFocus, DEFAULT_DATA.overlayDefaultFocus);
     assert.equal(state.confirmDeleteByHotkey, DEFAULT_DATA.confirmDeleteByHotkey);
     assert.equal(state.versionHistoryEnabled, DEFAULT_DATA.versionHistoryEnabled);
     assert.equal(state.versionHistorySnapshotInterval, DEFAULT_DATA.versionHistorySnapshotInterval);
@@ -94,6 +95,20 @@ test('SettingsState: container reference reads live reassigned data slice (P1)',
     // Simulate external data replacement (sync or reset)
     currentData = Object.assign({}, DEFAULT_DATA, { language: 'fr' });
     assert.equal(state.language, 'fr');
+});
+
+test('SettingsState: the opening focus is what will happen, not only what was chosen', () => {
+    const focus = (data: Partial<PluginData>): string => {
+        const { host } = createMockHost(data);
+        return new SettingsState(() => host).overlayDefaultFocus;
+    };
+
+    assert.equal(focus({ overlayDefaultFocus: 'session-filter', showFilterInput: true }), 'session-filter');
+    // There is no filter box to put the cursor in.
+    assert.equal(focus({ overlayDefaultFocus: 'session-filter', showFilterInput: false }), 'current-session');
+    assert.equal(focus({ overlayDefaultFocus: 'session-create', showFilterInput: false }), 'session-create');
+    // A value no version wrote - hand-edited data.json - opens as the default does.
+    assert.equal(focus({ overlayDefaultFocus: 'search' }), 'current-session');
 });
 
 test('SettingsState: setters update data, trigger callbacks, and support persist option', async () => {

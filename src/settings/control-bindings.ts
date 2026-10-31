@@ -124,6 +124,15 @@ export const CONTROL_BINDINGS: Record<string, ControlBinding> = {
     showFilterInput: {
         read: (plugin) => state(plugin).showFilterInput,
         write: (plugin, value) => state(plugin).setShowFilterInput(value === true),
+        // The opening-focus row below offers the filter box only while there
+        // is one, and shows the filter choice as the current session while
+        // the filter is hidden - both of which a re-evaluation would not
+        // redraw.
+        rereadDefinitions: true,
+    },
+    overlayDefaultFocus: {
+        read: (plugin) => state(plugin).overlayDefaultFocus,
+        write: (plugin, value) => state(plugin).setOverlayDefaultFocus(String(value)),
     },
 
     // --- Confirmations -------------------------------------------------

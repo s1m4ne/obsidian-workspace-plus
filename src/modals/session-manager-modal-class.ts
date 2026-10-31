@@ -297,12 +297,18 @@ export class SessionManagerModal extends Modal {
         this.listenerDoc.addEventListener('keydown', this.modalKeyHandler, true);
 
         // Obsidian auto-focuses the first input, which here is the field that
-        // names a new session, so the session this modal opened on has to take
-        // the focus back after that has happened. Where it lands was a setting
-        // with three answers; the other two were a keystroke away.
-        this.ownerWindow().setTimeout(() => {
-            this.focusSessionTarget(this.getDefaultSessionTarget());
-        }, 50);
+        // names a new session. That is one of the three answers; for the other
+        // two, the chosen place takes the focus back after it has happened.
+        const focusTarget = this.plugin.getSettingsState().overlayDefaultFocus;
+        if (focusTarget !== 'session-create') {
+            this.ownerWindow().setTimeout(() => {
+                if (focusTarget === 'session-filter' && this.filterInput) {
+                    this.focusFilterInput();
+                } else {
+                    this.focusSessionTarget(this.getDefaultSessionTarget());
+                }
+            }, 50);
+        }
     }
 
     /**

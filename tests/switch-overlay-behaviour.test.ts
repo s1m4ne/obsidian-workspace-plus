@@ -69,6 +69,7 @@ function createTestPlugin() {
         autoSaveOnSwitch: false,
         warnOnUnsavedSwitch: false,
         showFilterInput: true,
+        overlayDefaultFocus: 'current-session',
     });
 
     /** The saved overlay position, under the shape the overlay actually uses. */
@@ -480,6 +481,35 @@ test('the search overlay saves the current layout and closes', async () => {
     plugin.hideSearchOverlay();
 });
 
+test('the search overlay opens with the cursor where the setting puts it', async () => {
+    const { plugin, searchOverlay } = createTestPlugin();
+    const landsOn = async (): Promise<string> => {
+        searchOverlay.open();
+        await new Promise((r) => setTimeout(r, 40));
+        const active = document.activeElement;
+        const overlay = plugin.searchOverlayEl as HTMLElement;
+        const where = active === overlay.querySelector('.wpp-search-input') ? 'filter'
+            : active === overlay.querySelector('.wpp-save-input') ? 'name'
+                : active === overlay ? 'sessions' : 'elsewhere';
+        plugin.hideSearchOverlay();
+        return where;
+    };
+
+    plugin.data.showFilterInput = true;
+    plugin.data.overlayDefaultFocus = 'current-session';
+    assert.equal(await landsOn(), 'sessions');
+    plugin.data.overlayDefaultFocus = 'session-filter';
+    assert.equal(await landsOn(), 'filter');
+    plugin.data.overlayDefaultFocus = 'session-create';
+    assert.equal(await landsOn(), 'name');
+
+    // Issue #128's choice, with the filter hidden: there is no box to type
+    // in, so it opens as the default does rather than on a hidden input.
+    plugin.data.showFilterInput = false;
+    plugin.data.overlayDefaultFocus = 'session-filter';
+    assert.equal(await landsOn(), 'sessions');
+});
+
 test('the search overlay filters as you type and offers per-row actions', async () => {
     const { plugin, searchOverlay } = createTestPlugin();
     plugin.persistData = async () => true;
@@ -567,10 +597,10 @@ test('the search overlay filters as you type and offers per-row actions', async 
     plugin.hideSearchOverlay();
     assert.equal(plugin.searchOverlayEl, null);
 
-    // Typing a name and pressing Enter creates a session. The field no longer
-    // takes the opening focus - where the overlay lands was a setting with
-    // three answers and is now always the current session - so this reaches it
-    // by writing to the field directly, the way a click on it would.
+    // The knob the overlay actually reads. This line used to set
+    // searchOverlayFocusTarget, which nothing in src reads, so the test took the
+    // focusTarget !== 'session-create' branch - the opposite of what it names.
+    plugin.data.overlayDefaultFocus = 'session-create';
     searchOverlay.open();
     const saveInputEl = (plugin.searchOverlayEl as HTMLElement | null)?.querySelector<HTMLInputElement>('.wpp-save-input');
     if (saveInputEl) {

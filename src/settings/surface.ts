@@ -147,7 +147,18 @@ function switchPreviewGroup(ctx: SettingsContext): SettingDefinitionItem {
     };
 }
 
-function overlayGroup(): SettingDefinitionItem {
+function overlayGroup(ctx: SettingsContext): SettingDefinitionItem {
+    // The filter box is offered only while there is one. Choosing it and then
+    // hiding the filter keeps the choice, but the row shows what opening will
+    // actually do - see SettingsState.overlayDefaultFocus.
+    const focusOptions: Record<string, string> = {
+        'current-session': text(L.settingsOverlayFocusCurrentSession),
+    };
+    if (ctx.plugin.getSettingsState().showFilterInput) {
+        focusOptions['session-filter'] = text(L.settingsOverlayFocusSessionFilter);
+    }
+    focusOptions['session-create'] = text(L.settingsOverlayFocusSessionCreate);
+
     return {
         type: 'group',
         heading: text(L.settingsSectionSessionListSearch),
@@ -156,6 +167,11 @@ function overlayGroup(): SettingDefinitionItem {
                 name: text(L.settingsShowFilterInput),
                 desc: text(L.settingsShowFilterInputDesc),
                 control: { type: 'toggle', key: 'showFilterInput' },
+            },
+            {
+                name: text(L.settingsOverlayDefaultFocus),
+                desc: text(L.settingsOverlayDefaultFocusDesc),
+                control: { type: 'dropdown', key: 'overlayDefaultFocus', options: focusOptions },
             },
         ],
     };
@@ -192,7 +208,7 @@ export function surfaceGroups(ctx: SettingsContext): SettingDefinitionItem[] {
         savingGroup(ctx),
         restoreGroup(),
         switchPreviewGroup(ctx),
-        overlayGroup(),
+        overlayGroup(ctx),
         confirmationsGroup(ctx),
         // Below the deletion group, at the maintainer's request: these two
         // change which commands the palette and the hotkey screen offer, which
