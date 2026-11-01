@@ -141,7 +141,7 @@ export const ACTIONS: readonly StatusBarAction[] = [
         id: 'reloadWithoutSaving',
         labelKey: 'statusBarActionReloadWithoutSaving',
         run(plugin) {
-            return plugin.getSessionSaver().reloadCurrentSessionWithoutSaving();
+            plugin.getSessionSaver().reloadCurrentSession();
         },
     },
     {

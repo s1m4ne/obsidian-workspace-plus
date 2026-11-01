@@ -1,6 +1,6 @@
 // Behavior Lock: what every i18n key actually resolves to.
 //
-// The other i18n lock proves the shape holds - 315 keys in all 21 locales, the
+// The other i18n lock proves the shape holds - 316 keys in all 21 locales, the
 // right types, plurals picking the right form. It does not prove the values are
 //
 // Edited deliberately, with the maintainer's authorization, at the commit that
@@ -161,6 +161,20 @@
 // switcher, session manager and filter. Treat them as a first pass.
 // 310 keys -> 315.
 //
+// And again, same authorization, for #129: reload stops being a quick action.
+// Selecting the session you are in no longer reloads it, and reload from any
+// entry point asks under the unsaved-switch warning rather than under
+// confirmQuickActions - so that setting now covers saving only, and two
+// values in every locale said it covered reloading too.
+//
+//   ~ settingsConfirmQuickActions, ...Desc   "save/reload" -> "save"
+//   + reloadUnavailableWithAutoSave          what the status-bar action says
+//                                            when reload is not offered
+//
+// The changed values are the old ones with the reload half taken out, in each
+// locale's own words; the added one was written fresh, naming auto-save mode
+// as each locale's settingsAutoSaveOnSwitch does. 315 keys -> 316.
+//
 // RULE: Behavior Lock tests are NEVER edited during the refactor. If this fails,
 // a translation changed. Regenerating the fixture is only correct when the change
 // was intended and the maintainer has said so.
@@ -256,10 +270,10 @@ test('the fixture covers every locale and key, so the comparison is not vacuous'
 
     assert.equal(locales.length, 21);
     for (const locale of locales) {
-        assert.equal(Object.keys(expected[locale] ?? {}).length, 315, `locale ${locale}`);
+        assert.equal(Object.keys(expected[locale] ?? {}).length, 316, `locale ${locale}`);
     }
 
-    // 62 of the 315 are functions, recorded from their output rather than their
+    // 62 of the 316 are functions, recorded from their output rather than their
     // source, so a rewritten implementation with the same output still passes.
     const functionEntries = Object.values(expected.en ?? {}).filter((v) => v.startsWith('fn:'));
     assert.equal(functionEntries.length, 62);

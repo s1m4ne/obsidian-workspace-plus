@@ -53,7 +53,7 @@ interface ModalPlugin {
     /** What the scoped hotkeys reached (#119). */
     calls: string[];
     saveAsSession(): Promise<void>;
-    reloadCurrentSessionWithoutSaving(): Promise<void>;
+    reloadCurrentSession(): void;
     toggleAutoSaveOnSwitch(options?: { notify?: boolean }): Promise<void>;
     renameCurrentSession(): void;
     duplicateCurrentSession(): Promise<void>;
@@ -246,10 +246,7 @@ function makePlugin(containerEl: HTMLElement, groupFeatureEnabled = false): Moda
         // have their own buttons and those are covered above.
         calls: [] as string[],
         saveAsSession(): Promise<void> { this.calls.push('saveAsSession'); return Promise.resolve(); },
-        reloadCurrentSessionWithoutSaving(): Promise<void> {
-            this.calls.push('reloadCurrentSessionWithoutSaving');
-            return Promise.resolve();
-        },
+        reloadCurrentSession(): void { this.calls.push('reloadCurrentSession'); },
         toggleAutoSaveOnSwitch(): Promise<void> { this.calls.push('toggleAutoSaveOnSwitch'); return Promise.resolve(); },
         renameCurrentSession(): void { this.calls.push('renameCurrentSession'); },
         duplicateCurrentSession(): Promise<void> { this.calls.push('duplicateCurrentSession'); return Promise.resolve(); },

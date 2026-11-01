@@ -510,6 +510,42 @@ test('the search overlay opens with the cursor where the setting puts it', async
     assert.equal(await landsOn(), 'sessions');
 });
 
+test('selecting the session you are in closes the overlay and reloads nothing (#129)', async () => {
+    const { plugin, searchOverlay } = createTestPlugin();
+    const saver = plugin.getSessionSaver();
+    const reloads: string[] = [];
+    saver.reloadCurrentSessionWithoutSaving = async () => { reloads.push('without saving'); return true; };
+    saver.reloadCurrentSession = () => { reloads.push('requested'); };
+    const activeRow = (): HTMLElement | null =>
+        plugin.searchOverlayEl?.querySelector<HTMLElement>(`.wpp-switch-item[data-session-id="${plugin.data.activeSessionId}"]`) ?? null;
+
+    // Both modes: with auto-save on there was no reload button, yet a click
+    // on the row reloaded.
+    for (const autoSave of [true, false]) {
+        plugin.data.autoSaveOnSwitch = autoSave;
+
+        searchOverlay.open();
+        activeRow()?.dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
+        assert.equal(plugin.searchOverlayEl, null, 'a click closes it');
+
+        plugin.data.overlayDefaultFocus = 'current-session';
+        searchOverlay.open();
+        await new Promise((r) => setTimeout(r, 40));
+        document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter' }));
+        assert.equal(plugin.searchOverlayEl, null, 'Enter closes it');
+    }
+    assert.deepEqual(reloads, []);
+
+    // The button that says reload still reloads, through the guarded path.
+    plugin.data.autoSaveOnSwitch = false;
+    searchOverlay.open();
+    const reloadButton = activeRow()?.querySelector<HTMLElement>('.wpp-qs-action-btn[aria-label="Reload this session"]');
+    assert.ok(reloadButton, 'the active row offers reload with auto-save off');
+    reloadButton.dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
+    assert.deepEqual(reloads, ['requested']);
+    plugin.hideSearchOverlay();
+});
+
 test('the search overlay filters as you type and offers per-row actions', async () => {
     const { plugin, searchOverlay } = createTestPlugin();
     plugin.persistData = async () => true;

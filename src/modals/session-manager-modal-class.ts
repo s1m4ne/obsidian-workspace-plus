@@ -346,7 +346,7 @@ export class SessionManagerModal extends Modal {
             { id: 'save-as-session', run: () => { void plugin.getSessionSaver().saveAsSession(); } },
             {
                 id: 'reload-current-session-without-saving',
-                run: () => { void plugin.getSessionSaver().reloadCurrentSessionWithoutSaving(); },
+                run: () => { plugin.getSessionSaver().reloadCurrentSession(); },
             },
             { id: 'rename-session', run: () => { plugin.getSessionStore().renameCurrentSession(); } },
             { id: 'duplicate-session', run: () => { void plugin.getSessionStore().duplicateCurrentSession(); } },

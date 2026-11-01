@@ -228,6 +228,53 @@ test('SessionSaver: reloadCurrentSessionWithoutSaving and captureActiveSessionLa
     assert.equal(events.pushedHistory.length, 1);
 });
 
+test('SessionSaver: a requested reload is guarded the way a switch is (#129)', async () => {
+    const { L } = await import('../src/i18n.ts');
+    const lastNotice = (): string => harness.obsidian.notices[harness.obsidian.notices.length - 1]?.message ?? '';
+
+    // The fixture's current layout differs from s1's saved one, so there are
+    // unsaved changes unless a test says otherwise.
+    const setUp = (data: Partial<PluginData>) => {
+        const { host, events } = createMockHost(data);
+        const asked: string[] = [];
+        let confirm: (() => void) | null = null;
+        host.openConfirmModal = (message, onConfirm) => { asked.push(message); confirm = onConfirm; };
+        return { saver: new SessionSaver(host), host, events, asked, confirm: () => confirm?.() };
+    };
+
+    // Auto-save on: not offered, and it says so rather than doing nothing.
+    const auto = setUp({ autoSaveOnSwitch: true });
+    auto.saver.reloadCurrentSession();
+    assert.equal(auto.events.appliedLayouts.length, 0);
+    assert.equal(auto.asked.length, 0);
+    assert.equal(lastNotice(), L.reloadUnavailableWithAutoSave);
+
+    // Unsaved changes ask first, and only the confirmation reloads.
+    const dirty = setUp({ autoSaveOnSwitch: false, warnOnUnsavedSwitch: true });
+    dirty.saver.reloadCurrentSession();
+    assert.equal(dirty.asked.length, 1);
+    assert.equal(dirty.events.appliedLayouts.length, 0, 'nothing reloads before the answer');
+    dirty.confirm();
+    await new Promise((r) => setTimeout(r, 0));
+    assert.equal(dirty.events.appliedLayouts.length, 1);
+
+    // The same setting that lets a switch go without asking lets reload go too.
+    const unwarned = setUp({ autoSaveOnSwitch: false, warnOnUnsavedSwitch: false });
+    unwarned.saver.reloadCurrentSession();
+    await new Promise((r) => setTimeout(r, 0));
+    assert.equal(unwarned.asked.length, 0);
+    assert.equal(unwarned.events.appliedLayouts.length, 1);
+
+    // Nothing unsaved: nothing to ask, and nothing to redraw.
+    const clean = setUp({ autoSaveOnSwitch: false, warnOnUnsavedSwitch: true });
+    clean.host.getCurrentWorkspaceLayout = () => ({ type: 'main', id: 'l1' });
+    clean.saver.reloadCurrentSession();
+    await new Promise((r) => setTimeout(r, 0));
+    assert.equal(clean.asked.length, 0);
+    assert.equal(clean.events.appliedLayouts.length, 0);
+    assert.match(lastNotice(), /Work/);
+});
+
 test('SessionSaver helpers: findSessionByName and chooseSessionGroupForView', () => {
     const { host } = createMockHost({
         groups: {

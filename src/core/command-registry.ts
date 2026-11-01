@@ -356,13 +356,17 @@ export class CommandRegistry {
             },
         });
 
-        addSimpleCommand(
-            'reload-current-session-without-saving',
-            String(L.cmdReloadCurrentWithoutSaving || ''),
-            () => {
-                void host.getSessionSaver().reloadCurrentSessionWithoutSaving();
-            }
-        );
+        host.addCommand({
+            id: 'reload-current-session-without-saving',
+            name: String(L.cmdReloadCurrentWithoutSaving || ''),
+            // Not offered with auto-save on, the way saving the layout to a
+            // session is not: see SessionSaver.reloadCurrentSession (#129).
+            checkCallback: (checking) => {
+                if (host.getSessionSaver().isAutoSaveOnSwitchEnabled()) return false;
+                if (!checking) host.getSessionSaver().reloadCurrentSession();
+                return true;
+            },
+        });
 
         addSimpleCommand('toggle-auto-save-on-switch', String(L.cmdToggleAutoSave || ''), () => {
             void host.getSessionSaver().toggleAutoSaveOnSwitch({ notify: true });

@@ -466,6 +466,45 @@ export class SessionSaver {
         return true;
     }
 
+    /**
+     * Reload as someone asked for it - the command, the status bar, the
+     * reload buttons. Unlike reloadCurrentSessionWithoutSaving, which the
+     * import uses to put what it loaded on screen, this one is guarded the way
+     * a switch is (#129):
+     *
+     * - With auto-save on it is not offered. A save happens only at a switch,
+     *   so reload would go back to the moment the session was entered, in a
+     *   mode built on there being no unsaved state. Version history is the way
+     *   back there.
+     * - With nothing unsaved there is nothing to lose, and re-applying the
+     *   same layout only makes the workspace redraw.
+     * - Unsaved changes ask first, under the same setting that guards leaving
+     *   the session with them: the loss is the same in both directions.
+     */
+    reloadCurrentSession(): void {
+        if (this.isAutoSaveOnSwitchEnabled()) {
+            new Notice(String(L.reloadUnavailableWithAutoSave));
+            return;
+        }
+        const session = this.getActiveSession();
+        if (!session) {
+            new Notice(formatString(L.noSession));
+            return;
+        }
+        if (!this.isActiveSessionDirty()) {
+            new Notice(formatString(L.reloadedSession, session.name));
+            return;
+        }
+        const reload = (): void => { void this.reloadCurrentSessionWithoutSaving(); };
+        if (!this.isWarnOnUnsavedSwitchEnabled()) {
+            reload();
+            return;
+        }
+        this.host.openConfirmModal?.(formatString(L.confirmReloadSession, session.name), reload, {
+            confirmText: String(L.statusBarActionReloadWithoutSaving),
+        });
+    }
+
     async reloadCurrentSessionWithoutSaving(options?: { silent?: boolean }): Promise<boolean> {
         const opts = options || {};
         const session = this.getActiveSession();
