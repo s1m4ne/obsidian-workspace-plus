@@ -11,7 +11,7 @@ import * as settingsContextMenu from '../../settings-context-menu-items.ts';
 import type { SettingsContextMenuPluginHost } from '../../settings-context-menu-items.ts';
 import * as sessionListActions from '../../session-list-actions.ts';
 import * as utils from '../../utils.ts';
-import type { SessionGroup, SessionItem } from '../../storage/default-data.ts';
+import type { OverlayFocus, SessionGroup, SessionItem } from '../../storage/default-data.ts';
 import type { HistoryModalPluginHost } from '../../modals/history-modal.ts';
 import type { GroupStore } from '../../state/group-store.ts';
 import type { SettingsState } from '../../state/settings-state.ts';
@@ -87,12 +87,12 @@ interface SearchOverlayKeyboardOptions {
     focusSaveInput(): void;
     focusSearchInput(): void;
     focusFirstResult(): void;
+    focusNextResult(): void;
     focusLastResult(): void;
     hasSearchInput(): boolean;
     getFiltered(): SessionItem[];
     getSelectedIndex(): number;
     setSelectedIndex(value: number): void;
-    setKeyboardNav(value: boolean): void;
 }
 
 function hasBlockingModal(): boolean {
@@ -103,9 +103,17 @@ function syncSearchOverlaySelectedIndex(
     plugin: SearchOverlayHost,
     filtered: SessionItem[],
     currentIndex: number,
+    query: string,
     options: { preserveWhenMissing?: boolean } = {},
 ): number {
     if (filtered.length === 0) return -1;
+
+    // With a query, Enter goes to what was typed: the exact name if there is
+    // one, else the top row. It used to stay on the current session whenever
+    // that matched too, so Enter after typing went nowhere (#132). The rows
+    // are not reordered - a drag in a filtered list saves the visible order.
+    const typedIdx = navigationUtils.findTypedSessionIndex(filtered, query);
+    if (typedIdx !== -1) return typedIdx;
 
     const activeIdx = plugin.getSessionStore().findActiveSessionIndex(filtered);
     if (activeIdx !== -1) return activeIdx;
@@ -140,7 +148,9 @@ function handleSearchOverlayVerticalKey(event: KeyboardEvent, activeEl: Element 
     if (activeEl === options.searchInput) {
         event.preventDefault();
         event.stopImmediatePropagation();
-        if (event.key === 'ArrowDown') options.focusFirstResult();
+        // Typing has already selected a row, so Down moves past it rather
+        // than back to the top (#132).
+        if (event.key === 'ArrowDown') options.focusNextResult();
         else options.focusSaveInput();
         return true;
     }
@@ -159,7 +169,6 @@ function handleSearchOverlayVerticalKey(event: KeyboardEvent, activeEl: Element 
     const filtered = options.getFiltered();
     event.preventDefault();
     if (filtered.length === 0) return true;
-    options.setKeyboardNav(true);
     const direction = event.key === 'ArrowUp' ? -1 : 1;
     const nextIndex = options.getSelectedIndex() + direction;
     if (nextIndex < 0) {
@@ -398,7 +407,11 @@ export class SearchOverlay {
         });
     }
 
-    open(anchorEl?: HTMLElement | null): void {
+    /**
+     * `focus` overrides the opening-focus setting. "Search sessions" passes
+     * the filter: the command is named for searching (#132).
+     */
+    open(anchorEl?: HTMLElement | null, options: { focus?: OverlayFocus } = {}): void {
         const strings = L;
         const self = this.host;
         // Some of what open() does is its own work, and it used to reach for it
@@ -414,7 +427,7 @@ export class SearchOverlay {
             : null;
         self.searchOverlayViewGroupId = overlayGroupId;
         let ordered = self.getSessionStore().getOrderedSessionsForGroup(overlayGroupId);
-        const focusTarget = self.getSettingsState().overlayDefaultFocus;
+        const focusTarget = options.focus ?? self.getSettingsState().overlayDefaultFocus;
 
         self.getSwitchOverlay().hide();
         hideThisOverlay();
@@ -429,12 +442,11 @@ export class SearchOverlay {
 
         let filtered = ordered.slice();
         let selectedIndex = 0;
-        let keyboardNav = false;
 
-        function syncSelectedIndexToActive(options?: { preserveWhenMissing?: boolean }): void {
-            selectedIndex = syncSearchOverlaySelectedIndex(self, filtered, selectedIndex, options);
+        function syncSelectedIndex(query: string, syncOptions?: { preserveWhenMissing?: boolean }): void {
+            selectedIndex = syncSearchOverlaySelectedIndex(self, filtered, selectedIndex, query, syncOptions);
         }
-        syncSelectedIndexToActive();
+        syncSelectedIndex('');
 
         function getOverlayGroupId() {
             if (!self.getGroupStore().isGroupFeatureEnabled()) {
@@ -644,7 +656,7 @@ export class SearchOverlay {
             // Its own method. This used to go out to a plugin shim that
             // forwarded straight back here.
             filtered = filterByQuery(ordered, searchInput.value);
-            syncSelectedIndexToActive({ preserveWhenMissing: true });
+            syncSelectedIndex(searchInput.value, { preserveWhenMissing: true });
             renderList();
         }
 
@@ -735,13 +747,6 @@ export class SearchOverlay {
 
                     // Drag to reorder
                     setupDrag(itemEl);
-
-                    // Mouse hover updates selection (when not in keyboard mode)
-                    overlayEventOwner.registerDomEvent(itemEl, 'mouseenter', function () {
-                        if (keyboardNav) return;
-                        selectedIndex = idx;
-                        updateSelection();
-                    });
 
                     // Right-click context menu
                     overlayEventOwner.registerDomEvent(itemEl, 'contextmenu', function (e) {
@@ -865,7 +870,10 @@ export class SearchOverlay {
             });
         }
 
-        function updateSelection() {
+        // The selected row is always painted: it is what Enter and Delete act
+        // on. It used to be painted only during arrow-key navigation (#132).
+        // The mouse does not scroll the list; the keyboard and typing do.
+        function updateSelection(scroll = true): void {
             const items = list.querySelectorAll('.wpp-switch-item');
             for (let si = 0; si < items.length; si++) {
                 const item = items[si];
@@ -875,29 +883,21 @@ export class SearchOverlay {
                 countSpan.textContent = (selectedIndex + 1) + ' / ' + filtered.length;
             }
             const selectedItem = items[selectedIndex];
-            if (keyboardNav && selectedItem) {
+            if (scroll && selectedItem) {
                 selectedItem.scrollIntoView({ block: 'nearest' });
             }
         }
 
-        function setKeyboardNavState(value: boolean): void {
-            keyboardNav = !!value;
-            overlay.classList.toggle('wpp-keyboard-nav', keyboardNav);
-        }
-
         function focusSaveInput() {
-            setKeyboardNavState(false);
             navigationUtils.focusTextInputEnd(saveInput);
         }
 
         function focusSearchInput() {
-            setKeyboardNavState(false);
             navigationUtils.focusTextInputSelect(searchInput);
         }
 
         function focusResultAt(index: number): void {
             if (!filtered.length) return;
-            setKeyboardNavState(true);
             selectedIndex = index;
             updateSelection();
             overlay.focus();
@@ -907,15 +907,26 @@ export class SearchOverlay {
             focusResultAt(0);
         }
 
+        function focusNextResult() {
+            focusResultAt(Math.min(selectedIndex + 1, filtered.length - 1));
+        }
+
         function focusLastResult() {
             focusResultAt(filtered.length - 1);
         }
 
-        // Exit keyboard mode when mouse moves over the list
-        overlayEventOwner.registerDomEvent(list, 'mousemove', function () {
-            if (keyboardNav) {
-                setKeyboardNavState(false);
-            }
+        // The pointer selects a row only by moving over it. This was
+        // mouseenter, which arrives before mousemove: after arrow keys it was
+        // ignored, the selection stayed on a row the pointer had left, and
+        // Enter went there. A rebuilt list under a resting pointer can also
+        // fire it without the mouse moving (#132).
+        overlayEventOwner.registerDomEvent(list, 'mousemove', function (e) {
+            const row = closest(e.target, '.wpp-switch-item');
+            if (!row) return;
+            const idx = filtered.findIndex((s) => s.id === row.dataset.sessionId);
+            if (idx === -1 || idx === selectedIndex) return;
+            selectedIndex = idx;
+            updateSelection(false);
         });
 
         function switchSelected(opts: { shiftKey?: boolean } = {}): void {
@@ -942,8 +953,9 @@ export class SearchOverlay {
             // Its own method. This used to go out to a plugin shim that
             // forwarded straight back here.
             filtered = filterByQuery(ordered, searchInput.value);
-            syncSelectedIndexToActive();
+            syncSelectedIndex(searchInput.value);
             renderList();
+            updateSelection();
         }
 
         self.searchOverlayKeyHandler = createSearchOverlayKeyHandler({
@@ -959,12 +971,12 @@ export class SearchOverlay {
             focusSaveInput: focusSaveInput,
             focusSearchInput: focusSearchInput,
             focusFirstResult: focusFirstResult,
+            focusNextResult: focusNextResult,
             focusLastResult: focusLastResult,
             hasSearchInput: function () { return self.getSettingsState().showFilterInput; },
             getFiltered: function () { return filtered; },
             getSelectedIndex: function () { return selectedIndex; },
             setSelectedIndex: function (value: number) { selectedIndex = value; },
-            setKeyboardNav: setKeyboardNavState,
         });
 
         self.searchOverlayClickOutsideHandler = function (e) {
@@ -983,9 +995,6 @@ export class SearchOverlay {
         overlayEventOwner.registerDomEvent(overlayDocument, 'mousedown', self.searchOverlayClickOutsideHandler, true);
 
         self.searchOverlayEl = overlay;
-        // The selection shows on the current session only when the keyboard
-        // starts there; with the cursor in a field, typing goes to the field.
-        setKeyboardNavState(focusTarget === 'current-session');
         renderList();
 
         // Position overlay relative to anchor (status bar button)

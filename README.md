@@ -123,7 +123,8 @@ All commands can be assigned custom hotkeys in **Settings** > **Hotkeys**.
 
 Some commands follow a setting and are hidden when it is off: the group
 commands need **Session groups**, and **Search sessions** needs **Show session
-filter**.
+filter**. **Reload current session (without saving)** is hidden while
+auto-save on switch is on, and asks first when there are unsaved changes.
 
 | Command | Default hotkey |
 | --- | --- |

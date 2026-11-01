@@ -29,3 +29,16 @@ export function getScopedControlEl(containerEl: HTMLElement | null | undefined, 
     if (controlEl && containerEl.contains(controlEl)) return controlEl;
     return activeEl;
 }
+
+/**
+ * The row a typed filter puts Enter on: the first exact name, ignoring case,
+ * else the top row. -1 with nothing typed or nothing listed, so each caller
+ * keeps its own answer for an empty filter. The quick switcher and the session
+ * manager share it so Enter means the same in both (#132).
+ */
+export function findTypedSessionIndex(sessions: readonly { name?: string }[], query: string): number {
+    const q = query.trim().toLowerCase();
+    if (!q || sessions.length === 0) return -1;
+    const exactIdx = sessions.findIndex((s) => (s.name || '').toLowerCase() === q);
+    return exactIdx !== -1 ? exactIdx : 0;
+}

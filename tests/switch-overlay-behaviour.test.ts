@@ -546,6 +546,78 @@ test('selecting the session you are in closes the overlay and reloads nothing (#
     plugin.hideSearchOverlay();
 });
 
+test('typing selects the exact name, else the top row, and shows it (#132)', async () => {
+    const { plugin, searchOverlay } = createTestPlugin();
+    plugin.data.activeSessionId = 's2';
+    searchOverlay.open();
+    const overlay = plugin.searchOverlayEl as HTMLElement;
+    const input = overlay.querySelector<HTMLInputElement>('.wpp-search-input') as HTMLInputElement;
+    const selected = (): string[] => Array.from(overlay.querySelectorAll<HTMLElement>('.wpp-switch-item.wpp-kb-selected'))
+        .map((el) => el.dataset.sessionId ?? '');
+    const type = (value: string): void => {
+        input.value = value;
+        input.dispatchEvent(new window.Event('input'));
+    };
+
+    // Opening selects the session you are in, and paints it: it is what
+    // Enter and Delete act on, and it used to be painted only after an arrow.
+    assert.deepEqual(selected(), ['s2']);
+
+    // Every row matches and the current one is among them. It used to keep
+    // the selection, so Enter went nowhere.
+    type('sess');
+    assert.deepEqual(selected(), ['s1']);
+
+    // An exact name wins over the top row, without moving any row.
+    plugin.getSessionStore().findSession('s3')!.name = 'Session';
+    type('session');
+    assert.deepEqual(selected(), ['s3']);
+    assert.deepEqual(Array.from(overlay.querySelectorAll<HTMLElement>('.wpp-switch-item')).map((el) => el.dataset.sessionId),
+        ['s1', 's2', 's3']);
+
+    // Down from the filter moves past what typing selected, not back to the top.
+    input.focus();
+    type('sess');
+    document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    assert.deepEqual(selected(), ['s2']);
+
+    // An empty filter is the opening state again.
+    type('');
+    assert.deepEqual(selected(), ['s2']);
+
+    // Enter goes to what was typed.
+    input.focus();
+    type('sess');
+    document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter' }));
+    await new Promise((r) => setTimeout(r, 20));
+    assert.equal(plugin.data.activeSessionId, 's1');
+    plugin.hideSearchOverlay();
+});
+
+test('the pointer selects a row by moving over it, after arrow keys too (#132)', () => {
+    const { plugin, searchOverlay } = createTestPlugin();
+    searchOverlay.open();
+    const overlay = plugin.searchOverlayEl as HTMLElement;
+    const row = (id: string): HTMLElement => overlay.querySelector<HTMLElement>(`.wpp-switch-item[data-session-id="${id}"]`) as HTMLElement;
+    const selected = (): string[] => Array.from(overlay.querySelectorAll<HTMLElement>('.wpp-switch-item.wpp-kb-selected'))
+        .map((el) => el.dataset.sessionId ?? '');
+
+    overlay.focus();
+    document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    assert.deepEqual(selected(), ['s2']);
+
+    // Entering a row is not moving over it: a list rebuilt under a resting
+    // pointer fires this with no hand on the mouse.
+    row('s3').dispatchEvent(new window.MouseEvent('mouseenter'));
+    assert.deepEqual(selected(), ['s2']);
+
+    // Moving over it selects it. After an arrow key the old order of events
+    // left the selection on s2 and painted nothing.
+    row('s3').dispatchEvent(new window.MouseEvent('mousemove', { bubbles: true }));
+    assert.deepEqual(selected(), ['s3']);
+    plugin.hideSearchOverlay();
+});
+
 test('the search overlay filters as you type and offers per-row actions', async () => {
     const { plugin, searchOverlay } = createTestPlugin();
     plugin.persistData = async () => true;

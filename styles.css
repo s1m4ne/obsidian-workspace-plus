@@ -571,20 +571,12 @@ body.wpp-session-list-dragging * {
     color: var(--text-muted);
 }
 
-/* Hover effect for search overlay items */
-.wpp-search-overlay .wpp-switch-item:hover {
-    background: var(--background-modifier-hover-dimmed, rgba(var(--mono-rgb-100), 0.03));
-}
-
-/* Keyboard navigation: highlight selected item */
-.wpp-search-overlay.wpp-keyboard-nav .wpp-switch-item.wpp-kb-selected,
-.wpp-search-overlay.wpp-keyboard-nav .wpp-switch-item.wpp-kb-selected:hover {
+/* The selected row - what Enter and Delete act on - is always painted, and
+   is the only row painted: the pointer selects by moving, so a separate hover
+   colour would mark a second row (#132). Same strength as the session
+   manager's focused row. */
+.wpp-search-overlay .wpp-switch-item.wpp-kb-selected {
     background: var(--background-modifier-hover);
-}
-
-/* Keyboard navigation: suppress hover on non-selected items */
-.wpp-search-overlay.wpp-keyboard-nav .wpp-switch-item:hover {
-    background: none;
 }
 
 /* Dragging styles for search overlay */

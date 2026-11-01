@@ -324,9 +324,13 @@ test('session manager keyboard moves across filter, rows, and the create control
         const filter = modal.filterInput;
         assert.ok(filter);
         filter.focus();
+        // Down from the filter goes past the row the filter paints - with
+        // nothing typed, the current session, the top row here (#132).
         h.dom.document.dispatchEvent(new h.dom.window.KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
-        assert.equal(modal.keyboardTarget.rowIndex, 0);
+        assert.equal(modal.keyboardTarget.rowIndex, 1);
         assert.equal(modal.keyboardTarget.actionKey, 'load');
+        h.dom.document.dispatchEvent(new h.dom.window.KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
+        assert.equal(modal.keyboardTarget.rowIndex, 0);
 
         h.dom.document.dispatchEvent(new h.dom.window.KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
         assert.equal(modal.keyboardTarget.actionKey, 'save-inline');
@@ -348,6 +352,41 @@ test('session manager keyboard moves across filter, rows, and the create control
         assert.ok(firstRow);
         assert.equal(modal.getRowActionTarget(firstRow, 'primary')?.getAttribute('data-action-key'), 'load');
         assert.equal(modal.getRowActionTarget(firstRow, 'missing')?.getAttribute('data-action-key'), 'load');
+    } finally {
+        modal.close();
+        h.restore();
+    }
+});
+
+test('the filter paints the row Enter goes to, and Enter goes there (#132)', async () => {
+    const { h, plugin, modal } = await openModal();
+    try {
+        const filter = modal.filterInput;
+        assert.ok(filter);
+        const painted = (): string[] => Array.from(modal.listEl.querySelectorAll<HTMLElement>('.wpp-session-item.wpp-focused'))
+            .map((el) => el.dataset.sessionId ?? '');
+        const type = (value: string): void => {
+            filter.value = value;
+            filter.dispatchEvent(new h.dom.window.Event('input'));
+        };
+        filter.focus();
+
+        // Nothing typed: the current session.
+        assert.deepEqual(painted(), ['s1']);
+
+        // Two matches. Enter used to do nothing until one was left.
+        type('e');
+        assert.deepEqual(painted(), ['s2']);
+
+        // An exact name wins over the top row.
+        plugin.data.sessions.s2 = { id: 's2', name: 'Ready', modified: 2, layout: {} };
+        plugin.data.sessions.s3 = { id: 's3', name: 'Rea', modified: 3, layout: {} };
+        type('rea');
+        assert.deepEqual(painted(), ['s3']);
+
+        h.dom.document.dispatchEvent(new h.dom.window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+        await Promise.resolve();
+        assert.deepEqual(plugin.switchedIds, ['s3']);
     } finally {
         modal.close();
         h.restore();

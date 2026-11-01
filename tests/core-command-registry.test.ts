@@ -103,7 +103,9 @@ function createMockHost() {
         getFrontmatterLinker: (): never => ({
             saveCurrentNoteNameAsSession: async () => { calls.push('saveCurrentNote'); return true; },
         }) as never,
-        getSearchOverlay: (): never => ({ open: () => { calls.push('openSearchOverlay'); } }) as never,
+        getSearchOverlay: (): never => ({
+            open: (_anchor?: unknown, options?: { focus?: string }) => { calls.push('openSearchOverlay:' + (options?.focus ?? '')); },
+        }) as never,
         // Version history goes through getHistoryService(); this double carries those members itself.
         getHistoryService(): never {
             return { isVersionHistoryEnabled: () => true, quickRestoreLatestHistory: async () => true } as never;
@@ -215,7 +217,8 @@ test('CommandRegistry: registers all core commands and handles callbacks', async
     const searchOverlay = cmdMap.get('search-session-overlay');
     assert.equal(searchOverlay?.checkCallback?.(true), true, 'available while the filter is on');
     searchOverlay?.checkCallback?.(false);
-    assert.ok(calls.includes('openSearchOverlay'));
+    // Named for searching, so it starts in the filter whatever the setting (#132).
+    assert.ok(calls.includes('openSearchOverlay:session-filter'));
 
     cmdMap.get('export-sessions-snapshot')?.callback?.();
     assert.ok(calls.includes('exportSnapshot'));
