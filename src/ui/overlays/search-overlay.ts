@@ -657,9 +657,6 @@ export class SearchOverlay {
                 refreshOrderedSessions();
             });
         };
-        const reloadActiveSession = (): void => {
-            void self.getSessionSaver().reloadCurrentSessionWithoutSaving();
-        };
 
         function renderList() {
             while (list.firstChild) list.removeChild(list.firstChild);
@@ -779,12 +776,12 @@ export class SearchOverlay {
                         });
                     }
 
-                    // Reload
+                    // Reload. It asks first under the unsaved-switch warning,
+                    // not confirmQuickActions - see reloadCurrentSession.
                     if (_reloadIcon) {
                         overlayEventOwner.registerDomEvent(_reloadIcon, 'click', function (e) {
                             e.stopPropagation();
-                            runQuickAction(self, formatString(strings.confirmReloadSession, sess.name),
-                                reloadActiveSession, { confirmText: text(strings.switchTo) });
+                            self.getSessionSaver().reloadCurrentSession();
                         });
                     }
 
@@ -926,12 +923,12 @@ export class SearchOverlay {
             const target = filtered[selectedIndex];
             if (!target) return;
             if (target.id === self.getSessionStore().getActiveSessionId()) {
+                // Already there, so there is nowhere to go. This used to
+                // reload - a click that did not say so discarding unsaved
+                // work, with auto-save on too, where reload is hidden (#129).
                 if (opts.shiftKey) {
                     runQuickAction(self, formatString(strings.confirmSaveSession, target.name),
                         saveActiveSession, { confirmText: text(strings.save), confirmClass: 'mod-cta' });
-                } else {
-                    runQuickAction(self, formatString(strings.confirmReloadSession, target.name),
-                        reloadActiveSession, { confirmText: text(strings.switchTo) });
                 }
                 hideThisOverlay();
                 return;

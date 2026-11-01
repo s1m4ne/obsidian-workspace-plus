@@ -31,6 +31,7 @@ function createMockHost() {
             ...DEFAULT_DATA,
             numberedSwitchCommands: true,
             showActiveSwitchCommand: false,
+            autoSaveOnSwitch: false,
             activeSessionId: 's1',
             activeGroupId: 'g1',
             sessions: sessionsMap,
@@ -85,9 +86,9 @@ function createMockHost() {
                 confirmOverwriteSessionWithCurrentLayout: (id: string) => { calls.push(`overwrite:${id}`); },
                 saveActiveSession: async () => { calls.push('saveActive'); return true; },
                 saveAsSession: async () => { calls.push('saveAs'); return true; },
-                reloadCurrentSessionWithoutSaving: async () => { calls.push('reloadWithoutSaving'); return true; },
+                reloadCurrentSession: () => { calls.push('reload'); },
                 toggleAutoSaveOnSwitch: async () => { calls.push('toggleAutoSave'); return true; },
-                isAutoSaveOnSwitchEnabled: () => false,
+                isAutoSaveOnSwitchEnabled: () => data.autoSaveOnSwitch,
                 setAutoSaveOnSwitch: (val: boolean) => { calls.push(`setAutoSave:${val}`); },
             } as never;
         },
@@ -154,7 +155,7 @@ function createMockHost() {
 }
 
 test('CommandRegistry: registers all core commands and handles callbacks', async () => {
-    const { host, commands, calls } = createMockHost();
+    const { host, data, commands, calls } = createMockHost();
     const registry = new CommandRegistry(host);
 
     registry.registerCommands();
@@ -196,8 +197,15 @@ test('CommandRegistry: registers all core commands and handles callbacks', async
     cmdMap.get('save-current-note-name-as-session')?.callback?.();
     assert.ok(calls.includes('saveCurrentNote'));
 
-    cmdMap.get('reload-current-session-without-saving')?.callback?.();
-    assert.ok(calls.includes('reloadWithoutSaving'));
+    // A checkCallback now, hidden while auto-save is on (#129); this double
+    // has auto-save off.
+    const reload = cmdMap.get('reload-current-session-without-saving');
+    assert.equal(reload?.checkCallback?.(true), true);
+    reload?.checkCallback?.(false);
+    assert.ok(calls.includes('reload'));
+    data.autoSaveOnSwitch = true;
+    assert.equal(reload?.checkCallback?.(true), false, 'not offered with auto-save on');
+    data.autoSaveOnSwitch = false;
 
     cmdMap.get('toggle-auto-save-on-switch')?.callback?.();
     assert.ok(calls.includes('toggleAutoSave'));

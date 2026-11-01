@@ -59,7 +59,7 @@ const menuPluginStubs = {
     isVersionHistoryEnabled: () => false,
     isWarnOnUnsavedSwitchEnabled: () => false,
     moveSessionToGroupExclusive: async () => false,
-    reloadCurrentSessionWithoutSaving: async () => false,
+    reloadCurrentSession: () => {},
     removeSessionFromGroup: async () => false,
     saveActiveSession: async () => false,
     saveAsSession: async () => false,
@@ -167,9 +167,8 @@ test('each configurable action performs its own effect and no other', async () =
             calls.push('saveCurrentNoteNameAsSession');
             return true;
         },
-        reloadCurrentSessionWithoutSaving: async () => {
-            calls.push('reloadCurrentSessionWithoutSaving');
-            return true;
+        reloadCurrentSession: () => {
+            calls.push('reloadCurrentSession');
         },
         renameCurrentSession() {
             calls.push('renameCurrentSession');
@@ -232,7 +231,7 @@ test('each configurable action performs its own effect and no other', async () =
 
     // reloadWithoutSaving
     await executeStatusBarAction(mockPlugin, 'reloadWithoutSaving');
-    assert.equal(calls[calls.length - 1], 'reloadCurrentSessionWithoutSaving');
+    assert.equal(calls[calls.length - 1], 'reloadCurrentSession');
 
     // renameSession
     executeStatusBarAction(mockPlugin, 'renameSession');

@@ -163,7 +163,7 @@ export function createSessionContextMenuOptions(options: SessionContextMenuOptio
         refreshSessions(options);
     });
 
-    const defaultReload = (): unknown => plugin.getSessionSaver().reloadCurrentSessionWithoutSaving();
+    const defaultReload = (): void => { plugin.getSessionSaver().reloadCurrentSession(); };
 
     const defaultSaveAs = (): unknown => callAfter(plugin.getSessionSaver().saveAsSession(), () => {
         refreshSessions(options);
