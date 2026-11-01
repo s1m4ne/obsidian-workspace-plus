@@ -7,7 +7,7 @@ import {
 } from 'obsidian';
 import { L } from '../i18n.ts';
 import * as obsidianInternals from '../platform/obsidian-internals.ts';
-import type { SessionItem } from '../storage/default-data.ts';
+import type { OverlayFocus, SessionItem } from '../storage/default-data.ts';
 import { isMacPlatform } from '../utils.ts';
 import type { GroupStore } from '../state/group-store.ts';
 import type { SessionSaver } from '../state/session-saver.ts';
@@ -80,7 +80,7 @@ export interface CommandRegistryHost {
     manifest: { id: string };
     addCommand(command: Command): Command;
     removeCommand(id: string): void;
-    getSearchOverlay(): { open(anchorEl?: HTMLElement): void };
+    getSearchOverlay(): { open(anchorEl?: HTMLElement, options?: { focus?: OverlayFocus }): void };
     // `Promise<unknown>`: it resolves with the path it wrote, and the one
     // caller here hands the promise to runWithFailureNotice without reading it.
     // Declaring Promise<void> was simply wrong about what it returns.
@@ -404,7 +404,9 @@ export class CommandRegistry {
             // status bar, where its job is the quick switcher.
             checkCallback: (checking) => {
                 if (!host.getSettingsState().showFilterInput) return false;
-                if (!checking) host.getSearchOverlay().open();
+                // Named for searching, so it starts in the filter whatever the
+                // opening-focus setting says (#132).
+                if (!checking) host.getSearchOverlay().open(undefined, { focus: 'session-filter' });
                 return true;
             },
         });

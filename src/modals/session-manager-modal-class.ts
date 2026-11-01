@@ -619,7 +619,11 @@ export class SessionManagerModal extends Modal {
             e.preventDefault();
             e.stopPropagation();
             if (e.key === 'ArrowDown') {
-                this.focusSessionTarget(this.getEdgeSessionTarget('first', 'load'));
+                // Past the row the filter has picked, as in the quick
+                // switcher (#132), rather than back to the top.
+                const last = this.getNavigationSessions().length - 1;
+                const rowIndex = Math.max(0, Math.min(this.getFilterTargetIndex() + 1, last));
+                this.focusSessionTarget({ zone: 'session-action', rowIndex, actionKey: 'load' });
             } else {
                 this.focusCreateInput();
             }
@@ -689,13 +693,12 @@ export class SessionManagerModal extends Modal {
 
     handleEnterKey(e: KeyboardEvent, controlEl: HTMLElement | null): void {
         if (controlEl === this.filterInput && !e.isComposing) {
-            // Enter in the filter commits only when the filter has narrowed the
-            // list to a single answer.
-            const filtered = this.getNavigationSessions();
-            const only = filtered.length === 1 ? filtered[0] : undefined;
-            if (only) {
+            // Enter in the filter goes to the row it has painted. It used to
+            // commit only once the list was down to one answer (#132).
+            const target = this.getNavigationSessions()[this.getFilterTargetIndex()];
+            if (target) {
                 e.preventDefault();
-                this.onLoad(only.id);
+                this.onLoad(target.id);
             }
             return;
         }
@@ -1045,11 +1048,29 @@ export class SessionManagerModal extends Modal {
         });
     }
 
+    /**
+     * The row Enter in the filter goes to: what was typed (the exact name,
+     * else the top row), or with nothing typed the current session, else the
+     * top row. The quick switcher picks the same way (#132).
+     */
+    getFilterTargetIndex(): number {
+        const sessions = this.getNavigationSessions();
+        const typedIdx = navigationUtils.findTypedSessionIndex(sessions, this.filterQuery);
+        if (typedIdx !== -1) return typedIdx;
+        if (sessions.length === 0) return -1;
+        const activeIdx = this.plugin.getSessionStore().findActiveSessionIndex(sessions);
+        return activeIdx !== -1 ? activeIdx : 0;
+    }
+
     updateFocusUI(): void {
         const items = this.listEl.querySelectorAll<HTMLElement>('.wpp-session-item');
         let focusedIndex = -1;
         if (this.keyboardTarget.zone === 'session-action' && this.keyboardTarget.rowIndex !== null) {
             focusedIndex = this.keyboardTarget.rowIndex;
+        } else if (this.keyboardTarget.zone === 'filter') {
+            // The filter holds focus, so no row button does; paint the row
+            // Enter will go to, the way the quick switcher does (#132).
+            focusedIndex = this.getFilterTargetIndex();
         }
         this.focusedIndex = focusedIndex;
         items.forEach((el, i) => { el.classList.toggle('wpp-focused', i === focusedIndex); });
