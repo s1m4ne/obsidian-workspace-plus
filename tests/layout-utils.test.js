@@ -145,6 +145,27 @@ test('layout utils merge main layout keeps current sidebars', function () {
     assert.equal(currentLayout.left.id, 'current-left');
 });
 
+test('layout utils merge main layout preserves floating popout windows', function () {
+    const targetLayout = {
+        main: { id: 'target-main', type: 'leaf', state: { type: 'markdown', state: { file: 'target.md' } } },
+        floating: {
+            id: 'floating-root',
+            type: 'split',
+            children: [{ id: 'popout-1', type: 'leaf', x: 100, y: 200, width: 800, height: 600, maximize: true }],
+        },
+    };
+    const currentLayout = {
+        main: { id: 'current-main', type: 'leaf', state: { type: 'markdown', state: { file: 'current.md' } } },
+        left: { id: 'current-left', type: 'leaf', state: { type: 'file-explorer' } },
+    };
+
+    const merged = layoutUtils.mergeMainLayoutIntoCurrent(targetLayout, currentLayout);
+
+    assert.deepEqual(merged.floating, targetLayout.floating);
+    assert.deepEqual(merged.main, targetLayout.main);
+    assert.deepEqual(merged.left, currentLayout.left);
+});
+
 test('layout utils main-only structural comparison ignores sidebar changes', function () {
     const a = {
         main: { id: 'a-main', type: 'leaf', state: { type: 'markdown', state: { file: 'a.md' } } },

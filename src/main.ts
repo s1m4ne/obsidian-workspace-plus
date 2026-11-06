@@ -10,7 +10,11 @@ import { ConfirmModal } from './modals/confirm-modal.ts';
 import type { ConfirmModalOptions } from './modals/confirm-modal.ts';
 import { RenameModal } from './modals/rename-modal.ts';
 import { UnsavedSwitchModal } from './modals/unsaved-switch-modal.ts';
-import { openSettingTab } from './platform/obsidian-internals.ts';
+import {
+    openSettingTab,
+    captureEnrichedWorkspaceLayout,
+    enforcePopoutWindowPositions,
+} from './platform/obsidian-internals.ts';
 import type { PluginData, SessionItem } from './storage/default-data.ts';
 import { CommandRegistry } from './core/command-registry.ts';
 import type { CommandRegistryHost } from './core/command-registry.ts';
@@ -714,7 +718,7 @@ export function sessionStoreHost(plugin: WorkspacePlusPlus): SessionStoreHost {
         get manifestId() { return plugin.manifest.id; },
         get groupStore() { return plugin.getGroupStore(); },
         get settingsState() { return plugin.getSettingsState(); },
-        getCurrentWorkspaceLayout: () => plugin.app.workspace.getLayout(),
+        getCurrentWorkspaceLayout: () => captureEnrichedWorkspaceLayout(plugin.app),
         moveSessionToGroupExclusive: (sessionId, groupId) =>
             plugin.getGroupStore().moveSessionToGroupExclusive(sessionId, groupId),
         resolveGroupSelection: (groupId) => plugin.getGroupStore().resolveGroupSelection(groupId),
@@ -771,7 +775,10 @@ export function sessionSwitcherHost(plugin: WorkspacePlusPlus): SessionSwitcherH
         getCurrentWorkspaceLayout: () => plugin.getSessionStore().getCurrentWorkspaceLayout(),
         // The workspace itself, not the switcher's own restore: the switcher
         // builds the layout and then calls this to put it on screen.
-        changeWorkspaceLayout: (layout) => plugin.app.workspace.changeLayout(layout).then(() => true),
+        changeWorkspaceLayout: (layout) =>
+            plugin.app.workspace.changeLayout(layout)
+                .then(() => enforcePopoutWindowPositions(plugin.app, layout))
+                .then(() => true),
         commitWorkspaceToSession: (session, options) =>
             plugin.getSessionSaver().commitWorkspaceToSession(session, options),
         saveActiveSession: (options) => plugin.getSessionSaver().saveActiveSession(options),
