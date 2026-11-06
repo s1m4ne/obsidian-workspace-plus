@@ -142,6 +142,9 @@ export function mergeMainLayoutIntoCurrent(targetLayout: unknown, currentLayout:
     if (typeof target.active === 'string' && nodeContainsId(target.main, target.active)) {
         current.active = target.active;
     }
+    if (target.floating) {
+        current.floating = target.floating;
+    }
     return current;
 }
 

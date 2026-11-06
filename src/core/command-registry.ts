@@ -5,6 +5,7 @@ import {
     type Hotkey,
     Notice,
 } from 'obsidian';
+import { enforcePopoutWindowPositions } from '../platform/obsidian-internals.ts';
 import { L } from '../i18n.ts';
 import * as obsidianInternals from '../platform/obsidian-internals.ts';
 import type { OverlayFocus, SessionItem } from '../storage/default-data.ts';
@@ -277,6 +278,26 @@ export class CommandRegistry {
                 void host.getSessionStore().duplicateCurrentSession();
             },
             [{ modifiers: ['Mod', 'Shift'], key: 'M' }]
+        );
+
+        addSimpleCommand(
+            'snap-popout-windows',
+            'Snap popout windows to saved monitor positions',
+            () => {
+                const activeSession = host.getSessionStore().getActiveSession();
+                if (!activeSession || !activeSession.layout) {
+                    new Notice('No active session layout to snap popouts to.');
+                    return;
+                }
+                void enforcePopoutWindowPositions(host.app, activeSession.layout)
+                    .then(() => {
+                        new Notice('Snapped popouts to saved monitor positions.');
+                    })
+                    .catch((err) => {
+                        console.error('[Workspace++] Failed to snap popouts:', err);
+                        new Notice('Failed to snap popouts.');
+                    });
+            }
         );
 
         // Numbered session switching (Mod+Shift+1 through 9)
